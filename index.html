@@ -9183,6 +9183,7 @@
     </div>
   </div>
 
+  <script src="data/partner-schools.js"></script>
   <script>
     const teachers = [
       {
@@ -9379,27 +9380,20 @@
       teacher.loginNotes = "Teacher invite link gives access to Teacher Tools only.";
     });
 
-    const schoolLibrary = teachers[0].schools.map((school) => ({
+    const partnerSchoolColors = [
+      "oklch(64% 0.12 18)",
+      "oklch(58% 0.12 225)",
+      "oklch(58% 0.12 150)",
+      "oklch(64% 0.12 72)",
+      "oklch(72% 0.095 20)"
+    ];
+    const partnerSchoolSeed = Array.isArray(window.partnerSchoolDirectory) && window.partnerSchoolDirectory.length
+      ? window.partnerSchoolDirectory
+      : teachers[0].schools.map((school) => ({ ...school, assignedTeacherId: "lexi" }));
+    const schoolLibrary = partnerSchoolSeed.map((school, index) => ({
       ...JSON.parse(JSON.stringify(school)),
-      assignedTeacherId: "lexi"
+      color: school.color || partnerSchoolColors[index % partnerSchoolColors.length]
     }));
-
-    schoolLibrary.push({
-      name: "New Partner School",
-      nickname: "",
-      classCount: "",
-      dayOfWeek: "",
-      timeBlock: "AM",
-      isd: "",
-      seasonStartDate: "2026-08-31",
-      address: "",
-      directorName: "",
-      phone: "",
-      email: "",
-      importantNotes: "",
-      assignedTeacherId: "",
-      color: "oklch(72% 0.095 20)"
-    });
     let schoolLibrarySortMode = "name";
 
     const icons = {

@@ -19,10 +19,11 @@ Start the normal Dance Techniques local app server, open the Teacher Portal, the
 
 ## Data Safety
 
-- The checked-in app contains demonstration data and `.example` contact details.
+- Teacher/profile examples use demonstration data and `.example` contacts; Partner School starter records use reviewed public business information.
 - Changes made in the browser are saved only in that browser's local storage; they are not automatically committed to GitHub.
 - Do not add real passwords, payroll documents, student/parent records, or private teacher details to this folder.
-- Public Partner School directory information can be added through a reviewed repo data file when the import format is finalized.
+- Public Partner School starter information is checked in at `data/partner-schools.js`, with source research in `research/partner-schools/`.
+- Browser edits override the starter directory on that browser but do not automatically update the checked-in data file.
 
 ## Source Note
 
