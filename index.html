@@ -756,6 +756,15 @@
       width: 100%;
     }
 
+    .reschedule-now-fields {
+      display: grid;
+      gap: 10px;
+    }
+
+    .reschedule-now-fields[hidden] {
+      display: none;
+    }
+
     .reschedule-status {
       margin: 10px 0 0;
       padding: 8px 10px;
@@ -6693,7 +6702,7 @@
 
     .reschedule-tracker-counters {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 10px;
       margin-bottom: 12px;
     }
@@ -6865,6 +6874,47 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       background: white;
+    }
+
+    .reschedule-record-actions {
+      display: grid;
+      gap: 7px;
+      justify-items: end;
+    }
+
+    .reschedule-action-pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 22px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 820;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .reschedule-action-pill.rescheduled {
+      background: oklch(96% 0.04 150);
+      color: oklch(38% 0.1 150);
+    }
+
+    .reschedule-action-pill.date-tbd {
+      background: oklch(96% 0.05 85);
+      color: oklch(42% 0.12 75);
+    }
+
+    .reschedule-action-pill.cancelled {
+      background: oklch(96% 0.04 25);
+      color: oklch(42% 0.14 25);
+    }
+
+    .reschedule-reminder-note {
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.3;
+      text-align: right;
     }
 
     .reschedule-source-pill {
@@ -7762,25 +7812,35 @@
                         <input type="date" id="future-reschedule-date">
                       </label>
                       <div class="future-class-list" id="future-reschedule-class-list"></div>
-                      <label>Move selected class to
-                        <input type="date" id="future-reschedule-new-date" data-reschedule-date>
-                      </label>
-                      <div class="reschedule-date-preview" id="future-reschedule-preview" data-reschedule-preview></div>
-                      <label>AM/PM for reschedule day
-                        <select id="future-reschedule-timeblock" data-reschedule-timeblock>
-                          <option value="AM">AM</option>
-                          <option value="PM">PM</option>
+                      <label>Class change <span aria-hidden="true">*</span>
+                        <select id="future-reschedule-action" data-reschedule-action required>
+                          <option value="" selected disabled>Choose an action</option>
+                          <option value="reschedule_now">Reschedule Now</option>
+                          <option value="date_tbd">Date TBD</option>
+                          <option value="cancel">Cancel — No Make-Up</option>
                         </select>
                       </label>
-                      <label>Reason
-                        <textarea id="future-reschedule-reason" rows="3" placeholder="Add the conflict or note"></textarea>
+                      <div class="reschedule-now-fields" data-reschedule-now-fields hidden>
+                        <label>Move selected class to
+                          <input type="date" id="future-reschedule-new-date" data-reschedule-date>
+                        </label>
+                        <div class="reschedule-date-preview" id="future-reschedule-preview" data-reschedule-preview></div>
+                        <label>AM/PM for reschedule day
+                          <select id="future-reschedule-timeblock" data-reschedule-timeblock>
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                          </select>
+                        </label>
+                      </div>
+                      <label>Reason <span aria-hidden="true">*</span>
+                        <textarea id="future-reschedule-reason" rows="3" placeholder="Add the conflict or note" required></textarea>
                       </label>
-                      <label>Requested By
+                      <label>Requested By <span aria-hidden="true">*</span>
                         <select id="future-reschedule-requested-by" required>
                           <option value="" selected disabled>Choose one</option>
                         </select>
                       </label>
-                      <button class="primary" type="button" id="future-reschedule-save">Reschedule selected classes</button>
+                      <button class="primary" type="button" id="future-reschedule-save">Save class change</button>
                     </div>
                   </details>
                   <div class="calendar-sync-panel" aria-label="Schedule calendar sync">
@@ -8242,12 +8302,16 @@
             <div>
               <div class="reschedule-tracker-counters" aria-label="Reschedule counters">
                 <div class="reschedule-counter-card">
-                  <strong id="admin-rescheduled-by-teacher-count">0</strong>
-                  <span>Rescheduled by Teacher</span>
+                  <strong id="admin-needs-date-count">0</strong>
+                  <span>Needs New Date</span>
                 </div>
                 <div class="reschedule-counter-card">
-                  <strong id="admin-rescheduled-by-school-count">0</strong>
-                  <span>Rescheduled by School</span>
+                  <strong id="admin-rescheduled-count">0</strong>
+                  <span>Rescheduled</span>
+                </div>
+                <div class="reschedule-counter-card">
+                  <strong id="admin-cancelled-count">0</strong>
+                  <span>Cancelled</span>
                 </div>
               </div>
               <div class="admin-curriculum-progress-list" id="admin-reschedule-tracker-list" aria-label="Admin reschedule tracker"></div>
@@ -9301,7 +9365,7 @@
   </div>
   <div class="confirm-overlay" id="reschedule-alert-confirm" aria-hidden="true">
     <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="reschedule-alert-title">
-      <h3 id="reschedule-alert-title">Reschedule Successful</h3>
+      <h3 id="reschedule-alert-title">Class Change Saved</h3>
       <div class="reschedule-alert-warning">
         <span class="reschedule-alert-icon" aria-hidden="true">!</span>
         <p id="reschedule-alert-copy">Please alert the parents via Brightwheel, and call and confirm with the school's director.</p>
@@ -10217,6 +10281,26 @@
     const rescheduleOverridesForTeacher = () => teachers[0]?.reschedules || [];
     const closureClassOverridesForTeacher = () => teachers[0]?.closureClassOverrides || [];
 
+    const rescheduleActionFor = (item) => item?.action || "reschedule_now";
+    const rescheduleStatusFor = (item) => {
+      const action = rescheduleActionFor(item);
+      if (action === "date_tbd") return "date_tbd";
+      if (action === "cancel") return "cancelled";
+      return "rescheduled";
+    };
+    const rescheduleActionLabel = (item) => {
+      const status = rescheduleStatusFor(item);
+      if (status === "date_tbd") return "Date TBD";
+      if (status === "cancelled") return "Cancelled — No Make-Up";
+      return "Rescheduled";
+    };
+    const rescheduleTimingLabel = (item) => {
+      const status = rescheduleStatusFor(item);
+      if (status === "date_tbd") return `${rescheduleDateLabel(item.originalDate)} • New date needed`;
+      if (status === "cancelled") return `${rescheduleDateLabel(item.originalDate)} • No make-up class`;
+      return `${rescheduleDateLabel(item.originalDate)} to ${rescheduleDateLabel(item.newDate)} • ${item.timeBlock || "AM"}`;
+    };
+
     const rescheduleOverrideFor = (schoolName, originalDate, week, curriculum) => rescheduleOverridesForTeacher().find((item) => (
       item.schoolName === schoolName &&
       item.originalDate === originalDate &&
@@ -10299,6 +10383,7 @@
       return adjustedSchoolEventsForOverrides(school, profileSchool, schoolEvents).map(({ week, curriculum, date, scheduledDate, effectiveDate }) => {
         const hasCurriculum = Boolean(week && curriculum);
         const override = rescheduleOverrideFor(school.school, scheduledDate, week, curriculum);
+        if (override && rescheduleActionFor(override) !== "reschedule_now") return null;
         const eventDate = override?.newDate || effectiveDate;
         const eventTimeBlock = override?.timeBlock || profileSchool?.timeBlock || school.timeBlock || "AM";
         return ({
@@ -10322,7 +10407,7 @@
         curriculumTitle: hasCurriculum ? curriculumTitleForWeek(week, curriculum) : "School visit",
         hasCurriculum
         });
-      });
+      }).filter(Boolean);
     }).concat((profileTeacher.scheduleEvents || []).map((item) => {
       const school = schoolProfileByName(item.schoolName);
       return {
@@ -10930,7 +11015,10 @@
     const rescheduledOriginalsMarkup = (items) => items.map((item) => {
       const school = schoolProfileByName(item.schoolName);
       const schoolName = school?.nickname || school?.name || item.schoolName;
-      const movedTo = item.newDate ? `Moved to ${rescheduleDateLabel(item.newDate)}` : "Moved to new date";
+      const status = rescheduleStatusFor(item);
+      const movedTo = status === "date_tbd"
+        ? "Date TBD"
+        : (status === "cancelled" ? "Cancelled • No make-up" : `Moved to ${rescheduleDateLabel(item.newDate)}`);
       return `
         <small>
           <span class="calendar-time-block">NC</span>
@@ -11231,6 +11319,7 @@
           </div>
         `;
         renderFutureRequestedByOptions();
+        syncRescheduleActionPanel(document.getElementById("schedule-tool-reschedule"));
         return;
       }
       list.innerHTML = dayEvents
@@ -11245,19 +11334,31 @@
           </label>
         `).join("");
       renderFutureRequestedByOptions();
+      syncRescheduleActionPanel(document.getElementById("schedule-tool-reschedule"));
     };
 
     const saveFutureReschedules = () => {
       const selectedEvents = selectedFutureRescheduleEvents();
+      const action = document.getElementById("future-reschedule-action")?.value || "";
       const newDate = document.getElementById("future-reschedule-new-date")?.value || "";
       const timeBlock = document.getElementById("future-reschedule-timeblock")?.value || "AM";
-      const reason = document.getElementById("future-reschedule-reason")?.value.trim() || "Future conflict";
+      const reason = document.getElementById("future-reschedule-reason")?.value.trim() || "";
       const requestedBy = document.getElementById("future-reschedule-requested-by")?.value || "";
       if (!selectedEvents.length) {
         showToast("Select at least one class");
         return;
       }
-      if (!newDate) {
+      if (!action) {
+        showToast("Choose Reschedule Now, Date TBD, or Cancel");
+        document.getElementById("future-reschedule-action")?.focus();
+        return;
+      }
+      if (!reason) {
+        showToast("Add a reason for the class change");
+        document.getElementById("future-reschedule-reason")?.focus();
+        return;
+      }
+      if (action === "reschedule_now" && !newDate) {
         showToast("Choose the new class date");
         return;
       }
@@ -11277,8 +11378,10 @@
           reason,
           requestedBy,
           schoolRequested: requestedByIsSchool(requestedBy, item.schoolName),
-          newDate,
-          timeBlock,
+          action,
+          status: action === "date_tbd" ? "date_tbd" : (action === "cancel" ? "cancelled" : "rescheduled"),
+          newDate: action === "reschedule_now" ? newDate : "",
+          timeBlock: action === "reschedule_now" ? timeBlock : "",
           updatedAt: new Date().toISOString()
         };
         const existingIndex = profileTeacher.reschedules.findIndex((entry) => (
@@ -11301,7 +11404,8 @@
       renderAdminRescheduleTracker();
       showRescheduleReminder(savedOverrides);
       clearUnsavedEdits();
-      showToast(`${selectedEvents.length} class${selectedEvents.length === 1 ? "" : "es"} rescheduled`);
+      const actionLabel = action === "date_tbd" ? "marked Date TBD" : (action === "cancel" ? "cancelled" : "rescheduled");
+      showToast(`${selectedEvents.length} class${selectedEvents.length === 1 ? "" : "es"} ${actionLabel}`);
     };
 
     const schoolhouseIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V20h14V9.5"/><path d="M9 20v-6h6v6"/><path d="M8 11h2M14 11h2"/></svg>';
@@ -12009,8 +12113,9 @@
       const callButton = document.getElementById("reschedule-alert-call");
       const firstSchool = schoolProfileByName(saved[0].schoolName);
       if (copy) {
+        const firstStatus = rescheduleStatusFor(saved[0]);
         copy.textContent = saved.length === 1
-          ? `Please alert the parents via Brightwheel, and call and confirm with ${firstSchool?.nickname || firstSchool?.name || saved[0].schoolName}'s director.`
+          ? `${firstStatus === "cancelled" ? "This class was cancelled." : (firstStatus === "date_tbd" ? "This class still needs a new date." : "This class was rescheduled.")} Please alert the parents via Brightwheel, and call and confirm with ${firstSchool?.nickname || firstSchool?.name || saved[0].schoolName}'s director.`
           : "Please alert the parents via Brightwheel, and call and confirm with each school's director.";
       }
       if (callButton) {
@@ -12025,8 +12130,8 @@
           const requestLabel = item.requestedBy ? ` • Requested by ${item.requestedBy}` : (item.schoolRequested ? ` • Requested by ${schoolRequestedByName(item.schoolName)}` : "");
           return `
             <div class="row">
-              <div><strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong><small>${escapeText(rescheduleDateLabel(item.originalDate))} to ${escapeText(rescheduleDateLabel(item.newDate))} • ${escapeText(item.timeBlock || "AM")}${escapeText(requestLabel)}</small></div>
-              <span class="status pending">${escapeText(school?.directorName || "Director")}</span>
+              <div><strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong><small>${escapeText(rescheduleTimingLabel(item))}${escapeText(requestLabel)}</small></div>
+              <span class="status pending">${escapeText(rescheduleActionLabel(item))}</span>
             </div>
           `;
         }).join("");
@@ -12048,8 +12153,8 @@
         const requestLabel = item.requestedBy ? ` • Requested by ${item.requestedBy}` : (item.schoolRequested ? ` • Requested by ${schoolRequestedByName(item.schoolName)}` : "");
         return `
           <div class="row">
-            <div><strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong><small>${escapeText(rescheduleDateLabel(item.originalDate))} to ${escapeText(rescheduleDateLabel(item.newDate))} • ${escapeText(item.timeBlock || "AM")} • ${escapeText(item.week || "School visit")} ${escapeText(item.curriculum || "")}${item.reason ? ` • ${escapeText(item.reason)}` : ""}${escapeText(requestLabel)}</small></div>
-            <span class="status pending">Admin alert</span>
+            <div><strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong><small>${escapeText(rescheduleTimingLabel(item))} • ${escapeText(item.week || "School visit")} ${escapeText(item.curriculum || "")}${item.reason ? ` • ${escapeText(item.reason)}` : ""}${escapeText(requestLabel)}</small></div>
+            <span class="status pending">${escapeText(rescheduleActionLabel(item))}</span>
           </div>
         `;
       }).join("");
@@ -12623,6 +12728,22 @@
       preview.innerHTML = `<strong>${escapeText(dateLabel)}</strong>${warning}${rows}`;
     };
 
+    const syncRescheduleActionPanel = (panel) => {
+      if (!panel) return;
+      const action = panel.querySelector("[data-reschedule-action]")?.value || "";
+      const nowFields = panel.querySelector("[data-reschedule-now-fields]");
+      if (nowFields) nowFields.hidden = action !== "reschedule_now";
+      const dateInput = panel.querySelector("[data-reschedule-date]");
+      if (dateInput) dateInput.required = action === "reschedule_now";
+      const saveButton = panel.querySelector("[data-save-reschedule], #future-reschedule-save");
+      if (saveButton) {
+        saveButton.textContent = action === "date_tbd"
+          ? "Save as Date TBD"
+          : (action === "cancel" ? "Cancel Class — No Make-Up" : (action === "reschedule_now" ? "Save Reschedule" : "Save Class Change"));
+      }
+      if (action === "reschedule_now") renderRescheduleDatePreview(panel);
+    };
+
     const curriculumLevelsForClass = (classRow) => {
       const level = Math.max(1, Math.min(3, Number(classRow?.level) || 1));
       return Array.from({ length: level }, (_, index) => index + 1);
@@ -12838,7 +12959,7 @@
         <section class="my-day-hero">
           <div class="my-day-date-row">
             <span class="mini-label">${escapeText(dateLabel)} • ${timeBlockLabel(event.timeBlock)}</span>
-            <button class="reschedule-toggle" type="button" data-reschedule-toggle>Reschedule</button>
+            <button class="reschedule-toggle" type="button" data-reschedule-toggle>Change Class</button>
           </div>
           <button class="my-day-school-name" type="button" data-directions-url="${escapeText(directionsUrlForEvent(event))}" aria-label="Get directions to ${escapeText(schoolDisplayName(event))}">${escapeText(schoolDisplayName(event))}</button>
           <span class="my-day-school-detail">${escapeText(event.isd)}</span>
@@ -12866,28 +12987,39 @@
             data-week="${escapeText(event.week)}"
             data-curriculum="${escapeText(event.curriculum)}">
             <label>
-              <small>Why are you rescheduling?</small>
-              <textarea rows="3" data-reschedule-reason placeholder="Add a quick note">${escapeText(event.rescheduleReason)}</textarea>
-            </label>
-            <label>
-              <small>Move this school to</small>
-              <input type="date" data-reschedule-date value="${escapeText(event.date)}">
-            </label>
-            <div class="reschedule-date-preview" data-reschedule-preview></div>
-            <label>
-              <small>AM/PM for this reschedule day</small>
-              <select data-reschedule-timeblock>
-                <option value="AM" ${event.timeBlock === "AM" ? "selected" : ""}>AM</option>
-                <option value="PM" ${event.timeBlock === "PM" ? "selected" : ""}>PM</option>
+              <small>Class change *</small>
+              <select data-reschedule-action required>
+                <option value="" selected disabled>Choose an action</option>
+                <option value="reschedule_now">Reschedule Now</option>
+                <option value="date_tbd">Date TBD</option>
+                <option value="cancel">Cancel — No Make-Up</option>
               </select>
             </label>
             <label>
-              <small>Requested By</small>
+              <small>Reason *</small>
+              <textarea rows="3" data-reschedule-reason placeholder="Add the reason" required>${escapeText(event.rescheduleReason)}</textarea>
+            </label>
+            <div class="reschedule-now-fields" data-reschedule-now-fields hidden>
+              <label>
+                <small>Move this school to</small>
+                <input type="date" data-reschedule-date value="${escapeText(event.date)}">
+              </label>
+              <div class="reschedule-date-preview" data-reschedule-preview></div>
+              <label>
+                <small>AM/PM for this reschedule day</small>
+                <select data-reschedule-timeblock>
+                  <option value="AM" ${event.timeBlock === "AM" ? "selected" : ""}>AM</option>
+                  <option value="PM" ${event.timeBlock === "PM" ? "selected" : ""}>PM</option>
+                </select>
+              </label>
+            </div>
+            <label>
+              <small>Requested By *</small>
               <select data-reschedule-requested-by required>
                 ${requestedByOptionsMarkup(event.school, event.requestedBy || (event.schoolRequested ? schoolRequestedByName(event.school) : ""))}
               </select>
             </label>
-            <button class="primary" type="button" data-save-reschedule>Save reschedule</button>
+            <button class="primary" type="button" data-save-reschedule>Save class change</button>
           </div>
         </section>
 
@@ -13660,25 +13792,30 @@
 
     const rescheduleSourceLabel = (teacher, item) => {
       const sourceType = rescheduleSourceType(teacher, item);
-      return sourceType === "school" ? "Rescheduled by School" : "Rescheduled by Teacher";
+      return sourceType === "school" ? "Requested by School" : "Requested by Teacher";
     };
 
     const renderAdminRescheduleTracker = () => {
       const list = document.getElementById("admin-reschedule-tracker-list");
-      const teacherCount = document.getElementById("admin-rescheduled-by-teacher-count");
-      const schoolCount = document.getElementById("admin-rescheduled-by-school-count");
+      const needsDateCount = document.getElementById("admin-needs-date-count");
+      const rescheduledCount = document.getElementById("admin-rescheduled-count");
+      const cancelledCount = document.getElementById("admin-cancelled-count");
       const shortcutCount = document.getElementById("admin-reschedule-tracker-shortcut-count");
-      const records = teachers.flatMap((teacher, teacherIndex) => (teacher.reschedules || []).map((item) => ({
+      const records = teachers.flatMap((teacher, teacherIndex) => (teacher.reschedules || []).map((item, itemIndex) => ({
         teacher,
         teacherIndex,
+        itemIndex,
         item,
-        sourceType: rescheduleSourceType(teacher, item)
+        sourceType: rescheduleSourceType(teacher, item),
+        status: rescheduleStatusFor(item)
       })));
-      const rescheduledByTeacher = records.filter((record) => record.sourceType === "teacher").length;
-      const rescheduledBySchool = records.filter((record) => record.sourceType === "school").length;
-      if (teacherCount) teacherCount.textContent = String(rescheduledByTeacher);
-      if (schoolCount) schoolCount.textContent = String(rescheduledBySchool);
-      if (shortcutCount) shortcutCount.textContent = "Make-Up Classes";
+      const needsDate = records.filter((record) => record.status === "date_tbd").length;
+      const rescheduled = records.filter((record) => record.status === "rescheduled").length;
+      const cancelled = records.filter((record) => record.status === "cancelled").length;
+      if (needsDateCount) needsDateCount.textContent = String(needsDate);
+      if (rescheduledCount) rescheduledCount.textContent = String(rescheduled);
+      if (cancelledCount) cancelledCount.textContent = String(cancelled);
+      if (shortcutCount) shortcutCount.textContent = needsDate ? `${needsDate} Need Date${needsDate === 1 ? "" : "s"}` : "Class Changes";
       updateAdminDashboardReviewBubbles();
       if (!list) return;
       list.innerHTML = teachers.map((teacher, teacherIndex) => {
@@ -13688,26 +13825,33 @@
         return `
           <details class="reschedule-teacher-section">
             <summary>
-              <span class="reschedule-teacher-summary-text"><strong>${escapeText(teacher.displayName || fullName(teacher))}</strong><small>${teacherRecords.length} rescheduled class${teacherRecords.length === 1 ? "" : "es"}</small></span>
+              <span class="reschedule-teacher-summary-text"><strong>${escapeText(teacher.displayName || fullName(teacher))}</strong><small>${teacherRecords.length} class change${teacherRecords.length === 1 ? "" : "s"}</small></span>
               <span class="status ${teacherRecords.length ? "pending" : "ok"}">${teacherRecords.length ? "Review" : "Clear"}</span>
             </summary>
             <div class="reschedule-teacher-body">
-              ${teacherRecords.length ? teacherRecords.map(({ item, sourceType }) => {
+              ${teacherRecords.length ? teacherRecords.map(({ item, itemIndex, sourceType, status }) => {
                 const school = findSchool(teacher, item.schoolName) || schoolProfileByName(item.schoolName);
                 const requestedBy = item.requestedBy || (item.schoolRequested ? schoolRequestedByName(item.schoolName) : fullName(teacher));
                 return `
                   <article class="reschedule-record-card">
                     <div>
                       <strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong>
-                      <small>${escapeText(rescheduleDateLabel(item.originalDate))} to ${escapeText(rescheduleDateLabel(item.newDate))} • ${escapeText(item.timeBlock || "AM")} • ${escapeText(item.week || "School visit")} ${escapeText(item.curriculum || "")}${item.reason ? ` • ${escapeText(item.reason)}` : ""}</small>
+                      <small>${escapeText(rescheduleTimingLabel(item))} • ${escapeText(item.week || "School visit")} ${escapeText(item.curriculum || "")}${item.reason ? ` • ${escapeText(item.reason)}` : ""}</small>
                       <span class="tempo-tag-row">
                         <span class="tempo-tag-pill">Requested by: ${escapeText(requestedBy)}</span>
                       </span>
                     </div>
-                    <span class="reschedule-source-pill ${sourceType}">${escapeText(rescheduleSourceLabel(teacher, item))}</span>
+                    <span class="reschedule-record-actions">
+                      <span class="reschedule-action-pill ${status === "date_tbd" ? "date-tbd" : status}">${escapeText(rescheduleActionLabel(item))}</span>
+                      <span class="reschedule-source-pill ${sourceType}">${escapeText(rescheduleSourceLabel(teacher, item))}</span>
+                      ${status === "date_tbd" ? `
+                        <button class="secondary" type="button" data-send-reschedule-reminder="${teacherIndex}:${itemIndex}">${item.reminderSentAt ? "Send Again" : "Send Push Reminder"}</button>
+                        ${item.reminderSentAt ? `<small class="reschedule-reminder-note">Last sent ${escapeText(formatReminderTime(item.reminderSentAt))}</small>` : ""}
+                      ` : ""}
+                    </span>
                   </article>
                 `;
-              }).join("") : `<div class="teacher-class-empty">No rescheduled classes for this teacher yet.</div>`}
+              }).join("") : `<div class="teacher-class-empty">No class changes for this teacher yet.</div>`}
             </div>
           </details>
         `;
@@ -14466,8 +14610,14 @@
       const panel = toggle.closest(".my-day-hero")?.querySelector("[data-reschedule-panel]");
       if (!panel) return;
       panel.hidden = !panel.hidden;
-      toggle.textContent = panel.hidden ? "Reschedule" : "Close";
-      if (!panel.hidden) renderRescheduleDatePreview(panel);
+      toggle.textContent = panel.hidden ? "Change Class" : "Close";
+      if (!panel.hidden) syncRescheduleActionPanel(panel);
+    });
+
+    document.addEventListener("change", (event) => {
+      const actionSelect = event.target.closest("[data-reschedule-action]");
+      if (!actionSelect) return;
+      syncRescheduleActionPanel(actionSelect.closest("[data-reschedule-panel]"));
     });
 
     document.addEventListener("input", (event) => {
@@ -14487,15 +14637,22 @@
       if (!saveButton) return;
       const panel = saveButton.closest("[data-reschedule-panel]");
       if (!panel) return;
+      const action = panel.querySelector("[data-reschedule-action]")?.value || "";
       const reason = panel.querySelector("[data-reschedule-reason]")?.value.trim() || "";
       const newDate = panel.querySelector("[data-reschedule-date]")?.value || "";
       const timeBlock = panel.querySelector("[data-reschedule-timeblock]")?.value || "AM";
       const requestedBy = panel.querySelector("[data-reschedule-requested-by]")?.value || "";
-      if (!reason) {
-        showToast("Add a reason for the reschedule");
+      if (!action) {
+        showToast("Choose Reschedule Now, Date TBD, or Cancel");
+        panel.querySelector("[data-reschedule-action]")?.focus();
         return;
       }
-      if (!newDate) {
+      if (!reason) {
+        showToast("Add a reason for the class change");
+        panel.querySelector("[data-reschedule-reason]")?.focus();
+        return;
+      }
+      if (action === "reschedule_now" && !newDate) {
         showToast("Choose the new class date");
         return;
       }
@@ -14513,8 +14670,10 @@
         reason,
         requestedBy,
         schoolRequested: requestedByIsSchool(requestedBy, panel.dataset.school),
-        newDate,
-        timeBlock,
+        action,
+        status: action === "date_tbd" ? "date_tbd" : (action === "cancel" ? "cancelled" : "rescheduled"),
+        newDate: action === "reschedule_now" ? newDate : "",
+        timeBlock: action === "reschedule_now" ? timeBlock : "",
         updatedAt: new Date().toISOString()
       };
       const existingIndex = profileTeacher.reschedules.findIndex((item) => (
@@ -14535,7 +14694,29 @@
       renderAdminRescheduleTracker();
       showRescheduleReminder(override);
       clearUnsavedEdits();
-      showToast("Class moved on the calendar");
+      showToast(action === "date_tbd" ? "Class saved with Date TBD" : (action === "cancel" ? "Class cancelled with no make-up" : "Class moved on the calendar"));
+    });
+
+    document.getElementById("admin-reschedule-tracker-list")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-send-reschedule-reminder]");
+      if (!button) return;
+      const [teacherIndex, itemIndex] = button.dataset.sendRescheduleReminder.split(":").map(Number);
+      const teacher = teachers[teacherIndex];
+      const item = teacher?.reschedules?.[itemIndex];
+      if (!teacher || !item || rescheduleStatusFor(item) !== "date_tbd") return;
+      item.reminderSentAt = new Date().toISOString();
+      item.reminderCount = Number(item.reminderCount || 0) + 1;
+      teacher.notifications ||= [];
+      teacher.notifications.push({
+        type: "reschedule_reminder",
+        schoolName: item.schoolName,
+        originalDate: item.originalDate,
+        createdAt: item.reminderSentAt,
+        read: false
+      });
+      saveAppData();
+      renderAdminRescheduleTracker();
+      showToast(`Push reminder queued for ${teacher.displayName || fullName(teacher)}`);
     });
 
     document.getElementById("delete-profile")?.addEventListener("click", () => {
