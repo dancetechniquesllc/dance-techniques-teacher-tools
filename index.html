@@ -6572,6 +6572,23 @@
       line-height: 1.3;
     }
 
+    .progress-school-identity {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .progress-school-identity strong,
+    .progress-school-identity small {
+      display: block;
+    }
+
+    .progress-school-identity small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
     .progress-teacher summary::after,
     .progress-school summary::after,
     .progress-class summary::after {
@@ -13447,7 +13464,7 @@
                 return `
                   <details class="progress-school">
                     <summary>
-                      <span><strong>${escapeText(school.nickname || school.name)}</strong><small>${escapeText(school.isd || "School")} • ${classes.length} classes</small></span>
+                      <span class="progress-school-identity"><strong>${escapeText(school.nickname || school.name)}</strong><small>${escapeText(school.isd || "School")} • ${classes.length} classes</small></span>
                       <span class="status private">${escapeText(dayOptions.find((day) => Number(day.value) === Number(school.dayOfWeek))?.label || "Day")} ${escapeText(school.timeBlock || "")}</span>
                     </summary>
                     <div class="progress-stack">
