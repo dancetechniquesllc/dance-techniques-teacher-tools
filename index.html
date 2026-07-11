@@ -6363,6 +6363,60 @@
       gap: 10px;
     }
 
+    .progress-day-filter {
+      display: grid;
+      grid-template-columns: repeat(7, max-content);
+      width: max-content;
+      max-width: 100%;
+      margin-bottom: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      overflow-x: auto;
+    }
+
+    .progress-day-filter button {
+      min-width: 54px;
+      min-height: 36px;
+      padding: 0 11px;
+      border: 0;
+      border-right: 1px solid var(--border);
+      border-radius: 0;
+      background: white;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 780;
+      white-space: nowrap;
+    }
+
+    .progress-day-filter button:last-child {
+      border-right: 0;
+    }
+
+    .progress-day-filter button[aria-pressed="true"] {
+      background: var(--rose);
+      color: white;
+    }
+
+    .progress-day-empty {
+      display: grid;
+      gap: 4px;
+      padding: 18px;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: var(--surface-soft);
+    }
+
+    .progress-day-empty strong {
+      font-size: 14px;
+    }
+
+    .progress-day-empty small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
     .admin-tool-section {
       margin-top: 12px;
     }
@@ -8152,6 +8206,15 @@
                 </select>
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
               </span>
+            </div>
+            <div class="progress-day-filter" id="admin-curriculum-progress-day-filter" role="group" aria-label="Filter Class Progress by day">
+              <button type="button" data-progress-day="all" aria-pressed="true">All</button>
+              <button type="button" data-progress-day="today" aria-pressed="false">Today</button>
+              <button type="button" data-progress-day="1" aria-pressed="false">Mon</button>
+              <button type="button" data-progress-day="2" aria-pressed="false">Tue</button>
+              <button type="button" data-progress-day="3" aria-pressed="false">Wed</button>
+              <button type="button" data-progress-day="4" aria-pressed="false">Thu</button>
+              <button type="button" data-progress-day="5" aria-pressed="false">Fri</button>
             </div>
             <div class="admin-curriculum-progress-list" id="admin-curriculum-progress-list" aria-label="Admin curriculum progress"></div>
           </section>
@@ -11617,6 +11680,7 @@
       { value: 4, label: "Thu" },
       { value: 5, label: "Fri" }
     ];
+    let adminCurriculumProgressDay = "all";
     const isdOptions = ["Rockwall ISD", "Garland ISD", "Wylie ISD", "Forney ISD", "Mesquite ISD"];
     const isdCalendars = [
       {
@@ -13466,17 +13530,46 @@
     const renderAdminCurriculumProgress = () => {
       const list = document.getElementById("admin-curriculum-progress-list");
       if (!list) return;
-      list.innerHTML = teachers.map((teacher, teacherIndex) => {
-        const schoolCount = teacher.schools.length;
-        const completedRecords = teacher.curriculum.filter((item) => item.steps.every((step) => step.checked)).length;
+      const today = new Date().getDay();
+      const selectedDay = adminCurriculumProgressDay === "today" ? today : Number(adminCurriculumProgressDay);
+      const isFiltered = adminCurriculumProgressDay !== "all";
+      const fullDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const todayButton = document.querySelector('[data-progress-day="today"]');
+      if (todayButton) todayButton.textContent = `Today (${dayOptions.find((day) => day.value === today)?.label || fullDayNames[today].slice(0, 3)})`;
+      document.querySelectorAll("[data-progress-day]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.progressDay === adminCurriculumProgressDay));
+      });
+      const visibleTeachers = teachers.map((teacher, teacherIndex) => {
+        const schools = isFiltered
+          ? teacher.schools.filter((school) => Number(school.dayOfWeek) === selectedDay)
+          : teacher.schools;
+        return { teacher, teacherIndex, schools };
+      }).filter(({ schools }) => schools.length > 0);
+      if (!visibleTeachers.length) {
+        const label = adminCurriculumProgressDay === "today"
+          ? fullDayNames[today]
+          : (dayOptions.find((day) => day.value === selectedDay)?.label || "this day");
+        list.innerHTML = `
+          <div class="progress-day-empty">
+            <strong>No Dance Techniques classes scheduled for ${escapeText(label)}.</strong>
+            <small>Choose another weekday or All to view the complete Class Progress list.</small>
+          </div>
+        `;
+        return;
+      }
+      list.innerHTML = visibleTeachers.map(({ teacher, teacherIndex, schools }) => {
+        const schoolNames = new Set(schools.map((school) => school.name));
+        const curriculumRecords = teacher.curriculum.filter((item) => schoolNames.has(item.schoolName));
+        const schoolCount = schools.length;
+        const completedRecords = curriculumRecords.filter((item) => item.steps.every((step) => step.checked)).length;
         return `
           <details class="progress-teacher" data-progress-teacher="${teacherIndex}">
             <summary>
-              <span class="progress-teacher-identity"><strong>${escapeText(fullName(teacher))}</strong><small>${schoolCount} schools • ${completedRecords}/${teacher.curriculum.length} school checklists complete</small></span>
+              <span class="progress-teacher-identity"><strong>${escapeText(fullName(teacher))}</strong><small>${schoolCount} school${schoolCount === 1 ? "" : "s"} • ${completedRecords}/${curriculumRecords.length} school checklist${curriculumRecords.length === 1 ? "" : "s"} complete</small></span>
               <span class="status ${statusClass(teacher.status)}">${escapeText(icons[teacher.status] || teacher.status)}</span>
             </summary>
             <div class="progress-stack">
-              ${teacher.schools.map((school, schoolIndex) => {
+              ${schools.map((school) => {
                 const classes = normalizeClassCurriculumRows(school);
                 return `
                   <details class="progress-school">
@@ -14017,6 +14110,13 @@
       sendAdminTeacherReply(button.dataset.adminSendTeacherReply);
     });
 
+    document.getElementById("admin-curriculum-progress-day-filter")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-progress-day]");
+      if (!button) return;
+      adminCurriculumProgressDay = button.dataset.progressDay || "all";
+      renderAdminCurriculumProgress();
+    });
+
     document.getElementById("open-private-message")?.addEventListener("click", () => {
       document.getElementById("teacher-private-composer")?.classList.toggle("open");
       document.getElementById("teacher-message-draft")?.focus();
@@ -14472,6 +14572,7 @@
       markAdminDashboardSectionViewed(section);
       if (section === "master-my-day") renderMasterMyDay();
       if (section === "school-library") renderIsdCalendars();
+      if (section === "curriculum-progress") renderAdminCurriculumProgress();
       if (section === "messages") renderAdminMessagesPage();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
