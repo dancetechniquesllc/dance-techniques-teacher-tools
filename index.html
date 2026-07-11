@@ -5725,6 +5725,23 @@
       display: none;
     }
 
+    .admin-teacher-message-identity {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .admin-teacher-message-identity strong,
+    .admin-teacher-message-identity small {
+      display: block;
+    }
+
+    .admin-teacher-message-identity small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
     .admin-teacher-message-section summary::after {
       content: "+";
       display: grid;
@@ -13644,7 +13661,7 @@
         return `
           <details class="admin-teacher-message-section">
             <summary>
-              <span><strong>${escapeText(teacher.displayName || fullName(teacher))}</strong><small>${adminThreads.length} admin thread${adminThreads.length === 1 ? "" : "s"} • ${teacherOnlyThreads.length} teacher thread${teacherOnlyThreads.length === 1 ? "" : "s"}</small></span>
+              <span class="admin-teacher-message-identity"><strong>${escapeText(teacher.displayName || fullName(teacher))}</strong><small>${adminThreads.length} admin thread${adminThreads.length === 1 ? "" : "s"} • ${teacherOnlyThreads.length} teacher thread${teacherOnlyThreads.length === 1 ? "" : "s"}</small></span>
               <span class="status ${unreadCount ? "pending" : "ok"}">${unreadCount ? `${unreadCount} unread` : "Current"}</span>
             </summary>
             <div class="admin-teacher-message-body">
