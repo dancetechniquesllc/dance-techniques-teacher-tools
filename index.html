@@ -6589,6 +6589,23 @@
       line-height: 1.3;
     }
 
+    .progress-class-identity {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .progress-class-identity strong,
+    .progress-class-identity small {
+      display: block;
+    }
+
+    .progress-class-identity small {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
     .progress-teacher summary::after,
     .progress-school summary::after,
     .progress-class summary::after {
@@ -13474,7 +13491,7 @@
                         return `
                           <details class="progress-class">
                             <summary>
-                              <span><strong>${escapeText(classRow.title)}</strong><small>${escapeText(classRow.age)} • Level ${escapeText(classRow.level)} • ${escapeText(classRow.startTime || "Start time not set")}</small></span>
+                              <span class="progress-class-identity"><strong>${escapeText(classRow.title)}</strong><small>${escapeText(classRow.age)} • Level ${escapeText(classRow.level)} • ${escapeText(classRow.startTime || "Start time not set")}</small></span>
                               <span class="week-badge ${badgeClass}">${escapeText(progress.label)}</span>
                             </summary>
                             <div class="progress-class-body">
