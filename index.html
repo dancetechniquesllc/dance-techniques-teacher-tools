@@ -7517,6 +7517,107 @@
     body[data-mode="admin"] .phone-stage { display: none; }
     body[data-mode="admin"] .workspace { grid-template-columns: 1fr; }
 
+    .auth-gate {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      overflow-y: auto;
+      background:
+        radial-gradient(circle at 18% 12%, oklch(92% 0.055 18 / .9), transparent 34%),
+        radial-gradient(circle at 85% 88%, oklch(93% 0.045 225 / .8), transparent 38%),
+        #fffaf9;
+    }
+
+    .auth-gate[hidden] { display: none; }
+
+    .auth-card {
+      width: min(470px, 100%);
+      padding: clamp(26px, 6vw, 46px);
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, .96);
+      box-shadow: 0 24px 70px oklch(36% 0.05 18 / .14);
+    }
+
+    .auth-brand {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .auth-brand .mark { flex: 0 0 auto; }
+    .auth-brand h1,
+    .auth-card h2 { margin: 0; font-family: var(--font-display); }
+    .auth-brand h1 { font-size: clamp(24px, 6vw, 34px); }
+    .auth-brand p,
+    .auth-card > p { margin: 5px 0 0; color: var(--muted); font-weight: 680; line-height: 1.45; }
+
+    .auth-form {
+      display: grid;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .auth-form label {
+      display: grid;
+      gap: 7px;
+      font-weight: 850;
+    }
+
+    .auth-form input {
+      width: 100%;
+      min-height: 52px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      font: inherit;
+      background: white;
+    }
+
+    .auth-form button { min-height: 52px; }
+
+    .auth-message {
+      min-height: 22px;
+      margin: 0;
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 760;
+    }
+
+    .auth-help {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 680;
+      line-height: 1.45;
+    }
+
+    .auth-pending { display: none; }
+    .auth-gate[data-state="pending"] .auth-login { display: none; }
+    .auth-gate[data-state="pending"] .auth-pending { display: block; }
+
+    .session-strip {
+      display: none;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 8px 18px;
+      border-bottom: 1px solid var(--border);
+      background: white;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    body[data-authenticated="true"] .session-strip { display: flex; }
+    .session-strip button { padding: 7px 11px; font-size: 12px; }
+    body.auth-checking > .app { visibility: hidden; }
+
     @media (min-width: 1100px) {
       body[data-mode="teacher"] .admin-shell {
         display: grid;
@@ -7526,8 +7627,45 @@
     }
   </style>
 </head>
-<body data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="my-day">
+<body class="auth-checking" data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="my-day">
+  <section class="auth-gate" id="auth-gate" data-state="checking" aria-live="polite">
+    <div class="auth-card">
+      <div class="auth-brand">
+        <div class="mark"><img src="assets/dtllc-d-dancer-white-v3.png" alt="" aria-hidden="true"></div>
+        <div>
+          <h1>Dance Techniques</h1>
+          <p>Teacher Portal</p>
+        </div>
+      </div>
+      <div class="auth-login">
+        <h2>Welcome back</h2>
+        <p>Sign in with your Dance Techniques teacher account.</p>
+        <form class="auth-form" id="auth-form">
+          <label>Email
+            <input id="auth-email" type="email" autocomplete="username" required>
+          </label>
+          <label>Password
+            <input id="auth-password" type="password" autocomplete="current-password" minlength="8" required>
+          </label>
+          <p class="auth-message" id="auth-message"></p>
+          <button class="primary" id="auth-submit" type="submit">Sign In</button>
+        </form>
+        <div class="auth-help">Need an account or forgot your password? Contact Dance Techniques so we can help you securely.</div>
+      </div>
+      <div class="auth-pending">
+        <h2>Your account is waiting for approval</h2>
+        <p>A Dance Techniques director needs to activate your access before you can use the portal.</p>
+        <form class="auth-form" id="auth-pending-form">
+          <button class="secondary" type="submit">Sign Out</button>
+        </form>
+      </div>
+    </div>
+  </section>
   <main class="app">
+    <div class="session-strip" id="session-strip">
+      <span id="session-name">Signed in</span>
+      <button class="secondary" id="auth-sign-out" type="button">Sign Out</button>
+    </div>
     <header class="topbar">
       <div class="brand">
         <div class="mark"><img src="assets/dtllc-d-dancer-white-v3.png" alt="" aria-hidden="true"></div>
@@ -9616,7 +9754,9 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
+  <script src="supabase-auth.js"></script>
   <script>
     const teachers = [
       {

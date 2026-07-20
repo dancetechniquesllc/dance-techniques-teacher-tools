@@ -1,7 +1,7 @@
 # Teacher Tools and Director Dashboard Prototype
 
 **Status:** In development
-**Last updated:** 2026-07-09
+**Last updated:** 2026-07-20
 
 This folder is the repo-safe copy of the Teacher Tools and Director Dashboard prototype developed in Open Design.
 
@@ -16,11 +16,13 @@ Start the normal Dance Techniques local app server, open the Teacher Portal, the
 - Partner School cards, teacher/ISD bubbles, and sorting
 - Schedule, curriculum, messages, pay-stub placeholders, and admin tools
 - Browser-local prototype saving
+- Supabase email/password sign-in with inactive-account approval gating
 
 ## Data Safety
 
 - Teacher/profile examples use demonstration data and `.example` contacts; Partner School starter records use reviewed public business information.
-- Changes made in the browser are saved only in that browser's local storage; they are not automatically committed to GitHub.
+- Sign-in is connected to the live Supabase project, but roster and profile edits are still saved only in that browser's local storage until the data migration is complete.
+- Only active Supabase profiles can open the portal. New accounts remain inactive until a director or admin approves them.
 - Do not add real passwords, payroll documents, student/parent records, or private teacher details to this folder.
 - Public Partner School starter information is checked in at `data/partner-schools.js`, with source research in `research/partner-schools/`.
 - Browser edits override the starter directory on that browser but do not automatically update the checked-in data file.
