@@ -3815,6 +3815,13 @@
     .roster-class-card strong,
     .roster-class-card small { display: block; }
     .roster-class-card small { margin-top: 4px; color: var(--muted); }
+    .roster-class-card.teacher-tiffany { background: oklch(94% 0.04 315); color: oklch(38% 0.13 315); border-color: oklch(76% 0.08 315); }
+    .roster-class-card.teacher-lexi { background: oklch(95% 0.04 150); color: oklch(34% 0.11 150); border-color: oklch(76% 0.08 150); }
+    .roster-class-card.teacher-judy { background: oklch(95% 0.04 235); color: oklch(34% 0.12 235); border-color: oklch(76% 0.08 235); }
+    .roster-class-card.teacher-makayla { background: oklch(96% 0.06 92); color: oklch(42% 0.1 82); border-color: oklch(82% 0.1 92); }
+    .roster-class-card.teacher-erika { background: oklch(95% 0.05 55); color: oklch(42% 0.11 45); border-color: oklch(78% 0.1 55); }
+    .roster-class-card[class*="teacher-"] small { color: inherit; opacity: .82; }
+    .roster-class-card[class*="teacher-"].is-selected { outline: 2px solid currentColor; outline-offset: 1px; }
     .roster-enrollment-bubble { display: inline-flex !important; width: fit-content; margin-top: 8px !important; padding: 5px 9px; border-radius: 999px; font-weight: 850; color: oklch(28% 0.04 40) !important; }
     .roster-enrollment-bubble.low { background: oklch(91% 0.12 90); }
     .roster-enrollment-bubble.ready { background: oklch(88% 0.11 145); }
@@ -15284,6 +15291,12 @@
       }
 
       const visibleClasses = filteredRosterClasses();
+      const defaultRosterView = rosterSchoolFilter === "all" && rosterTeacherFilter === "all" && !rosterSearchTerm;
+      if (defaultRosterView) visibleClasses.sort((a, b) => (
+        rosterTeacherName(a.teacherId).localeCompare(rosterTeacherName(b.teacherId))
+        || a.schoolName.localeCompare(b.schoolName)
+        || a.name.localeCompare(b.name, undefined, { numeric: true })
+      ));
       const visibleSchoolCount = new Set(visibleClasses.map((item) => item.schoolName)).size;
       const totalEnrolled = visibleClasses.reduce((sum, item) => sum + rosterEnrolled(item).length, 0);
       const totalProspects = visibleClasses.reduce((sum, item) => sum + rosterProspects(item).length, 0);
@@ -15301,7 +15314,7 @@
       if (list) list.innerHTML = visibleClasses.length ? visibleClasses.map((item) => {
         const enrolled = rosterEnrolled(item).length;
         const prospects = rosterProspects(item).length;
-        return `<button class="roster-class-card ${item.id === selectedRosterClassId ? "is-selected" : ""}" type="button" data-roster-class="${rosterSafe(item.id)}">
+        return `<button class="roster-class-card ${teacherAssignmentColorClass(item.teacherId)} ${item.id === selectedRosterClassId ? "is-selected" : ""}" type="button" data-roster-class="${rosterSafe(item.id)}">
           <strong>${rosterSafe(item.name)}</strong>
           <small>${rosterSafe(item.schoolName)}</small>
           <small>${rosterSafe(rosterTeacherName(item.teacherId))} · ${rosterSafe(item.day)} ${rosterSafe(item.time)}</small>
