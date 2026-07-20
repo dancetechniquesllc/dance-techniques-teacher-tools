@@ -9841,6 +9841,7 @@
         capacity: 12,
         students: [
           { id: "ava-m", firstName: "Ava", lastName: "Martinez", classroom: "Toddlers A", birthdate: "2024-01-18", status: "enrolled" },
+          { id: "miles-carter-sample", firstName: "Miles", lastName: "Carter", classroom: "Toddlers A", birthdate: "2023-12-11", status: "enrolled", gender: "male", photo: "" },
           { id: "charlotte-r", firstName: "Charlotte", lastName: "Reynolds", classroom: "Toddlers B", birthdate: "2023-11-02", status: "enrolled" },
           { id: "ella-s", firstName: "Ella", lastName: "Sullivan", classroom: "Toddlers A", birthdate: "2024-03-09", status: "enrolled" },
           { id: "lily-j", firstName: "Lily", lastName: "Johnson", classroom: "Toddlers B", birthdate: "2023-09-21", status: "trial-scheduled", trialDate: "2026-09-14", parentPhone: "(972) 555-0184", parentEmail: "jordan.johnson@example.com", notes: "Mom asked for more information about class shoes and enrollment." }
@@ -12206,6 +12207,11 @@
         if (typeof student[field] === "undefined") student[field] = value;
       });
     }));
+    const sampleBoyStudent = { id: "miles-carter-sample", firstName: "Miles", lastName: "Carter", classroom: "Toddlers A", birthdate: "2023-12-11", status: "enrolled", gender: "male", photo: "" };
+    if (!rosterClasses.some((rosterClass) => rosterClass.students.some((student) => student.id === sampleBoyStudent.id))) {
+      const sampleBoyRoster = rosterClasses.find((rosterClass) => rosterClass.id === "primrose-north-under-3") || rosterClasses.find((rosterClass) => rosterClass.sourceActive !== false);
+      sampleBoyRoster?.students.push(sampleBoyStudent);
+    }
 
     const monthOptions = [
       "January", "February", "March", "April", "May", "June",
