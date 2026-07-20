@@ -3850,6 +3850,17 @@
     .roster-student-row small { color: var(--muted); }
     .roster-student-name strong,
     .roster-student-name small { display: block; }
+    .roster-student-note {
+      grid-column: 1 / -1;
+      padding: 9px 10px;
+      border-radius: 8px;
+      background: oklch(97% 0.018 42);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .roster-student-note strong { color: var(--fg); }
+    .roster-contact-line { margin-top: 3px; }
     .roster-empty { padding: 18px; text-align: center; color: var(--muted); }
 
     @media (max-width: 900px) {
@@ -9753,7 +9764,7 @@
           { id: "ava-m", firstName: "Ava", lastName: "Martinez", classroom: "Toddlers A", birthdate: "2024-01-18", status: "enrolled" },
           { id: "charlotte-r", firstName: "Charlotte", lastName: "Reynolds", classroom: "Toddlers B", birthdate: "2023-11-02", status: "enrolled" },
           { id: "ella-s", firstName: "Ella", lastName: "Sullivan", classroom: "Toddlers A", birthdate: "2024-03-09", status: "enrolled" },
-          { id: "lily-j", firstName: "Lily", lastName: "Johnson", classroom: "Toddlers B", birthdate: "2023-09-21", status: "trial-scheduled", trialDate: "2026-09-14" }
+          { id: "lily-j", firstName: "Lily", lastName: "Johnson", classroom: "Toddlers B", birthdate: "2023-09-21", status: "trial-scheduled", trialDate: "2026-09-14", parentPhone: "(972) 555-0184", parentEmail: "jordan.johnson@example.com", notes: "Mom asked for more information about class shoes and enrollment." }
         ]
       },
       {
@@ -9768,7 +9779,7 @@
         students: [
           { id: "mia-b", firstName: "Mia", lastName: "Bennett", classroom: "Preschool 1", birthdate: "2022-04-12", status: "enrolled" },
           { id: "zoe-k", firstName: "Zoe", lastName: "Kim", classroom: "Pre-K", birthdate: "2021-08-30", status: "enrolled" },
-          { id: "nora-p", firstName: "Nora", lastName: "Parker", classroom: "Preschool 2", birthdate: "2022-12-07", status: "trial-attended", trialDate: "2026-09-08" }
+          { id: "nora-p", firstName: "Nora", lastName: "Parker", classroom: "Preschool 2", birthdate: "2022-12-07", status: "trial-attended", trialDate: "2026-09-08", parentPhone: "(469) 555-0126", parentEmail: "", notes: "Loved the trial. Family wants the tuition link before deciding." }
         ]
       },
       {
@@ -9800,7 +9811,7 @@
         capacity: 10,
         students: [
           { id: "grace-t", firstName: "Grace", lastName: "Turner", classroom: "Pre-K", birthdate: "2021-10-14", status: "enrolled" },
-          { id: "hazel-c", firstName: "Hazel", lastName: "Collins", classroom: "Preschool", birthdate: "2022-05-23", status: "ready-to-enroll", trialDate: "2026-09-10" }
+          { id: "hazel-c", firstName: "Hazel", lastName: "Collins", classroom: "Preschool", birthdate: "2022-05-23", status: "ready-to-enroll", trialDate: "2026-09-10", parentPhone: "", parentEmail: "collins.family@example.com", notes: "Ready to enroll once Mom receives the registration instructions." }
         ]
       }
     ];
@@ -12101,8 +12112,17 @@
     ["Anderson", "Brown", "Carter", "Davis", "Evans", "Foster", "Garcia", "Harris", "Irwin", "Jackson", "Kelly"].forEach((lastName, index) => {
       sampleRosterLastNames[`rockwall-student-${index + 1}`] = lastName;
     });
+    const sampleProspectDetails = {
+      "lily-j": { parentPhone: "(972) 555-0184", parentEmail: "jordan.johnson@example.com", notes: "Mom asked for more information about class shoes and enrollment." },
+      "nora-p": { parentPhone: "(469) 555-0126", parentEmail: "", notes: "Loved the trial. Family wants the tuition link before deciding." },
+      "hazel-c": { parentPhone: "", parentEmail: "collins.family@example.com", notes: "Ready to enroll once Mom receives the registration instructions." }
+    };
     rosterClasses.forEach((rosterClass) => rosterClass.students.forEach((student) => {
       if (sampleRosterLastNames[student.id] && /^[A-Z]\.$/.test(student.lastName || "")) student.lastName = sampleRosterLastNames[student.id];
+      const sampleDetails = sampleProspectDetails[student.id];
+      if (sampleDetails) Object.entries(sampleDetails).forEach(([field, value]) => {
+        if (typeof student[field] === "undefined") student[field] = value;
+      });
     }));
 
     const monthOptions = [
@@ -15000,22 +15020,31 @@
       "ready-to-enroll": "Ready to enroll"
     }[status] || "Prospective");
 
+    const sortRosterStudents = (students) => [...students].sort((a, b) => {
+      const classroomOrder = (a.classroom || "").localeCompare(b.classroom || "", undefined, { sensitivity: "base", numeric: true });
+      if (classroomOrder) return classroomOrder;
+      const birthdateOrder = (b.birthdate || "").localeCompare(a.birthdate || "");
+      if (birthdateOrder) return birthdateOrder;
+      return `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`);
+    });
+
     const filteredRosterClasses = () => rosterClasses.filter((rosterClass) => {
       if (rosterSchoolFilter !== "all" && rosterClass.schoolName !== rosterSchoolFilter) return false;
       if (rosterTeacherFilter !== "all" && rosterClass.teacherId !== rosterTeacherFilter) return false;
       if (!rosterSearchTerm) return true;
-      const studentNames = rosterClass.students.map((student) => `${student.firstName} ${student.lastName}`).join(" ");
-      return `${rosterClass.name} ${rosterClass.schoolName} ${rosterTeacherName(rosterClass.teacherId)} ${studentNames}`.toLowerCase().includes(rosterSearchTerm);
+      const studentDetails = rosterClass.students.map((student) => `${student.firstName} ${student.lastName} ${student.classroom || ""} ${student.parentPhone || ""} ${student.parentEmail || ""} ${student.notes || ""}`).join(" ");
+      return `${rosterClass.name} ${rosterClass.schoolName} ${rosterTeacherName(rosterClass.teacherId)} ${studentDetails}`.toLowerCase().includes(rosterSearchTerm);
     });
 
     const renderRosterStudentRows = (students, prospective = false) => {
       if (!students.length) return `<div class="roster-empty">${prospective ? "No prospective students right now." : "No enrolled students yet."}</div>`;
-      return students.map((student) => `
+      return sortRosterStudents(students).map((student) => `
         <div class="roster-student-row">
           <span class="roster-student-name"><strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}</strong><small>${prospective ? rosterStatusLabel(student.status) : "Enrolled"}</small></span>
           <span><small>Classroom</small><br>${rosterSafe(student.classroom || "—")}</span>
           <span><small>Age</small><br>${rosterAge(student.birthdate)}</span>
           <span>${prospective ? `<small>Trial date</small><br>${rosterSafe(student.trialDate || "Not set")}<br>` : ""}<button class="secondary" type="button" data-roster-edit-student="${rosterSafe(student.id)}">Edit</button>${prospective ? ` <button class="primary" type="button" data-roster-enroll="${rosterSafe(student.id)}">Approve</button>` : ""}</span>
+          ${(student.notes || (prospective && (student.parentPhone || student.parentEmail))) ? `<span class="roster-student-note"><strong>Notes</strong>${student.notes ? ` · ${rosterSafe(student.notes)}` : ""}${prospective && (student.parentPhone || student.parentEmail) ? `<div class="roster-contact-line"><strong>Parent contact:</strong> ${rosterSafe([student.parentPhone, student.parentEmail].filter(Boolean).join(" · "))}</div>` : ""}</span>` : ""}
         </div>
       `).join("");
     };
@@ -16010,11 +16039,17 @@
       if (addButton) {
         const firstName = window.prompt("Student first name");
         if (!firstName?.trim()) return;
-        const lastName = window.prompt("Student last name or initial", "");
+        const lastName = window.prompt("Student full last name", "");
         const classroom = window.prompt("School classroom", "");
         const birthdate = window.prompt("Birthdate (YYYY-MM-DD)", "");
         const prospective = addButton.dataset.rosterAdd === "prospective";
         const trialDate = prospective ? window.prompt("Trial date (YYYY-MM-DD)", "") : "";
+        const parentPhone = window.prompt("Parent phone number", "");
+        if (parentPhone === null) return;
+        const parentEmail = window.prompt("Parent email", "");
+        if (parentEmail === null) return;
+        const notes = window.prompt(prospective ? "Prospective student notes or follow-up needed" : "Student notes", "");
+        if (notes === null) return;
         rosterClass.students.push({
           id: `${firstName}-${lastName || Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
           firstName: firstName.trim(),
@@ -16022,7 +16057,10 @@
           classroom: classroom?.trim() || "",
           birthdate: birthdate?.trim() || "",
           status: prospective ? "trial-scheduled" : "enrolled",
-          trialDate: trialDate?.trim() || ""
+          trialDate: trialDate?.trim() || "",
+          parentPhone: parentPhone.trim(),
+          parentEmail: parentEmail.trim(),
+          notes: notes.trim()
         });
         renderClassesAndRosters();
         scheduleAppDataSave();
@@ -16050,9 +16088,18 @@
         if (classroom === null) return;
         const birthdate = window.prompt("Birthdate (YYYY-MM-DD)", student.birthdate || "");
         if (birthdate === null) return;
+        const parentPhone = window.prompt("Parent phone number", student.parentPhone || "");
+        if (parentPhone === null) return;
+        const parentEmail = window.prompt("Parent email", student.parentEmail || "");
+        if (parentEmail === null) return;
+        const notes = window.prompt("Student notes and follow-up", student.notes || "");
+        if (notes === null) return;
         student.lastName = lastName.trim();
         student.classroom = classroom.trim();
         student.birthdate = birthdate.trim();
+        student.parentPhone = parentPhone.trim();
+        student.parentEmail = parentEmail.trim();
+        student.notes = notes.trim();
         renderClassesAndRosters();
         scheduleAppDataSave();
         showToast("Student updated");
