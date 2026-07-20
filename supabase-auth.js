@@ -11,6 +11,8 @@
   const message = document.getElementById("auth-message");
   const sessionName = document.getElementById("session-name");
   const app = document.querySelector(".app");
+  const isLocalTour = ["127.0.0.1", "localhost"].includes(window.location.hostname)
+    && new URLSearchParams(window.location.search).get("tour") === "1";
 
   const setGateState = (state) => {
     gate.dataset.state = state;
@@ -27,6 +29,14 @@
     if (copy.includes("failed to fetch")) return "We couldn’t reach the portal. Check your connection and try again.";
     return error?.message || "Sign-in didn’t finish. Please try again.";
   };
+
+  if (isLocalTour) {
+    sessionName.textContent = "Sample App Tour";
+    document.body.dataset.userRole = "admin";
+    document.body.dataset.tourMode = "true";
+    setGateState("ready");
+    return;
+  }
 
   if (!window.supabase?.createClient) {
     setGateState("login");

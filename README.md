@@ -9,6 +9,8 @@ This folder is the repo-safe copy of the Teacher Tools and Director Dashboard pr
 
 Start the normal Dance Techniques local app server, open the Teacher Portal, then choose **Teacher Tools & Director Dashboard**.
 
+For an in-person walkthrough before accounts are ready, append `?tour=1` to the local Director Dashboard URL. Tour mode works only on `localhost`/`127.0.0.1`, uses sample data, and cannot bypass sign-in on the published app.
+
 ## Current Scope
 
 - Teacher and director views
