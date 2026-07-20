@@ -3840,7 +3840,7 @@
 
     .roster-student-row {
       display: grid;
-      grid-template-columns: minmax(150px, 1.3fr) minmax(85px, .7fr) 82px minmax(105px, .8fr) auto;
+      grid-template-columns: minmax(175px, 1.4fr) minmax(100px, .8fr) 95px auto;
       gap: 10px;
       align-items: center;
       padding: 10px 0;
@@ -9750,10 +9750,10 @@
         classroom: "Movement Room",
         capacity: 12,
         students: [
-          { id: "ava-m", firstName: "Ava", lastName: "M.", classroom: "Toddlers A", birthdate: "2024-01-18", status: "enrolled" },
-          { id: "charlotte-r", firstName: "Charlotte", lastName: "R.", classroom: "Toddlers B", birthdate: "2023-11-02", status: "enrolled" },
-          { id: "ella-s", firstName: "Ella", lastName: "S.", classroom: "Toddlers A", birthdate: "2024-03-09", status: "enrolled" },
-          { id: "lily-j", firstName: "Lily", lastName: "J.", classroom: "Toddlers B", birthdate: "2023-09-21", status: "trial-scheduled", trialDate: "2026-09-14" }
+          { id: "ava-m", firstName: "Ava", lastName: "Martinez", classroom: "Toddlers A", birthdate: "2024-01-18", status: "enrolled" },
+          { id: "charlotte-r", firstName: "Charlotte", lastName: "Reynolds", classroom: "Toddlers B", birthdate: "2023-11-02", status: "enrolled" },
+          { id: "ella-s", firstName: "Ella", lastName: "Sullivan", classroom: "Toddlers A", birthdate: "2024-03-09", status: "enrolled" },
+          { id: "lily-j", firstName: "Lily", lastName: "Johnson", classroom: "Toddlers B", birthdate: "2023-09-21", status: "trial-scheduled", trialDate: "2026-09-14" }
         ]
       },
       {
@@ -9766,9 +9766,9 @@
         classroom: "Movement Room",
         capacity: 12,
         students: [
-          { id: "mia-b", firstName: "Mia", lastName: "B.", classroom: "Preschool 1", birthdate: "2022-04-12", status: "enrolled" },
-          { id: "zoe-k", firstName: "Zoe", lastName: "K.", classroom: "Pre-K", birthdate: "2021-08-30", status: "enrolled" },
-          { id: "nora-p", firstName: "Nora", lastName: "P.", classroom: "Preschool 2", birthdate: "2022-12-07", status: "trial-attended", trialDate: "2026-09-08" }
+          { id: "mia-b", firstName: "Mia", lastName: "Bennett", classroom: "Preschool 1", birthdate: "2022-04-12", status: "enrolled" },
+          { id: "zoe-k", firstName: "Zoe", lastName: "Kim", classroom: "Pre-K", birthdate: "2021-08-30", status: "enrolled" },
+          { id: "nora-p", firstName: "Nora", lastName: "Parker", classroom: "Preschool 2", birthdate: "2022-12-07", status: "trial-attended", trialDate: "2026-09-08" }
         ]
       },
       {
@@ -9783,7 +9783,7 @@
         students: Array.from({ length: 11 }, (_, index) => ({
           id: `rockwall-student-${index + 1}`,
           firstName: ["Emma", "Olivia", "Amelia", "Sophia", "Isla", "Harper", "Evelyn", "Camila", "Luna", "Sofia", "Aria"][index],
-          lastName: `${String.fromCharCode(65 + index)}.`,
+          lastName: ["Anderson", "Brown", "Carter", "Davis", "Evans", "Foster", "Garcia", "Harris", "Irwin", "Jackson", "Kelly"][index],
           classroom: index < 6 ? "Preschool" : "Pre-K",
           birthdate: `2022-${String((index % 9) + 1).padStart(2, "0")}-15`,
           status: "enrolled"
@@ -9799,8 +9799,8 @@
         classroom: "Multipurpose Room",
         capacity: 10,
         students: [
-          { id: "grace-t", firstName: "Grace", lastName: "T.", classroom: "Pre-K", birthdate: "2021-10-14", status: "enrolled" },
-          { id: "hazel-c", firstName: "Hazel", lastName: "C.", classroom: "Preschool", birthdate: "2022-05-23", status: "ready-to-enroll", trialDate: "2026-09-10" }
+          { id: "grace-t", firstName: "Grace", lastName: "Turner", classroom: "Pre-K", birthdate: "2021-10-14", status: "enrolled" },
+          { id: "hazel-c", firstName: "Hazel", lastName: "Collins", classroom: "Preschool", birthdate: "2022-05-23", status: "ready-to-enroll", trialDate: "2026-09-10" }
         ]
       }
     ];
@@ -12093,6 +12093,17 @@
     };
 
     loadPersistedAppData();
+
+    const sampleRosterLastNames = {
+      "ava-m": "Martinez", "charlotte-r": "Reynolds", "ella-s": "Sullivan", "lily-j": "Johnson",
+      "mia-b": "Bennett", "zoe-k": "Kim", "nora-p": "Parker", "grace-t": "Turner", "hazel-c": "Collins"
+    };
+    ["Anderson", "Brown", "Carter", "Davis", "Evans", "Foster", "Garcia", "Harris", "Irwin", "Jackson", "Kelly"].forEach((lastName, index) => {
+      sampleRosterLastNames[`rockwall-student-${index + 1}`] = lastName;
+    });
+    rosterClasses.forEach((rosterClass) => rosterClass.students.forEach((student) => {
+      if (sampleRosterLastNames[student.id] && /^[A-Z]\.$/.test(student.lastName || "")) student.lastName = sampleRosterLastNames[student.id];
+    }));
 
     const monthOptions = [
       "January", "February", "March", "April", "May", "June",
@@ -15004,8 +15015,7 @@
           <span class="roster-student-name"><strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}</strong><small>${prospective ? rosterStatusLabel(student.status) : "Enrolled"}</small></span>
           <span><small>Classroom</small><br>${rosterSafe(student.classroom || "—")}</span>
           <span><small>Age</small><br>${rosterAge(student.birthdate)}</span>
-          <span><small>${prospective ? "Trial date" : "Birthdate"}</small><br>${rosterSafe(prospective ? (student.trialDate || "Not set") : (student.birthdate || "—"))}</span>
-          <span>${prospective ? `<button class="primary" type="button" data-roster-enroll="${rosterSafe(student.id)}">Approve</button>` : `<button class="secondary" type="button" data-roster-edit-student="${rosterSafe(student.id)}">Edit</button>`}</span>
+          <span>${prospective ? `<small>Trial date</small><br>${rosterSafe(student.trialDate || "Not set")}<br>` : ""}<button class="secondary" type="button" data-roster-edit-student="${rosterSafe(student.id)}">Edit</button>${prospective ? ` <button class="primary" type="button" data-roster-enroll="${rosterSafe(student.id)}">Approve</button>` : ""}</span>
         </div>
       `).join("");
     };
@@ -16034,9 +16044,15 @@
       if (editStudentButton) {
         const student = rosterClass.students.find((item) => item.id === editStudentButton.dataset.rosterEditStudent);
         if (!student) return;
+        const lastName = window.prompt("Student full last name", student.lastName || "");
+        if (lastName === null) return;
         const classroom = window.prompt("School classroom", student.classroom || "");
         if (classroom === null) return;
+        const birthdate = window.prompt("Birthdate (YYYY-MM-DD)", student.birthdate || "");
+        if (birthdate === null) return;
+        student.lastName = lastName.trim();
         student.classroom = classroom.trim();
+        student.birthdate = birthdate.trim();
         renderClassesAndRosters();
         scheduleAppDataSave();
         showToast("Student updated");
