@@ -76,6 +76,11 @@
 
     sessionName.textContent = profile.full_name ? `${profile.full_name} · ${profile.role}` : `Signed in · ${profile.role}`;
     document.body.dataset.userRole = profile.role;
+    const landingMode = profile.role === "teacher" ? "teacher" : "admin";
+    document.body.dataset.mode = landingMode;
+    document.querySelectorAll("[data-mode-btn]").forEach((button) => {
+      button.classList.toggle("active", button.dataset.modeBtn === landingMode);
+    });
     window.dtCurrentProfile = profile;
     setGateState("ready");
   };

@@ -7653,6 +7653,7 @@
     }
 
     body[data-authenticated="true"] .session-strip { display: flex; }
+    body[data-user-role="teacher"] [data-mode-btn="admin"] { display: none; }
     .session-strip button { padding: 7px 11px; font-size: 12px; }
     body.auth-checking > .app { visibility: hidden; }
 
@@ -9813,7 +9814,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20260720-tour"></script>
+  <script src="supabase-auth.js?v=20260720-accounts"></script>
   <script>
     const teachers = [
       {

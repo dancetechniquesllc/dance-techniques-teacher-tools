@@ -19,6 +19,7 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 - Schedule, curriculum, messages, pay-stub placeholders, and admin tools
 - Browser-local prototype saving
 - Supabase email/password sign-in with inactive-account approval gating
+- Role-aware landing: directors/admins open the Director Dashboard, while teachers open Teacher Tools without a Director Dashboard switch
 - Responsive branded sign-in artwork optimized for teacher phones and director/admin computers
 
 ## Data Safety
