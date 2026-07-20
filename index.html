@@ -8335,6 +8335,7 @@
               <div>
                 <h3>Classes &amp; Rosters</h3>
                 <p>Keep every school, teacher, class, enrolled dancer, and trial student coordinated.</p>
+                <span class="status ok">Synced from assigned school classes</span>
               </div>
               <span class="admin-page-actions">
                 <select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool">
@@ -8349,7 +8350,7 @@
                   <option value="curriculum">Curriculum Composer</option>
                 </select>
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
-                <button class="primary" type="button" id="add-roster-class">Add Class</button>
+                <button class="primary" type="button" id="add-roster-class">Manage School Classes</button>
               </span>
             </div>
             <div class="roster-summary-grid" id="admin-roster-summary"></div>
@@ -13660,6 +13661,58 @@
       return school.classCurriculum;
     };
 
+    const rosterSourceKey = (teacherId, schoolName, rowIndex) => `${teacherId}::${String(schoolName).trim().toLowerCase()}::${rowIndex}`;
+
+    const syncRosterClassesForTeacher = (teacher) => {
+      if (!teacher) return;
+      const expectedSourceKeys = new Set();
+      teacher.schools.forEach((school) => {
+        const rows = normalizeClassCurriculumRows(school);
+        const unlinkedSchoolMatches = rosterClasses.filter((item) => !item.sourceKey && item.teacherId === teacher.id && item.schoolName === school.name);
+        rows.forEach((row, rowIndex) => {
+          const sourceKey = rosterSourceKey(teacher.id, school.name, rowIndex);
+          expectedSourceKeys.add(sourceKey);
+          let rosterClass = rosterClasses.find((item) => item.sourceKey === sourceKey);
+          if (!rosterClass) rosterClass = unlinkedSchoolMatches[rowIndex];
+          if (!rosterClass) {
+            rosterClass = {
+              id: `roster-${teacher.id}-${school.name}-${rowIndex + 1}`.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""),
+              capacity: 12,
+              students: []
+            };
+            rosterClasses.push(rosterClass);
+          }
+          rosterClass.sourceKey = sourceKey;
+          rosterClass.sourceActive = true;
+          rosterClass.teacherId = teacher.id;
+          rosterClass.schoolName = school.name;
+          rosterClass.name = row.title || `Class ${rowIndex + 1}`;
+          rosterClass.ageGroup = row.age || "";
+          rosterClass.level = row.level || "";
+          rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
+          rosterClass.time = row.startTime || "";
+          rosterClass.classroom = row.age || "Classroom not set";
+          rosterClass.schoolStudentEstimate = row.students;
+        });
+      });
+      rosterClasses.forEach((rosterClass) => {
+        if (!rosterClass.sourceKey?.startsWith(`${teacher.id}::`) || expectedSourceKeys.has(rosterClass.sourceKey)) return;
+        if (rosterClass.students.length) rosterClass.sourceActive = false;
+      });
+      rosterClasses.forEach((rosterClass) => {
+        if (!rosterClass.sourceKey) rosterClass.sourceActive = false;
+      });
+      for (let index = rosterClasses.length - 1; index >= 0; index -= 1) {
+        const rosterClass = rosterClasses[index];
+        if (rosterClass.sourceKey?.startsWith(`${teacher.id}::`) && !expectedSourceKeys.has(rosterClass.sourceKey) && !rosterClass.students.length) {
+          rosterClasses.splice(index, 1);
+        }
+      }
+      if (!rosterClasses.some((item) => item.id === selectedRosterClassId && item.sourceActive !== false)) {
+        selectedRosterClassId = rosterClasses.find((item) => item.sourceActive !== false)?.id || "";
+      }
+    };
+
     const renderClassCurriculumRows = (school, schoolIndex) => {
       const rows = normalizeClassCurriculumRows(school);
       if (!rows.length) {
@@ -14674,6 +14727,8 @@
         if (!row) return;
         const classFieldName = classField.dataset.teacherClassField;
         row[classFieldName] = classFieldName === "students" ? (classField.value === "" ? "" : Number(classField.value)) : classField.value;
+        syncRosterClassesForTeacher(profileTeacher);
+        scheduleAppDataSave();
         if (classFieldName === "title") {
           renderAdminCurriculumProgress();
           renderMyDay();
@@ -14704,6 +14759,8 @@
       const schoolField = field.dataset.teacherSchoolField;
       school[schoolField] = schoolField === "classCount" || schoolField === "dayOfWeek" ? (field.value === "" ? "" : Number(field.value)) : field.value;
       if (schoolField === "classCount") normalizeClassCurriculumRows(school);
+      syncRosterClassesForTeacher(profileTeacher);
+      scheduleAppDataSave();
       document.querySelectorAll(`[data-school-index="${field.dataset.teacherSchoolIndex}"] [data-school-field="${schoolField}"]`).forEach((match) => {
         match.value = field.value;
       });
@@ -15053,7 +15110,7 @@
       return `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`);
     });
 
-    const filteredRosterClasses = () => rosterClasses.filter((rosterClass) => {
+    const filteredRosterClasses = () => rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).filter((rosterClass) => {
       if (rosterSchoolFilter !== "all" && rosterClass.schoolName !== rosterSchoolFilter) return false;
       if (rosterTeacherFilter !== "all" && rosterClass.teacherId !== rosterTeacherFilter) return false;
       if (!rosterSearchTerm) return true;
@@ -15102,8 +15159,9 @@
     function renderClassesAndRosters() {
       const schoolSelect = document.getElementById("roster-school-filter");
       const teacherSelect = document.getElementById("roster-teacher-filter");
-      const schoolNames = [...new Set(rosterClasses.map((item) => item.schoolName))].sort();
-      const assignedTeacherIds = [...new Set(rosterClasses.map((item) => item.teacherId))];
+      const activeRosterClasses = rosterClasses.filter((item) => item.sourceActive !== false);
+      const schoolNames = [...new Set(activeRosterClasses.map((item) => item.schoolName))].sort();
+      const assignedTeacherIds = [...new Set(activeRosterClasses.map((item) => item.teacherId))];
       if (schoolSelect) {
         schoolSelect.innerHTML = `<option value="all">All schools</option>${schoolNames.map((name) => `<option value="${rosterSafe(name)}">${rosterSafe(name)}</option>`).join("")}`;
         schoolSelect.value = rosterSchoolFilter;
@@ -15113,19 +15171,19 @@
         teacherSelect.value = rosterTeacherFilter;
       }
 
-      const totalEnrolled = rosterClasses.reduce((sum, item) => sum + rosterEnrolled(item).length, 0);
-      const totalProspects = rosterClasses.reduce((sum, item) => sum + rosterProspects(item).length, 0);
-      const fullClasses = rosterClasses.filter((item) => rosterEnrolled(item).length >= item.capacity).length;
+      const totalEnrolled = activeRosterClasses.reduce((sum, item) => sum + rosterEnrolled(item).length, 0);
+      const totalProspects = activeRosterClasses.reduce((sum, item) => sum + rosterProspects(item).length, 0);
+      const fullClasses = activeRosterClasses.filter((item) => rosterEnrolled(item).length >= item.capacity).length;
       const summary = document.getElementById("admin-roster-summary");
       if (summary) summary.innerHTML = [
         [schoolNames.length, "Schools"],
-        [rosterClasses.length, "Active classes"],
+        [activeRosterClasses.length, "Active classes"],
         [totalEnrolled, "Enrolled dancers"],
         [totalProspects, "Prospective students"],
         [fullClasses, "At capacity"]
       ].map(([value, label]) => `<div class="stat"><strong>${value}</strong><span>${label}</span></div>`).join("");
       const shortcut = document.getElementById("admin-roster-shortcut-bubble");
-      if (shortcut) shortcut.textContent = `${rosterClasses.length} Classes · ${totalProspects} Prospects`;
+      if (shortcut) shortcut.textContent = `${activeRosterClasses.length} Classes · ${totalProspects} Prospects`;
 
       const visibleClasses = filteredRosterClasses();
       if (!visibleClasses.some((item) => item.id === selectedRosterClassId)) selectedRosterClassId = visibleClasses[0]?.id || "";
@@ -15142,7 +15200,7 @@
       }).join("") : `<div class="roster-empty">No classes match these filters.</div>`;
 
       const detail = document.getElementById("admin-roster-detail");
-      const selected = rosterClasses.find((item) => item.id === selectedRosterClassId);
+      const selected = rosterClasses.find((item) => item.id === selectedRosterClassId && item.sourceActive !== false);
       if (!detail) return;
       if (!selected) {
         detail.innerHTML = `<div class="roster-empty">Choose a class to view its roster.</div>`;
@@ -15153,11 +15211,11 @@
       detail.innerHTML = `
         <div class="roster-detail-heading">
           <div><h3>${rosterSafe(selected.name)}</h3><p>${rosterSafe(selected.schoolName)}</p></div>
-          <button class="secondary" type="button" data-roster-edit-class>Edit class details</button>
+          <button class="secondary" type="button" data-roster-edit-class>Edit in school profile</button>
         </div>
         <div class="roster-meta">
-          <span>${rosterSafe(rosterTeacherName(selected.teacherId))}</span><span>${rosterSafe(selected.day)} · ${rosterSafe(selected.time)}</span>
-          <span>${rosterSafe(selected.classroom)}</span><span>${enrolled.length}/${selected.capacity} enrolled</span>
+          <span>${rosterSafe(rosterTeacherName(selected.teacherId))}</span><span>${rosterSafe(selected.day)} · ${rosterSafe(selected.time || "Time not set")}</span>
+          <span>${rosterSafe(selected.ageGroup || selected.classroom)}</span>${selected.level ? `<span>Level ${rosterSafe(selected.level)}</span>` : ""}<span>${enrolled.length}/${selected.capacity} enrolled</span>
         </div>
         <div class="roster-section-heading"><div><h4>Enrolled students</h4><small>Official class roster</small></div><button class="secondary" type="button" data-roster-add="enrolled">Add enrolled student</button></div>
         <div class="roster-student-list">${renderRosterStudentRows(enrolled)}</div>
@@ -15177,7 +15235,11 @@
       markAdminDashboardSectionViewed(section);
       if (section === "master-my-day") renderMasterMyDay();
       if (section === "school-library") renderIsdCalendars();
-      if (section === "classes-rosters") renderClassesAndRosters();
+      if (section === "classes-rosters") {
+        syncRosterClassesForTeacher(profileTeacher);
+        renderClassesAndRosters();
+        scheduleAppDataSave();
+      }
       if (section === "curriculum-progress") renderAdminCurriculumProgress();
       if (section === "messages") renderAdminMessagesPage();
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -16044,22 +16106,9 @@
     });
 
     document.getElementById("add-roster-class")?.addEventListener("click", () => {
-      const schoolName = window.prompt("School name", schoolLibrary[0]?.name || "");
-      if (!schoolName?.trim()) return;
-      const name = window.prompt("Class name or age group", "Ages 3–5");
-      if (!name?.trim()) return;
-      const teacherId = window.prompt(`Teacher (${teachers.map((teacher) => teacher.id).join(", ")})`, teachers[0]?.id || "") || teachers[0]?.id;
-      const baseId = `${schoolName}-${name}`.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-      let id = baseId || `class-${Date.now()}`;
-      let suffix = 2;
-      while (rosterClasses.some((item) => item.id === id)) id = `${baseId}-${suffix++}`;
-      rosterClasses.push({ id, name: name.trim(), schoolName: schoolName.trim(), teacherId, day: "To schedule", time: "", classroom: "", capacity: 12, students: [] });
-      selectedRosterClassId = id;
-      rosterSchoolFilter = "all";
-      rosterTeacherFilter = "all";
-      renderClassesAndRosters();
-      scheduleAppDataSave();
-      showToast("New class added");
+      openTeacherProfile(profileTeacher.id);
+      window.setTimeout(() => document.getElementById("teacher-class-count-list")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+      showToast("Manage class count and details under each assigned school");
     });
 
     document.getElementById("admin-home-classes-rosters")?.addEventListener("click", (event) => {
@@ -16118,14 +16167,10 @@
         return;
       }
       if (event.target.closest("[data-roster-edit-class]")) {
-        const name = window.prompt("Class name", rosterClass.name);
-        if (!name?.trim()) return;
-        const capacity = Number(window.prompt("Class capacity", String(rosterClass.capacity)));
-        rosterClass.name = name.trim();
-        if (Number.isFinite(capacity) && capacity > 0) rosterClass.capacity = capacity;
-        renderClassesAndRosters();
-        scheduleAppDataSave();
-        showToast("Class details updated");
+        const teacher = teachers.find((item) => item.id === rosterClass.teacherId) || profileTeacher;
+        openTeacherProfile(teacher.id);
+        window.setTimeout(() => document.getElementById("teacher-class-count-list")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+        showToast("Edit this class under its assigned school");
         return;
       }
       const editStudentButton = event.target.closest("[data-roster-edit-student]");
