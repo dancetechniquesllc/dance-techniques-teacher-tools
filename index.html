@@ -3923,6 +3923,15 @@
       font-size: 12px;
     }
 
+    .stat small {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 680;
+      line-height: 1.25;
+    }
+
     .admin-grid {
       display: grid;
       grid-template-columns: minmax(320px, 430px) 1fr;
@@ -8367,7 +8376,7 @@
             <div class="admin-card-header">
               <div>
                 <h3>Classes &amp; Rosters</h3>
-                <p>Keep every school, teacher, class, enrolled dancer, and trial student coordinated.</p>
+                <p><em>Keep every school, teacher, class, dancer, and future student beautifully coordinated.</em></p>
               </div>
               <span class="admin-page-actions">
                 <select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool">
@@ -8382,13 +8391,13 @@
                   <option value="curriculum">Curriculum Composer</option>
                 </select>
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
-                <button class="primary" type="button" id="add-roster-class">Add Class</button>
+                <button class="primary" type="button" id="add-roster-class">Create a Class</button>
               </span>
             </div>
             <div class="roster-summary-grid" id="admin-roster-summary"></div>
             <div class="roster-toolbar">
-              <label>School
-                <select id="roster-school-filter"><option value="all">All schools</option></select>
+              <label>Partner School
+                <select id="roster-school-filter"><option value="all">All partner schools</option></select>
               </label>
               <label>Teacher
                 <select id="roster-teacher-filter"><option value="all">All teachers</option></select>
@@ -9575,8 +9584,8 @@
   </div>
   <div class="confirm-overlay" id="roster-prospects-overlay" aria-hidden="true">
     <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-prospects-title">
-      <h3 id="roster-prospects-title">Prospective Student Follow-Up</h3>
-      <p id="roster-prospects-summary">All prospective students matching the current filters.</p>
+      <h3 id="roster-prospects-title">Future Dancer Follow-Up</h3>
+      <p id="roster-prospects-summary">All future dancers matching the current filters.</p>
       <div class="prospect-followup-list" id="roster-prospects-list"></div>
       <div class="confirm-actions"><button class="primary" type="button" id="roster-prospects-close">Done</button></div>
     </div>
@@ -15197,7 +15206,7 @@
       "trial-scheduled": "Trial scheduled",
       "trial-attended": "Trial attended",
       "ready-to-enroll": "Ready to enroll"
-    }[status] || "Prospective");
+    }[status] || "Future Dancer");
 
     const birthdayFallsThisWeek = (birthdate) => {
       if (!birthdate) return false;
@@ -15230,7 +15239,7 @@
     });
 
     const renderRosterStudentRows = (students, prospective = false) => {
-      if (!students.length) return `<div class="roster-empty">${prospective ? "No prospective students right now." : "No enrolled students yet."}</div>`;
+      if (!students.length) return `<div class="roster-empty">${prospective ? "No future dancers right now." : "No enrolled dancers yet."}</div>`;
       return sortRosterStudents(students).map((student) => `
         <div class="roster-student-row ${student.gender === "male" ? "is-male" : ""}">
           <span class="roster-student-name"><span class="roster-student-photo">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(`${student.firstName?.[0] || ""}${student.lastName?.[0] || ""}`)}</span><strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}${birthdayFallsThisWeek(student.birthdate) ? `<span class="birthday-cupcake" role="img" aria-label="Birthday this week" title="Birthday this week">🧁</span>` : ""}</strong></span>
@@ -15282,7 +15291,7 @@
       const schoolNames = [...new Set(activeRosterClasses.map((item) => item.schoolName))].sort();
       const assignedTeacherIds = [...new Set(activeRosterClasses.map((item) => item.teacherId))];
       if (schoolSelect) {
-        schoolSelect.innerHTML = `<option value="all">All schools</option>${schoolNames.map((name) => `<option value="${rosterSafe(name)}">${rosterSafe(name)}</option>`).join("")}`;
+        schoolSelect.innerHTML = `<option value="all">All partner schools</option>${schoolNames.map((name) => `<option value="${rosterSafe(name)}">${rosterSafe(name)}</option>`).join("")}`;
         schoolSelect.value = rosterSchoolFilter;
       }
       if (teacherSelect) {
@@ -15302,12 +15311,12 @@
       const totalProspects = visibleClasses.reduce((sum, item) => sum + rosterProspects(item).length, 0);
       const summary = document.getElementById("admin-roster-summary");
       if (summary) summary.innerHTML = `
-        <div class="stat"><strong>${visibleSchoolCount}</strong><span>Schools</span></div>
-        <div class="stat"><strong>${visibleClasses.length}</strong><span>Active classes</span></div>
-        <div class="stat"><strong>${totalEnrolled}</strong><span>Enrolled dancers</span></div>
-        <button class="stat roster-summary-action" type="button" data-roster-show-prospects><strong>${totalProspects}</strong><span>Prospective students · View follow-up list</span></button>`;
+        <div class="stat"><strong>${visibleSchoolCount}</strong><span>Partner Schools</span><small>Currently Dancing With Us</small></div>
+        <div class="stat"><strong>${visibleClasses.length}</strong><span>Dance Classes</span><small>Active this Season</small></div>
+        <div class="stat"><strong>${totalEnrolled}</strong><span>Enrolled Dancers</span><small>Taking their First Steps</small></div>
+        <button class="stat roster-summary-action" type="button" data-roster-show-prospects><strong>${totalProspects}</strong><span>Future Dancers</span><small>Ready for a Friendly Follow-Up</small></button>`;
       const shortcut = document.getElementById("admin-roster-shortcut-bubble");
-      if (shortcut) shortcut.textContent = `${activeRosterClasses.length} Classes · ${totalProspects} Prospects`;
+      if (shortcut) shortcut.textContent = `${activeRosterClasses.length} Classes · ${totalProspects} Future Dancers`;
 
       if (!visibleClasses.some((item) => item.id === selectedRosterClassId)) selectedRosterClassId = visibleClasses[0]?.id || "";
       const list = document.getElementById("admin-roster-class-list");
@@ -15319,7 +15328,7 @@
           <small>${rosterSafe(item.schoolName)}</small>
           <small>${rosterSafe(rosterTeacherName(item.teacherId))} · ${rosterSafe(item.day)} ${rosterSafe(item.time)}</small>
           <small class="roster-enrollment-bubble ${enrolled >= item.capacity ? "full" : (enrolled >= 7 ? "ready" : "low")}">${enrolled}/${item.capacity} Enrolled${enrolled >= item.capacity ? " · Full" : ""}</small>
-          ${prospects ? `<small>${prospects} prospective</small>` : ""}
+          ${prospects ? `<small>${prospects} future dancer${prospects === 1 ? "" : "s"}</small>` : ""}
         </button>`;
       }).join("") : `<div class="roster-empty">No classes match these filters.</div>`;
 
@@ -15344,12 +15353,12 @@
           <label>Start time<input type="time" step="900" data-roster-class-setting="time" value="${rosterSafe(selected.time || "")}"></label>
         </div>
         <div class="roster-meta">
-          <span>${rosterSafe(rosterTeacherName(selected.teacherId))}</span><span>${rosterSafe(selected.day)} · ${rosterSafe(selected.time || "Time not set")}</span>
+          <span class="school-library-assignment ${teacherAssignmentColorClass(selected.teacherId)}">Teacher · ${rosterSafe(rosterTeacherName(selected.teacherId))}</span><span>${rosterSafe(selected.day)} · ${rosterSafe(selected.time || "Time not set")}</span>
           ${selected.ageGroup ? `<span>${rosterSafe(selected.ageGroup)}</span>` : ""}${selected.level ? `<span>Level ${rosterSafe(selected.level)}</span>` : ""}<span>${enrolled.length}/${selected.capacity} enrolled</span>
         </div>
-        <div class="roster-section-heading"><div><h4>Enrolled students</h4><small>Official class roster</small></div><button class="secondary" type="button" data-roster-add="enrolled">Add enrolled student</button></div>
+        <div class="roster-section-heading"><div><h4>Enrolled Dancers</h4><small>Official class roster</small></div><button class="secondary" type="button" data-roster-add="enrolled">Add a Dancer</button></div>
         <div class="roster-student-list">${renderRosterStudentRows(enrolled)}</div>
-        <div class="roster-section-heading"><div><h4>Prospective students</h4><small>Trials and enrollment follow-up</small></div><button class="primary" type="button" data-roster-add="prospective">Add prospective student</button></div>
+        <div class="roster-section-heading"><div><h4>Future Dancers</h4><small>Trials and friendly follow-up</small></div><button class="primary" type="button" data-roster-add="prospective">Add a Future Dancer</button></div>
         <div class="roster-student-list">${renderRosterStudentRows(prospects, true)}</div>
       `;
     }
@@ -15358,7 +15367,7 @@
       const matches = filteredRosterClasses().flatMap((rosterClass) => rosterProspects(rosterClass).map((student) => ({ rosterClass, student })));
       const list = document.getElementById("roster-prospects-list");
       const summary = document.getElementById("roster-prospects-summary");
-      if (summary) summary.textContent = `${matches.length} prospective student${matches.length === 1 ? "" : "s"} matching the current filters.`;
+      if (summary) summary.textContent = `${matches.length} future dancer${matches.length === 1 ? "" : "s"} matching the current filters.`;
       if (list) list.innerHTML = matches.length ? matches.map(({ rosterClass, student }) => `
         <div class="prospect-followup-card">
           <strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}</strong>
@@ -15370,7 +15379,7 @@
             ${student.parentEmail ? `<a class="secondary" href="mailto:${rosterSafe(student.parentEmail)}">Email parent</a>` : ""}
             <button class="primary" type="button" data-prospect-open-student="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}">Open student</button>
           </div>
-        </div>`).join("") : `<div class="roster-empty">No prospective students match these filters.</div>`;
+        </div>`).join("") : `<div class="roster-empty">No future dancers match these filters.</div>`;
       const overlay = document.getElementById("roster-prospects-overlay");
       overlay?.classList.add("active");
       overlay?.setAttribute("aria-hidden", "false");
@@ -16367,7 +16376,7 @@
         if (parentPhone === null) return;
         const parentEmail = window.prompt("Parent email", "");
         if (parentEmail === null) return;
-        const notes = window.prompt(prospective ? "Prospective student notes or follow-up needed" : "Student notes", "");
+        const notes = window.prompt(prospective ? "Future dancer notes or follow-up needed" : "Dancer notes", "");
         if (notes === null) return;
         rosterClass.students.push({
           id: `${firstName}-${lastName || Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
@@ -16386,7 +16395,7 @@
         syncRosterCountToSource(rosterClass, { previousCount });
         renderClassesAndRosters();
         scheduleAppDataSave();
-        showToast(prospective ? "Prospective student added" : "Enrolled student added");
+        showToast(prospective ? "Future dancer added" : "Dancer added");
         return;
       }
       if (event.target.closest("[data-roster-edit-class]")) {
