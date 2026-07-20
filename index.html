@@ -3854,6 +3854,15 @@
     .roster-edit-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
     .roster-edit-form .full-field { grid-column: 1 / -1; }
     .roster-edit-form textarea { min-height: 100px; resize: vertical; }
+    .teacher-class-roster-actions {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding-top: 8px;
+    }
     .roster-empty { padding: 18px; text-align: center; color: var(--muted); }
 
     @media (max-width: 900px) {
@@ -13655,7 +13664,8 @@
           students,
           duration: classDurationForStudents(students),
           endTime: endTimeForClass(row.startTime, students),
-          startTime: row.startTime || ""
+          startTime: row.startTime || "",
+          durationAlert: row.durationAlert || null
         };
       });
       return school.classCurriculum;
@@ -13684,6 +13694,9 @@
           }
           rosterClass.sourceKey = sourceKey;
           rosterClass.sourceActive = true;
+          rosterClass.sourceTeacherId = teacher.id;
+          rosterClass.sourceSchoolName = school.name;
+          rosterClass.sourceRowIndex = rowIndex;
           rosterClass.teacherId = teacher.id;
           rosterClass.schoolName = school.name;
           rosterClass.name = row.title || `Class ${rowIndex + 1}`;
@@ -13693,6 +13706,7 @@
           rosterClass.time = row.startTime || "";
           rosterClass.classroom = row.age || "Classroom not set";
           rosterClass.schoolStudentEstimate = row.students;
+          syncRosterCountToSource(rosterClass, { notify: false, refresh: false });
         });
       });
       rosterClasses.forEach((rosterClass) => {
@@ -13710,6 +13724,32 @@
       }
       if (!rosterClasses.some((item) => item.id === selectedRosterClassId && item.sourceActive !== false)) {
         selectedRosterClassId = rosterClasses.find((item) => item.sourceActive !== false)?.id || "";
+      }
+    };
+
+    const linkedSchoolClassRow = (rosterClass) => {
+      const teacher = teachers.find((item) => item.id === rosterClass.sourceTeacherId);
+      const school = teacher?.schools.find((item) => item.name === rosterClass.sourceSchoolName);
+      const row = school ? normalizeClassCurriculumRows(school)[Number(rosterClass.sourceRowIndex)] : null;
+      return { teacher, school, row };
+    };
+
+    const syncRosterCountToSource = (rosterClass, { previousCount = null, notify = true, refresh = true } = {}) => {
+      if (!rosterClass?.sourceKey) return;
+      const { row } = linkedSchoolClassRow(rosterClass);
+      if (!row) return;
+      const enrolledCount = rosterEnrolled(rosterClass).length;
+      const priorCount = previousCount == null ? Number(row.students) || 0 : previousCount;
+      row.students = enrolledCount;
+      row.duration = classDurationForStudents(enrolledCount);
+      row.endTime = endTimeForClass(row.startTime, enrolledCount);
+      if (priorCount <= 6 && enrolledCount > 6) {
+        row.durationAlert = `Roster reached ${enrolledCount} students · class is now 45 minutes`;
+        if (notify) showToast(`${rosterClass.name} now has ${enrolledCount} students. Alert: class length changed to 45 minutes.`);
+      }
+      if (refresh && document.body.dataset.adminPage === "profile") {
+        renderTeacherClassCounts();
+        renderSchoolRows();
       }
     };
 
@@ -13738,8 +13778,8 @@
               <span class="teacher-class-control-label">Level</span>
             </label>
             <label class="teacher-class-students-field">
-              <input aria-label="Class ${rowIndex + 1} student count for ${escapeText(school.nickname || school.name)}" type="number" min="0" max="30" step="1" data-teacher-school-index="${schoolIndex}" data-teacher-class-index="${rowIndex}" data-teacher-class-field="students" value="${escapeText(row.students)}">
-              <span class="teacher-class-control-label">Students</span>
+              <input aria-label="Class ${rowIndex + 1} student count for ${escapeText(school.nickname || school.name)}" type="number" min="0" max="30" step="1" value="${escapeText(row.students)}" readonly>
+              <span class="teacher-class-control-label">Students from roster</span>
               <small class="teacher-class-students-note">${escapeText(row.duration)}</small>
             </label>
           </div>
@@ -13748,6 +13788,10 @@
             <span class="teacher-class-control-label teacher-class-start-label">Starts At</span>
             <small class="teacher-class-end-note">${escapeText(row.endTime)}</small>
           </label>
+          <div class="teacher-class-roster-actions">
+            <button class="secondary" type="button" data-view-roster-source="${escapeText(rosterSourceKey(profileTeacher.id, school.name, rowIndex))}">View/Change Roster</button>
+            ${row.durationAlert ? `<span class="status pending">${escapeText(row.durationAlert)}</span>` : ""}
+          </div>
         </div>
       `).join("");
     };
@@ -15211,7 +15255,7 @@
       detail.innerHTML = `
         <div class="roster-detail-heading">
           <div><h3>${rosterSafe(selected.name)}</h3><p>${rosterSafe(selected.schoolName)}</p></div>
-          <button class="secondary" type="button" data-roster-edit-class>Edit in school profile</button>
+          <button class="secondary" type="button" data-roster-edit-class>Edit class name</button>
         </div>
         <div class="roster-meta">
           <span>${rosterSafe(rosterTeacherName(selected.teacherId))}</span><span>${rosterSafe(selected.day)} · ${rosterSafe(selected.time || "Time not set")}</span>
@@ -16105,6 +16149,19 @@
       renderClassesAndRosters();
     });
 
+    document.addEventListener("click", (event) => {
+      const rosterShortcut = event.target.closest("[data-view-roster-source]");
+      if (!rosterShortcut) return;
+      syncRosterClassesForTeacher(profileTeacher);
+      const rosterClass = rosterClasses.find((item) => item.sourceKey === rosterShortcut.dataset.viewRosterSource && item.sourceActive !== false);
+      if (!rosterClass) return showToast("This roster is still being created. Please try again.");
+      selectedRosterClassId = rosterClass.id;
+      rosterSchoolFilter = "all";
+      rosterTeacherFilter = "all";
+      rosterSearchTerm = "";
+      openAdminSection("classes-rosters");
+    });
+
     document.getElementById("add-roster-class")?.addEventListener("click", () => {
       openTeacherProfile(profileTeacher.id);
       window.setTimeout(() => document.getElementById("teacher-class-count-list")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
@@ -16124,11 +16181,13 @@
       if (enrollButton) {
         const student = rosterClass.students.find((item) => item.id === enrollButton.dataset.rosterEnroll);
         if (!student) return;
+        const previousCount = rosterEnrolled(rosterClass).length;
         if (rosterEnrolled(rosterClass).length >= rosterClass.capacity) {
           showToast("This class is at capacity. Add a new class before approving enrollment.");
           return;
         }
         student.status = "enrolled";
+        syncRosterCountToSource(rosterClass, { previousCount });
         renderClassesAndRosters();
         scheduleAppDataSave();
         showToast(`${student.firstName} approved as an enrolled student`);
@@ -16136,6 +16195,7 @@
       }
       const addButton = event.target.closest("[data-roster-add]");
       if (addButton) {
+        const previousCount = rosterEnrolled(rosterClass).length;
         const firstName = window.prompt("Student first name");
         if (!firstName?.trim()) return;
         const lastName = window.prompt("Student full last name", "");
@@ -16161,16 +16221,22 @@
           parentEmail: parentEmail.trim(),
           notes: notes.trim()
         });
+        syncRosterCountToSource(rosterClass, { previousCount });
         renderClassesAndRosters();
         scheduleAppDataSave();
         showToast(prospective ? "Prospective student added" : "Enrolled student added");
         return;
       }
       if (event.target.closest("[data-roster-edit-class]")) {
-        const teacher = teachers.find((item) => item.id === rosterClass.teacherId) || profileTeacher;
-        openTeacherProfile(teacher.id);
-        window.setTimeout(() => document.getElementById("teacher-class-count-list")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-        showToast("Edit this class under its assigned school");
+        const name = window.prompt("Class name", rosterClass.name);
+        if (!name?.trim()) return;
+        const { row } = linkedSchoolClassRow(rosterClass);
+        if (!row) return showToast("Open the assigned school to edit this class");
+        row.title = name.trim();
+        rosterClass.name = row.title;
+        renderClassesAndRosters();
+        scheduleAppDataSave();
+        showToast("Class name updated in the roster and school calendar");
         return;
       }
       const editStudentButton = event.target.closest("[data-roster-edit-student]");
@@ -16190,6 +16256,7 @@
       const rosterClass = rosterClasses.find((item) => item.id === editingRosterClassId);
       const student = rosterClass?.students.find((item) => item.id === editingRosterStudentId);
       if (!student) return closeRosterStudentEditor();
+      const previousCount = rosterEnrolled(rosterClass).length;
       student.firstName = document.getElementById("roster-edit-first-name").value.trim();
       student.lastName = document.getElementById("roster-edit-last-name").value.trim();
       student.classroom = document.getElementById("roster-edit-classroom").value.trim();
@@ -16199,6 +16266,7 @@
       student.status = document.getElementById("roster-edit-status").value;
       student.trialDate = document.getElementById("roster-edit-trial-date").value;
       student.notes = document.getElementById("roster-edit-notes").value.trim();
+      syncRosterCountToSource(rosterClass, { previousCount });
       closeRosterStudentEditor();
       renderClassesAndRosters();
       scheduleAppDataSave();
