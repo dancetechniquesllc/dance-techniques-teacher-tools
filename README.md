@@ -17,6 +17,7 @@ Start the normal Dance Techniques local app server, open the Teacher Portal, the
 - Schedule, curriculum, messages, pay-stub placeholders, and admin tools
 - Browser-local prototype saving
 - Supabase email/password sign-in with inactive-account approval gating
+- Responsive branded sign-in artwork optimized for teacher phones and director/admin computers
 
 ## Data Safety
 

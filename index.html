@@ -4,6 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dance Techniques Teacher PWA Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: oklch(98.6% 0.014 14);
@@ -7518,6 +7521,7 @@
     body[data-mode="admin"] .workspace { grid-template-columns: 1fr; }
 
     .auth-gate {
+      --auth-blush: #dca49b;
       position: fixed;
       inset: 0;
       z-index: 1000;
@@ -7525,10 +7529,11 @@
       place-items: center;
       padding: 24px;
       overflow-y: auto;
-      background:
-        radial-gradient(circle at 18% 12%, oklch(92% 0.055 18 / .9), transparent 34%),
-        radial-gradient(circle at 85% 88%, oklch(93% 0.045 225 / .8), transparent 38%),
-        #fffaf9;
+      background-color: #fff8f4;
+      background-image: url("assets/teacher-tools-sign-in-background.png");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: auto 100%;
     }
 
     .auth-gate[hidden] { display: none; }
@@ -7538,23 +7543,47 @@
       padding: clamp(26px, 6vw, 46px);
       border: 1px solid var(--border);
       border-radius: 26px;
-      background: rgba(255, 255, 255, .96);
+      background: rgba(255, 253, 251, .93);
+      backdrop-filter: blur(5px);
       box-shadow: 0 24px 70px oklch(36% 0.05 18 / .14);
     }
 
     .auth-brand {
-      display: flex;
-      gap: 14px;
+      display: grid;
+      gap: 2px;
       align-items: center;
+      justify-items: center;
+      text-align: center;
       margin-bottom: 30px;
     }
 
-    .auth-brand .mark { flex: 0 0 auto; }
-    .auth-brand h1,
+    .auth-logo {
+      display: block;
+      width: clamp(108px, 28vw, 142px);
+      height: 94px;
+      object-fit: contain;
+      margin-bottom: -4px;
+    }
+
+    .auth-brand h1 {
+      margin: 0;
+      color: var(--auth-blush);
+      font-family: "Parisienne", var(--font-script);
+      font-size: clamp(40px, 9vw, 56px);
+      font-weight: 400;
+      line-height: 1;
+    }
+
     .auth-card h2 { margin: 0; font-family: var(--font-display); }
-    .auth-brand h1 { font-size: clamp(24px, 6vw, 34px); }
     .auth-brand p,
     .auth-card > p { margin: 5px 0 0; color: var(--muted); font-weight: 680; line-height: 1.45; }
+
+    .auth-brand p {
+      margin-top: 4px;
+      font-size: 14px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
 
     .auth-form {
       display: grid;
@@ -7579,6 +7608,14 @@
     }
 
     .auth-form button { min-height: 52px; }
+    #auth-submit {
+      color: #2d2422;
+      background: var(--auth-blush);
+      box-shadow: 0 10px 24px rgba(159, 100, 91, .2);
+    }
+
+    #auth-submit:hover { background: #d49388; }
+    #auth-submit:focus-visible { outline: 3px solid rgba(220, 164, 155, .42); outline-offset: 3px; }
 
     .auth-message {
       min-height: 22px;
@@ -7618,6 +7655,26 @@
     .session-strip button { padding: 7px 11px; font-size: 12px; }
     body.auth-checking > .app { visibility: hidden; }
 
+    @media (max-width: 640px) {
+      .auth-gate {
+        align-items: center;
+        padding: 18px;
+        background-size: cover;
+      }
+
+      .auth-card {
+        width: 100%;
+        padding: 25px 22px 26px;
+        border-radius: 22px;
+      }
+
+      .auth-brand { margin-bottom: 22px; }
+      .auth-logo { width: 104px; height: 72px; }
+      .auth-brand h1 { font-size: 42px; }
+      .auth-form { gap: 13px; margin-top: 19px; }
+      .auth-help { margin-top: 15px; padding-top: 15px; }
+    }
+
     @media (min-width: 1100px) {
       body[data-mode="teacher"] .admin-shell {
         display: grid;
@@ -7631,15 +7688,14 @@
   <section class="auth-gate" id="auth-gate" data-state="checking" aria-live="polite">
     <div class="auth-card">
       <div class="auth-brand">
-        <div class="mark"><img src="assets/dtllc-d-dancer-white-v3.png" alt="" aria-hidden="true"></div>
+        <img class="auth-logo" src="assets/dance-techniques-blush-logo.png" alt="Dance Techniques dancer logo">
         <div>
           <h1>Dance Techniques</h1>
-          <p>Teacher Portal</p>
+          <p>Teacher Tools</p>
         </div>
       </div>
       <div class="auth-login">
-        <h2>Welcome back</h2>
-        <p>Sign in with your Dance Techniques teacher account.</p>
+        <h2>Bonjour!</h2>
         <form class="auth-form" id="auth-form">
           <label>Email
             <input id="auth-email" type="email" autocomplete="username" required>
