@@ -11,6 +11,11 @@
   const message = document.getElementById("auth-message");
   const sessionName = document.getElementById("session-name");
   const app = document.querySelector(".app");
+  const resetEmailInput = document.getElementById("auth-reset-email");
+  const resetMessage = document.getElementById("auth-reset-message");
+  const resetSubmit = document.getElementById("auth-reset-submit");
+  const passwordMessage = document.getElementById("auth-password-message");
+  let passwordRecoveryMode = false;
   const isLocalTour = ["127.0.0.1", "localhost"].includes(window.location.hostname)
     && new URLSearchParams(window.location.search).get("tour") === "1";
 
@@ -50,6 +55,10 @@
   window.dtSupabase = client;
 
   const showSession = async (session) => {
+    if (passwordRecoveryMode) {
+      setGateState("setup");
+      return;
+    }
     if (!session?.user) {
       setGateState("login");
       return;
@@ -87,6 +96,7 @@
 
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
+    message.classList.remove("auth-success");
     message.textContent = "";
     submitButton.disabled = true;
     submitButton.textContent = "Signing In…";
@@ -115,9 +125,75 @@
   document.getElementById("auth-sign-out")?.addEventListener("click", signOut);
   document.getElementById("auth-pending-form")?.addEventListener("submit", signOut);
 
-  client.auth.onAuthStateChange((_event, session) => {
+  document.getElementById("auth-forgot")?.addEventListener("click", () => {
+    resetEmailInput.value = emailInput.value.trim();
+    resetMessage.textContent = "";
+    setGateState("forgot");
+    resetEmailInput.focus();
+  });
+
+  document.getElementById("auth-reset-cancel")?.addEventListener("click", () => {
+    message.textContent = "";
+    setGateState("login");
+    emailInput.focus();
+  });
+
+  document.getElementById("auth-reset-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    resetMessage.classList.remove("auth-success");
+    resetMessage.textContent = "";
+    resetSubmit.disabled = true;
+    resetSubmit.textContent = "Sending…";
+    const redirectTo = `${window.location.origin}${window.location.pathname}`;
+    const { error } = await client.auth.resetPasswordForEmail(resetEmailInput.value.trim(), { redirectTo });
+    resetSubmit.disabled = false;
+    resetSubmit.textContent = "Send Reset Link";
+    if (error) {
+      resetMessage.textContent = friendlyAuthError(error);
+      return;
+    }
+    resetMessage.classList.add("auth-success");
+    resetMessage.textContent = "Check your email for your secure password link.";
+  });
+
+  document.getElementById("auth-password-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const nextPassword = document.getElementById("auth-new-password").value;
+    const confirmation = document.getElementById("auth-confirm-password").value;
+    passwordMessage.textContent = "";
+    if (nextPassword !== confirmation) {
+      passwordMessage.textContent = "Those passwords don’t match yet.";
+      return;
+    }
+    const passwordSubmit = document.getElementById("auth-password-submit");
+    passwordSubmit.disabled = true;
+    passwordSubmit.textContent = "Saving…";
+    const { error } = await client.auth.updateUser({ password: nextPassword });
+    passwordSubmit.disabled = false;
+    passwordSubmit.textContent = "Save Password";
+    if (error) {
+      passwordMessage.textContent = friendlyAuthError(error);
+      return;
+    }
+    passwordRecoveryMode = false;
+    await client.auth.signOut();
+    message.textContent = "Password saved. You can sign in now.";
+    message.classList.add("auth-success");
+    setGateState("login");
+  });
+
+  client.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") {
+      passwordRecoveryMode = true;
+      setGateState("setup");
+      return;
+    }
     window.setTimeout(() => showSession(session), 0);
   });
 
   client.auth.getSession().then(({ data }) => showSession(data.session));
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+  }
 })();

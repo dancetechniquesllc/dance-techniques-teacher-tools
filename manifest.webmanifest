@@ -1,0 +1,18 @@
+{
+  "name": "Dance Techniques Teacher Tools",
+  "short_name": "Teacher Tools",
+  "description": "Dance Techniques Teacher Tools and Director Dashboard",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff8f4",
+  "theme_color": "#dca49b",
+  "icons": [
+    {
+      "src": "assets/teacher-tool-logo.png",
+      "sizes": "900x900",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

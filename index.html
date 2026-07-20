@@ -3,7 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#dca49b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>Dance Techniques Teacher PWA Prototype</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/teacher-tool-logo.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Parisienne&display=swap" rel="stylesheet">
@@ -7637,8 +7642,27 @@
     }
 
     .auth-pending { display: none; }
+    .auth-reset-request,
+    .auth-password-setup { display: none; }
     .auth-gate[data-state="pending"] .auth-login { display: none; }
     .auth-gate[data-state="pending"] .auth-pending { display: block; }
+    .auth-gate[data-state="forgot"] .auth-login { display: none; }
+    .auth-gate[data-state="forgot"] .auth-reset-request { display: block; }
+    .auth-gate[data-state="setup"] .auth-login { display: none; }
+    .auth-gate[data-state="setup"] .auth-password-setup { display: block; }
+
+    .auth-text-button {
+      display: inline;
+      padding: 0;
+      color: var(--rose);
+      background: transparent;
+      font-size: inherit;
+      font-weight: 850;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .auth-success { color: #31744a; }
 
     .session-strip {
       display: none;
@@ -7708,13 +7732,39 @@
           <p class="auth-message" id="auth-message"></p>
           <button class="primary" id="auth-submit" type="submit">Sign In</button>
         </form>
-        <div class="auth-help">Need an account or forgot your password? Contact Dance Techniques so we can help you securely.</div>
+        <div class="auth-help">Need an account? Contact Dance Techniques. <button class="auth-text-button" id="auth-forgot" type="button">Forgot your password?</button></div>
       </div>
       <div class="auth-pending">
         <h2>Your account is waiting for approval</h2>
         <p>A Dance Techniques director needs to activate your access before you can use the portal.</p>
         <form class="auth-form" id="auth-pending-form">
           <button class="secondary" type="submit">Sign Out</button>
+        </form>
+      </div>
+      <div class="auth-reset-request">
+        <h2>Reset your password</h2>
+        <p>Enter your account email and we’ll send you a secure link.</p>
+        <form class="auth-form" id="auth-reset-form">
+          <label>Email
+            <input id="auth-reset-email" type="email" autocomplete="email" required>
+          </label>
+          <p class="auth-message" id="auth-reset-message"></p>
+          <button class="primary" id="auth-reset-submit" type="submit">Send Reset Link</button>
+          <button class="secondary" id="auth-reset-cancel" type="button">Back to Sign In</button>
+        </form>
+      </div>
+      <div class="auth-password-setup">
+        <h2>Choose your password</h2>
+        <p>Create a private password with at least eight characters.</p>
+        <form class="auth-form" id="auth-password-form">
+          <label>New password
+            <input id="auth-new-password" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <label>Confirm password
+            <input id="auth-confirm-password" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <p class="auth-message" id="auth-password-message"></p>
+          <button class="primary" id="auth-password-submit" type="submit">Save Password</button>
         </form>
       </div>
     </div>
@@ -9814,7 +9864,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20260720-accounts"></script>
+  <script src="supabase-auth.js?v=20260720-published"></script>
   <script>
     const teachers = [
       {
