@@ -3758,7 +3758,7 @@
 
     .roster-summary-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(110px, 1fr));
+      grid-template-columns: repeat(4, minmax(130px, 1fr));
       gap: 10px;
     }
 
@@ -3815,6 +3815,10 @@
     .roster-class-card strong,
     .roster-class-card small { display: block; }
     .roster-class-card small { margin-top: 4px; color: var(--muted); }
+    .roster-enrollment-bubble { display: inline-flex !important; width: fit-content; margin-top: 8px !important; padding: 5px 9px; border-radius: 999px; font-weight: 850; color: oklch(28% 0.04 40) !important; }
+    .roster-enrollment-bubble.low { background: oklch(91% 0.12 90); }
+    .roster-enrollment-bubble.ready { background: oklch(88% 0.11 145); }
+    .roster-enrollment-bubble.full { background: oklch(88% 0.12 25); color: oklch(42% 0.14 25) !important; }
 
     .roster-detail {
       padding: 16px;
@@ -3850,6 +3854,19 @@
     .roster-student-row small { color: var(--muted); }
     .roster-student-name strong,
     .roster-student-name small { display: block; }
+    .roster-student-name { display: flex; align-items: center; gap: 9px; }
+    .roster-student-photo { width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; overflow: hidden; border-radius: 999px; background: oklch(94% 0.035 25); color: var(--fg); font-weight: 900; }
+    .roster-student-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .roster-student-row.is-male, .roster-student-row.is-male small { color: oklch(48% 0.16 250); }
+    .birthday-cupcake { margin-left: 5px; font-size: 18px; filter: saturate(1.1); }
+    .roster-photo-editor { display: flex; align-items: center; gap: 12px; }
+    .roster-photo-preview { width: 64px; height: 64px; overflow: hidden; display: grid; place-items: center; border-radius: 999px; background: oklch(94% 0.035 25); font-weight: 900; }
+    .roster-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .roster-summary-action { width: 100%; text-align: left; cursor: pointer; }
+    .prospect-followup-list { display: grid; gap: 10px; margin: 14px 0; }
+    .prospect-followup-card { padding: 12px; border: 1px solid var(--border); border-radius: 9px; background: oklch(98% 0.01 40); }
+    .prospect-followup-card strong, .prospect-followup-card small { display: block; }
+    .prospect-contact-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; }
     .roster-edit-dialog { width: min(620px, 100%); max-height: calc(100vh - 36px); overflow: auto; }
     .roster-edit-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
     .roster-edit-form .full-field { grid-column: 1 / -1; }
@@ -8344,7 +8361,6 @@
               <div>
                 <h3>Classes &amp; Rosters</h3>
                 <p>Keep every school, teacher, class, enrolled dancer, and trial student coordinated.</p>
-                <span class="status ok">Synced from assigned school classes</span>
               </div>
               <span class="admin-page-actions">
                 <select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool">
@@ -9521,8 +9537,13 @@
       <h3 id="roster-student-edit-title">Edit Student</h3>
       <p>Birthday, parent contact information, and notes stay inside this private edit view.</p>
       <form class="roster-edit-form" id="roster-student-edit-form">
+        <div class="full-field roster-photo-editor">
+          <div class="roster-photo-preview" id="roster-edit-photo-preview">Photo</div>
+          <label class="secondary">Upload or take photo<input id="roster-edit-photo" type="file" accept="image/*" hidden></label>
+        </div>
         <label>First name<input id="roster-edit-first-name" required></label>
         <label>Full last name<input id="roster-edit-last-name" required></label>
+        <label>Gender<select id="roster-edit-gender"><option value="female">Female</option><option value="male">Male</option></select></label>
         <label>Classroom<input id="roster-edit-classroom"></label>
         <label>Birthdate<input id="roster-edit-birthdate" type="date"></label>
         <label>Parent phone<input id="roster-edit-phone" type="tel"></label>
@@ -9543,6 +9564,14 @@
         <button class="secondary" type="button" id="roster-edit-cancel">Cancel</button>
         <button class="primary" type="submit" form="roster-student-edit-form">Save student</button>
       </div>
+    </div>
+  </div>
+  <div class="confirm-overlay" id="roster-prospects-overlay" aria-hidden="true">
+    <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-prospects-title">
+      <h3 id="roster-prospects-title">Prospective Student Follow-Up</h3>
+      <p id="roster-prospects-summary">All prospective students matching the current filters.</p>
+      <div class="prospect-followup-list" id="roster-prospects-list"></div>
+      <div class="confirm-actions"><button class="primary" type="button" id="roster-prospects-close">Done</button></div>
     </div>
   </div>
   <div class="confirm-overlay" id="holiday-class-confirm" aria-hidden="true">
@@ -9855,6 +9884,7 @@
     let rosterSearchTerm = "";
     let editingRosterStudentId = "";
     let editingRosterClassId = "";
+    let pendingRosterStudentPhoto = "";
 
     const icons = {
       active: "Active",
@@ -15162,6 +15192,20 @@
       "ready-to-enroll": "Ready to enroll"
     }[status] || "Prospective");
 
+    const birthdayFallsThisWeek = (birthdate) => {
+      if (!birthdate) return false;
+      const [birthYear, birthMonth, birthDay] = birthdate.split("-").map(Number);
+      if (!birthYear || !birthMonth || !birthDay) return false;
+      const today = new Date();
+      const start = new Date(today);
+      start.setHours(0, 0, 0, 0);
+      start.setDate(today.getDate() - today.getDay());
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      const candidates = [start.getFullYear(), end.getFullYear()].map((year) => new Date(year, birthMonth - 1, birthDay));
+      return candidates.some((birthday) => birthday >= start && birthday <= end);
+    };
+
     const sortRosterStudents = (students) => [...students].sort((a, b) => {
       const classroomOrder = (a.classroom || "").localeCompare(b.classroom || "", undefined, { sensitivity: "base", numeric: true });
       if (classroomOrder) return classroomOrder;
@@ -15181,8 +15225,8 @@
     const renderRosterStudentRows = (students, prospective = false) => {
       if (!students.length) return `<div class="roster-empty">${prospective ? "No prospective students right now." : "No enrolled students yet."}</div>`;
       return sortRosterStudents(students).map((student) => `
-        <div class="roster-student-row">
-          <span class="roster-student-name"><strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}</strong></span>
+        <div class="roster-student-row ${student.gender === "male" ? "is-male" : ""}">
+          <span class="roster-student-name"><span class="roster-student-photo">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(`${student.firstName?.[0] || ""}${student.lastName?.[0] || ""}`)}</span><strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}${birthdayFallsThisWeek(student.birthdate) ? `<span class="birthday-cupcake" role="img" aria-label="Birthday this week" title="Birthday this week">🧁</span>` : ""}</strong></span>
           <span><small>Classroom</small><br>${rosterSafe(student.classroom || "—")}</span>
           <span><small>Age</small><br>${rosterAge(student.birthdate)}</span>
           <span><button class="secondary" type="button" data-roster-edit-student="${rosterSafe(student.id)}">Edit</button>${prospective ? ` <button class="primary" type="button" data-roster-enroll="${rosterSafe(student.id)}">Approve</button>` : ""}</span>
@@ -15196,6 +15240,7 @@
       overlay?.setAttribute("aria-hidden", "true");
       editingRosterStudentId = "";
       editingRosterClassId = "";
+      pendingRosterStudentPhoto = "";
     };
 
     const openRosterStudentEditor = (rosterClass, student) => {
@@ -15203,6 +15248,7 @@
       editingRosterStudentId = student.id;
       document.getElementById("roster-edit-first-name").value = student.firstName || "";
       document.getElementById("roster-edit-last-name").value = student.lastName || "";
+      document.getElementById("roster-edit-gender").value = student.gender || "female";
       document.getElementById("roster-edit-classroom").value = student.classroom || "";
       document.getElementById("roster-edit-birthdate").value = student.birthdate || "";
       document.getElementById("roster-edit-phone").value = student.parentPhone || "";
@@ -15213,6 +15259,9 @@
       assignedClassSelect.value = rosterClass.id;
       document.getElementById("roster-edit-trial-date").value = student.trialDate || "";
       document.getElementById("roster-edit-notes").value = student.notes || "";
+      pendingRosterStudentPhoto = student.photo || "";
+      const photoPreview = document.getElementById("roster-edit-photo-preview");
+      photoPreview.innerHTML = pendingRosterStudentPhoto ? `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Student photo preview">` : rosterSafe(`${student.firstName?.[0] || ""}${student.lastName?.[0] || ""}` || "Photo");
       const overlay = document.getElementById("roster-student-edit-overlay");
       overlay?.classList.add("active");
       overlay?.setAttribute("aria-hidden", "false");
@@ -15234,21 +15283,19 @@
         teacherSelect.value = rosterTeacherFilter;
       }
 
-      const totalEnrolled = activeRosterClasses.reduce((sum, item) => sum + rosterEnrolled(item).length, 0);
-      const totalProspects = activeRosterClasses.reduce((sum, item) => sum + rosterProspects(item).length, 0);
-      const fullClasses = activeRosterClasses.filter((item) => rosterEnrolled(item).length >= item.capacity).length;
+      const visibleClasses = filteredRosterClasses();
+      const visibleSchoolCount = new Set(visibleClasses.map((item) => item.schoolName)).size;
+      const totalEnrolled = visibleClasses.reduce((sum, item) => sum + rosterEnrolled(item).length, 0);
+      const totalProspects = visibleClasses.reduce((sum, item) => sum + rosterProspects(item).length, 0);
       const summary = document.getElementById("admin-roster-summary");
-      if (summary) summary.innerHTML = [
-        [schoolNames.length, "Schools"],
-        [activeRosterClasses.length, "Active classes"],
-        [totalEnrolled, "Enrolled dancers"],
-        [totalProspects, "Prospective students"],
-        [fullClasses, "At capacity"]
-      ].map(([value, label]) => `<div class="stat"><strong>${value}</strong><span>${label}</span></div>`).join("");
+      if (summary) summary.innerHTML = `
+        <div class="stat"><strong>${visibleSchoolCount}</strong><span>Schools</span></div>
+        <div class="stat"><strong>${visibleClasses.length}</strong><span>Active classes</span></div>
+        <div class="stat"><strong>${totalEnrolled}</strong><span>Enrolled dancers</span></div>
+        <button class="stat roster-summary-action" type="button" data-roster-show-prospects><strong>${totalProspects}</strong><span>Prospective students · View follow-up list</span></button>`;
       const shortcut = document.getElementById("admin-roster-shortcut-bubble");
       if (shortcut) shortcut.textContent = `${activeRosterClasses.length} Classes · ${totalProspects} Prospects`;
 
-      const visibleClasses = filteredRosterClasses();
       if (!visibleClasses.some((item) => item.id === selectedRosterClassId)) selectedRosterClassId = visibleClasses[0]?.id || "";
       const list = document.getElementById("admin-roster-class-list");
       if (list) list.innerHTML = visibleClasses.length ? visibleClasses.map((item) => {
@@ -15258,7 +15305,8 @@
           <strong>${rosterSafe(item.name)}</strong>
           <small>${rosterSafe(item.schoolName)}</small>
           <small>${rosterSafe(rosterTeacherName(item.teacherId))} · ${rosterSafe(item.day)} ${rosterSafe(item.time)}</small>
-          <small>${enrolled}/${item.capacity} enrolled${prospects ? ` · ${prospects} prospective` : ""}</small>
+          <small class="roster-enrollment-bubble ${enrolled >= item.capacity ? "full" : (enrolled >= 7 ? "ready" : "low")}">${enrolled}/${item.capacity} Enrolled${enrolled >= item.capacity ? " · Full" : ""}</small>
+          ${prospects ? `<small>${prospects} prospective</small>` : ""}
         </button>`;
       }).join("") : `<div class="roster-empty">No classes match these filters.</div>`;
 
@@ -15284,7 +15332,7 @@
         </div>
         <div class="roster-meta">
           <span>${rosterSafe(rosterTeacherName(selected.teacherId))}</span><span>${rosterSafe(selected.day)} · ${rosterSafe(selected.time || "Time not set")}</span>
-          <span>${rosterSafe(selected.ageGroup || selected.classroom)}</span>${selected.level ? `<span>Level ${rosterSafe(selected.level)}</span>` : ""}<span>${enrolled.length}/${selected.capacity} enrolled</span>
+          ${selected.ageGroup ? `<span>${rosterSafe(selected.ageGroup)}</span>` : ""}${selected.level ? `<span>Level ${rosterSafe(selected.level)}</span>` : ""}<span>${enrolled.length}/${selected.capacity} enrolled</span>
         </div>
         <div class="roster-section-heading"><div><h4>Enrolled students</h4><small>Official class roster</small></div><button class="secondary" type="button" data-roster-add="enrolled">Add enrolled student</button></div>
         <div class="roster-student-list">${renderRosterStudentRows(enrolled)}</div>
@@ -15292,6 +15340,34 @@
         <div class="roster-student-list">${renderRosterStudentRows(prospects, true)}</div>
       `;
     }
+
+    const openProspectiveFollowup = () => {
+      const matches = filteredRosterClasses().flatMap((rosterClass) => rosterProspects(rosterClass).map((student) => ({ rosterClass, student })));
+      const list = document.getElementById("roster-prospects-list");
+      const summary = document.getElementById("roster-prospects-summary");
+      if (summary) summary.textContent = `${matches.length} prospective student${matches.length === 1 ? "" : "s"} matching the current filters.`;
+      if (list) list.innerHTML = matches.length ? matches.map(({ rosterClass, student }) => `
+        <div class="prospect-followup-card">
+          <strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}</strong>
+          <small>${rosterSafe(rosterClass.schoolName)} · ${rosterSafe(rosterClass.name)} · ${rosterSafe(rosterTeacherName(rosterClass.teacherId))}</small>
+          <small>${rosterSafe(rosterStatusLabel(student.status))}${student.trialDate ? ` · Trial ${rosterSafe(student.trialDate)}` : ""}</small>
+          ${student.notes ? `<p>${rosterSafe(student.notes)}</p>` : ""}
+          <div class="prospect-contact-actions">
+            ${student.parentPhone ? `<a class="secondary" href="tel:${rosterSafe(student.parentPhone.replace(/[^+\d]/g, ""))}">Call ${rosterSafe(student.parentPhone)}</a>` : ""}
+            ${student.parentEmail ? `<a class="secondary" href="mailto:${rosterSafe(student.parentEmail)}">Email parent</a>` : ""}
+            <button class="primary" type="button" data-prospect-open-student="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}">Open student</button>
+          </div>
+        </div>`).join("") : `<div class="roster-empty">No prospective students match these filters.</div>`;
+      const overlay = document.getElementById("roster-prospects-overlay");
+      overlay?.classList.add("active");
+      overlay?.setAttribute("aria-hidden", "false");
+    };
+
+    const closeProspectiveFollowup = () => {
+      const overlay = document.getElementById("roster-prospects-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+    };
 
     function openAdminSection(section) {
       if (!navigationGuardBypass && hasUnsavedEdits && (document.body.dataset.adminPage !== "home" || document.body.dataset.adminSection !== section)) {
@@ -16236,6 +16312,10 @@
     });
 
     document.getElementById("admin-home-classes-rosters")?.addEventListener("click", (event) => {
+      if (event.target.closest("[data-roster-show-prospects]")) {
+        openProspectiveFollowup();
+        return;
+      }
       const classButton = event.target.closest("[data-roster-class]");
       if (classButton) {
         selectedRosterClassId = classButton.dataset.rosterClass;
@@ -16286,7 +16366,9 @@
           trialDate: trialDate?.trim() || "",
           parentPhone: parentPhone.trim(),
           parentEmail: parentEmail.trim(),
-          notes: notes.trim()
+          notes: notes.trim(),
+          gender: "female",
+          photo: ""
         });
         syncRosterCountToSource(rosterClass, { previousCount });
         renderClassesAndRosters();
@@ -16315,6 +16397,29 @@
     });
 
     document.getElementById("roster-edit-cancel")?.addEventListener("click", closeRosterStudentEditor);
+    document.getElementById("roster-edit-photo")?.addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      if (!file.type.startsWith("image/")) return showToast("Choose a photo from the library or camera");
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        const source = String(reader.result || "");
+        const image = new Image();
+        image.addEventListener("load", () => {
+          const maxSize = 480;
+          const scale = Math.min(1, maxSize / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height);
+          pendingRosterStudentPhoto = canvas.toDataURL("image/jpeg", 0.82);
+          const preview = document.getElementById("roster-edit-photo-preview");
+          if (preview) preview.innerHTML = `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Student photo preview">`;
+        });
+        image.src = source;
+      });
+      reader.readAsDataURL(file);
+    });
     document.getElementById("roster-student-edit-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "roster-student-edit-overlay") closeRosterStudentEditor();
     });
@@ -16334,6 +16439,8 @@
       }
       student.firstName = document.getElementById("roster-edit-first-name").value.trim();
       student.lastName = document.getElementById("roster-edit-last-name").value.trim();
+      student.gender = document.getElementById("roster-edit-gender").value;
+      student.photo = pendingRosterStudentPhoto;
       student.classroom = document.getElementById("roster-edit-classroom").value.trim();
       student.birthdate = document.getElementById("roster-edit-birthdate").value;
       student.parentPhone = document.getElementById("roster-edit-phone").value.trim();
@@ -16356,6 +16463,21 @@
       renderClassesAndRosters();
       scheduleAppDataSave();
       showToast(targetClass.id !== rosterClass.id ? `Student moved to ${targetClass.name}` : "Student updated");
+    });
+
+    document.getElementById("roster-prospects-close")?.addEventListener("click", closeProspectiveFollowup);
+    document.getElementById("roster-prospects-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "roster-prospects-overlay") closeProspectiveFollowup();
+      const openButton = event.target.closest("[data-prospect-open-student]");
+      if (!openButton) return;
+      const [classId, studentId] = openButton.dataset.prospectOpenStudent.split("::");
+      const rosterClass = rosterClasses.find((item) => item.id === classId);
+      const student = rosterClass?.students.find((item) => item.id === studentId);
+      if (!rosterClass || !student) return;
+      closeProspectiveFollowup();
+      selectedRosterClassId = rosterClass.id;
+      renderClassesAndRosters();
+      openRosterStudentEditor(rosterClass, student);
     });
 
     ["input", "change", "click", "drop"].forEach((eventName) => {
