@@ -3850,17 +3850,10 @@
     .roster-student-row small { color: var(--muted); }
     .roster-student-name strong,
     .roster-student-name small { display: block; }
-    .roster-student-note {
-      grid-column: 1 / -1;
-      padding: 9px 10px;
-      border-radius: 8px;
-      background: oklch(97% 0.018 42);
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-    .roster-student-note strong { color: var(--fg); }
-    .roster-contact-line { margin-top: 3px; }
+    .roster-edit-dialog { width: min(620px, 100%); max-height: calc(100vh - 36px); overflow: auto; }
+    .roster-edit-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+    .roster-edit-form .full-field { grid-column: 1 / -1; }
+    .roster-edit-form textarea { min-height: 100px; resize: vertical; }
     .roster-empty { padding: 18px; text-align: center; color: var(--muted); }
 
     @media (max-width: 900px) {
@@ -3868,6 +3861,8 @@
       .roster-workspace { grid-template-columns: 1fr; }
       .roster-student-row { grid-template-columns: 1fr 1fr; }
       .roster-student-row > :last-child { justify-self: start; }
+      .roster-edit-form { grid-template-columns: 1fr; }
+      .roster-edit-form .full-field { grid-column: auto; }
     }
 
     .admin-profile-page .curriculum-builder-card {
@@ -9511,6 +9506,34 @@
       </div>
     </div>
   </div>
+  <div class="confirm-overlay" id="roster-student-edit-overlay" aria-hidden="true">
+    <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-student-edit-title">
+      <h3 id="roster-student-edit-title">Edit Student</h3>
+      <p>Birthday, parent contact information, and notes stay inside this private edit view.</p>
+      <form class="roster-edit-form" id="roster-student-edit-form">
+        <label>First name<input id="roster-edit-first-name" required></label>
+        <label>Full last name<input id="roster-edit-last-name" required></label>
+        <label>Classroom<input id="roster-edit-classroom"></label>
+        <label>Birthdate<input id="roster-edit-birthdate" type="date"></label>
+        <label>Parent phone<input id="roster-edit-phone" type="tel"></label>
+        <label>Parent email<input id="roster-edit-email" type="email"></label>
+        <label id="roster-edit-status-wrap">Student status
+          <select id="roster-edit-status">
+            <option value="trial-scheduled">Trial scheduled</option>
+            <option value="trial-attended">Trial attended</option>
+            <option value="ready-to-enroll">Ready to enroll</option>
+            <option value="enrolled">Enrolled</option>
+          </select>
+        </label>
+        <label id="roster-edit-trial-wrap">Trial date<input id="roster-edit-trial-date" type="date"></label>
+        <label class="full-field">Notes<textarea id="roster-edit-notes" placeholder="Questions from family, follow-up needed, class observations, or other helpful details"></textarea></label>
+      </form>
+      <div class="confirm-actions">
+        <button class="secondary" type="button" id="roster-edit-cancel">Cancel</button>
+        <button class="primary" type="submit" form="roster-student-edit-form">Save student</button>
+      </div>
+    </div>
+  </div>
   <div class="confirm-overlay" id="holiday-class-confirm" aria-hidden="true">
     <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="holiday-class-confirm-title">
       <h3 id="holiday-class-confirm-title">Are you sure?</h3>
@@ -9819,6 +9842,8 @@
     let rosterSchoolFilter = "all";
     let rosterTeacherFilter = "all";
     let rosterSearchTerm = "";
+    let editingRosterStudentId = "";
+    let editingRosterClassId = "";
 
     const icons = {
       active: "Active",
@@ -15011,7 +15036,7 @@
       let months = today.getMonth() - born.getMonth();
       if (today.getDate() < born.getDate()) months -= 1;
       if (months < 0) { years -= 1; months += 12; }
-      return years < 3 ? `${years}y ${months}m` : `${years}`;
+      return `${years} yr ${months} mo`;
     };
 
     const rosterStatusLabel = (status) => ({
@@ -15040,13 +15065,38 @@
       if (!students.length) return `<div class="roster-empty">${prospective ? "No prospective students right now." : "No enrolled students yet."}</div>`;
       return sortRosterStudents(students).map((student) => `
         <div class="roster-student-row">
-          <span class="roster-student-name"><strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}</strong><small>${prospective ? rosterStatusLabel(student.status) : "Enrolled"}</small></span>
+          <span class="roster-student-name"><strong>${rosterSafe(student.firstName)} ${rosterSafe(student.lastName)}</strong></span>
           <span><small>Classroom</small><br>${rosterSafe(student.classroom || "—")}</span>
           <span><small>Age</small><br>${rosterAge(student.birthdate)}</span>
-          <span>${prospective ? `<small>Trial date</small><br>${rosterSafe(student.trialDate || "Not set")}<br>` : ""}<button class="secondary" type="button" data-roster-edit-student="${rosterSafe(student.id)}">Edit</button>${prospective ? ` <button class="primary" type="button" data-roster-enroll="${rosterSafe(student.id)}">Approve</button>` : ""}</span>
-          ${(student.notes || (prospective && (student.parentPhone || student.parentEmail))) ? `<span class="roster-student-note"><strong>Notes</strong>${student.notes ? ` · ${rosterSafe(student.notes)}` : ""}${prospective && (student.parentPhone || student.parentEmail) ? `<div class="roster-contact-line"><strong>Parent contact:</strong> ${rosterSafe([student.parentPhone, student.parentEmail].filter(Boolean).join(" · "))}</div>` : ""}</span>` : ""}
+          <span><button class="secondary" type="button" data-roster-edit-student="${rosterSafe(student.id)}">Edit</button>${prospective ? ` <button class="primary" type="button" data-roster-enroll="${rosterSafe(student.id)}">Approve</button>` : ""}</span>
         </div>
       `).join("");
+    };
+
+    const closeRosterStudentEditor = () => {
+      const overlay = document.getElementById("roster-student-edit-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+      editingRosterStudentId = "";
+      editingRosterClassId = "";
+    };
+
+    const openRosterStudentEditor = (rosterClass, student) => {
+      editingRosterClassId = rosterClass.id;
+      editingRosterStudentId = student.id;
+      document.getElementById("roster-edit-first-name").value = student.firstName || "";
+      document.getElementById("roster-edit-last-name").value = student.lastName || "";
+      document.getElementById("roster-edit-classroom").value = student.classroom || "";
+      document.getElementById("roster-edit-birthdate").value = student.birthdate || "";
+      document.getElementById("roster-edit-phone").value = student.parentPhone || "";
+      document.getElementById("roster-edit-email").value = student.parentEmail || "";
+      document.getElementById("roster-edit-status").value = student.status || "enrolled";
+      document.getElementById("roster-edit-trial-date").value = student.trialDate || "";
+      document.getElementById("roster-edit-notes").value = student.notes || "";
+      const overlay = document.getElementById("roster-student-edit-overlay");
+      overlay?.classList.add("active");
+      overlay?.setAttribute("aria-hidden", "false");
+      window.setTimeout(() => document.getElementById("roster-edit-first-name")?.focus(), 50);
     };
 
     function renderClassesAndRosters() {
@@ -16082,28 +16132,32 @@
       if (editStudentButton) {
         const student = rosterClass.students.find((item) => item.id === editStudentButton.dataset.rosterEditStudent);
         if (!student) return;
-        const lastName = window.prompt("Student full last name", student.lastName || "");
-        if (lastName === null) return;
-        const classroom = window.prompt("School classroom", student.classroom || "");
-        if (classroom === null) return;
-        const birthdate = window.prompt("Birthdate (YYYY-MM-DD)", student.birthdate || "");
-        if (birthdate === null) return;
-        const parentPhone = window.prompt("Parent phone number", student.parentPhone || "");
-        if (parentPhone === null) return;
-        const parentEmail = window.prompt("Parent email", student.parentEmail || "");
-        if (parentEmail === null) return;
-        const notes = window.prompt("Student notes and follow-up", student.notes || "");
-        if (notes === null) return;
-        student.lastName = lastName.trim();
-        student.classroom = classroom.trim();
-        student.birthdate = birthdate.trim();
-        student.parentPhone = parentPhone.trim();
-        student.parentEmail = parentEmail.trim();
-        student.notes = notes.trim();
-        renderClassesAndRosters();
-        scheduleAppDataSave();
-        showToast("Student updated");
+        openRosterStudentEditor(rosterClass, student);
       }
+    });
+
+    document.getElementById("roster-edit-cancel")?.addEventListener("click", closeRosterStudentEditor);
+    document.getElementById("roster-student-edit-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "roster-student-edit-overlay") closeRosterStudentEditor();
+    });
+    document.getElementById("roster-student-edit-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const rosterClass = rosterClasses.find((item) => item.id === editingRosterClassId);
+      const student = rosterClass?.students.find((item) => item.id === editingRosterStudentId);
+      if (!student) return closeRosterStudentEditor();
+      student.firstName = document.getElementById("roster-edit-first-name").value.trim();
+      student.lastName = document.getElementById("roster-edit-last-name").value.trim();
+      student.classroom = document.getElementById("roster-edit-classroom").value.trim();
+      student.birthdate = document.getElementById("roster-edit-birthdate").value;
+      student.parentPhone = document.getElementById("roster-edit-phone").value.trim();
+      student.parentEmail = document.getElementById("roster-edit-email").value.trim();
+      student.status = document.getElementById("roster-edit-status").value;
+      student.trialDate = document.getElementById("roster-edit-trial-date").value;
+      student.notes = document.getElementById("roster-edit-notes").value.trim();
+      closeRosterStudentEditor();
+      renderClassesAndRosters();
+      scheduleAppDataSave();
+      showToast("Student updated");
     });
 
     ["input", "change", "click", "drop"].forEach((eventName) => {
