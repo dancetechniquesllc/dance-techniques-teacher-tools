@@ -8359,7 +8359,7 @@
                   <option value="curriculum">Curriculum Composer</option>
                 </select>
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
-                <button class="primary" type="button" id="add-roster-class">Manage School Classes</button>
+                <button class="primary" type="button" id="add-roster-class">Add Class</button>
               </span>
             </div>
             <div class="roster-summary-grid" id="admin-roster-summary"></div>
@@ -9535,6 +9535,7 @@
             <option value="enrolled">Enrolled</option>
           </select>
         </label>
+        <label>Assigned class<select id="roster-edit-assigned-class"></select></label>
         <label id="roster-edit-trial-wrap">Trial date<input id="roster-edit-trial-date" type="date"></label>
         <label class="full-field">Notes<textarea id="roster-edit-notes" placeholder="Questions from family, follow-up needed, class observations, or other helpful details"></textarea></label>
       </form>
@@ -13735,16 +13736,18 @@
     };
 
     const syncRosterCountToSource = (rosterClass, { previousCount = null, notify = true, refresh = true } = {}) => {
-      if (!rosterClass?.sourceKey) return;
-      const { row } = linkedSchoolClassRow(rosterClass);
-      if (!row) return;
+      if (!rosterClass) return;
+      const { row } = rosterClass.sourceKey ? linkedSchoolClassRow(rosterClass) : { row: null };
       const enrolledCount = rosterEnrolled(rosterClass).length;
-      const priorCount = previousCount == null ? Number(row.students) || 0 : previousCount;
-      row.students = enrolledCount;
-      row.duration = classDurationForStudents(enrolledCount);
-      row.endTime = endTimeForClass(row.startTime, enrolledCount);
+      const priorCount = previousCount == null ? enrolledCount : previousCount;
+      if (row) {
+        row.students = enrolledCount;
+        row.duration = classDurationForStudents(enrolledCount);
+        row.endTime = endTimeForClass(row.startTime, enrolledCount);
+      }
       if (priorCount <= 6 && enrolledCount > 6) {
-        row.durationAlert = `Roster reached ${enrolledCount} students · class is now 45 minutes`;
+        rosterClass.durationAlert = `Roster reached ${enrolledCount} students · class is now 45 minutes`;
+        if (row) row.durationAlert = rosterClass.durationAlert;
         if (notify) showToast(`${rosterClass.name} now has ${enrolledCount} students. Alert: class length changed to 45 minutes.`);
       }
       if (refresh && document.body.dataset.adminPage === "profile") {
@@ -13803,7 +13806,12 @@
         container.innerHTML = `<p class="hint-text">No schools assigned yet. Use Class Calendar to add this teacher's first school.</p>`;
         return;
       }
-      container.innerHTML = profileTeacher.schools.map((school, index) => `
+      container.innerHTML = profileTeacher.schools.map((school, index) => {
+        const schoolRosters = rosterClasses.filter((item) => item.sourceActive !== false && item.teacherId === profileTeacher.id && item.schoolName === school.name);
+        const rosterCount = schoolRosters.length;
+        const rosterAlert = schoolRosters.find((item) => item.durationAlert)?.durationAlert || "";
+        school.classCount = rosterCount;
+        return `
         <div class="teacher-class-row">
           <span>
             <strong>${escapeText(school.nickname || school.name)}</strong>
@@ -13811,7 +13819,7 @@
           </span>
           <span class="teacher-class-controls">
             <span class="teacher-class-control">
-              <input aria-label="Number of classes for ${escapeText(school.nickname || school.name)}" type="number" min="0" max="20" step="1" data-teacher-school-index="${index}" data-teacher-school-field="classCount" value="${escapeText(school.classCount ?? "")}">
+              <input aria-label="Number of classes for ${escapeText(school.nickname || school.name)}" type="number" value="${rosterCount}" readonly>
               <span># of Classes</span>
             </span>
             <span class="teacher-class-control">
@@ -13827,11 +13835,9 @@
               <span>AM/PM</span>
             </span>
           </span>
-          <span class="teacher-class-curriculum-list">
-            ${renderClassCurriculumRows(school, index)}
-          </span>
+          <span class="teacher-class-roster-actions"><button class="secondary" type="button" data-view-school-rosters="${escapeText(school.name)}">View Classes &amp; Rosters</button>${rosterAlert ? `<span class="status pending">${escapeText(rosterAlert)}</span>` : ""}</span>
         </div>
-      `).join("");
+      `}).join("");
     };
 
     const renderSchoolRows = () => {
@@ -13841,7 +13847,12 @@
         container.innerHTML = `<p class="hint-text">No schools assigned yet. Click Add school to start this teacher's calendar.</p>`;
         return;
       }
-      container.innerHTML = profileTeacher.schools.map((school, index) => `
+      container.innerHTML = profileTeacher.schools.map((school, index) => {
+        const schoolRosters = rosterClasses.filter((item) => item.sourceActive !== false && item.teacherId === profileTeacher.id && item.schoolName === school.name);
+        const rosterCount = schoolRosters.length;
+        const rosterAlert = schoolRosters.find((item) => item.durationAlert)?.durationAlert || "";
+        school.classCount = rosterCount;
+        return `
         <details class="calendar-row" data-school-index="${index}">
           <summary>
             <label class="calendar-school-name" onclick="event.stopPropagation()">
@@ -13851,7 +13862,7 @@
           </summary>
           <div class="calendar-row-body">
             <label class="calendar-field">
-              <input aria-label="Number of classes for ${escapeText(school.name)}" type="number" min="0" max="20" step="1" placeholder="Classes" data-school-field="classCount" value="${escapeText(school.classCount ?? "")}">
+              <input aria-label="Number of classes for ${escapeText(school.name)}" type="number" value="${rosterCount}" readonly>
               <span class="calendar-field-label">Classes</span>
             </label>
             <label class="calendar-field">
@@ -13900,17 +13911,10 @@
                 <span class="calendar-field-label">Email</span>
               </label>
             </div>
-            <details class="school-class-details">
-              <summary>
-                <span><strong>Classes</strong><small>Edit each class for this school.</small></span>
-              </summary>
-              <div class="school-class-details-body">
-                ${renderClassCurriculumRows(school, index)}
-              </div>
-            </details>
+            <div class="teacher-class-roster-actions"><button class="primary" type="button" data-view-school-rosters="${escapeText(school.name)}">View Classes &amp; Rosters</button>${rosterAlert ? `<span class="status pending">${escapeText(rosterAlert)}</span>` : ""}</div>
           </div>
         </details>
-      `).join("");
+      `}).join("");
     };
 
     const renderIsdCalendars = () => {
@@ -14503,6 +14507,9 @@
       profileTeacher.closureClassOverrides.forEach((item) => {
         if (item.schoolName === oldName) item.schoolName = newName;
       });
+      rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === oldName).forEach((item) => {
+        item.schoolName = newName;
+      });
     };
 
     const schoolLibraryFieldValue = (field) => {
@@ -14727,6 +14734,9 @@
       const nextValue = schoolFieldValue(field);
       if (schoolField === "name") updateSchoolNameReferences(school.name, nextValue);
       school[schoolField] = nextValue;
+      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name).forEach((item) => {
+        item.day = weekdayNames[school.dayOfWeek] || "To schedule";
+      });
       if (!["classCount", "address", "directorName", "phone", "email"].includes(schoolField)) markScheduleDirty();
       renderCurriculumProgress();
       renderAdminCurriculumProgress();
@@ -14752,6 +14762,9 @@
       const nextValue = schoolFieldValue(field);
       if (schoolField === "name") updateSchoolNameReferences(school.name, nextValue);
       school[schoolField] = nextValue;
+      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name).forEach((item) => {
+        item.day = weekdayNames[school.dayOfWeek] || "To schedule";
+      });
       if (!["classCount", "address", "directorName", "phone", "email"].includes(schoolField)) markScheduleDirty();
       renderCurriculumProgress();
       renderAdminCurriculumProgress();
@@ -14771,7 +14784,6 @@
         if (!row) return;
         const classFieldName = classField.dataset.teacherClassField;
         row[classFieldName] = classFieldName === "students" ? (classField.value === "" ? "" : Number(classField.value)) : classField.value;
-        syncRosterClassesForTeacher(profileTeacher);
         scheduleAppDataSave();
         if (classFieldName === "title") {
           renderAdminCurriculumProgress();
@@ -14801,9 +14813,13 @@
       const school = profileTeacher.schools[Number(field.dataset.teacherSchoolIndex)];
       if (!school) return;
       const schoolField = field.dataset.teacherSchoolField;
+      const previousSchoolName = school.name;
       school[schoolField] = schoolField === "classCount" || schoolField === "dayOfWeek" ? (field.value === "" ? "" : Number(field.value)) : field.value;
       if (schoolField === "classCount") normalizeClassCurriculumRows(school);
-      syncRosterClassesForTeacher(profileTeacher);
+      rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === previousSchoolName).forEach((rosterClass) => {
+        if (schoolField === "name") rosterClass.schoolName = school.name;
+        if (schoolField === "dayOfWeek") rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
+      });
       scheduleAppDataSave();
       document.querySelectorAll(`[data-school-index="${field.dataset.teacherSchoolIndex}"] [data-school-field="${schoolField}"]`).forEach((match) => {
         match.value = field.value;
@@ -15192,6 +15208,9 @@
       document.getElementById("roster-edit-phone").value = student.parentPhone || "";
       document.getElementById("roster-edit-email").value = student.parentEmail || "";
       document.getElementById("roster-edit-status").value = student.status || "enrolled";
+      const assignedClassSelect = document.getElementById("roster-edit-assigned-class");
+      assignedClassSelect.innerHTML = rosterClasses.filter((item) => item.sourceActive !== false).map((item) => `<option value="${rosterSafe(item.id)}">${rosterSafe(item.schoolName)} · ${rosterSafe(item.name)}</option>`).join("");
+      assignedClassSelect.value = rosterClass.id;
       document.getElementById("roster-edit-trial-date").value = student.trialDate || "";
       document.getElementById("roster-edit-notes").value = student.notes || "";
       const overlay = document.getElementById("roster-student-edit-overlay");
@@ -15255,7 +15274,13 @@
       detail.innerHTML = `
         <div class="roster-detail-heading">
           <div><h3>${rosterSafe(selected.name)}</h3><p>${rosterSafe(selected.schoolName)}</p></div>
-          <button class="secondary" type="button" data-roster-edit-class>Edit class name</button>
+          <span class="status ok">${enrolled.length} student${enrolled.length === 1 ? "" : "s"} · ${rosterSafe(classDurationForStudents(enrolled.length) || "No duration yet")}</span>
+        </div>
+        <div class="roster-toolbar">
+          <label>Class name<input data-roster-class-setting="name" value="${rosterSafe(selected.name)}"></label>
+          <label>Age<select data-roster-class-setting="ageGroup">${optionMarkup(classAgeOptions, selected.ageGroup || "Tots")}</select></label>
+          <label>Level<select data-roster-class-setting="level">${optionMarkup(classLevelOptions, selected.level || "1")}</select></label>
+          <label>Start time<input type="time" step="900" data-roster-class-setting="time" value="${rosterSafe(selected.time || "")}"></label>
         </div>
         <div class="roster-meta">
           <span>${rosterSafe(rosterTeacherName(selected.teacherId))}</span><span>${rosterSafe(selected.day)} · ${rosterSafe(selected.time || "Time not set")}</span>
@@ -15280,7 +15305,6 @@
       if (section === "master-my-day") renderMasterMyDay();
       if (section === "school-library") renderIsdCalendars();
       if (section === "classes-rosters") {
-        syncRosterClassesForTeacher(profileTeacher);
         renderClassesAndRosters();
         scheduleAppDataSave();
       }
@@ -16149,23 +16173,66 @@
       renderClassesAndRosters();
     });
 
+    document.getElementById("admin-home-classes-rosters")?.addEventListener("change", (event) => {
+      const field = event.target.closest("[data-roster-class-setting]");
+      if (!field) return;
+      const rosterClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
+      if (!rosterClass) return;
+      const setting = field.dataset.rosterClassSetting;
+      rosterClass[setting] = field.value;
+      if (setting === "ageGroup") rosterClass.classroom = field.value;
+      const { row } = linkedSchoolClassRow(rosterClass);
+      if (row) {
+        if (setting === "name") row.title = field.value;
+        if (setting === "ageGroup") row.age = field.value;
+        if (setting === "level") row.level = field.value;
+        if (setting === "time") row.startTime = field.value;
+      }
+      renderClassesAndRosters();
+      scheduleAppDataSave();
+      showToast("Class details updated");
+    });
+
     document.addEventListener("click", (event) => {
-      const rosterShortcut = event.target.closest("[data-view-roster-source]");
+      const rosterShortcut = event.target.closest("[data-view-school-rosters]");
       if (!rosterShortcut) return;
-      syncRosterClassesForTeacher(profileTeacher);
-      const rosterClass = rosterClasses.find((item) => item.sourceKey === rosterShortcut.dataset.viewRosterSource && item.sourceActive !== false);
-      if (!rosterClass) return showToast("This roster is still being created. Please try again.");
-      selectedRosterClassId = rosterClass.id;
-      rosterSchoolFilter = "all";
-      rosterTeacherFilter = "all";
+      const schoolName = rosterShortcut.dataset.viewSchoolRosters;
+      const rosterClass = rosterClasses.find((item) => item.schoolName === schoolName && item.teacherId === profileTeacher.id && item.sourceActive !== false);
+      selectedRosterClassId = rosterClass?.id || "";
+      rosterSchoolFilter = schoolName;
+      rosterTeacherFilter = profileTeacher.id;
       rosterSearchTerm = "";
       openAdminSection("classes-rosters");
     });
 
     document.getElementById("add-roster-class")?.addEventListener("click", () => {
-      openTeacherProfile(profileTeacher.id);
-      window.setTimeout(() => document.getElementById("teacher-class-count-list")?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-      showToast("Manage class count and details under each assigned school");
+      const teacher = teachers.find((item) => item.id === (rosterTeacherFilter !== "all" ? rosterTeacherFilter : profileTeacher.id)) || profileTeacher;
+      const schoolNames = teacher.schools.map((school) => school.name);
+      const schoolName = window.prompt(`School (${schoolNames.join(", ")})`, rosterSchoolFilter !== "all" ? rosterSchoolFilter : (schoolNames[0] || ""));
+      if (!schoolName?.trim() || !schoolNames.includes(schoolName.trim())) return showToast("Choose one of this teacher’s assigned schools");
+      const school = teacher.schools.find((item) => item.name === schoolName.trim());
+      const existingCount = rosterClasses.filter((item) => item.sourceActive !== false && item.teacherId === teacher.id && item.schoolName === school.name).length;
+      const rosterClass = {
+        id: `roster-${teacher.id}-${school.name}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        name: `Class ${existingCount + 1}`,
+        ageGroup: "Tots",
+        level: "1",
+        time: "",
+        teacherId: teacher.id,
+        schoolName: school.name,
+        day: weekdayNames[school.dayOfWeek] || "To schedule",
+        capacity: 12,
+        students: [],
+        sourceActive: true
+      };
+      rosterClasses.push(rosterClass);
+      school.classCount = existingCount + 1;
+      selectedRosterClassId = rosterClass.id;
+      rosterSchoolFilter = school.name;
+      rosterTeacherFilter = teacher.id;
+      renderClassesAndRosters();
+      scheduleAppDataSave();
+      showToast("Class added. Set its name, age, level, and start time.");
     });
 
     document.getElementById("admin-home-classes-rosters")?.addEventListener("click", (event) => {
@@ -16257,20 +16324,38 @@
       const student = rosterClass?.students.find((item) => item.id === editingRosterStudentId);
       if (!student) return closeRosterStudentEditor();
       const previousCount = rosterEnrolled(rosterClass).length;
+      const targetClassId = document.getElementById("roster-edit-assigned-class").value;
+      const targetClass = rosterClasses.find((item) => item.id === targetClassId && item.sourceActive !== false) || rosterClass;
+      const targetPreviousCount = rosterEnrolled(targetClass).length;
+      const nextStatus = document.getElementById("roster-edit-status").value;
+      if (targetClass.id !== rosterClass.id && nextStatus === "enrolled" && targetPreviousCount >= targetClass.capacity) {
+        showToast(`${targetClass.name} is at capacity. Choose another class or add a new one.`);
+        return;
+      }
       student.firstName = document.getElementById("roster-edit-first-name").value.trim();
       student.lastName = document.getElementById("roster-edit-last-name").value.trim();
       student.classroom = document.getElementById("roster-edit-classroom").value.trim();
       student.birthdate = document.getElementById("roster-edit-birthdate").value;
       student.parentPhone = document.getElementById("roster-edit-phone").value.trim();
       student.parentEmail = document.getElementById("roster-edit-email").value.trim();
-      student.status = document.getElementById("roster-edit-status").value;
+      student.status = nextStatus;
       student.trialDate = document.getElementById("roster-edit-trial-date").value;
       student.notes = document.getElementById("roster-edit-notes").value.trim();
-      syncRosterCountToSource(rosterClass, { previousCount });
+      if (targetClass.id !== rosterClass.id) {
+        rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
+        targetClass.students.push(student);
+        selectedRosterClassId = targetClass.id;
+        rosterSchoolFilter = "all";
+        rosterTeacherFilter = "all";
+        syncRosterCountToSource(rosterClass, { previousCount });
+        syncRosterCountToSource(targetClass, { previousCount: targetPreviousCount });
+      } else {
+        syncRosterCountToSource(rosterClass, { previousCount });
+      }
       closeRosterStudentEditor();
       renderClassesAndRosters();
       scheduleAppDataSave();
-      showToast("Student updated");
+      showToast(targetClass.id !== rosterClass.id ? `Student moved to ${targetClass.name}` : "Student updated");
     });
 
     ["input", "change", "click", "drop"].forEach((eventName) => {
