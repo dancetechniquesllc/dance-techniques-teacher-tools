@@ -7533,13 +7533,13 @@
       background-image: url("assets/teacher-tools-sign-in-background.png");
       background-repeat: no-repeat;
       background-position: center;
-      background-size: auto 100%;
+      background-size: cover;
     }
 
     .auth-gate[hidden] { display: none; }
 
     .auth-card {
-      width: min(470px, 100%);
+      width: min(540px, 100%);
       padding: clamp(26px, 6vw, 46px);
       border: 1px solid var(--border);
       border-radius: 26px;
@@ -7572,6 +7572,7 @@
       font-size: clamp(40px, 9vw, 56px);
       font-weight: 400;
       line-height: 1;
+      white-space: nowrap;
     }
 
     .auth-card h2 { margin: 0; font-family: var(--font-display); }
