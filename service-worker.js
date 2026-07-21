@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v1-landing";
+const CACHE_NAME = "my-dance-techniques-v2-exact-logo";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -9,6 +9,7 @@ const CORE_ASSETS = [
   "./assets/dance-techniques-blush-logo.png",
   "./assets/teacher-tools-sign-in-background.png",
   "./assets/my-dance-techniques/dt-main-logo.png",
+  "./assets/my-dance-techniques/blush-logo-exact.png",
   "./assets/my-dance-techniques/floral-corner-top-left.png",
   "./assets/my-dance-techniques/ballet-shoes-top-right.png",
   "./assets/my-dance-techniques/floral-corner-bottom-left.png",
