@@ -14487,9 +14487,16 @@
       button.disabled = false;
       if (error || !data?.ok) {
         console.error("Teacher invitation could not be sent", error || data);
+        let invitationErrorMessage = data?.message || "";
+        if (!invitationErrorMessage && error?.context) {
+          try {
+            const errorPayload = await error.context.clone().json();
+            invitationErrorMessage = errorPayload?.message || "";
+          } catch (_) { /* Keep the friendly fallback below. */ }
+        }
         button.textContent = profileTeacher.inviteStatus === "Invite sent" ? "Send Invite Again" : "Send Invite Now";
         message.className = "login-invite-message error";
-        message.textContent = data?.message || "The invitation couldn’t be sent. Please try again.";
+        message.textContent = invitationErrorMessage || "The invitation couldn’t be sent. Please try again.";
         return;
       }
       profileTeacher.loginEmail = email;
