@@ -13222,6 +13222,24 @@
       cloudPersistenceSaveTimer = window.setTimeout(saveCloudAppData, 700);
     };
 
+    const isUuid = (value) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
+
+    const syncSchoolAssignmentsToDatabase = async () => {
+      const client = window.dtSupabase;
+      const profile = window.dtCurrentProfile;
+      if (!client || !profile || !["admin", "director"].includes(profile.role) || document.body.dataset.tourMode === "true") return true;
+      const desiredAssignments = schoolLibrary
+        .filter((school) => isUuid(school.id) && isUuid(school.assignedTeacherId))
+        .map((school) => ({ teacher_id: school.assignedTeacherId, partner_school_id: school.id, active: true }));
+      if (!desiredAssignments.length) return true;
+      const { error } = await client.from("teacher_school_assignments").upsert(desiredAssignments, { onConflict: "teacher_id,partner_school_id" });
+      if (error) {
+        console.error("Partner School assignments could not be synchronized", error);
+        return false;
+      }
+      return true;
+    };
+
     const saveAppData = () => {
       const payload = appDataPayload();
       const savedAt = payload.savedAt;
@@ -16195,6 +16213,9 @@
         renderTeacherProfileList();
         markAdminDashboardReview("schoolLibrary");
         saveAppData();
+        syncSchoolAssignmentsToDatabase().then((synced) => {
+          if (!synced) showToast("The school assignment is saved here, but teacher access still needs attention.");
+        });
       }
     });
 
@@ -16305,19 +16326,52 @@
       });
     });
 
-    document.getElementById("admin-photo-input")?.addEventListener("change", (event) => {
+    const appProfilePhoto = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener("error", () => reject(new Error("The photo could not be read.")));
+      reader.addEventListener("load", () => {
+        const image = new Image();
+        image.addEventListener("error", () => reject(new Error("The photo could not be opened.")));
+        image.addEventListener("load", () => {
+          const maxSide = 640;
+          const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+          const width = Math.max(1, Math.round(image.naturalWidth * scale));
+          const height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const context = canvas.getContext("2d");
+          if (!context) return reject(new Error("The photo could not be prepared."));
+          context.drawImage(image, 0, 0, width, height);
+          resolve(canvas.toDataURL("image/jpeg", .82));
+        });
+        image.src = reader.result;
+      });
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById("admin-photo-input")?.addEventListener("change", async (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        profileTeacher.photo = reader.result;
+      try {
+        profileTeacher.photo = await appProfilePhoto(file);
         renderProfileHero();
         renderTeacherProfileList();
-        markUnsavedEdits();
-        showToast("Profile photo preview updated");
-      });
-      reader.addEventListener("error", () => showToast("Photo upload did not finish"));
-      reader.readAsDataURL(file);
+        saveAppData();
+        const cloudSaved = await saveCloudAppData();
+        if (cloudSaved === true) {
+          clearUnsavedEdits();
+          showToast("Profile photo saved");
+        } else if (cloudSaved === false) {
+          markUnsavedEdits();
+          showToast("The photo is still on this device, but cloud save needs attention.");
+        } else {
+          showToast("Profile photo updated");
+        }
+      } catch (error) {
+        console.error("Profile photo upload did not finish", error);
+        showToast("Photo upload did not finish");
+      }
       event.target.value = "";
     });
 
@@ -18215,6 +18269,8 @@
         const { data: teacherStates, error: teacherStatesError } = await client.from("teacher_portal_state").select("teacher_id, payload");
         if (teacherStatesError) console.error("Teacher cloud changes could not load for the Director Dashboard", teacherStatesError);
         else (teacherStates || []).forEach((teacherState) => applyTeacherCloudData(teacherState.payload, teacherState.teacher_id, { includeMessages: false }));
+        const assignmentsSynced = await syncSchoolAssignmentsToDatabase();
+        if (!assignmentsSynced) showToast("Some teacher school assignments still need attention.");
       }
       const removedDemoContent = stripLegacyProductionDemoContent();
       if (data?.payload || isLeader || removedDemoContent) {
