@@ -10334,7 +10334,16 @@
         return teacher;
       });
       replaceCollection(teachers, liveTeachers);
-      profileTeacher = teachers.find((teacher) => teacher.id === profile.id) || teachers[0] || profileTeacher;
+      const signedInTeacher = teachers.find((teacher) => teacher.id === profile.id);
+      if (!signedInTeacher) {
+        sharedRosterReady = false;
+        replaceCollection(rosterClasses, []);
+        setSharedRosterState("error", "Your Teacher Tools profile didn’t open", "No other teacher’s information is being shown. Please sign out and try again, or contact an administrator.");
+        renderClassesAndRosters();
+        return sharedRosterError("Your signed-in profile could not be matched.", new Error(`Missing profile ${profile.id}`), { reload: false });
+      }
+      profileTeacher = signedInTeacher;
+      document.body.dataset.currentTeacherId = profileTeacher.id;
       replaceCollection(schoolLibrary, schools.map((school, index) => ({
         id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
         isd: school.district || "", directorName: school.director_name || "", phone: school.director_phone || "", email: school.director_email || "",
@@ -10367,8 +10376,9 @@
       selectedRosterClassId = rosterClasses[0]?.id || "";
       sharedRosterReady = true;
       setSharedRosterState("ready");
-      renderTeacherProfileList();
-      renderSchoolLibrary();
+      renderHomeWidget();
+      renderLexiSchedule();
+      initializeAdminProfile();
       renderClassesAndRosters();
       showToast("Shared classes and rosters are current");
     };
