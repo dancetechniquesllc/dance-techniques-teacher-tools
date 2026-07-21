@@ -2258,6 +2258,43 @@
       display: none !important;
     }
 
+    .music-playlist-section {
+      grid-column: 1 / -1;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      overflow: hidden;
+    }
+
+    .music-playlist-section summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      cursor: pointer;
+      font-weight: 780;
+      list-style: none;
+    }
+
+    .music-playlist-section summary::-webkit-details-marker { display: none; }
+    .music-playlist-section summary::after { content: "+"; color: var(--rose-gold); font-size: 19px; }
+    .music-playlist-section[open] summary::after { content: "−"; }
+
+    .music-playlist-section .playlist-grid-inner,
+    .music-playlist-grid-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+    }
+
+    .music-playlist-section .playlist-grid-inner {
+      padding: 0 10px 10px;
+    }
+
+    .music-playlist-grid-inner {
+      grid-column: 1 / -1;
+    }
+
     .playlist {
       min-height: 82px;
       padding: 12px;
@@ -2874,6 +2911,28 @@
       width: 100%;
       margin-top: 4px;
       accent-color: var(--rose-gold);
+    }
+
+    .music-now-playing {
+      display: grid;
+      grid-template-columns: minmax(88px, 132px) 1fr;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .music-now-playing-art {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid color-mix(in oklch, var(--rose-gold), white 58%);
+      box-shadow: 0 10px 24px oklch(35% 0.05 20 / 0.16);
+    }
+
+    .music-now-playing-art[hidden] { display: none; }
+
+    .music-now-playing:has(.music-now-playing-art[hidden]) {
+      grid-template-columns: 1fr;
     }
 
     .playlist.selected {
@@ -8397,10 +8456,13 @@
               <input class="search" id="music-library-search" type="search" placeholder="Search playlists or songs" aria-label="Search playlists or songs">
 
               <div class="player-slot">
-                <div>
-                  <span class="mini-label">DT Tunes</span>
-                  <p class="class-title" id="music-now-playing-title" style="color:var(--fg);font-size:21px;margin-top:8px;">Choose a song</p>
-                  <p class="subtle" id="music-now-playing-artist">Your shared Dance Techniques music library is ready.</p>
+                <div class="music-now-playing">
+                  <img class="music-now-playing-art" id="music-now-playing-art" alt="" hidden>
+                  <div>
+                    <span class="mini-label">DT Tunes</span>
+                    <p class="class-title" id="music-now-playing-title" style="color:var(--fg);font-size:21px;margin-top:8px;">Choose a song</p>
+                    <p class="subtle" id="music-now-playing-artist">Your shared Dance Techniques music library is ready.</p>
+                  </div>
                 </div>
                 <audio class="dt-tunes-audio" id="dt-tunes-audio" controls preload="none"></audio>
               </div>
@@ -17138,6 +17200,11 @@
       `).join("");
     };
 
+    const musicPlaylistMarkup = (playlists) => playlists.map((playlist) => {
+      const songCount = musicPlaylistTracks(playlist).length;
+      return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}"><strong>${escapeText(playlist.name)}</strong><small>${escapeText(playlist.category)} • ${songCount} song${songCount === 1 ? "" : "s"}</small></button>`;
+    }).join("");
+
     const renderMusicPlaylists = () => {
       const grid = document.getElementById("music-playlist-grid");
       if (!grid) return;
@@ -17152,10 +17219,20 @@
         renderMusicTrackList();
         return;
       }
-      grid.innerHTML = visible.map((playlist) => {
-        const songCount = musicPlaylistTracks(playlist).length;
-        return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}"><strong>${escapeText(playlist.name)}</strong><small>${escapeText(playlist.category)} • ${songCount} song${songCount === 1 ? "" : "s"}</small></button>`;
-      }).join("");
+      const balletPlaylists = visible.filter((playlist) => playlist.name.toLowerCase().includes("ballet"));
+      const tapPlaylists = visible.filter((playlist) => playlist.name.toLowerCase().includes("tap"));
+      const otherPlaylists = visible.filter((playlist) => !balletPlaylists.includes(playlist) && !tapPlaylists.includes(playlist));
+      const sectionMarkup = (label, playlists) => playlists.length ? `
+        <details class="music-playlist-section" ${query ? "open" : ""}>
+          <summary><span>${escapeText(label)}</span><small>${playlists.length} playlist${playlists.length === 1 ? "" : "s"}</small></summary>
+          <div class="playlist-grid-inner">${musicPlaylistMarkup(playlists)}</div>
+        </details>
+      ` : "";
+      grid.innerHTML = `
+        ${sectionMarkup("Ballet", balletPlaylists)}
+        ${sectionMarkup("Tap", tapPlaylists)}
+        ${otherPlaylists.length ? `<div class="music-playlist-grid-inner">${musicPlaylistMarkup(otherPlaylists)}</div>` : ""}
+      `;
       renderMusicTrackList();
     };
 
@@ -17167,7 +17244,7 @@
       if (grid) grid.innerHTML = `<p class="subtle">Opening your shared playlists…</p>`;
       const { data, error } = await client
         .from("music_playlists")
-        .select("id, name, category, sort_order, music_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path))")
+        .select("id, name, category, sort_order, music_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path, cover_path))")
         .eq("active", true)
         .order("sort_order");
       if (error) {
@@ -17188,6 +17265,15 @@
       if (!client || !audio || !track) return;
       setText("music-now-playing-title", track.title);
       setText("music-now-playing-artist", track.artist || "Dance Techniques");
+      const artwork = document.getElementById("music-now-playing-art");
+      const coverFilename = track.cover_path?.split("/").pop();
+      const coverUrl = coverFilename ? `assets/dt-tunes/song-covers/${encodeURIComponent(coverFilename)}` : "";
+      if (artwork) {
+        artwork.hidden = !coverUrl;
+        artwork.src = coverUrl;
+        artwork.alt = coverUrl ? `${track.title} album art` : "";
+        artwork.onerror = () => { artwork.hidden = true; };
+      }
       const { data, error } = await client.storage.from("teacher-music").createSignedUrl(track.storage_path, 3600);
       if (error || !data?.signedUrl) {
         console.error("DT Tunes song could not open", error);
@@ -17201,7 +17287,12 @@
         showToast("Press play in the music player to begin.");
       }
       if ("mediaSession" in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({ title: track.title, artist: track.artist || "Dance Techniques", album: "DT Tunes" });
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: track.title,
+          artist: track.artist || "Dance Techniques",
+          album: "DT Tunes",
+          artwork: coverUrl ? [{ src: new URL(coverUrl, window.location.href).href, sizes: "512x512", type: "image/png" }] : []
+        });
       }
     };
 
