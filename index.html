@@ -12936,10 +12936,16 @@
       };
     };
 
+    const teacherAppDataPayload = () => ({
+      savedAt: new Date().toISOString(),
+      teacher: JSON.parse(JSON.stringify(profileTeacher)),
+      messageThreads: JSON.parse(JSON.stringify(messageThreads))
+    });
+
     const saveCloudAppData = async () => {
       const client = window.dtSupabase;
       const profile = window.dtCurrentProfile;
-      if (!cloudPersistenceReady || !client || !profile || !["admin", "director"].includes(profile.role)) return null;
+      if (!cloudPersistenceReady || !client || !profile) return null;
       if (cloudPersistenceSaving) {
         cloudPersistencePending = true;
         return null;
@@ -12947,11 +12953,18 @@
       clearTimeout(cloudPersistenceSaveTimer);
       cloudPersistenceSaving = true;
       cloudPersistencePending = false;
-      const { error } = await client.from("portal_app_state").upsert({
-        id: cloudStateRecordId,
-        payload: appDataPayload({ includeRosters: false }),
-        updated_by: profile.id
-      }, { onConflict: "id" });
+      const isLeader = ["admin", "director"].includes(profile.role);
+      const cloudWrite = isLeader
+        ? client.from("portal_app_state").upsert({
+            id: cloudStateRecordId,
+            payload: appDataPayload({ includeRosters: false }),
+            updated_by: profile.id
+          }, { onConflict: "id" })
+        : client.from("teacher_portal_state").upsert({
+            teacher_id: profile.id,
+            payload: teacherAppDataPayload()
+          }, { onConflict: "teacher_id" });
+      const { error } = await cloudWrite;
       cloudPersistenceSaving = false;
       if (error) {
         console.error("Director Dashboard cloud save failed", error);
@@ -13028,6 +13041,14 @@
       replaceCollection(tempoEncouragementLibrary, persisted.tempoEncouragementLibrary);
       pendingPersistentAdminReviewFlags = persisted.adminDashboardReviewFlags || null;
       profileTeacher = teachers.find((teacher) => teacher.id === currentTeacherId) || teachers[0] || profileTeacher;
+    };
+
+    const applyTeacherCloudData = (persisted, teacherId, { includeMessages = true } = {}) => {
+      if (!persisted?.teacher || !teacherId) return;
+      const liveTeacher = teachers.find((teacher) => teacher.id === teacherId);
+      if (!liveTeacher) return;
+      Object.assign(liveTeacher, JSON.parse(JSON.stringify(persisted.teacher)), { id: teacherId });
+      if (includeMessages) replaceCollection(messageThreads, persisted.messageThreads);
     };
 
     const loadPersistedAppData = () => applyPersistedAppData(readPersistedAppData());
@@ -17829,23 +17850,30 @@
 
     const loadCloudAppData = async (profile = window.dtCurrentProfile) => {
       const client = window.dtSupabase;
-      if (!client || !profile || !["admin", "director"].includes(profile.role) || document.body.dataset.tourMode === "true") return;
+      if (!client || !profile || document.body.dataset.tourMode === "true") return;
       cloudPersistenceReady = false;
-      const { data, error } = await client
-        .from("portal_app_state")
-        .select("payload, updated_at")
-        .eq("id", cloudStateRecordId)
-        .maybeSingle();
+      const isLeader = ["admin", "director"].includes(profile.role);
+      const { data, error } = isLeader
+        ? await client.from("portal_app_state").select("payload, updated_at").eq("id", cloudStateRecordId).maybeSingle()
+        : await client.from("teacher_portal_state").select("payload, updated_at").eq("teacher_id", profile.id).maybeSingle();
       if (error) {
-        console.error("Director Dashboard cloud data could not load", error);
+        console.error("Teacher Tools cloud data could not load", error);
         showToast("Cloud sync couldn’t open. This browser copy is still available.");
         return;
       }
       if (data?.payload) {
-        applyPersistedAppData(data.payload, { mergeTeachers: true });
+        if (isLeader) applyPersistedAppData(data.payload, { mergeTeachers: true });
+        else applyTeacherCloudData(data.payload, profile.id);
+      }
+      if (isLeader) {
+        const { data: teacherStates, error: teacherStatesError } = await client.from("teacher_portal_state").select("teacher_id, payload");
+        if (teacherStatesError) console.error("Teacher cloud changes could not load for the Director Dashboard", teacherStatesError);
+        else (teacherStates || []).forEach((teacherState) => applyTeacherCloudData(teacherState.payload, teacherState.teacher_id, { includeMessages: false }));
+      }
+      if (data?.payload || isLeader) {
         renderCloudSyncedAppData();
-        document.documentElement.dataset.cloudLoadedAt = data.updated_at || "";
-        showToast("Director Dashboard synced from the cloud");
+        document.documentElement.dataset.cloudLoadedAt = data?.updated_at || "";
+        showToast(isLeader ? "Director Dashboard synced from the cloud" : "Teacher Tools synced from the cloud");
       }
       cloudPersistenceReady = true;
     };
