@@ -273,6 +273,31 @@
       outline: none;
     }
 
+    .mobile-head-actions {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-left: auto;
+    }
+
+    .teacher-sign-out {
+      min-height: 38px;
+      padding: 0 13px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: oklch(100% 0 0 / .82);
+      color: var(--fg);
+      font-size: 12px;
+      font-weight: 800;
+      box-shadow: 0 6px 14px oklch(22% 0.03 245 / .06);
+    }
+
+    .teacher-sign-out:hover,
+    .teacher-sign-out:focus-visible {
+      border-color: var(--accent-strong);
+      outline: none;
+    }
+
     .back-btn {
       width: 42px;
       height: 42px;
@@ -7753,6 +7778,11 @@
     }
 
     body[data-mode="teacher"] .admin-shell { display: none; }
+    body[data-mode="teacher"] .session-strip,
+    body[data-mode="teacher"] > .app > .topbar { display: none !important; }
+    body[data-mode="teacher"] > .app { padding-top: 0; }
+    body[data-mode="teacher"] .phone::before { display: none; }
+    body[data-mode="teacher"] .phone-screen { padding-top: 18px; }
     body[data-mode="admin"] .phone-stage { display: none; }
     body[data-mode="admin"] .workspace { grid-template-columns: 1fr; }
 
@@ -8148,7 +8178,10 @@
                     <h2>Teacher Tools</h2>
                   </div>
                 </div>
-                <button class="avatar" data-tab-jump="profile" data-profile-avatar aria-label="Open profile">T</button>
+                <div class="mobile-head-actions">
+                  <button class="teacher-sign-out" id="teacher-auth-sign-out" type="button">Sign Out</button>
+                  <button class="avatar" data-tab-jump="profile" data-profile-avatar aria-label="Open profile">T</button>
+                </div>
               </div>
 
               <button class="os-widget" data-tab-jump="my-day" aria-label="Open My Day">
@@ -17827,6 +17860,10 @@
       if (grid) grid.hidden = false;
       if (trackPanel) trackPanel.hidden = true;
       grid?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    document.getElementById("teacher-auth-sign-out")?.addEventListener("click", () => {
+      document.getElementById("auth-sign-out")?.click();
     });
 
     const renderCloudSyncedAppData = () => {
