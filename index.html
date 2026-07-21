@@ -14473,6 +14473,18 @@
         message.textContent = "Sign in as an administrator to send this invitation.";
         return;
       }
+      const { data: sessionData } = await client.auth.getSession();
+      const sessionUserId = sessionData?.session?.user?.id || "";
+      const { data: invitingProfile } = sessionUserId
+        ? await client.from("profiles").select("id, full_name, role, active").eq("id", sessionUserId).maybeSingle()
+        : { data: null };
+      if (!invitingProfile?.active || !["admin", "director"].includes(invitingProfile.role)) {
+        message.className = "login-invite-message error";
+        message.textContent = invitingProfile?.full_name
+          ? `This browser is currently signed in as ${invitingProfile.full_name} (${invitingProfile.role}). Sign out, then sign in with the Dance Techniques admin account to send invitations.`
+          : "Your admin session has ended. Sign out, then sign in with the Dance Techniques admin account.";
+        return;
+      }
       button.disabled = true;
       button.textContent = "Sending…";
       message.className = "login-invite-message";
