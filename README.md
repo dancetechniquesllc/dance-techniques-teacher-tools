@@ -19,7 +19,7 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 - Teacher profiles and school assignments
 - Partner School cards, teacher/ISD bubbles, and sorting
 - Schedule, curriculum, messages, pay-stub placeholders, and admin tools
-- Browser-local prototype saving
+- Shared Supabase-backed Classes & Rosters for signed-in accounts, with browser-local saving retained for the safe local tour and unfinished prototype sections
 - Supabase email/password sign-in with inactive-account approval gating
 - Role-aware landing: directors/admins open the Director Dashboard, while teachers open Teacher Tools without a Director Dashboard switch
 - Installable PWA manifest, offline shell, live HTTPS address, and secure password-reset/password-setup screens
@@ -28,7 +28,7 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 ## Data Safety
 
 - Teacher/profile examples use demonstration data and `.example` contacts; Partner School starter records use reviewed public business information.
-- Sign-in is connected to the live Supabase project, but roster and profile edits are still saved only in that browser's local storage until the data migration is complete.
+- Signed-in Classes & Rosters records load from and save to the live Supabase project. Other unfinished prototype sections still save only in that browser's local storage.
 - Only active Supabase profiles can open the portal. New accounts remain inactive until a director or admin approves them.
 - Do not add real passwords, payroll documents, student/parent records, or private teacher details to this folder.
 - Public Partner School starter information is checked in at `data/partner-schools.js`, with source research in `research/partner-schools/`.

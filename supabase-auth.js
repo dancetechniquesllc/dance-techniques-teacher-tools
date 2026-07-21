@@ -92,6 +92,7 @@
     });
     window.dtCurrentProfile = profile;
     setGateState("ready");
+    window.dispatchEvent(new CustomEvent("dt-auth-ready", { detail: { profile } }));
   };
 
   form?.addEventListener("submit", async (event) => {

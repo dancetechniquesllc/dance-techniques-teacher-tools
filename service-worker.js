@@ -1,9 +1,9 @@
-const CACHE_NAME = "dt-teacher-tools-v1";
+const CACHE_NAME = "dt-teacher-tools-v2-shared-rosters";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260720-published",
+  "./supabase-auth.js?v=20260720-shared-rosters",
   "./data/partner-schools.js",
   "./assets/teacher-tool-logo.png",
   "./assets/dance-techniques-blush-logo.png",

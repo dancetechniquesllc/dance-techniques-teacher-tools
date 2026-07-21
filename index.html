@@ -9864,7 +9864,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20260720-published"></script>
+  <script src="supabase-auth.js?v=20260720-shared-rosters"></script>
   <script>
     const teachers = [
       {
@@ -10150,6 +10150,151 @@
     let editingRosterStudentId = "";
     let editingRosterClassId = "";
     let pendingRosterStudentPhoto = "";
+    let sharedRosterReady = false;
+
+    const sharedRosterError = (message, error) => {
+      console.error(message, error);
+      showToast(`${message} Please try again.`);
+    };
+
+    const dbTime = (value = "") => value ? String(value).slice(0, 5) : "";
+    const uiStudentStatus = (status) => status === "enrolled" ? "enrolled" : "trial-scheduled";
+    const dbEnrollmentStatus = (status) => status === "enrolled" ? "enrolled" : "trial";
+
+    const loadSharedClassesAndRosters = async (profile = window.dtCurrentProfile) => {
+      const client = window.dtSupabase;
+      if (!client || !profile || document.body.dataset.tourMode === "true") return;
+      const [profilesResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult] = await Promise.all([
+        client.from("profiles").select("id, full_name, role, color, phone, active").eq("active", true),
+        client.from("partner_schools").select("*").eq("active", true),
+        client.from("teacher_school_assignments").select("id, teacher_id, partner_school_id, active").eq("active", true),
+        client.from("dance_classes").select("*").eq("status", "active"),
+        client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled"]),
+        client.from("student_notes").select("id, student_id, note, created_at").order("created_at", { ascending: false })
+      ]);
+      const failed = [profilesResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult].find((result) => result.error);
+      if (failed) return sharedRosterError("Shared roster data could not be loaded.", failed.error);
+
+      const profiles = profilesResult.data || [];
+      const schools = schoolsResult.data || [];
+      const assignments = assignmentsResult.data || [];
+      const classes = classesResult.data || [];
+      const notesByStudent = new Map();
+      (notesResult.data || []).forEach((note) => { if (!notesByStudent.has(note.student_id)) notesByStudent.set(note.student_id, note); });
+      const schoolById = new Map(schools.map((school) => [school.id, school]));
+      const assignmentById = new Map(assignments.map((assignment) => [assignment.id, assignment]));
+
+      const liveTeachers = profiles.map((item) => {
+        const names = item.full_name.trim().split(/\s+/);
+        const existing = teachers.find((teacher) => teacher.firstName?.toLowerCase() === names[0]?.toLowerCase());
+        const teacher = existing ? JSON.parse(JSON.stringify(existing)) : createBlankTeacherProfile();
+        teacher.id = item.id;
+        teacher.firstName = names.shift() || "Teacher";
+        teacher.lastName = names.join(" ");
+        teacher.displayName = `Ms. ${teacher.firstName}`;
+        teacher.teacherType = item.role === "teacher" ? "Teacher" : (item.role === "director" ? "Director" : "Admin");
+        teacher.phone = item.phone || teacher.phone || "";
+        teacher.schools = assignments.filter((assignment) => assignment.teacher_id === item.id).map((assignment) => {
+          const school = schoolById.get(assignment.partner_school_id) || {};
+          return {
+            id: school.id, assignmentId: assignment.id, name: school.name || "Partner School", nickname: school.nickname || school.name,
+            dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", isd: school.district || "", seasonStartDate: school.season_start_date || "",
+            address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "), directorName: school.director_name || "",
+            phone: school.director_phone || "", email: school.director_email || "", color: item.color || ""
+          };
+        });
+        return teacher;
+      });
+      replaceCollection(teachers, liveTeachers);
+      profileTeacher = teachers.find((teacher) => teacher.id === profile.id) || teachers[0] || profileTeacher;
+      replaceCollection(schoolLibrary, schools.map((school, index) => ({
+        id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
+        isd: school.district || "", directorName: school.director_name || "", phone: school.director_phone || "", email: school.director_email || "",
+        dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", seasonStartDate: school.season_start_date || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
+      })));
+      const enrollments = enrollmentsResult.data || [];
+      const liveRosterClasses = classes.map((item) => {
+        const assignment = assignmentById.get(item.teacher_school_assignment_id);
+        const school = schoolById.get(assignment?.partner_school_id) || {};
+        return {
+          id: item.id, assignmentId: item.teacher_school_assignment_id, name: item.name, ageGroup: item.age_group, level: String(item.level),
+          time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", schoolName: school.name || "Partner School",
+          day: weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
+          students: enrollments.filter((enrollment) => enrollment.dance_class_id === item.id).map((enrollment) => {
+            const student = enrollment.students || {};
+            const note = notesByStudent.get(student.id);
+            return { id: student.id, enrollmentId: enrollment.id, noteId: note?.id || "", firstName: student.first_name, lastName: student.last_name,
+              birthdate: student.birth_date, gender: student.gender === "male" ? "male" : "female", classroom: item.classroom || "",
+              status: uiStudentStatus(enrollment.status), trialDate: enrollment.trial_date || "", parentPhone: student.parent_phone || "",
+              parentEmail: student.parent_email || "", notes: note?.note || "", photoPath: student.photo_path || "", photo: "" };
+          })
+        };
+      });
+      const photoStudents = liveRosterClasses.flatMap((rosterClass) => rosterClass.students).filter((student) => student.photoPath);
+      await Promise.all(photoStudents.map(async (student) => {
+        const { data } = await client.storage.from("student-photos").createSignedUrl(student.photoPath, 3600);
+        student.photo = data?.signedUrl || "";
+      }));
+      replaceCollection(rosterClasses, liveRosterClasses);
+      selectedRosterClassId = rosterClasses[0]?.id || "";
+      sharedRosterReady = true;
+      renderTeacherProfileList();
+      renderSchoolLibrary();
+      renderClassesAndRosters();
+      showToast("Shared classes and rosters are current");
+    };
+
+    const saveSharedClass = async (rosterClass) => {
+      if (!sharedRosterReady || !window.dtSupabase) return;
+      if (rosterClass.sharedSavePending) return rosterClass.sharedSavePending;
+      const payload = { teacher_school_assignment_id: rosterClass.assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active" };
+      const oldId = rosterClass.id;
+      rosterClass.sharedSavePending = (async () => {
+        const query = oldId?.startsWith("roster-") ? window.dtSupabase.from("dance_classes").insert(payload) : window.dtSupabase.from("dance_classes").update(payload).eq("id", oldId);
+        const { data, error } = await query.select("id").single();
+        if (error) return sharedRosterError("The class change was not shared.", error);
+        rosterClass.id = data.id;
+        if (selectedRosterClassId === oldId) selectedRosterClassId = data.id;
+      })();
+      await rosterClass.sharedSavePending;
+      delete rosterClass.sharedSavePending;
+    };
+
+    const saveSharedStudent = async (student, rosterClass) => {
+      if (!sharedRosterReady || !window.dtSupabase) return;
+      if (rosterClass.sharedSavePending) await rosterClass.sharedSavePending;
+      if (!student.birthdate) return sharedRosterError("A birthdate is required before this dancer can be shared.", new Error("Missing birthdate"));
+      const studentPayload = { first_name: student.firstName, last_name: student.lastName, birth_date: student.birthdate, gender: student.gender === "male" ? "male" : "female", parent_phone: student.parentPhone || null, parent_email: student.parentEmail || null };
+      let studentId = student.id;
+      if (!student.enrollmentId) {
+        const { data, error } = await window.dtSupabase.from("students").insert(studentPayload).select("id").single();
+        if (error) return sharedRosterError("The dancer was not shared.", error);
+        studentId = data.id;
+        student.id = studentId;
+        const enrollment = await window.dtSupabase.from("class_enrollments").insert({ dance_class_id: rosterClass.id, student_id: studentId, status: dbEnrollmentStatus(student.status), trial_date: student.trialDate || null }).select("id").single();
+        if (enrollment.error) return sharedRosterError("The class enrollment was not shared.", enrollment.error);
+        student.enrollmentId = enrollment.data.id;
+      } else {
+        const updated = await window.dtSupabase.from("students").update(studentPayload).eq("id", studentId);
+        if (updated.error) return sharedRosterError("The dancer change was not shared.", updated.error);
+        const enrollment = await window.dtSupabase.from("class_enrollments").update({ dance_class_id: rosterClass.id, status: dbEnrollmentStatus(student.status), trial_date: student.trialDate || null }).eq("id", student.enrollmentId);
+        if (enrollment.error) return sharedRosterError("The class enrollment was not shared.", enrollment.error);
+      }
+      if (student.notes) {
+        const noteQuery = student.noteId ? window.dtSupabase.from("student_notes").update({ note: student.notes }).eq("id", student.noteId) : window.dtSupabase.from("student_notes").insert({ student_id: studentId, note: student.notes });
+        const noteResult = await noteQuery.select("id").single();
+        if (!noteResult.error) student.noteId = noteResult.data.id;
+      }
+      if (student.photo?.startsWith("data:image/")) {
+        const photoPath = `${studentId}/${Date.now()}.jpg`;
+        const photoBlob = await fetch(student.photo).then((response) => response.blob());
+        const upload = await window.dtSupabase.storage.from("student-photos").upload(photoPath, photoBlob, { contentType: "image/jpeg", upsert: false });
+        if (upload.error) return sharedRosterError("The dancer details were shared, but the photo was not uploaded.", upload.error);
+        const photoUpdate = await window.dtSupabase.from("students").update({ photo_path: photoPath }).eq("id", studentId);
+        if (photoUpdate.error) return sharedRosterError("The photo uploaded, but could not be attached to the dancer.", photoUpdate.error);
+        student.photoPath = photoPath;
+      }
+    };
 
     const icons = {
       active: "Active",
@@ -16542,6 +16687,7 @@
       }
       renderClassesAndRosters();
       scheduleAppDataSave();
+      saveSharedClass(rosterClass);
       showToast("Class details updated");
     });
 
@@ -16570,6 +16716,7 @@
         ageGroup: "Tots",
         level: "1",
         time: "",
+        assignmentId: school.assignmentId || "",
         teacherId: teacher.id,
         schoolName: school.name,
         day: weekdayNames[school.dayOfWeek] || "To schedule",
@@ -16584,6 +16731,7 @@
       rosterTeacherFilter = teacher.id;
       renderClassesAndRosters();
       scheduleAppDataSave();
+      saveSharedClass(rosterClass);
       showToast("Class added. Set its name, age, level, and start time.");
     });
 
@@ -16613,6 +16761,7 @@
         syncRosterCountToSource(rosterClass, { previousCount });
         renderClassesAndRosters();
         scheduleAppDataSave();
+        saveSharedStudent(student, rosterClass);
         showToast(`${student.firstName} approved as an enrolled student`);
         return;
       }
@@ -16632,7 +16781,7 @@
         if (parentEmail === null) return;
         const notes = window.prompt(prospective ? "Future dancer notes or follow-up needed" : "Dancer notes", "");
         if (notes === null) return;
-        rosterClass.students.push({
+        const newStudent = {
           id: `${firstName}-${lastName || Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
           firstName: firstName.trim(),
           lastName: lastName?.trim() || "",
@@ -16645,10 +16794,12 @@
           notes: notes.trim(),
           gender: "female",
           photo: ""
-        });
+        };
+        rosterClass.students.push(newStudent);
         syncRosterCountToSource(rosterClass, { previousCount });
         renderClassesAndRosters();
         scheduleAppDataSave();
+        saveSharedStudent(newStudent, rosterClass);
         showToast(prospective ? "Future dancer added" : "Dancer added");
         return;
       }
@@ -16738,6 +16889,7 @@
       closeRosterStudentEditor();
       renderClassesAndRosters();
       scheduleAppDataSave();
+      saveSharedStudent(student, targetClass);
       showToast(targetClass.id !== rosterClass.id ? `Student moved to ${targetClass.name}` : "Student updated");
     });
 
@@ -16761,6 +16913,8 @@
     });
 
     window.addEventListener("beforeunload", saveAppData);
+    window.addEventListener("dt-auth-ready", (event) => loadSharedClassesAndRosters(event.detail?.profile));
+    if (window.dtCurrentProfile) loadSharedClassesAndRosters(window.dtCurrentProfile);
     saveAppData();
 
     renderCurriculumWeekList();
