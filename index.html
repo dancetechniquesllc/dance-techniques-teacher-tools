@@ -694,6 +694,20 @@
       line-height: 1.15;
     }
 
+    .my-day-playlist-select {
+      width: min(100%, 330px);
+      min-height: 34px;
+      margin-top: 4px;
+      padding: 5px 31px 5px 9px;
+      border: 1px solid #aebaa6;
+      border-radius: 7px;
+      background-color: rgb(255 255 255 / 0.76);
+      color: #34402f;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
     .my-day-music-button {
       width: 40px;
       height: 40px;
@@ -8264,7 +8278,10 @@
 	                      <div class="my-day-music-top">
 	                        <span>
 	                          <small>DT Tunes</small>
-	                          <strong data-my-day-music-title>Choose a playlist in Music</strong>
+	                          <select class="my-day-playlist-select" data-my-day-playlist-select aria-label="Choose a DT Tunes playlist">
+	                            <option value="">Choose a playlist</option>
+	                          </select>
+	                          <strong data-my-day-music-title>Ready when you are</strong>
 	                        </span>
 	                        <button class="my-day-music-button" type="button" data-my-day-music-toggle aria-label="Play or pause DT Tunes">▶</button>
 	                      </div>
@@ -13883,7 +13900,10 @@
         <div class="my-day-music-top">
           <span>
             <small>DT Tunes</small>
-            <strong data-my-day-music-title>Choose a playlist in Music</strong>
+            <select class="my-day-playlist-select" data-my-day-playlist-select aria-label="Choose a DT Tunes playlist">
+              <option value="">Choose a playlist</option>
+            </select>
+            <strong data-my-day-music-title>Ready when you are</strong>
           </span>
           <button class="my-day-music-button" type="button" data-my-day-music-toggle aria-label="Play or pause DT Tunes">▶</button>
         </div>
@@ -17550,11 +17570,22 @@
       const audio = document.getElementById("dt-tunes-audio");
       const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
       const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === musicLibraryState.currentTrackId);
-      const title = track?.title || playlist?.name || "Choose a playlist in Music";
+      const title = track?.title || (playlist ? `${musicPlaylistTracks(playlist).length} songs ready` : "Ready when you are");
       const isPlaying = Boolean(audio && !audio.paused && !audio.ended && audio.src);
       const duration = Number.isFinite(audio?.duration) ? audio.duration : Number(track?.duration_seconds || 0);
       const progress = duration > 0 ? Math.min(100, (Number(audio?.currentTime || 0) / duration) * 100) : 0;
       document.querySelectorAll("[data-my-day-music-title]").forEach((element) => { element.textContent = title; });
+      const playlistOptions = musicLibraryState.playlists
+        .map((item) => `<option value="${escapeText(item.id)}">${escapeText(item.name)}</option>`)
+        .join("");
+      const playlistSignature = musicLibraryState.playlists.map((item) => `${item.id}:${item.name}`).join("|");
+      document.querySelectorAll("[data-my-day-playlist-select]").forEach((select) => {
+        if (select.dataset.playlistSignature !== playlistSignature) {
+          select.innerHTML = `<option value="">Choose a playlist</option>${playlistOptions}`;
+          select.dataset.playlistSignature = playlistSignature;
+        }
+        select.value = musicLibraryState.selectedPlaylistId;
+      });
       document.querySelectorAll("[data-my-day-music-toggle]").forEach((button) => {
         button.textContent = isPlaying ? "❚❚" : "▶";
         button.setAttribute("aria-label", isPlaying ? "Pause DT Tunes" : "Play DT Tunes");
@@ -17683,6 +17714,25 @@
         return;
       }
       if (event.target.closest("[data-my-day-music-repeat]")) toggleMusicRepeat();
+    });
+
+    document.addEventListener("change", (event) => {
+      const playlistSelect = event.target.closest("[data-my-day-playlist-select]");
+      if (!playlistSelect) return;
+      const audio = document.getElementById("dt-tunes-audio");
+      musicLibraryState.selectedPlaylistId = playlistSelect.value;
+      musicLibraryState.currentTrackId = "";
+      if (audio) {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      }
+      const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+      setText("music-now-playing-title", playlist?.name || "Choose a song");
+      setText("music-now-playing-artist", playlist ? `${musicPlaylistTracks(playlist).length} songs ready` : "Your shared Dance Techniques music library is ready.");
+      renderMusicPlaylists();
+      updateMyDayMusicPlayer();
+      if (playlist) showToast(`${playlist.name} is ready to play.`);
     });
 
     document.getElementById("music-back-to-playlists")?.addEventListener("click", () => {
