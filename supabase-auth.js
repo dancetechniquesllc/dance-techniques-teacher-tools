@@ -15,7 +15,11 @@
   const resetMessage = document.getElementById("auth-reset-message");
   const resetSubmit = document.getElementById("auth-reset-submit");
   const passwordMessage = document.getElementById("auth-password-message");
-  let passwordRecoveryMode = false;
+  const authQuery = new URLSearchParams(window.location.search);
+  const authHash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  let passwordRecoveryMode = authQuery.get("password-recovery") === "1"
+    || authQuery.has("code")
+    || authHash.get("type") === "recovery";
   const isLocalTour = ["127.0.0.1", "localhost"].includes(window.location.hostname)
     && new URLSearchParams(window.location.search).get("tour") === "1";
 
@@ -154,7 +158,7 @@
     resetMessage.textContent = "";
     resetSubmit.disabled = true;
     resetSubmit.textContent = "Sending…";
-    const redirectTo = `${window.location.origin}${window.location.pathname}`;
+    const redirectTo = `${window.location.origin}${window.location.pathname}?password-recovery=1`;
     const { error } = await client.auth.resetPasswordForEmail(resetEmailInput.value.trim(), { redirectTo });
     resetSubmit.disabled = false;
     resetSubmit.textContent = "Send Reset Link";
