@@ -17381,8 +17381,22 @@
           album: "DT Tunes",
           artwork: coverUrl ? [{ src: new URL(coverUrl, window.location.href).href, sizes: "512x512", type: "image/png" }] : []
         });
-        navigator.mediaSession.setActionHandler("previoustrack", () => playAdjacentMusicTrack(-1));
-        navigator.mediaSession.setActionHandler("nexttrack", () => playAdjacentMusicTrack(1));
+        const registerMediaAction = (action, handler) => {
+          try { navigator.mediaSession.setActionHandler(action, handler); } catch (_) { /* Unsupported by this iPhone version. */ }
+        };
+        registerMediaAction("play", () => audio.play());
+        registerMediaAction("pause", () => audio.pause());
+        registerMediaAction("previoustrack", () => playAdjacentMusicTrack(-1));
+        registerMediaAction("nexttrack", () => playAdjacentMusicTrack(1));
+        registerMediaAction("seekbackward", (details) => {
+          audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset || 15));
+        });
+        registerMediaAction("seekforward", (details) => {
+          audio.currentTime = Math.min(audio.duration || audio.currentTime, audio.currentTime + (details.seekOffset || 15));
+        });
+        registerMediaAction("seekto", (details) => {
+          if (Number.isFinite(details.seekTime)) audio.currentTime = details.seekTime;
+        });
       }
     };
 
@@ -17414,7 +17428,33 @@
       showToast(musicLibraryState.repeatCurrentTrack ? "This song will repeat." : "Playlist play will continue normally.");
     };
 
-    document.getElementById("dt-tunes-audio")?.addEventListener("ended", () => {
+    const dtTunesAudio = document.getElementById("dt-tunes-audio");
+
+    const updateMusicMediaPosition = () => {
+      if (!("mediaSession" in navigator) || !dtTunesAudio || !Number.isFinite(dtTunesAudio.duration) || dtTunesAudio.duration <= 0) return;
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: dtTunesAudio.duration,
+          playbackRate: dtTunesAudio.playbackRate,
+          position: Math.min(dtTunesAudio.currentTime, dtTunesAudio.duration)
+        });
+      } catch (_) { /* Position controls are not available on every iPhone version. */ }
+    };
+
+    dtTunesAudio?.addEventListener("play", () => {
+      if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
+      updateMusicMediaPosition();
+    });
+
+    dtTunesAudio?.addEventListener("pause", () => {
+      if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
+      updateMusicMediaPosition();
+    });
+
+    dtTunesAudio?.addEventListener("timeupdate", updateMusicMediaPosition);
+    dtTunesAudio?.addEventListener("durationchange", updateMusicMediaPosition);
+
+    dtTunesAudio?.addEventListener("ended", () => {
       if (!musicLibraryState.repeatCurrentTrack) playAdjacentMusicTrack(1, { automatic: true });
     });
 
