@@ -10360,7 +10360,8 @@
         teacher.id = item.id;
         teacher.firstName = names.shift() || "Teacher";
         teacher.lastName = names.join(" ");
-        teacher.displayName = `Ms. ${teacher.firstName}`;
+        const isCompanyProfile = item.full_name.trim().toLowerCase() === "dance techniques";
+        teacher.displayName = item.role === "admin" || isCompanyProfile ? item.full_name.trim() : `Ms. ${teacher.firstName}`;
         teacher.teacherType = item.role === "teacher" ? "Teacher" : (item.role === "director" ? "Director" : "Admin");
         teacher.phone = item.phone || teacher.phone || "";
         teacher.schools = assignments.filter((assignment) => assignment.teacher_id === item.id).map((assignment) => {
