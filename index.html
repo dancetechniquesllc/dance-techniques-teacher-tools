@@ -5972,7 +5972,54 @@
     }
 
     .admin-section-nav {
-      min-width: 190px;
+      width: auto;
+      min-width: 0;
+      max-width: 100%;
+    }
+
+    .admin-section-page > .admin-card-header {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "actions" "heading";
+      gap: 14px;
+      text-align: center;
+    }
+
+    .admin-section-page > .admin-card-header > div:first-child {
+      grid-area: heading;
+      width: 100%;
+    }
+
+    .admin-section-page > .admin-card-header > .admin-page-actions {
+      grid-area: actions;
+      justify-self: end;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .admin-section-page > .admin-card-header [data-admin-tools-home] {
+      order: -1;
+      font-size: 0;
+      white-space: nowrap;
+    }
+
+    .admin-section-page > .admin-card-header [data-admin-tools-home]::before {
+      content: "\2190  DD";
+      font-size: 12px;
+    }
+
+    .school-library-directory-toolbar {
+      display: flex;
+      align-items: end;
+      justify-content: flex-end;
+      gap: 10px;
+      margin: 12px 0;
+      flex-wrap: wrap;
+    }
+
+    .roster-toolbar > #add-roster-class {
+      align-self: end;
+      flex: 0 0 auto;
+      white-space: nowrap;
     }
 
     .master-my-day-list,
@@ -6569,7 +6616,7 @@
 
     .school-library-tools {
       display: grid;
-      gap: 12px;
+      gap: 8px;
       margin-bottom: 12px;
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -6580,9 +6627,9 @@
     .school-library-tools > summary {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto auto;
-      gap: 10px;
-      align-items: start;
-      padding: 12px;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px;
       cursor: pointer;
       list-style: none;
     }
@@ -6595,21 +6642,37 @@
       content: "+";
       display: grid;
       place-items: center;
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       grid-column: -1;
       justify-self: end;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: white;
       color: var(--rose);
-      font-size: 17px;
+      font-size: 14px;
       font-weight: 900;
       line-height: 1;
     }
 
     .school-library-tools[open] > summary::after {
       content: "-";
+    }
+
+    .school-library-tools > summary h3 {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.1;
+    }
+
+    .school-library-tools:not([open]) > summary p {
+      display: none;
+    }
+
+    .school-library-tools > summary .status {
+      min-height: 20px;
+      padding: 2px 7px;
+      font-size: 10px;
     }
 
     .school-library-tools-body {
@@ -6672,6 +6735,14 @@
       align-items: center;
       justify-content: end;
       flex-wrap: wrap;
+    }
+
+    .isd-calendar-actions > :is(button, .secondary, .danger-btn) {
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: 7px;
+      font-size: 11px;
+      line-height: 1;
     }
 
     .hint-text {
@@ -7773,6 +7844,25 @@
       .admin-tool-grid {
         grid-template-columns: 1fr;
       }
+      .admin-section-page > .admin-card-header > .admin-page-actions {
+        display: flex;
+        width: 100%;
+        justify-self: stretch;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+      }
+      .admin-section-page > .admin-card-header > .admin-page-actions > :is(select, button) {
+        min-width: 0;
+      }
+      .admin-section-page > .admin-card-header > .admin-page-actions > .admin-section-nav {
+        width: auto;
+        max-width: calc(100% - 72px);
+      }
+      .school-library-directory-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: end;
+      }
       .toolbar .search { max-width: none; }
       .field-pair, .form-actions { grid-template-columns: 1fr; }
       .profile-mini-grid { grid-template-columns: 1fr; }
@@ -8015,6 +8105,8 @@
     }
 
     body[data-authenticated="true"] .session-strip { display: flex; }
+    body[data-authenticated="true"] .topbar .brand { display: none; }
+    body[data-authenticated="true"] .topbar { justify-content: flex-end; }
     body[data-authenticated="true"]:not([data-tour-mode="true"]) .switcher { display: none; }
     body[data-authenticated="true"]:not([data-tour-mode="true"]) .topbar { display: none; }
     body[data-user-role="teacher"] [data-mode-btn="admin"] { display: none; }
@@ -8981,15 +9073,6 @@
                   <option value="messages">Messages</option>
                 </select>
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
-                <label class="school-library-sort-control">Sort
-                  <select id="school-library-sort" aria-label="Sort partner schools">
-                    <option value="name">Alphabetical</option>
-                    <option value="isd">ISD</option>
-                    <option value="day">Day of Week</option>
-                    <option value="teacher">Teacher</option>
-                  </select>
-                </label>
-                <button class="primary" type="button" id="add-library-school">Add School</button>
               </span>
             </div>
             <details class="school-library-tools">
@@ -9006,7 +9089,7 @@
                     <select id="isd-calendar-isd"></select>
                   </label>
                   <label>Direct link
-                    <input id="isd-calendar-url" type="url" placeholder="https://district.org/calendar">
+                    <input id="isd-calendar-url" type="url">
                   </label>
                   <label>PDF upload
                     <input id="isd-calendar-file" type="file" accept="application/pdf,image/*">
@@ -9016,6 +9099,17 @@
                 <div class="isd-calendar-list" id="isd-calendar-list"></div>
               </div>
             </details>
+            <div class="school-library-directory-toolbar">
+              <label class="school-library-sort-control">Sort
+                <select id="school-library-sort" aria-label="Sort partner schools">
+                  <option value="name">Alphabetical</option>
+                  <option value="isd">ISD</option>
+                  <option value="day">Day of Week</option>
+                  <option value="teacher">Teacher</option>
+                </select>
+              </label>
+              <button class="primary" type="button" id="add-library-school">Add School</button>
+            </div>
             <div class="school-library-list" id="admin-school-library-list" aria-label="Admin school library"></div>
           </section>
 
@@ -9038,12 +9132,12 @@
                   <option value="curriculum">Curriculum Composer</option>
                 </select>
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
-                <button class="primary" type="button" id="add-roster-class">Create a Class</button>
               </span>
             </div>
             <div class="roster-shared-state" id="roster-shared-state" role="status" aria-live="polite"></div>
             <div class="roster-summary-grid" id="admin-roster-summary"></div>
             <div class="roster-toolbar">
+              <button class="primary" type="button" id="add-roster-class">Create a Class</button>
               <label>Partner School
                 <select id="roster-school-filter"><option value="all">All partner schools</option></select>
               </label>
@@ -9078,12 +9172,11 @@
                   <option value="messages">Messages</option>
                 </select>
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
-                <button class="primary" type="button" data-add-teacher-profile>Add teacher</button>
               </span>
             </div>
             <div class="teacher-list-toolbar">
               <div>
-                <strong>Teacher directory</strong>
+                <strong>Teacher Directory</strong>
                 <small>Create a teacher profile first, then fill in contact, login, and school details.</small>
               </div>
               <button class="primary" type="button" data-add-teacher-profile>Add teacher</button>
@@ -10669,7 +10762,9 @@
       replaceCollection(schoolLibrary, schools.map((school, index) => ({
         id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
         isd: school.district || "", directorName: school.director_name || "", phone: school.director_phone || "", email: school.director_email || "",
-        dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", seasonStartDate: school.season_start_date || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
+        dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", seasonStartDate: school.season_start_date || "",
+        assignedTeacherId: assignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id || "",
+        color: partnerSchoolColors[index % partnerSchoolColors.length]
       })));
       const enrollments = enrollmentsResult.data || [];
       const liveRosterClasses = classes.map((item) => {
@@ -13162,11 +13257,13 @@
     const applyPersistedAppData = (persisted, { mergeTeachers = false } = {}) => {
       if (!persisted) return;
       const currentTeacherId = persisted.currentTeacherId || profileTeacher?.id || "lexi";
+      const persistedTeacherIdMap = new Map();
       if (Array.isArray(persisted.teachers)) {
         if (mergeTeachers) {
           const mergedTeachers = teachers.map((liveTeacher) => {
             const savedTeacher = persisted.teachers.find((teacher) => teacher.id === liveTeacher.id)
               || persisted.teachers.find((teacher) => teacher.firstName?.trim().toLowerCase() === liveTeacher.firstName?.trim().toLowerCase());
+            if (savedTeacher?.id) persistedTeacherIdMap.set(savedTeacher.id, liveTeacher.id);
             return savedTeacher ? {
               ...JSON.parse(JSON.stringify(savedTeacher)),
               id: liveTeacher.id,
@@ -13184,6 +13281,11 @@
         }
       }
       replaceCollection(schoolLibrary, persisted.schoolLibrary);
+      schoolLibrary.forEach((school) => {
+        if (persistedTeacherIdMap.has(school.assignedTeacherId)) {
+          school.assignedTeacherId = persistedTeacherIdMap.get(school.assignedTeacherId);
+        }
+      });
       replaceCollection(rosterClasses, persisted.rosterClasses);
       replaceCollection(messageThreads, persisted.messageThreads);
       replaceCollection(isdCalendars, persisted.isdCalendars);
@@ -13253,23 +13355,26 @@
     let messageActivitySequence = Math.max(...messageThreads.map((thread) => thread.activityOrder || 0));
     let curriculumStyleFilter = "all";
 
-    const curriculumWeekStatus = (week) => {
+    const curriculumWeekCompleteForAllSchools = (week) => {
       const schoolCount = profileTeacher.schools.length;
-      const completedRecords = profileTeacher.curriculum.filter((item) => (
+      if (!schoolCount) return false;
+      const completedSchoolNames = new Set(profileTeacher.curriculum.filter((item) => (
         item.curriculumWeek === `Week ${week.week}` &&
         item.curriculumType === week.style &&
         item.completed
-      ));
-      if (schoolCount > 0 && completedRecords.length >= schoolCount) {
+      )).map((item) => item.schoolName));
+      return completedSchoolNames.size >= schoolCount;
+    };
+
+    const curriculumWeekStatus = (week) => {
+      if (curriculumWeekCompleteForAllSchools(week)) {
         return { label: "Complete", className: "complete" };
       }
       const currentWeekNumber = Number(currentTeachingEvent()?.week) || 1;
       if (week.week === currentWeekNumber) return { label: "Now", className: "ok" };
-      const nextWeek = curriculumDatabase.weeks.find((candidate) => candidate.week > currentWeekNumber && !profileTeacher.curriculum.some((item) => (
-        item.curriculumWeek === `Week ${candidate.week}` &&
-        item.curriculumType === candidate.style &&
-        item.completed
-      )));
+      const nextWeek = curriculumDatabase.weeks.find((candidate) => (
+        candidate.week > currentWeekNumber && !curriculumWeekCompleteForAllSchools(candidate)
+      ));
       if (nextWeek?.id === week.id) return { label: "Next", className: "pending" };
       return { label: "", className: "" };
     };
@@ -13312,7 +13417,44 @@
       return "private";
     };
     const fullName = (teacher) => `${teacher.firstName} ${teacher.lastName}`.trim();
+    const repairTeacherNickname = (teacher) => {
+      if (!teacher) return teacher;
+      const nickname = String(teacher.displayName || "").trim().toLowerCase();
+      const firstName = String(teacher.firstName || "").trim();
+      const isCompanyProfile = fullName(teacher).toLowerCase() === "dance techniques";
+      if (!isCompanyProfile && firstName && (!nickname || nickname === "ms. new")) {
+        teacher.displayName = `Ms. ${firstName}`;
+      }
+      return teacher;
+    };
+    teachers.forEach(repairTeacherNickname);
     const teacherNickname = (teacher) => teacher?.displayName?.trim() || teacher?.firstName?.trim() || fullName(teacher || {}) || "Teacher";
+
+    const syncTeachingTeamSchools = () => {
+      if (!schoolLibrary.some((school) => Object.prototype.hasOwnProperty.call(school, "assignedTeacherId"))) return;
+      teachers.forEach((teacher) => {
+        const existingById = new Map((teacher.schools || []).map((school) => [String(school.id || school.name), school]));
+        teacher.schools = schoolLibrary
+          .filter((school) => school.assignedTeacherId === teacher.id)
+          .map((school) => ({
+            ...(existingById.get(String(school.id || school.name)) || {}),
+            id: school.id || "",
+            name: school.name || "Partner School",
+            nickname: school.nickname || school.name || "Partner School",
+            classCount: school.classCount || "",
+            dayOfWeek: school.dayOfWeek,
+            timeBlock: school.timeBlock || "AM",
+            isd: school.isd || "",
+            seasonStartDate: school.seasonStartDate || "",
+            address: school.address || "",
+            directorName: school.directorName || "",
+            phone: school.phone || "",
+            email: school.email || "",
+            importantNotes: school.importantNotes || "",
+            color: school.color || ""
+          }));
+      });
+    };
     const initialsFor = (teacher) => `${teacher.firstName?.[0] || ""}${teacher.lastName?.[0] || ""}`.toUpperCase() || "T";
     const inviteSlugFor = (teacher) => `${teacher.id || fullName(teacher)}`.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     const inviteLinkFor = (teacher) => {
@@ -13382,7 +13524,8 @@
     };
     const refreshIsdSelectOptions = (activeField, activeValue = "") => {
       document.querySelectorAll('select[data-school-field="isd"], select[data-school-library-field="isd"], #isd-calendar-isd').forEach((select) => {
-        select.innerHTML = isdOptionMarkup(select === activeField ? activeValue : select.value);
+        const markup = isdOptionMarkup(select === activeField ? activeValue : select.value);
+        select.innerHTML = select.id === "isd-calendar-isd" ? markup.replace(">ISD</option>", "></option>") : markup;
       });
     };
 
@@ -14589,6 +14732,8 @@
     const renderTeacherProfileList = () => {
       const list = document.getElementById("admin-teacher-profile-list");
       const teachingTeam = teachers.filter((teacher) => (teacher.displayName || fullName(teacher)).trim().toLowerCase() !== "dance techniques");
+      teachingTeam.forEach(repairTeacherNickname);
+      syncTeachingTeamSchools();
       const activeTeacherCount = teachingTeam.filter((teacher) => teacher.status === "active").length;
       const shortcutCount = document.getElementById("admin-teacher-profiles-count");
       if (shortcutCount) shortcutCount.textContent = `${activeTeacherCount} Active Teacher${activeTeacherCount === 1 ? "" : "s"}`;
@@ -15091,7 +15236,7 @@
     const renderIsdCalendars = () => {
       const select = document.getElementById("isd-calendar-isd");
       if (select && !select.innerHTML) {
-        select.innerHTML = isdOptionMarkup(select.value || isdOptions[0]);
+        select.innerHTML = isdOptionMarkup("").replace(">ISD</option>", "></option>");
       }
       const list = document.getElementById("isd-calendar-list");
       if (!list) return;
@@ -15116,11 +15261,16 @@
     const saveIsdCalendar = () => {
       const isdSelect = document.getElementById("isd-calendar-isd");
       if (maybeAddNewIsd(isdSelect)) return;
-      const isd = isdSelect?.value || isdOptions[0];
+      const isd = isdSelect?.value || "";
       const urlInput = document.getElementById("isd-calendar-url");
       const fileInput = document.getElementById("isd-calendar-file");
       const file = fileInput?.files?.[0];
       const url = urlInput?.value.trim() || "";
+      if (!isd) {
+        showToast("Choose an ISD first");
+        isdSelect?.focus();
+        return;
+      }
       if (!url && !file) {
         showToast("Add a calendar link or PDF first");
         return;
@@ -15134,6 +15284,7 @@
       });
       if (urlInput) urlInput.value = "";
       if (fileInput) fileInput.value = "";
+      if (isdSelect) isdSelect.value = "";
       renderIsdCalendars();
       clearUnsavedEdits();
       showToast(`${isd} calendar saved`);
@@ -15836,6 +15987,9 @@
       if (!field) return;
       const key = field.dataset.profileField;
       profileTeacher[key] = field.value;
+      if (key === "firstName" && String(profileTeacher.displayName || "").trim().toLowerCase() === "ms. new") {
+        profileTeacher.displayName = field.value.trim() ? `Ms. ${field.value.trim()}` : "";
+      }
       if (key === "email" && !profileTeacher.loginEmail) {
         profileTeacher.loginEmail = field.value;
         document.querySelectorAll('[data-profile-field="loginEmail"]').forEach((match) => {
@@ -16021,6 +16175,10 @@
       if (!school) return;
       if (field.dataset.schoolLibraryField === "isd" && maybeAddNewIsd(field)) return;
       school[field.dataset.schoolLibraryField] = schoolLibraryFieldValue(field);
+      if (field.dataset.schoolLibraryField === "assignedTeacherId") {
+        syncTeachingTeamSchools();
+        renderTeacherProfileList();
+      }
     });
 
     document.getElementById("admin-school-library-list")?.addEventListener("change", (event) => {
@@ -16032,6 +16190,12 @@
       if (field.dataset.schoolLibraryField === "isd" && maybeAddNewIsd(field)) return;
       school[field.dataset.schoolLibraryField] = schoolLibraryFieldValue(field);
       updateSchoolLibraryCardBubbles(card, school);
+      if (field.dataset.schoolLibraryField === "assignedTeacherId") {
+        syncTeachingTeamSchools();
+        renderTeacherProfileList();
+        markAdminDashboardReview("schoolLibrary");
+        saveAppData();
+      }
     });
 
     document.getElementById("school-library-sort")?.addEventListener("change", (event) => {
@@ -16566,6 +16730,9 @@
           option.textContent = "Classes & Rosters";
           select.insertBefore(option, select.firstChild);
         }
+        [...select.options]
+          .sort((a, b) => a.textContent.trim().localeCompare(b.textContent.trim()))
+          .forEach((option) => select.appendChild(option));
         select.value = section || "tempo";
       });
     }
@@ -18081,6 +18248,7 @@
     else if (document.body.dataset.tourMode !== "true") setSharedRosterState("loading", "Opening your shared roster…", "Only records available to this account will appear.");
     saveAppData();
 
+    updateAdminSectionNav();
     renderCurriculumWeekList();
     renderHomeWidget();
     renderLexiSchedule();
