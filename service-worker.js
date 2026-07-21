@@ -1,9 +1,9 @@
-const CACHE_NAME = "my-dance-techniques-v4-password-recovery";
+const CACHE_NAME = "my-dance-techniques-v5-account-security";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260720-recovery",
+  "./supabase-auth.js?v=20260720-account-security",
   "./data/partner-schools.js",
   "./assets/teacher-tool-logo.png",
   "./assets/dance-techniques-blush-logo.png",

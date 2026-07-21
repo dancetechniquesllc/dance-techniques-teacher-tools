@@ -8529,6 +8529,25 @@
               </div>
 
               <div class="panel" style="margin-top:12px;">
+                <div data-account-security hidden>
+                  <div class="section-title">
+                    <h3>Account security</h3>
+                    <span class="status ok">Private</span>
+                  </div>
+                  <form class="teacher-profile-form account-password-form">
+                    <label>New password
+                      <input data-account-new-password type="password" autocomplete="new-password" minlength="8" required>
+                    </label>
+                    <label>Confirm new password
+                      <input data-account-confirm-password type="password" autocomplete="new-password" minlength="8" required>
+                    </label>
+                    <p class="auth-message" data-account-password-message></p>
+                    <button class="primary" data-account-password-submit type="submit">Change My Password</button>
+                  </form>
+                </div>
+              </div>
+
+              <div class="panel" style="margin-top:12px;">
                 <div class="section-title">
                   <h3>Classes by school</h3>
                   <span class="status ok">Editable</span>
@@ -9444,6 +9463,28 @@
 
         <div class="admin-profile-stack">
           <section class="admin-profile-card">
+            <div data-account-security hidden>
+              <div class="admin-card-header">
+                <div>
+                  <h3>Account security</h3>
+                  <p>Change the password for your currently signed-in account.</p>
+                </div>
+                <span class="status ok">Private</span>
+              </div>
+              <form class="profile-form-grid account-password-form">
+                <label>New password
+                  <input data-account-new-password type="password" autocomplete="new-password" minlength="8" required>
+                </label>
+                <label>Confirm new password
+                  <input data-account-confirm-password type="password" autocomplete="new-password" minlength="8" required>
+                </label>
+                <p class="auth-message full-field" data-account-password-message></p>
+                <button class="primary full-field" data-account-password-submit type="submit">Change My Password</button>
+              </form>
+            </div>
+          </section>
+
+          <section class="admin-profile-card">
             <div class="admin-card-header">
               <div>
                 <h3>Personal info</h3>
@@ -9975,7 +10016,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20260720-recovery"></script>
+  <script src="supabase-auth.js?v=20260720-account-security"></script>
   <script>
     const teachers = [
       {
@@ -13992,6 +14033,12 @@
       });
       const deactivate = document.getElementById("deactivate-profile");
       if (deactivate) deactivate.textContent = profileTeacher.status === "active" ? "Deactivate" : "Reactivate";
+      const isOwnAccount = Boolean(window.dtCurrentProfile?.id && window.dtCurrentProfile.id === profileTeacher.id);
+      document.querySelectorAll("[data-account-security]").forEach((section) => {
+        section.hidden = !isOwnAccount;
+        const card = section.closest(".panel, .admin-profile-card");
+        if (card) card.hidden = !isOwnAccount;
+      });
       const inviteButton = document.getElementById("profile-invite-text-button");
       if (inviteButton) {
         inviteButton.href = smsInviteHrefFor(profileTeacher);

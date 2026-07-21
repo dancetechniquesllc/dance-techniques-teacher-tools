@@ -196,6 +196,34 @@
     setGateState("login");
   });
 
+  document.querySelectorAll(".account-password-form").forEach((accountForm) => {
+    accountForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const nextPassword = accountForm.querySelector("[data-account-new-password]").value;
+      const confirmation = accountForm.querySelector("[data-account-confirm-password]").value;
+      const accountMessage = accountForm.querySelector("[data-account-password-message]");
+      const accountSubmit = accountForm.querySelector("[data-account-password-submit]");
+      accountMessage.classList.remove("auth-success");
+      accountMessage.textContent = "";
+      if (nextPassword !== confirmation) {
+        accountMessage.textContent = "Those passwords don’t match yet.";
+        return;
+      }
+      accountSubmit.disabled = true;
+      accountSubmit.textContent = "Saving…";
+      const { error } = await client.auth.updateUser({ password: nextPassword });
+      accountSubmit.disabled = false;
+      accountSubmit.textContent = "Change My Password";
+      if (error) {
+        accountMessage.textContent = friendlyAuthError(error);
+        return;
+      }
+      accountForm.reset();
+      accountMessage.classList.add("auth-success");
+      accountMessage.textContent = "Your password has been changed.";
+    });
+  });
+
   client.auth.onAuthStateChange((event, session) => {
     if (event === "PASSWORD_RECOVERY") {
       passwordRecoveryMode = true;
