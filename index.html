@@ -7577,10 +7577,13 @@
     .landing-shoes { width: clamp(190px, 21vw, 330px); right: -22px; top: -22px; }
     .landing-floral-bottom-left,
     .landing-floral-bottom-right { display: none; }
-    .landing-sparkles { width: 160px; left: 50%; top: 30px; opacity: .52; transform: translateX(-50%); }
+    .landing-sparkles { display: none; }
 
-    .landing-heading { position: relative; z-index: 1; display: grid; justify-items: center; text-align: center; }
-    .landing-logo { width: clamp(330px, 34vw, 500px); height: clamp(190px, 20vw, 270px); margin: -28px 0 -24px; object-fit: contain; }
+    .landing-heading { position: relative; z-index: 1; display: grid; width: min(560px, 72vw); margin: 0 auto; justify-items: center; text-align: center; background: #fffaf6; box-shadow: 0 0 42px 46px #fffaf6; }
+    .landing-logo { width: clamp(330px, 34vw, 500px); height: clamp(190px, 20vw, 270px); margin: -28px 0 -52px; object-fit: contain; }
+    .landing-wordmark { display: grid; justify-items: center; color: #171312; line-height: 1; }
+    .landing-wordmark strong { font-family: "Bodoni 72 Smallcaps", "Bodoni 72", Didot, Georgia, serif; font-size: clamp(24px, 2.5vw, 36px); font-weight: 400; letter-spacing: .28em; }
+    .landing-wordmark span { margin-top: 7px; font-family: "Avenir Next Ultra Light", "Avenir Next", sans-serif; font-size: clamp(13px, 1.25vw, 18px); font-weight: 200; letter-spacing: .42em; }
 
     .portal-choice-grid { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2vw, 30px); margin-top: 12px; }
     .portal-choice { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 500px; padding: 20px clamp(15px, 1.8vw, 28px) 22px; border: 1px solid rgba(221, 196, 188, .72); border-radius: 22px; background: rgba(255, 253, 250, .88); box-shadow: 0 12px 28px rgba(123, 91, 82, .1); text-align: center; }
@@ -7592,7 +7595,7 @@
     .portal-divider::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 1px; background: #efccc7; }
     .portal-divider::after { content: "♥"; position: relative; padding: 0 9px; color: #eab568; background: #fffdfa; }
     .portal-choice p { max-width: 390px; min-height: 76px; margin: 0 auto 16px; color: #625956; font-family: "Avenir Next Ultra Light", "Avenir Next", sans-serif; font-size: clamp(14px, 1.15vw, 17px); font-weight: 200; line-height: 1.45; }
-    .portal-entry { width: 100%; min-height: 48px; margin-top: auto; border-radius: 999px; color: white; background: linear-gradient(90deg, #d36571, #e3898f); box-shadow: 0 8px 18px rgba(179, 99, 105, .22); letter-spacing: .12em; text-transform: uppercase; }
+    .portal-entry { width: 100%; min-height: 48px; margin-top: auto; border-radius: 999px; color: white; background: linear-gradient(90deg, #d36571, #e3898f); box-shadow: 0 8px 18px rgba(179, 99, 105, .22); font-family: "Bodoni 72 Smallcaps", "Bodoni 72", Didot, Georgia, serif; font-size: 18px; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; }
     .portal-entry:disabled { cursor: not-allowed; background: #bdb5b0; box-shadow: 0 7px 15px rgba(90, 80, 76, .12); opacity: .9; }
     .landing-site-link { position: relative; z-index: 2; display: flex; width: min(480px, 90%); min-height: 50px; align-items: center; justify-content: center; margin: 18px auto 0; border-radius: 999px; color: white; background: linear-gradient(90deg, #d36571, #e3898f); box-shadow: 0 9px 20px rgba(179, 99, 105, .2); font-size: 16px; letter-spacing: .1em; text-decoration: none; text-transform: uppercase; }
 
@@ -7759,7 +7762,10 @@
       .landing-floral-top { width: 180px; left: -66px; top: -42px; }
       .landing-shoes { width: 150px; right: -48px; top: -22px; }
       .landing-floral-bottom-left, .landing-floral-bottom-right { width: 175px; opacity: .7; }
-      .landing-logo { width: 320px; height: 190px; margin: -30px 0 -28px; }
+      .landing-heading { width: min(310px, 88vw); box-shadow: 0 0 24px 24px #fffaf6; }
+      .landing-logo { width: 320px; height: 190px; margin: -30px 0 -48px; }
+      .landing-wordmark strong { font-size: 24px; }
+      .landing-wordmark span { font-size: 12px; }
       .portal-choice-grid { grid-template-columns: 1fr; max-width: 520px; margin: 20px auto 0; }
       .portal-choice { min-height: 0; padding: 20px 18px 22px; }
       .portal-choice.is-teacher { order: 1; }
@@ -7789,6 +7795,7 @@
       <img class="landing-decoration landing-sparkles" src="assets/my-dance-techniques/gold-sparkles.png" alt="">
       <header class="landing-heading">
         <img class="landing-logo" src="assets/my-dance-techniques/blush-logo-exact.png" alt="Dance Techniques">
+        <div class="landing-wordmark" aria-label="Dance Techniques"><strong>DANCE</strong><span>TECHNIQUES</span></div>
       </header>
       <div class="portal-choice-grid">
         <article class="portal-choice is-parent">
