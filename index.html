@@ -14036,12 +14036,13 @@
 
     const renderTeacherProfileList = () => {
       const list = document.getElementById("admin-teacher-profile-list");
-      const activeTeacherCount = teachers.filter((teacher) => teacher.status === "active").length;
+      const teachingTeam = teachers.filter((teacher) => (teacher.displayName || fullName(teacher)).trim().toLowerCase() !== "dance techniques");
+      const activeTeacherCount = teachingTeam.filter((teacher) => teacher.status === "active").length;
       const shortcutCount = document.getElementById("admin-teacher-profiles-count");
       if (shortcutCount) shortcutCount.textContent = `${activeTeacherCount} Active Teacher${activeTeacherCount === 1 ? "" : "s"}`;
       if (!list) return;
       list.innerHTML = `
-        ${teachers.map((teacher) => `
+        ${teachingTeam.map((teacher) => `
           <button class="teacher-row ${teacher.id === profileTeacher.id ? "selected" : ""}" type="button" data-admin-open-profile="${escapeText(teacher.id)}">
             <span class="teacher-card-main">
               <strong>${escapeText(fullName(teacher))}</strong>
