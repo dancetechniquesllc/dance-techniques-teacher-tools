@@ -7580,21 +7580,18 @@
     .landing-sparkles { width: 160px; left: 50%; top: 30px; opacity: .52; transform: translateX(-50%); }
 
     .landing-heading { position: relative; z-index: 1; display: grid; justify-items: center; text-align: center; }
-    .landing-logo { width: clamp(102px, 11vw, 155px); height: 112px; object-fit: contain; }
-    .landing-heading h1 { margin: -6px 0 0; color: #db8287; font-family: var(--font-script); font-size: clamp(48px, 5.8vw, 82px); font-weight: 400; line-height: 1; }
-    .landing-heading .promise { max-width: 720px; margin: 13px 0 0; color: #d97980; font-size: clamp(14px, 1.35vw, 20px); letter-spacing: .22em; line-height: 1.5; }
-    .landing-heading .instruction { margin: 10px 0 0; color: #625956; font-size: clamp(16px, 1.45vw, 22px); letter-spacing: .12em; }
+    .landing-logo { width: clamp(220px, 23vw, 340px); height: clamp(150px, 16vw, 225px); object-fit: contain; }
 
     .portal-choice-grid { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2vw, 30px); margin-top: 12px; }
     .portal-choice { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 500px; padding: 20px clamp(15px, 1.8vw, 28px) 22px; border: 1px solid rgba(221, 196, 188, .72); border-radius: 22px; background: rgba(255, 253, 250, .88); box-shadow: 0 12px 28px rgba(123, 91, 82, .1); text-align: center; }
     .portal-choice.is-active { border-color: rgba(216, 121, 128, .58); box-shadow: 0 16px 36px rgba(182, 106, 111, .16); }
     .coming-banner { position: absolute; z-index: 2; width: min(88%, 330px); left: 50%; top: -15px; clip-path: inset(0 0 22% 0); transform: translateX(-50%); }
     .portal-illustration { width: 100%; height: 245px; margin: 6px auto 0; object-fit: contain; }
-    .portal-choice h2 { margin: 0; color: #d2777e; font-family: Georgia, "Times New Roman", serif; font-size: clamp(27px, 2.25vw, 38px); font-weight: 400; }
+    .portal-choice h2 { margin: 0; color: #d2777e; font-family: "Bondi 7s SmallCaps", "Bondi 7s", "Avenir Next", sans-serif; font-size: clamp(27px, 2.25vw, 38px); font-weight: 400; letter-spacing: .04em; text-transform: lowercase; }
     .portal-divider { width: 76%; height: 20px; margin: 3px auto 7px; position: relative; }
     .portal-divider::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 1px; background: #efccc7; }
     .portal-divider::after { content: "♥"; position: relative; padding: 0 9px; color: #eab568; background: #fffdfa; }
-    .portal-choice p { max-width: 390px; min-height: 76px; margin: 0 auto 16px; color: #625956; font-size: clamp(14px, 1.15vw, 17px); font-weight: 650; line-height: 1.45; }
+    .portal-choice p { max-width: 390px; min-height: 76px; margin: 0 auto 16px; color: #625956; font-family: "Avenir Next Ultra Light", "Avenir Next", sans-serif; font-size: clamp(14px, 1.15vw, 17px); font-weight: 200; line-height: 1.45; }
     .portal-entry { width: 100%; min-height: 48px; margin-top: auto; border-radius: 999px; color: white; background: linear-gradient(90deg, #d36571, #e3898f); box-shadow: 0 8px 18px rgba(179, 99, 105, .22); letter-spacing: .12em; text-transform: uppercase; }
     .portal-entry:disabled { cursor: not-allowed; background: #bdb5b0; box-shadow: 0 7px 15px rgba(90, 80, 76, .12); opacity: .9; }
     .landing-site-link { position: relative; z-index: 2; display: flex; width: min(480px, 90%); min-height: 50px; align-items: center; justify-content: center; margin: 18px auto 0; border-radius: 999px; color: white; background: linear-gradient(90deg, #d36571, #e3898f); box-shadow: 0 9px 20px rgba(179, 99, 105, .2); font-size: 16px; letter-spacing: .1em; text-decoration: none; text-transform: uppercase; }
@@ -7762,10 +7759,7 @@
       .landing-floral-top { width: 180px; left: -66px; top: -42px; }
       .landing-shoes { width: 150px; right: -48px; top: -22px; }
       .landing-floral-bottom-left, .landing-floral-bottom-right { width: 175px; opacity: .7; }
-      .landing-logo { width: 100px; height: 86px; }
-      .landing-heading h1 { font-size: 48px; }
-      .landing-heading .promise { max-width: 330px; font-size: 12px; letter-spacing: .14em; }
-      .landing-heading .instruction { font-size: 14px; letter-spacing: .08em; }
+      .landing-logo { width: 210px; height: 150px; }
       .portal-choice-grid { grid-template-columns: 1fr; max-width: 520px; margin: 20px auto 0; }
       .portal-choice { min-height: 0; padding: 20px 18px 22px; }
       .portal-choice.is-teacher { order: 1; }
@@ -7795,33 +7789,30 @@
       <img class="landing-decoration landing-sparkles" src="assets/my-dance-techniques/gold-sparkles.png" alt="">
       <header class="landing-heading">
         <img class="landing-logo" src="assets/my-dance-techniques/dt-main-logo.png" alt="Dance Techniques">
-        <h1>My Dance Techniques</h1>
-        <p class="promise">One connected home for every part of your Dance Techniques experience.</p>
-        <p class="instruction">Choose your role to get started.</p>
       </header>
       <div class="portal-choice-grid">
         <article class="portal-choice is-parent">
           <img class="coming-banner" src="assets/my-dance-techniques/coming-soon-banner.png" alt="Coming soon">
           <img class="portal-illustration" src="assets/my-dance-techniques/parent-portal-illustration.png" alt="A parent viewing their dancer’s class update on a phone">
-          <h2>Parent Portal</h2><div class="portal-divider" aria-hidden="true"></div>
+          <h2>parent portal</h2><div class="portal-divider" aria-hidden="true"></div>
           <p>View your dancer’s photos, class updates, important information, manage enrollment, and stay connected all year long.</p>
           <button class="portal-entry" type="button" disabled aria-disabled="true">Coming Soon</button>
         </article>
         <article class="portal-choice is-teacher is-active">
           <img class="portal-illustration" src="assets/my-dance-techniques/teacher-tools-illustration.png" alt="A Dance Techniques lesson planner with ballet and tap shoes">
-          <h2>Teacher Tools</h2><div class="portal-divider" aria-hidden="true"></div>
+          <h2>teacher tools</h2><div class="portal-divider" aria-hidden="true"></div>
           <p>Plan your day, access curriculum and music, track classes and resources, and stay connected with the teaching team.</p>
           <button class="portal-entry" id="open-teacher-login" type="button">Log In</button>
         </article>
         <article class="portal-choice is-director">
           <img class="coming-banner" src="assets/my-dance-techniques/coming-soon-banner.png" alt="Coming soon">
           <img class="portal-illustration" src="assets/my-dance-techniques/director-dashboard-illustration.png" alt="Connected Dance Techniques partner schools">
-          <h2>Director Dashboard</h2><div class="portal-divider" aria-hidden="true"></div>
+          <h2>director dashboard</h2><div class="portal-divider" aria-hidden="true"></div>
           <p>Oversee your territory, partner schools, teaching team, enrollment, and franchise operations.</p>
           <button class="portal-entry" type="button" disabled aria-disabled="true">Coming Soon</button>
         </article>
       </div>
-      <a class="landing-site-link" href="https://dancetechniques.com/">Visit DanceTechniques.com</a>
+      <a class="landing-site-link" href="https://www.dancetechniques.info/">Visit DanceTechniques.info</a>
     </div>
     <div class="auth-card">
       <div class="auth-brand">
