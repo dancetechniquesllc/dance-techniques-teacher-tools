@@ -7973,6 +7973,20 @@
 
     .auth-success { color: #31744a; }
 
+    .account-security-details > summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      cursor: pointer;
+      list-style: none;
+      font-family: var(--font-display);
+    }
+    .account-security-details > summary::-webkit-details-marker { display: none; }
+    .account-security-details > summary span:first-child { display: grid; gap: 3px; }
+    .account-security-details > summary small { color: var(--muted); font-family: var(--font-body); font-weight: 650; }
+    .account-security-details[open] > summary { margin-bottom: 18px; }
+
     .session-strip {
       display: none;
       align-items: center;
@@ -8025,6 +8039,10 @@
       .portal-illustration { height: 220px; }
       .portal-choice p { min-height: 0; }
       .coming-banner { top: -13px; }
+      .portal-choice.is-parent,
+      .portal-choice.is-director { padding-top: 116px; }
+      .portal-choice.is-parent .portal-illustration,
+      .portal-choice.is-director .portal-illustration { margin-top: 0; }
     }
 
     @media (min-width: 1100px) {
@@ -8036,7 +8054,7 @@
     }
   </style>
 </head>
-<body class="auth-checking" data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="my-day">
+<body class="auth-checking" data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="today">
   <section class="auth-gate" id="auth-gate" data-state="checking" aria-live="polite">
     <div class="portal-landing" id="portal-landing">
       <img class="landing-decoration landing-floral-top" src="assets/my-dance-techniques/floral-corner-top-left.png" alt="">
@@ -8083,12 +8101,12 @@
       <div class="auth-login">
         <button class="auth-back" id="auth-back-home" type="button">← My Dance Techniques</button>
         <h2>Bonjour!</h2>
-        <form class="auth-form" id="auth-form">
+        <form class="auth-form" id="auth-form" autocomplete="on">
           <label>Email
-            <input id="auth-email" type="email" autocomplete="username" required>
+            <input id="auth-email" name="username" type="email" inputmode="email" autocomplete="username" autocapitalize="none" spellcheck="false" enterkeyhint="next" required>
           </label>
           <label>Password
-            <input id="auth-password" type="password" autocomplete="current-password" minlength="8" required>
+            <input id="auth-password" name="password" type="password" autocomplete="current-password" enterkeyhint="go" minlength="8" required>
           </label>
           <p class="auth-message" id="auth-message"></p>
           <button class="primary" id="auth-submit" type="submit">Sign In</button>
@@ -8171,7 +8189,7 @@
               </div>
             </nav>
 
-            <section class="view" id="today-view">
+            <section class="view active" id="today-view">
               <div class="mobile-head">
                 <div>
                   <div class="title-line">
@@ -8277,7 +8295,7 @@
               </button>
             </section>
 
-            <section class="view active" id="my-day-view">
+            <section class="view" id="my-day-view">
               <div class="mobile-head page-head">
                 <button class="back-btn" data-tab-jump="today" aria-label="Back to Today">&larr;</button>
                 <div class="mobile-title">
@@ -8745,9 +8763,6 @@
                   <span class="status ok">Synced</span>
                 </div>
                 <form class="teacher-profile-form" id="teacher-profile-form">
-                  <label>Display Name
-                    <input id="teacher-display-name" data-profile-field="displayName" autocomplete="nickname">
-                  </label>
                   <div class="field-row">
                     <label>First Name
                       <input id="teacher-first-name" data-profile-field="firstName" autocomplete="given-name">
@@ -8756,8 +8771,8 @@
                       <input id="teacher-last-name" data-profile-field="lastName" autocomplete="family-name">
                     </label>
                   </div>
-                  <label>Email
-                    <input id="teacher-email" data-profile-field="email" type="email" autocomplete="email">
+                  <label>Login Email
+                    <input id="teacher-email" data-profile-field="email" type="email" autocomplete="username" readonly aria-readonly="true">
                   </label>
                   <label>Phone
                     <input id="teacher-phone" data-profile-field="phone" autocomplete="tel">
@@ -8769,31 +8784,29 @@
               </div>
 
               <div class="panel" style="margin-top:12px;">
-                <div data-account-security hidden>
-                  <div class="section-title">
-                    <h3>Account security</h3>
-                    <span class="status ok">Private</span>
-                  </div>
-                  <form class="teacher-profile-form account-password-form">
-                    <label>New password
-                      <input data-account-new-password type="password" autocomplete="new-password" minlength="8" required>
-                    </label>
-                    <label>Confirm new password
-                      <input data-account-confirm-password type="password" autocomplete="new-password" minlength="8" required>
-                    </label>
-                    <p class="auth-message" data-account-password-message></p>
-                    <button class="primary" data-account-password-submit type="submit">Change My Password</button>
-                  </form>
-                </div>
-              </div>
-
-              <div class="panel" style="margin-top:12px;">
                 <div class="section-title">
                   <h3>Classes by school</h3>
                   <span class="status ok">Editable</span>
                 </div>
                 <div class="teacher-class-list" id="teacher-class-count-list"></div>
               </div>
+
+              <details class="panel account-security-details" data-account-security hidden style="margin-top:12px;">
+                <summary>
+                  <span><strong>Account security</strong><small>Change your private password</small></span>
+                  <span class="status ok">Private</span>
+                </summary>
+                <form class="teacher-profile-form account-password-form">
+                  <label>New password
+                    <input data-account-new-password type="password" autocomplete="new-password" minlength="8" required>
+                  </label>
+                  <label>Confirm new password
+                    <input data-account-confirm-password type="password" autocomplete="new-password" minlength="8" required>
+                  </label>
+                  <p class="auth-message" data-account-password-message></p>
+                  <button class="primary" data-account-password-submit type="submit">Change My Password</button>
+                </form>
+              </details>
             </section>
           </div>
 
@@ -10629,6 +10642,10 @@
         return sharedRosterError("Your signed-in profile could not be matched.", new Error(`Missing profile ${profile.id}`), { reload: false });
       }
       profileTeacher = signedInTeacher;
+      if (profile.email) {
+        profileTeacher.email = profile.email;
+        profileTeacher.loginEmail = profile.email;
+      }
       document.body.dataset.currentTeacherId = profileTeacher.id;
       replaceCollection(schoolLibrary, schools.map((school, index) => ({
         id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
@@ -10968,17 +10985,29 @@
       const field = target.closest?.("input, select, textarea, [contenteditable=\"true\"]");
       if (!field) return null;
       if (field.closest(".confirm-overlay")) return null;
-      if (field.matches("[data-unsaved-ignore], .admin-section-nav, input[type=\"search\"], #curriculum-week-select")) return null;
+      if (field.matches("[data-unsaved-ignore], .admin-section-nav, input[type=\"search\"], #curriculum-week-select, [data-my-day-playlist-select]")) return null;
       if (field.disabled || field.readOnly) return null;
+      const isEditableRecord = field.matches([
+        "[data-profile-field]",
+        "[data-school-field]",
+        "[data-school-library-field]",
+        "[data-teacher-class-field]",
+        "[data-partner-school-notes]",
+        "[data-curriculum-field]",
+        "[data-schedule-field]",
+        "#profile-notes",
+        "#teacher-message-draft"
+      ].join(", "));
+      if (!isEditableRecord) return null;
       return field;
     };
 
     document.addEventListener("input", (event) => {
-      if (editableChangeTarget(event.target)) markUnsavedEdits();
+      if (event.isTrusted && editableChangeTarget(event.target)) markUnsavedEdits();
     }, true);
 
     document.addEventListener("change", (event) => {
-      if (editableChangeTarget(event.target)) markUnsavedEdits();
+      if (event.isTrusted && editableChangeTarget(event.target)) markUnsavedEdits();
     }, true);
 
     document.getElementById("unsaved-save")?.addEventListener("click", () => continuePendingNavigation({ save: true }));
@@ -11453,8 +11482,8 @@
 
     const dayLabelForSchool = (profileSchool, fallback) => weekdayNames[Number(profileSchool?.dayOfWeek)] || fallback;
 
-    const rescheduleOverridesForTeacher = () => teachers[0]?.reschedules || [];
-    const closureClassOverridesForTeacher = () => teachers[0]?.closureClassOverrides || [];
+    const rescheduleOverridesForTeacher = () => profileTeacher?.reschedules || [];
+    const closureClassOverridesForTeacher = () => profileTeacher?.closureClassOverrides || [];
 
     const rescheduleActionFor = (item) => item?.action || "reschedule_now";
     const rescheduleStatusFor = (item) => {
@@ -11547,8 +11576,10 @@
       return entries;
     };
 
-    const flattenLexiSchedule = () => lexiSchedule.flatMap((school) => {
-      const profileSchool = teachers[0]?.schools.find((entry) => entry.name === school.school);
+    const flattenLexiSchedule = () => lexiSchedule.filter((school) => (
+      profileTeacher.schools.some((entry) => entry.name === school.school)
+    )).flatMap((school) => {
+      const profileSchool = profileTeacher.schools.find((entry) => entry.name === school.school);
       const curriculumEvents = curriculumEventsForSeasonStart(school, profileSchool);
       const lastCurriculumDate = curriculumEvents[curriculumEvents.length - 1]?.[2];
       const schoolEvents = [
@@ -13117,7 +13148,11 @@
           const mergedTeachers = teachers.map((liveTeacher) => {
             const savedTeacher = persisted.teachers.find((teacher) => teacher.id === liveTeacher.id)
               || persisted.teachers.find((teacher) => teacher.firstName?.trim().toLowerCase() === liveTeacher.firstName?.trim().toLowerCase());
-            return savedTeacher ? { ...JSON.parse(JSON.stringify(savedTeacher)), id: liveTeacher.id } : liveTeacher;
+            return savedTeacher ? {
+              ...JSON.parse(JSON.stringify(savedTeacher)),
+              id: liveTeacher.id,
+              schools: JSON.parse(JSON.stringify(liveTeacher.schools || []))
+            } : liveTeacher;
           });
           persisted.teachers.forEach((savedTeacher) => {
             if (!mergedTeachers.some((teacher) => teacher.id === savedTeacher.id || teacher.firstName?.trim().toLowerCase() === savedTeacher.firstName?.trim().toLowerCase())) {
@@ -13142,7 +13177,14 @@
       if (!persisted?.teacher || !teacherId) return;
       const liveTeacher = teachers.find((teacher) => teacher.id === teacherId);
       if (!liveTeacher) return;
+      const assignedSchools = JSON.parse(JSON.stringify(liveTeacher.schools || []));
+      const signedInEmail = window.dtCurrentProfile?.id === teacherId ? (window.dtCurrentProfile.email || "") : "";
       Object.assign(liveTeacher, JSON.parse(JSON.stringify(persisted.teacher)), { id: teacherId });
+      liveTeacher.schools = assignedSchools;
+      if (signedInEmail) {
+        liveTeacher.email = signedInEmail;
+        liveTeacher.loginEmail = signedInEmail;
+      }
       if (includeMessages) replaceCollection(messageThreads, persisted.messageThreads);
     };
 
@@ -18002,6 +18044,7 @@
       await loadSharedClassesAndRosters(profile);
       await loadCloudAppData(profile);
       loadSharedMusicLibrary(profile);
+      clearUnsavedEdits();
     };
 
     ["input", "change", "click", "drop"].forEach((eventName) => {
@@ -18010,6 +18053,7 @@
 
     window.addEventListener("beforeunload", saveAppData);
     window.addEventListener("dt-auth-ready", (event) => {
+      if (event.detail?.profile?.role === "teacher") setTab("today");
       loadSharedPortalData(event.detail?.profile);
     });
     if (window.dtCurrentProfile) {

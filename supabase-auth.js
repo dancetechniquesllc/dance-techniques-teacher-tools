@@ -89,6 +89,7 @@
     }
 
     sessionName.textContent = profile.full_name ? `${profile.full_name} · ${profile.role}` : `Signed in · ${profile.role}`;
+    profile.email = session.user.email || "";
     document.body.dataset.userRole = profile.role;
     const landingMode = profile.role === "teacher" ? "teacher" : "admin";
     document.body.dataset.mode = landingMode;
