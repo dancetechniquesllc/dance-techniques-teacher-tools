@@ -674,10 +674,10 @@
       display: grid;
       gap: 10px;
       padding: 11px;
-      border: 1px dashed oklch(72% 0.025 245);
+      border: 1px dashed #8f9f84;
       border-radius: 8px;
       background:
-        linear-gradient(135deg, oklch(98% 0.012 245), oklch(97% 0.017 175));
+        linear-gradient(135deg, #edf0e8, #d9e1d2);
     }
 
     .my-day-music-top {
@@ -695,12 +695,13 @@
     }
 
     .my-day-music-button {
-      width: 34px;
-      height: 34px;
+      width: 40px;
+      height: 40px;
       display: grid;
       place-items: center;
       border-radius: 999px;
-      background: var(--fg);
+      border: 1px solid #718166;
+      background: #34402f;
       color: white;
       font-size: 13px;
       font-weight: 900;
@@ -708,6 +709,51 @@
 
     .my-day-music-player .player-bars {
       height: 34px;
+    }
+
+    .my-day-music-progress {
+      height: 6px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.7);
+    }
+
+    .my-day-music-progress span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: #718166;
+      transition: width 180ms linear;
+    }
+
+    .my-day-music-controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .my-day-music-control {
+      min-height: 34px;
+      padding: 0 7px;
+      border: 1px solid #aebaa6;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.62);
+      color: #34402f;
+      font: inherit;
+      font-size: 11px;
+      font-weight: 740;
+    }
+
+    .my-day-music-control[aria-pressed="true"] {
+      border-color: #718166;
+      background: #c8d3c0;
+    }
+
+    .my-day-music-time {
+      color: #53604d;
+      font-size: 11px;
+      text-align: right;
     }
 
     .my-day-actions button {
@@ -8200,16 +8246,19 @@
 	                    <div class="my-day-music-player">
 	                      <div class="my-day-music-top">
 	                        <span>
-	                          <small>Music</small>
-	                          <strong>Princess & Troll Toes</strong>
+	                          <small>DT Tunes</small>
+	                          <strong data-my-day-music-title>Choose a playlist in Music</strong>
 	                        </span>
-	                        <button class="my-day-music-button" type="button" aria-label="Play music">▶</button>
+	                        <button class="my-day-music-button" type="button" data-my-day-music-toggle aria-label="Play or pause DT Tunes">▶</button>
 	                      </div>
-	                      <div class="player-bars" aria-hidden="true">
-	                        <span></span><span></span><span></span><span></span><span></span><span></span>
-	                        <span></span><span></span><span></span><span></span><span></span><span></span>
-	                        <span></span><span></span><span></span><span></span><span></span><span></span>
+	                      <div class="my-day-music-progress" aria-hidden="true"><span data-my-day-music-progress></span></div>
+	                      <div class="my-day-music-controls" aria-label="My Day music controls">
+	                        <button class="my-day-music-control" type="button" data-my-day-music-previous aria-label="Previous song">⏮ Prev</button>
+	                        <button class="my-day-music-control" type="button" data-my-day-music-repeat aria-label="Repeat current song" aria-pressed="false">↻ Repeat</button>
+	                        <button class="my-day-music-control" type="button" data-my-day-music-next aria-label="Next song">Next ⏭</button>
+	                        <button class="my-day-music-control" type="button" data-tab-jump="music">Library</button>
 	                      </div>
+	                      <small class="my-day-music-time" data-my-day-music-time>0:00 / 0:00</small>
 	                    </div>
 	                  </div>
 	                </section>
@@ -13812,16 +13861,19 @@
       <div class="my-day-music-player">
         <div class="my-day-music-top">
           <span>
-            <small>Music</small>
-            <strong>${escapeText(event.curriculumTitle || "Class playlist")}</strong>
+            <small>DT Tunes</small>
+            <strong data-my-day-music-title>Choose a playlist in Music</strong>
           </span>
-          <button class="my-day-music-button" type="button" aria-label="Play music">▶</button>
+          <button class="my-day-music-button" type="button" data-my-day-music-toggle aria-label="Play or pause DT Tunes">▶</button>
         </div>
-        <div class="player-bars" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span><span></span><span></span>
-          <span></span><span></span><span></span><span></span><span></span><span></span>
+        <div class="my-day-music-progress" aria-hidden="true"><span data-my-day-music-progress></span></div>
+        <div class="my-day-music-controls" aria-label="My Day music controls">
+          <button class="my-day-music-control" type="button" data-my-day-music-previous aria-label="Previous song">⏮ Prev</button>
+          <button class="my-day-music-control" type="button" data-my-day-music-repeat aria-label="Repeat current song" aria-pressed="false">↻ Repeat</button>
+          <button class="my-day-music-control" type="button" data-my-day-music-next aria-label="Next song">Next ⏭</button>
+          <button class="my-day-music-control" type="button" data-tab-jump="music">Library</button>
         </div>
+        <small class="my-day-music-time" data-my-day-music-time>0:00 / 0:00</small>
       </div>
     `;
 
@@ -14091,6 +14143,7 @@
             <small>${escapeText(dateLabel)} is clear. Rescheduled classes will appear here only when they land on today.</small>
           </section>
         `;
+        window.setTimeout(updateMyDayMusicPlayer, 0);
         return;
       }
       if (dayEvents.length > 1) {
@@ -14107,9 +14160,11 @@
           `;
         }).join("");
         stack.innerHTML = groupedMarkup;
+        window.setTimeout(updateMyDayMusicPlayer, 0);
         return;
       }
       stack.innerHTML = myDayEventMarkup(dayEvents[0], dateLabel, true);
+      window.setTimeout(updateMyDayMusicPlayer, 0);
     };
 
     const markScheduleDirty = () => {
@@ -17236,8 +17291,9 @@
     };
 
     const musicDurationLabel = (seconds = 0) => {
-      const minutes = Math.floor(Number(seconds) / 60);
-      const remainder = Math.max(0, Number(seconds) % 60);
+      const wholeSeconds = Math.max(0, Math.floor(Number(seconds) || 0));
+      const minutes = Math.floor(wholeSeconds / 60);
+      const remainder = wholeSeconds % 60;
       return `${minutes}:${String(remainder).padStart(2, "0")}`;
     };
 
@@ -17341,6 +17397,7 @@
       musicLibraryState.playlists = data || [];
       musicLibraryState.selectedPlaylistId = "";
       renderMusicPlaylists();
+      updateMyDayMusicPlayer();
     };
 
     const playMusicTrack = async (trackId) => {
@@ -17353,6 +17410,7 @@
       const artist = musicArtistLabel(track.artist);
       setText("music-now-playing-title", track.title);
       setText("music-now-playing-artist", artist);
+      updateMyDayMusicPlayer();
       const artwork = document.getElementById("music-now-playing-art");
       const coverFilename = track.cover_path?.split("/").pop();
       const coverUrl = coverFilename ? `assets/dt-tunes/song-covers/${encodeURIComponent(coverFilename)}` : "";
@@ -17405,6 +17463,29 @@
       return musicPlaylistTracks(playlist);
     };
 
+    const updateMyDayMusicPlayer = () => {
+      const audio = document.getElementById("dt-tunes-audio");
+      const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+      const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === musicLibraryState.currentTrackId);
+      const title = track?.title || playlist?.name || "Choose a playlist in Music";
+      const isPlaying = Boolean(audio && !audio.paused && !audio.ended && audio.src);
+      const duration = Number.isFinite(audio?.duration) ? audio.duration : Number(track?.duration_seconds || 0);
+      const progress = duration > 0 ? Math.min(100, (Number(audio?.currentTime || 0) / duration) * 100) : 0;
+      document.querySelectorAll("[data-my-day-music-title]").forEach((element) => { element.textContent = title; });
+      document.querySelectorAll("[data-my-day-music-toggle]").forEach((button) => {
+        button.textContent = isPlaying ? "❚❚" : "▶";
+        button.setAttribute("aria-label", isPlaying ? "Pause DT Tunes" : "Play DT Tunes");
+      });
+      document.querySelectorAll("[data-my-day-music-progress]").forEach((element) => { element.style.width = `${progress}%`; });
+      document.querySelectorAll("[data-my-day-music-time]").forEach((element) => {
+        element.textContent = `${musicDurationLabel(audio?.currentTime || 0)} / ${musicDurationLabel(duration)}`;
+      });
+      document.querySelectorAll("[data-my-day-music-repeat]").forEach((button) => {
+        button.setAttribute("aria-pressed", String(musicLibraryState.repeatCurrentTrack));
+        button.textContent = musicLibraryState.repeatCurrentTrack ? "↻ Repeating" : "↻ Repeat";
+      });
+    };
+
     const playAdjacentMusicTrack = (direction, { automatic = false } = {}) => {
       const tracks = currentMusicPlaylistTracks();
       const currentIndex = tracks.findIndex((track) => track.id === musicLibraryState.currentTrackId);
@@ -17425,6 +17506,7 @@
         button.setAttribute("aria-pressed", String(musicLibraryState.repeatCurrentTrack));
         button.textContent = musicLibraryState.repeatCurrentTrack ? "↻ Repeating" : "↻ Repeat";
       }
+      updateMyDayMusicPlayer();
       showToast(musicLibraryState.repeatCurrentTrack ? "This song will repeat." : "Playlist play will continue normally.");
     };
 
@@ -17444,15 +17526,23 @@
     dtTunesAudio?.addEventListener("play", () => {
       if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
       updateMusicMediaPosition();
+      updateMyDayMusicPlayer();
     });
 
     dtTunesAudio?.addEventListener("pause", () => {
       if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
       updateMusicMediaPosition();
+      updateMyDayMusicPlayer();
     });
 
-    dtTunesAudio?.addEventListener("timeupdate", updateMusicMediaPosition);
-    dtTunesAudio?.addEventListener("durationchange", updateMusicMediaPosition);
+    dtTunesAudio?.addEventListener("timeupdate", () => {
+      updateMusicMediaPosition();
+      updateMyDayMusicPlayer();
+    });
+    dtTunesAudio?.addEventListener("durationchange", () => {
+      updateMusicMediaPosition();
+      updateMyDayMusicPlayer();
+    });
 
     dtTunesAudio?.addEventListener("ended", () => {
       if (!musicLibraryState.repeatCurrentTrack) playAdjacentMusicTrack(1, { automatic: true });
@@ -17468,6 +17558,7 @@
       if (playlistButton) {
         musicLibraryState.selectedPlaylistId = playlistButton.dataset.musicPlaylist;
         renderMusicPlaylists();
+        updateMyDayMusicPlayer();
         document.getElementById("music-playlist-grid")?.setAttribute("hidden", "");
         const trackPanel = document.getElementById("music-track-panel");
         if (trackPanel) trackPanel.hidden = false;
@@ -17484,6 +17575,31 @@
       if (controlButton.dataset.musicControl === "previous") playAdjacentMusicTrack(-1);
       if (controlButton.dataset.musicControl === "next") playAdjacentMusicTrack(1);
       if (controlButton.dataset.musicControl === "repeat") toggleMusicRepeat();
+    });
+
+    document.addEventListener("click", (event) => {
+      const toggle = event.target.closest("[data-my-day-music-toggle]");
+      if (toggle) {
+        const audio = document.getElementById("dt-tunes-audio");
+        if (audio?.src) {
+          if (audio.paused) audio.play().catch(() => showToast("Open DT Tunes and press play to begin."));
+          else audio.pause();
+          return;
+        }
+        const firstTrack = currentMusicPlaylistTracks()[0];
+        if (firstTrack) playMusicTrack(firstTrack.id);
+        else setTab("music");
+        return;
+      }
+      if (event.target.closest("[data-my-day-music-previous]")) {
+        playAdjacentMusicTrack(-1);
+        return;
+      }
+      if (event.target.closest("[data-my-day-music-next]")) {
+        playAdjacentMusicTrack(1);
+        return;
+      }
+      if (event.target.closest("[data-my-day-music-repeat]")) toggleMusicRepeat();
     });
 
     document.getElementById("music-back-to-playlists")?.addEventListener("click", () => {
