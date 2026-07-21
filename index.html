@@ -12893,8 +12893,13 @@
       }
     ];
     const persistentStorageKey = "dt-teacher-tools-prototype-v1";
+    const cloudStateRecordId = "director-dashboard";
     let pendingPersistentAdminReviewFlags = null;
     let persistenceSaveTimer = 0;
+    let cloudPersistenceSaveTimer = 0;
+    let cloudPersistenceReady = false;
+    let cloudPersistenceSaving = false;
+    let cloudPersistencePending = false;
 
     const replaceCollection = (target, source) => {
       if (!Array.isArray(source)) return;
@@ -12916,19 +12921,57 @@
       }
     };
 
-    const saveAppData = () => {
+    const appDataPayload = ({ includeRosters = true } = {}) => {
       const savedAt = new Date().toISOString();
-      const payload = {
+      return {
         savedAt,
         currentTeacherId: profileTeacher?.id || "lexi",
         teachers,
         schoolLibrary,
-        rosterClasses,
+        ...(includeRosters ? { rosterClasses } : {}),
         messageThreads,
         isdCalendars,
         tempoEncouragementLibrary,
         adminDashboardReviewFlags: typeof adminDashboardReviewFlags === "undefined" ? pendingPersistentAdminReviewFlags : adminDashboardReviewFlags
       };
+    };
+
+    const saveCloudAppData = async () => {
+      const client = window.dtSupabase;
+      const profile = window.dtCurrentProfile;
+      if (!cloudPersistenceReady || !client || !profile || !["admin", "director"].includes(profile.role)) return null;
+      if (cloudPersistenceSaving) {
+        cloudPersistencePending = true;
+        return null;
+      }
+      clearTimeout(cloudPersistenceSaveTimer);
+      cloudPersistenceSaving = true;
+      cloudPersistencePending = false;
+      const { error } = await client.from("portal_app_state").upsert({
+        id: cloudStateRecordId,
+        payload: appDataPayload({ includeRosters: false }),
+        updated_by: profile.id
+      }, { onConflict: "id" });
+      cloudPersistenceSaving = false;
+      if (error) {
+        console.error("Director Dashboard cloud save failed", error);
+        return false;
+      }
+      document.documentElement.dataset.cloudSaved = "true";
+      document.documentElement.dataset.cloudSavedAt = new Date().toISOString();
+      if (cloudPersistencePending) scheduleCloudAppDataSave();
+      return true;
+    };
+
+    const scheduleCloudAppDataSave = () => {
+      if (!cloudPersistenceReady) return;
+      clearTimeout(cloudPersistenceSaveTimer);
+      cloudPersistenceSaveTimer = window.setTimeout(saveCloudAppData, 700);
+    };
+
+    const saveAppData = () => {
+      const payload = appDataPayload();
+      const savedAt = payload.savedAt;
       try {
         const serializedPayload = JSON.stringify(payload);
         window.localStorage?.setItem(persistentStorageKey, serializedPayload);
@@ -12950,6 +12993,7 @@
         }
         console.warn("Prototype saved data could not be stored.", error);
       }
+      scheduleCloudAppDataSave();
     };
 
     const scheduleAppDataSave = () => {
@@ -12957,11 +13001,26 @@
       persistenceSaveTimer = window.setTimeout(saveAppData, 180);
     };
 
-    const loadPersistedAppData = () => {
-      const persisted = readPersistedAppData();
+    const applyPersistedAppData = (persisted, { mergeTeachers = false } = {}) => {
       if (!persisted) return;
       const currentTeacherId = persisted.currentTeacherId || profileTeacher?.id || "lexi";
-      replaceCollection(teachers, persisted.teachers);
+      if (Array.isArray(persisted.teachers)) {
+        if (mergeTeachers) {
+          const mergedTeachers = teachers.map((liveTeacher) => {
+            const savedTeacher = persisted.teachers.find((teacher) => teacher.id === liveTeacher.id)
+              || persisted.teachers.find((teacher) => teacher.firstName?.trim().toLowerCase() === liveTeacher.firstName?.trim().toLowerCase());
+            return savedTeacher ? { ...JSON.parse(JSON.stringify(savedTeacher)), id: liveTeacher.id } : liveTeacher;
+          });
+          persisted.teachers.forEach((savedTeacher) => {
+            if (!mergedTeachers.some((teacher) => teacher.id === savedTeacher.id || teacher.firstName?.trim().toLowerCase() === savedTeacher.firstName?.trim().toLowerCase())) {
+              mergedTeachers.push(JSON.parse(JSON.stringify(savedTeacher)));
+            }
+          });
+          replaceCollection(teachers, mergedTeachers);
+        } else {
+          replaceCollection(teachers, persisted.teachers);
+        }
+      }
       replaceCollection(schoolLibrary, persisted.schoolLibrary);
       replaceCollection(rosterClasses, persisted.rosterClasses);
       replaceCollection(messageThreads, persisted.messageThreads);
@@ -12970,6 +13029,8 @@
       pendingPersistentAdminReviewFlags = persisted.adminDashboardReviewFlags || null;
       profileTeacher = teachers.find((teacher) => teacher.id === currentTeacherId) || teachers[0] || profileTeacher;
     };
+
+    const loadPersistedAppData = () => applyPersistedAppData(readPersistedAppData());
 
     loadPersistedAppData();
 
@@ -15386,7 +15447,7 @@
       showToast("School row added");
     };
 
-    const saveTeacherProfile = () => {
+    const saveTeacherProfile = async () => {
       if (scheduleDirty) {
         if (window.scheduleGenerator?.rebuildTeacherSchedule) {
           window.scheduleGenerator.rebuildTeacherSchedule(profileTeacher);
@@ -15407,7 +15468,10 @@
       renderTeacherProfileList();
       clearUnsavedEdits();
       saveAppData();
-      showToast("Teacher profile saved");
+      const cloudSaved = await saveCloudAppData();
+      if (cloudSaved === true) showToast("Teacher profile saved to the cloud");
+      else if (cloudSaved === false) showToast("Saved in this browser, but cloud sync needs attention.");
+      else showToast("Teacher profile saved");
     };
 
     const updateSchoolNameReferences = (oldName, newName) => {
@@ -17744,18 +17808,64 @@
       grid?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
+    const renderCloudSyncedAppData = () => {
+      renderCurriculumWeekList();
+      renderHomeWidget();
+      renderLexiSchedule();
+      renderScheduleBuilderPreview();
+      renderProfileHero();
+      renderTeacherProfileList();
+      renderSchoolLibrary();
+      renderSchoolRows();
+      renderTeacherClassCounts();
+      renderCurriculumProgress();
+      renderAdminCurriculumProgress();
+      renderAdminRescheduleTracker();
+      renderAdminMessagesPage();
+      renderContactSchools();
+      renderMyDay();
+      renderClassesAndRosters();
+    };
+
+    const loadCloudAppData = async (profile = window.dtCurrentProfile) => {
+      const client = window.dtSupabase;
+      if (!client || !profile || !["admin", "director"].includes(profile.role) || document.body.dataset.tourMode === "true") return;
+      cloudPersistenceReady = false;
+      const { data, error } = await client
+        .from("portal_app_state")
+        .select("payload, updated_at")
+        .eq("id", cloudStateRecordId)
+        .maybeSingle();
+      if (error) {
+        console.error("Director Dashboard cloud data could not load", error);
+        showToast("Cloud sync couldn’t open. This browser copy is still available.");
+        return;
+      }
+      if (data?.payload) {
+        applyPersistedAppData(data.payload, { mergeTeachers: true });
+        renderCloudSyncedAppData();
+        document.documentElement.dataset.cloudLoadedAt = data.updated_at || "";
+        showToast("Director Dashboard synced from the cloud");
+      }
+      cloudPersistenceReady = true;
+    };
+
+    const loadSharedPortalData = async (profile) => {
+      await loadSharedClassesAndRosters(profile);
+      await loadCloudAppData(profile);
+      loadSharedMusicLibrary(profile);
+    };
+
     ["input", "change", "click", "drop"].forEach((eventName) => {
       document.addEventListener(eventName, () => scheduleAppDataSave());
     });
 
     window.addEventListener("beforeunload", saveAppData);
     window.addEventListener("dt-auth-ready", (event) => {
-      loadSharedClassesAndRosters(event.detail?.profile);
-      loadSharedMusicLibrary(event.detail?.profile);
+      loadSharedPortalData(event.detail?.profile);
     });
     if (window.dtCurrentProfile) {
-      loadSharedClassesAndRosters(window.dtCurrentProfile);
-      loadSharedMusicLibrary(window.dtCurrentProfile);
+      loadSharedPortalData(window.dtCurrentProfile);
     }
     else if (document.body.dataset.tourMode !== "true") setSharedRosterState("loading", "Opening your shared roster…", "Only records available to this account will appear.");
     saveAppData();
