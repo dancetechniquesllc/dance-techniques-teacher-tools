@@ -8018,8 +8018,27 @@
       font-family: "Parisienne", var(--font-script);
       font-size: clamp(40px, 9vw, 56px);
       font-weight: 400;
+      font-kerning: normal;
+      font-variant-ligatures: common-ligatures contextual;
+      font-feature-settings: "liga" 1, "calt" 1;
+      letter-spacing: -.035em;
       line-height: 1;
       white-space: nowrap;
+    }
+
+    :is(
+      .tempo-card strong,
+      .curriculum-style-marker,
+      .notification-preview .bell,
+      .week-chip .style-icon,
+      .director-dashboard-title,
+      .phone-stage .mobile-head h2,
+      .auth-brand h1
+    ) {
+      font-kerning: normal;
+      font-variant-ligatures: common-ligatures contextual;
+      font-feature-settings: "liga" 1, "calt" 1;
+      letter-spacing: -.035em;
     }
 
     .auth-card h2 { margin: 0; font-family: var(--font-display); }
@@ -13259,6 +13278,42 @@
       return true;
     };
 
+    const saveTeacherPhotoToCloud = async (teacher = profileTeacher) => {
+      const client = window.dtSupabase;
+      const profile = window.dtCurrentProfile;
+      if (!client || !profile || !isUuid(teacher?.id) || document.body.dataset.tourMode === "true") return null;
+      const isOwnProfile = teacher.id === profile.id;
+      const isLeader = ["admin", "director"].includes(profile.role);
+      if (!isOwnProfile && !isLeader) return false;
+      const { data: currentState, error: readError } = await client
+        .from("teacher_portal_state")
+        .select("payload")
+        .eq("teacher_id", teacher.id)
+        .maybeSingle();
+      if (readError) {
+        console.error("Teacher photo state could not be opened", readError);
+        return false;
+      }
+      const payload = currentState?.payload && typeof currentState.payload === "object"
+        ? JSON.parse(JSON.stringify(currentState.payload))
+        : {};
+      payload.savedAt = new Date().toISOString();
+      payload.teacher = {
+        ...(payload.teacher && typeof payload.teacher === "object" ? payload.teacher : {}),
+        id: teacher.id,
+        photo: teacher.photo || ""
+      };
+      const { error } = await client.from("teacher_portal_state").upsert({
+        teacher_id: teacher.id,
+        payload
+      }, { onConflict: "teacher_id" });
+      if (error) {
+        console.error("Teacher photo could not be saved to the cloud", error);
+        return false;
+      }
+      return true;
+    };
+
     const scheduleCloudAppDataSave = () => {
       if (!cloudPersistenceReady) return;
       clearTimeout(cloudPersistenceSaveTimer);
@@ -13360,9 +13415,11 @@
       const liveTeacher = teachers.find((teacher) => teacher.id === teacherId);
       if (!liveTeacher) return;
       const assignedSchools = JSON.parse(JSON.stringify(liveTeacher.schools || []));
+      const directorPhoto = liveTeacher.photo || "";
       const signedInEmail = window.dtCurrentProfile?.id === teacherId ? (window.dtCurrentProfile.email || "") : "";
       Object.assign(liveTeacher, JSON.parse(JSON.stringify(persisted.teacher)), { id: teacherId });
       liveTeacher.schools = assignedSchools;
+      if (!liveTeacher.photo && directorPhoto) liveTeacher.photo = directorPhoto;
       if (signedInEmail) {
         liveTeacher.email = signedInEmail;
         liveTeacher.loginEmail = signedInEmail;
@@ -16406,11 +16463,14 @@
         renderProfileHero();
         renderTeacherProfileList();
         saveAppData();
-        const cloudSaved = await saveCloudAppData();
-        if (cloudSaved === true) {
+        const [workspaceSaved, teacherPhotoSaved] = await Promise.all([
+          saveCloudAppData(),
+          saveTeacherPhotoToCloud(profileTeacher)
+        ]);
+        if (workspaceSaved !== false && teacherPhotoSaved === true) {
           clearUnsavedEdits();
           showToast("Profile photo saved");
-        } else if (cloudSaved === false) {
+        } else if (workspaceSaved === false || teacherPhotoSaved === false) {
           markUnsavedEdits();
           showToast("The photo is still on this device, but cloud save needs attention.");
         } else {
@@ -18317,6 +18377,12 @@
         const { data: teacherStates, error: teacherStatesError } = await client.from("teacher_portal_state").select("teacher_id, payload");
         if (teacherStatesError) console.error("Teacher cloud changes could not load for the Director Dashboard", teacherStatesError);
         else (teacherStates || []).forEach((teacherState) => applyTeacherCloudData(teacherState.payload, teacherState.teacher_id, { includeMessages: false }));
+        const teacherPhotoResults = await Promise.all(teachers
+          .filter((teacher) => teacher.photo && isUuid(teacher.id))
+          .map((teacher) => saveTeacherPhotoToCloud(teacher)));
+        if (teacherPhotoResults.some((saved) => saved === false)) {
+          showToast("Some teacher profile photos still need attention.");
+        }
         const assignmentsSynced = await syncSchoolAssignmentsToDatabase();
         if (!assignmentsSynced) showToast("Some teacher school assignments still need attention.");
       }
