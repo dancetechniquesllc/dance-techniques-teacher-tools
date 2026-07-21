@@ -2945,6 +2945,37 @@
       flex: 0 0 auto;
     }
 
+    .music-track-panel-header {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .music-playlist-back {
+      width: fit-content;
+      min-height: 34px;
+      padding: 0 11px;
+      border: 1px solid color-mix(in oklch, var(--rose-gold), white 58%);
+      border-radius: 999px;
+      background: color-mix(in oklch, var(--surface), var(--rose) 7%);
+      color: var(--fg);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    .music-track-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .music-track-heading h3 {
+      margin: 0;
+      line-height: 1.12;
+    }
+
     .segmented {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -8470,12 +8501,12 @@
               <div class="playlist-grid" id="music-playlist-grid" aria-live="polite"></div>
 
               <div class="panel" id="music-track-panel" style="margin-top:12px;" hidden>
-                <div class="section-title">
-                  <div>
-                    <button class="back-btn" id="music-back-to-playlists" type="button" aria-label="Back to all playlists">&larr; All Playlists</button>
-                    <h3 id="music-track-list-title" style="margin-top:10px;">Songs</h3>
+                <div class="music-track-panel-header">
+                  <button class="music-playlist-back" id="music-back-to-playlists" type="button" aria-label="Back to all playlists">&larr; All Playlists</button>
+                  <div class="music-track-heading">
+                    <h3 id="music-track-list-title">Songs</h3>
+                    <span class="status ok" id="music-track-count">Loading</span>
                   </div>
-                  <span class="status ok" id="music-track-count">Loading</span>
                 </div>
                 <div class="list" id="music-track-list">
                   <div class="row"><div><strong>Opening DT Tunes…</strong><small>Your private teacher library is loading.</small></div></div>
