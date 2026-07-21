@@ -6308,6 +6308,23 @@
       line-height: 1.35;
     }
 
+    .login-invite-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .login-invite-message {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .login-invite-message.success { color: oklch(42% 0.1 145); }
+    .login-invite-message.error { color: var(--danger); }
+
     .profile-compact-row {
       display: grid;
       grid-template-columns: minmax(76px, .55fr) minmax(150px, 1fr) minmax(145px, .95fr);
@@ -9707,7 +9724,7 @@
             <div class="admin-card-header">
               <div>
                 <h3>Login setup</h3>
-                <p>Use this to prepare teacher accounts before the real login system is connected.</p>
+                <p>Set access and send a secure account invitation.</p>
               </div>
               <span class="status pending" id="profile-login-status-badge">Not invited</span>
             </div>
@@ -9735,11 +9752,15 @@
               <label>Invite sent date
                 <input id="profile-invite-date" data-profile-field="inviteDate" type="date">
               </label>
+              <div class="login-invite-actions full-field">
+                <button class="primary" type="button" id="profile-send-email-invite">Send Invite Now</button>
+                <p class="login-invite-message" id="profile-email-invite-message" role="status" aria-live="polite">The invitation will be sent to the login email above.</p>
+              </div>
               <label class="full-field">Login setup notes
                 <textarea id="profile-login-notes" data-profile-field="loginNotes" rows="3" placeholder="Add setup reminders, missing information, or rollout notes."></textarea>
               </label>
             </form>
-            <p class="login-setup-note">Do not store passwords here. Actual passwords and account invites should be handled by the login provider when the app is connected.</p>
+            <p class="login-setup-note">Do not store passwords here. Dance Techniques will email a secure link so the teacher can choose their own password.</p>
           </section>
 
           <section class="admin-profile-card">
@@ -14224,7 +14245,68 @@
         inviteButton.textContent = profileTeacher.inviteStatus === "Invite sent" ? "Text invite again" : "Text invite";
         inviteButton.setAttribute("aria-label", `Text invite to ${fullName(profileTeacher)}`);
       }
+      const emailInviteButton = document.getElementById("profile-send-email-invite");
+      if (emailInviteButton) {
+        emailInviteButton.textContent = profileTeacher.inviteStatus === "Invite sent" ? "Send Invite Again" : "Send Invite Now";
+        emailInviteButton.setAttribute("aria-label", `Email a login invitation to ${fullName(profileTeacher)}`);
+      }
+      const emailInviteMessage = document.getElementById("profile-email-invite-message");
+      if (emailInviteMessage) {
+        emailInviteMessage.className = "login-invite-message";
+        emailInviteMessage.textContent = profileTeacher.loginEmail
+          ? `The invitation will be sent to ${profileTeacher.loginEmail}.`
+          : "Add a login email before sending the invitation.";
+      }
       renderCalendarSyncLinks();
+    };
+
+    const sendTeacherEmailInvite = async () => {
+      const button = document.getElementById("profile-send-email-invite");
+      const message = document.getElementById("profile-email-invite-message");
+      const email = String(document.getElementById("profile-login-email")?.value || profileTeacher.loginEmail || "").trim().toLowerCase();
+      const client = window.dtSupabase;
+      if (!email || !email.includes("@")) {
+        message.className = "login-invite-message error";
+        message.textContent = "Add a valid login email first.";
+        document.getElementById("profile-login-email")?.focus();
+        return;
+      }
+      if (!client || document.body.dataset.tourMode === "true") {
+        message.className = "login-invite-message error";
+        message.textContent = "Sign in as an administrator to send this invitation.";
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Sending…";
+      message.className = "login-invite-message";
+      message.textContent = `Sending a secure setup link to ${email}…`;
+      const { data, error } = await client.functions.invoke("send-teacher-invite", {
+        body: {
+          email,
+          fullName: fullName(profileTeacher),
+          teacherType: profileTeacher.teacherType || "Teacher"
+        }
+      });
+      button.disabled = false;
+      if (error || !data?.ok) {
+        console.error("Teacher invitation could not be sent", error || data);
+        button.textContent = profileTeacher.inviteStatus === "Invite sent" ? "Send Invite Again" : "Send Invite Now";
+        message.className = "login-invite-message error";
+        message.textContent = data?.message || "The invitation couldn’t be sent. Please try again.";
+        return;
+      }
+      profileTeacher.loginEmail = email;
+      profileTeacher.inviteStatus = "Invite sent";
+      profileTeacher.inviteDate = isoDate(new Date());
+      syncPersonalForm();
+      renderProfileHero();
+      renderTeacherProfileList();
+      saveAppData();
+      message.className = "login-invite-message success";
+      message.textContent = data.mode === "recovery"
+        ? `A fresh password setup link was sent to ${email}.`
+        : `Invitation sent to ${email}.`;
+      showToast(`Invite sent to ${email}`);
     };
 
     const renderTeacherProfileList = () => {
@@ -15768,6 +15850,7 @@
       saveAppData();
       showToast(`Text invite ready for ${profileTeacher.displayName || fullName(profileTeacher)}`);
     });
+    document.getElementById("profile-send-email-invite")?.addEventListener("click", sendTeacherEmailInvite);
     document.querySelectorAll("[data-focus-field]").forEach((button) => button.addEventListener("click", () => {
       document.getElementById(button.dataset.focusField)?.focus();
     }));

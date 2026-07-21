@@ -19,7 +19,8 @@
   const authHash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
   let passwordRecoveryMode = authQuery.get("password-recovery") === "1"
     || authQuery.has("code")
-    || authHash.get("type") === "recovery";
+    || ["invite", "recovery"].includes(authQuery.get("type"))
+    || ["invite", "recovery"].includes(authHash.get("type"));
   const isLocalTour = ["127.0.0.1", "localhost"].includes(window.location.hostname)
     && new URLSearchParams(window.location.search).get("tour") === "1";
 
