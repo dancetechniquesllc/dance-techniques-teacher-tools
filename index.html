@@ -17219,9 +17219,19 @@
         renderMusicTrackList();
         return;
       }
-      const balletPlaylists = visible.filter((playlist) => playlist.name.toLowerCase().includes("ballet"));
-      const tapPlaylists = visible.filter((playlist) => playlist.name.toLowerCase().includes("tap"));
-      const otherPlaylists = visible.filter((playlist) => !balletPlaylists.includes(playlist) && !tapPlaylists.includes(playlist));
+      const recitalPlaylists = visible.filter((playlist) => playlist.name.toLowerCase().includes("recital"));
+      const balletPlaylists = visible.filter((playlist) => {
+        const title = playlist.name.toLowerCase();
+        return title.includes("ballet") && !title.includes("recital");
+      });
+      const tapPlaylists = visible.filter((playlist) => {
+        const title = playlist.name.toLowerCase();
+        return title.includes("tap") && !title.includes("ballet") && !title.includes("recital");
+      });
+      const otherPlaylists = visible.filter((playlist) => {
+        const title = playlist.name.toLowerCase();
+        return !title.includes("ballet") && !title.includes("tap") && !title.includes("recital");
+      });
       const sectionMarkup = (label, playlists) => playlists.length ? `
         <details class="music-playlist-section" ${query ? "open" : ""}>
           <summary><span>${escapeText(label)}</span><small>${playlists.length} playlist${playlists.length === 1 ? "" : "s"}</small></summary>
@@ -17231,7 +17241,8 @@
       grid.innerHTML = `
         ${sectionMarkup("Ballet", balletPlaylists)}
         ${sectionMarkup("Tap", tapPlaylists)}
-        ${otherPlaylists.length ? `<div class="music-playlist-grid-inner">${musicPlaylistMarkup(otherPlaylists)}</div>` : ""}
+        ${sectionMarkup("Recital", recitalPlaylists)}
+        ${sectionMarkup("Other", otherPlaylists)}
       `;
       renderMusicTrackList();
     };
