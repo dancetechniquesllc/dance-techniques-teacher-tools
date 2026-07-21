@@ -9,6 +9,8 @@ This folder is the repo-safe copy of the Teacher Tools and Director Dashboard pr
 
 Start the normal Dance Techniques local app server, open the Teacher Portal, then choose **Teacher Tools & Director Dashboard**.
 
+The live installable app is published at `https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/`. Its public deployment repository contains only the browser app; the company repository remains private and Supabase keeps live records behind role-based access rules.
+
 For an in-person walkthrough before accounts are ready, append `?tour=1` to the local Director Dashboard URL. Tour mode works only on `localhost`/`127.0.0.1`, uses sample data, and cannot bypass sign-in on the published app.
 
 ## Current Scope
@@ -20,6 +22,7 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 - Browser-local prototype saving
 - Supabase email/password sign-in with inactive-account approval gating
 - Role-aware landing: directors/admins open the Director Dashboard, while teachers open Teacher Tools without a Director Dashboard switch
+- Installable PWA manifest, offline shell, live HTTPS address, and secure password-reset/password-setup screens
 - Responsive branded sign-in artwork optimized for teacher phones and director/admin computers
 
 ## Data Safety
