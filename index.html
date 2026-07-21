@@ -3896,6 +3896,17 @@
       padding-top: 8px;
     }
     .roster-empty { padding: 18px; text-align: center; color: var(--muted); }
+    .roster-shared-state {
+      display: none;
+      margin: 14px 0;
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface-soft);
+      text-align: center;
+    }
+    .roster-shared-state.active { display: block; }
+    .roster-shared-state strong { display: block; margin-bottom: 5px; }
 
     @media (max-width: 900px) {
       .roster-summary-grid { grid-template-columns: repeat(2, 1fr); }
@@ -8640,6 +8651,7 @@
                 <button class="primary" type="button" id="add-roster-class">Create a Class</button>
               </span>
             </div>
+            <div class="roster-shared-state" id="roster-shared-state" role="status" aria-live="polite"></div>
             <div class="roster-summary-grid" id="admin-roster-summary"></div>
             <div class="roster-toolbar">
               <label>Partner School
@@ -10152,9 +10164,19 @@
     let pendingRosterStudentPhoto = "";
     let sharedRosterReady = false;
 
-    const sharedRosterError = (message, error) => {
+    const setSharedRosterState = (state, title = "", detail = "") => {
+      document.body.dataset.sharedRosterState = state;
+      const panel = document.getElementById("roster-shared-state");
+      if (!panel) return;
+      panel.classList.toggle("active", state === "loading" || state === "error");
+      panel.innerHTML = title ? `<strong>${title}</strong>${detail ? `<span>${detail}</span>` : ""}` : "";
+      document.getElementById("add-roster-class")?.toggleAttribute("disabled", state !== "ready" && document.body.dataset.tourMode !== "true");
+    };
+
+    const sharedRosterError = (message, error, { reload = true } = {}) => {
       console.error(message, error);
       showToast(`${message} Please try again.`);
+      if (reload && sharedRosterReady) window.setTimeout(() => loadSharedClassesAndRosters(window.dtCurrentProfile), 0);
     };
 
     const dbTime = (value = "") => value ? String(value).slice(0, 5) : "";
@@ -10164,6 +10186,7 @@
     const loadSharedClassesAndRosters = async (profile = window.dtCurrentProfile) => {
       const client = window.dtSupabase;
       if (!client || !profile || document.body.dataset.tourMode === "true") return;
+      setSharedRosterState("loading", "Opening your shared roster…", "Only records available to this account will appear.");
       const [profilesResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active").eq("active", true),
         client.from("partner_schools").select("*").eq("active", true),
@@ -10173,7 +10196,13 @@
         client.from("student_notes").select("id, student_id, note, created_at").order("created_at", { ascending: false })
       ]);
       const failed = [profilesResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult].find((result) => result.error);
-      if (failed) return sharedRosterError("Shared roster data could not be loaded.", failed.error);
+      if (failed) {
+        sharedRosterReady = false;
+        replaceCollection(rosterClasses, []);
+        setSharedRosterState("error", "Your shared roster didn’t open", "No sample or private roster information is being shown. Refresh or try again in a moment.");
+        renderClassesAndRosters();
+        return sharedRosterError("Shared roster data could not be loaded.", failed.error, { reload: false });
+      }
 
       const profiles = profilesResult.data || [];
       const schools = schoolsResult.data || [];
@@ -10238,6 +10267,7 @@
       replaceCollection(rosterClasses, liveRosterClasses);
       selectedRosterClassId = rosterClasses[0]?.id || "";
       sharedRosterReady = true;
+      setSharedRosterState("ready");
       renderTeacherProfileList();
       renderSchoolLibrary();
       renderClassesAndRosters();
@@ -10263,6 +10293,7 @@
     const saveSharedStudent = async (student, rosterClass) => {
       if (!sharedRosterReady || !window.dtSupabase) return;
       if (rosterClass.sharedSavePending) await rosterClass.sharedSavePending;
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rosterClass.id || "")) return;
       if (!student.birthdate) return sharedRosterError("A birthdate is required before this dancer can be shared.", new Error("Missing birthdate"));
       const studentPayload = { first_name: student.firstName, last_name: student.lastName, birth_date: student.birthdate, gender: student.gender === "male" ? "male" : "female", parent_phone: student.parentPhone || null, parent_email: student.parentEmail || null };
       let studentId = student.id;
@@ -15684,6 +15715,13 @@
     };
 
     function renderClassesAndRosters() {
+      const sharedState = document.body.dataset.sharedRosterState;
+      if (document.body.dataset.tourMode !== "true" && sharedState !== "ready") {
+        document.getElementById("admin-roster-summary").innerHTML = "";
+        document.getElementById("admin-roster-class-list").innerHTML = "";
+        document.getElementById("admin-roster-detail").innerHTML = "";
+        return;
+      }
       const schoolSelect = document.getElementById("roster-school-filter");
       const teacherSelect = document.getElementById("roster-teacher-filter");
       const activeRosterClasses = rosterClasses.filter((item) => item.sourceActive !== false);
@@ -15729,7 +15767,7 @@
           <small class="roster-enrollment-bubble ${enrolled >= item.capacity ? "full" : (enrolled >= 7 ? "ready" : "low")}">${enrolled}/${item.capacity} Enrolled${enrolled >= item.capacity ? " · Full" : ""}</small>
           ${prospects ? `<small>${prospects} future dancer${prospects === 1 ? "" : "s"}</small>` : ""}
         </button>`;
-      }).join("") : `<div class="roster-empty">No classes match these filters.</div>`;
+      }).join("") : `<div class="roster-empty">${activeRosterClasses.length ? "No classes match these filters." : (teachers.some((teacher) => teacher.schools?.length) ? "No classes have been created yet. Choose Create a Class when the approved schedule is ready." : "No school assignments are ready yet. Add approved partner-school assignments before creating classes.")}</div>`;
 
       const detail = document.getElementById("admin-roster-detail");
       const selected = rosterClasses.find((item) => item.id === selectedRosterClassId && item.sourceActive !== false);
@@ -16915,6 +16953,7 @@
     window.addEventListener("beforeunload", saveAppData);
     window.addEventListener("dt-auth-ready", (event) => loadSharedClassesAndRosters(event.detail?.profile));
     if (window.dtCurrentProfile) loadSharedClassesAndRosters(window.dtCurrentProfile);
+    else if (document.body.dataset.tourMode !== "true") setSharedRosterState("loading", "Opening your shared roster…", "Only records available to this account will appear.");
     saveAppData();
 
     renderCurriculumWeekList();

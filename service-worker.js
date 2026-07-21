@@ -1,4 +1,4 @@
-const CACHE_NAME = "dt-teacher-tools-v2-shared-rosters";
+const CACHE_NAME = "dt-teacher-tools-v3-safe-shared-rosters";
 const CORE_ASSETS = [
   "./",
   "./index.html",
