@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v2-exact-logo";
+const CACHE_NAME = "my-dance-techniques-v3-solid-banner";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -18,7 +18,8 @@ const CORE_ASSETS = [
   "./assets/my-dance-techniques/parent-portal-illustration.png",
   "./assets/my-dance-techniques/teacher-tools-illustration.png",
   "./assets/my-dance-techniques/director-dashboard-illustration.png",
-  "./assets/my-dance-techniques/coming-soon-banner.png"
+  "./assets/my-dance-techniques/coming-soon-banner.png",
+  "./assets/my-dance-techniques/coming-soon-banner-v2.png"
 ];
 
 self.addEventListener("install", (event) => {
