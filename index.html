@@ -2879,9 +2879,9 @@
     .player-slot {
       min-height: 166px;
       border-radius: 8px;
-      border: 1px dashed oklch(67% 0.055 145);
+      border: 1px dashed #8f9f84;
       background:
-        linear-gradient(135deg, oklch(97% 0.025 135), oklch(94% 0.04 155));
+        linear-gradient(135deg, #edf0e8, #d9e1d2);
       display: grid;
       align-content: center;
       gap: 12px;
@@ -2910,7 +2910,39 @@
     .dt-tunes-audio {
       width: 100%;
       margin-top: 4px;
-      accent-color: var(--rose-gold);
+      accent-color: #77886d;
+    }
+
+    .dt-tunes-controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .dt-tunes-control {
+      min-height: 40px;
+      padding: 0 10px;
+      border: 1px solid #aebaa6;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.62);
+      color: #34402f;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 740;
+    }
+
+    .dt-tunes-control:hover,
+    .dt-tunes-control:focus-visible,
+    .dt-tunes-control[aria-pressed="true"] {
+      border-color: #718166;
+      background: #c8d3c0;
+      color: #253020;
+    }
+
+    #music-track-count {
+      background: #d8e3d1;
+      color: #33452e;
+      border-color: #b3c2aa;
     }
 
     .music-now-playing {
@@ -8496,6 +8528,11 @@
                   </div>
                 </div>
                 <audio class="dt-tunes-audio" id="dt-tunes-audio" controls preload="none"></audio>
+                <div class="dt-tunes-controls" aria-label="Playlist controls">
+                  <button class="dt-tunes-control" type="button" data-music-control="previous" aria-label="Play previous song">⏮ Previous</button>
+                  <button class="dt-tunes-control" id="dt-tunes-repeat" type="button" data-music-control="repeat" aria-label="Repeat current song" aria-pressed="false">↻ Repeat</button>
+                  <button class="dt-tunes-control" type="button" data-music-control="next" aria-label="Play next song">Next ⏭</button>
+                </div>
               </div>
 
               <div class="playlist-grid" id="music-playlist-grid" aria-live="polite"></div>
@@ -17193,7 +17230,9 @@
     const musicLibraryState = {
       playlists: [],
       selectedPlaylistId: "",
-      search: ""
+      search: "",
+      currentTrackId: "",
+      repeatCurrentTrack: false
     };
 
     const musicDurationLabel = (seconds = 0) => {
@@ -17309,6 +17348,8 @@
       const audio = document.getElementById("dt-tunes-audio");
       const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === trackId);
       if (!client || !audio || !track) return;
+      musicLibraryState.currentTrackId = track.id;
+      audio.loop = musicLibraryState.repeatCurrentTrack;
       const artist = musicArtistLabel(track.artist);
       setText("music-now-playing-title", track.title);
       setText("music-now-playing-artist", artist);
@@ -17340,8 +17381,42 @@
           album: "DT Tunes",
           artwork: coverUrl ? [{ src: new URL(coverUrl, window.location.href).href, sizes: "512x512", type: "image/png" }] : []
         });
+        navigator.mediaSession.setActionHandler("previoustrack", () => playAdjacentMusicTrack(-1));
+        navigator.mediaSession.setActionHandler("nexttrack", () => playAdjacentMusicTrack(1));
       }
     };
+
+    const currentMusicPlaylistTracks = () => {
+      const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+      return musicPlaylistTracks(playlist);
+    };
+
+    const playAdjacentMusicTrack = (direction, { automatic = false } = {}) => {
+      const tracks = currentMusicPlaylistTracks();
+      const currentIndex = tracks.findIndex((track) => track.id === musicLibraryState.currentTrackId);
+      const nextIndex = currentIndex + direction;
+      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= tracks.length) {
+        if (!automatic) showToast(direction > 0 ? "You’re at the end of this playlist." : "You’re at the first song in this playlist.");
+        return;
+      }
+      playMusicTrack(tracks[nextIndex].id);
+    };
+
+    const toggleMusicRepeat = () => {
+      musicLibraryState.repeatCurrentTrack = !musicLibraryState.repeatCurrentTrack;
+      const audio = document.getElementById("dt-tunes-audio");
+      const button = document.getElementById("dt-tunes-repeat");
+      if (audio) audio.loop = musicLibraryState.repeatCurrentTrack;
+      if (button) {
+        button.setAttribute("aria-pressed", String(musicLibraryState.repeatCurrentTrack));
+        button.textContent = musicLibraryState.repeatCurrentTrack ? "↻ Repeating" : "↻ Repeat";
+      }
+      showToast(musicLibraryState.repeatCurrentTrack ? "This song will repeat." : "Playlist play will continue normally.");
+    };
+
+    document.getElementById("dt-tunes-audio")?.addEventListener("ended", () => {
+      if (!musicLibraryState.repeatCurrentTrack) playAdjacentMusicTrack(1, { automatic: true });
+    });
 
     document.getElementById("music-library-search")?.addEventListener("input", (event) => {
       musicLibraryState.search = event.target.value;
@@ -17360,7 +17435,15 @@
         return;
       }
       const trackButton = event.target.closest("[data-music-track]");
-      if (trackButton) playMusicTrack(trackButton.dataset.musicTrack);
+      if (trackButton) {
+        playMusicTrack(trackButton.dataset.musicTrack);
+        return;
+      }
+      const controlButton = event.target.closest("[data-music-control]");
+      if (!controlButton) return;
+      if (controlButton.dataset.musicControl === "previous") playAdjacentMusicTrack(-1);
+      if (controlButton.dataset.musicControl === "next") playAdjacentMusicTrack(1);
+      if (controlButton.dataset.musicControl === "repeat") toggleMusicRepeat();
     });
 
     document.getElementById("music-back-to-playlists")?.addEventListener("click", () => {
