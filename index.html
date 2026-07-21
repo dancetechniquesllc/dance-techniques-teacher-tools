@@ -2865,6 +2865,22 @@
     .player-bars span:nth-child(3n + 1) { height: 22px; }
     .player-bars span:nth-child(3n + 2) { height: 46px; }
 
+    .dt-tunes-audio {
+      width: 100%;
+      margin-top: 4px;
+      accent-color: var(--rose-gold);
+    }
+
+    .playlist.selected {
+      border-color: var(--rose-gold);
+      background: color-mix(in oklch, var(--surface), var(--rose) 9%);
+      box-shadow: 0 8px 20px oklch(56% 0.08 18 / 0.12);
+    }
+
+    .music-track-button {
+      flex: 0 0 auto;
+    }
+
     .segmented {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -8368,62 +8384,31 @@
                 <button class="back-btn" data-tab-jump="today" aria-label="Back to Today">&larr;</button>
                 <div class="mobile-title">
                   <h2>Music</h2>
-                  <p class="subtle">Lexi • classroom playlists</p>
+                  <p class="subtle" id="music-profile-label">Shared teacher library</p>
                 </div>
                 <button class="avatar" data-tab-jump="profile" data-profile-avatar aria-label="Open profile">T</button>
               </div>
 
-              <input class="search" type="search" placeholder="Search playlists" aria-label="Search playlists">
+              <input class="search" id="music-library-search" type="search" placeholder="Search playlists or songs" aria-label="Search playlists or songs">
 
               <div class="player-slot">
                 <div>
-                  <span class="mini-label">Existing music player integration</span>
-                  <p class="class-title" style="color:var(--fg);font-size:21px;margin-top:8px;">Embedded player shell</p>
-                  <p class="subtle">Current app can mount here with teacher profile context.</p>
+                  <span class="mini-label">DT Tunes</span>
+                  <p class="class-title" id="music-now-playing-title" style="color:var(--fg);font-size:21px;margin-top:8px;">Choose a song</p>
+                  <p class="subtle" id="music-now-playing-artist">Your shared Dance Techniques music library is ready.</p>
                 </div>
-                <div class="player-bars" aria-hidden="true">
-                  <span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span>
-                  <span></span><span></span><span></span><span></span><span></span><span></span>
-                </div>
+                <audio class="dt-tunes-audio" id="dt-tunes-audio" controls preload="none"></audio>
               </div>
 
-              <div class="playlist-grid">
-                <button class="playlist"><strong>Tiny Tots</strong><small>Warm-ups, scarf songs</small></button>
-                <button class="playlist"><strong>Pre-K Combo</strong><small>Ballet, tap, jazz</small></button>
-                <button class="playlist"><strong>Recital Prep</strong><small>Teacher-facing cuts</small></button>
-                <button class="playlist"><strong>Backup Activities</strong><small>Rainy day class flow</small></button>
-              </div>
+              <div class="playlist-grid" id="music-playlist-grid" aria-live="polite"></div>
 
               <div class="panel" style="margin-top:12px;">
                 <div class="section-title">
-                  <h3>Next up</h3>
-                  <span class="status ok">Ready</span>
+                  <h3 id="music-track-list-title">Songs</h3>
+                  <span class="status ok" id="music-track-count">Loading</span>
                 </div>
-                <div class="list">
-                  <div class="row">
-                    <div><strong>Warm-Up + Stretch</strong><small>2 songs • teacher-ready</small></div>
-                    <span class="status ok">Ready</span>
-                  </div>
-                  <div class="row">
-                    <div><strong>Across the Floor</strong><small>Tap basics • 8 count practice</small></div>
-                    <span class="status private">Private</span>
-                  </div>
-                  <div class="row">
-                    <div><strong>Freeze Dance</strong><small>Backup activity for younger rooms</small></div>
-                    <span class="status ok">Ready</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="panel" style="margin-top:12px;">
-                <div class="section-title">
-                  <h3>Recently used</h3>
-                  <span class="status ok">Synced</span>
-                </div>
-                <div class="list">
-                  <div class="row"><div><strong>Tiptoe Freeze</strong><small>Primrose Rockwall • yesterday</small></div><button class="icon-btn" aria-label="Play Tiptoe Freeze">▶</button></div>
-                  <div class="row"><div><strong>Tap Toes Count-In</strong><small>Primrose Wylie • Monday</small></div><button class="icon-btn" aria-label="Play Tap Toes Count-In">▶</button></div>
+                <div class="list" id="music-track-list">
+                  <div class="row"><div><strong>Opening DT Tunes…</strong><small>Your private teacher library is loading.</small></div></div>
                 </div>
               </div>
             </section>
@@ -17103,13 +17088,146 @@
       openRosterStudentEditor(rosterClass, student);
     });
 
+    const musicLibraryState = {
+      playlists: [],
+      selectedPlaylistId: "",
+      search: ""
+    };
+
+    const musicDurationLabel = (seconds = 0) => {
+      const minutes = Math.floor(Number(seconds) / 60);
+      const remainder = Math.max(0, Number(seconds) % 60);
+      return `${minutes}:${String(remainder).padStart(2, "0")}`;
+    };
+
+    const musicPlaylistTracks = (playlist) => (playlist?.music_playlist_tracks || [])
+      .slice()
+      .sort((left, right) => left.position - right.position)
+      .map((entry) => entry.music_tracks)
+      .filter(Boolean);
+
+    const renderMusicTrackList = () => {
+      const list = document.getElementById("music-track-list");
+      const title = document.getElementById("music-track-list-title");
+      const count = document.getElementById("music-track-count");
+      if (!list || !title || !count) return;
+      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
+      const query = musicLibraryState.search.trim().toLowerCase();
+      const tracks = selected ? musicPlaylistTracks(selected) : [];
+      const visibleTracks = tracks.filter((track) => !query || `${track.title} ${track.artist}`.toLowerCase().includes(query));
+      title.textContent = selected?.name || "Songs";
+      count.textContent = `${visibleTracks.length} Song${visibleTracks.length === 1 ? "" : "s"}`;
+      if (!visibleTracks.length) {
+        list.innerHTML = `<div class="row"><div><strong>${query ? "No matching songs" : "No songs available"}</strong><small>${query ? "Try another search." : "Choose another playlist."}</small></div></div>`;
+        return;
+      }
+      list.innerHTML = visibleTracks.map((track) => `
+        <div class="row">
+          <div><strong>${escapeText(track.title)}</strong><small>${escapeText(track.artist || "Dance Techniques")} • ${musicDurationLabel(track.duration_seconds)}</small></div>
+          <button class="icon-btn music-track-button" type="button" data-music-track="${escapeText(track.id)}" aria-label="Play ${escapeText(track.title)}">▶</button>
+        </div>
+      `).join("");
+    };
+
+    const renderMusicPlaylists = () => {
+      const grid = document.getElementById("music-playlist-grid");
+      if (!grid) return;
+      const query = musicLibraryState.search.trim().toLowerCase();
+      const visible = musicLibraryState.playlists.filter((playlist) => {
+        if (!query) return true;
+        return playlist.name.toLowerCase().includes(query)
+          || musicPlaylistTracks(playlist).some((track) => `${track.title} ${track.artist}`.toLowerCase().includes(query));
+      });
+      if (!visible.length) {
+        grid.innerHTML = `<p class="subtle">No playlists or songs match that search.</p>`;
+        renderMusicTrackList();
+        return;
+      }
+      if (!visible.some((playlist) => playlist.id === musicLibraryState.selectedPlaylistId)) {
+        musicLibraryState.selectedPlaylistId = visible[0].id;
+      }
+      grid.innerHTML = visible.map((playlist) => {
+        const songCount = musicPlaylistTracks(playlist).length;
+        return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}"><strong>${escapeText(playlist.name)}</strong><small>${escapeText(playlist.category)} • ${songCount} song${songCount === 1 ? "" : "s"}</small></button>`;
+      }).join("");
+      renderMusicTrackList();
+    };
+
+    const loadSharedMusicLibrary = async (profile = window.dtCurrentProfile) => {
+      const client = window.dtSupabase;
+      const grid = document.getElementById("music-playlist-grid");
+      if (!client || !profile || document.body.dataset.tourMode === "true") return;
+      setText("music-profile-label", `${profile.full_name} • shared teacher library`);
+      if (grid) grid.innerHTML = `<p class="subtle">Opening your shared playlists…</p>`;
+      const { data, error } = await client
+        .from("music_playlists")
+        .select("id, name, category, sort_order, music_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path))")
+        .eq("active", true)
+        .order("sort_order");
+      if (error) {
+        console.error("DT Tunes could not load", error);
+        if (grid) grid.innerHTML = `<p class="subtle">DT Tunes couldn’t open. Refresh and try again.</p>`;
+        setText("music-track-count", "Unavailable");
+        return;
+      }
+      musicLibraryState.playlists = data || [];
+      musicLibraryState.selectedPlaylistId = musicLibraryState.playlists[0]?.id || "";
+      renderMusicPlaylists();
+    };
+
+    const playMusicTrack = async (trackId) => {
+      const client = window.dtSupabase;
+      const audio = document.getElementById("dt-tunes-audio");
+      const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === trackId);
+      if (!client || !audio || !track) return;
+      setText("music-now-playing-title", track.title);
+      setText("music-now-playing-artist", track.artist || "Dance Techniques");
+      const { data, error } = await client.storage.from("teacher-music").createSignedUrl(track.storage_path, 3600);
+      if (error || !data?.signedUrl) {
+        console.error("DT Tunes song could not open", error);
+        showToast("That song couldn’t open. Please try again.");
+        return;
+      }
+      audio.src = data.signedUrl;
+      try {
+        await audio.play();
+      } catch (_) {
+        showToast("Press play in the music player to begin.");
+      }
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({ title: track.title, artist: track.artist || "Dance Techniques", album: "DT Tunes" });
+      }
+    };
+
+    document.getElementById("music-library-search")?.addEventListener("input", (event) => {
+      musicLibraryState.search = event.target.value;
+      renderMusicPlaylists();
+    });
+
+    document.getElementById("music-view")?.addEventListener("click", (event) => {
+      const playlistButton = event.target.closest("[data-music-playlist]");
+      if (playlistButton) {
+        musicLibraryState.selectedPlaylistId = playlistButton.dataset.musicPlaylist;
+        renderMusicPlaylists();
+        return;
+      }
+      const trackButton = event.target.closest("[data-music-track]");
+      if (trackButton) playMusicTrack(trackButton.dataset.musicTrack);
+    });
+
     ["input", "change", "click", "drop"].forEach((eventName) => {
       document.addEventListener(eventName, () => scheduleAppDataSave());
     });
 
     window.addEventListener("beforeunload", saveAppData);
-    window.addEventListener("dt-auth-ready", (event) => loadSharedClassesAndRosters(event.detail?.profile));
-    if (window.dtCurrentProfile) loadSharedClassesAndRosters(window.dtCurrentProfile);
+    window.addEventListener("dt-auth-ready", (event) => {
+      loadSharedClassesAndRosters(event.detail?.profile);
+      loadSharedMusicLibrary(event.detail?.profile);
+    });
+    if (window.dtCurrentProfile) {
+      loadSharedClassesAndRosters(window.dtCurrentProfile);
+      loadSharedMusicLibrary(window.dtCurrentProfile);
+    }
     else if (document.body.dataset.tourMode !== "true") setSharedRosterState("loading", "Opening your shared roster…", "Only records available to this account will appear.");
     saveAppData();
 
