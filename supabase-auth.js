@@ -60,7 +60,7 @@
       return;
     }
     if (!session?.user) {
-      setGateState("login");
+      setGateState("landing");
       return;
     }
 
@@ -119,12 +119,21 @@
     await client.auth.signOut();
     passwordInput.value = "";
     message.textContent = "";
-    setGateState("login");
-    emailInput.focus();
+    setGateState("landing");
   };
 
   document.getElementById("auth-sign-out")?.addEventListener("click", signOut);
   document.getElementById("auth-pending-form")?.addEventListener("submit", signOut);
+
+  document.getElementById("open-teacher-login")?.addEventListener("click", () => {
+    setGateState("login");
+    window.setTimeout(() => emailInput.focus(), 0);
+  });
+
+  document.getElementById("auth-back-home")?.addEventListener("click", () => {
+    message.textContent = "";
+    setGateState("landing");
+  });
 
   document.getElementById("auth-forgot")?.addEventListener("click", () => {
     resetEmailInput.value = emailInput.value.trim();

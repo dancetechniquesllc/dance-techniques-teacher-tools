@@ -15,6 +15,7 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 
 ## Current Scope
 
+- Responsive **My Dance Techniques** landing page with Teacher Tools active and future Parent Portal and franchise Director Dashboard entrances visibly marked Coming Soon
 - Teacher and director views
 - Teacher profiles and school assignments
 - Partner School cards, teacher/ISD bubbles, and sorting
@@ -25,6 +26,7 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 - Role-aware landing: directors/admins open the Director Dashboard, while teachers open Teacher Tools without a Director Dashboard switch
 - Installable PWA manifest, offline shell, live HTTPS address, and secure password-reset/password-setup screens
 - Responsive branded sign-in artwork optimized for teacher phones and director/admin computers
+- Teacher-first mobile role ordering, with the existing secure sign-in and role-aware routing preserved behind the Teacher Tools entrance
 
 ## Data Safety
 

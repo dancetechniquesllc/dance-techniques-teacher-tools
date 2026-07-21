@@ -1,13 +1,23 @@
-const CACHE_NAME = "dt-teacher-tools-v3-safe-shared-rosters";
+const CACHE_NAME = "my-dance-techniques-v1-landing";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260720-shared-rosters",
+  "./supabase-auth.js?v=20260720-landing",
   "./data/partner-schools.js",
   "./assets/teacher-tool-logo.png",
   "./assets/dance-techniques-blush-logo.png",
-  "./assets/teacher-tools-sign-in-background.png"
+  "./assets/teacher-tools-sign-in-background.png",
+  "./assets/my-dance-techniques/dt-main-logo.png",
+  "./assets/my-dance-techniques/floral-corner-top-left.png",
+  "./assets/my-dance-techniques/ballet-shoes-top-right.png",
+  "./assets/my-dance-techniques/floral-corner-bottom-left.png",
+  "./assets/my-dance-techniques/floral-corner-bottom-right.png",
+  "./assets/my-dance-techniques/gold-sparkles.png",
+  "./assets/my-dance-techniques/parent-portal-illustration.png",
+  "./assets/my-dance-techniques/teacher-tools-illustration.png",
+  "./assets/my-dance-techniques/director-dashboard-illustration.png",
+  "./assets/my-dance-techniques/coming-soon-banner.png"
 ];
 
 self.addEventListener("install", (event) => {

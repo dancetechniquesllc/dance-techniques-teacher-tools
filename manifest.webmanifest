@@ -1,7 +1,7 @@
 {
-  "name": "Dance Techniques Teacher Tools",
-  "short_name": "Teacher Tools",
-  "description": "Dance Techniques Teacher Tools and Director Dashboard",
+  "name": "My Dance Techniques",
+  "short_name": "My DT",
+  "description": "One connected home for the Dance Techniques experience",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
