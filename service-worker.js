@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v8-production-navigation";
+const CACHE_NAME = "my-dance-techniques-v9-director-header";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const CORE_ASSETS = [
   "./data/partner-schools.js",
   "./assets/teacher-tool-logo.png",
   "./assets/dance-techniques-blush-logo.png",
+  "./assets/dance-techniques-logo-only.png",
   "./assets/teacher-tools-sign-in-background.png",
   "./assets/my-dance-techniques/dt-main-logo.png",
   "./assets/my-dance-techniques/blush-logo-exact.png",
