@@ -345,6 +345,7 @@
       box-shadow: 0 10px 28px oklch(22% 0.03 245 / 0.07);
       margin-bottom: 14px;
       text-align: center;
+      color: var(--fg);
     }
 
     .widget-top {
@@ -10793,6 +10794,50 @@
       }
     ];
 
+    const legacyDemoMessageTexts = new Set([
+      "Group chat reminder: please bring any school schedule changes and curriculum notes.",
+      "This thread is visible to teachers, directors, and admins.",
+      "I will review open curriculum checklists before the meeting.",
+      "Reminder: please double-check Teacher Tools before your first class and send schedule changes through the app.",
+      "Your payday directory and curriculum progress are ready for review.",
+      "Perfect. I will check it after classes.",
+      "Can you look over the Primrose Rockwall music list before Thursday?",
+      "I need help finishing the Week 1 checklist after class.",
+      "Thanks. I can see it here and will follow up today."
+    ]);
+    const legacyDemoPayStubNames = new Set([
+      "lexi-2026-07-01-pay-stub.pdf",
+      "lexi-2026-06-15-pay-stub.pdf"
+    ]);
+
+    const stripLegacyProductionDemoContent = () => {
+      if (document.body.dataset.tourMode === "true") return false;
+      let changed = false;
+      messageThreads.forEach((thread) => {
+        const filteredMessages = (thread.messages || []).filter((message) => !legacyDemoMessageTexts.has(message.text));
+        if (filteredMessages.length !== (thread.messages || []).length) {
+          thread.messages = filteredMessages;
+          thread.unreadFor = [];
+          changed = true;
+        }
+      });
+      for (let index = messageThreads.length - 1; index >= 0; index -= 1) {
+        if (messageThreads[index].type === "private" && !messageThreads[index].messages.length) {
+          messageThreads.splice(index, 1);
+          changed = true;
+        }
+      }
+      teachers.forEach((teacher) => {
+        const payStubs = Array.isArray(teacher.payStubs) ? teacher.payStubs : [];
+        const filteredPayStubs = payStubs.filter((stub) => !legacyDemoPayStubNames.has(stub.filename));
+        if (filteredPayStubs.length !== payStubs.length) {
+          teacher.payStubs = filteredPayStubs;
+          changed = true;
+        }
+      });
+      return changed;
+    };
+
     const lexiSchedule = [
       {
         school: "Primrose North Rockwall",
@@ -11229,7 +11274,7 @@
     };
 
     const prototypeToday = new Date("2026-09-14T12:00:00");
-    const homeWidgetDate = new Date(prototypeToday);
+    const homeWidgetDate = document.body.dataset.tourMode === "true" ? new Date(prototypeToday) : new Date();
     // Brand copy: Today's Tempo encouragement library. Messages are tagged so Admin can rotate them by season or mood.
     const tempoMonthTags = ["august", "september", "october", "november", "december", "january", "february", "march", "april", "may"];
     const tempoEntry = (body, ...tags) => {
@@ -11790,6 +11835,23 @@
       const depositLabel = nextPayrollDate(homeWidgetDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
       setText("payday-classes-taught", classesLabel);
       setText("payday-next-deposit", `Next payroll date: ${depositLabel}`);
+      const payStubs = Array.isArray(profileTeacher.payStubs) ? profileTeacher.payStubs.slice().sort((a, b) => b.payDate.localeCompare(a.payDate)) : [];
+      const payBadge = document.getElementById("pay-home-badge");
+      const payAlert = document.getElementById("pay-home-alert");
+      if (payBadge) {
+        payBadge.textContent = String(payStubs.length);
+        payBadge.hidden = payStubs.length === 0;
+      }
+      if (payAlert) payAlert.hidden = payStubs.length === 0;
+      const stubList = document.getElementById("stub-list");
+      if (stubList) {
+        stubList.innerHTML = payStubs.length ? payStubs.map((stub, index) => `
+          <div class="stub">
+            <div><strong>${index === 0 ? "Most Recent Payday" : "Previous Payday"}</strong><small>${escapeText(formatPayDate(stub.payDate))}</small><small>Payday record</small></div>
+            <div class="stub-actions"><button class="secondary" type="button" data-download-stub="${escapeText(stub.payDate)}">Download</button></div>
+          </div>
+        `).join("") : `<div class="stub"><div><strong>No paydays available yet</strong><small>Your payday records will appear here when they are added.</small></div></div>`;
+      }
     };
 
     const renderHomeWidget = () => {
@@ -11924,7 +11986,7 @@
       const index = calendarMonths.findIndex((month) => month.getFullYear() === date.getFullYear() && month.getMonth() === date.getMonth());
       return index >= 0 ? index : 0;
     };
-    let classesCalendarIndex = calendarIndexForDate(prototypeToday);
+    let classesCalendarIndex = calendarIndexForDate(homeWidgetDate);
 
     const scheduleClosures = [
       {
@@ -12310,7 +12372,7 @@
     };
 
     const renderLexiSchedule = () => {
-      const today = new Date(prototypeToday);
+      const today = new Date(homeWidgetDate);
       const allEvents = flattenLexiSchedule();
       const nextEvent = nextClassForReferenceTime(allEvents, today);
       const month = calendarMonths[classesCalendarIndex];
@@ -17907,12 +17969,14 @@
         if (teacherStatesError) console.error("Teacher cloud changes could not load for the Director Dashboard", teacherStatesError);
         else (teacherStates || []).forEach((teacherState) => applyTeacherCloudData(teacherState.payload, teacherState.teacher_id, { includeMessages: false }));
       }
-      if (data?.payload || isLeader) {
+      const removedDemoContent = stripLegacyProductionDemoContent();
+      if (data?.payload || isLeader || removedDemoContent) {
         renderCloudSyncedAppData();
         document.documentElement.dataset.cloudLoadedAt = data?.updated_at || "";
         showToast(isLeader ? "Director Dashboard synced from the cloud" : "Teacher Tools synced from the cloud");
       }
       cloudPersistenceReady = true;
+      if (removedDemoContent) await saveCloudAppData();
     };
 
     const loadSharedPortalData = async (profile) => {
