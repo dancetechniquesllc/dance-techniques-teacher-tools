@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#dca49b" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -37,7 +37,15 @@
     }
 
     * { box-sizing: border-box; }
+    html {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
     body {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
       margin: 0;
       color: var(--fg);
       background:
@@ -4607,6 +4615,35 @@
 
     .teacher-card-main {
       display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .teacher-card-photo {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--blush);
+      color: var(--rose);
+      font-size: 15px;
+      font-weight: 850;
+      line-height: 1;
+    }
+
+    .teacher-card-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .teacher-card-copy {
+      display: grid;
       gap: 8px;
       min-width: 0;
     }
@@ -7866,6 +7903,12 @@
       .toolbar .search { max-width: none; }
       .field-pair, .form-actions { grid-template-columns: 1fr; }
       .profile-mini-grid { grid-template-columns: 1fr; }
+      body[data-mode="teacher"] {
+        touch-action: pan-y;
+      }
+      body[data-mode="teacher"] :is(input, select, textarea) {
+        font-size: 16px;
+      }
     }
 
     body[data-mode="teacher"] .admin-shell { display: none; }
@@ -14760,9 +14803,14 @@
         ${teachingTeam.map((teacher) => `
           <button class="teacher-row ${teacher.id === profileTeacher.id ? "selected" : ""}" type="button" data-admin-open-profile="${escapeText(teacher.id)}">
             <span class="teacher-card-main">
-              <strong>${escapeText(fullName(teacher))}</strong>
-              <span class="teacher-school-tags" aria-label="Assigned schools">
-                ${teacher.schools.map((school) => `<span class="teacher-school-tag">${escapeText(school.nickname || school.name)}</span>`).join("")}
+              <span class="teacher-card-photo" aria-hidden="true">
+                ${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(initialsFor(teacher))}
+              </span>
+              <span class="teacher-card-copy">
+                <strong>${escapeText(fullName(teacher))}</strong>
+                <span class="teacher-school-tags" aria-label="Assigned schools">
+                  ${teacher.schools.map((school) => `<span class="teacher-school-tag">${escapeText(school.nickname || school.name)}</span>`).join("")}
+                </span>
               </span>
             </span>
             <span class="teacher-card-badges">
