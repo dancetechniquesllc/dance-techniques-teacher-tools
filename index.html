@@ -17202,6 +17202,10 @@
       return `${minutes}:${String(remainder).padStart(2, "0")}`;
     };
 
+    const musicArtistLabel = (artist = "") => artist.trim().toLowerCase() === "orico"
+      ? "Dance Techniques"
+      : (artist || "Dance Techniques");
+
     const musicPlaylistTracks = (playlist) => (playlist?.music_playlist_tracks || [])
       .slice()
       .sort((left, right) => left.position - right.position)
@@ -17225,7 +17229,7 @@
       }
       list.innerHTML = visibleTracks.map((track) => `
         <div class="row">
-          <div><strong>${escapeText(track.title)}</strong><small>${escapeText(track.artist || "Dance Techniques")} • ${musicDurationLabel(track.duration_seconds)}</small></div>
+          <div><strong>${escapeText(track.title)}</strong><small>${escapeText(musicArtistLabel(track.artist))} • ${musicDurationLabel(track.duration_seconds)}</small></div>
           <button class="icon-btn music-track-button" type="button" data-music-track="${escapeText(track.id)}" aria-label="Play ${escapeText(track.title)}">▶</button>
         </div>
       `).join("");
@@ -17305,8 +17309,9 @@
       const audio = document.getElementById("dt-tunes-audio");
       const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === trackId);
       if (!client || !audio || !track) return;
+      const artist = musicArtistLabel(track.artist);
       setText("music-now-playing-title", track.title);
-      setText("music-now-playing-artist", track.artist || "Dance Techniques");
+      setText("music-now-playing-artist", artist);
       const artwork = document.getElementById("music-now-playing-art");
       const coverFilename = track.cover_path?.split("/").pop();
       const coverUrl = coverFilename ? `assets/dt-tunes/song-covers/${encodeURIComponent(coverFilename)}` : "";
@@ -17331,7 +17336,7 @@
       if ("mediaSession" in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: track.title,
-          artist: track.artist || "Dance Techniques",
+          artist,
           album: "DT Tunes",
           artwork: coverUrl ? [{ src: new URL(coverUrl, window.location.href).href, sizes: "512x512", type: "image/png" }] : []
         });
