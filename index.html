@@ -8000,6 +8000,7 @@
     }
 
     body[data-authenticated="true"] .session-strip { display: flex; }
+    body[data-authenticated="true"]:not([data-tour-mode="true"]) .switcher { display: none; }
     body[data-user-role="teacher"] [data-mode-btn="admin"] { display: none; }
     .session-strip button { padding: 7px 11px; font-size: 12px; }
     body.auth-checking > .app { visibility: hidden; }
