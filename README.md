@@ -1,13 +1,13 @@
-# Teacher Tools and Director Dashboard Prototype
+# My Dance Techniques — Canonical App
 
-**Status:** In development
-**Last updated:** 2026-07-20
+**Status:** Active canonical app
+**Last updated:** 2026-07-23
 
-This folder is the repo-safe copy of the Teacher Tools and Director Dashboard prototype developed in Open Design.
+This folder is the single source of truth for My Dance Techniques, including Teacher Tools and the Director Dashboard. All development starts here, and approved releases are published from here to the public deployment repository.
 
 ## Open It
 
-Start the normal Dance Techniques local app server, open the Teacher Portal, then choose **Teacher Tools & Director Dashboard**.
+Start the normal Dance Techniques local app server, open the Teacher Portal, then choose **Teacher Tools & Director Dashboard**. The local server now resolves this repository automatically instead of relying on a computer-specific folder.
 
 The live installable app is published at `https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/`. Its public deployment repository contains only the browser app; the company repository remains private and Supabase keeps live records behind role-based access rules.
 
@@ -38,6 +38,8 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 - Public Partner School starter information is checked in at `data/partner-schools.js`, with source research in `research/partner-schools/`.
 - Browser edits override the starter directory on that browser but do not automatically update the checked-in data file.
 
-## Source Note
+## Canonical Source Rule
 
-Open Design remains a local design workspace. This folder is the shareable app copy and is the version that should be reviewed, committed, and synchronized through GitHub.
+Do not develop directly in a separate deployment checkout. Changes are reviewed and committed in this folder first, then published with `tools/publish-teacher-tools-site.sh`. The public repository is a deployment mirror, not a second development source.
+
+The July 23, 2026 public release was reconciled back into this folder after development had temporarily drifted into the deployment repository. Git history preserves the earlier app; no old prototype should be used as a working source.

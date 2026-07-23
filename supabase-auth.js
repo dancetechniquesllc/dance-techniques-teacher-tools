@@ -3,6 +3,7 @@
 
   const projectUrl = "https://pgagpvfiplizahsnmvxf.supabase.co";
   const publishableKey = "sb_publishable_ZypHy48w_5CFqkjpuRYCbA_802_MDed";
+  window.DT_VAPID_PUBLIC_KEY = "BFgsYSQnkEQ8aUqbeweRXsPaaccqTz5hFGjzh3ybTOTxybs8ZLfHuQcPhQhMEpq7tCekPQjubaEFWsuasMgK5yI";
   const gate = document.getElementById("auth-gate");
   const form = document.getElementById("auth-form");
   const emailInput = document.getElementById("auth-email");

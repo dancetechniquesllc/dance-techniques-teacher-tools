@@ -1,13 +1,29 @@
-const CACHE_NAME = "my-dance-techniques-v10-director-header";
+const CACHE_NAME = "my-dance-techniques-v71-official-app-icon";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260720-account-security",
+  "./supabase-auth.js?v=20260721-notifications",
   "./data/partner-schools.js",
-  "./assets/teacher-tool-logo.png",
+  "./dt-touch/dt-touch.js?v=20260722c",
+  "./config/dt-touch-voice.json",
+  "./assets/app-icon-192.png?v=20260723-app-icon",
+  "./assets/app-icon-512.png?v=20260723-app-icon",
+  "./assets/apple-touch-icon.png?v=20260723-app-icon",
+  "./assets/favicon-64.png?v=20260723-app-icon",
+  "./assets/app-icon-my-day.png",
+  "./assets/app-icon-rosters.png",
+  "./assets/app-icon-music.png",
+  "./assets/app-icon-curriculum.png",
+  "./assets/app-icon-schedule.png",
+  "./assets/app-icon-messages.png",
+  "./assets/app-icon-payday.png",
+  "./assets/app-icon-partner-schools.png",
   "./assets/dance-techniques-blush-logo.png",
   "./assets/dance-techniques-logo-only.png",
+  "./assets/director-dashboard-title.png",
+  "./assets/birthday-crown-ring.png",
+  "./assets/birthday-crown-ring-sage.png",
   "./assets/teacher-tools-sign-in-background.png",
   "./assets/my-dance-techniques/dt-main-logo.png",
   "./assets/my-dance-techniques/blush-logo-exact.png",
@@ -63,4 +79,29 @@ self.addEventListener("fetch", (event) => {
       return cached || network;
     })
   );
+});
+
+self.addEventListener("push", (event) => {
+  let payload = {};
+  try { payload = event.data?.json() || {}; } catch (error) { payload = { body: event.data?.text() || "" }; }
+  const title = payload.title || "Dance Techniques";
+  const options = {
+    body: payload.body || "You have a new notification.",
+    icon: "./assets/app-icon-192.png?v=20260721",
+    badge: "./assets/favicon-64.png?v=20260721",
+    data: { url: payload.url || "./?open=notifications", notificationId: payload.notificationId || "" },
+    tag: payload.tag || payload.notificationId || "dance-techniques",
+    renotify: Boolean(payload.urgent)
+  };
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url || "./?open=notifications", self.location.origin).href;
+  event.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+    const existing = clients.find((client) => client.url.startsWith(self.location.origin));
+    if (existing) return existing.focus().then(() => existing.navigate(target));
+    return self.clients.openWindow(target);
+  }));
 });
