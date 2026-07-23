@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v73-partner-school-card-saving";
+const CACHE_NAME = "my-dance-techniques-v74-wix-orders-go-live-cutoff";
 const CORE_ASSETS = [
   "./",
   "./index.html",

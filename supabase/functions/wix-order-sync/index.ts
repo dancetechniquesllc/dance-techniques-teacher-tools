@@ -75,7 +75,7 @@ Deno.serve(async (request) => {
         .select("id").eq("wix_order_id", wixOrderId).maybeSingle();
       if (existingOrderError) throw new Error(`Boutique order duplicate check failed: ${existingOrderError.code}`);
       const orderCreatedAt = timestamp(order.createdDate || order._createdDate);
-      if (!existingOrder && (!orderCreatedAt || new Date(orderCreatedAt).valueOf() < goLiveAt)) continue;
+      if (!orderCreatedAt || new Date(orderCreatedAt).valueOf() < goLiveAt) continue;
       const contact = order.billingInfo?.contactDetails || order.recipientInfo?.contactDetails || {};
       const total = order.priceSummary?.total || order.balanceSummary?.balance;
       const orderRow = {

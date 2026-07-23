@@ -2009,12 +2009,13 @@
     .teacher-roster-duration.duration-45 { background: oklch(91% 0.07 145); color: oklch(38% 0.1 145); }
     .teacher-roster-start-button { min-height: 30px; padding: 0 10px; border: 1px solid var(--fg); border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 10px; font-weight: 800; }
     .teacher-roster-start-button.is-active { border-color: var(--berry); background: var(--blush); color: var(--berry); }
-    .teacher-roster-class-actions { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 13px; align-items: stretch; }
+    .teacher-roster-class-actions { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 13px; align-items: stretch; }
     .teacher-roster-class-actions button { width: 100%; min-width: 0; min-height: 34px; padding: 5px 7px; border: 1px solid transparent; border-radius: 999px; font-size: 9px; font-weight: 800; line-height: 1.15; text-align: center; }
     .teacher-class-action-start { background: var(--fg); color: var(--bg); }
     .teacher-class-action-kit { border-color: #789478 !important; background: #8fa88e; color: white; }
     .teacher-class-action-kit.is-active { box-shadow: inset 0 0 0 2px white; }
     .teacher-class-action-boutique { border-color: var(--border) !important; background: var(--blush); color: var(--berry); }
+    .teacher-class-action-helper { border-color: #d3a51e !important; background: #f8e7a9; color: var(--fg); }
     .teacher-roster-class-actions button:disabled { cursor: default; opacity: .46; }
     .teacher-roster-class-actions .teacher-class-action-boutique:disabled { opacity: 1; }
 
@@ -2056,6 +2057,8 @@
     .teacher-roster-classroom + .teacher-roster-classroom { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
     .teacher-roster-classroom h4 { margin: 0 0 9px; font-family: inherit; font-size: 15px; font-weight: 700; }
     .teacher-roster-student-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 8px; }
+    .teacher-classroom-selected-count { display: flex; justify-content: flex-end; min-height: 24px; margin-top: 10px; }
+    .teacher-classroom-selected-count span { display: grid; place-items: center; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: var(--berry); color: white; font-size: 11px; font-weight: 850; }
     .teacher-roster-student-tile { min-width: 0; display: grid; justify-items: center; align-content: start; gap: 6px; text-align: center; }
     .teacher-roster-profile-button { position: relative; width: 62px; height: 62px; padding: 0; border: 2px solid transparent; border-radius: 50%; background: transparent; color: inherit; }
     .teacher-roster-profile-button .roster-student-photo { width: 58px; height: 58px; font-size: 17px; }
@@ -2072,6 +2075,7 @@
       font-weight: 900;
       text-shadow: 0 1px 2px oklch(35% 0.06 10 / .3);
     }
+    .teacher-roster-selection-check.is-safe { background: rgb(118 118 118 / .78); text-shadow: none; }
     .teacher-roster-check { position: absolute; right: -2px; top: -2px; width: 22px; height: 22px; display: grid; place-items: center; border: 2px solid white; border-radius: 50%; background: oklch(72% 0.12 145); color: white; font-size: 12px; font-weight: 900; }
     .teacher-roster-check.is-tardy { background: oklch(76% 0.14 86); color: oklch(30% 0.065 75); }
     .teacher-roster-check.is-absent { background: var(--berry); color: white; }
@@ -2102,7 +2106,11 @@
     .student-library-card .student-library-teacher { color: var(--berry); font-weight: 700; }
     .student-library-card .student-library-age { color: color-mix(in oklch, var(--muted) 72%, white); font-size: 10px; font-weight: 450; }
     .student-library-day-bubble { position: absolute; top: 10px; right: 10px; min-width: 29px; height: 29px; display: grid; place-items: center; padding: 0 7px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 950; }
-    .enrollment-student-view-toggle { width: min(620px, 100%); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin: -4px auto 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .enrollment-summary-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 4px 0 16px; }
+    .enrollment-summary-card { min-height: 86px; display: grid; place-content: center; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); text-align: center; }
+    .enrollment-summary-card strong { color: var(--berry); font-size: 25px; line-height: 1; }
+    .enrollment-summary-card small { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .enrollment-student-view-toggle button { min-height: 48px; padding: 9px 14px; border-radius: 12px; background: transparent; color: var(--fg); font-family: var(--font-body); font-size: 16px; font-weight: 800; }
     .enrollment-student-view-toggle button.is-selected { background: var(--blush); color: var(--berry); box-shadow: 0 1px 3px oklch(35% 0.04 25 / .08); }
     .enrollment-student-view-panel[hidden] { display: none !important; }
@@ -2113,7 +2121,14 @@
     .student-library-class-section > h4 { margin: 0 0 13px; padding-bottom: 9px; border-bottom: 2px solid var(--border); color: var(--muted); font-family: var(--font-body); font-size: 15px; font-weight: 600; }
     .student-library-class-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
     @media (max-width: 980px) { .student-library-grid, .student-library-class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-    @media (max-width: 560px) { .student-library-grid, .student-library-class-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) {
+      .student-library-grid, .student-library-class-grid { grid-template-columns: 1fr; }
+      .enrollment-summary-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+      .enrollment-summary-card { min-height: 72px; padding: 8px 4px; }
+      .enrollment-summary-card strong { font-size: 21px; }
+      .enrollment-summary-card small { font-size: 9px; }
+      .enrollment-student-view-toggle button { padding-inline: 5px; font-size: 12px; }
+    }
     .teacher-attendance-review-list { display: grid; gap: 8px; margin-top: 14px; }
     .teacher-attendance-review-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-soft); }
     .teacher-attendance-review-row .roster-student-photo { width: 42px; height: 42px; font-size: 12px; }
@@ -2150,10 +2165,12 @@
     .teacher-attendance-actions button { min-height: 34px; padding: 0 9px; border-radius: 999px; font-size: 10px; font-weight: 800; }
     .teacher-attendance-review { display: grid; gap: 8px; margin-top: 12px; padding: 11px; border: 1px solid oklch(78% 0.08 70); border-radius: 9px; background: oklch(97% 0.035 75); }
     .teacher-attendance-review > strong { font-size: 14px; }
-    .teacher-attendance-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .teacher-attendance-footer { display: flex; justify-content: space-between; gap: 8px; margin-top: 12px; }
+    .teacher-attendance-footer .teacher-workflow-cancel { border-color: color-mix(in srgb, var(--berry) 28%, var(--border)); background: var(--blush); color: var(--berry); }
     .teacher-attendance-complete { padding: 10px; border-radius: 9px; background: oklch(94% 0.05 145); color: oklch(35% 0.1 145); font-size: 12px; font-weight: 800; text-align: center; }
     .teacher-roster-future-panel { margin-top: 12px; border-top: 1px solid var(--border); }
-    .teacher-roster-future-panel summary { padding: 12px 0 4px; cursor: pointer; font-weight: 750; }
+    .teacher-roster-future-panel > summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0 4px; cursor: pointer; font-weight: 750; }
+    .teacher-roster-future-panel > summary button { flex: 0 0 auto; }
 
     .teacher-roster-student strong,
     .teacher-roster-student small { display: block; }
@@ -2184,9 +2201,20 @@
       color: var(--muted);
       font: 500 11px/1.2 "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif;
     }
+    .teacher-roster-form [hidden] { display: none !important; }
 
     .teacher-roster-form .full-field { grid-column: 1 / -1; }
     .teacher-roster-form textarea { min-height: 76px; resize: vertical; }
+    .teacher-roster-form .field-subtitle { color: var(--muted); font-size: 10px; font-weight: 500; line-height: 1.35; }
+    .teacher-roster-form + .confirm-actions .trial-request-submit { border-color: color-mix(in srgb, var(--berry) 35%, var(--border)); background: var(--blush); color: var(--berry); }
+    .teacher-roster-form + .confirm-actions .future-dancer-delete { border-color: #111; background: #111; color: white; }
+    .future-dancer-delete[hidden] { display: none !important; }
+    .teacher-prospect-followup-section { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 14px; border: 1px solid color-mix(in srgb, var(--berry) 25%, var(--border)); border-radius: 12px; background: color-mix(in srgb, var(--blush) 72%, white); }
+    .teacher-future-prospect-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+    .teacher-future-prospect-card { position: relative; display: grid; place-items: center; gap: 7px; min-width: 0; padding: 14px 8px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: inherit; text-align: center; }
+    .teacher-future-prospect-card:hover { border-color: color-mix(in srgb, var(--berry) 35%, var(--border)); background: color-mix(in srgb, var(--blush) 38%, var(--surface)); }
+    .teacher-future-prospect-card .roster-student-photo { width: 58px; height: 58px; flex-basis: 58px; }
+    .teacher-future-prospect-card strong { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
 
     @media (max-width: 460px) {
       .teacher-roster-form { grid-template-columns: 1fr; }
@@ -4905,6 +4933,7 @@
     .enrollment-queue-item .enrollment-card-age { color: color-mix(in oklch, var(--muted) 72%, white); font-size: 10px; font-weight: 400 !important; }
     .enrollment-queue-item .enrollment-priority-bubble,
     .enrollment-queue-item .enrollment-stage-bubble { position: absolute; top: 10px; right: 10px; max-width: calc(100% - 20px); margin: 0; font-size: 9px; }
+    .enrollment-future-match-heart { position: absolute; top: 36px; right: 13px; width: 22px; height: 20px; display: grid; place-items: center; background: var(--blush); color: var(--berry); font-size: 11px; line-height: 1; clip-path: path("M11 19C9 16 1 12 1 6 1 2 4 0 7 0c2 0 3 1 4 3 1-2 2-3 4-3 3 0 6 2 6 6 0 6-8 10-10 13Z"); filter: drop-shadow(0 1px 1px rgb(91 45 55 / .16)); }
     .enrollment-priority-bubble { display: inline-flex; width: fit-content; align-items: center; margin-top: 3px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1; }
     .enrollment-priority-bubble.today { background: oklch(91% 0.09 25); color: oklch(43% 0.16 25); }
     .enrollment-priority-bubble.tomorrow { background: oklch(93% 0.11 92); color: oklch(43% 0.1 72); }
@@ -5308,6 +5337,8 @@
     .roster-student-name small { display: block; }
     .roster-student-name { display: flex; align-items: center; gap: 9px; }
     .roster-student-photo { box-sizing: border-box; position: relative; width: 38px; height: 38px; flex: 0 0 38px; display: grid; place-items: center; overflow: visible; border-radius: 999px; background: oklch(94% 0.035 25); color: var(--fg); font-weight: 900; }
+    .roster-student-photo.is-prospect-heart,
+    .roster-photo-preview.is-prospect-heart { overflow: hidden; border: 0; border-radius: 0; background: var(--blush); color: var(--berry); clip-path: none; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 58'%3E%3Cpath fill='black' d='M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 58'%3E%3Cpath fill='black' d='M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z'/%3E%3C/svg%3E") center / contain no-repeat; font-size: 0; }
     .roster-student-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .roster-student-photo img,
     .roster-photo-preview img { position: relative; z-index: 0; border-radius: inherit; }
@@ -5339,7 +5370,10 @@
     .has-boutique-deliver > .boutique-order-badge { background-color: #8fa88e; }
     .roster-student-row.is-male, .roster-student-row.is-male small { color: #68775f; }
     .roster-student-row.is-male .roster-student-photo { background: #e2e8de; color: #4f5f48; }
-    .teacher-helper-sparkle { margin: 0 1px; color: #d3a51e; font-size: 8px; line-height: 1; vertical-align: 1px; filter: drop-shadow(0 1px 1px rgb(91 60 0 / .16)); }
+    .teacher-helper-sparkle { margin: 0 1px; color: var(--fg); font-size: 8px; line-height: 1; vertical-align: 1px; }
+    .teacher-helper-name { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; padding: 3px 6px; border: 1px solid #d3a51e; border-radius: 999px; background: #f8e7a9; color: var(--fg); white-space: nowrap; }
+    .teacher-helper-picker-dialog { position: relative; }
+    .teacher-helper-picker-close { position: absolute; top: 10px; right: 10px; }
     .roster-photo-editor { display: flex; align-items: center; gap: 12px; }
     .roster-photo-preview { box-sizing: border-box; position: relative; width: 64px; height: 64px; overflow: visible; display: grid; place-items: center; border-radius: 999px; background: oklch(94% 0.035 25); font-weight: 900; }
     .roster-photo-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
@@ -5352,9 +5386,42 @@
     .roster-edit-form { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
     .roster-edit-form .full-field { grid-column: 1 / -1; }
     .roster-edit-form textarea { min-height: 100px; resize: vertical; }
+    .roster-future-only { display: none; }
+    .roster-edit-form.is-future-dancer .roster-future-only { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .roster-edit-form.is-future-dancer label:has(#roster-edit-preferred-name),
+    .roster-edit-form.is-future-dancer label:has(#roster-edit-gender),
+    .roster-edit-form.is-future-dancer label:has(#roster-edit-tshirt-size),
+    .roster-edit-form.is-future-dancer label:has(#roster-edit-requested-style),
+    .roster-edit-form.is-future-dancer label:has(#roster-edit-medical-notes),
+    .roster-edit-form.is-future-dancer label:has(#roster-edit-parent-relationship),
+    .roster-edit-form.is-future-dancer .roster-profile-related-field,
+    .roster-edit-form.is-future-dancer .roster-profile-related-selected,
+    .roster-edit-form.is-future-dancer .roster-profile-two-row:has(#roster-edit-status),
+    .roster-edit-form.is-future-dancer .roster-profile-raw { display: none !important; }
+    .roster-edit-form.is-future-dancer .roster-profile-details-row { grid-template-columns: 1fr; }
+    .roster-future-picture-cell { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 800; }
+    .roster-future-picture-preview { min-height: 112px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); color: var(--muted); font-size: 11px; font-weight: 600; }
+    .roster-future-picture-preview img { width: 100%; height: 150px; object-fit: cover; }
+    .roster-edit-form.is-future-dancer { grid-template-columns: max-content minmax(0, 1fr); }
+    .roster-edit-form.is-future-dancer .roster-profile-identity { order: 0; }
+    .roster-edit-form.is-future-dancer .roster-profile-school-row { order: 1; grid-column: 1 / -1; }
+    .roster-edit-form.is-future-dancer .roster-profile-details-row,
+    .roster-edit-form.is-future-dancer .roster-profile-notes-row { display: contents; }
+    .roster-edit-form.is-future-dancer .roster-profile-details-row label:has(#roster-edit-birthdate) { order: 2; grid-column: 1; width: 165px; }
+    .roster-edit-form.is-future-dancer .roster-profile-notes-row label:has(#roster-edit-notes) { order: 2; grid-column: 2; min-width: 0; }
+    .roster-edit-form.is-future-dancer .roster-profile-notes-row #roster-edit-notes { width: 100%; }
+    .roster-edit-form.is-future-dancer .roster-profile-parent-name-row { order: 3; grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }
+    .roster-edit-form.is-future-dancer .roster-profile-parent-contact-row { order: 4; grid-column: 1 / -1; }
+    .roster-edit-form.is-future-dancer .roster-future-only { order: 5; }
+    .roster-edit-form.is-future-dancer .roster-profile-name-row { grid-template-columns: 1fr 1fr minmax(150px, .75fr); }
+    .roster-future-trial-inline { display: none; }
+    .roster-edit-form.is-future-dancer .roster-future-trial-inline { display: grid; }
+    #roster-student-edit-overlay.is-future-dancer .roster-profile-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #roster-student-edit-overlay.is-future-dancer .roster-profile-actions button { width: 100%; }
     .roster-profile-attendance { display: grid; gap: 8px; margin-top: 12px; }
     .roster-profile-attendance-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
     .roster-profile-attendance-heading strong { font-size: 14px; }
+    .roster-attendance-helper-sparkle { margin-left: 4px; color: #d3a51e; font-size: 12px; }
     .roster-profile-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .roster-profile-header h3 { margin: 0; }
     .roster-profile-close { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 999px; background: var(--blush); color: var(--fg); font-size: 20px; font-weight: 850; line-height: 1; }
@@ -5460,6 +5527,7 @@
     .boutique-assignment-search { width: 100%; margin-bottom: 10px; }
     .boutique-assignment-suggestions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; max-height: 380px; overflow: auto; }
     .boutique-assignment-suggestion { display: grid; grid-template-columns: 42px minmax(0, 1fr); align-items: center; gap: 9px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: inherit; text-align: left; }
+    .boutique-assignment-suggestion.is-best-match { border-color: color-mix(in srgb, var(--berry) 42%, var(--border)); background: linear-gradient(135deg, color-mix(in srgb, var(--berry) 12%, white), color-mix(in srgb, var(--berry) 5%, white)); box-shadow: 0 8px 20px rgba(145, 72, 98, .12); }
     .boutique-assignment-suggestion strong, .boutique-assignment-suggestion small { display: block; }
     .boutique-assignment-suggestion small { color: var(--muted); font-size: 10px; }
     .boutique-assignment-suggestion em { grid-column: 2; color: var(--berry); font-size: 9px; font-style: normal; font-weight: 850; }
@@ -10860,7 +10928,7 @@
 
               <div class="teacher-roster-toolbar">
                 <button class="primary" type="button" id="teacher-roster-create-class">Create Class</button>
-                <button class="secondary" type="button" id="teacher-roster-add-future">Add Future Dancer</button>
+                <button class="secondary roster-add-future-button" type="button" id="teacher-roster-add-future">Add Prospect Dancer</button>
               </div>
               <label class="teacher-roster-filter">
                 <select id="teacher-roster-school-filter" aria-label="Filter rosters by assigned school"></select>
@@ -11585,6 +11653,7 @@
                   <button class="newsletter-template is-selected" type="button" data-newsletter-template="monthly">Monthly Newsletter</button>
                   <button class="newsletter-template" type="button" data-newsletter-template="birthday">Birthday Ballerina</button>
                   <button class="newsletter-template" type="button" data-newsletter-template="welcome">Parent Welcome</button>
+                  <button class="newsletter-template" type="button" data-newsletter-template="trial-complete">Trial Complete</button>
                   <button class="newsletter-template" type="button" data-newsletter-template="fall">Fall Enrollment</button>
                   <button class="newsletter-template" type="button" data-newsletter-template="recital">Recital Information</button>
                   <button class="newsletter-template" type="button" data-newsletter-template="costume">Costume Week</button>
@@ -11871,11 +11940,14 @@
                 <label>Teacher
                   <select id="enrollment-teacher-filter"><option value="all">All teachers</option></select>
                 </label>
+                <label>Dance Day
+                  <select id="enrollment-day-filter"><option value="all">All dance days</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select>
+                </label>
                 <label>Find a Student or Parent
                   <input id="enrollment-name-search" type="search" placeholder="Search student or parent name" autocomplete="off">
                 </label>
               </div>
-              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="enrollment-checklist-filter,enrollment-school-filter,enrollment-teacher-filter,enrollment-name-search">Reset Filter</button></div>
+              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="enrollment-checklist-filter,enrollment-school-filter,enrollment-teacher-filter,enrollment-day-filter,enrollment-name-search">Reset Filter</button></div>
               <div class="enrollment-queue-workspace">
                 <div class="enrollment-queue-list" id="enrollment-queue-list"></div>
                 <div class="confirm-overlay" id="enrollment-review-overlay" aria-hidden="true">
@@ -11933,9 +12005,11 @@
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
               </span>
             </div>
+            <div class="enrollment-summary-row" id="enrollment-student-summary" aria-label="Enrollment and student summary"></div>
             <div class="enrollment-student-view-toggle" role="tablist" aria-label="Enrollment and student view">
               <button class="is-selected" type="button" role="tab" aria-selected="true" data-enrollment-student-view="enrollments">New Enrollments</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="directory">Dancer Directory</button>
+              <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="future-dancers">Future Dancers</button>
             </div>
             <div class="enrollment-student-view-panel" id="enrollment-student-intake-slot" data-enrollment-student-panel="enrollments"></div>
             <div class="enrollment-student-view-panel" id="dancer-directory-panel" data-enrollment-student-panel="directory" hidden>
@@ -11952,12 +12026,27 @@
                 <label>Teacher
                   <select id="student-library-teacher"><option value="all">All teachers</option></select>
                 </label>
+                <label>Dance Day
+                  <select id="student-library-day"><option value="all">All dance days</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select>
+                </label>
                 <label>Student Status
-                  <select id="student-library-status"><option value="all">All students</option><option value="enrolled">Enrolled</option><option value="future">Future dancers</option></select>
+                  <select id="student-library-status"><option value="all">All enrolled dancers</option><option value="enrolled">Enrolled</option></select>
                 </label>
               </div>
-              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="student-library-search,student-library-school,student-library-teacher,student-library-status">Reset Filter</button></div>
+              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="student-library-search,student-library-school,student-library-teacher,student-library-day,student-library-status">Reset Filter</button></div>
               <div class="student-library-grid" id="admin-student-library-list"></div>
+            </div>
+            <div class="enrollment-student-view-panel" id="director-future-dancers-panel" data-enrollment-student-panel="future-dancers" hidden>
+              <div class="section-title" style="margin-top:8px">
+                <div><h3>Future Dancers</h3><p>Completed trials ready for Director follow-up.</p></div>
+              </div>
+              <div class="roster-toolbar">
+                <label>Find a Future Dancer<input id="director-future-dancer-search" type="search" placeholder="Search dancer or parent"></label>
+                <label>Partner School<select id="director-future-dancer-school"><option value="all">All partner schools</option></select></label>
+                <label>Dance Day<select id="director-future-dancer-day"><option value="all">All dance days</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select></label>
+              </div>
+              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="director-future-dancer-search,director-future-dancer-school,director-future-dancer-day">Reset Filter</button></div>
+              <div class="teacher-future-prospect-grid" id="director-future-dancer-list"></div>
             </div>
           </section>
 
@@ -13101,11 +13190,14 @@
 
   <div class="confirm-overlay" id="teacher-roster-future-overlay" aria-hidden="true">
     <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-roster-future-title">
-      <h3 id="teacher-roster-future-title">Add a Future Dancer</h3>
+      <h3 id="teacher-roster-future-title">Trial Request</h3>
       <p>Add the dancer and parent contact information to one of your assigned classes.</p>
       <form class="teacher-roster-form" id="teacher-roster-future-form">
-        <label class="full-field">Assigned Class
-          <select id="teacher-roster-future-class" required></select>
+        <label>Class Attending
+          <select id="teacher-roster-future-class"></select>
+        </label>
+        <label>School Classroom
+          <select id="teacher-roster-future-classroom"></select>
         </label>
         <label>First Name
           <input id="teacher-roster-future-first" required autocomplete="off">
@@ -13114,27 +13206,42 @@
           <input id="teacher-roster-future-last" required autocomplete="off">
         </label>
         <label>Birthdate
-          <input id="teacher-roster-future-birthdate" type="date" required>
-        </label>
-        <label>School Classroom
-          <input id="teacher-roster-future-classroom" placeholder="For example, Preschool 2">
+          <input id="teacher-roster-future-birthdate" type="date">
         </label>
         <label>Trial Date
           <input id="teacher-roster-future-trial" type="date">
         </label>
+        <label>Parent First Name
+          <input id="teacher-roster-future-parent-first" autocomplete="given-name">
+        </label>
+        <label>Parent Last Name
+          <input id="teacher-roster-future-parent-last" autocomplete="family-name">
+        </label>
         <label>Parent Phone
           <input id="teacher-roster-future-phone" type="tel" autocomplete="tel">
         </label>
-        <label class="full-field">Parent Email
+        <label>Parent Email
           <input id="teacher-roster-future-email" type="email" autocomplete="email">
         </label>
         <label class="full-field">Notes
-          <textarea id="teacher-roster-future-notes" placeholder="Trial details, follow-up requests, or information the Director should know"></textarea>
+          <textarea id="teacher-roster-future-notes"></textarea>
+          <small class="field-subtitle">Example: Ms. Jessica suggested we take her, she's new to the school.</small>
         </label>
+        <div class="teacher-prospect-followup-section" id="teacher-roster-future-followup-section" hidden>
+          <label>Picture
+            <input id="teacher-roster-future-photo" type="file" accept="image/*">
+            <small class="field-subtitle" id="teacher-roster-future-photo-status">No picture selected.</small>
+          </label>
+          <label>Teacher's Feedback
+            <textarea id="teacher-roster-future-feedback"></textarea>
+            <small class="field-subtitle">Add the teacher’s observations after the dancer’s trial.</small>
+          </label>
+        </div>
       </form>
       <div class="confirm-actions">
         <button class="secondary" type="button" id="teacher-roster-future-cancel">Cancel</button>
-        <button class="primary" type="submit" form="teacher-roster-future-form">Add Future Dancer</button>
+        <button class="future-dancer-delete" type="button" id="teacher-roster-future-delete" hidden>Delete Dancer</button>
+        <button class="primary trial-request-submit" type="submit" form="teacher-roster-future-form">Add Prospect Dancer</button>
       </div>
     </div>
   </div>
@@ -13196,6 +13303,7 @@
             <label>First name<input id="roster-edit-first-name" required></label>
             <label>Preferred name<input id="roster-edit-preferred-name"></label>
             <label>Last name<input id="roster-edit-last-name" required></label>
+            <label class="roster-future-trial-inline">Trial Date<input id="roster-edit-future-trial-date" type="date"></label>
           </div>
         </div>
         <div class="roster-profile-four-row roster-profile-details-row">
@@ -13204,24 +13312,28 @@
           <label>T-Shirt Size<input id="roster-edit-tshirt-size"></label>
           <label>2025 Recital<select id="roster-edit-requested-style"><option value="">No answer</option><option value="Ballet">Ballet</option><option value="Tap">Tap</option><option value="I can't remember">I can't remember</option></select></label>
         </div>
-        <div class="roster-profile-two-row">
+        <div class="roster-profile-two-row roster-profile-notes-row">
           <label>Medical Information<input id="roster-edit-medical-notes" placeholder="Allergies, medical information, or other important details"></label>
           <label>Registration Notes<input id="roster-edit-notes" placeholder="Questions, follow-up, or registration notes"></label>
         </div>
-        <div class="roster-profile-three-row roster-profile-divider-before">
+        <div class="roster-profile-three-row roster-profile-divider-before roster-profile-school-row">
           <label>School<select id="roster-edit-school"></select></label>
           <label>Class<select id="roster-edit-assigned-class"></select></label>
           <label>Official Classroom<select id="roster-edit-official-classroom"><option value="">Unassigned</option></select></label>
         </div>
         <input id="roster-edit-classroom" type="hidden">
-        <div class="roster-profile-three-row roster-profile-divider-before">
+        <div class="roster-profile-three-row roster-profile-divider-before roster-profile-parent-name-row">
           <label>Parent First Name<input id="roster-edit-parent-first-name"></label>
           <label>Parent Last Name<input id="roster-edit-parent-last-name"></label>
           <label>Relationship to Student<input id="roster-edit-parent-relationship"></label>
         </div>
-        <div class="roster-profile-two-row">
+        <div class="roster-profile-two-row roster-profile-parent-contact-row">
           <label>Parent Phone<input id="roster-edit-phone" type="tel"></label>
           <label>Parent Email<input id="roster-edit-email" type="email"></label>
+        </div>
+        <div class="roster-future-only">
+          <div class="roster-future-picture-cell"><span>Picture</span><div class="roster-future-picture-preview" id="roster-future-picture-preview">No picture uploaded.</div></div>
+          <label>Teacher’s Feedback<textarea id="roster-edit-future-feedback"></textarea></label>
         </div>
         <div class="roster-profile-two-row">
           <div class="roster-profile-related-field"><span>Related Dancer</span><input id="roster-edit-related-search" type="search" placeholder="Search enrolled students" autocomplete="off"><span class="enrollment-related-results" id="roster-edit-related-results"></span></div>
@@ -13257,6 +13369,7 @@
       </form>
       <div class="confirm-actions roster-profile-actions">
         <button class="danger-btn" type="button" id="roster-delete-student">Delete Permanently</button>
+        <button class="secondary" type="button" id="roster-contact-future-parent" hidden>Contact Parent</button>
         <button class="primary" type="submit" form="roster-student-edit-form">Save student</button>
       </div>
     </div>
@@ -13298,6 +13411,15 @@
       <h3 id="teacher-attendance-review-title">Complete Check-In</h3>
       <p>These students were not selected. Mark each one tardy or absent.</p>
       <div class="teacher-attendance-review-list" id="teacher-attendance-review-list"></div>
+    </div>
+  </div>
+  <div class="confirm-overlay" id="teacher-helper-picker-overlay" aria-hidden="true">
+    <div class="confirm-dialog teacher-helper-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-helper-picker-title">
+      <button class="roster-profile-close teacher-helper-picker-close" type="button" id="teacher-helper-picker-close" aria-label="Close helper picker">×</button>
+      <h3 id="teacher-helper-picker-title">Choose This Week’s Helper</h3>
+      <p id="teacher-helper-picker-copy">The planned helper did not attend today. Select a dancer who attended class.</p>
+      <div class="teacher-attendance-review-list" id="teacher-helper-picker-list"></div>
+      <div class="confirm-actions"><button class="secondary" type="button" id="teacher-helper-picker-cancel">Cancel</button></div>
     </div>
   </div>
   <div class="confirm-overlay" id="archived-students-overlay" aria-hidden="true">
@@ -13704,11 +13826,11 @@
         classroom: "Movement Room",
         capacity: 12,
         students: [
-          { id: "ava-m", firstName: "Ava", lastName: "Martinez", classroom: "Toddlers A", birthdate: "2024-01-18", status: "enrolled" },
+          { id: "ava-m", firstName: "Ava", lastName: "Martinez", classroom: "Toddlers A", birthdate: "2024-01-18", status: "enrolled", parentName: "Jordan Sample", parentEmail: "jordan.sample@example.com" },
           { id: "miles-carter-sample", firstName: "Miles", lastName: "Carter", classroom: "Toddlers A", birthdate: "2023-12-11", status: "enrolled", gender: "male", photo: "" },
           { id: "charlotte-r", firstName: "Charlotte", lastName: "Reynolds", classroom: "Toddlers B", birthdate: "2023-11-02", status: "enrolled" },
           { id: "ella-s", firstName: "Ella", lastName: "Sullivan", classroom: "Toddlers A", birthdate: "2024-03-09", status: "enrolled" },
-          { id: "lily-j", firstName: "Lily", lastName: "Johnson", classroom: "Toddlers B", birthdate: "2023-09-21", status: "trial-scheduled", trialDate: "2026-09-14", parentPhone: "(972) 555-0184", parentEmail: "jordan.johnson@example.com", notes: "Mom asked for more information about class shoes and enrollment." }
+          { id: "lily-j", firstName: "Lily", lastName: "Johnson", classroom: "Toddlers B", birthdate: "2023-09-21", status: "trial-scheduled", trialDate: "2026-09-14", parentName: "Jordan Sample", parentPhone: "(972) 555-0184", parentEmail: "jordan.sample@example.com", notes: "Mom asked for more information about class shoes and enrollment." }
         ]
       },
       {
@@ -13783,9 +13905,13 @@
     let enrollmentReviewOpen = false;
     let enrollmentClassPreviewId = "";
     let enrollmentStudentsView = "enrollments";
+    let directorFutureDancerSearch = "";
+    let directorFutureDancerSchool = "all";
+    let directorFutureDancerDay = "all";
     let enrollmentChecklistFilter = "incomplete";
     let enrollmentSchoolFilter = "all";
     let enrollmentTeacherFilter = "all";
+    let enrollmentDayFilter = "all";
     let enrollmentNameSearch = "";
     let enrollmentIntakeSubscription = null;
 
@@ -14239,6 +14365,10 @@
       return school?.nickname || school?.name || item.requested_school_name || "School not provided";
     };
     const enrollmentMatchedTeacherId = (item) => item.matched_teacher_id || suggestEnrollmentClass(item)?.teacherId || "";
+    const enrollmentMatchedDanceDay = (item) => {
+      const classId = item.matched_dance_class_id || suggestEnrollmentClass(item)?.classId;
+      return rosterClasses.find((rosterClass) => rosterClass.id === classId)?.day || "";
+    };
     const filteredEnrollmentQueue = () => enrollmentIntakeQueue.filter((item) => {
       const workflowStage = enrollmentWorkflowStage(item);
       if (workflowStage === "complete") return false;
@@ -14246,6 +14376,7 @@
       const school = enrollmentMatchedSchool(item);
       if (enrollmentSchoolFilter !== "all" && (school?.id || school?.name) !== enrollmentSchoolFilter) return false;
       if (enrollmentTeacherFilter !== "all" && enrollmentMatchedTeacherId(item) !== enrollmentTeacherFilter) return false;
+      if (enrollmentDayFilter !== "all" && enrollmentMatchedDanceDay(item) !== enrollmentDayFilter) return false;
       const searchTerm = enrollmentNameSearch.trim().toLowerCase();
       if (searchTerm) {
         const searchableNames = [
@@ -14262,9 +14393,11 @@
       const checklistSelect = document.getElementById("enrollment-checklist-filter");
       const schoolSelect = document.getElementById("enrollment-school-filter");
       const teacherSelect = document.getElementById("enrollment-teacher-filter");
+      const daySelect = document.getElementById("enrollment-day-filter");
       const searchInput = document.getElementById("enrollment-name-search");
       if (checklistSelect) checklistSelect.value = enrollmentChecklistFilter;
       if (searchInput && searchInput.value !== enrollmentNameSearch) searchInput.value = enrollmentNameSearch;
+      if (daySelect) daySelect.value = enrollmentDayFilter;
       if (schoolSelect) {
         const schools = schoolLibrary.filter((school) => enrollmentIntakeQueue.some((item) => {
           const matched = enrollmentMatchedSchool(item);
@@ -14316,6 +14449,30 @@
     };
     const enrollmentRelatedDancerBubbles = (item) => enrollmentRelatedDancerNames(item).map((name) => `<span class="enrollment-related-bubble">${escapeText(name)}<button type="button" data-enrollment-related-remove="${escapeText(name)}" aria-label="Remove ${escapeText(name)}">×</button></span>`).join("");
     const relatedDancerNamesFromValue = (value) => String(value || "").split(" • ").map((name) => name.trim()).filter(Boolean);
+    const enrollmentPersonMatchKey = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const futureDancerMatchForEnrollment = (item) => {
+      const enrollmentNames = [
+        [item?.student_first_name, item?.student_last_name].filter(Boolean).join(" "),
+        [item?.student_preferred_name, item?.student_last_name].filter(Boolean).join(" ")
+      ].map(enrollmentPersonMatchKey).filter(Boolean);
+      if (!enrollmentNames.length) return null;
+      return rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).flatMap((rosterClass) => rosterClass.students
+        .filter((student) => student.status !== "enrolled"
+          && student.additionalInformation?.trial_completed
+          && !student.additionalInformation?.future_dancer_archived)
+        .map((student) => ({ rosterClass, student }))).find(({ rosterClass, student }) => {
+          const futureNames = [
+            rosterStudentFullName(student),
+            [student.firstName, student.lastName].filter(Boolean).join(" "),
+            [student.preferredName, student.lastName].filter(Boolean).join(" ")
+          ].map(enrollmentPersonMatchKey).filter(Boolean);
+          const nameMatches = enrollmentNames.some((name) => futureNames.includes(name));
+          const schoolMatches = !item?.requested_school_name
+            || enrollmentSchoolNameMatches(rosterClass.schoolName, item.requested_school_name)
+            || enrollmentSchoolNameMatches(rosterSchoolNickname(rosterClass.schoolName), item.requested_school_name);
+          return nameMatches && schoolMatches;
+        }) || null;
+    };
     const rosterStudentRecordByName = (name) => {
       const normalized = String(name || "").trim().toLowerCase();
       if (!normalized) return null;
@@ -14364,6 +14521,7 @@
         const firstName = item.student_preferred_name || item.student_first_name || "";
         const lastName = item.student_last_name || "";
         const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "DT";
+        const futureDancerMatch = futureDancerMatchForEnrollment(item);
         return `
         <button class="enrollment-queue-item ${item.id === selectedEnrollmentIntakeId && enrollmentReviewOpen ? "is-selected" : ""}" type="button" data-enrollment-intake-open="${escapeText(item.id)}">
           <span class="enrollment-card-avatar">${escapeText(initials)}</span>
@@ -14371,6 +14529,7 @@
           <small>${escapeText(enrollmentDisplaySchoolName(item))}</small>
           <small class="enrollment-card-age">${escapeText(item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided")}</small>
           ${placed ? `<span class="enrollment-stage-bubble">${escapeText(enrollmentWorkflowLabel(item))}</span>` : `<span class="enrollment-priority-bubble ${priorityStyle}">${escapeText(priority.label)}</span>`}
+          ${futureDancerMatch ? `<span class="enrollment-future-match-heart" aria-label="Matches Future Dancer" title="Matches Future Dancer">♥</span>` : ""}
         </button>`;
       }).join("") : `<div class="roster-empty">No enrollments match these filters.</div>`;
       const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
@@ -14563,12 +14722,64 @@
         .subscribe();
     };
 
+    const transferFutureDancerEnrollment = async (item, match) => {
+      if (!item || !match) return;
+      const futureRecord = rosterClasses.flatMap((rosterClass) => rosterClass.students.map((student) => ({ rosterClass, student })))
+        .find(({ rosterClass, student }) => rosterClass.id === match.rosterClassId && student.id === match.studentId);
+      const placedRecord = rosterClasses.flatMap((rosterClass) => rosterClass.students.map((student) => ({ rosterClass, student })))
+        .find(({ student }) => student.id === item.placed_student_id);
+      if (!futureRecord || !placedRecord) return;
+      if (match.trialDate) placedRecord.student.trialDate = match.trialDate;
+      placedRecord.student.additionalInformation = {
+        ...(placedRecord.student.additionalInformation || {}),
+        matched_future_dancer_id: futureRecord.student.id,
+        original_trial_date: match.trialDate || null
+      };
+      futureRecord.student.additionalInformation = {
+        ...(futureRecord.student.additionalInformation || {}),
+        future_dancer_archived: true,
+        future_dancer_archived_at: new Date().toISOString(),
+        archived_for_enrollment_id: item.id,
+        archived_for_student_id: placedRecord.student.id
+      };
+      scheduleAppDataSave();
+      await Promise.all([
+        saveSharedStudent(placedRecord.student, placedRecord.rosterClass),
+        saveSharedStudent(futureRecord.student, futureRecord.rosterClass)
+      ]);
+      renderStudentLibrary();
+      renderDirectorFutureDancers();
+      renderEnrollmentStudentSummary();
+    };
+
     const approveSelectedEnrollment = async () => {
       const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
       if (!item) return;
+      const futureMatch = futureDancerMatchForEnrollment(item);
+      const futureMatchSnapshot = futureMatch ? {
+        rosterClassId: futureMatch.rosterClass.id,
+        studentId: futureMatch.student.id,
+        trialDate: futureMatch.student.trialDate || ""
+      } : null;
       if (document.body.dataset.tourMode === "true") {
         item.status = "placed";
         item.placed_at = new Date().toISOString();
+        if (futureMatch) {
+          const targetClass = rosterClasses.find((rosterClass) => rosterClass.id === item.matched_dance_class_id) || futureMatch.rosterClass;
+          const enrolledStudent = {
+            ...JSON.parse(JSON.stringify(futureMatch.student)),
+            id: `tour-enrolled-${Date.now()}`,
+            enrollmentId: `tour-class-enrollment-${Date.now()}`,
+            firstName: item.student_first_name || futureMatch.student.firstName,
+            preferredName: item.student_preferred_name || futureMatch.student.preferredName || "",
+            lastName: item.student_last_name || futureMatch.student.lastName,
+            status: "enrolled",
+            trialDate: futureMatch.student.trialDate || ""
+          };
+          targetClass.students.push(enrolledStudent);
+          item.placed_student_id = enrolledStudent.id;
+          await transferFutureDancerEnrollment(item, futureMatchSnapshot);
+        }
         renderEnrollmentQueue();
         showToast("Sample enrollment placed");
         return;
@@ -14590,6 +14801,7 @@
       Object.assign(item, data);
       await syncEnrollmentIntakeToStudent(item);
       await loadSharedClassesAndRosters(window.dtCurrentProfile);
+      await transferFutureDancerEnrollment(item, futureMatchSnapshot);
       await loadEnrollmentIntakeQueue(window.dtCurrentProfile);
       showToast("Enrollment approved and added to the class roster");
     };
@@ -14726,7 +14938,8 @@
               status: uiStudentStatus(enrollment.status), trialDate: enrollment.trial_date || "", parentName: student.parent_name || "",
               parentFirstName: student.parent_first_name || "", parentLastName: student.parent_last_name || "", parentPhone: student.parent_phone || "",
               parentEmail: student.parent_email || "", tuitionDiscount: student.tuition_discount || "none", medicalNotes: student.medical_notes || "", registrationNotes: student.registration_notes || "",
-              notes: note?.note || student.registration_notes || "", photoPath: student.photo_path || "", photo: "" };
+              notes: note?.note || student.registration_notes || "", additionalInformation: student.additional_information && typeof student.additional_information === "object" ? { ...student.additional_information } : {},
+              teacherFeedback: student.additional_information?.teacher_feedback || "", photoPath: student.photo_path || "", photo: "" };
           })
         };
       });
@@ -14865,10 +15078,9 @@
       if (!sharedRosterReady || !window.dtSupabase) return;
       if (rosterClass.sharedSavePending) await rosterClass.sharedSavePending;
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rosterClass.id || "")) return;
-      if (!student.birthdate) return sharedRosterError("A birthdate is required before this dancer can be shared.", new Error("Missing birthdate"));
       const studentPayload = {
         first_name: student.firstName, last_name: student.lastName, preferred_name: student.preferredName || null,
-        birth_date: student.birthdate, gender: student.gender === "male" ? "male" : "female", classroom: student.classroom || null,
+        birth_date: student.birthdate || null, gender: student.gender === "male" ? "male" : "female", classroom: student.classroom || null,
         official_classroom: student.officialClassroom || null, tshirt_size: student.tshirtSize || null,
         tuition_discount: student.tuitionDiscount || "none",
         kit_ready: Boolean(student.kitReady || student.kitPickedUp || student.kitReceived),
@@ -17603,6 +17815,7 @@
       sampleRosterLastNames[`rockwall-student-${index + 1}`] = lastName;
     });
     const sampleProspectDetails = {
+      "ava-m": { parentName: "Jordan Sample", parentEmail: "jordan.sample@example.com" },
       "lily-j": { parentPhone: "(972) 555-0184", parentEmail: "jordan.johnson@example.com", notes: "Mom asked for more information about class shoes and enrollment." },
       "nora-p": { parentPhone: "(469) 555-0126", parentEmail: "", notes: "Loved the trial. Family wants the tuition link before deciding." },
       "hazel-c": { parentPhone: "", parentEmail: "collins.family@example.com", notes: "Ready to enroll once Mom receives the registration instructions." }
@@ -17611,7 +17824,7 @@
       if (sampleRosterLastNames[student.id] && /^[A-Z]\.$/.test(student.lastName || "")) student.lastName = sampleRosterLastNames[student.id];
       const sampleDetails = sampleProspectDetails[student.id];
       if (sampleDetails) Object.entries(sampleDetails).forEach(([field, value]) => {
-        if (typeof student[field] === "undefined") student[field] = value;
+        if (student.id === "ava-m" || typeof student[field] === "undefined") student[field] = value;
       });
     }));
     const sampleBoyStudent = { id: "miles-carter-sample", firstName: "Miles", lastName: "Carter", classroom: "Toddlers A", birthdate: "2023-12-11", status: "enrolled", gender: "male", photo: "" };
@@ -21297,12 +21510,15 @@
     let teacherRosterSchoolFilter = "all";
     let selectedTeacherRosterClassId = "";
     let teacherRosterAttendanceReviewClassId = "";
+    let teacherHelperPickerClassId = "";
+    let teacherHelperPickerMode = "attendance";
     const openTeacherRosterClassIds = new Set();
     const pendingTeacherRosterCheckIns = new Set();
     const activeTeacherRosterCheckInClassIds = new Set();
     const activeTeacherRosterCheckOutClassIds = new Set();
     const submittedTeacherRosterCheckInClassIds = new Set();
     const activeTeacherKitDeliveryClassIds = new Set();
+    const activeTeacherBoutiqueDeliveryClassIds = new Set();
     const pendingTeacherKitDeliveries = new Set();
     const pendingTeacherKitPickups = new Set();
     const pendingTeacherKitSelfFills = new Set();
@@ -21311,6 +21527,7 @@
     let teacherOrderSearchTerm = "";
     let teacherOrderDayFilter = "all";
     let teacherOrderSchoolFilter = "all";
+    const boutiqueOrdersGoLiveAt = "2026-07-23T05:00:00.000Z";
     let boutiqueOrders = [];
     const selectedBoutiqueOrderIds = new Set();
 
@@ -21368,32 +21585,36 @@
     const loadBoutiqueOrders = async (profile = window.dtCurrentProfile) => {
       if (document.body.dataset.tourMode === "true") {
         boutiqueOrders = [
-          { id: "sample-wix-1", wix_order_number: "SAMPLE-103", status: "to_fill", buyer_first_name: "Sample", buyer_last_name: "Parent", buyer_email: "", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-1", name: "Pink Tutu", quantity: 1, options: { Size: "4T" } }] },
-          { id: "sample-wix-2", wix_order_number: "SAMPLE-102", status: "to_fill", buyer_first_name: "Sample", buyer_last_name: "Parent", buyer_email: "", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-2", name: "Dance Bow", quantity: 2, options: {} }] },
-          { id: "sample-wix-3", wix_order_number: "SAMPLE-101", status: "to_fill", buyer_first_name: "Sample", buyer_last_name: "Parent", buyer_email: "", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-3", name: "Ballet Skirt", quantity: 1, options: { Size: "5T" } }] }
+          { id: "sample-wix-1", wix_order_number: "SAMPLE-103", status: "to_fill", buyer_first_name: "Taylor", buyer_last_name: "Davis", buyer_email: "taylor.davis@example.com", requested_dancer_name: "Sophie Davis", requested_school: "Primrose Rockwall", test_scenario: "Wix: Dancer's Name: Sophie Davis · School: Primrose Rockwall", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-1", name: "Pink Tutu", quantity: 1, options: { Size: "4T" } }] },
+          { id: "sample-wix-2", wix_order_number: "SAMPLE-102", status: "to_fill", buyer_first_name: "Jordan", buyer_last_name: "Sample", buyer_email: "jordan.sample@example.com", requested_dancer_name: "Jordan Sample", requested_school: "", test_scenario: "Wix: parent entered Jordan Sample as Dancer's Name", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-2", name: "Dance Bow", quantity: 2, options: {} }] },
+          { id: "sample-wix-3", wix_order_number: "SAMPLE-101", status: "to_fill", buyer_first_name: "Casey", buyer_last_name: "Carter", buyer_email: "casey.carter@example.com", requested_dancer_name: "Miles Carter", requested_school: "Primrose", test_scenario: "Wix: Dancer's Name: Miles Carter · School: Primrose", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-3", name: "Ballet Skirt", quantity: 1, options: { Size: "5T" } }] }
         ];
         renderDirectorBoutiqueOrders();
         renderTeacherOrders();
         return;
       }
       if (!window.dtSupabase || !profile) return;
-      if (["admin", "director"].includes(profile.role)) {
-        const { error: syncError } = await window.dtSupabase.functions.invoke("wix-order-sync", { body: { limit: 100 } });
-        if (syncError) console.error("Wix orders could not refresh", syncError);
+      if (!["admin", "director"].includes(profile.role)) {
+        boutiqueOrders = [];
+        renderTeacherOrders();
+        return;
       }
+      const { error: syncError } = await window.dtSupabase.functions.invoke("wix-order-sync", { body: { limit: 100 } });
+      if (syncError) console.error("Wix orders could not refresh", syncError);
       const { data, error } = await window.dtSupabase.from("boutique_orders")
-        .select("id,wix_order_number,status,buyer_first_name,buyer_last_name,buyer_email,total,currency,assigned_student_id,wix_created_at,filled_at,picked_up_at,delivered_at,boutique_order_items(id,name,description,quantity,price,image_url,options)")
-        .neq("status", "cancelled").order("wix_created_at", { ascending: false });
+        .select("id,wix_order_number,status,buyer_first_name,buyer_last_name,buyer_email,total,currency,assigned_student_id,wix_created_at,filled_at,picked_up_at,delivered_at,raw_order,boutique_order_items(id,name,description,quantity,price,image_url,options)")
+        .neq("status", "cancelled")
+        .gte("wix_created_at", boutiqueOrdersGoLiveAt)
+        .order("wix_created_at", { ascending: false });
       if (error) {
         console.error("Boutique orders could not load", error);
         showToast("Boutique orders couldn’t open. Please refresh and try again.");
         return;
       }
-      boutiqueOrders = data || [];
+      boutiqueOrders = (data || []).filter((order) => (
+        order.wix_created_at && new Date(order.wix_created_at).valueOf() >= new Date(boutiqueOrdersGoLiveAt).valueOf()
+      ));
       renderDirectorBoutiqueOrders();
-      renderTeacherOrders();
-      renderStudentLibrary();
-      renderTeacherRosters();
     };
 
     const renderDirectorBoutiqueOrders = () => {
@@ -21425,7 +21646,7 @@
       list.innerHTML = visible.length ? visible.map((order) => {
         const assigned = boutiqueOrderStudentRecord(order.assigned_student_id);
         const dayLabel = assigned ? (({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[assigned.rosterClass.day] || "—") : "";
-        const displayName = assigned ? rosterStudentFullName(assigned.student) : boutiqueOrderBuyerName(order);
+        const displayName = assigned ? rosterStudentFullName(assigned.student) : (boutiqueOrderDancerName(order) || "Dancer name missing");
         const schoolLabel = assigned ? rosterSchoolNickname(assigned.rosterClass.schoolName) : "Dancer not assigned";
         const selectable = Boolean(assigned && boutiqueOrderNextStatus(order.status));
         return `<div class="boutique-order-card is-${rosterSafe(order.status)} ${selectedBoutiqueOrderIds.has(order.id) ? "is-selected" : ""}" ${selectable ? `data-boutique-order-select-card="${rosterSafe(order.id)}"` : ""}>${dayLabel ? `<span class="boutique-kit-day-bubble" title="${rosterSafe(assigned.rosterClass.day)}">${dayLabel}</span>` : ""}<button class="boutique-order-profile-trigger" type="button" data-boutique-assign-open="${rosterSafe(order.id)}" aria-label="${assigned ? "Change assigned dancer" : "Assign order to a dancer"}"><span class="roster-student-photo ${assigned ? rosterStudentBadgeClasses(assigned.student) : ""}">${assigned ? (assigned.student.photo ? `<img src="${rosterSafe(assigned.student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(assigned.student))) : `<span class="boutique-assign-circle-copy"><strong>+</strong><small>Assign</small></span>`}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span></button><strong>${rosterSafe(displayName)}</strong><small>${rosterSafe(schoolLabel)}</small><span class="boutique-order-number">${rosterSafe(boutiqueStatusLabel(order.status))}</span>${boutiqueOrderItemsMarkup(order)}</div>`;
@@ -21440,13 +21661,7 @@
       }
     };
 
-    const teacherBoutiqueOrders = () => boutiqueOrders.filter((order) => {
-      const record = boutiqueOrderStudentRecord(order.assigned_student_id);
-      if (!record) return false;
-      return (teacherOrderDayFilter === "all" || record.rosterClass.day === teacherOrderDayFilter) &&
-        (teacherOrderSchoolFilter === "all" || record.rosterClass.schoolName === teacherOrderSchoolFilter) &&
-        (!teacherOrderSearchTerm || [rosterStudentFullName(record.student), boutiqueOrderBuyerName(order), boutiqueOrderItemsLabel(order)].join(" ").toLowerCase().includes(teacherOrderSearchTerm));
-    });
+    const teacherBoutiqueOrders = () => [];
 
     const teacherBoutiqueCardMarkup = (order) => {
       const record = boutiqueOrderStudentRecord(order.assigned_student_id);
@@ -21481,10 +21696,71 @@
 
     let boutiqueAssignmentOrderId = "";
     const normalizeBoutiqueMatch = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const boutiqueOrderDancerName = (order) => {
+      const directName = order?.requested_dancer_name || order?.dancer_name || order?.custom_dancer_name;
+      if (String(directName || "").trim()) return String(directName).trim();
+      const findLabeledValue = (value, depth = 0) => {
+        if (!value || typeof value !== "object" || depth > 7) return "";
+        for (const [key, nested] of Object.entries(value)) {
+          const normalizedKey = normalizeBoutiqueMatch(key);
+          if (normalizedKey.includes("dancer name") && ["string", "number"].includes(typeof nested) && String(nested).trim()) return String(nested).trim();
+          if (nested && typeof nested === "object") {
+            const label = normalizeBoutiqueMatch(nested.label || nested.name || nested.title);
+            const labeledValue = nested.value || nested.text || nested.answer;
+            if (label.includes("dancer name") && ["string", "number"].includes(typeof labeledValue) && String(labeledValue).trim()) return String(labeledValue).trim();
+            const found = findLabeledValue(nested, depth + 1);
+            if (found) return found;
+          }
+        }
+        return "";
+      };
+      return findLabeledValue(order?.raw_order) || findLabeledValue(order?.boutique_order_items);
+    };
+    const boutiqueOrderSchoolName = (order) => {
+      const directSchool = order?.requested_school || order?.school_name || order?.custom_school;
+      if (String(directSchool || "").trim()) return String(directSchool).trim();
+      const findLabeledValue = (value, depth = 0) => {
+        if (!value || typeof value !== "object" || depth > 7) return "";
+        for (const [key, nested] of Object.entries(value)) {
+          const normalizedKey = normalizeBoutiqueMatch(key);
+          if ((normalizedKey === "school" || normalizedKey.includes("dancer school")) && ["string", "number"].includes(typeof nested) && String(nested).trim()) return String(nested).trim();
+          if (nested && typeof nested === "object") {
+            const label = normalizeBoutiqueMatch(nested.label || nested.name || nested.title);
+            const labeledValue = nested.value || nested.text || nested.answer;
+            if ((label === "school" || label.includes("dancer school")) && ["string", "number"].includes(typeof labeledValue) && String(labeledValue).trim()) return String(labeledValue).trim();
+            const found = findLabeledValue(nested, depth + 1);
+            if (found) return found;
+          }
+        }
+        return "";
+      };
+      return findLabeledValue(order?.raw_order) || findLabeledValue(order?.boutique_order_items);
+    };
+    const boutiqueNameEditDistance = (left, right) => {
+      const previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+      for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+        const current = [leftIndex];
+        for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+          current[rightIndex] = Math.min(
+            current[rightIndex - 1] + 1,
+            previous[rightIndex] + 1,
+            previous[rightIndex - 1] + (left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1)
+          );
+        }
+        previous.splice(0, previous.length, ...current);
+      }
+      return previous[right.length];
+    };
+    const boutiqueAmbiguousSchoolMatches = (order) => {
+      const enteredSchool = normalizeBoutiqueMatch(boutiqueOrderSchoolName(order));
+      if (!enteredSchool) return [];
+      return [...new Set(schoolLibrary.map((school) => school.name).filter((name) => normalizeBoutiqueMatch(name).includes(enteredSchool)))].sort();
+    };
     const boutiqueAssignmentCandidates = (order, search = "") => {
-      const enteredName = normalizeBoutiqueMatch(order?.requested_dancer_name || order?.dancer_name || order?.custom_dancer_name);
+      const enteredName = normalizeBoutiqueMatch(boutiqueOrderDancerName(order));
       const enteredFirst = enteredName.split(" ")[0] || "";
-      const enteredSchool = normalizeBoutiqueMatch(order?.requested_school || order?.school_name || order?.custom_school);
+      const enteredLast = enteredName.split(" ").slice(1).join(" ");
+      const enteredSchool = normalizeBoutiqueMatch(boutiqueOrderSchoolName(order));
       const buyerName = normalizeBoutiqueMatch(boutiqueOrderBuyerName(order));
       const buyerEmail = normalizeBoutiqueMatch(order?.buyer_email);
       const query = normalizeBoutiqueMatch(search);
@@ -21492,6 +21768,7 @@
         const studentName = normalizeBoutiqueMatch(`${record.student.firstName || ""} ${record.student.lastName || ""}`);
         const preferredName = normalizeBoutiqueMatch(`${record.student.preferredName || ""} ${record.student.lastName || ""}`);
         const studentFirst = normalizeBoutiqueMatch(record.student.preferredName || record.student.firstName);
+        const studentLast = normalizeBoutiqueMatch(record.student.lastName);
         const school = normalizeBoutiqueMatch(`${record.rosterClass.schoolName || ""} ${rosterSchoolNickname(record.rosterClass.schoolName)}`);
         const parent = normalizeBoutiqueMatch(record.student.parentName || `${record.student.parentFirstName || ""} ${record.student.parentLastName || ""}`);
         const email = normalizeBoutiqueMatch(record.student.parentEmail);
@@ -21499,8 +21776,9 @@
         let score = 0;
         if (enteredName && (studentName === enteredName || preferredName === enteredName)) { score += 100; reasons.push("dancer name"); }
         else if (enteredFirst && studentFirst === enteredFirst) { score += 60; reasons.push("first name"); }
+        else if (enteredFirst && studentFirst && enteredLast && studentLast === enteredLast && boutiqueNameEditDistance(enteredFirst, studentFirst) <= (Math.max(enteredFirst.length, studentFirst.length) >= 6 ? 2 : 1)) { score += 80; reasons.push("possible dancer name typo"); }
         if (enteredSchool && school.includes(enteredSchool)) { score += 50; reasons.push("school"); }
-        if (buyerName && parent === buyerName) { score += 30; reasons.push("parent"); }
+        if (buyerName && parent === buyerName) { score += 30; reasons.push(enteredName && studentName !== enteredName && preferredName !== enteredName ? "no dancer name match · parent name match" : "parent name match"); }
         if (buyerEmail && email === buyerEmail) { score += 20; reasons.push("email"); }
         const searchable = normalizeBoutiqueMatch(`${rosterStudentFullName(record.student)} ${record.rosterClass.schoolName} ${record.student.parentName} ${record.student.parentEmail}`);
         return { ...record, score, reasons, matchesSearch: !query || searchable.includes(query) };
@@ -21513,7 +21791,13 @@
       if (!order || !list) return;
       const search = document.getElementById("boutique-assignment-search")?.value || "";
       const candidates = boutiqueAssignmentCandidates(order, search);
-      list.innerHTML = candidates.length ? candidates.map(({ rosterClass, student, score, reasons }) => `<button class="boutique-assignment-suggestion" type="button" data-boutique-assignment-student="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small></span>${score ? `<em>Suggested: ${rosterSafe(reasons.join(" + "))}</em>` : ""}</button>`).join("") : `<div class="boutique-kit-empty">No dancers match that search.</div>`;
+      const schoolMatches = boutiqueAmbiguousSchoolMatches(order);
+      const bestCandidateHasDancerMatch = candidates[0]?.reasons.some((reason) => ["dancer name", "first name", "possible dancer name typo"].includes(reason));
+      const unresolvedSchoolAmbiguity = schoolMatches.length > 1 && !bestCandidateHasDancerMatch;
+      const ambiguityNotice = unresolvedSchoolAmbiguity
+        ? `<div class="boutique-kit-empty"><strong>School location needed</strong><br>${rosterSafe(schoolMatches.join(", "))} all match this order. No dancer is suggested until the location is confirmed.</div>`
+        : "";
+      list.innerHTML = `${ambiguityNotice}${candidates.length ? candidates.map(({ rosterClass, student, score, reasons }, index) => `<button class="boutique-assignment-suggestion ${index === 0 && score && !unresolvedSchoolAmbiguity ? "is-best-match" : ""}" type="button" data-boutique-assignment-student="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small></span>${score && !unresolvedSchoolAmbiguity ? `<em>Suggested: ${rosterSafe(reasons.join(" + "))}</em>` : ""}</button>`).join("") : `<div class="boutique-kit-empty">No dancers match that search.</div>`}`;
     };
 
     const closeBoutiqueAssignment = () => {
@@ -21528,7 +21812,7 @@
       boutiqueAssignmentOrderId = orderId;
       setText("boutique-assignment-order", "");
       const summary = document.getElementById("boutique-assignment-order");
-      if (summary) summary.innerHTML = `<strong>${rosterSafe(boutiqueOrderBuyerName(order))}</strong><small>${rosterSafe(boutiqueOrderItemsLabel(order))}</small>`;
+      if (summary) summary.innerHTML = `<strong>${rosterSafe(boutiqueOrderDancerName(order) || "Dancer name missing")}</strong><small>${rosterSafe(boutiqueOrderSchoolName(order) || "School not entered")}</small><small>Ordered By: ${rosterSafe(boutiqueOrderBuyerName(order))}</small>`;
       const search = document.getElementById("boutique-assignment-search");
       if (search) search.value = "";
       const remove = document.getElementById("boutique-assignment-remove");
@@ -21890,13 +22174,12 @@
     };
     const teacherRosterHelperForWeek = (rosterClass) => {
       const activeStudentIds = new Set(rosterEnrolled(rosterClass).map((student) => student.id));
-      return (rosterClass.helperHistory || []).find((entry) => entry.weekStart === teacherHelperWeekKey() && activeStudentIds.has(entry.studentId)) || null;
+      return (rosterClass.helperHistory || []).find((entry) => entry.weekStart === teacherHelperWeekKey() && !entry.replacedAt && activeStudentIds.has(entry.studentId)) || null;
     };
     const assignTeacherRosterHelper = (rosterClass) => {
       const existing = teacherRosterHelperForWeek(rosterClass);
       if (existing) return rosterClass.students.find((student) => student.id === existing.studentId) || null;
-      const attendance = teacherAttendanceForClass(rosterClass);
-      const eligible = rosterEnrolled(rosterClass).filter((student) => ["present", "tardy"].includes(teacherAttendanceStatus(attendance[student.id])));
+      const eligible = rosterEnrolled(rosterClass);
       if (!eligible.length) return null;
       const history = Array.isArray(rosterClass.helperHistory) ? rosterClass.helperHistory : [];
       const countFor = (studentId) => history.filter((entry) => entry.studentId === studentId).length;
@@ -21916,8 +22199,8 @@
     };
     const teacherRosterAttendanceFinalized = (rosterClass) => {
       const attendance = teacherAttendanceForClass(rosterClass);
-      const enrolled = rosterEnrolled(rosterClass);
-      return enrolled.length > 0 && enrolled.every((student) => {
+      const attendanceStudents = teacherRosterAttendanceStudents(rosterClass);
+      return attendanceStudents.length > 0 && attendanceStudents.every((student) => {
         const entry = attendance[student.id];
         const status = teacherAttendanceStatus(entry);
         if (status === "absent") return true;
@@ -21940,11 +22223,13 @@
           : `<button class="teacher-attendance-button" type="button" data-teacher-attendance-status="present" data-teacher-attendance-student="${rosterSafe(student.id)}" data-teacher-attendance-class="${rosterSafe(rosterClass.id)}">${attendanceStatus === "present" ? "✓ Checked In" : attendanceStatus === "tardy" ? "Tardy" : attendanceStatus === "absent" ? "Absent" : "Check In"}</button>`)}
       </div>`;
     };
+    const teacherFutureProspectCardMarkup = (student, rosterClass) => `<button class="teacher-future-prospect-card" type="button" data-teacher-edit-prospect="${rosterSafe(student.id)}" data-teacher-prospect-class="${rosterSafe(rosterClass.id)}" aria-label="Edit ${rosterSafe(rosterStudentFullName(student))}"><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong></button>`;
 
     const teacherRosterClassroomMarkup = (students, rosterClass) => {
       const attendance = teacherAttendanceForClass(rosterClass);
       const checkInActive = activeTeacherRosterCheckInClassIds.has(rosterClass.id);
       const checkOutActive = activeTeacherRosterCheckOutClassIds.has(rosterClass.id);
+      const checkInSubmitted = submittedTeacherRosterCheckInClassIds.has(rosterClass.id);
       const kitDeliveryActive = activeTeacherKitDeliveryClassIds.has(rosterClass.id);
       const weeklyHelperId = teacherRosterHelperForWeek(rosterClass)?.studentId || "";
       const attendanceFinalized = teacherRosterAttendanceFinalized(rosterClass);
@@ -21959,7 +22244,8 @@
               const attendanceEntry = attendance[student.id];
               const status = teacherAttendanceStatus(attendanceEntry);
               const checkedOut = typeof attendanceEntry === "object" && Boolean(attendanceEntry?.checkOutAt);
-              const attendanceSelectable = checkInActive ? !status : (checkOutActive && ["present", "tardy"].includes(status) && !checkedOut);
+              const checkedIn = ["present", "tardy"].includes(status);
+              const attendanceSelectable = checkInActive ? !status : (checkOutActive && status !== "absent" && !checkedOut);
               const pendingKey = `${rosterClass.id}:${student.id}`;
               const kitSelectable = kitDeliveryActive && student.kitPickedUp && !student.kitReceived;
               const selectable = kitSelectable || attendanceSelectable;
@@ -21967,17 +22253,25 @@
               return `<div class="teacher-roster-student-tile ${status ? `is-${status}` : ""}">
                 <button class="teacher-roster-profile-button ${pending ? "is-pending" : ""}" type="button" ${kitSelectable ? `data-teacher-kit-select="${rosterSafe(student.id)}"` : selectable ? `data-teacher-attendance-select="${rosterSafe(student.id)}"` : `data-teacher-roster-profile="${rosterSafe(student.id)}"`} data-teacher-attendance-class="${rosterSafe(rosterClass.id)}" aria-label="${selectable ? `${pending ? "Remove" : "Select"} ${rosterSafe(rosterStudentFullName(student))} for ${kitSelectable ? "T-Shirt and bag delivery" : checkOutActive ? "check out" : "check in"}` : `Open ${rosterSafe(rosterStudentFullName(student))} profile`}">
                   <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
-                  ${pending ? `<span class="teacher-roster-selection-check" aria-hidden="true">✓</span>` : ""}
-                  ${attendanceFinalized && ["present", "tardy", "absent"].includes(status) ? `<span class="teacher-roster-check is-${status}" aria-label="${status === "absent" ? "Absent" : status === "tardy" ? "Tardy" : "Attended"}" title="${status === "absent" ? "Absent" : status === "tardy" ? "Tardy" : "Attended"}">${status === "absent" ? "×" : "✓"}</span>` : ""}
+                  ${pending ? `<span class="teacher-roster-selection-check ${checkOutActive ? "is-safe" : ""}" aria-hidden="true">✓</span>` : ""}
+                  ${!pending && checkedIn && (checkInSubmitted || checkOutActive || checkedOut) ? `<span class="teacher-roster-selection-check ${checkedOut ? "is-safe" : ""}" aria-label="${checkedOut ? "Safely returned to classroom" : "Checked in"}" title="${checkedOut ? "Safely returned to classroom" : "Checked in"}">✓</span>` : ""}
+                  ${attendanceFinalized && status === "absent" ? `<span class="teacher-roster-check is-absent" aria-label="Absent" title="Absent">×</span>` : ""}
                 </button>
-                <strong>${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
+                <strong class="${weeklyHelperId === student.id ? "teacher-helper-name" : ""}">${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
               </div>`;
             }).join("");
+        const selectedCount = classroomStudents.filter((student) => {
+          const entry = attendance[student.id];
+          const pending = pendingTeacherRosterCheckIns.has(`${rosterClass.id}:${student.id}`);
+          if (checkOutActive) return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && !(typeof entry === "object" && entry.checkOutAt) && !pending;
+          return pending;
+        }).length;
         return `<section class="teacher-roster-classroom">
           <h4>${rosterSafe(classroom)}</h4>
           <div class="teacher-roster-student-grid">
             ${studentTiles}
           </div>
+          ${(checkInActive || checkOutActive) ? `<div class="teacher-classroom-selected-count"><span>${selectedCount}</span></div>` : ""}
         </section>`;
       }).join("");
     };
@@ -22012,32 +22306,36 @@
       if (!openTeacherRosterClassIds.size && selectedTeacherRosterClassId) openTeacherRosterClassIds.add(selectedTeacherRosterClassId);
       list.innerHTML = visibleClasses.map((rosterClass) => {
         const enrolled = rosterEnrolled(rosterClass);
-        const prospects = rosterProspects(rosterClass);
+        if (enrolled.length) assignTeacherRosterHelper(rosterClass);
+        const attendanceStudents = teacherRosterAttendanceStudents(rosterClass);
+        const prospects = rosterProspects(rosterClass).filter((student) => !rosterTrialAttendancePending(student) && !student.additionalInformation?.trial_completed);
         const attendance = teacherAttendanceForClass(rosterClass);
-        const unresolved = enrolled.filter((student) => !teacherAttendanceStatus(attendance[student.id]));
-        const attendanceComplete = enrolled.length > 0 && unresolved.length === 0;
+        const unresolved = attendanceStudents.filter((student) => !teacherAttendanceStatus(attendance[student.id]));
+        const attendanceComplete = attendanceStudents.length > 0 && unresolved.length === 0;
         const checkInActive = activeTeacherRosterCheckInClassIds.has(rosterClass.id);
         const checkOutActive = activeTeacherRosterCheckOutClassIds.has(rosterClass.id);
         const kitDeliveryActive = activeTeacherKitDeliveryClassIds.has(rosterClass.id);
+        const boutiqueDeliveryActive = activeTeacherBoutiqueDeliveryClassIds.has(rosterClass.id);
         const outstandingKits = enrolled.filter((student) => !student.kitReceived);
         const readyKits = outstandingKits.filter((student) => student.kitPickedUp);
         const checkInSubmitted = submittedTeacherRosterCheckInClassIds.has(rosterClass.id);
-        const awaitingCheckOut = enrolled.filter((student) => {
+        const awaitingCheckOut = attendanceStudents.filter((student) => {
           const entry = attendance[student.id];
           return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && !(typeof entry === "object" && entry.checkOutAt);
         });
         const classComplete = attendanceComplete && awaitingCheckOut.length === 0;
-        const duration = classDurationForStudents(enrolled.length) || "No duration";
+        const duration = classDurationForStudents(attendanceStudents.length) || "No duration";
         const durationClass = duration.startsWith("30") ? "duration-30" : duration.startsWith("45") ? "duration-45" : "";
         return `<details class="teacher-roster-card teacher-roster-active-card" data-teacher-roster-details="${rosterSafe(rosterClass.id)}" ${openTeacherRosterClassIds.has(rosterClass.id) ? "open" : ""}>
-          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}"><div class="teacher-roster-active-heading"><div><h3>${rosterSafe(rosterClass.name)}</h3><p>${rosterSafe(rosterClass.day || "Day not set")} · ${rosterSafe(rosterClass.time || "Time not set")}</p></div><span class="teacher-roster-duration ${durationClass}">${enrolled.length} students · ${rosterSafe(duration)}</span></div><div class="teacher-roster-class-actions">${enrolled.length ? `<button class="teacher-class-action-start ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${classComplete ? "disabled" : ""}>${classComplete ? "Class Complete" : checkOutActive ? "Check-Out Started" : checkInActive ? "Check-In Started" : checkInSubmitted ? "End Class" : "Start Class"}</button>` : `<button class="teacher-class-action-start" type="button" disabled>Start Class</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" ${readyKits.length ? "" : "disabled"}>${kitDeliveryActive ? "Delivery Started" : "Deliver Shirts"}</button><button class="teacher-class-action-boutique" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" disabled>Deliver Boutique</button></div></summary>
+          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}"><div class="teacher-roster-active-heading"><div><h3>${rosterSafe(rosterClass.name)}</h3><p>${rosterSafe(rosterClass.day || "Day not set")} · ${rosterSafe(rosterClass.time || "Time not set")}</p></div><span class="teacher-roster-duration ${durationClass}">${attendanceStudents.length} students · ${rosterSafe(duration)}</span></div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${classComplete ? "disabled" : ""}>${classComplete ? "Class Complete" : checkOutActive ? "Check-Out Started" : checkInActive ? "Check-In Started" : checkInSubmitted ? "End Class" : "Start Class"}</button>` : `<button class="teacher-class-action-start" type="button" disabled>Start Class</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" ${readyKits.length ? "" : "disabled"}>${kitDeliveryActive ? "Delivery Started" : "Deliver Shirts"}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" disabled>${boutiqueDeliveryActive ? "Delivery Started" : "Deliver Boutique"}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}">✦ Helper ✦</button></div></summary>
           <div class="teacher-roster-card-body">
             ${classComplete ? `<div class="teacher-attendance-complete">✓ Class attendance complete for today</div>` : checkInSubmitted ? `<div class="teacher-attendance-complete">✓ Check-in recorded</div>` : ""}
-            <div>${enrolled.length ? teacherRosterClassroomMarkup(enrolled, rosterClass) : `<div class="teacher-roster-empty">No enrolled dancers yet.</div>`}</div>
-            ${enrolled.length && !checkInSubmitted && checkInActive ? `<div class="teacher-attendance-footer"><button class="primary" type="button" data-teacher-attendance-finish="${rosterSafe(rosterClass.id)}">Check In</button></div>` : ""}
-            ${checkInSubmitted && checkOutActive ? `<div class="teacher-attendance-footer"><button class="primary" type="button" data-teacher-attendance-checkout="${rosterSafe(rosterClass.id)}">Check Out</button></div>` : ""}
-            ${kitDeliveryActive ? `<div class="teacher-attendance-footer"><button class="primary" type="button" data-teacher-kit-delivery-finish="${rosterSafe(rosterClass.id)}">Mark as Delivered</button></div>` : ""}
-            <details class="teacher-roster-future-panel"><summary>Future Dancers (${prospects.length})</summary><div class="teacher-roster-section-title"><span></span><button class="secondary" type="button" data-teacher-roster-add-future="${rosterSafe(rosterClass.id)}">Add</button></div><div class="teacher-roster-students">${prospects.length ? sortRosterStudents(prospects).map((student) => teacherRosterStudentMarkup(student, true)).join("") : `<div class="teacher-roster-empty">No future dancers yet.</div>`}</div></details>
+            <div>${attendanceStudents.length ? teacherRosterClassroomMarkup(attendanceStudents, rosterClass) : `<div class="teacher-roster-empty">No dancers attending this class yet.</div>`}</div>
+            ${attendanceStudents.length && !checkInSubmitted && checkInActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-attendance="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-attendance-finish="${rosterSafe(rosterClass.id)}">Check In</button></div>` : ""}
+            ${checkInSubmitted && checkOutActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-attendance="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-attendance-checkout="${rosterSafe(rosterClass.id)}">Check Out</button></div>` : ""}
+            ${kitDeliveryActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-kit-delivery="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-kit-delivery-finish="${rosterSafe(rosterClass.id)}">Mark as Delivered</button></div>` : ""}
+            ${boutiqueDeliveryActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-boutique-delivery="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button">Mark as Delivered</button></div>` : ""}
+            <details class="teacher-roster-future-panel"><summary><span>Future Dancers (${prospects.length})</span><button class="secondary roster-add-future-button" type="button" data-teacher-roster-add-future="${rosterSafe(rosterClass.id)}">Add Prospect</button></summary>${prospects.length ? `<div class="teacher-future-prospect-grid">${sortRosterStudents(prospects).map((student) => teacherFutureProspectCardMarkup(student, rosterClass)).join("")}</div>` : `<div class="teacher-roster-empty">No future dancers yet.</div>`}</details>
           </div>
         </details>`;
       }).join("");
@@ -22064,9 +22362,16 @@
       window.setTimeout(() => document.getElementById("teacher-roster-class-name")?.focus(), 40);
     };
 
-    const openTeacherFutureDancerCreator = (preferredClassId = "") => {
+    let editingTeacherProspectStudentId = "";
+    let editingTeacherProspectClassId = "";
+    let pendingTeacherProspectPhoto = "";
+
+    const openTeacherFutureDancerCreator = (preferredClassId = "", student = null) => {
       const classes = teacherRosterClasses();
       if (!classes.length) return showToast("Create a class before adding a future dancer");
+      editingTeacherProspectStudentId = student?.id || "";
+      editingTeacherProspectClassId = student ? preferredClassId : "";
+      pendingTeacherProspectPhoto = student?.photo || "";
       const classSelect = document.getElementById("teacher-roster-future-class");
       classSelect.innerHTML = classes.map((rosterClass) => {
         const school = assignedTeacherSchools().find((item) => item.name === rosterClass.schoolName);
@@ -22075,8 +22380,63 @@
       if (classes.some((rosterClass) => rosterClass.id === preferredClassId)) classSelect.value = preferredClassId;
       document.getElementById("teacher-roster-future-form")?.reset();
       if (classes.some((rosterClass) => rosterClass.id === preferredClassId)) classSelect.value = preferredClassId;
+      renderTeacherFutureDancerClassrooms();
+      if (student) {
+        document.getElementById("teacher-roster-future-first").value = student.firstName || "";
+        document.getElementById("teacher-roster-future-last").value = student.lastName || "";
+        document.getElementById("teacher-roster-future-birthdate").value = student.birthdate || "";
+        document.getElementById("teacher-roster-future-classroom").value = student.officialClassroom || student.classroom || "";
+        document.getElementById("teacher-roster-future-trial").value = student.trialDate || "";
+        document.getElementById("teacher-roster-future-parent-first").value = student.parentFirstName || String(student.parentName || "").split(" ")[0] || "";
+        document.getElementById("teacher-roster-future-parent-last").value = student.parentLastName || String(student.parentName || "").split(" ").slice(1).join(" ");
+        document.getElementById("teacher-roster-future-phone").value = student.parentPhone || "";
+        document.getElementById("teacher-roster-future-email").value = student.parentEmail || "";
+        document.getElementById("teacher-roster-future-notes").value = student.notes || "";
+        document.getElementById("teacher-roster-future-feedback").value = student.teacherFeedback || student.additionalInformation?.teacher_feedback || "";
+      }
+      document.getElementById("teacher-roster-future-followup-section")?.toggleAttribute("hidden", !student);
+      document.getElementById("teacher-roster-future-delete")?.toggleAttribute("hidden", !student);
+      setText("teacher-roster-future-title", student ? "Future Dancer" : "Trial Request");
+      const submitButton = document.querySelector(".trial-request-submit");
+      if (submitButton) submitButton.textContent = student ? "Trial Complete" : "Add Prospect Dancer";
+      setText("teacher-roster-future-photo-status", pendingTeacherProspectPhoto ? "Picture on file. Choose another to replace it." : "No picture selected.");
       setTeacherRosterOverlay("teacher-roster-future-overlay", true);
       window.setTimeout(() => document.getElementById("teacher-roster-future-first")?.focus(), 40);
+    };
+
+    const renderTeacherFutureDancerClassrooms = () => {
+      const classroomSelect = document.getElementById("teacher-roster-future-classroom");
+      const selectedClass = teacherRosterClasses().find((item) => item.id === document.getElementById("teacher-roster-future-class")?.value);
+      if (!classroomSelect || !selectedClass) return;
+      const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, selectedClass.schoolName));
+      const officialClassrooms = [...new Set([
+        ...(school?.classroomOptions || []),
+        ...rosterClasses.filter((item) => enrollmentSchoolNameMatches(item.schoolName, selectedClass.schoolName))
+          .flatMap((item) => item.students.map((student) => student.officialClassroom || student.classroom).filter(Boolean))
+      ].map((value) => String(value).trim()).filter(Boolean))].sort((left, right) => left.localeCompare(right, undefined, { sensitivity: "base", numeric: true }));
+      classroomSelect.innerHTML = `<option value="">Select classroom</option>${officialClassrooms.map((classroom) => `<option value="${rosterSafe(classroom)}">${rosterSafe(classroom)}</option>`).join("")}`;
+    };
+
+    const deleteTeacherFutureDancer = async () => {
+      const rosterClass = teacherRosterClasses().find((item) => item.id === editingTeacherProspectClassId);
+      const student = rosterClass?.students.find((item) => item.id === editingTeacherProspectStudentId);
+      if (!rosterClass || !student) return;
+      if (!window.confirm(`Are you sure you want to delete ${rosterStudentFullName(student)}? This permanently removes the dancer and cannot be undone.`)) return;
+      if (student.enrollmentId && window.dtSupabase && document.body.dataset.tourMode !== "true") {
+        const result = await window.dtSupabase.from("students").delete().eq("id", student.id);
+        if (result.error) return sharedRosterError("The future dancer could not be deleted.", result.error, { reload: false });
+        if (student.photoPath) await window.dtSupabase.storage.from("student-photos").remove([student.photoPath]);
+      }
+      rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
+      setTeacherRosterOverlay("teacher-roster-future-overlay", false);
+      editingTeacherProspectStudentId = "";
+      editingTeacherProspectClassId = "";
+      pendingTeacherProspectPhoto = "";
+      scheduleAppDataSave();
+      renderTeacherRosters();
+      renderClassesAndRosters();
+      renderEnrollmentStudentsView();
+      showToast(`${rosterStudentFullName(student)} was deleted`);
     };
 
     const openTeacherStudentProfile = (rosterClass, student) => {
@@ -22113,20 +22473,58 @@
       const list = document.getElementById("teacher-attendance-review-list");
       if (!list) return;
       const attendance = teacherAttendanceForClass(rosterClass);
-      const unresolved = sortRosterStudents(rosterEnrolled(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id])));
+      const unresolved = sortRosterStudents(teacherRosterAttendanceStudents(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id])));
       if (!unresolved.length) {
+        const checkoutCompleted = teacherRosterAttendanceStudents(rosterClass).some((student) => typeof attendance[student.id] === "object" && Boolean(attendance[student.id]?.checkOutAt));
         teacherRosterAttendanceReviewClassId = "";
         activeTeacherRosterCheckInClassIds.delete(rosterClass.id);
         activeTeacherRosterCheckOutClassIds.delete(rosterClass.id);
         submittedTeacherRosterCheckInClassIds.delete(rosterClass.id);
         setTeacherRosterOverlay("teacher-attendance-review-overlay", false);
         renderTeacherRosters();
-        showToast("Check-in complete — ready to end class");
+        showToast(checkoutCompleted ? "Class attendance complete" : "Check-in complete — ready to end class");
         return;
       }
       list.innerHTML = unresolved.map((student) => `<div class="teacher-attendance-review-row"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><span class="teacher-attendance-actions"><button class="secondary" type="button" data-review-attendance-status="tardy" data-review-student="${rosterSafe(student.id)}">Tardy</button><button class="secondary" type="button" data-review-attendance-status="absent" data-review-student="${rosterSafe(student.id)}">Absent</button></span></div>`).join("");
       teacherRosterAttendanceReviewClassId = rosterClass.id;
       setTeacherRosterOverlay("teacher-attendance-review-overlay", true);
+    };
+
+    const renderTeacherHelperPicker = (rosterClass, mode = "attendance") => {
+      const list = document.getElementById("teacher-helper-picker-list");
+      if (!list) return;
+      const attendance = teacherAttendanceForClass(rosterClass);
+      const currentHelperId = teacherRosterHelperForWeek(rosterClass)?.studentId || "";
+      const choices = sortRosterStudents(rosterEnrolled(rosterClass).filter((student) => {
+        if (mode === "manual") return student.id !== currentHelperId;
+        const entry = attendance[student.id];
+        return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && typeof entry === "object" && Boolean(entry.checkOutAt);
+      }));
+      if (!choices.length) {
+        showToast("No other dancers are available for Helper");
+        return;
+      }
+      document.getElementById("teacher-helper-picker-title").textContent = mode === "manual" ? "Choose a New Helper" : "Choose This Week’s Helper";
+      document.getElementById("teacher-helper-picker-copy").textContent = mode === "manual"
+        ? "Select a replacement. The current helper will be scheduled again next week for a redemption opportunity."
+        : "The planned helper did not attend today. Select a dancer who attended class.";
+      list.innerHTML = choices.map((student) => `<button class="teacher-attendance-review-row" type="button" data-teacher-helper-choice="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><span>Choose</span></button>`).join("");
+      teacherHelperPickerClassId = rosterClass.id;
+      teacherHelperPickerMode = mode;
+      setTeacherRosterOverlay("teacher-helper-picker-overlay", true);
+    };
+
+    const finishTeacherRosterCheckout = (rosterClass) => {
+      const attendance = teacherAttendanceForClass(rosterClass);
+      const unresolved = teacherRosterAttendanceStudents(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id]));
+      activeTeacherRosterCheckOutClassIds.delete(rosterClass.id);
+      submittedTeacherRosterCheckInClassIds.delete(rosterClass.id);
+      if (unresolved.length) {
+        renderTeacherAttendanceReview(rosterClass);
+      } else {
+        renderTeacherRosters();
+        showToast("Class attendance complete");
+      }
     };
 
     document.getElementById("teacher-roster-create-class")?.addEventListener("click", openTeacherRosterClassCreator);
@@ -22138,11 +22536,47 @@
       renderTeacherRosters();
     });
     document.getElementById("teacher-roster-list")?.addEventListener("click", (event) => {
+      const changeHelperButton = event.target.closest("[data-teacher-change-helper]");
+      if (changeHelperButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        const rosterClass = teacherRosterClasses().find((item) => item.id === changeHelperButton.dataset.teacherChangeHelper);
+        if (rosterClass) renderTeacherHelperPicker(rosterClass, "manual");
+        return;
+      }
+      const cancelAttendanceButton = event.target.closest("[data-teacher-cancel-attendance]");
+      if (cancelAttendanceButton) {
+        const classId = cancelAttendanceButton.dataset.teacherCancelAttendance;
+        activeTeacherRosterCheckInClassIds.delete(classId);
+        activeTeacherRosterCheckOutClassIds.delete(classId);
+        [...pendingTeacherRosterCheckIns].filter((key) => key.startsWith(`${classId}:`)).forEach((key) => pendingTeacherRosterCheckIns.delete(key));
+        teacherRosterAttendanceReviewClassId = "";
+        renderTeacherRosters();
+        showToast("Class workflow canceled");
+        return;
+      }
+      const cancelKitButton = event.target.closest("[data-teacher-cancel-kit-delivery]");
+      if (cancelKitButton) {
+        const classId = cancelKitButton.dataset.teacherCancelKitDelivery;
+        activeTeacherKitDeliveryClassIds.delete(classId);
+        [...pendingTeacherKitDeliveries].filter((key) => key.startsWith(`${classId}:`)).forEach((key) => pendingTeacherKitDeliveries.delete(key));
+        renderTeacherRosters();
+        showToast("Shirt delivery canceled");
+        return;
+      }
+      const cancelBoutiqueButton = event.target.closest("[data-teacher-cancel-boutique-delivery]");
+      if (cancelBoutiqueButton) {
+        activeTeacherBoutiqueDeliveryClassIds.delete(cancelBoutiqueButton.dataset.teacherCancelBoutiqueDelivery);
+        renderTeacherRosters();
+        showToast("Boutique delivery canceled");
+        return;
+      }
       const startKitDeliveryButton = event.target.closest("[data-teacher-start-kit-delivery]");
       if (startKitDeliveryButton) {
         event.preventDefault();
         event.stopPropagation();
         const classId = startKitDeliveryButton.dataset.teacherStartKitDelivery;
+        activeTeacherBoutiqueDeliveryClassIds.delete(classId);
         activeTeacherRosterCheckInClassIds.delete(classId);
         activeTeacherRosterCheckOutClassIds.delete(classId);
         [...pendingTeacherRosterCheckIns].filter((key) => key.startsWith(`${classId}:`)).forEach((key) => pendingTeacherRosterCheckIns.delete(key));
@@ -22158,12 +22592,27 @@
         renderTeacherRosters();
         return;
       }
+      const startBoutiqueDeliveryButton = event.target.closest("[data-teacher-start-boutique-delivery]");
+      if (startBoutiqueDeliveryButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        const classId = startBoutiqueDeliveryButton.dataset.teacherStartBoutiqueDelivery;
+        activeTeacherRosterCheckInClassIds.delete(classId);
+        activeTeacherRosterCheckOutClassIds.delete(classId);
+        activeTeacherKitDeliveryClassIds.delete(classId);
+        activeTeacherBoutiqueDeliveryClassIds.add(classId);
+        openTeacherRosterClassIds.add(classId);
+        renderTeacherRosters();
+        showToast("Select each dancer receiving a Boutique order");
+        return;
+      }
       const startClassButton = event.target.closest("[data-teacher-start-class]");
       if (startClassButton) {
         event.preventDefault();
         event.stopPropagation();
         const classId = startClassButton.dataset.teacherStartClass;
         const mode = startClassButton.dataset.teacherStartMode || "checkin";
+        activeTeacherBoutiqueDeliveryClassIds.delete(classId);
         activeTeacherKitDeliveryClassIds.delete(classId);
         [...pendingTeacherKitDeliveries].filter((key) => key.startsWith(`${classId}:`)).forEach((key) => pendingTeacherKitDeliveries.delete(key));
         if (mode === "checkout") activeTeacherRosterCheckOutClassIds.add(classId);
@@ -22220,7 +22669,7 @@
         const studentId = attendanceButton.dataset.teacherAttendanceStudent;
         const status = attendanceButton.dataset.teacherAttendanceStatus;
         attendance[studentId] = { status, checkInAt: status === "absent" ? "" : new Date().toISOString(), checkOutAt: "" };
-        const unresolved = rosterEnrolled(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id]));
+        const unresolved = teacherRosterAttendanceStudents(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id]));
         if (teacherRosterAttendanceReviewClassId === rosterClass.id && !unresolved.length) {
           teacherRosterAttendanceReviewClassId = "";
           showToast("Attendance complete");
@@ -22239,7 +22688,7 @@
           attendance[key.slice(classPrefix.length)] = { status: "present", checkInAt: new Date().toISOString(), checkOutAt: "" };
           pendingTeacherRosterCheckIns.delete(key);
         });
-        const unresolved = rosterEnrolled(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id]));
+        const unresolved = teacherRosterAttendanceStudents(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id]));
         const helper = assignTeacherRosterHelper(rosterClass);
         scheduleAppDataSave();
         submittedTeacherRosterCheckInClassIds.add(rosterClass.id);
@@ -22255,30 +22704,54 @@
         if (!rosterClass) return;
         const attendance = teacherAttendanceForClass(rosterClass);
         const classPrefix = `${rosterClass.id}:`;
+        const checkedOutAt = new Date().toISOString();
         [...pendingTeacherRosterCheckIns].filter((key) => key.startsWith(classPrefix)).forEach((key) => {
           const studentId = key.slice(classPrefix.length);
           const existing = attendance[studentId];
-          attendance[studentId] = typeof existing === "object"
-            ? { ...existing, checkOutAt: new Date().toISOString() }
-            : { status: teacherAttendanceStatus(existing), checkInAt: "", checkOutAt: new Date().toISOString() };
+          const existingStatus = teacherAttendanceStatus(existing);
+          attendance[studentId] = existingStatus
+            ? (typeof existing === "object"
+              ? { ...existing, checkOutAt: checkedOutAt }
+              : { status: existingStatus, checkInAt: "", checkOutAt: checkedOutAt })
+            : { status: "tardy", checkInAt: checkedOutAt, checkOutAt: checkedOutAt, autoTardy: true };
           pendingTeacherRosterCheckIns.delete(key);
         });
-        const remaining = rosterEnrolled(rosterClass).filter((student) => {
+        const completedProspects = teacherRosterAttendanceStudents(rosterClass).filter((student) => {
+          const entry = attendance[student.id];
+          return rosterTrialAttendancePending(student) && ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && typeof entry === "object" && Boolean(entry.checkOutAt);
+        });
+        completedProspects.forEach((student) => {
+          student.trialAttendancePending = false;
+          student.additionalInformation = { ...(student.additionalInformation || {}), trial_attendance_pending: false };
+          student.status = "trial-attended";
+        });
+        if (completedProspects.length) {
+          Promise.all(completedProspects.map((student) => saveSharedStudent(student, rosterClass))).catch((error) => sharedRosterError("The prospect attendance could not be saved.", error, { reload: false }));
+        }
+        const remaining = teacherRosterAttendanceStudents(rosterClass).filter((student) => {
           const entry = attendance[student.id];
           return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && !(typeof entry === "object" && entry.checkOutAt);
         });
-        const unresolved = rosterEnrolled(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id]));
+        const unresolved = teacherRosterAttendanceStudents(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id]));
+        const plannedHelper = teacherRosterHelperForWeek(rosterClass);
+        const plannedHelperAttended = plannedHelper && (() => {
+          const entry = attendance[plannedHelper.studentId];
+          return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && typeof entry === "object" && Boolean(entry.checkOutAt);
+        })();
+        const attendedDancers = rosterEnrolled(rosterClass).filter((student) => {
+          const entry = attendance[student.id];
+          return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && typeof entry === "object" && Boolean(entry.checkOutAt);
+        });
         scheduleAppDataSave();
         renderTeacherRosters();
         if (remaining.length) {
           showToast(`${remaining.length} dancer${remaining.length === 1 ? " still needs" : "s still need"} check-out`);
+        } else if (plannedHelper && !plannedHelperAttended && attendedDancers.length) {
+          renderTeacherHelperPicker(rosterClass);
         } else if (unresolved.length) {
           renderTeacherAttendanceReview(rosterClass);
         } else {
-          activeTeacherRosterCheckOutClassIds.delete(rosterClass.id);
-          submittedTeacherRosterCheckInClassIds.delete(rosterClass.id);
-          renderTeacherRosters();
-          showToast("Class attendance complete");
+          finishTeacherRosterCheckout(rosterClass);
         }
         return;
       }
@@ -22314,6 +22787,13 @@
         showToast(`${selectedStudents.length} enrollment kit${selectedStudents.length === 1 ? "" : "s"} marked delivered`);
         return;
       }
+      const prospectButton = event.target.closest("[data-teacher-edit-prospect]");
+      if (prospectButton) {
+        const rosterClass = teacherRosterClasses().find((item) => item.id === prospectButton.dataset.teacherProspectClass);
+        const student = rosterClass?.students.find((item) => item.id === prospectButton.dataset.teacherEditProspect);
+        if (rosterClass && student) openTeacherFutureDancerCreator(rosterClass.id, student);
+        return;
+      }
       const button = event.target.closest("[data-teacher-roster-add-future]");
       if (!button) return;
       event.preventDefault();
@@ -22321,6 +22801,18 @@
     });
     document.getElementById("teacher-roster-class-cancel")?.addEventListener("click", () => setTeacherRosterOverlay("teacher-roster-class-overlay", false));
     document.getElementById("teacher-roster-future-cancel")?.addEventListener("click", () => setTeacherRosterOverlay("teacher-roster-future-overlay", false));
+    document.getElementById("teacher-roster-future-delete")?.addEventListener("click", deleteTeacherFutureDancer);
+    document.getElementById("teacher-roster-future-class")?.addEventListener("change", renderTeacherFutureDancerClassrooms);
+    document.getElementById("teacher-roster-future-photo")?.addEventListener("change", (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        pendingTeacherProspectPhoto = typeof reader.result === "string" ? reader.result : "";
+        setText("teacher-roster-future-photo-status", pendingTeacherProspectPhoto ? file.name : "No picture selected.");
+      });
+      reader.readAsDataURL(file);
+    });
     document.getElementById("teacher-student-profile-close")?.addEventListener("click", () => setTeacherRosterOverlay("teacher-student-profile-overlay", false));
     document.getElementById("teacher-student-profile-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "teacher-student-profile-overlay") setTeacherRosterOverlay("teacher-student-profile-overlay", false);
@@ -22361,6 +22853,57 @@
       scheduleAppDataSave();
       renderTeacherAttendanceReview(rosterClass);
     });
+    document.getElementById("teacher-helper-picker-list")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-teacher-helper-choice]");
+      if (!button) return;
+      const rosterClass = teacherRosterClasses().find((item) => item.id === teacherHelperPickerClassId);
+      const student = rosterClass?.students.find((item) => item.id === button.dataset.teacherHelperChoice);
+      if (!rosterClass || !student) return;
+      const pickerMode = teacherHelperPickerMode;
+      const weekStart = teacherHelperWeekKey();
+      const replacedHelper = teacherRosterHelperForWeek(rosterClass);
+      if (pickerMode === "manual" && replacedHelper?.studentId && replacedHelper.studentId !== student.id) {
+        const nextWeekDate = new Date(`${weekStart}T12:00:00`);
+        nextWeekDate.setDate(nextWeekDate.getDate() + 7);
+        const nextWeekStart = isoDate(nextWeekDate);
+        rosterClass.helperHistory = (rosterClass.helperHistory || []).filter((entry) => entry.weekStart !== nextWeekStart);
+        rosterClass.helperHistory.push({
+          weekStart: nextWeekStart,
+          studentId: replacedHelper.studentId,
+          assignedAt: new Date().toISOString(),
+          assignedBy: window.dtCurrentProfile?.id || profileTeacher?.id || "",
+          redemption: true
+        });
+      }
+      if (pickerMode === "manual" && replacedHelper) {
+        rosterClass.helperHistory = (rosterClass.helperHistory || []).map((entry) => entry === replacedHelper
+          ? { ...entry, replacedAt: new Date().toISOString(), replacedByStudentId: student.id }
+          : entry);
+      } else {
+        rosterClass.helperHistory = (rosterClass.helperHistory || []).filter((entry) => entry.weekStart !== weekStart);
+      }
+      rosterClass.helperHistory.push({
+        weekStart,
+        studentId: student.id,
+        assignedAt: new Date().toISOString(),
+        assignedBy: window.dtCurrentProfile?.id || profileTeacher?.id || ""
+      });
+      teacherHelperPickerClassId = "";
+      teacherHelperPickerMode = "attendance";
+      setTeacherRosterOverlay("teacher-helper-picker-overlay", false);
+      scheduleAppDataSave();
+      saveSharedClass(rosterClass);
+      if (pickerMode === "attendance") finishTeacherRosterCheckout(rosterClass);
+      else renderTeacherRosters();
+      showToast(pickerMode === "manual"
+        ? `${rosterStudentFirstName(student)} is the new Helper`
+        : `${rosterStudentFirstName(student)} is this week’s Helper!`);
+    });
+    ["teacher-helper-picker-cancel", "teacher-helper-picker-close"].forEach((id) => document.getElementById(id)?.addEventListener("click", () => {
+        teacherHelperPickerClassId = "";
+        teacherHelperPickerMode = "attendance";
+        setTeacherRosterOverlay("teacher-helper-picker-overlay", false);
+      }));
     ["teacher-roster-class-overlay", "teacher-roster-future-overlay"].forEach((id) => document.getElementById(id)?.addEventListener("click", (event) => {
       if (event.target.id === id) setTeacherRosterOverlay(id, false);
     }));
@@ -22402,28 +22945,57 @@
       const firstName = document.getElementById("teacher-roster-future-first").value.trim();
       const lastName = document.getElementById("teacher-roster-future-last").value.trim();
       const birthdate = document.getElementById("teacher-roster-future-birthdate").value;
-      if (!firstName || !lastName || !birthdate) return showToast("Add the dancer’s name and birthdate");
-      const student = {
-        id: `future-${firstName}-${lastName}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      if (!firstName || !lastName) return showToast("Add the dancer’s first and last name");
+      const officialClassroom = document.getElementById("teacher-roster-future-classroom").value.trim();
+      const parentFirstName = document.getElementById("teacher-roster-future-parent-first").value.trim();
+      const parentLastName = document.getElementById("teacher-roster-future-parent-last").value.trim();
+      const sourceClass = teacherRosterClasses().find((item) => item.id === editingTeacherProspectClassId);
+      const existingStudent = sourceClass?.students.find((item) => item.id === editingTeacherProspectStudentId);
+      const studentDetails = {
         firstName,
         lastName,
         birthdate,
-        classroom: document.getElementById("teacher-roster-future-classroom").value.trim(),
-        status: "trial-scheduled",
+        classroom: officialClassroom,
+        officialClassroom,
         trialDate: document.getElementById("teacher-roster-future-trial").value,
+        parentName: [parentFirstName, parentLastName].filter(Boolean).join(" "),
+        parentFirstName,
+        parentLastName,
         parentPhone: document.getElementById("teacher-roster-future-phone").value.trim(),
         parentEmail: document.getElementById("teacher-roster-future-email").value.trim(),
         notes: document.getElementById("teacher-roster-future-notes").value.trim(),
         gender: "female",
-        photo: ""
+        photo: pendingTeacherProspectPhoto || existingStudent?.photo || ""
       };
-      rosterClass.students.push(student);
+      if (existingStudent) {
+        const teacherFeedback = document.getElementById("teacher-roster-future-feedback").value.trim();
+        studentDetails.teacherFeedback = teacherFeedback;
+        studentDetails.status = "trial-attended";
+        studentDetails.additionalInformation = {
+          ...(existingStudent.additionalInformation || {}),
+          teacher_feedback: teacherFeedback,
+          trial_completed: true,
+          trial_completed_at: new Date().toISOString()
+        };
+      }
+      const student = existingStudent || {
+        id: `future-${firstName}-${lastName}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+        status: "trial-scheduled",
+        trialAttendancePending: true,
+        additionalInformation: { trial_attendance_pending: true }
+      };
+      Object.assign(student, studentDetails);
+      if (!existingStudent) rosterClass.students.push(student);
+      else if (sourceClass.id !== rosterClass.id) {
+        sourceClass.students.splice(sourceClass.students.indexOf(existingStudent), 1);
+        rosterClass.students.push(existingStudent);
+      }
       setTeacherRosterOverlay("teacher-roster-future-overlay", false);
       renderTeacherRosters();
       renderClassesAndRosters();
       scheduleAppDataSave();
       saveSharedStudent(student, rosterClass);
-      showToast(`${firstName} added as a future dancer`);
+      showToast(existingStudent ? `${firstName}’s trial is complete and ready for Director follow-up` : `${firstName} added as a prospect dancer`);
     });
 
     const rosterSafe = (value = "") => String(value)
@@ -22439,18 +23011,12 @@
     const rosterStudentInitials = (student) => `${rosterStudentFirstName(student)[0] || ""}${student?.lastName?.[0] || ""}`.toUpperCase();
     const rosterClassInitials = (rosterClass) => String(rosterClass?.name || "Class").split(/\s+/).filter((part) => /^[A-Za-z0-9]/.test(part)).map((part) => (/^\d+$/.test(part) ? part : part[0] || "")).join("").slice(0, 3).toUpperCase();
     const rosterStudentKitPending = (student) => student?.status === "enrolled" && !student?.kitReceived;
-    const rosterStudentBoutiqueStatus = (student) => {
-      const statuses = boutiqueOrders.filter((order) => order.assigned_student_id === student?.id).map((order) => order.status);
-      if (statuses.includes("to_deliver")) return "deliver";
-      if (statuses.includes("to_pick_up")) return "pickup";
-      if (statuses.includes("to_fill")) return "fill";
-      return "";
-    };
+    const rosterStudentBoutiqueStatus = () => "";
     const rosterStudentBadgeClasses = (student) => {
       const boutiqueStatus = rosterStudentBoutiqueStatus(student);
       const isBirthdayWeek = birthdayFallsThisWeek(student?.birthdate);
       const isMale = String(student?.gender || "").toLowerCase() === "male";
-      return [isBirthdayWeek ? "is-birthday-week" : "", isBirthdayWeek && isMale ? "is-male-birthday" : "", student?.medicalNotes ? "has-medical" : "", rosterStudentKitPending(student) ? (student?.kitPickedUp ? "has-kit-picked-up" : student?.kitReady ? "has-kit-ready" : "has-kit-waiting") : "", boutiqueStatus ? `has-boutique-${boutiqueStatus}` : ""].filter(Boolean).join(" ");
+      return [student?.status !== "enrolled" ? "is-prospect-heart" : "", isBirthdayWeek ? "is-birthday-week" : "", isBirthdayWeek && isMale ? "is-male-birthday" : "", student?.medicalNotes ? "has-medical" : "", rosterStudentKitPending(student) ? (student?.kitPickedUp ? "has-kit-picked-up" : student?.kitReady ? "has-kit-ready" : "has-kit-waiting") : "", boutiqueStatus ? `has-boutique-${boutiqueStatus}` : ""].filter(Boolean).join(" ");
     };
     const rosterStudentBadgeTitle = (student) => {
       const boutiqueStatus = rosterStudentBoutiqueStatus(student);
@@ -22462,7 +23028,9 @@
       return school?.nickname?.trim() || schoolName;
     };
     const rosterEnrolled = (rosterClass) => rosterClass.students.filter((student) => student.status === "enrolled");
-    const rosterProspects = (rosterClass) => rosterClass.students.filter((student) => student.status !== "enrolled");
+    const rosterProspects = (rosterClass) => rosterClass.students.filter((student) => student.status !== "enrolled" && !student.additionalInformation?.future_dancer_archived);
+    const rosterTrialAttendancePending = (student) => student?.status !== "enrolled" && Boolean(student?.trialAttendancePending || student?.additionalInformation?.trial_attendance_pending);
+    const teacherRosterAttendanceStudents = (rosterClass) => rosterClass.students.filter((student) => student.status === "enrolled" || rosterTrialAttendancePending(student));
     const rosterAge = (birthdate) => {
       if (!birthdate) return "—";
       const born = new Date(`${birthdate}T12:00:00`);
@@ -22539,9 +23107,10 @@
       const list = document.getElementById("admin-student-library-list");
       const schoolFilter = document.getElementById("student-library-school");
       const teacherFilter = document.getElementById("student-library-teacher");
+      const dayFilter = document.getElementById("student-library-day");
       const statusFilter = document.getElementById("student-library-status");
       const search = document.getElementById("student-library-search");
-      if (!list || !schoolFilter || !teacherFilter || !statusFilter || !search) return;
+      if (!list || !schoolFilter || !teacherFilter || !dayFilter || !statusFilter || !search) return;
       const currentSchool = schoolFilter.value || "all";
       const currentTeacher = teacherFilter.value || "all";
       const schools = [...new Set(rosterClasses.filter((item) => item.sourceActive !== false).map((item) => item.schoolName).filter(Boolean))].sort();
@@ -22552,10 +23121,10 @@
       teacherFilter.value = assignedTeacherIds.includes(currentTeacher) ? currentTeacher : "all";
       const term = search.value.trim().toLowerCase();
       const records = rosterClasses.filter((item) => item.sourceActive !== false).flatMap((rosterClass) => rosterClass.students.map((student) => ({ rosterClass, student }))).filter(({ rosterClass, student }) => {
+        if (student.status !== "enrolled") return false;
         if (schoolFilter.value !== "all" && rosterClass.schoolName !== schoolFilter.value) return false;
         if (teacherFilter.value !== "all" && rosterClass.teacherId !== teacherFilter.value) return false;
-        if (statusFilter.value === "enrolled" && student.status !== "enrolled") return false;
-        if (statusFilter.value === "future" && student.status === "enrolled") return false;
+        if (dayFilter.value !== "all" && rosterClass.day !== dayFilter.value) return false;
         const haystack = `${student.firstName} ${student.preferredName || ""} ${student.lastName} ${student.parentFirstName || ""} ${student.parentLastName || ""} ${student.parentEmail || ""} ${rosterClass.schoolName} ${rosterClass.name}`.toLowerCase();
         return !term || haystack.includes(term);
       }).sort((left, right) => `${left.student.lastName} ${rosterStudentFirstName(left.student)}`.localeCompare(`${right.student.lastName} ${rosterStudentFirstName(right.student)}`));
@@ -22584,7 +23153,53 @@
       }
     };
 
+    const renderDirectorFutureDancers = () => {
+      const list = document.getElementById("director-future-dancer-list");
+      if (!list) return;
+      const schoolFilter = document.getElementById("director-future-dancer-school");
+      const dayFilter = document.getElementById("director-future-dancer-day");
+      const searchInput = document.getElementById("director-future-dancer-search");
+      const allRecords = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).flatMap((rosterClass) => rosterClass.students
+        .filter((student) => student.status !== "enrolled" && student.additionalInformation?.trial_completed && !student.additionalInformation?.future_dancer_archived)
+        .map((student) => ({ rosterClass, student })));
+      const schools = [...new Set(allRecords.map(({ rosterClass }) => rosterClass.schoolName))].sort((left, right) => rosterSchoolNickname(left).localeCompare(rosterSchoolNickname(right)));
+      if (schoolFilter) {
+        schoolFilter.innerHTML = `<option value="all">All partner schools</option>${schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}`;
+        schoolFilter.value = schools.includes(directorFutureDancerSchool) ? directorFutureDancerSchool : "all";
+      }
+      if (searchInput && searchInput.value !== directorFutureDancerSearch) searchInput.value = directorFutureDancerSearch;
+      if (dayFilter) dayFilter.value = directorFutureDancerDay;
+      const term = directorFutureDancerSearch.trim().toLowerCase();
+      const records = allRecords.filter(({ rosterClass, student }) => {
+        if (directorFutureDancerSchool !== "all" && rosterClass.schoolName !== directorFutureDancerSchool) return false;
+        if (directorFutureDancerDay !== "all" && rosterClass.day !== directorFutureDancerDay) return false;
+        const haystack = `${rosterStudentFullName(student)} ${student.parentFirstName || ""} ${student.parentLastName || ""} ${student.parentEmail || ""}`.toLowerCase();
+        return !term || haystack.includes(term);
+      })
+        .sort((left, right) => new Date(right.student.additionalInformation?.trial_completed_at || 0) - new Date(left.student.additionalInformation?.trial_completed_at || 0)
+          || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
+      list.innerHTML = records.length ? records.map(({ rosterClass, student }) => {
+        const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
+        return `<button class="teacher-future-prospect-card" type="button" data-director-future-student="${rosterSafe(student.id)}" data-director-future-class="${rosterSafe(rosterClass.id)}" aria-label="Open ${rosterSafe(rosterStudentFullName(student))}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${rosterSafe(dayLabel)}</span><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>Trial Date: ${rosterSafe(student.trialDate ? new Date(`${student.trialDate}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Not entered")}</small></button>`;
+      }).join("") : `<div class="roster-empty" style="grid-column:1/-1">No future dancers match these filters.</div>`;
+    };
+
+    const renderEnrollmentStudentSummary = () => {
+      const summary = document.getElementById("enrollment-student-summary");
+      if (!summary) return;
+      const activeClasses = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false);
+      const activeDancers = activeClasses.reduce((count, rosterClass) => count + rosterClass.students.filter((student) => student.status === "enrolled").length, 0);
+      const futureDancers = activeClasses.reduce((count, rosterClass) => count + rosterClass.students.filter((student) => student.status !== "enrolled" && student.additionalInformation?.trial_completed && !student.additionalInformation?.future_dancer_archived).length, 0);
+      const metrics = [
+        [enrollmentIntakeQueue.length, "New Enrollments"],
+        [activeDancers, "Active Dancers"],
+        [futureDancers, "Future Dancers"]
+      ];
+      summary.innerHTML = metrics.map(([value, label]) => `<article class="enrollment-summary-card"><strong>${rosterSafe(value)}</strong><small>${rosterSafe(label)}</small></article>`).join("");
+    };
+
     const renderEnrollmentStudentsView = () => {
+      renderEnrollmentStudentSummary();
       document.querySelectorAll("[data-enrollment-student-view]").forEach((button) => {
         const selected = button.dataset.enrollmentStudentView === enrollmentStudentsView;
         button.classList.toggle("is-selected", selected);
@@ -22594,6 +23209,7 @@
         panel.hidden = panel.dataset.enrollmentStudentPanel !== enrollmentStudentsView;
       });
       if (enrollmentStudentsView === "enrollments") renderEnrollmentQueue();
+      else if (enrollmentStudentsView === "future-dancers") renderDirectorFutureDancers();
       else renderStudentLibrary();
     };
 
@@ -22704,11 +23320,16 @@
         return true;
       }).sort((left, right) => rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
     };
-
     const openRosterStudentEditor = (rosterClass, student) => {
       editingRosterClassId = rosterClass.id;
       editingRosterStudentId = student.id;
-      const intakeRecord = enrollmentIntakeQueue.find((item) => item.placed_student_id === student.id || item.placed_class_enrollment_id === student.enrollmentId);
+      const isFutureDancer = student.status !== "enrolled" && Boolean(student.additionalInformation?.trial_completed);
+      document.getElementById("roster-student-edit-form")?.classList.toggle("is-future-dancer", isFutureDancer);
+      document.getElementById("roster-student-edit-overlay")?.classList.toggle("is-future-dancer", isFutureDancer);
+      document.getElementById("roster-student-edit-title").textContent = isFutureDancer ? "Future Dancer" : "Student Profile";
+      document.getElementById("roster-contact-future-parent").hidden = !isFutureDancer;
+      document.getElementById("roster-delete-student").textContent = isFutureDancer ? "Delete Dancer" : "Delete Permanently";
+      const intakeRecord = isFutureDancer ? null : enrollmentIntakeQueue.find((item) => item.placed_student_id === student.id || item.placed_class_enrollment_id === student.enrollmentId);
       const profileValue = (studentField, intakeField) => student[studentField] ?? intakeRecord?.[intakeField] ?? "";
       document.getElementById("roster-edit-first-name").value = student.firstName || "";
       document.getElementById("roster-edit-last-name").value = student.lastName || "";
@@ -22792,6 +23413,8 @@
         renderOfficialClassroomOptions(selectedClass, keepCurrentClassroom ? (document.getElementById("roster-edit-official-classroom")?.value || "") : "");
       };
       document.getElementById("roster-edit-trial-date").value = student.trialDate || "";
+      document.getElementById("roster-edit-future-trial-date").value = student.trialDate || "";
+      document.getElementById("roster-edit-future-feedback").value = student.additionalInformation?.teacher_feedback || "";
       document.getElementById("roster-edit-notes").value = student.notes || profileValue("registrationNotes", "registration_notes");
       document.getElementById("roster-edit-medical-notes").value = profileValue("medicalNotes", "medical_notes");
       const attendancePanel = document.getElementById("roster-profile-attendance");
@@ -22799,11 +23422,14 @@
         const attendanceHistory = Object.entries(rosterClass.attendance || {}).sort(([left], [right]) => right.localeCompare(left)).flatMap(([date, dayAttendance]) => {
           const entry = dayAttendance?.[student.id];
           const status = teacherAttendanceStatus(entry);
-          return status ? [{ date, status, checkInAt: typeof entry === "object" ? entry.checkInAt : "", checkOutAt: typeof entry === "object" ? entry.checkOutAt : "" }] : [];
+          const helperWeek = teacherHelperWeekKey(new Date(`${date}T12:00:00`));
+          const wasHelper = (rosterClass.helperHistory || []).some((helperEntry) => helperEntry.weekStart === helperWeek && helperEntry.studentId === student.id);
+          return status ? [{ date, status, helperWeek, wasHelper, checkInAt: typeof entry === "object" ? entry.checkInAt : "", checkOutAt: typeof entry === "object" ? entry.checkOutAt : "" }] : [];
         });
         const tardyCount = attendanceHistory.filter((entry) => entry.status === "tardy").length;
         const absentCount = attendanceHistory.filter((entry) => entry.status === "absent").length;
-        attendancePanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Attendance History</strong><span>${tardyCount} Tardy · ${absentCount} Absent</span></div>${attendanceHistory.length ? attendanceHistory.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(new Date(`${entry.date}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))} · ${rosterSafe(entry.status[0].toUpperCase() + entry.status.slice(1))}</strong><strong>${rosterSafe(rosterClass.name)}</strong><small>In ${rosterSafe(teacherAttendanceTimeLabel(entry.checkInAt))}</small><small>Out ${rosterSafe(teacherAttendanceTimeLabel(entry.checkOutAt))}</small></div>`).join("") : `<div class="teacher-roster-empty">No attendance recorded yet.</div>`}`;
+        const helperCount = new Set(attendanceHistory.filter((entry) => entry.wasHelper).map((entry) => entry.helperWeek)).size;
+        attendancePanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Attendance History</strong><span>${tardyCount} Tardy · ${absentCount} Absent · ${helperCount} Class Helper</span></div>${attendanceHistory.length ? attendanceHistory.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(new Date(`${entry.date}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))} · ${rosterSafe(entry.status[0].toUpperCase() + entry.status.slice(1))}${entry.wasHelper ? `<span class="roster-attendance-helper-sparkle" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}</strong><strong>${rosterSafe(rosterClass.name)}</strong><small>In ${rosterSafe(teacherAttendanceTimeLabel(entry.checkInAt))}</small><small>Out ${rosterSafe(teacherAttendanceTimeLabel(entry.checkOutAt))}</small></div>`).join("") : `<div class="teacher-roster-empty">No attendance recorded yet.</div>`}`;
       }
       const newsletterHistoryPanel = document.getElementById("roster-profile-newsletter-history");
       if (newsletterHistoryPanel) {
@@ -22816,10 +23442,13 @@
       pendingRosterStudentPhoto = student.photo || "";
       rosterStudentProfileDirty = false;
       const photoPreview = document.getElementById("roster-edit-photo-preview");
-      photoPreview.classList.remove("is-birthday-week", "is-male-birthday", "has-medical", "has-kit-waiting", "has-kit-ready", "has-kit-picked-up");
+      photoPreview.classList.remove("is-birthday-week", "is-male-birthday", "has-medical", "has-kit-waiting", "has-kit-ready", "has-kit-picked-up", "is-prospect-heart");
+      photoPreview.classList.toggle("is-prospect-heart", isFutureDancer);
       rosterStudentBadgeClasses(student).split(/\s+/).filter(Boolean).forEach((className) => photoPreview.classList.add(className));
       photoPreview.title = rosterStudentBadgeTitle(student) || "Click to add or change photo";
-      photoPreview.innerHTML = `${pendingRosterStudentPhoto ? `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Student photo preview">` : rosterSafe(rosterStudentInitials(student) || "Photo")}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span>`;
+      photoPreview.innerHTML = isFutureDancer ? "" : `${pendingRosterStudentPhoto ? `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Student photo preview">` : rosterSafe(rosterStudentInitials(student) || "Photo")}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span>`;
+      const futurePicturePreview = document.getElementById("roster-future-picture-preview");
+      if (futurePicturePreview) futurePicturePreview.innerHTML = pendingRosterStudentPhoto ? `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Teacher-uploaded dancer picture">` : "No picture uploaded.";
       const overlay = document.getElementById("roster-student-edit-overlay");
       overlay?.classList.add("active");
       overlay?.setAttribute("aria-hidden", "false");
@@ -23377,6 +24006,7 @@
       monthly: { headline: "What’s Happening at Dance Techniques", subject: "Your monthly Dance Techniques update", message: "Hi [Parent First Name],\n\nHere is everything happening in [Dancer Preferred Name]’s dance world this month!", color: "berry" },
       birthday: { headline: "A Birthday Ballerina Celebration", subject: "We’re celebrating [Dancer Preferred Name]!", message: "Hi [Parent First Name],\n\nWe are so excited to celebrate your birthday ballerina during dance class!", color: "gold" },
       welcome: { headline: "Welcome to Dance Techniques", subject: "Welcome to your Dance Techniques family", message: "Hi [Parent First Name],\n\nWe cannot wait to welcome [Dancer Preferred Name] to class with [Teacher Name]!", color: "blush" },
+      "trial-complete": { headline: "Your Dancer’s Trial Is Complete", subject: "A lovely next step for [Dancer Preferred Name]", message: "Hi [Parent First Name],\n\nWe loved having [Dancer Preferred Name] join us for a trial class! We would love to help you with the next step.", color: "blush" },
       fall: { headline: "Fall Enrollment Is Here", subject: "A beautiful new dance season is waiting", message: "Dance season is just around the corner! Save your dancer’s place for a season of movement, confidence, and joy.", color: "berry" },
       recital: { headline: "Recital Information", subject: "Everything your dance family needs for recital", message: "Hi [Parent First Name],\n\nOur dancers have been working so hard, and recital time is almost here!", color: "gold" },
       costume: { headline: "Costume Week", subject: "Costume Week details for [Dancer Preferred Name]", message: "Hi [Parent First Name],\n\nIt is time for a little extra sparkle! Here is what you need to know for Costume Week.", color: "blush" },
@@ -23445,9 +24075,9 @@
     let newsletterSetupStep = 1;
     let newsletterSetupComplete = false;
     let newsletterSetupSelection = { mode: "", category: "parent", template: newsletterDraft.template || "monthly", audience: newsletterDraft.audience || "parents", targetMode: "all", day: "all", schools: [], teachers: [], classes: [], students: [], school: newsletterDraft.school || "all", teacher: newsletterDraft.teacher || "all" };
-    const newsletterTemplateLabel = (template) => ({ monthly: "Monthly Newsletter", birthday: "Birthday Ballerina", welcome: "Parent Welcome", fall: "Fall Enrollment", recital: "Recital Information", costume: "Costume Week", picture: "Picture Week", "save-date": "Save the Date", summer: "Summer Session", partnership: "Partnership Welcome", "no-class-school": "No Class Reminder", "save-date-school": "Save the Date to Partner Schools" }[template] || "Start Fresh");
+    const newsletterTemplateLabel = (template) => ({ monthly: "Monthly Newsletter", birthday: "Birthday Ballerina", welcome: "Parent Welcome", "trial-complete": "Trial Complete", fall: "Fall Enrollment", recital: "Recital Information", costume: "Costume Week", picture: "Picture Week", "save-date": "Save the Date", summer: "Summer Session", partnership: "Partnership Welcome", "no-class-school": "No Class Reminder", "save-date-school": "Save the Date to Partner Schools" }[template] || "Start Fresh");
     const newsletterTemplateCategories = [
-      { key: "parent", label: "Parent Communication", description: "Everyday updates, celebrations, and warm family welcomes.", templates: ["monthly", "birthday", "welcome"] },
+      { key: "parent", label: "Parent Communication", description: "Everyday updates, celebrations, and warm family welcomes.", templates: ["monthly", "birthday", "welcome", "trial-complete"] },
       { key: "enrollment", label: "Enrollment & Sessions", description: "Promote upcoming seasons and registration opportunities.", templates: ["fall", "summer"] },
       { key: "events", label: "Events & Milestones", description: "Keep families prepared for special dates and dance moments.", templates: ["recital", "costume", "picture", "save-date"] },
       { key: "schools", label: "Partner Schools", description: "Director-facing communication for your school partnerships.", templates: ["partnership", "no-class-school", "save-date-school"] }
@@ -24580,7 +25210,7 @@
       if (!button) return;
       openTeacherDashboardRecord(button.dataset.teacherDdJump, profileTeacher.id);
     });
-    ["student-library-search", "student-library-school", "student-library-teacher", "student-library-status"].forEach((id) => {
+    ["student-library-search", "student-library-school", "student-library-teacher", "student-library-day", "student-library-status"].forEach((id) => {
       document.getElementById(id)?.addEventListener(id === "student-library-search" ? "input" : "change", renderStudentLibrary);
     });
     document.getElementById("admin-student-library-list")?.addEventListener("click", (event) => {
@@ -24591,12 +25221,31 @@
       const student = rosterClass?.students.find((item) => item.id === studentId);
       if (rosterClass && student) openRosterStudentEditor(rosterClass, student);
     });
+    document.getElementById("director-future-dancer-list")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-director-future-student]");
+      if (!button) return;
+      const rosterClass = rosterClasses.find((item) => item.id === button.dataset.directorFutureClass);
+      const student = rosterClass?.students.find((item) => item.id === button.dataset.directorFutureStudent);
+      if (rosterClass && student) openRosterStudentEditor(rosterClass, student);
+    });
     document.getElementById("admin-home-student-library")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-enrollment-student-view]");
       if (!button) return;
       enrollmentStudentsView = button.dataset.enrollmentStudentView;
       enrollmentReviewOpen = false;
       renderEnrollmentStudentsView();
+    });
+    document.getElementById("director-future-dancer-search")?.addEventListener("input", (event) => {
+      directorFutureDancerSearch = event.target.value;
+      renderDirectorFutureDancers();
+    });
+    document.getElementById("director-future-dancer-school")?.addEventListener("change", (event) => {
+      directorFutureDancerSchool = event.target.value || "all";
+      renderDirectorFutureDancers();
+    });
+    document.getElementById("director-future-dancer-day")?.addEventListener("change", (event) => {
+      directorFutureDancerDay = event.target.value || "all";
+      renderDirectorFutureDancers();
     });
 
     document.addEventListener("click", (event) => {
@@ -24757,6 +25406,11 @@
       }
       if (event.target.id === "enrollment-teacher-filter") {
         enrollmentTeacherFilter = event.target.value;
+        renderEnrollmentQueue();
+        return;
+      }
+      if (event.target.id === "enrollment-day-filter") {
+        enrollmentDayFilter = event.target.value;
         renderEnrollmentQueue();
         return;
       }
@@ -25984,6 +26638,46 @@
       if (event.target.id === "roster-profile-unsaved-overlay") setRosterProfileUnsavedOpen(false);
     });
     document.getElementById("roster-delete-student")?.addEventListener("click", deleteEditingRosterStudent);
+    document.getElementById("roster-contact-future-parent")?.addEventListener("click", () => {
+      const { rosterClass, student } = currentEditingRosterStudent();
+      if (!rosterClass || !student) return;
+      const newsletterPicture = pendingRosterStudentPhoto || student.photo || "";
+      const newsletterFeedback = document.getElementById("roster-edit-future-feedback")?.value.trim() || student.additionalInformation?.teacher_feedback || "";
+      newsletterDraft = {
+        ...newsletterDraft,
+        ...newsletterTemplates["trial-complete"],
+        template: "trial-complete",
+        audience: "parents",
+        school: rosterClass.schoolName,
+        teacher: rosterClass.teacherId || "all",
+        sections: [
+          ...(newsletterPicture ? [{ type: "photo", title: `${rosterStudentFirstName(student)}’s Trial`, text: "", url: newsletterPicture }] : []),
+          ...(newsletterFeedback ? [{ type: "reminder", title: "Teacher’s Feedback", text: newsletterFeedback }] : [])
+        ],
+        targeting: { mode: "students", day: rosterClass.day || "all", schools: [rosterClass.schoolName], teachers: [], classes: [rosterClass.id], students: [student.id] }
+      };
+      newsletterSetupSelection = {
+        mode: "template",
+        category: "parent",
+        template: "trial-complete",
+        audience: "parents",
+        targetMode: "students",
+        day: rosterClass.day || "all",
+        schools: [rosterClass.schoolName],
+        teachers: [],
+        classes: [rosterClass.id],
+        students: [student.id],
+        school: rosterClass.schoolName,
+        teacher: rosterClass.teacherId || "all"
+      };
+      newsletterSetupComplete = true;
+      closeRosterStudentEditor();
+      openAdminSection("newsletter-studio");
+      renderNewsletterSetup();
+      renderNewsletterStudio();
+      saveNewsletterDraft();
+      showToast("Trial Complete template opened for this parent");
+    });
     document.getElementById("show-archived-students")?.addEventListener("click", openArchivedStudents);
     document.getElementById("archived-students-close")?.addEventListener("click", closeArchivedStudents);
     document.getElementById("archived-students-overlay")?.addEventListener("click", (event) => {
@@ -26083,7 +26777,10 @@
           pendingRosterStudentPhoto = canvas.toDataURL("image/jpeg", 0.82);
           rosterStudentProfileDirty = true;
           const preview = document.getElementById("roster-edit-photo-preview");
-          if (preview) preview.innerHTML = `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Student photo preview"><span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span>`;
+          const isFutureDancer = document.getElementById("roster-student-edit-form")?.classList.contains("is-future-dancer");
+          if (preview && !isFutureDancer) preview.innerHTML = `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Student photo preview"><span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span>`;
+          const futurePreview = document.getElementById("roster-future-picture-preview");
+          if (futurePreview && isFutureDancer) futurePreview.innerHTML = `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Teacher-uploaded dancer picture">`;
         });
         image.src = source;
       });
@@ -26097,6 +26794,7 @@
       const rosterClass = rosterClasses.find((item) => item.id === editingRosterClassId);
       const student = rosterClass?.students.find((item) => item.id === editingRosterStudentId);
       if (!student) return closeRosterStudentEditor();
+      const isFutureDancer = student.status !== "enrolled" && Boolean(student.additionalInformation?.trial_completed);
       const previousCount = rosterEnrolled(rosterClass).length;
       const targetClassId = document.getElementById("roster-edit-assigned-class").value;
       const targetClass = rosterClasses.find((item) => item.id === targetClassId && item.sourceActive !== false) || rosterClass;
@@ -26151,7 +26849,7 @@
         student.kitDeliveredAt = "";
         student.kitDeliveredBy = "";
       }
-      student.trialDate = document.getElementById("roster-edit-trial-date").value;
+      student.trialDate = isFutureDancer ? document.getElementById("roster-edit-future-trial-date").value : document.getElementById("roster-edit-trial-date").value;
       student.parentRelationship = document.getElementById("roster-edit-parent-relationship").value.trim();
       student.enrollmentHistory = document.getElementById("roster-edit-enrollment-history").value.trim();
       student.relatedDancerName = document.getElementById("roster-edit-related-dancer").value.trim();
@@ -26159,9 +26857,10 @@
       student.requestedDanceStyle = document.getElementById("roster-edit-requested-style").value;
       student.discountDetails = document.getElementById("roster-edit-discount-details").value.trim();
       student.paymentStatus = document.getElementById("roster-edit-payment-status").value;
-      student.additionalInformation = Object.fromEntries([...document.querySelectorAll("[data-profile-additional-information]")]
+      student.additionalInformation = { ...(student.additionalInformation || {}), ...Object.fromEntries([...document.querySelectorAll("[data-profile-additional-information]")]
         .map((field) => [field.dataset.profileAdditionalInformation, field.value.trim()])
-        .filter(([label]) => label));
+        .filter(([label]) => label)) };
+      if (isFutureDancer) student.additionalInformation.teacher_feedback = document.getElementById("roster-edit-future-feedback").value.trim();
       student.notes = document.getElementById("roster-edit-notes").value.trim();
       student.registrationNotes = student.notes;
       student.medicalNotes = document.getElementById("roster-edit-medical-notes").value.trim();
