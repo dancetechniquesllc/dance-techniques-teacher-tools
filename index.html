@@ -14668,9 +14668,11 @@
           const school = schoolById.get(assignment.partner_school_id) || {};
           return {
             id: school.id, assignmentId: assignment.id, name: school.name || "Partner School", nickname: school.nickname || school.name,
+            initials: school.initials || "",
             dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", isd: school.district || "", seasonStartDate: school.season_start_date || "",
             address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "), directorName: school.director_name || "",
-            phone: school.director_phone || "", email: school.director_email || "", partnershipBenefit: school.partnership_benefit || "", color: item.color || ""
+            phone: school.director_phone || "", email: school.director_email || "", importantNotes: school.important_notes || "",
+            partnershipBenefit: school.partnership_benefit || "", color: item.color || ""
           };
         });
         return teacher;
@@ -14693,10 +14695,12 @@
       if (schools.length) {
         replaceCollection(schoolLibrary, schools.map((school, index) => ({
           id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
+          initials: school.initials || "",
           isd: school.district || "", directorName: school.director_name || "", phone: school.director_phone || "", email: school.director_email || "",
           dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", seasonStartDate: school.season_start_date || "",
           assignedTeacherId: assignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id || "",
-          classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
+          classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "",
+          importantNotes: school.important_notes || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
         })));
       } else if (schoolLibrary.length) {
         console.error("The shared partner-school table is empty; the preserved directory remains visible and will not be overwritten.");
@@ -20359,6 +20363,7 @@
       const payload = {
         name: school.name || "Partner School",
         nickname: school.nickname || null,
+        initials: school.initials || null,
         ...partnerSchoolAddressPayload(school.address),
         district: school.isd || null,
         director_name: school.directorName || null,
@@ -20368,6 +20373,7 @@
         time_of_day: school.timeBlock || null,
         season_start_date: school.seasonStartDate || null,
         partnership_benefit: school.partnershipBenefit || null,
+        important_notes: school.importantNotes || null,
         classroom_options: school.classroomOptions || []
       };
       const query = isUuid(school.id)
@@ -20787,9 +20793,11 @@
       const saveButton = event.target.closest("[data-school-profile-save]");
       if (!saveButton) return;
       const card = saveButton.closest(".school-library-card");
-      const school = schoolLibrary[Number(card?.dataset.librarySchoolIndex)];
+      const schoolIndex = Number(card?.dataset.librarySchoolIndex);
+      const school = schoolLibrary[schoolIndex];
       if (!school) return;
       saveButton.disabled = true;
+      saveButton.textContent = "Saving…";
       syncTeachingTeamSchools();
       saveAppData();
       const schoolSaved = await syncPartnerSchoolToDatabase(school);
@@ -20799,13 +20807,17 @@
         schoolSaved === false ? Promise.resolve(false) : syncSchoolAssignmentsToDatabase(),
         saveCloudAppData()
       ]);
-      if (card) card.open = false;
+      const saveFailed = schoolSaved === false || assignmentsSaved === false || cloudSaved === false;
       renderSchoolLibrary();
+      if (saveFailed) {
+        const reopenedCard = document.querySelector(`.school-library-card[data-library-school-index="${schoolIndex}"]`);
+        if (reopenedCard) reopenedCard.open = true;
+      }
       renderStudentLibrary();
       renderEnrollmentQueue();
       renderClassesAndRosters();
       renderTeacherProfileList();
-      if (schoolSaved === false || assignmentsSaved === false || cloudSaved === false) showToast("Saved here, but some shared school information needs attention");
+      if (saveFailed) showToast("This school could not be saved everywhere. The card is still open so you can try again.");
       else showToast("Partner school updated everywhere");
     });
 

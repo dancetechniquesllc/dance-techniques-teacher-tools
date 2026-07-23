@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v72-season-tuition-and-all-schools";
+const CACHE_NAME = "my-dance-techniques-v73-partner-school-card-saving";
 const CORE_ASSETS = [
   "./",
   "./index.html",
