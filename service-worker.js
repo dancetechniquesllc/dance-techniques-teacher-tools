@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v71-official-app-icon";
+const CACHE_NAME = "my-dance-techniques-v72-season-tuition-and-all-schools";
 const CORE_ASSETS = [
   "./",
   "./index.html",

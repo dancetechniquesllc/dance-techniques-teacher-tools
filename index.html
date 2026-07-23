@@ -14172,6 +14172,18 @@
       const rosterClass = rosterClasses.find((entry) => entry.id === (item.matched_dance_class_id || suggestion?.classId))
         || rosterClasses.find((entry) => enrollmentSchoolNameMatches(entry.schoolName, item.requested_school_name));
       const school = schoolLibrary.find((entry) => enrollmentSchoolNameMatches(entry.name, item.requested_school_name) || enrollmentSchoolNameMatches(entry.nickname, item.requested_school_name));
+      const seasonStart = school?.seasonStartDate ? new Date(`${school.seasonStartDate}T12:00:00`) : null;
+      if (seasonStart && !Number.isNaN(seasonStart.valueOf()) && start < seasonStart) {
+        return {
+          classCount: 4,
+          amount: monthlyTuition,
+          monthlyTuition,
+          discounted,
+          nextMonth: false,
+          beforeSeason: true,
+          seasonStartDate: school.seasonStartDate
+        };
+      }
       const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
       const danceDayIndex = dayNames.indexOf(rosterClass?.day) >= 0 ? dayNames.indexOf(rosterClass.day) : Number(school?.dayOfWeek);
       let classDates = [];
@@ -14457,7 +14469,7 @@
             <div class="enrollment-three-field-row enrollment-row-divider-before">
               <label class="enrollment-review-field ${item.payment_status === "paid" ? "" : "fee-unpaid"}"><span>Enrollment Fee Status</span><select name="payment_status"><option value="unpaid" ${item.payment_status !== "paid" ? "selected" : ""}>Unpaid</option><option value="paid" ${item.payment_status === "paid" ? "selected" : ""}>Paid</option></select></label>
               <label class="enrollment-review-field"><span>Tuition Discount</span><select name="tuition_discount"><option value="none" ${!item.tuition_discount || item.tuition_discount === "none" ? "selected" : ""}>None</option><option value="sibling" ${item.tuition_discount === "sibling" ? "selected" : ""}>Sibling</option><option value="staff" ${item.tuition_discount === "staff" ? "selected" : ""}>Staff</option><option value="director" ${item.tuition_discount === "director" ? "selected" : ""}>Director</option></select></label>
-              <div class="enrollment-review-field suggested"><span>Suggested Tuition</span><strong>${tuition.nextMonth ? `$${tuition.monthlyTuition.toFixed(2)} Next Month` : `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`}</strong><small>${tuition.nextMonth ? "No remaining classes this month." : `${tuition.classCount} remaining ${tuition.classCount === 1 ? "class" : "classes"}.`}</small></div>
+              <div class="enrollment-review-field suggested"><span>Suggested Tuition</span><strong>${tuition.beforeSeason ? `$${tuition.amount.toFixed(2)} · Full Tuition` : tuition.nextMonth ? `$${tuition.monthlyTuition.toFixed(2)} Next Month` : `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`}</strong><small>${tuition.beforeSeason ? `Season starts ${new Date(`${tuition.seasonStartDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric" })}.` : tuition.nextMonth ? "No remaining classes this month." : `${tuition.classCount} remaining ${tuition.classCount === 1 ? "class" : "classes"}.`}</small></div>
             </div>
             ${renderAdditionalInformationFields(item.additional_information, "data-enrollment-additional-information")}
             ${item.provisional_included_at ? `<div class="enrollment-review-field suggested"><span>Teacher Acknowledgment</span><strong>♥ Included in Class</strong><small>${escapeText(enrollmentDateLabel(item.provisional_included_at))} · Official roster approval is still required.</small></div>` : ""}
@@ -23195,7 +23207,10 @@
       const schoolSelect = document.getElementById("roster-school-filter");
       const teacherSelect = document.getElementById("roster-teacher-filter");
       const activeRosterClasses = rosterClasses.filter((item) => item.sourceActive !== false);
-      const schoolNames = [...new Set(activeRosterClasses.map((item) => item.schoolName))].sort();
+      const schoolNames = [...new Set([
+        ...schoolLibrary.map((school) => school.name).filter(Boolean),
+        ...activeRosterClasses.map((item) => item.schoolName).filter(Boolean)
+      ])].sort();
       const assignedTeacherIds = [...new Set(activeRosterClasses.map((item) => item.teacherId))];
       if (schoolSelect) {
         schoolSelect.innerHTML = `<option value="all">All partner schools</option>${schoolNames.map((name) => `<option value="${rosterSafe(name)}">${rosterSafe(name)}</option>`).join("")}`;
@@ -23213,12 +23228,18 @@
         || a.schoolName.localeCompare(b.schoolName)
         || a.name.localeCompare(b.name, undefined, { numeric: true })
       ));
-      const visibleSchoolCount = new Set(visibleClasses.map((item) => item.schoolName)).size;
+      const visibleSchoolCount = rosterSearchTerm
+        ? new Set(visibleClasses.map((item) => item.schoolName)).size
+        : rosterSchoolFilter !== "all"
+          ? (schoolNames.includes(rosterSchoolFilter) ? 1 : 0)
+          : rosterTeacherFilter !== "all"
+            ? new Set((teachers.find((teacher) => teacher.id === rosterTeacherFilter)?.schools || []).map((school) => school.name).filter(Boolean)).size
+            : schoolNames.length;
       const totalEnrolled = visibleClasses.reduce((sum, item) => sum + rosterEnrolled(item).length, 0);
       const totalProspects = visibleClasses.reduce((sum, item) => sum + rosterProspects(item).length, 0);
       const summary = document.getElementById("admin-roster-summary");
       if (summary) summary.innerHTML = `
-        <div class="stat"><strong>${visibleSchoolCount}</strong><span>Partner Schools</span><small>Currently Dancing With Us</small></div>
+        <div class="stat"><strong>${visibleSchoolCount}</strong><span>Partner Schools</span><small>In the School Directory</small></div>
         <div class="stat"><strong>${visibleClasses.length}</strong><span>Dance Classes</span><small>Active this Season</small></div>
         <div class="stat"><strong>${totalEnrolled}</strong><span>Enrolled Dancers</span><small>Taking their First Steps</small></div>
         <button class="stat roster-summary-action" type="button" data-roster-show-prospects><strong>${totalProspects}</strong><span>Future Dancers</span><small>Ready for a Friendly Follow-Up</small></button>`;
@@ -23245,7 +23266,7 @@
       };
       if (list) {
         if (!visibleClasses.length) {
-          list.innerHTML = `<div class="roster-empty">${activeRosterClasses.length ? "No classes match these filters." : (teachers.some((teacher) => teacher.schools?.length) ? "No classes have been created yet. Choose Create a Class when the approved schedule is ready." : "No school assignments are ready yet. Add approved partner-school assignments before creating classes.")}</div>`;
+          list.innerHTML = `<div class="roster-empty">${rosterSchoolFilter !== "all" && schoolNames.includes(rosterSchoolFilter) ? `No classes have been created for ${rosterSafe(rosterSchoolFilter)} yet. Assign a teacher to this school, then choose Create a Class when the approved schedule is ready.` : activeRosterClasses.length ? "No classes match these filters." : (teachers.some((teacher) => teacher.schools?.length) ? "No classes have been created yet. Choose Create a Class when the approved schedule is ready." : "No school assignments are ready yet. Add approved partner-school assignments before creating classes.")}</div>`;
         } else {
           const schoolGroups = new Map();
           visibleClasses.forEach((item) => {
