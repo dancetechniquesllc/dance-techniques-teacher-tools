@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v74-wix-orders-go-live-cutoff";
+const CACHE_NAME = "my-dance-techniques-v75-full-bleed-app-icon";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -7,10 +7,10 @@ const CORE_ASSETS = [
   "./data/partner-schools.js",
   "./dt-touch/dt-touch.js?v=20260722c",
   "./config/dt-touch-voice.json",
-  "./assets/app-icon-192.png?v=20260723-app-icon",
-  "./assets/app-icon-512.png?v=20260723-app-icon",
-  "./assets/apple-touch-icon.png?v=20260723-app-icon",
-  "./assets/favicon-64.png?v=20260723-app-icon",
+  "./assets/app-icon-192.png?v=20260723-full-bleed-icon",
+  "./assets/app-icon-512.png?v=20260723-full-bleed-icon",
+  "./assets/apple-touch-icon.png?v=20260723-full-bleed-icon",
+  "./assets/favicon-64.png?v=20260723-full-bleed-icon",
   "./assets/app-icon-my-day.png",
   "./assets/app-icon-rosters.png",
   "./assets/app-icon-music.png",
@@ -87,8 +87,8 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "Dance Techniques";
   const options = {
     body: payload.body || "You have a new notification.",
-    icon: "./assets/app-icon-192.png?v=20260721",
-    badge: "./assets/favicon-64.png?v=20260721",
+    icon: "./assets/app-icon-192.png?v=20260723-full-bleed-icon",
+    badge: "./assets/favicon-64.png?v=20260723-full-bleed-icon",
     data: { url: payload.url || "./?open=notifications", notificationId: payload.notificationId || "" },
     tag: payload.tag || payload.notificationId || "dance-techniques",
     renotify: Boolean(payload.urgent)

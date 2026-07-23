@@ -8,8 +8,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>My Dance Techniques</title>
   <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png?v=20260723-app-icon" />
-  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=20260723-app-icon" />
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png?v=20260723-full-bleed-icon" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=20260723-full-bleed-icon" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Parisienne&display=swap" rel="stylesheet">
@@ -5404,6 +5404,10 @@
     .roster-future-picture-preview img { width: 100%; height: 150px; object-fit: cover; }
     .roster-edit-form.is-future-dancer { grid-template-columns: max-content minmax(0, 1fr); }
     .roster-edit-form.is-future-dancer .roster-profile-identity { order: 0; }
+    .roster-edit-form.is-future-dancer .roster-photo-preview.is-prospect-heart {
+      -webkit-mask-size: 90%;
+      mask-size: 90%;
+    }
     .roster-edit-form.is-future-dancer .roster-profile-school-row { order: 1; grid-column: 1 / -1; }
     .roster-edit-form.is-future-dancer .roster-profile-details-row,
     .roster-edit-form.is-future-dancer .roster-profile-notes-row { display: contents; }
@@ -17914,13 +17918,9 @@
     const fullName = (teacher) => `${teacher.firstName} ${teacher.lastName}`.trim();
     const repairTeacherNickname = (teacher) => {
       if (!teacher) return teacher;
-      const nickname = String(teacher.displayName || "").trim().toLowerCase();
       const firstName = String(teacher.firstName || "").trim();
       const isCompanyProfile = fullName(teacher).toLowerCase() === "dance techniques";
-      const abbreviatedNickname = firstName && nickname === `ms. ${firstName[0].toLowerCase()}`;
-      if (!isCompanyProfile && firstName && (!nickname || nickname === "ms. new" || abbreviatedNickname)) {
-        teacher.displayName = `Ms. ${firstName}`;
-      }
+      if (!isCompanyProfile && firstName) teacher.displayName = `Ms. ${firstName}`;
       return teacher;
     };
     teachers.forEach(repairTeacherNickname);
@@ -20748,9 +20748,7 @@
       if (!field) return;
       const key = field.dataset.profileField;
       profileTeacher[key] = field.value;
-      if (key === "firstName" && String(profileTeacher.displayName || "").trim().toLowerCase() === "ms. new") {
-        profileTeacher.displayName = field.value.trim() ? `Ms. ${field.value.trim()}` : "";
-      }
+      if (key === "firstName") repairTeacherNickname(profileTeacher);
       if (key === "email" && !profileTeacher.loginEmail) {
         profileTeacher.loginEmail = field.value;
         document.querySelectorAll('[data-profile-field="loginEmail"]').forEach((match) => {
