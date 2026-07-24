@@ -13439,11 +13439,10 @@
                 </label>
                 <label>Payment tier
                   <select id="profile-pay-tier" data-profile-field="payTier">
-                    <option value="">None Selected</option>
-                    <option value="tier_a_founding_teacher">Founding Teacher</option>
                     <option value="tier_b_teacher">Teacher</option>
-                    <option value="tier_c_administrator">Administrator</option>
+                    <option value="tier_a_founding_teacher">Founding Teacher</option>
                     <option value="tier_d_director">Director</option>
+                    <option value="tier_c_administrator">Admin</option>
                   </select>
                   <small id="profile-pay-tier-description" class="subtle"></small>
                 </label>
@@ -14270,7 +14269,7 @@
         tshirtSize: "M",
         birthday: "1990-06-12",
         teacherType: "Admin",
-        payTier: "",
+        payTier: "tier_b_teacher",
         loginEmail: "lexi@dancetechniques.example",
         accessLevel: "Teacher + admin tools",
         inviteStatus: "Login active",
@@ -14363,7 +14362,7 @@
       copy.tshirtSize = "";
       copy.birthday = "";
       copy.teacherType = "Teacher";
-      copy.payTier = "";
+      copy.payTier = "tier_b_teacher";
       copy.loginEmail = copy.email;
       copy.accessLevel = "Teacher app only";
       copy.inviteStatus = "Not invited";
@@ -14416,7 +14415,7 @@
         tshirtSize: "",
         birthday: "",
         teacherType: "Teacher",
-        payTier: "",
+        payTier: "tier_b_teacher",
         loginEmail: "",
         accessLevel: "Teacher app only",
         inviteStatus: "Not invited",
@@ -15947,6 +15946,7 @@
         .filter((profile) => !knownTeacherNames.has(profile.firstName.toLowerCase()))
         .map((profile) => duplicateTeacherProfile(fallbackSource, profile));
       replaceCollection(teachers, [...liveTeachers, ...preservedMissingTeachers, ...requiredDirectoryTeachers]);
+      teachers.forEach((teacher) => { if (!teacher.payTier) teacher.payTier = "tier_b_teacher"; });
       const signedInTeacher = teachers.find((teacher) => teacher.id === profile.id);
       if (!signedInTeacher) {
         sharedRosterReady = false;
@@ -18891,6 +18891,7 @@
         schoolPartnershipPaymentState = { ...schoolPartnershipPaymentState, ...JSON.parse(JSON.stringify(persisted.schoolPartnershipPaymentState)) };
       }
       pendingPersistentAdminReviewFlags = persisted.adminDashboardReviewFlags || null;
+      teachers.forEach((teacher) => { if (!teacher.payTier) teacher.payTier = "tier_b_teacher"; });
       profileTeacher = teachers.find((teacher) => teacher.id === currentTeacherId) || teachers[0] || profileTeacher;
     };
 
@@ -21131,7 +21132,7 @@
         return;
       }
       profileTeacher = teachers.find((teacher) => teacher.id === teacherId) || profileTeacher;
-      if (!profileTeacher.payTier) profileTeacher.payTier = "";
+      if (!profileTeacher.payTier) profileTeacher.payTier = "tier_b_teacher";
       syncTeachingTeamSchools();
       syncPersonalForm();
       renderProfileHero();
@@ -26289,7 +26290,7 @@
     const payrollTierLabels = {
       tier_a_founding_teacher: "Founding Teacher",
       tier_b_teacher: "Teacher",
-      tier_c_administrator: "Administrator",
+      tier_c_administrator: "Admin",
       tier_d_director: "Director"
     };
     const payrollTierIsAssigned = (tier) => Boolean(payrollTierLabels[tier]);
