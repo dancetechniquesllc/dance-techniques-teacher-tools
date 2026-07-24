@@ -616,6 +616,7 @@
       width: 22px;
       height: 22px;
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 12H5M11 6l-6 6 6 6' fill='none' stroke='%23171313' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
+      transform: translateY(1px);
     }
 
     .view { display: none; }
@@ -19283,7 +19284,7 @@
       if (reaction === "heart") {
         return `<svg class="reaction-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35 10.55 20.03C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35Z"></path></svg>`;
       }
-      return `<svg class="reaction-icon${reaction === "down" ? " down" : ""}" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20h4V9H2v11Zm20-10c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L13.17 3 6.59 9.59A2 2 0 0 0 6 11v7c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-1Z"></path></svg>`;
+      return `<svg class="reaction-icon${reaction === "down" ? " down" : ""}" viewBox="0 0 24 24" aria-hidden="true"><path d="M3.2 9.65h3.55c.55 0 1 .45 1 1v8.1c0 .55-.45 1-1 1H3.2c-.55 0-1-.45-1-1v-8.1c0-.55.45-1 1-1Zm4.55 1.05c1.53-1.18 2.52-2.7 2.9-4.4l.37-1.68c.13-.58.65-1 1.25-1 1.22 0 2.16 1.07 1.98 2.28l-.42 2.82h3.92c1.62 0 2.82 1.5 2.47 3.08l-1.2 5.5a3.08 3.08 0 0 1-3 2.43H7.75V10.7Z"></path></svg>`;
     };
     const messageTeacherForName = (name) => teachers.find((teacher) => (
       teacher.firstName === name ||
