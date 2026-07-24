@@ -4311,6 +4311,36 @@
       color: oklch(40% 0.09 350);
     }
 
+    .team-talk-preview-bubble {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 760;
+      line-height: 1.35;
+    }
+
+    .team-talk-preview-meta {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 10.5px;
+      text-align: center;
+    }
+
+    .message-bubble.team-message,
+    .message-bubble.team-message.mine {
+      border: 0;
+      background: var(--team-message-color);
+      color: var(--team-message-text);
+    }
+
+    .message-bubble.team-message .message-bubble-sender {
+      color: var(--team-message-text);
+    }
+
     .message-read-receipt {
       margin-top: 8px;
       padding: 0;
@@ -11486,6 +11516,7 @@
                       <h3>Team Talk</h3>
                       <button class="team-talk-group-button" type="button" data-teacher-thread="team-meeting">Group Chat</button>
                     </div>
+                    <div id="teacher-team-talk-preview"></div>
                   </div>
                   <div class="section-title">
                     <h3>Inbox</h3>
@@ -19176,6 +19207,15 @@
       const match = String(value).match(/^(Today|Yesterday|Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+(.+)$/);
       return match ? `${match[2]} - ${match[1]}` : value;
     };
+    const messageTeacherForName = (name) => teachers.find((teacher) => (
+      teacher.firstName === name ||
+      teacher.displayName === name ||
+      teacher.displayName === personDisplayName(name)
+    ));
+    const messageAssignedColor = (name) => {
+      const teacher = messageTeacherForName(name);
+      return teacher ? teacherProfileColor(teacher) : "#dba9a1";
+    };
 
     const renderThreadButtons = (containerId, threads, selectedId, dataAttribute, viewerName) => {
       const container = document.getElementById(containerId);
@@ -19252,6 +19292,21 @@
       `;
     };
 
+    const renderTeamTalkPreview = (thread) => {
+      const target = document.getElementById("teacher-team-talk-preview");
+      if (!target) return;
+      const latest = thread ? latestThreadMessage(thread) : null;
+      if (!latest) {
+        target.innerHTML = `<small class="team-talk-preview-meta">No Team Talk messages yet</small>`;
+        return;
+      }
+      const color = messageAssignedColor(latest.from);
+      target.innerHTML = `
+        <span class="team-talk-preview-bubble" style="background:${escapeText(color)};color:${escapeText(coordinatedInitialColor(color))}">${escapeText(latest.text || "Open Team Talk")}</span>
+        <small class="team-talk-preview-meta">${escapeText(messageSenderDisplayName(latest))} - ${escapeText(announcementDateTimeLabel(latest))}</small>
+      `;
+    };
+
     const openAnnouncementHistory = () => {
       const thread = messageThreads.find((entry) => entry.id === announcementThreadId);
       if (!thread) return;
@@ -19311,9 +19366,12 @@
             ✔ ${viewedCount} of ${receiptNames.length} viewed
           </button>
         ` : "";
+        const isTeamMessage = thread.type === "team";
+        const teamColor = isTeamMessage ? messageAssignedColor(message.from) : "";
+        const teamStyle = isTeamMessage ? ` style="--team-message-color:${escapeText(teamColor)};--team-message-text:${escapeText(coordinatedInitialColor(teamColor))}"` : "";
         return `
-          <div class="message-bubble ${message.from === viewerName ? "mine" : ""}" data-message-hold>
-            <div class="message-bubble-sender">${escapeText(messageSenderDisplayName(message))} · ${escapeText(message.time)}</div>
+          <div class="message-bubble ${message.from === viewerName ? "mine" : ""}${isTeamMessage ? " team-message" : ""}" data-message-hold${teamStyle}>
+            <div class="message-bubble-sender">${escapeText(messageSenderDisplayName(message))}${isTeamMessage ? "" : ` · ${escapeText(message.time)}`}</div>
             ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}
             ${receipt}
             <div class="reaction-row" aria-label="Message reactions">
@@ -19335,7 +19393,7 @@
         if (draft) draft.value = "";
         return;
       }
-      if (draft) draft.placeholder = thread.type === "team" ? "Reply to Team Talk" : `Reply to ${messageThreadNameFor(thread, "Lexi")}`;
+      if (draft) draft.placeholder = thread.type === "team" ? "Reply to Team Talk" : `Reply to ${messageThreadNameFor(thread, teacherMessageViewerName())}`;
     };
 
     const renderTeacherMessages = () => {
@@ -19358,6 +19416,7 @@
       if (selectedTeacherMessageThreadId) clearThreadUnreadFor(selectedTeacherMessageThreadId, viewerName);
       const activeThread = threads.find((thread) => thread.id === selectedTeacherMessageThreadId);
       renderLatestTeacherAnnouncement(announcementThreads[0], viewerName);
+      renderTeamTalkPreview(pinnedThreads[0]);
       renderThreadButtons("teacher-thread-list", inboxThreads, selectedTeacherMessageThreadId, "data-teacher-thread", viewerName);
       renderMessageStack(
         activeThread,
@@ -19505,18 +19564,19 @@
     };
 
     const privateThreadFor = (recipient) => {
+      const sender = teacherMessageViewerName();
       const existing = messageThreads.find((thread) => (
         thread.type === "private" &&
-        thread.participants.includes("Lexi") &&
+        thread.participants.includes(sender) &&
         thread.participants.includes(recipient)
       ));
       if (existing) return existing;
       const thread = {
-        id: `lexi-${recipient.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-        title: `Lexi + ${recipient}`,
+        id: `${sender.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${recipient.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
+        title: `${sender} + ${recipient}`,
         type: "private",
         scope: "Private",
-        participants: ["Lexi", recipient],
+        participants: [sender, recipient],
         activityOrder: ++messageActivitySequence,
         messages: []
       };
@@ -19525,12 +19585,13 @@
     };
 
     const sendTeacherPrivateMessage = () => {
+      const sender = teacherMessageViewerName();
       const recipient = document.getElementById("teacher-private-recipient")?.value || "Lexi";
       const draft = document.getElementById("teacher-message-draft");
       const text = draft?.value.trim() || "Can you help me with this when you have a minute?";
       const thread = privateThreadFor(recipient);
       thread.messages.push({
-        from: "Lexi",
+        from: sender,
         role: profileTeacher.teacherType || "Teacher",
         time: "Just now",
         text
@@ -19551,6 +19612,7 @@
     };
 
     const sendTeacherReply = () => {
+      const sender = teacherMessageViewerName();
       const thread = messageThreads.find((entry) => entry.id === selectedTeacherMessageThreadId);
       const draft = document.getElementById("teacher-reply-draft");
       const text = draft?.value.trim() || "";
@@ -19568,7 +19630,7 @@
         return;
       }
       thread.messages.push({
-        from: "Lexi",
+        from: sender,
         role: profileTeacher.teacherType || "Teacher",
         time: "Just now",
         text
@@ -19576,7 +19638,7 @@
       thread.activityOrder = ++messageActivitySequence;
       thread.unreadFor = [...new Set([
         ...(thread.unreadFor || []),
-        ...thread.participants.filter((participant) => participant !== "Lexi")
+        ...thread.participants.filter((participant) => participant !== sender)
       ])];
       if (draft) draft.value = "";
       selectedAdminMessageThreadId = thread.id;
