@@ -239,6 +239,15 @@
   client.auth.getSession().then(({ data }) => showSession(data.session));
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+    let refreshingForAppUpdate = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshingForAppUpdate) return;
+      refreshingForAppUpdate = true;
+      window.location.reload();
+    });
+    window.addEventListener("load", async () => {
+      const registration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
+      registration.update().catch((error) => console.warn("App update check did not finish", error));
+    });
   }
 })();

@@ -1,9 +1,9 @@
-const CACHE_NAME = "my-dance-techniques-v109-required-team-directory";
+const CACHE_NAME = "my-dance-techniques-v129-isolated-class-roster";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260721-notifications",
+  "./supabase-auth.js?v=20260723-auto-update",
   "./data/partner-schools.js",
   "./dt-touch/dt-touch.js?v=20260722c",
   "./config/dt-touch-voice.json",

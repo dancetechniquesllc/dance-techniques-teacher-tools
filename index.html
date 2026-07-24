@@ -839,24 +839,26 @@
       outline-offset: 2px;
     }
 
-    button.my-day-detail.full {
-      border-color: var(--danger);
-      background: var(--danger);
-      color: white;
-      box-shadow: 0 8px 18px oklch(34% 0.08 15 / 0.14);
+    button.my-day-detail-curriculum {
+      border-color: var(--border);
+      background: var(--blush);
+      color: var(--berry);
+      box-shadow: 0 8px 18px oklch(34% 0.08 15 / 0.09);
     }
 
-    button.my-day-detail.full small {
-      color: white;
+    button.my-day-detail-curriculum:hover,
+    button.my-day-detail-curriculum:focus-visible {
+      border-color: var(--berry);
+      background: var(--blush);
     }
 
-    button.my-day-detail.full:hover,
-    button.my-day-detail.full:focus-visible {
-      border-color: var(--danger);
-      background: var(--danger);
+    .my-day-detail small {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 760;
+      line-height: 1.2;
     }
-
-    .my-day-detail small,
     .my-day-step small {
       display: block;
       color: var(--muted);
@@ -1400,9 +1402,9 @@
       width: 100%;
       padding: 10px 11px;
       border-radius: 8px;
-      border: 1px solid var(--danger);
-      background: var(--danger);
-      color: white;
+      border: 1px solid var(--border);
+      background: var(--blush);
+      color: var(--berry);
       text-align: left;
       box-shadow: 0 8px 18px oklch(34% 0.08 15 / 0.14);
     }
@@ -1425,15 +1427,25 @@
 
     .my-day-lesson-plan-button small {
       margin-top: 2px;
-      color: white;
+      color: var(--berry);
       font-size: 10.5px;
       font-weight: 730;
       line-height: 1.2;
     }
 
     .my-day-lesson-plan-button .status {
-      background: var(--surface);
-      color: var(--danger);
+      background: var(--berry);
+      color: white;
+    }
+    .my-day-class-roster-button {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--berry);
+      border-radius: 999px;
+      background: var(--berry);
+      color: white;
+      font-size: 12px;
+      font-weight: 850;
     }
 
     .my-day-step-list {
@@ -1947,6 +1959,79 @@
     #rosters-view button,
     #rosters-view select { font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; }
     .teacher-roster-list { display: grid; gap: 10px; }
+    #rosters-view.is-my-day-roster-popup {
+      position: fixed;
+      z-index: 180;
+      inset: 0;
+      display: block !important;
+      padding: 0;
+      background: rgb(35 25 25 / .38);
+    }
+    #rosters-view.is-my-day-roster-popup > :not(#teacher-roster-list) { display: none !important; }
+    #rosters-view.is-my-day-roster-popup #teacher-roster-list { display: block; }
+    #rosters-view.is-my-day-roster-popup #teacher-roster-list > :not(.my-day-roster-popup) { display: none !important; }
+    .my-day-roster-popup {
+      position: fixed;
+      z-index: 181;
+      inset: 12px;
+      width: min(720px, calc(100vw - 24px));
+      height: min(900px, calc(100dvh - 24px));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      margin: auto;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--bg);
+      box-shadow: 0 22px 60px rgb(45 25 25 / .24);
+      overflow: hidden;
+    }
+    .my-day-roster-popup-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 2px 2px 12px; }
+    .my-day-roster-popup-header h3 { margin: 0; font-size: 22px; }
+    .my-day-roster-popup-close { width: 38px; min-height: 38px; padding: 0; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 24px; }
+    .my-day-roster-popup-body { min-height: 0; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+    .my-day-roster-popup-body > .teacher-roster-card { margin: 0; }
+    @media (max-width: 900px) {
+      .my-day-roster-popup {
+        inset: 8px;
+        width: min(680px, calc(100vw - 16px));
+        height: calc(100dvh - 16px);
+        padding: 12px;
+        border-radius: 14px;
+      }
+      .my-day-roster-popup-header h3 { font-size: 19px; }
+      .my-day-roster-popup-close { width: 44px; min-height: 44px; flex: 0 0 44px; }
+      .my-day-roster-popup .teacher-roster-class-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .my-day-roster-popup .teacher-roster-class-actions button { min-height: 44px; font-size: 11px; }
+    }
+    @media (max-width: 560px) {
+      .my-day-roster-popup {
+        inset: 0;
+        width: 100%;
+        height: 100dvh;
+        padding: max(10px, env(safe-area-inset-top)) 9px max(10px, env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: 0;
+      }
+      .my-day-roster-popup-header { position: sticky; top: 0; z-index: 4; padding: 2px 2px 10px; background: var(--bg); }
+      .my-day-roster-popup-header h3 { font-size: 17px; line-height: 1.15; }
+      .my-day-roster-popup .teacher-roster-active-card > summary { padding-right: 10px; padding-left: 38px; }
+      .my-day-roster-popup .teacher-roster-active-card > summary::before { left: 11px; }
+      .my-day-roster-popup .teacher-roster-duration { font-size: 10px; }
+      .my-day-roster-popup .teacher-roster-student-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .my-day-roster-popup .teacher-attendance-footer { position: sticky; bottom: 0; z-index: 3; padding-bottom: max(8px, env(safe-area-inset-bottom)); background: var(--bg); }
+      .my-day-roster-popup .teacher-attendance-footer button { min-height: 46px; }
+    }
+    .teacher-roster-multi-class-edit {
+      width: 100%;
+      min-height: 42px;
+      margin: 0 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--blush);
+      color: var(--berry);
+      font-weight: 850;
+    }
 
     .teacher-roster-class-tabs {
       display: grid;
@@ -1987,33 +2072,27 @@
     }
 
     .teacher-roster-active-card { padding: 0; }
-    .teacher-roster-active-card > summary { position: relative; display: block; padding: 14px; }
-    .teacher-roster-active-card:not([open]) > summary { padding-bottom: 62px; }
-    .teacher-roster-active-card:not([open]) > summary::after {
-      content: "⌄";
+    .teacher-roster-active-card > summary { position: relative; display: block; padding: 14px 14px 14px 43px; }
+    .teacher-roster-active-card > summary::-webkit-details-marker { display: none; }
+    .teacher-roster-active-card > summary::before {
+      content: "▶";
       position: absolute;
-      right: 12px;
-      bottom: 10px;
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-      border: 2px solid color-mix(in srgb, var(--berry) 55%, var(--border));
-      border-radius: 999px;
-      background: var(--blush);
-      color: var(--berry);
-      box-shadow: 0 4px 10px color-mix(in srgb, var(--berry) 12%, transparent);
-      font-size: 28px;
-      font-weight: 850;
+      top: 18px;
+      left: 15px;
+      color: #000;
+      font-size: 17px;
+      font-weight: 950;
       line-height: 1;
-      transform: translateY(-2px);
     }
+    .teacher-roster-active-card[open] > summary::before { content: "▼"; }
+    .teacher-roster-active-card:not([open]) > summary { padding-bottom: 62px; }
     .teacher-roster-active-card > summary .teacher-roster-active-heading { width: 100%; margin: 0; }
-    .teacher-roster-active-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .teacher-roster-active-heading { position: relative; display: block; min-height: 68px; margin-bottom: 12px; }
+    .teacher-roster-active-heading > div:first-child { padding-top: 36px; }
     .teacher-roster-heading-actions { flex: 0 0 auto; display: grid; justify-items: stretch; gap: 6px; }
     .teacher-roster-active-heading h3 { margin: 0; font-family: inherit; font-size: 22px; font-weight: 700; }
     .teacher-roster-active-heading p { margin: 3px 0 0; color: var(--fg); font-size: 12px; font-weight: 600; }
-    .teacher-roster-duration { flex: 0 0 auto; padding: 6px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+    .teacher-roster-duration { position: absolute; top: 0; right: 0; padding: 6px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; }
     .teacher-roster-duration.duration-30 { background: oklch(91% 0.055 10); color: var(--berry); }
     .teacher-roster-duration.duration-45 { background: oklch(91% 0.07 145); color: oklch(38% 0.1 145); }
     .teacher-roster-start-button { min-height: 30px; padding: 0 10px; border: 1px solid var(--fg); border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 10px; font-weight: 800; }
@@ -2021,6 +2100,12 @@
     .teacher-roster-class-actions { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 13px; align-items: stretch; }
     .teacher-roster-class-actions button { width: 100%; min-width: 0; min-height: 34px; padding: 5px 7px; border: 1px solid transparent; border-radius: 999px; font-size: 9px; font-weight: 800; line-height: 1.15; text-align: center; }
     .teacher-class-action-start { background: var(--fg); color: var(--bg); }
+    .teacher-class-action-start.is-off-day {
+      border-color: #aaa7a5;
+      background: #aaa7a5;
+      color: #fff;
+      opacity: 1;
+    }
     .teacher-class-action-kit { border-color: #789478 !important; background: #8fa88e; color: white; }
     .teacher-class-action-kit.is-active { box-shadow: inset 0 0 0 2px white; }
     .teacher-class-action-boutique { border-color: var(--border) !important; background: var(--blush); color: var(--berry); }
@@ -4096,7 +4181,7 @@
       width: 68px;
       height: 68px;
       border: 0;
-      border-radius: 18px;
+      border-radius: 50%;
       display: grid;
       place-items: center;
       background:
@@ -4108,6 +4193,8 @@
       box-shadow: 0 12px 24px oklch(14% 0.006 20 / 0.18);
       background-size: cover;
       background-position: center;
+      background-repeat: no-repeat;
+      overflow: hidden;
     }
 
     button.profile-avatar-large {
@@ -11031,6 +11118,7 @@
               <label class="teacher-roster-filter">
                 <select id="teacher-roster-school-filter" aria-label="Filter rosters by assigned school"></select>
               </label>
+              <button class="teacher-roster-multi-class-edit" type="button" id="teacher-roster-multi-class-edit">Rearrange Classes</button>
               <div class="teacher-roster-list" id="teacher-roster-list"></div>
             </section>
 
@@ -12081,7 +12169,7 @@
             </div>
             <div class="confirm-overlay" id="roster-multi-class-overlay" aria-hidden="true">
               <div class="confirm-dialog roster-multi-class-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-multi-class-title">
-                <div class="roster-profile-header"><div><h3 id="roster-multi-class-title">Multi Class Edit</h3><p class="subtle" id="roster-multi-class-school"></p></div><button class="roster-profile-close" type="button" id="roster-multi-class-close" aria-label="Close Multi Class Edit">×</button></div>
+                <div class="roster-profile-header"><div><h3 id="roster-multi-class-title">Rearrange Classes</h3><p class="subtle" id="roster-multi-class-school"></p></div><button class="roster-profile-close" type="button" id="roster-multi-class-close" aria-label="Close Rearrange Classes">×</button></div>
                 <div class="roster-multi-class-filters">
                   <label>Student Order<select id="roster-multi-sort"><option value="first-name">Student First Name · Alphabetical</option><option value="classroom">Official Classroom</option><option value="age">Age · Youngest First</option></select></label>
                   <label>Classroom<select id="roster-multi-classroom-filter"><option value="all">All Classrooms</option></select></label>
@@ -12918,8 +13006,6 @@
             <div class="admin-table">
               <div class="admin-table" id="school-calendar-rows"></div>
             </div>
-            <p class="hint-text">Nicknames appear on calendar day cells in place of the full school name.</p>
-            <p class="schedule-save-state" id="schedule-save-state">Schedule is current.</p>
           </section>
 
           <section class="admin-profile-card">
@@ -13706,7 +13792,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20260721-notifications"></script>
+  <script src="supabase-auth.js?v=20260723-auto-update"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <script>
     const teachers = [
@@ -15654,9 +15740,23 @@
         const nextMode = button.dataset.modeBtn;
         if (document.body.dataset.mode === nextMode) return;
         runGuardedNavigation(() => {
+          const leavingTeacherPreview = document.body.dataset.tourMode === "true" && document.body.dataset.mode === "teacher" && nextMode === "admin";
+          if (leavingTeacherPreview && teacherToolsPreviewSnapshot) {
+            applyPersistedAppData(JSON.parse(JSON.stringify(teacherToolsPreviewSnapshot)));
+            teacherToolsPreviewSnapshot = null;
+          }
           document.body.dataset.mode = nextMode;
           if (nextMode === "admin") document.body.dataset.adminPage = "home";
-          if (nextMode === "teacher") setTab("today");
+          if (nextMode === "teacher") {
+            if (document.body.dataset.tourMode === "true") {
+              teacherToolsPreviewSnapshot = JSON.parse(JSON.stringify(appDataPayload()));
+              profileTeacher = teachers.find((teacher) => teacher.firstName?.trim().toLowerCase() === "lexi") || teachers[0] || profileTeacher;
+              renderCloudSyncedAppData();
+            }
+            setTab("today");
+          } else if (leavingTeacherPreview) {
+            renderCloudSyncedAppData();
+          }
           document.querySelectorAll("[data-mode-btn]").forEach((item) => item.classList.toggle("active", item === button));
         });
       });
@@ -17774,6 +17874,12 @@
       target.splice(0, target.length, ...source);
     };
 
+    const isTeacherToolsPreviewSandbox = () => (
+      document.body.dataset.tourMode === "true" &&
+      document.body.dataset.mode === "teacher"
+    );
+    let teacherToolsPreviewSnapshot = null;
+
     const readPersistedAppData = () => {
       try {
         const raw = window.localStorage?.getItem(persistentStorageKey);
@@ -17960,6 +18066,11 @@
     };
 
     const saveAppData = () => {
+      if (isTeacherToolsPreviewSandbox()) {
+        window.dtPrototypeStorageStatus = { ok: true, savedAt: "", method: "preview sandbox" };
+        document.documentElement.dataset.prototypeSaved = "preview";
+        return;
+      }
       const payload = appDataPayload();
       const savedAt = payload.savedAt;
       try {
@@ -18355,7 +18466,11 @@
       openNewIsdDialog(field);
       return true;
     };
-    const schoolProfileByName = (schoolName) => profileTeacher.schools.find((school) => school.name === schoolName);
+    const schoolProfileByName = (schoolName) => profileTeacher.schools.find((school) => (
+      school.name === schoolName ||
+      enrollmentSchoolNameMatches(school.name, schoolName) ||
+      enrollmentSchoolNameMatches(school.nickname, schoolName)
+    ));
     const rescheduleDateLabel = (dateString) => dateString ? new Date(`${dateString}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
     const setRescheduleAlertOpen = (open) => {
       const overlay = document.getElementById("reschedule-alert-confirm");
@@ -19123,10 +19238,28 @@
       return `<span class="status ${statusClassName} my-day-class-progress">${escapeText(text)}</span>`;
     };
 
+    const myDayClassRowsForEvent = (school, event) => {
+      if (!event?.isPreviewOnly) return normalizeClassCurriculumRows(school);
+      const previewSchool = {
+        ...school,
+        classCount: Math.max(1, Number(event.classCount) || Number(school.classCount) || 1),
+        classCurriculum: Array.isArray(school.classCurriculum)
+          ? school.classCurriculum.map((row) => ({ ...row }))
+          : []
+      };
+      return normalizeClassCurriculumRows(previewSchool);
+    };
+
     const myDayClassCurriculumMarkup = (event, visibleSteps, fallbackProgress, fallbackProgressRecord) => {
       const school = schoolProfileByName(event.school);
       if (!school) return "";
-      const classes = normalizeClassCurriculumRows(school);
+      const classes = myDayClassRowsForEvent(school, event);
+      const matchingRosterClasses = rosterClasses.filter((rosterClass) => (
+        rosterClass.sourceActive !== false &&
+        rosterClass.teacherId === profileTeacher.id &&
+        enrollmentSchoolNameMatches(rosterClass.schoolName, event.school)
+      )).sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time)
+        || left.name.localeCompare(right.name, undefined, { numeric: true }));
       if (!classes.length) return "";
       return `
         <div class="my-day-class-curriculum-list">
@@ -19135,6 +19268,7 @@
             const classProgress = myDayClassProgressFor(classRow, fallbackProgress);
             const classSteps = Array.isArray(classRow.progress?.steps) && classRow.progress.steps.length ? classRow.progress.steps : visibleSteps;
             const classChecklistMarkup = myDayChecklistMarkup(classRow.progress || fallbackProgressRecord, classSteps);
+            const linkedRosterClass = matchingRosterClasses.find((rosterClass) => rosterClass.name === classRow.title) || matchingRosterClasses[index];
             return `
               <details class="my-day-class-curriculum">
                 <summary>
@@ -19146,6 +19280,7 @@
                 </summary>
                 <div class="my-day-class-curriculum-body">
                   ${myDayClassCurriculumLevelsMarkup(classRow, event)}
+                  ${linkedRosterClass ? `<button class="my-day-class-roster-button" type="button" data-my-day-class-roster="${escapeText(linkedRosterClass.id)}">Class Roster</button>` : ""}
                   ${classChecklistMarkup}
                 </div>
               </details>
@@ -19158,7 +19293,7 @@
     const myDayAllClassCurriculumComplete = (event, fallbackProgress) => {
       const school = schoolProfileByName(event.school);
       if (!school) return false;
-      const classes = normalizeClassCurriculumRows(school);
+      const classes = myDayClassRowsForEvent(school, event);
       return classes.length > 0 && classes.every((classRow) => myDayClassProgressFor(classRow, fallbackProgress).completed);
     };
 
@@ -19169,7 +19304,14 @@
       </div>
     `;
 
-    const myDayEventMarkup = (event, dateLabel, isToday) => {
+    const myDaySchoolTitle = (event) => {
+      const school = schoolProfileByName(event?.school);
+      return school?.nickname?.trim() || schoolDisplayName(event);
+    };
+
+    const myDayEventMarkup = (event, dateLabel, isToday, showTimeBlock = true) => {
+      const schoolTitle = myDaySchoolTitle(event);
+      const dateAndPeriodLabel = showTimeBlock ? `${dateLabel} • ${timeBlockLabel(event.timeBlock)}` : dateLabel;
       if (event.isCustomEvent) {
         const schoolProfile = schoolProfileByName(event.school);
         const importantNotesMarkup = schoolProfile?.importantNotes?.trim() ? `
@@ -19181,10 +19323,10 @@
         return `
           <section class="my-day-hero">
             <div class="my-day-date-row">
-              <span class="mini-label">${escapeText(dateLabel)} • ${timeBlockLabel(event.timeBlock)}</span>
+              <span class="mini-label">${escapeText(dateAndPeriodLabel)}</span>
               <span class="status private">★ Star Alert</span>
             </div>
-            <button class="my-day-school-name" type="button" data-directions-url="${escapeText(directionsUrlForEvent(event))}" aria-label="Get directions to ${escapeText(schoolDisplayName(event))}">${escapeText(schoolDisplayName(event))}</button>
+            <button class="my-day-school-name" type="button" data-directions-url="${escapeText(directionsUrlForEvent(event))}" aria-label="Get directions to ${escapeText(schoolTitle)}">${escapeText(schoolTitle)}</button>
             <span class="my-day-school-detail">${escapeText(event.isd || "School event")}</span>
             <div class="my-day-important-note">
               <strong>${escapeText(event.eventTitle || "School event")}</strong>
@@ -19210,8 +19352,7 @@
         </div>
       ` : "";
       const curriculumDetailMarkup = event.hasCurriculum ? `
-        <button class="my-day-detail full" type="button" data-curriculum-week="${escapeText(event.curriculumKey)}" aria-label="Open ${escapeText(event.curriculumTitle)} curriculum card">
-          <small>Curriculum</small>
+        <button class="my-day-detail my-day-detail-curriculum" type="button" data-curriculum-week="${escapeText(event.curriculumKey)}" aria-label="Open ${escapeText(event.curriculumTitle)} curriculum card">
           <strong>${curriculumWeekWithMarkerMarkup(event, weekLabel)}</strong>
         </button>
       ` : "";
@@ -19229,10 +19370,10 @@
       return `
         <section class="my-day-hero">
           <div class="my-day-date-row">
-            <span class="mini-label">${escapeText(dateLabel)} • ${timeBlockLabel(event.timeBlock)}</span>
-            <button class="reschedule-toggle" type="button" data-reschedule-toggle>Change Class</button>
+            <span class="mini-label">${escapeText(dateAndPeriodLabel)}</span>
+            <button class="reschedule-toggle" type="button" data-reschedule-toggle>Reschedule</button>
           </div>
-          <button class="my-day-school-name" type="button" data-directions-url="${escapeText(directionsUrlForEvent(event))}" aria-label="Get directions to ${escapeText(schoolDisplayName(event))}">${escapeText(schoolDisplayName(event))}</button>
+          <button class="my-day-school-name" type="button" data-directions-url="${escapeText(directionsUrlForEvent(event))}" aria-label="Get directions to ${escapeText(schoolTitle)}">${escapeText(schoolTitle)}</button>
           <span class="my-day-school-detail">${escapeText(event.isd)}</span>
           ${importantNotesMarkup}
           ${recitalCountdownMarkup(event)}
@@ -19240,12 +19381,16 @@
           <div class="my-day-detail-grid">
             ${curriculumDetailMarkup}
             <div class="my-day-detail">
+              <small>Teacher Tools</small>
+              <strong>${escapeText(propsForEvent(event))}</strong>
+            </div>
+            <div class="my-day-detail">
               <small>Memory Moment</small>
               <strong>${escapeText(curriculumWeeks[event.curriculumKey]?.photo || "No memory moment")}</strong>
             </div>
             <div class="my-day-detail">
-              <small>Teacher Tools</small>
-              <strong>${escapeText(propsForEvent(event))}</strong>
+              <small>French Word of the Week</small>
+              <strong>${escapeText(curriculumWeeks[event.curriculumKey]?.vocab || "No French word assigned")}</strong>
             </div>
             ${event.hasCurriculum ? myDayMusicPlayerMarkup(event) : ""}
           </div>
@@ -19320,14 +19465,62 @@
       return `<section class="panel"><button class="my-day-orders-card" type="button" data-my-day-orders data-orders-day="${escapeText(danceDay)}"><span><strong>Orders for Today</strong><small>${ready ? `${ready} ready for pickup` : "Nothing waiting for pickup"} · ${possession ? `${possession} ready to deliver` : "Nothing to deliver"}</small></span><span class="my-day-orders-counts">${ready ? `<span class="ready">${ready} Pickup</span>` : ""}${possession ? `<span class="possession">${possession} Deliver</span>` : ""}</span></button></section>`;
     };
 
+    const teacherToolsPreviewMyDayEvents = (todayKey) => (profileTeacher.schools || []).slice(0, 2).map((school, index) => {
+      const curriculumRecord = curriculumDatabase.weeks[index] || curriculumDatabase.weeks[0];
+      const curriculumWeek = `W${curriculumRecord?.week || index + 1}`;
+      const curriculumStyle = curriculumRecord?.style || (index % 2 ? "Tap" : "Ballet");
+      const matchingClasses = rosterClasses.filter((rosterClass) => (
+        rosterClass.sourceActive !== false &&
+        rosterClass.teacherId === profileTeacher.id &&
+        enrollmentSchoolNameMatches(rosterClass.schoolName, school.name)
+      ));
+      return {
+        school: school.name,
+        displaySchool: school.nickname || school.name,
+        day: weekdayLabelFromDate(todayKey),
+        isd: school.isd || "",
+        address: school.address || school.name,
+        teacher: profileTeacher.firstName || teacherNickname(profileTeacher),
+        classCount: Math.max(1, matchingClasses.length || Number(school.classCount) || 1),
+        timeBlock: school.timeBlock || (index ? "PM" : "AM"),
+        week: curriculumWeek,
+        curriculum: curriculumStyle,
+        date: todayKey,
+        originalDate: "",
+        isRescheduled: false,
+        rescheduleReason: "",
+        requestedBy: "",
+        schoolRequested: false,
+        curriculumKey: curriculumKeyForWeek(curriculumWeek),
+        curriculumTitle: curriculumTitleForWeek(curriculumWeek, curriculumStyle),
+        hasCurriculum: true,
+        isPreviewOnly: true
+      };
+    });
+
     const renderMyDay = () => {
       const event = currentTeachingEvent();
       const todayKey = isoDate(homeWidgetDate);
       const todayDate = new Date(`${todayKey}T12:00:00`);
       const dateLabel = todayDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-      const dayEvents = eventsForTeachingDate(todayKey);
+      const scheduledDayEvents = eventsForTeachingDate(todayKey).map((scheduledEvent) => {
+        if (document.body.dataset.tourMode !== "true") return scheduledEvent;
+        const matchingClassCount = rosterClasses.filter((rosterClass) => (
+          rosterClass.sourceActive !== false &&
+          rosterClass.teacherId === profileTeacher.id &&
+          enrollmentSchoolNameMatches(rosterClass.schoolName, scheduledEvent.school)
+        )).length;
+        return {
+          ...scheduledEvent,
+          classCount: Math.max(1, matchingClassCount || Number(scheduledEvent.classCount) || 1),
+          isPreviewOnly: true
+        };
+      });
+      const dayEvents = scheduledDayEvents.length || document.body.dataset.tourMode !== "true"
+        ? scheduledDayEvents
+        : teacherToolsPreviewMyDayEvents(todayKey);
       const stack = document.getElementById("my-day-stack");
-      setText("my-day-subtitle", `${dateLabel} schedule`);
+      setText("my-day-subtitle", dateLabel);
       if (!stack) return;
       if (!dayEvents.length) {
         stack.innerHTML = `
@@ -19347,7 +19540,7 @@
             <details class="my-day-period">
               <summary>${block === "AM" ? "Morning Classes" : "Afternoon Classes"}</summary>
               <div class="my-day-stack">
-                ${blockEvents.map((item) => myDayEventMarkup(item, dateLabel, true)).join("")}
+                ${blockEvents.map((item) => myDayEventMarkup(item, dateLabel, true, false)).join("")}
               </div>
             </details>
           `;
@@ -20538,7 +20731,35 @@
       const myDayTeachers = teachers.filter((teacher) => (teacher.displayName || fullName(teacher)).trim().toLowerCase() !== "dance techniques");
       list.innerHTML = myDayTeachers.map((teacher) => {
         profileTeacher = teacher;
-        const dayEvents = eventsForTeachingDate(todayKey);
+        const scheduledEvents = eventsForTeachingDate(todayKey);
+        const previewEvents = (teacher.schools || []).slice(0, 2).map((school, index) => {
+          const curriculumRecord = curriculumDatabase.weeks[index] || curriculumDatabase.weeks[0];
+          const curriculumWeek = `W${curriculumRecord?.week || index + 1}`;
+          const curriculumStyle = curriculumRecord?.style || (index % 2 ? "Tap" : "Ballet");
+          return {
+            school: school.name,
+            displaySchool: school.nickname || school.name,
+            day: weekdayLabelFromDate(todayKey),
+            isd: school.isd || "",
+            address: school.address || school.name,
+            teacher: teacher.firstName || teacherNickname(teacher),
+            classCount: Math.max(1, Number(school.classCount) || 1),
+            timeBlock: school.timeBlock || (index ? "PM" : "AM"),
+            week: curriculumWeek,
+            curriculum: curriculumStyle,
+            date: todayKey,
+            originalDate: "",
+            isRescheduled: false,
+            rescheduleReason: "",
+            requestedBy: "",
+            schoolRequested: false,
+            curriculumKey: curriculumKeyForWeek(curriculumWeek),
+            curriculumTitle: curriculumTitleForWeek(curriculumWeek, curriculumStyle),
+            hasCurriculum: true,
+            isPreviewOnly: true
+          };
+        });
+        const dayEvents = scheduledEvents.length ? scheduledEvents : previewEvents;
         const previewMarkup = dayEvents.length ? dayEvents.map((event) => myDayEventMarkup(event, dateLabel, true)).join("") : `
           <section class="my-day-empty">
             <strong>No classes scheduled for this date</strong>
@@ -21695,7 +21916,7 @@
       const panel = toggle.closest(".my-day-hero")?.querySelector("[data-reschedule-panel]");
       if (!panel) return;
       panel.hidden = !panel.hidden;
-      toggle.textContent = panel.hidden ? "Change Class" : "Close";
+      toggle.textContent = panel.hidden ? "Reschedule" : "Close";
       if (!panel.hidden) syncRescheduleActionPanel(panel);
     });
 
@@ -22612,6 +22833,57 @@
       }).join("");
     };
 
+    const teacherRosterDayKey = (value) => {
+      const normalized = String(value || "").trim().toLowerCase().replace(/[^a-z]/g, "");
+      const aliases = {
+        m: "monday", mon: "monday", monday: "monday",
+        t: "tuesday", tu: "tuesday", tue: "tuesday", tues: "tuesday", tuesday: "tuesday",
+        w: "wednesday", wed: "wednesday", weds: "wednesday", wednesday: "wednesday",
+        th: "thursday", thu: "thursday", thur: "thursday", thurs: "thursday", thursday: "thursday",
+        f: "friday", fri: "friday", friday: "friday"
+      };
+      return aliases[normalized] || normalized;
+    };
+
+    const teacherRosterClassIsToday = (rosterClass) => {
+      const today = homeWidgetDate.toLocaleDateString("en-US", { weekday: "long" });
+      return Boolean(rosterClass?.day) && teacherRosterDayKey(rosterClass.day) === teacherRosterDayKey(today);
+    };
+
+    let myDayRosterPopupClassId = "";
+    const mountMyDayRosterPopup = () => {
+      if (!myDayRosterPopupClassId) return;
+      const rosterView = document.getElementById("rosters-view");
+      const list = document.getElementById("teacher-roster-list");
+      const rosterClass = teacherRosterClasses().find((item) => item.id === myDayRosterPopupClassId);
+      const card = list?.querySelector(`[data-teacher-roster-details="${CSS.escape(myDayRosterPopupClassId)}"]`);
+      if (!rosterView || !list || !rosterClass || !card) return;
+      const popup = document.createElement("section");
+      popup.className = "my-day-roster-popup";
+      popup.setAttribute("role", "dialog");
+      popup.setAttribute("aria-modal", "true");
+      popup.setAttribute("aria-label", `${rosterClass.name} class roster`);
+      popup.innerHTML = `<div class="my-day-roster-popup-header"><h3>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</h3><button class="my-day-roster-popup-close" type="button" data-close-my-day-roster-popup aria-label="Close Class Roster">×</button></div><div class="my-day-roster-popup-body"></div>`;
+      popup.querySelector(".my-day-roster-popup-body")?.appendChild(card);
+      list.appendChild(popup);
+      rosterView.classList.add("is-my-day-roster-popup");
+    };
+    const closeMyDayRosterPopup = () => {
+      myDayRosterPopupClassId = "";
+      document.getElementById("rosters-view")?.classList.remove("is-my-day-roster-popup");
+      renderTeacherRosters();
+    };
+    const openMyDayRosterPopup = (classId) => {
+      const rosterClass = teacherRosterClasses().find((item) => item.id === classId);
+      if (!rosterClass) return showToast("This class roster is not available yet");
+      myDayRosterPopupClassId = rosterClass.id;
+      teacherRosterSchoolFilter = rosterClass.schoolName;
+      selectedTeacherRosterClassId = rosterClass.id;
+      openTeacherRosterClassIds.clear();
+      openTeacherRosterClassIds.add(rosterClass.id);
+      renderTeacherRosters();
+    };
+
     function renderTeacherRosters() {
       const list = document.getElementById("teacher-roster-list");
       const filter = document.getElementById("teacher-roster-school-filter");
@@ -22624,11 +22896,17 @@
       const schoolHasClasses = (school) => allClasses.some((rosterClass) => enrollmentSchoolNameMatches(school.name, rosterClass.schoolName)
         || enrollmentSchoolNameMatches(school.nickname, rosterClass.schoolName));
       const selectedSchool = schools.find((school) => enrollmentSchoolNameMatches(school.name, teacherRosterSchoolFilter));
-      if (teacherRosterSchoolFilter === "all" || !selectedSchool || !schoolHasClasses(selectedSchool)) {
+      if (teacherRosterSchoolFilter === "all" || !selectedSchool) {
         teacherRosterSchoolFilter = schools.find(schoolHasClasses)?.name || schools[0]?.name || "all";
       }
       filter.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
       filter.value = teacherRosterSchoolFilter;
+      const multiClassEditButton = document.getElementById("teacher-roster-multi-class-edit");
+      if (multiClassEditButton) {
+        const selectedSchoolClassCount = allClasses.filter((rosterClass) => enrollmentSchoolNameMatches(rosterClass.schoolName, teacherRosterSchoolFilter)).length;
+        multiClassEditButton.disabled = selectedSchoolClassCount < 2;
+        multiClassEditButton.title = selectedSchoolClassCount < 2 ? "At least two classes are needed to move dancers" : "";
+      }
       const visibleClasses = allClasses.filter((rosterClass) => teacherRosterSchoolFilter === "all"
         || enrollmentSchoolNameMatches(rosterClass.schoolName, teacherRosterSchoolFilter))
         .sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time)
@@ -22660,10 +22938,15 @@
           return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && !(typeof entry === "object" && entry.checkOutAt);
         });
         const classComplete = attendanceComplete && awaitingCheckOut.length === 0;
+        const classIsToday = teacherRosterClassIsToday(rosterClass);
+        const startClassDisabled = classComplete;
+        const startClassTitle = !classIsToday
+          ? `Start Class is available on ${rosterClass.day || "the assigned dance day"}`
+          : "";
         const duration = classDurationForStudents(attendanceStudents.length) || "No duration";
         const durationClass = duration.startsWith("30") ? "duration-30" : duration.startsWith("45") ? "duration-45" : "";
         return `<details class="teacher-roster-card teacher-roster-active-card" data-teacher-roster-details="${rosterSafe(rosterClass.id)}" ${openTeacherRosterClassIds.has(rosterClass.id) ? "open" : ""}>
-          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}"><div class="teacher-roster-active-heading"><div><h3>${rosterSafe(rosterClass.name)}</h3><p>${rosterSafe(rosterClass.day || "Day not set")} · ${rosterSafe(rosterClass.time || "Time not set")}</p></div><span class="teacher-roster-duration ${durationClass}">${attendanceStudents.length} students · ${rosterSafe(duration)}</span></div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${classComplete ? "disabled" : ""}>${classComplete ? "Class Complete" : checkOutActive ? "Check-Out Started" : checkInActive ? "Check-In Started" : checkInSubmitted ? "End Class" : "Start Class"}</button>` : `<button class="teacher-class-action-start" type="button" disabled>Start Class</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" ${readyKits.length ? "" : "disabled"}>${kitDeliveryActive ? "Delivery Started" : "Deliver Shirts"}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" disabled>${boutiqueDeliveryActive ? "Delivery Started" : "Deliver Boutique"}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}">✦ Helper ✦</button></div></summary>
+          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}"><div class="teacher-roster-active-heading"><div><h3>${rosterSafe(rosterClass.name)}</h3><p>${rosterSafe(rosterClass.day || "Day not set")} · ${rosterSafe(rosterClass.time || "Time not set")}</p></div><span class="teacher-roster-duration ${durationClass}">${attendanceStudents.length} students · ${rosterSafe(duration)}</span></div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : ""} ${startClassDisabled ? "disabled" : ""}>${classComplete ? "Class Complete" : checkOutActive ? "Check-Out Started" : checkInActive ? "Check-In Started" : checkInSubmitted ? "End Class" : "Start Class"}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : ""} disabled>Start Class</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" ${readyKits.length ? "" : "disabled"}>${kitDeliveryActive ? "Delivery Started" : "Deliver Shirts"}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" disabled>${boutiqueDeliveryActive ? "Delivery Started" : "Deliver Boutique"}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}">✦ Helper ✦</button></div></summary>
           <div class="teacher-roster-card-body">
             ${classComplete ? `<div class="teacher-attendance-complete">✓ Class attendance complete for today</div>` : checkInSubmitted ? `<div class="teacher-attendance-complete">✓ Check-in recorded</div>` : ""}
             <div>${attendanceStudents.length ? teacherRosterClassroomMarkup(attendanceStudents, rosterClass) : `<div class="teacher-roster-empty">No dancers attending this class yet.</div>`}</div>
@@ -22675,6 +22958,7 @@
           </div>
         </details>`;
       }).join("");
+      if (myDayRosterPopupClassId) window.setTimeout(mountMyDayRosterPopup, 0);
     }
 
     const setTeacherRosterOverlay = (id, open) => {
@@ -22871,6 +23155,27 @@
       openTeacherRosterClassIds.clear();
       renderTeacherRosters();
     });
+    document.addEventListener("click", (event) => {
+      const rosterButton = event.target.closest("[data-my-day-class-roster]");
+      if (rosterButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        openMyDayRosterPopup(rosterButton.dataset.myDayClassRoster);
+        return;
+      }
+      if (event.target.closest("[data-close-my-day-roster-popup]")) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMyDayRosterPopup();
+      }
+    });
+    document.getElementById("teacher-roster-multi-class-edit")?.addEventListener("click", () => {
+      if (!teacherRosterSchoolFilter || teacherRosterSchoolFilter === "all") return showToast("Choose a school first");
+      rosterMultiClassOpenedFromTeacherTools = true;
+      rosterMultiClassSchoolName = teacherRosterSchoolFilter;
+      mountRosterMultiClassOverlayForTeacherTools();
+      renderRosterMultiClassEdit();
+    });
     document.getElementById("teacher-roster-list")?.addEventListener("click", (event) => {
       const changeHelperButton = event.target.closest("[data-teacher-change-helper]");
       if (changeHelperButton) {
@@ -22947,6 +23252,11 @@
         event.preventDefault();
         event.stopPropagation();
         const classId = startClassButton.dataset.teacherStartClass;
+        const rosterClass = teacherRosterClasses().find((item) => item.id === classId);
+        if (startClassButton.dataset.teacherOffDay === "true") {
+          window.alert(`${rosterSchoolNickname(rosterClass?.schoolName || "This school")} isn't scheduled for class today.`);
+          return;
+        }
         const mode = startClassButton.dataset.teacherStartMode || "checkin";
         activeTeacherBoutiqueDeliveryClassIds.delete(classId);
         activeTeacherKitDeliveryClassIds.delete(classId);
@@ -24187,12 +24497,32 @@
     let rosterMultiClassClassroomFilter = "all";
     let rosterMultiClassAgeFilter = "all";
     let rosterMultiClassDragStudent = null;
+    let rosterMultiClassOpenedFromTeacherTools = false;
+    let rosterMultiClassOverlayHome = null;
+    let rosterMultiClassOverlayNextSibling = null;
+    const mountRosterMultiClassOverlayForTeacherTools = () => {
+      const overlay = document.getElementById("roster-multi-class-overlay");
+      if (!overlay || overlay.parentElement === document.body) return;
+      rosterMultiClassOverlayHome = overlay.parentElement;
+      rosterMultiClassOverlayNextSibling = overlay.nextSibling;
+      document.body.appendChild(overlay);
+    };
+    const restoreRosterMultiClassOverlayHome = () => {
+      const overlay = document.getElementById("roster-multi-class-overlay");
+      if (!overlay || !rosterMultiClassOverlayHome) return;
+      rosterMultiClassOverlayHome.insertBefore(overlay, rosterMultiClassOverlayNextSibling);
+      rosterMultiClassOverlayHome = null;
+      rosterMultiClassOverlayNextSibling = null;
+    };
     const closeRosterMultiClassEdit = () => {
       rosterMultiClassSchoolName = "";
       rosterMultiClassDragStudent = null;
       const overlay = document.getElementById("roster-multi-class-overlay");
       overlay?.classList.remove("active");
       overlay?.setAttribute("aria-hidden", "true");
+      if (rosterMultiClassOpenedFromTeacherTools) renderTeacherRosters();
+      rosterMultiClassOpenedFromTeacherTools = false;
+      restoreRosterMultiClassOverlayHome();
     };
     const rosterMultiClassStudents = (classes) => classes.flatMap((rosterClass) =>
       rosterEnrolled(rosterClass).map((student) => ({ rosterClass, student }))
@@ -24344,7 +24674,7 @@
               const teacherNames = [...new Set(classes.map((item) => rosterTeacherName(item.teacherId)).filter(Boolean))];
               const dayShort = { Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" };
               return `<section class="roster-school-results">
-              <div class="roster-school-results-heading"><div class="roster-school-results-title"><span class="roster-school-day-bubbles">${dayLabels.map((day) => `<span class="roster-school-day-bubble" title="${rosterSafe(day)}">${rosterSafe(dayShort[day] || day.slice(0, 2))}</span>`).join("")}</span><h3>${rosterSafe(schoolNickname)}${teacherNames.length ? ` – ${rosterSafe(teacherNames.join(" & "))}` : ""}</h3></div><button class="roster-multi-class-open" type="button" data-roster-multi-class-open="${rosterSafe(classes[0]?.schoolName || schoolNickname)}">Multi Class Edit</button></div>
+        <div class="roster-school-results-heading"><div class="roster-school-results-title"><span class="roster-school-day-bubbles">${dayLabels.map((day) => `<span class="roster-school-day-bubble" title="${rosterSafe(day)}">${rosterSafe(dayShort[day] || day.slice(0, 2))}</span>`).join("")}</span><h3>${rosterSafe(schoolNickname)}${teacherNames.length ? ` – ${rosterSafe(teacherNames.join(" & "))}` : ""}</h3></div><button class="roster-multi-class-open" type="button" data-roster-multi-class-open="${rosterSafe(classes[0]?.schoolName || schoolNickname)}">Rearrange Classes</button></div>
               <div class="roster-school-results-line" aria-hidden="true"></div>
               <div class="roster-school-class-grid">${classes.sort((left, right) => (left.day || "").localeCompare(right.day || "") || (left.time || "").localeCompare(right.time || "") || left.name.localeCompare(right.name, undefined, { numeric: true })).map(rosterClassCardMarkup).join("")}</div>
             </section>`;
@@ -27184,6 +27514,7 @@
       }
       const multiClassButton = event.target.closest("[data-roster-multi-class-open]");
       if (multiClassButton) {
+        rosterMultiClassOpenedFromTeacherTools = false;
         rosterMultiClassSchoolName = multiClassButton.dataset.rosterMultiClassOpen;
         renderRosterMultiClassEdit();
         return;
@@ -27351,8 +27682,27 @@
       rosterMultiClassDragStudent = null;
       renderRosterMultiClassEdit();
       renderClassesAndRosters();
+      if (rosterMultiClassOpenedFromTeacherTools) renderTeacherRosters();
       scheduleAppDataSave();
       await saveSharedStudent(student, targetClass);
+      if (rosterMultiClassOpenedFromTeacherTools) {
+        const directorIds = teachers
+          .filter((teacher) => ["Admin", "Director"].includes(teacher.teacherType) && teacher.id !== profileTeacher.id)
+          .map((teacher) => teacher.id);
+        await queueAppNotifications(directorIds, {
+          title: "Dancer moved to a different class",
+          message: `${profileTeacher.displayName || fullName(profileTeacher)} moved ${rosterStudentFullName(student)} from ${sourceClass.name} to ${targetClass.name} at ${rosterSchoolNickname(targetClass.schoolName)}.`,
+          notification_type: "roster_class_change",
+          priority: "routine",
+          metadata: {
+            student_id: student.id,
+            source_class_id: sourceClass.id,
+            target_class_id: targetClass.id,
+            school_name: targetClass.schoolName,
+            changed_by_teacher_id: profileTeacher.id
+          }
+        });
+      }
       showToast(`${rosterStudentFirstName(student)} moved to ${targetClass.name}`);
     });
     document.getElementById("roster-class-profile-overlay")?.addEventListener("click", (event) => {
