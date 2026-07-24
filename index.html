@@ -208,6 +208,33 @@
       min-width: 0;
     }
 
+    .teacher-conversation-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .conversation-profile-bubble {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 3px solid var(--blush-strong);
+      border-radius: 999px;
+      background-position: center;
+      background-size: cover;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .conversation-profile-bubble img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
     .mobile-head h2 {
       margin: 0;
       font-family: var(--font-display);
@@ -11552,9 +11579,9 @@
             <section class="view" id="teacher-conversation-view">
               <div class="mobile-head page-head">
                 <button class="back-btn" data-tab-jump="messages" aria-label="Back to Messages">&larr;</button>
-                <div class="mobile-title">
+                <div class="mobile-title teacher-conversation-title">
+                  <span class="conversation-profile-bubble" id="teacher-conversation-profile" hidden></span>
                   <h2 id="teacher-message-title">Conversation</h2>
-                  <p class="subtle" id="teacher-message-participants">Messages</p>
                 </div>
               </div>
 
@@ -19355,16 +19382,42 @@
       modal.classList.add("open");
     };
 
+    const renderTeacherConversationProfile = (thread, viewerName) => {
+      const avatar = document.getElementById("teacher-conversation-profile");
+      if (!avatar) return;
+      if (!thread || thread.type !== "private") {
+        avatar.hidden = true;
+        avatar.innerHTML = "";
+        return;
+      }
+      const otherName = thread.participants.find((participant) => participant !== viewerName && participant !== "Admins") || "Admin";
+      const teacher = messageTeacherForName(otherName);
+      const color = teacher ? teacherProfileColor(teacher) : "#dba9a1";
+      avatar.hidden = false;
+      avatar.style.backgroundColor = color;
+      avatar.style.borderColor = color;
+      avatar.style.color = coordinatedInitialColor(color);
+      if (otherName === "Admin") {
+        avatar.innerHTML = `<img src="./assets/dance-techniques-logo-only.png" alt="Dance Techniques">`;
+      } else if (teacher?.photo) {
+        avatar.innerHTML = `<img src="${escapeText(teacher.photo)}" alt="">`;
+      } else {
+        avatar.textContent = otherName.slice(0, 1).toUpperCase();
+      }
+    };
+
     const renderMessageStack = (thread, titleId, participantsId, scopeId, stackId, viewerName) => {
       const stack = document.getElementById(stackId);
       const teacherPanel = stackId === "teacher-message-stack" ? document.getElementById("teacher-message-thread-panel") : null;
       if (!thread) {
         teacherPanel?.classList.add("hidden");
+        if (teacherPanel) renderTeacherConversationProfile(null, viewerName);
         if (stack) stack.innerHTML = "";
         return;
       }
       teacherPanel?.classList.remove("hidden");
       setText(titleId, messageThreadNameFor(thread, viewerName));
+      if (teacherPanel) renderTeacherConversationProfile(thread, viewerName);
       setText(participantsId, thread.type === "announcement" ? "Entire Team" : thread.participants.map(personDisplayName).join(" • "));
       const scope = document.getElementById(scopeId);
       if (scope) {
@@ -19386,7 +19439,7 @@
         const teamStyle = isTeamMessage ? ` style="--team-message-color:${escapeText(teamColor)};--team-message-text:${escapeText(coordinatedInitialColor(teamColor))}"` : "";
         return `
           <div class="message-bubble ${message.from === viewerName ? "mine" : ""}${isTeamMessage ? " team-message" : ""}" data-message-hold${teamStyle}>
-            <div class="message-bubble-sender">${escapeText(messageSenderDisplayName(message))}${isTeamMessage ? "" : ` · ${escapeText(message.time)}`}</div>
+            <div class="message-bubble-sender">${isTeamMessage ? escapeText(messageSenderDisplayName(message)) : escapeText(message.time)}</div>
             ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}
             ${receipt}
             <div class="reaction-row" aria-label="Message reactions">
