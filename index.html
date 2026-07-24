@@ -14254,13 +14254,43 @@
       }
     };
 
+    const notificationActionTarget = (item) => {
+      const metadata = item?.metadata || {};
+      const rawAction = String(item?.action_url || "");
+      let open = "";
+      let id = "";
+      try {
+        const actionUrl = new URL(rawAction, window.location.href);
+        open = actionUrl.searchParams.get("open") || "";
+        id = actionUrl.searchParams.get("id") || "";
+      } catch (error) {
+        console.warn("Notification action URL could not be read", error);
+      }
+      return {
+        open: open.toLowerCase(),
+        id,
+        enrollmentId: metadata.enrollment_id || (["enrollment", "enrollments"].includes(open) ? id : ""),
+        studentId: metadata.student_id || (open === "student" ? id : ""),
+        classId: metadata.target_class_id || metadata.class_id || (open === "class" ? id : ""),
+        teacherId: metadata.teacher_id || metadata.changed_by_teacher_id || (open === "teacher" ? id : ""),
+        schoolId: metadata.school_id || (open === "school" ? id : ""),
+        orderId: metadata.order_id || metadata.boutique_order_id || (["order", "boutique-order"].includes(open) ? id : "")
+      };
+    };
+
+    const closeNotificationPanels = () => {
+      document.querySelectorAll(".teacher-notifications[open]").forEach((panel) => panel.removeAttribute("open"));
+    };
+
     const openNotificationAction = (item) => {
       if (!item) return;
       const isLeader = ["admin", "director"].includes(window.dtCurrentProfile?.role) || document.body.dataset.mode === "admin";
-      if (item.metadata?.enrollment_id && isLeader) {
+      const target = notificationActionTarget(item);
+      closeNotificationPanels();
+      if (target.enrollmentId && isLeader) {
         document.body.dataset.mode = "admin";
         document.querySelectorAll("[data-mode-btn]").forEach((button) => button.classList.toggle("active", button.dataset.modeBtn === "admin"));
-        selectedEnrollmentIntakeId = item.metadata.enrollment_id;
+        selectedEnrollmentIntakeId = target.enrollmentId;
         const enrollment = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
         if (enrollment) enrollment.editing_enrollment = true;
         enrollmentReviewOpen = true;
@@ -14268,19 +14298,94 @@
         renderEnrollmentQueue();
         return;
       }
-      if (item.notification_type === "direct_message" || item.notification_type === "studio_announcement") {
+      if (target.studentId && isLeader) {
+        const rosterClass = rosterClasses.find((entry) => (
+          (!target.classId || entry.id === target.classId)
+          && (entry.students || []).some((student) => student.id === target.studentId)
+        )) || rosterClasses.find((entry) => (entry.students || []).some((student) => student.id === target.studentId));
+        const student = rosterClass?.students.find((entry) => entry.id === target.studentId);
+        openAdminSection("student-library");
+        if (rosterClass && student) openRosterStudentEditor(rosterClass, student);
+        else showToast("The dancer record may have been moved or archived");
+        return;
+      }
+      if (target.teacherId && isLeader && ["teacher", "teacher-profile", "teaching-team"].includes(target.open)) {
+        openTeacherProfile(target.teacherId);
+        return;
+      }
+      if (target.schoolId && isLeader) {
+        openAdminSection("school-library");
+        window.setTimeout(() => {
+          const schoolIndex = schoolLibrary.findIndex((school) => String(school.id || school.name) === String(target.schoolId));
+          const card = document.querySelector(`.school-library-card[data-library-school-index="${schoolIndex}"]`);
+          if (card) {
+            card.open = true;
+            card.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 80);
+        return;
+      }
+      if (target.orderId) {
+        if (isLeader) {
+          openAdminSection("boutique-backend");
+          window.setTimeout(() => openBoutiqueAssignment(target.orderId), 80);
+        } else {
+          document.body.dataset.mode = "teacher";
+          setTab("rosters");
+          window.setTimeout(() => openBoutiqueAssignment(target.orderId), 80);
+        }
+        return;
+      }
+      if (item.notification_type === "direct_message" || item.notification_type === "studio_announcement" || target.open === "messages") {
         if (isLeader) openAdminSection("messages");
         else { document.body.dataset.mode = "teacher"; setTab("messages"); }
         return;
       }
-      if (item.notification_type === "email_plan_upgrade" && isLeader) {
+      if ((item.notification_type === "email_plan_upgrade" || ["newsletter", "newsletter-studio"].includes(target.open)) && isLeader) {
         openAdminSection("newsletter-studio");
         return;
       }
-      if (item.notification_type?.startsWith("schedule_") || item.notification_type === "school_closure") {
+      if (item.notification_type?.startsWith("schedule_") || item.notification_type === "school_closure" || ["schedule", "schedule-changes", "reschedule-tracker"].includes(target.open)) {
         if (isLeader) openAdminSection("reschedule-tracker");
         else { document.body.dataset.mode = "teacher"; setTab("classes"); }
+        return;
       }
+      if (["new_enrollment", "same_day_enrollment", "unpaid_enrollment_fee", "provisional_acknowledged", "enrollment_digest"].includes(item.notification_type)
+        || ["enrollment", "enrollments", "student-library"].includes(target.open)) {
+        if (isLeader) openAdminSection("student-library");
+        else { document.body.dataset.mode = "teacher"; setTab("rosters"); }
+        return;
+      }
+      if (item.notification_type === "roster_class_change" || ["class", "classes", "rosters", "classes-rosters"].includes(target.open)) {
+        if (isLeader) openAdminSection("classes-rosters");
+        else { document.body.dataset.mode = "teacher"; setTab("rosters"); }
+        return;
+      }
+      if (item.notification_type === "kit_pickup_digest" || ["orders", "boutique", "boutique-backend"].includes(target.open)) {
+        if (isLeader) openAdminSection("boutique-backend");
+        else { document.body.dataset.mode = "teacher"; setTab("rosters"); }
+        return;
+      }
+      if (target.open && isLeader) {
+        const sectionAliases = {
+          schools: "school-library",
+          "partner-schools": "school-library",
+          teachers: "teacher-profiles",
+          "teaching-team": "teacher-profiles",
+          curriculum: "curriculum-progress",
+          "class-progress": "curriculum-progress",
+          "my-day": "master-my-day",
+          finance: "finance-folio"
+        };
+        const section = sectionAliases[target.open] || target.open;
+        if (document.getElementById(`admin-home-${section}`)) {
+          openAdminSection(section);
+          return;
+        }
+      }
+      if (isLeader) openAdminToolsHome();
+      else { document.body.dataset.mode = "teacher"; setTab("home"); }
+      showToast("Opened the closest matching area");
     };
 
     const markAllNotificationsRead = async () => {
