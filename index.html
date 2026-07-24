@@ -1988,16 +1988,25 @@
 
     .teacher-roster-active-card { padding: 0; }
     .teacher-roster-active-card > summary { position: relative; display: block; padding: 14px; }
-    .teacher-roster-active-card:not([open]) > summary { padding-bottom: 30px; }
+    .teacher-roster-active-card:not([open]) > summary { padding-bottom: 62px; }
     .teacher-roster-active-card:not([open]) > summary::after {
       content: "⌄";
       position: absolute;
-      right: 14px;
-      bottom: 7px;
+      right: 12px;
+      bottom: 10px;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 2px solid color-mix(in srgb, var(--berry) 55%, var(--border));
+      border-radius: 999px;
+      background: var(--blush);
       color: var(--berry);
-      font-size: 24px;
-      font-weight: 700;
+      box-shadow: 0 4px 10px color-mix(in srgb, var(--berry) 12%, transparent);
+      font-size: 28px;
+      font-weight: 850;
       line-height: 1;
+      transform: translateY(-2px);
     }
     .teacher-roster-active-card > summary .teacher-roster-active-heading { width: 100%; margin: 0; }
     .teacher-roster-active-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
@@ -6945,15 +6954,15 @@
       border-color: oklch(78% 0.1 55);
     }
     .school-library-assignment[style*="--teacher-assigned-color"] {
-      background: color-mix(in srgb, var(--teacher-assigned-color) 32%, white);
-      color: color-mix(in srgb, var(--teacher-assigned-color) 42%, black);
-      border-color: color-mix(in srgb, var(--teacher-assigned-color) 70%, white);
+      background: var(--teacher-assigned-color);
+      color: var(--teacher-assigned-text);
+      border-color: color-mix(in srgb, var(--teacher-assigned-color) 70%, black);
     }
 
     .school-library-assignment.unassigned {
-      background: oklch(96% 0.03 18);
-      color: var(--danger);
-      border-color: oklch(82% 0.07 18);
+      background: #d8d8d8;
+      color: #555;
+      border-color: #aaa;
     }
 
     .school-library-isd-bubble {
@@ -15068,6 +15077,7 @@
       const schoolById = new Map(schools.map((school) => [school.id, school]));
       const assignmentById = new Map(assignments.map((assignment) => [assignment.id, assignment]));
 
+      const preservedTeacherDirectory = teachers.map((teacher) => JSON.parse(JSON.stringify(teacher)));
       const liveTeachers = profiles.map((item) => {
         const names = item.full_name.trim().split(/\s+/);
         const existing = teachers.find((teacher) => teacher.firstName?.toLowerCase() === names[0]?.toLowerCase());
@@ -15093,7 +15103,11 @@
         });
         return teacher;
       });
-      replaceCollection(teachers, liveTeachers);
+      const missingDirectoryTeachers = preservedTeacherDirectory.filter((savedTeacher) => (
+        !isCompanyTeacherProfile(savedTeacher)
+        && !liveTeachers.some((liveTeacher) => liveTeacher.firstName?.trim().toLowerCase() === savedTeacher.firstName?.trim().toLowerCase())
+      ));
+      replaceCollection(teachers, [...liveTeachers, ...missingDirectoryTeachers]);
       const signedInTeacher = teachers.find((teacher) => teacher.id === profile.id);
       if (!signedInTeacher) {
         sharedRosterReady = false;
@@ -19599,7 +19613,9 @@
     };
     const teacherAssignmentStyle = (teacherId) => {
       const teacher = teachers.find((item) => item.id === teacherId);
-      return teacher ? `style="--teacher-assigned-color:${escapeText(teacherProfileColor(teacher))}"` : "";
+      if (!teacher) return "";
+      const color = teacherProfileColor(teacher);
+      return `style="--teacher-assigned-color:${escapeText(color)};--teacher-assigned-text:${escapeText(coordinatedInitialColor(color))}"`;
     };
 
     const schoolDaySortValue = (school) => {
@@ -19814,8 +19830,14 @@
         teacherBubble.textContent = assignment;
         teacherBubble.className = `status school-library-assignment ${assignmentClass}`;
         const teacher = teachers.find((item) => item.id === school.assignedTeacherId);
-        if (teacher) teacherBubble.style.setProperty("--teacher-assigned-color", teacherProfileColor(teacher));
-        else teacherBubble.style.removeProperty("--teacher-assigned-color");
+        if (teacher) {
+          const color = teacherProfileColor(teacher);
+          teacherBubble.style.setProperty("--teacher-assigned-color", color);
+          teacherBubble.style.setProperty("--teacher-assigned-text", coordinatedInitialColor(color));
+        } else {
+          teacherBubble.style.removeProperty("--teacher-assigned-color");
+          teacherBubble.style.removeProperty("--teacher-assigned-text");
+        }
       }
       if (isdBubble) isdBubble.textContent = school.isd || "No ISD";
     };
