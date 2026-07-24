@@ -4240,7 +4240,8 @@
       color: var(--rose);
     }
 
-    .announcement-card {
+    .announcement-card,
+    .team-talk-card {
       margin-bottom: 12px;
       padding: 12px;
       border: 1px solid oklch(82% 0.045 24 / 0.66);
@@ -4293,7 +4294,7 @@
 
     .team-talk-group-button {
       width: fit-content;
-      margin: 8px 0 12px;
+      margin: 0;
       border: 0;
       background: oklch(82% 0.055 20);
       color: oklch(40% 0.09 350);
@@ -11469,10 +11470,12 @@
                     </div>
                     <div id="teacher-latest-announcement"></div>
                   </div>
-                  <div class="section-title">
-                    <h3>Team Talk</h3>
+                  <div class="team-talk-card">
+                    <div class="section-title">
+                      <h3>Team Talk</h3>
+                      <button class="team-talk-group-button" type="button" data-teacher-thread="team-meeting">Group Chat</button>
+                    </div>
                   </div>
-                  <button class="team-talk-group-button" type="button" data-teacher-thread="team-meeting">Group Chat</button>
                   <div class="section-title">
                     <h3>Inbox</h3>
                     <button class="plus-circle" type="button" id="open-private-message" aria-label="New private message">+</button>

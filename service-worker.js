@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v139-announcement-history-button";
+const CACHE_NAME = "my-dance-techniques-v140-team-talk-card";
 const CORE_ASSETS = [
   "./",
   "./index.html",
