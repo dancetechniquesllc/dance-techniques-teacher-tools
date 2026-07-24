@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v75-full-bleed-app-icon";
+const CACHE_NAME = "my-dance-techniques-v93-duplicate-first-names";
 const CORE_ASSETS = [
   "./",
   "./index.html",

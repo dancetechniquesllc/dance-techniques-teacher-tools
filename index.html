@@ -4805,9 +4805,9 @@
     .dashboard-filter-reset {
       min-height: 38px;
       padding: 8px 18px;
-      border: 1px solid var(--accent-strong);
+      border: 1px solid var(--blush);
       border-radius: 999px;
-      background: var(--blush);
+      background: transparent;
       color: var(--berry);
       font: 700 13px/1 "Avenir Next", sans-serif;
       cursor: pointer;
@@ -5103,6 +5103,7 @@
     .enrollment-class-preview-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
     .enrollment-class-preview-assign { width: min(190px, 100%); border-color: color-mix(in srgb, var(--berry) 28%, var(--border)); background: var(--blush); color: var(--berry); }
     .enrollment-class-preview-assign.is-selected { border-color: var(--berry); background: var(--berry); color: #fff; }
+    .enrollment-placement-approve-actions button.is-blocked { opacity: .58; cursor: help; }
     .enrollment-review-save-actions,
     .enrollment-placement-approve-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
     .enrollment-review-save-actions button,
@@ -5232,9 +5233,40 @@
 
     .roster-class-list { display: grid; gap: 28px; }
     .roster-school-results { min-width: 0; }
-    .roster-school-results > h3 { margin: 0; font-family: var(--font-body); font-size: 24px; font-weight: 850; }
+    .roster-school-results-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .roster-school-results-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .roster-school-results-title > h3 { margin: 0; font-family: var(--font-body); font-size: 24px; font-weight: 850; }
+    .roster-school-day-bubbles { display: flex; gap: 5px; flex: 0 0 auto; }
+    .roster-school-day-bubble { min-width: 32px; height: 32px; display: grid; place-items: center; padding: 0 8px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 850; }
+    .roster-multi-class-open { min-height: 32px; padding: 6px 12px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; white-space: nowrap; }
     .roster-school-results-line { height: 1px; margin: 8px 0 14px; background: var(--border); }
-    .roster-school-class-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .roster-school-class-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .confirm-dialog.roster-multi-class-dialog { width: calc(100vw - 28px); max-width: 1800px; max-height: calc(100vh - 28px); overflow: auto; padding: 24px; border-radius: 14px; }
+    .roster-multi-class-filters { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; margin: 18px 0; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); }
+    .roster-multi-class-filters label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; }
+    .roster-multi-class-filters select { min-height: 42px; }
+    .roster-multi-class-grid { display: grid; gap: 24px; margin-top: 8px; }
+    .roster-multi-class-section { min-height: 180px; padding: 4px 2px 18px; border-radius: 14px; transition: background .16s ease, box-shadow .16s ease; }
+    .roster-multi-class-section.is-drop-target { background: color-mix(in srgb, var(--blush) 45%, transparent); box-shadow: inset 0 0 0 2px var(--accent-strong); }
+    .roster-multi-class-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .roster-multi-class-title-row h4 { margin: 0; font-size: 22px; }
+    .roster-multi-class-title-row small { color: var(--muted); }
+    .roster-multi-class-divider { height: 2px; margin: 9px 0 16px; border-radius: 999px; background: var(--blush); }
+    .roster-multi-student-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+    .roster-multi-student { display: grid; justify-items: center; align-content: start; gap: 6px; min-width: 0; padding: 12px 8px; border: 1px solid transparent; border-radius: 14px; background: transparent; text-align: center; cursor: grab; }
+    .roster-multi-student:hover { border-color: var(--border); background: var(--surface-soft); }
+    .roster-multi-student:active { cursor: grabbing; }
+    .roster-multi-student.is-dragging { opacity: .42; }
+    .roster-multi-student .roster-student-photo { width: 76px; height: 76px; }
+    .roster-multi-student strong { max-width: 100%; font-size: 15px; line-height: 1.15; }
+    .roster-multi-student small { max-width: 100%; color: var(--muted); font-size: 11px; line-height: 1.25; }
+    .roster-multi-empty { grid-column: 1 / -1; min-height: 92px; display: grid; place-items: center; border: 1px dashed var(--border); border-radius: 12px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 1050px) { .roster-multi-student-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+    @media (max-width: 760px) {
+      .confirm-dialog.roster-multi-class-dialog { width: calc(100vw - 12px); max-height: calc(100vh - 12px); padding: 16px; }
+      .roster-multi-class-filters { grid-template-columns: 1fr; }
+      .roster-multi-student-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
     .roster-detail,
     .roster-student-list {
       display: grid;
@@ -5254,12 +5286,12 @@
     .roster-class-card {
       position: relative;
       width: 100%;
-      min-height: 210px;
+      min-height: 270px;
       display: grid;
       place-items: center;
-      align-content: center;
-      gap: 7px;
-      padding: 18px 12px;
+      align-content: start;
+      gap: 8px;
+      padding: 58px 14px 16px;
       border: 1px solid var(--border);
       border-radius: 16px;
       background: var(--surface-soft);
@@ -5276,16 +5308,24 @@
     .roster-class-card.is-selected { background: var(--blush); }
     .roster-class-card strong,
     .roster-class-card small { display: block; }
-    .roster-class-card > strong { color: var(--berry); font-size: 14px; line-height: 1.25; }
+    .roster-class-card > strong { color: var(--berry); font-size: 22px; line-height: 1.15; }
     .roster-class-card small { color: var(--muted); font-family: "Avenir Next", sans-serif; font-size: 10px; font-weight: 400; }
     .roster-class-badge { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 999px; background: var(--blush); color: var(--fg); font-size: 17px; font-weight: 850; }
     .roster-class-badge img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .roster-class-day-bubble { position: absolute; top: 10px; right: 10px; min-width: 28px; height: 28px; display: grid; place-items: center; padding: 0 7px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; font-weight: 850; }
+    .roster-class-time-bubble { position: absolute; top: 12px; left: 12px; display: inline-flex; min-height: 30px; align-items: center; padding: 5px 10px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; font-weight: 850; }
+    .roster-class-card > .roster-enrollment-bubble { position: absolute; top: 12px; right: 12px; left: auto; min-height: 30px; align-items: center; padding: 5px 10px; transform: none; margin: 0 !important; white-space: nowrap; }
+    .roster-class-age-range { margin-bottom: 5px; }
+    .roster-class-students { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px 6px; margin-top: 8px; }
+    .roster-class-student { min-width: 0; display: grid; justify-items: center; gap: 4px; }
+    .roster-class-student .roster-student-photo { width: 46px; height: 46px; font-size: 12px; }
+    .roster-class-student span:last-child { max-width: 100%; overflow: hidden; color: var(--fg); font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
+    .roster-class-no-students { grid-column: 1 / -1; color: var(--muted); font-size: 10px; }
     .roster-enrollment-bubble { display: inline-flex !important; width: fit-content; margin-top: 8px !important; padding: 5px 9px; border-radius: 999px; font-weight: 850; color: oklch(28% 0.04 40) !important; }
     .roster-enrollment-bubble.low { background: oklch(91% 0.12 90); }
     .roster-enrollment-bubble.ready { background: oklch(88% 0.11 145); }
     .roster-enrollment-bubble.full { background: oklch(88% 0.12 25); color: oklch(42% 0.14 25) !important; }
-    @media (max-width: 1100px) { .roster-school-class-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 1100px) { .roster-school-class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 760px) { .roster-school-class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 480px) { .roster-school-class-grid { grid-template-columns: 1fr; } }
 
@@ -5577,7 +5617,7 @@
     .newsletter-studio-shell[hidden], .newsletter-setup-card[hidden], .newsletter-setup-actions button[hidden] { display: none !important; }
     body[data-admin-section="newsletter-studio"] .app { width: min(1500px, calc(100% - 24px)); }
     .newsletter-setup-card { width: min(1050px, 100%); min-height: 480px; display: grid; align-content: start; gap: 20px; margin: 0 auto; padding: 32px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow); }
-    .newsletter-setup-progress { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+    .newsletter-setup-progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
     .newsletter-setup-progress span { height: 6px; border-radius: 999px; background: #f1dfdc; }
     .newsletter-setup-progress span.is-complete { background: var(--berry); }
     .newsletter-setup-copy { width: min(680px, 100%); margin: 0 auto 6px; text-align: center; }
@@ -5597,7 +5637,7 @@
     .newsletter-template-category h3 { margin: 0; color: var(--berry); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; }
     .newsletter-setup-form { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
     .newsletter-setup-form label { display: grid; gap: 6px; font-size: 11px; }
-    .newsletter-audience-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .newsletter-audience-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
     .newsletter-audience-card { min-height: 118px; display: grid; place-items: center; align-content: center; gap: 7px; padding: 16px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-soft); color: var(--fg); text-align: center; }
     .newsletter-audience-card:hover, .newsletter-audience-card.is-selected { border: 2px solid var(--berry); background: var(--blush); color: var(--berry); }
     .newsletter-audience-card strong { font-size: 16px; }
@@ -5652,6 +5692,12 @@
     .newsletter-current-setup strong, .newsletter-current-setup small { display: block; }
     .newsletter-current-setup small { color: var(--muted); font-weight: 400; }
     .newsletter-current-setup button { min-height: 32px; padding: 5px 10px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
+    .newsletter-change-template { border: 1px solid var(--border); border-radius: 11px; background: var(--surface-soft); }
+    .newsletter-change-template summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 13px; color: var(--berry); font-size: 11px; font-weight: 850; cursor: pointer; list-style: none; }
+    .newsletter-change-template summary::-webkit-details-marker { display: none; }
+    .newsletter-change-template summary::after { content: "⌄"; font-size: 16px; transition: transform .16s ease; }
+    .newsletter-change-template[open] summary::after { transform: rotate(180deg); }
+    .newsletter-change-template .newsletter-template-grid { padding: 0 11px 11px; }
     .newsletter-editor-panel, .newsletter-preview-panel { display: grid; gap: 13px; }
     .newsletter-studio-toolbar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
     .newsletter-studio-toolbar label, .newsletter-editor-panel label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 800; }
@@ -5661,11 +5707,21 @@
     .newsletter-field-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
     .newsletter-field-buttons button { min-height: 30px; padding: 5px 9px; border-radius: 999px; background: var(--surface-soft); color: var(--berry); font-size: 10px; }
     .newsletter-brand-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 11px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-soft); }
-    .newsletter-color-swatches { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
+    .newsletter-brand-controls .newsletter-color-control,
+    .newsletter-brand-controls .newsletter-inline-toolbar { grid-column: 1 / -1; }
+    #newsletter-font option[value="parisienne"] { font-family: "Parisienne", cursive; }
+    #newsletter-font option[value="bodoni-smallcaps"] { font-family: "Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif; font-variant: small-caps; }
+    #newsletter-font option[value="avenir-bold"] { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-weight: 800; }
+    #newsletter-font option[value="avenir-light"] { font-family: "Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-weight: 400; }
+    #newsletter-font option[value="avenir-ultra-light"] { font-family: "Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-weight: 200; }
+    .newsletter-color-swatches { display: flex; flex-wrap: nowrap; gap: 7px; align-items: center; }
     .newsletter-color-swatch { width: 29px; height: 29px; min-height: 29px; padding: 0; border: 3px solid white; border-radius: 999px; box-shadow: 0 0 0 1px var(--border); }
     .newsletter-color-swatch.is-selected { box-shadow: 0 0 0 2px var(--fg); }
     .newsletter-section-builder { display: grid; gap: 9px; }
     .newsletter-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .newsletter-block-categories { display: grid; gap: 9px; }
+    .newsletter-block-category { display: grid; gap: 6px; padding: 9px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); }
+    .newsletter-block-category strong { color: var(--berry); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; }
     .newsletter-add-section-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
     .newsletter-add-section-buttons button { min-height: 31px; padding: 5px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
     .newsletter-section-list { display: grid; gap: 8px; }
@@ -5704,8 +5760,25 @@
     .newsletter-preview-device { display: flex; gap: 6px; }
     .newsletter-preview-device button { min-height: 32px; padding: 5px 10px; border-radius: 999px; font-size: 10px; }
     .newsletter-preview-device button.is-selected { background: var(--fg); color: white; }
-    .newsletter-preview-stage { display: grid; place-items: start center; min-height: 650px; padding: 20px; border-radius: 14px; background: #e9e3df; overflow: auto; }
+    .newsletter-preview-panel { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: hidden; }
+    .newsletter-preview-stage { display: grid; place-items: start center; min-height: 0; max-height: calc(100vh - 285px); padding: 20px; border-radius: 14px; background: #e9e3df; overflow: auto; }
     .newsletter-preview-document { width: min(100%, 680px); min-height: 600px; border-radius: 14px; overflow: hidden; background: #fffaf6; box-shadow: 0 12px 34px rgb(58 29 22 / .14); transition: width .18s ease; }
+    .newsletter-preview-editable { border-radius: 7px; outline: 1px dashed transparent; white-space: pre-wrap; transition: outline-color .15s ease, background .15s ease; }
+    .newsletter-preview-editable:hover { outline-color: color-mix(in srgb, var(--newsletter-accent) 52%, transparent); }
+    .newsletter-preview-editable:focus { outline: 2px solid var(--newsletter-accent); background: rgb(255 255 255 / .52); }
+    .newsletter-preview-section-editor { position: relative; margin: 16px 0; padding: 14px; border: 1px dashed color-mix(in srgb, var(--newsletter-accent) 42%, transparent); border-radius: 11px; background: rgb(255 255 255 / .35); }
+    .newsletter-preview-section-editor.is-dragging { opacity: .45; }
+    .newsletter-preview-section-actions { position: absolute; inset: 6px 6px auto 6px; z-index: 2; display: flex; justify-content: space-between; gap: 4px; opacity: 0; transition: opacity .15s ease; }
+    .newsletter-preview-section-editor:hover .newsletter-preview-section-actions,
+    .newsletter-preview-section-editor:focus-within .newsletter-preview-section-actions { opacity: 1; }
+    .newsletter-preview-section-actions button { width: 25px; min-height: 25px; padding: 0; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 15px; }
+    .newsletter-preview-drag-handle { cursor: grab; }
+    .newsletter-inline-toolbar { position: relative; display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); }
+    .newsletter-inline-toolbar > button { min-height: 30px; padding: 5px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
+    .newsletter-inline-toolbar .newsletter-dt-touch { margin-left: auto; background: linear-gradient(135deg, var(--berry), #9b4669); color: white; }
+    .newsletter-field-popover { position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; width: min(420px, 90vw); display: grid; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: white; box-shadow: var(--shadow); }
+    .newsletter-field-popover[hidden] { display: none; }
+    .newsletter-preview-inline-input { width: 100%; margin-top: 7px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px; background: white; font: inherit; }
     .newsletter-preview-document.is-mobile { width: min(100%, 360px); }
     .newsletter-preview-document.template-birthday .newsletter-preview-header,
     .newsletter-preview-document.template-recital .newsletter-preview-header { background: linear-gradient(135deg, #f2c1bc, #f9e4b7); }
@@ -5726,7 +5799,8 @@
     .newsletter-video-card img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; opacity: .86; }
     .newsletter-video-play { position: absolute; inset: 50% auto auto 50%; width: 58px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: #ff0033; color: white; font-size: 21px; transform: translate(-50%, -50%); }
     .newsletter-preview-footer { padding: 18px 28px; border-top: 1px solid #eed7d3; color: #725d58; font-size: 11px; text-align: center; }
-    .newsletter-save-state { color: var(--muted); font-size: 11px; }
+    .newsletter-save-state { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 5px 11px; border-radius: 999px; background: var(--berry); color: white; font-size: 10px; font-weight: 850; white-space: nowrap; }
+    .newsletter-save-state::before { content: "✓"; font-size: 12px; }
     @media (max-width: 850px) {
       .boutique-kit-toolbar { grid-template-columns: 1fr 1fr; }
       .boutique-kit-heading { display: flex; align-items: flex-start; }
@@ -11645,65 +11719,62 @@
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
             <div class="newsletter-setup-card" id="newsletter-setup-card">
-              <div class="newsletter-setup-progress" id="newsletter-setup-progress" aria-label="Newsletter setup progress"><span></span><span></span><span></span><span></span><span></span></div>
+              <div class="newsletter-setup-progress" id="newsletter-setup-progress" aria-label="Newsletter setup progress"><span></span><span></span><span></span></div>
               <div id="newsletter-setup-content"></div>
               <div class="newsletter-setup-actions"><button class="secondary" type="button" id="newsletter-setup-back">Back</button><button class="primary" type="button" id="newsletter-setup-next">Next</button></div>
             </div>
             <div class="newsletter-studio-shell" id="newsletter-studio-shell" hidden>
               <article class="admin-card newsletter-editor-panel">
-                <div class="section-title"><div><h3>Create Newsletter</h3><p class="subtle">Your draft saves automatically on this device.</p></div><span class="newsletter-save-state" id="newsletter-save-state">Draft saved</span></div>
-                <div class="newsletter-current-setup"><div><strong id="newsletter-current-template">Monthly Parent Newsletter</strong><small id="newsletter-current-audience">Parents · All schools · All teachers</small></div><button type="button" id="newsletter-change-setup">Change Setup</button></div>
-                <div class="newsletter-template-grid" aria-label="Newsletter templates" hidden>
-                  <button class="newsletter-template is-selected" type="button" data-newsletter-template="monthly">Monthly Newsletter</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="birthday">Birthday Ballerina</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="welcome">Parent Welcome</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="trial-complete">Trial Complete</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="fall">Fall Enrollment</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="recital">Recital Information</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="costume">Costume Week</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="picture">Picture Week</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="save-date">Save the Date</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="summer">Summer Session</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="partnership">Partnership Welcome</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="no-class-school">No Class Reminder</button>
-                  <button class="newsletter-template" type="button" data-newsletter-template="save-date-school">Save the Date to Partner Schools</button>
-                </div>
-                <div class="newsletter-studio-toolbar" hidden>
-                  <label>Audience<select id="newsletter-audience"><option value="parents">Parents</option><option value="schools">Partner Schools</option><option value="teachers">Teaching Team</option></select></label>
-                  <label>School<select id="newsletter-school-filter"><option value="all">All schools</option></select></label>
-                  <label>Teacher<select id="newsletter-teacher-filter"><option value="all">All teachers</option></select></label>
-                </div>
+                <div class="section-title"><div><h3>Design Studio</h3><p class="subtle">Sections appear in Live Preview. Edit, drag to arrange, and remove them there.</p></div><span class="newsletter-save-state" id="newsletter-save-state">Draft saved</span></div>
+                <details class="newsletter-change-template" id="newsletter-change-template">
+                  <summary><span>Change Template</span><small id="newsletter-selected-template">Monthly Newsletter</small></summary>
+                  <div class="newsletter-template-grid" aria-label="Newsletter templates">
+                    <button class="newsletter-template is-selected" type="button" data-newsletter-template="monthly">Monthly Newsletter</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="birthday">Birthday Ballerina</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="welcome">Parent Welcome</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="trial-complete">Trial Complete</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="fall">Fall Enrollment</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="recital">Recital Information</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="costume">Costume Week</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="picture">Picture Week</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="save-date">Save the Date</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="summer">Summer Session</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="partnership">Partnership Welcome</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="no-class-school">No Class Reminder</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="save-date-school">Save the Date to Partner Schools</button>
+                  </div>
+                </details>
                 <p class="subtle" id="newsletter-recipient-summary" hidden>Choose an audience to preview recipients.</p>
-                <div class="newsletter-brand-controls">
-                  <label>Body Font<select id="newsletter-font"><option value="avenir-ultra-light">Avenir Next Ultra Light</option><option value="avenir-light">Avenir Light</option><option value="avenir-bold">Avenir Bold</option></select></label>
-                  <label>Titles &amp; Subtitles<select id="newsletter-title-font"><option value="avenir-bold">Avenir Bold</option><option value="parisienne">Parisienne</option><option value="bodoni-smallcaps">Bodoni 72 Smallcaps</option></select></label>
-                  <label>Text Size<select id="newsletter-text-size"><option value="compact">Compact</option><option value="standard">Standard</option><option value="large">Large</option></select></label>
-                  <label>Approved Color<span class="newsletter-color-swatches" id="newsletter-color-swatches"><button class="newsletter-color-swatch" type="button" data-newsletter-color="black" style="background:#160f0d" aria-label="Black"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="soft-grey" style="background:#5e5e5e" aria-label="Soft Dark Grey"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="berry" style="background:#65103f" aria-label="Berry"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="dusty-mauve" style="background:#9b687a" aria-label="Dusty Mauve"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="blush" style="background:#dba9a1" aria-label="Blush"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="sage" style="background:#68775f" aria-label="Sage · Bopper"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="gold" style="background:#d58c24" aria-label="Gold · Skiplynn"></button></span></label>
-                </div>
-                <label>Subject<input id="newsletter-subject" placeholder="A wonderful week at Dance Techniques"></label>
-                <label>Headline<input id="newsletter-headline" placeholder="What’s Happening at Dance Techniques"></label>
-                <label>Message<textarea id="newsletter-message" placeholder="Hi [Parent First Name],&#10;&#10;We loved dancing with [Dancer Preferred Name] this week!"></textarea></label>
-                <div><strong>Insert Personalized Field</strong><div class="newsletter-field-buttons" id="newsletter-field-buttons">
-                  <button type="button" data-newsletter-field="[Parent First Name]">Parent First Name</button>
-                  <button type="button" data-newsletter-field="[Dancer Preferred Name]">Dancer Preferred Name</button>
-                  <button type="button" data-newsletter-field="[School Nickname]">School Nickname</button>
-                  <button type="button" data-newsletter-field="[Teacher Name]">Teacher Name</button>
-                  <button type="button" data-newsletter-field="[Dance Day]">Dance Day</button>
-                  <button type="button" data-newsletter-field="[Dance Time]">Dance Time</button>
-                  <button type="button" data-newsletter-field="[Director First Name]">Director First Name</button>
-                </div></div>
                 <div class="newsletter-section-builder">
-                  <div class="newsletter-section-heading"><div><strong>Design Studio</strong><div class="subtle">Add and rearrange polished newsletter blocks.</div></div><button class="newsletter-dt-touch" type="button" id="newsletter-dt-touch">✦ Add the DT Touch ✦</button></div>
-                  <div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="title">+ Title</button><button type="button" data-newsletter-add-section="text">+ Text</button><button type="button" data-newsletter-add-section="photo">+ Photo</button><button type="button" data-newsletter-add-section="personalized">+ Personalized Fields</button><button type="button" data-newsletter-add-section="youtube">+ YouTube</button><button type="button" data-newsletter-add-section="button">+ Button</button><button type="button" data-newsletter-add-section="divider">+ Divider</button><button type="button" data-newsletter-add-section="character">+ Character Graphic</button><button type="button" data-newsletter-add-section="quote">+ Quote Box</button><button type="button" data-newsletter-add-section="reminder">+ Important Reminder</button><button type="button" data-newsletter-add-section="calendar">+ Calendar</button><button type="button" data-newsletter-add-section="social">+ Social Links</button><button type="button" disabled title="Resource Library is coming next">+ Resource Library</button></div>
-                  <div class="newsletter-section-list" id="newsletter-section-list"></div>
+                  <div class="newsletter-block-categories">
+                    <div class="newsletter-block-category"><strong>Information</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="title">+ Title</button><button type="button" data-newsletter-add-section="text">+ Text</button><button type="button" data-newsletter-add-section="quote">+ Quote Box</button><button type="button" data-newsletter-add-section="calendar">+ Calendar</button><button type="button" data-newsletter-add-section="reminder">+ Important Reminder</button></div></div>
+                    <div class="newsletter-block-category"><strong>Layout</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="button">+ Button</button><button type="button" data-newsletter-add-section="divider">+ Divider</button><button type="button" data-newsletter-add-section="section">+ Section</button></div></div>
+                    <div class="newsletter-block-category"><strong>Media</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="youtube">+ YouTube</button><button type="button" data-newsletter-add-section="character">+ Character Graphic</button><button type="button" data-newsletter-add-section="social">+ Social Links</button><button type="button" disabled title="Resource Library is coming next">+ Resource Library</button></div></div>
+                  </div>
                 </div>
-                <div class="newsletter-video-row"><label>YouTube video or playlist URL<input id="newsletter-video-url" type="url" placeholder="https://www.youtube.com/watch?v=..."></label><button class="secondary" type="button" id="newsletter-video-clear">Clear</button></div>
-                <label>Button label<input id="newsletter-cta-label" placeholder="Open Parent Portal"></label>
-                <label>Button link<input id="newsletter-cta-url" type="url" placeholder="https://app.dancetechniques.info"></label>
-                <div class="newsletter-editor-actions"><button class="secondary" type="button" id="newsletter-reset">New Draft</button><button class="secondary" type="button" id="newsletter-test-send">Send Test</button><button type="button" id="newsletter-send" disabled>Connect Email Provider to Send</button></div>
+                <div class="newsletter-editor-actions"><button class="secondary" type="button" id="newsletter-reset">New Draft</button><button class="secondary" type="button" id="newsletter-test-send">Send Test</button><button class="secondary" type="button" id="newsletter-change-audience">Change Audience</button><button type="button" id="newsletter-send" disabled>Connect Email Provider to Send</button></div>
               </article>
               <article class="admin-card newsletter-preview-panel">
-                <div class="newsletter-preview-controls"><div><h3>Live Preview</h3><p class="subtle" id="newsletter-preview-as">Previewing as a sample parent</p></div><div class="newsletter-preview-device"><button class="is-selected" type="button" data-newsletter-device="desktop">Desktop</button><button type="button" data-newsletter-device="mobile">Phone</button></div></div>
+                <div class="newsletter-brand-controls">
+                  <label>Fonts<select id="newsletter-font"><option value="parisienne">Parisienne</option><option value="bodoni-smallcaps">Bodoni 72 Smallcaps</option><option value="avenir-bold">Avenir Bold</option><option value="avenir-light">Avenir Light</option><option value="avenir-ultra-light">Avenir Ultra Light</option></select></label>
+                  <label>Text Size<select id="newsletter-text-size"><option value="8">8pt</option><option value="10">10pt</option><option value="12">12pt</option><option value="14">14pt</option><option value="16">16pt</option><option value="18">18pt</option><option value="20">20pt</option><option value="24">24pt</option><option value="28">28pt</option><option value="32">32pt</option></select></label>
+                  <label class="newsletter-color-control">Approved Color<span class="newsletter-color-swatches" id="newsletter-color-swatches"><button class="newsletter-color-swatch" type="button" data-newsletter-color="black" style="background:#160f0d" aria-label="Black"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="soft-grey" style="background:#5e5e5e" aria-label="Soft Dark Grey"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="berry" style="background:#65103f" aria-label="Berry"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="dusty-mauve" style="background:#9b687a" aria-label="Dusty Mauve"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="blush" style="background:#dba9a1" aria-label="Blush"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="sage" style="background:#68775f" aria-label="Sage · Bopper"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="gold" style="background:#d58c24" aria-label="Gold · Skiplynn"></button></span></label>
+                  <div class="newsletter-inline-toolbar" id="newsletter-inline-toolbar" aria-label="Text editing toolbar">
+                  <button type="button" data-newsletter-command="bold" aria-label="Bold"><strong>B</strong></button>
+                  <button type="button" data-newsletter-command="italic" aria-label="Italic"><em>I</em></button>
+                  <button type="button" data-newsletter-command="underline" aria-label="Underline"><u>U</u></button>
+                  <button type="button" id="newsletter-add-link">🔗 Hyperlink</button>
+                  <button type="button" id="newsletter-open-fields">＋ Personalized Field</button>
+                  <button class="newsletter-dt-touch" type="button" id="newsletter-dt-touch">✦ DT Touch ✦</button>
+                  <div class="newsletter-field-popover" id="newsletter-field-popover" hidden>
+                    <strong>Insert Personalized Field</strong>
+                    <div class="newsletter-field-buttons" id="newsletter-field-buttons">
+                      <button type="button" data-newsletter-field="[Parent First Name]">Parent First Name</button><button type="button" data-newsletter-field="[Dancer Preferred Name]">Dancer Preferred Name</button><button type="button" data-newsletter-field="[School Nickname]">School Nickname</button><button type="button" data-newsletter-field="[Teacher Name]">Teacher Name</button><button type="button" data-newsletter-field="[Dance Day]">Dance Day</button><button type="button" data-newsletter-field="[Dance Time]">Dance Time</button><button type="button" data-newsletter-field="[Director First Name]">Director First Name</button>
+                    </div>
+                  </div>
+                </div>
+                </div>
+                <div class="newsletter-preview-controls"><div><h3>Live Preview</h3></div><div class="newsletter-preview-device"><button class="is-selected" type="button" data-newsletter-device="desktop">Desktop</button><button type="button" data-newsletter-device="mobile">Phone</button></div></div>
                 <div class="newsletter-preview-stage"><div class="newsletter-preview-document" id="newsletter-preview-document"></div></div>
               </article>
             </div>
@@ -11986,6 +12057,18 @@
             <div class="confirm-overlay" id="roster-class-profile-overlay" aria-hidden="true">
               <div class="confirm-dialog roster-class-profile-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-class-profile-title">
                 <div class="roster-detail" id="admin-roster-detail"></div>
+              </div>
+            </div>
+            <div class="confirm-overlay" id="roster-multi-class-overlay" aria-hidden="true">
+              <div class="confirm-dialog roster-multi-class-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-multi-class-title">
+                <div class="roster-profile-header"><div><h3 id="roster-multi-class-title">Multi Class Edit</h3><p class="subtle" id="roster-multi-class-school"></p></div><button class="roster-profile-close" type="button" id="roster-multi-class-close" aria-label="Close Multi Class Edit">×</button></div>
+                <div class="roster-multi-class-filters">
+                  <label>Student Order<select id="roster-multi-sort"><option value="first-name">Student First Name · Alphabetical</option><option value="classroom">Official Classroom</option><option value="age">Age · Youngest First</option></select></label>
+                  <label>Classroom<select id="roster-multi-classroom-filter"><option value="all">All Classrooms</option></select></label>
+                  <label>Age<select id="roster-multi-age-filter"><option value="all">All Ages</option></select></label>
+                </div>
+                <div class="roster-multi-class-grid" id="roster-multi-class-grid"></div>
+                <div class="confirm-actions"><button class="primary" type="button" id="roster-multi-class-cancel">Done</button></div>
               </div>
             </div>
             <div class="archived-students-footer">
@@ -14077,6 +14160,10 @@
         else { document.body.dataset.mode = "teacher"; setTab("messages"); }
         return;
       }
+      if (item.notification_type === "email_plan_upgrade" && isLeader) {
+        openAdminSection("newsletter-studio");
+        return;
+      }
       if (item.notification_type?.startsWith("schedule_") || item.notification_type === "school_closure") {
         if (isLeader) openAdminSection("reschedule-tracker");
         else { document.body.dataset.mode = "teacher"; setTab("classes"); }
@@ -14114,6 +14201,34 @@
       if (!window.dtSupabase) return;
       const { error } = await window.dtSupabase.from("teacher_notifications").insert(rows);
       if (error) console.error("Notification could not be queued", error);
+    };
+    const enrolledStudentCountForEmailPlan = () => new Set(rosterClasses.flatMap((rosterClass) => (rosterClass.students || [])
+      .filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()))
+      .map((student) => student.id || `${student.firstName || ""}-${student.lastName || ""}-${student.parentEmail || ""}`))).size;
+    const ensureEmailPlanUpgradeNotification = async (profile = window.dtCurrentProfile) => {
+      const enrolledCount = enrolledStudentCountForEmailPlan();
+      if (enrolledCount < 295 || !["admin", "director"].includes(profile?.role)) return;
+      const recipients = [...new Set([...directorNotificationRecipientIds(), ...(isUuid(profile.id) ? [profile.id] : [])])];
+      if (!recipients.length || !window.dtSupabase || document.body.dataset.tourMode === "true") return;
+      const { data, error } = await window.dtSupabase
+        .from("teacher_notifications")
+        .select("teacher_id")
+        .in("teacher_id", recipients)
+        .eq("notification_type", "email_plan_upgrade");
+      if (error) {
+        console.error("Email plan notification could not be checked", error);
+        return;
+      }
+      const existing = new Set((data || []).map((item) => item.teacher_id));
+      const missingRecipients = recipients.filter((id) => !existing.has(id));
+      if (!missingRecipients.length) return;
+      await queueAppNotifications(missingRecipients, {
+        title: "Upgrade Email Plan",
+        message: `${enrolledCount} students are enrolled. Upgrade Brevo before sending a newsletter to every dance family.`,
+        notification_type: "email_plan_upgrade",
+        priority: "urgent",
+        action_url: "/?open=newsletter-studio"
+      });
     };
 
     const notificationEligibleIds = (items) => items.map((teacher) => teacher.id).filter((id) => document.body.dataset.tourMode === "true" || isUuid(id));
@@ -14565,6 +14680,12 @@
         || (schoolTeachers.some((teacher) => teacher.id === item.matched_teacher_id) ? item.matched_teacher_id : "")
         || "";
       item.matched_teacher_id = selectedTeacherId;
+      const placementMissing = [
+        !selectedSchoolId ? "Official School" : "",
+        !selectedClassId ? "Assigned Class" : "",
+        !selectedTeacherId ? "Class Teacher" : "",
+        !item.official_classroom ? "Official Classroom" : ""
+      ].filter(Boolean);
       const enrollmentClassCards = [...schoolClasses].sort((left, right) => (left.time || "").localeCompare(right.time || "") || left.name.localeCompare(right.name, undefined, { numeric: true })).map((rosterClass) => {
         const enrolledCount = rosterEnrolled(rosterClass).length;
         const teacher = teachers.find((candidate) => candidate.id === rosterClass.teacherId) || {};
@@ -14650,7 +14771,7 @@
               ${enrollmentClassCards || `<div class="roster-empty">Choose an Official School to see its available classes.</div>`}
             </div>
             <form class="enrollment-placement-approve-actions" id="enrollment-placement-form">
-              <button class="primary" type="submit" ${selectedSchoolId && selectedTeacherId && selectedClassId && item.official_classroom ? "" : "disabled"}>Approve & Place Dancer</button>
+              <button class="primary ${placementMissing.length ? "is-blocked" : ""}" type="submit" aria-disabled="${placementMissing.length ? "true" : "false"}" title="${placementMissing.length ? `Missing: ${escapeText(placementMissing.join(", "))}` : "Approve and place dancer"}">Approve & Place Dancer</button>
             </form>
           </section>`}
       `;
@@ -14756,9 +14877,50 @@
       renderEnrollmentStudentSummary();
     };
 
+    const enrollmentPlacementMissingFields = (item) => {
+      if (!item) return ["Enrollment Card"];
+      const rosterClass = rosterClasses.find((candidate) => candidate.id === item.matched_dance_class_id);
+      return [
+        !item.matched_partner_school_id ? "Official School" : "",
+        !item.matched_dance_class_id ? "Assigned Class" : "",
+        !rosterClass?.teacherId ? "Class Teacher" : "",
+        !item.official_classroom ? "Official Classroom" : ""
+      ].filter(Boolean);
+    };
+    const explainBlockedEnrollmentPlacement = (item) => {
+      const missing = enrollmentPlacementMissingFields(item);
+      if (!missing.length) return false;
+      window.alert(`This dancer can’t be placed yet.\n\nPlease complete: ${missing.join(", ")}.`);
+      return true;
+    };
+    const explainBlockedClassAssignment = (item, rosterClass) => {
+      if (!item) {
+        window.alert("Open an Enrollment Card before assigning a class.");
+        return true;
+      }
+      if (!rosterClass) {
+        window.alert("That class is no longer available. Refresh the enrollment list and choose another class.");
+        return true;
+      }
+      if (!item.matched_partner_school_id) {
+        window.alert("Choose an Official School before assigning a class.");
+        return true;
+      }
+      if (!rosterClass.teacherId) {
+        window.alert(`${rosterClass.name} cannot be assigned yet because it does not have a teacher.`);
+        return true;
+      }
+      if (rosterEnrolled(rosterClass).length >= Number(rosterClass.capacity || 12)) {
+        window.alert(`${rosterClass.name} cannot be assigned because the class is full.`);
+        return true;
+      }
+      return false;
+    };
+
     const approveSelectedEnrollment = async () => {
       const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
-      if (!item) return;
+      if (!item) return window.alert("Open an Enrollment Card before placing a dancer.");
+      if (explainBlockedEnrollmentPlacement(item)) return;
       const futureMatch = futureDancerMatchForEnrollment(item);
       const futureMatchSnapshot = futureMatch ? {
         rosterClassId: futureMatch.rosterClass.id,
@@ -14807,6 +14969,7 @@
       await loadSharedClassesAndRosters(window.dtCurrentProfile);
       await transferFutureDancerEnrollment(item, futureMatchSnapshot);
       await loadEnrollmentIntakeQueue(window.dtCurrentProfile);
+      await ensureEmailPlanUpgradeNotification(window.dtCurrentProfile);
       showToast("Enrollment approved and added to the class roster");
     };
 
@@ -23834,6 +23997,75 @@
       showToast(`${records.length} enrollment kit${records.length === 1 ? "" : "s"} marked ready for delivery`);
     });
 
+    let rosterMultiClassSchoolName = "";
+    let rosterMultiClassSort = "first-name";
+    let rosterMultiClassClassroomFilter = "all";
+    let rosterMultiClassAgeFilter = "all";
+    let rosterMultiClassDragStudent = null;
+    const closeRosterMultiClassEdit = () => {
+      rosterMultiClassSchoolName = "";
+      rosterMultiClassDragStudent = null;
+      const overlay = document.getElementById("roster-multi-class-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+    };
+    const rosterMultiClassStudents = (classes) => classes.flatMap((rosterClass) =>
+      rosterEnrolled(rosterClass).map((student) => ({ rosterClass, student }))
+    );
+    const rosterMultiAgeValue = (student) => student.birthdate ? new Date(student.birthdate).getTime() : 0;
+    const renderRosterMultiClassEdit = () => {
+      const overlay = document.getElementById("roster-multi-class-overlay");
+      const grid = document.getElementById("roster-multi-class-grid");
+      if (!overlay || !grid || !rosterMultiClassSchoolName) return closeRosterMultiClassEdit();
+      const classes = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false && enrollmentSchoolNameMatches(rosterClass.schoolName, rosterMultiClassSchoolName))
+        .sort((left, right) => (left.time || "").localeCompare(right.time || "") || left.name.localeCompare(right.name, undefined, { numeric: true }));
+      const records = rosterMultiClassStudents(classes);
+      const classroomOptions = [...new Set(records.map(({ student }) => student.classroom?.trim()).filter(Boolean))].sort((left, right) => left.localeCompare(right));
+      const ageOptions = [...new Set(records.map(({ student }) => rosterAge(student.birthdate)).filter(Boolean))].sort((left, right) => {
+        const leftNumber = Number.parseInt(left, 10);
+        const rightNumber = Number.parseInt(right, 10);
+        return (Number.isFinite(leftNumber) ? leftNumber : 999) - (Number.isFinite(rightNumber) ? rightNumber : 999) || left.localeCompare(right);
+      });
+      setText("roster-multi-class-school", rosterSchoolNickname(rosterMultiClassSchoolName));
+      const sortSelect = document.getElementById("roster-multi-sort");
+      const classroomSelect = document.getElementById("roster-multi-classroom-filter");
+      const ageSelect = document.getElementById("roster-multi-age-filter");
+      if (sortSelect) sortSelect.value = rosterMultiClassSort;
+      if (classroomSelect) {
+        classroomSelect.innerHTML = `<option value="all">All Classrooms</option>${classroomOptions.map((classroom) => `<option value="${rosterSafe(classroom)}">${rosterSafe(classroom)}</option>`).join("")}`;
+        classroomSelect.value = classroomOptions.includes(rosterMultiClassClassroomFilter) ? rosterMultiClassClassroomFilter : "all";
+        rosterMultiClassClassroomFilter = classroomSelect.value;
+      }
+      if (ageSelect) {
+        ageSelect.innerHTML = `<option value="all">All Ages</option>${ageOptions.map((age) => `<option value="${rosterSafe(age)}">${rosterSafe(age)}</option>`).join("")}`;
+        ageSelect.value = ageOptions.includes(rosterMultiClassAgeFilter) ? rosterMultiClassAgeFilter : "all";
+        rosterMultiClassAgeFilter = ageSelect.value;
+      }
+      grid.innerHTML = classes.length ? classes.map((rosterClass) => {
+        const enrolled = rosterEnrolled(rosterClass);
+        const students = enrolled.filter((student) =>
+          (rosterMultiClassClassroomFilter === "all" || (student.classroom || "") === rosterMultiClassClassroomFilter) &&
+          (rosterMultiClassAgeFilter === "all" || rosterAge(student.birthdate) === rosterMultiClassAgeFilter)
+        ).sort((left, right) => {
+          if (rosterMultiClassSort === "classroom") return (left.classroom || "").localeCompare(right.classroom || "") || rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right));
+          if (rosterMultiClassSort === "age") return rosterMultiAgeValue(right) - rosterMultiAgeValue(left) || rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right));
+          return rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right)) || (left.lastName || "").localeCompare(right.lastName || "");
+        });
+        return `<section class="roster-multi-class-section" data-roster-multi-drop-class="${rosterSafe(rosterClass.id)}">
+          <div class="roster-multi-class-title-row"><h4>${rosterSafe(rosterClass.name)}</h4><small>${enrolled.length}/${rosterClass.capacity || 12} students · ${rosterSafe(rosterClass.day || "Day not set")} ${rosterSafe(rosterClass.time || "")}</small></div>
+          <div class="roster-multi-class-divider"></div>
+          <div class="roster-multi-student-grid">${students.length ? students.map((student) => `<article class="roster-multi-student" draggable="true" data-roster-multi-student="${rosterSafe(student.id)}" data-roster-multi-source-class="${rosterSafe(rosterClass.id)}" title="Drag to move ${rosterSafe(rosterStudentFullName(student))} to another class">
+            <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
+            <strong>${rosterSafe(rosterStudentFullName(student))}</strong>
+            <small>${rosterSafe(student.classroom || "Official classroom not entered")}</small>
+            <small>${rosterSafe(rosterAge(student.birthdate))}</small>
+          </article>`).join("") : `<div class="roster-multi-empty">${enrolled.length ? "No students match these filters." : "Drag students here to add them to this class."}</div>`}</div>
+        </section>`;
+      }).join("") : `<div class="roster-empty">No active classes are available for this school.</div>`;
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+    };
+
     function renderClassesAndRosters() {
       renderBoutiqueBackendSummary();
       const sharedState = document.body.dataset.sharedRosterState;
@@ -23888,19 +24120,26 @@
       if (!visibleClasses.some((item) => item.id === selectedRosterClassId)) { selectedRosterClassId = ""; rosterClassProfileOpen = false; }
       const list = document.getElementById("admin-roster-class-list");
       const rosterClassCardMarkup = (item) => {
-        const enrolled = rosterEnrolled(item).length;
-        const prospects = rosterProspects(item).length;
-        const dayBubble = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[item.day] || "U";
-        const teacher = teachers.find((candidate) => candidate.id === item.teacherId) || {};
-        const teacherName = rosterTeacherName(item.teacherId);
+        const enrolledStudents = rosterEnrolled(item);
+        const enrolled = enrolledStudents.length;
+        const datedStudents = enrolledStudents.filter((student) => student.birthdate).sort((left, right) => right.birthdate.localeCompare(left.birthdate));
+        const ageRange = datedStudents.length
+          ? `${rosterAge(datedStudents[0].birthdate)} – ${rosterAge(datedStudents[datedStudents.length - 1].birthdate)}`
+          : "Ages not entered";
+        const firstNameCounts = enrolledStudents.reduce((counts, student) => {
+          const key = rosterStudentFirstName(student).trim().toLowerCase();
+          counts.set(key, (counts.get(key) || 0) + 1);
+          return counts;
+        }, new Map());
         return `<button class="roster-class-card ${item.id === selectedRosterClassId && rosterClassProfileOpen ? "is-selected" : ""}" type="button" data-roster-class="${rosterSafe(item.id)}">
-          <span class="roster-class-day-bubble" title="${rosterSafe(item.day || "Dance day not set")}">${rosterSafe(dayBubble)}</span>
-          <span class="roster-class-badge" title="${rosterSafe(teacherName)}">${teacher.photo ? `<img src="${rosterSafe(teacher.photo)}" alt="${rosterSafe(teacherName)}">` : rosterSafe(initialsFor(teacher) || "T")}</span>
-          <strong>${rosterSafe(item.name)}</strong>
-          <small>${rosterSafe(teacherName)}</small>
-          <small>${rosterSafe(item.day)} · ${rosterSafe(item.time || "Time not set")}</small>
+          <span class="roster-class-time-bubble">${rosterSafe(item.time || "Time not set")}</span>
           <small class="roster-enrollment-bubble ${enrolled >= item.capacity ? "full" : (enrolled >= 7 ? "ready" : "low")}">${enrolled}/${item.capacity} Enrolled${enrolled >= item.capacity ? " · Full" : ""}</small>
-          ${prospects ? `<small>${prospects} future dancer${prospects === 1 ? "" : "s"}</small>` : ""}
+          <strong>${rosterSafe(item.name)}</strong>
+          <small class="roster-class-age-range">${rosterSafe(ageRange)}</small>
+          <span class="roster-class-students">${enrolledStudents.length ? enrolledStudents.map((student) => `<span class="roster-class-student">
+            <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
+            <span>${rosterSafe(`${rosterStudentFirstName(student)}${firstNameCounts.get(rosterStudentFirstName(student).trim().toLowerCase()) > 1 && student.lastName ? ` ${student.lastName.trim().charAt(0).toUpperCase()}.` : ""}`)}</span>
+          </span>`).join("") : `<span class="roster-class-no-students">No enrolled dancers yet</span>`}</span>
         </button>`;
       };
       if (list) {
@@ -23915,11 +24154,16 @@
           });
           list.innerHTML = [...schoolGroups.entries()]
             .sort(([left], [right]) => left.localeCompare(right, undefined, { sensitivity: "base" }))
-            .map(([schoolNickname, classes]) => `<section class="roster-school-results">
-              <h3>${rosterSafe(schoolNickname)}</h3>
+            .map(([schoolNickname, classes]) => {
+              const dayLabels = [...new Set(classes.map((item) => item.day).filter(Boolean))];
+              const teacherNames = [...new Set(classes.map((item) => rosterTeacherName(item.teacherId)).filter(Boolean))];
+              const dayShort = { Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" };
+              return `<section class="roster-school-results">
+              <div class="roster-school-results-heading"><div class="roster-school-results-title"><span class="roster-school-day-bubbles">${dayLabels.map((day) => `<span class="roster-school-day-bubble" title="${rosterSafe(day)}">${rosterSafe(dayShort[day] || day.slice(0, 2))}</span>`).join("")}</span><h3>${rosterSafe(schoolNickname)}${teacherNames.length ? ` – ${rosterSafe(teacherNames.join(" & "))}` : ""}</h3></div><button class="roster-multi-class-open" type="button" data-roster-multi-class-open="${rosterSafe(classes[0]?.schoolName || schoolNickname)}">Multi Class Edit</button></div>
               <div class="roster-school-results-line" aria-hidden="true"></div>
               <div class="roster-school-class-grid">${classes.sort((left, right) => (left.day || "").localeCompare(right.day || "") || (left.time || "").localeCompare(right.time || "") || left.name.localeCompare(right.name, undefined, { numeric: true })).map(rosterClassCardMarkup).join("")}</div>
-            </section>`).join("");
+            </section>`;
+            }).join("");
         }
       }
 
@@ -23989,16 +24233,23 @@
     };
 
     const newsletterStorageKey = "dt-newsletter-studio-draft-v1";
-    const newsletterDefaultDraft = { template: "monthly", audience: "parents", school: "all", teacher: "all", subject: "", headline: "What’s Happening at Dance Techniques", message: "Hi [Parent First Name],\n\nWe loved dancing with [Dancer Preferred Name] this week!", font: "avenir-light", titleFont: "avenir-bold", textSize: "standard", color: "berry", sections: [], videoUrl: "", ctaLabel: "", ctaUrl: "", device: "desktop" };
+    const newsletterDefaultDraft = { template: "monthly", audience: "parents", school: "all", teacher: "all", subject: "", headline: "What’s Happening at Dance Techniques", message: "Hi [Parent First Name],\n\nWe loved dancing with [Dancer Preferred Name] this week!", font: "avenir-light", textSize: "12", color: "berry", sections: [], videoUrl: "", ctaLabel: "", ctaUrl: "", device: "desktop" };
     let newsletterDraft = { ...newsletterDefaultDraft };
     let newsletterSaveTimer = 0;
-    let newsletterActiveField = "newsletter-message";
+    let newsletterActiveField = "message";
+    let newsletterActivePreviewTarget = null;
+    let newsletterSavedSelection = null;
     try { newsletterDraft = { ...newsletterDefaultDraft, ...(JSON.parse(localStorage.getItem(newsletterStorageKey) || "null") || {}) }; } catch (_) { /* Start with a clean draft. */ }
     if (newsletterDraft.audience === "both") newsletterDraft.audience = "parents";
-    if (newsletterDraft.font === "parisienne") { newsletterDraft.font = "avenir-light"; newsletterDraft.titleFont = "parisienne"; }
-    if (!newsletterDraft.titleFont) newsletterDraft.titleFont = "avenir-bold";
+    if (["compact", "standard", "large"].includes(newsletterDraft.textSize)) newsletterDraft.textSize = newsletterDraft.textSize === "compact" ? "10" : newsletterDraft.textSize === "large" ? "14" : "12";
+    if (!["parisienne", "bodoni-smallcaps", "avenir-bold", "avenir-light", "avenir-ultra-light"].includes(newsletterDraft.font)) newsletterDraft.font = newsletterDraft.titleFont || "avenir-light";
     if (!Array.isArray(newsletterDraft.sections)) newsletterDraft.sections = [];
     newsletterDraft.sections = newsletterDraft.sections.map((section) => ({ ...section, type: section.type === "link" ? "social" : section.type === "highlight" ? "reminder" : section.type }));
+    if (newsletterDraft.videoUrl) newsletterDraft.sections.push({ type: "youtube", title: "", text: "", linkText: "", url: newsletterDraft.videoUrl });
+    if (newsletterDraft.ctaLabel || newsletterDraft.ctaUrl) newsletterDraft.sections.push({ type: "button", title: "", text: "", linkText: newsletterDraft.ctaLabel || "Open Link", url: newsletterDraft.ctaUrl || "" });
+    newsletterDraft.videoUrl = "";
+    newsletterDraft.ctaLabel = "";
+    newsletterDraft.ctaUrl = "";
 
     const newsletterTemplates = {
       monthly: { headline: "What’s Happening at Dance Techniques", subject: "Your monthly Dance Techniques update", message: "Hi [Parent First Name],\n\nHere is everything happening in [Dancer Preferred Name]’s dance world this month!", color: "berry" },
@@ -24018,21 +24269,39 @@
     if (!newsletterTemplates[newsletterDraft.template]) newsletterDraft.template = "monthly";
 
     const newsletterColors = { black: "#160f0d", "soft-grey": "#5e5e5e", berry: "#65103f", "dusty-mauve": "#9b687a", blush: "#dba9a1", sage: "#68775f", gold: "#d58c24" };
-    const newsletterFontStyle = () => newsletterDraft.font === "avenir-ultra-light" ? '"Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : '"Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif';
-    const newsletterTitleFontStyle = () => newsletterDraft.titleFont === "parisienne" ? '"Parisienne", cursive' : newsletterDraft.titleFont === "bodoni-smallcaps" ? '"Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif' : '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
+    const newsletterFontStyle = () => newsletterDraft.font === "parisienne" ? '"Parisienne", cursive' : newsletterDraft.font === "bodoni-smallcaps" ? '"Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif' : newsletterDraft.font === "avenir-ultra-light" ? '"Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : newsletterDraft.font === "avenir-light" ? '"Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
+    const newsletterTitleFontStyle = () => newsletterFontStyle();
     const newsletterFontWeight = () => newsletterDraft.font === "avenir-bold" ? "800" : newsletterDraft.font === "avenir-ultra-light" ? "200" : "400";
-    const newsletterFontSize = () => newsletterDraft.textSize === "compact" ? "14px" : newsletterDraft.textSize === "large" ? "18px" : "16px";
-    const newsletterSectionMarkup = (section) => {
+    const newsletterFontSize = () => `${Number(newsletterDraft.textSize) || 12}pt`;
+    const newsletterSectionMarkup = (section, context = newsletterSampleContext()) => {
       if (section.type === "divider") return `<div class="newsletter-content-section is-divider" aria-hidden="true"></div>`;
       if (section.type === "photo") return section.url ? `<section class="newsletter-content-section"><img class="newsletter-block-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">${section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text))}</p>` : ""}</section>` : `<section class="newsletter-content-section is-highlight"><p>Photo or Resource Library image</p></section>`;
       if (section.type === "youtube") { const id = newsletterYouTubeId(section.url); return section.url ? `<a class="newsletter-video-card" href="${rosterSafe(section.url)}" target="_blank" rel="noopener">${id ? `<img src="https://i.ytimg.com/vi/${rosterSafe(id)}/hqdefault.jpg" alt="YouTube video preview">` : ""}<span class="newsletter-video-play">▶</span></a>` : ""; }
-      if (section.type === "button") return section.linkText && section.url ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:var(--newsletter-accent);color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText))}</a></p>` : "";
+      if (section.type === "button") return section.linkText && section.url ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:var(--newsletter-accent);color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
       if (section.type === "character") return `<section class="newsletter-content-section is-character"><span class="newsletter-character-graphic">${rosterSafe(section.text || "🩰")}</span>${section.title ? `<h2>${rosterSafe(section.title)}</h2>` : ""}</section>`;
-      const title = section.title ? `<h2>${rosterSafe(newsletterPersonalize(section.title))}</h2>` : "";
-      const body = section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text))}</p>` : "";
-      const link = section.type === "social" && section.linkText && section.url ? `<p><a href="${rosterSafe(section.url)}" style="color:var(--newsletter-accent);font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText))}</a></p>` : "";
+      const title = section.title ? `<h2>${rosterSafe(newsletterPersonalize(section.title, context))}</h2>` : "";
+      const body = section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text, context))}</p>` : "";
+      const link = section.type === "social" && section.linkText && section.url ? `<p><a href="${rosterSafe(section.url)}" style="color:var(--newsletter-accent);font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
       const extraClass = section.type === "quote" ? " is-quote" : section.type === "reminder" || section.type === "calendar" ? " is-reminder" : section.type === "personalized" ? " is-highlight" : "";
       return `<section class="newsletter-content-section${extraClass}">${title}${body}${link}</section>`;
+    };
+    const newsletterEditableSectionMarkup = (section, index) => {
+      const type = section.type || "text";
+      const titleAllowed = !["divider", "youtube", "button"].includes(type);
+      const textAllowed = !["divider", "photo", "youtube", "button"].includes(type);
+      const linkTextAllowed = ["button", "social"].includes(type);
+      const urlAllowed = ["photo", "youtube", "button", "social"].includes(type);
+      const extraClass = type === "quote" ? " is-quote" : type === "reminder" || type === "calendar" ? " is-reminder" : type === "personalized" ? " is-highlight" : "";
+      const image = type === "photo" && section.url ? `<img class="newsletter-block-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">` : "";
+      const divider = type === "divider" ? `<div class="newsletter-content-section is-divider" aria-label="Divider"></div>` : "";
+      return `<section class="newsletter-preview-section-editor newsletter-content-section${extraClass}" draggable="true" data-newsletter-preview-section="${index}">
+        <span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
+        ${divider}${image}
+        ${titleAllowed ? `<h2 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="title" data-placeholder="Section title">${section.titleHtml || rosterSafe(section.title || "")}</h2>` : ""}
+        ${textAllowed ? `<div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="text" data-placeholder="Write this section…">${section.textHtml || rosterSafe(section.text || "")}</div>` : ""}
+        ${linkTextAllowed ? `<div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="linkText" data-placeholder="Button or link text">${section.linkTextHtml || rosterSafe(section.linkText || "")}</div>` : ""}
+        ${urlAllowed ? `<input class="newsletter-preview-inline-input" data-newsletter-preview-section-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="${type === "photo" ? "Image URL" : type === "youtube" ? "YouTube URL" : "Link URL"}">` : ""}
+      </section>`;
     };
     const renderNewsletterSectionEditors = () => {
       const list = document.getElementById("newsletter-section-list");
@@ -24050,9 +24319,25 @@
       const match = String(url).match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{6,})/i);
       return match?.[1] || "";
     };
-    const newsletterFilteredRecords = () => boutiqueKitRecords().filter(({ rosterClass }) => (newsletterDraft.school === "all" || rosterClass.schoolName === newsletterDraft.school) && (newsletterDraft.teacher === "all" || rosterClass.teacherId === newsletterDraft.teacher));
-    const newsletterSampleContext = () => {
-      const record = newsletterFilteredRecords()[0] || boutiqueKitRecords()[0];
+    const newsletterAudienceRecords = (audience = newsletterDraft.audience) => boutiqueKitRecords().filter(({ student }) => {
+      const status = String(student?.status || "").toLowerCase();
+      const isFutureDancer = !["enrolled", "active"].includes(status) && Boolean(student?.additionalInformation?.trial_completed);
+      return audience === "future" ? isFutureDancer : audience === "parents" ? ["enrolled", "active"].includes(status) : true;
+    });
+    const newsletterFilteredRecords = () => {
+      const targeting = newsletterDraft.targeting || {};
+      return newsletterAudienceRecords().filter(({ rosterClass, student }) => {
+        if (newsletterDraft.school !== "all" && rosterClass.schoolName !== newsletterDraft.school) return false;
+        if (newsletterDraft.teacher !== "all" && rosterClass.teacherId !== newsletterDraft.teacher) return false;
+        if (targeting.day && targeting.day !== "all" && rosterClass.day !== targeting.day) return false;
+        if (targeting.schools?.length && !targeting.schools.includes(rosterClass.schoolName)) return false;
+        if (targeting.teachers?.length && !targeting.teachers.includes(rosterClass.teacherId)) return false;
+        if (targeting.classes?.length && !targeting.classes.includes(rosterClass.id)) return false;
+        if (targeting.students?.length && !targeting.students.includes(student.id)) return false;
+        return true;
+      });
+    };
+    const newsletterContextForRecord = (record) => {
       const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, record?.rosterClass.schoolName)) || {};
       const student = record?.student || {};
       return {
@@ -24065,8 +24350,8 @@
         "[Director First Name]": String(school.directorName || "School Director").split(" ")[0]
       };
     };
-    const newsletterPersonalize = (value = "") => {
-      const context = newsletterSampleContext();
+    const newsletterSampleContext = () => newsletterContextForRecord(newsletterFilteredRecords()[0] || newsletterAudienceRecords()[0] || boutiqueKitRecords()[0]);
+    const newsletterPersonalize = (value = "", context = newsletterSampleContext()) => {
       return Object.entries(context).reduce((text, [token, replacement]) => text.replaceAll(token, replacement), String(value || ""));
     };
 
@@ -24080,9 +24365,15 @@
       { key: "events", label: "Events & Milestones", description: "Keep families prepared for special dates and dance moments.", templates: ["recital", "costume", "picture", "save-date"] },
       { key: "schools", label: "Partner Schools", description: "Director-facing communication for your school partnerships.", templates: ["partnership", "no-class-school", "save-date-school"] }
     ];
+    const newsletterTemplatesForAudience = (audience) => ({
+      parents: ["monthly", "birthday", "welcome", "fall", "recital", "costume", "picture", "save-date", "summer"],
+      future: ["trial-complete", "welcome", "fall", "save-date", "summer"],
+      schools: ["partnership", "no-class-school", "save-date-school"],
+      teachers: ["monthly", "recital", "costume", "picture", "save-date"]
+    }[audience] || ["monthly"]);
     const newsletterCategoryForTemplate = (template) => newsletterTemplateCategories.find((category) => category.templates.includes(template))?.key || "parent";
     newsletterSetupSelection.category = newsletterCategoryForTemplate(newsletterSetupSelection.template);
-    const newsletterAudienceLabel = (audience) => audience === "teachers" ? "Teaching Team" : audience === "schools" ? "Partner Schools" : "Parents";
+    const newsletterAudienceLabel = (audience) => audience === "teachers" ? "Teaching Team" : audience === "schools" ? "Partner Schools" : audience === "future" ? "Future Dancers" : "Active Dance Families";
     const newsletterTargetLabel = () => newsletterSetupSelection.audience === "teachers"
       ? (newsletterSetupSelection.targetMode === "all" ? "All teachers · linked in Announcements" : newsletterSetupSelection.targetMode === "day" ? `${newsletterSetupSelection.day === "all" ? "Selected dance day" : newsletterSetupSelection.day} teachers · private Admin messages` : `${newsletterSetupSelection.teachers.length || "Selected"} teachers · private Admin messages`)
       : newsletterSetupSelection.targetMode === "all" ? (newsletterSetupSelection.audience === "schools" && newsletterSetupSelection.day !== "all" ? `All partner schools on ${newsletterSetupSelection.day}` : `All ${newsletterSetupSelection.audience === "schools" ? "partner schools" : "recipients"}`) : "Targeted recipient group";
@@ -24098,15 +24389,17 @@
       const back = document.getElementById("newsletter-setup-back");
       const next = document.getElementById("newsletter-setup-next");
       if (back) back.hidden = newsletterSetupStep === 1;
-      if (next) next.textContent = newsletterSetupStep === 5 ? "Open Design Studio" : "Next";
-      if (newsletterSetupStep === 1) content.innerHTML = `<div class="newsletter-setup-copy"><h2>How would you like to begin?</h2><p>We’ll guide you through the setup before showing the editor.</p></div><div class="newsletter-choice-grid"><button class="newsletter-choice-card${newsletterSetupSelection.mode === "template" ? " is-selected" : ""}" type="button" data-newsletter-start="template"><span class="newsletter-choice-icon">▦</span><strong>Use a Template</strong><small>Start with a professionally designed Dance Techniques newsletter.</small></button><button class="newsletter-choice-card${newsletterSetupSelection.mode === "blank" ? " is-selected" : ""}" type="button" data-newsletter-start="blank"><span class="newsletter-choice-icon">＋</span><strong>Create a New One</strong><small>Begin with a clean branded layout and build it block by block.</small></button></div>`;
-      if (newsletterSetupStep === 2) content.innerHTML = `<div class="newsletter-setup-copy"><h2>Choose a Template Category</h2><p>Start with the kind of newsletter you want to create.</p></div><div class="newsletter-choice-grid">${newsletterTemplateCategories.map((category) => `<button class="newsletter-choice-card${newsletterSetupSelection.category === category.key ? " is-selected" : ""}" type="button" data-newsletter-setup-category="${category.key}"><strong>${category.label}</strong><small>${category.description}</small></button>`).join("")}</div>`;
-      if (newsletterSetupStep === 3) {
-        const category = newsletterTemplateCategories.find((item) => item.key === newsletterSetupSelection.category) || newsletterTemplateCategories[0];
-        content.innerHTML = `<div class="newsletter-setup-copy"><h2>Choose a ${category.label} Template</h2><p>Content, colors, and suggested wording will be prepared for you.</p></div><div class="newsletter-setup-template-grid">${category.templates.map((key) => `<button class="${newsletterSetupSelection.template === key ? "is-selected" : ""}" type="button" data-newsletter-setup-template="${key}">${newsletterTemplateLabel(key)}</button>`).join("")}</div>`;
+      if (next) {
+        next.hidden = newsletterSetupStep !== 1;
+        next.textContent = "Choose Starting Point";
       }
-      if (newsletterSetupStep === 4) {
-        const recipientRecords = boutiqueKitRecords();
+      if (newsletterSetupStep === 2) content.innerHTML = `<div class="newsletter-setup-copy"><h2>How would you like to begin?</h2><p>Choose a template or begin with a clean branded design.</p></div><div class="newsletter-choice-grid"><button class="newsletter-choice-card${newsletterSetupSelection.mode === "template" ? " is-selected" : ""}" type="button" data-newsletter-start="template"><span class="newsletter-choice-icon">▦</span><strong>Use a Template</strong><small>See only templates made for the audience you just selected.</small></button><button class="newsletter-choice-card${newsletterSetupSelection.mode === "blank" ? " is-selected" : ""}" type="button" data-newsletter-start="blank"><span class="newsletter-choice-icon">＋</span><strong>Create a New One</strong><small>Begin with a clean branded layout and build it block by block.</small></button></div>`;
+      if (newsletterSetupStep === 3) {
+        const audienceTemplates = newsletterTemplatesForAudience(newsletterSetupSelection.audience);
+        content.innerHTML = `<div class="newsletter-setup-copy"><h2>Choose a ${newsletterAudienceLabel(newsletterSetupSelection.audience)} Template</h2><p>Only templates intended for this audience are shown.</p></div><div class="newsletter-setup-template-grid">${audienceTemplates.map((key) => `<button class="${newsletterSetupSelection.template === key ? "is-selected" : ""}" type="button" data-newsletter-setup-template="${key}">${newsletterTemplateLabel(key)}</button>`).join("")}</div>`;
+      }
+      if (newsletterSetupStep === 1) {
+        const recipientRecords = newsletterAudienceRecords(newsletterSetupSelection.audience);
         const schools = [...new Set(recipientRecords.map(({ rosterClass }) => rosterClass.schoolName).filter(Boolean))].sort();
         const teacherIds = [...new Set(recipientRecords.map(({ rosterClass }) => rosterClass.teacherId).filter(Boolean))].sort((a, b) => rosterTeacherName(a).localeCompare(rosterTeacherName(b)));
         const newsletterWeekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -24119,11 +24412,12 @@
           && (newsletterSetupSelection.teacher === "all" || rosterClass.teacherId === newsletterSetupSelection.teacher)));
         const visibleTeacherIds = teacherIds.filter((teacherId) => newsletterSetupSelection.day === "all" || recipientRecords.some(({ rosterClass }) => rosterClass.teacherId === teacherId && rosterClass.day === newsletterSetupSelection.day));
         const audienceOptions = [
-          { key: "parents", title: "Dance Families", copy: "Send to parents and personalize with dancer details." },
+          { key: "parents", title: "Active Dance Families", copy: "Only families with currently enrolled, active dancers." },
+          { key: "future", title: "Future Dancers", copy: "Follow up separately with families after a completed trial." },
           { key: "schools", title: "Partner Schools", copy: "Send a director-facing update to school partners." },
           { key: "teachers", title: "Teaching Team", copy: "Send to every teacher or a targeted group of teachers." }
         ];
-        const isFamilies = newsletterSetupSelection.audience === "parents";
+        const isFamilies = ["parents", "future"].includes(newsletterSetupSelection.audience);
         const isTeachers = newsletterSetupSelection.audience === "teachers";
         const targetingOptions = isTeachers
           ? [["all", "All teachers"], ["teachers", "Choose specific teachers"], ["day", "Teachers with classes on a specific day"]]
@@ -24145,17 +24439,19 @@
           ? `<button class="newsletter-all-recipient-card${newsletterSetupSelection.targetMode === "all" && newsletterSetupSelection.day === "all" && newsletterSetupSelection.teacher === "all" ? " is-selected" : ""}" type="button" data-newsletter-recipient-all="schools"><strong>All Partner Schools</strong><small>Every active school</small></button>`
           : newsletterSetupSelection.audience === "teachers"
           ? `<button class="newsletter-all-recipient-card${newsletterSetupSelection.targetMode === "all" && newsletterSetupSelection.day === "all" ? " is-selected" : ""}" type="button" data-newsletter-recipient-all="teachers"><strong>All Teachers</strong><small>Clickable Announcement</small></button>`
-          : `<button class="newsletter-all-recipient-card${newsletterSetupSelection.targetMode === "all" ? " is-selected" : ""}" type="button" data-newsletter-recipient-all="parents"><strong>All Dance Families</strong><small>Every active family</small></button>`;
+          : newsletterSetupSelection.audience === "future"
+          ? `<button class="newsletter-all-recipient-card${newsletterSetupSelection.targetMode === "all" ? " is-selected" : ""}" type="button" data-newsletter-recipient-all="future"><strong>All Future Dancers</strong><small>Every completed trial</small></button>`
+          : `<button class="newsletter-all-recipient-card${newsletterSetupSelection.targetMode === "all" ? " is-selected" : ""}" type="button" data-newsletter-recipient-all="parents"><strong>All Dance Families</strong><small>Enrolled and active families only</small></button>`;
         content.innerHTML = `<div class="newsletter-setup-copy"><h2>Who should receive it?</h2><p>Choose your audience, then build the exact recipient group.</p></div><div class="newsletter-audience-grid">${audienceOptions.map((option) => `<button class="newsletter-audience-card${newsletterSetupSelection.audience === option.key ? " is-selected" : ""}" type="button" data-newsletter-setup-audience="${option.key}"><strong>${option.title}</strong><small>${option.copy}</small></button>`).join("")}</div><section class="newsletter-recipient-filters"><div class="newsletter-recipient-header"><div class="newsletter-recipient-header-copy"><h3>Build Your Recipient List</h3><p>${newsletterSetupSelection.audience === "schools" ? "Filter the school cards by dance day, then select the schools you want." : newsletterSetupSelection.audience === "teachers" ? "Filter the teacher cards by dance day, then select the teachers you want." : "Choose how you would like to find this newsletter’s recipients."}</p></div>${allRecipientAction}</div>${builderMarkup}</section>`;
         if (document.getElementById("newsletter-setup-target-mode")) document.getElementById("newsletter-setup-target-mode").value = newsletterSetupSelection.targetMode;
         if (document.getElementById("newsletter-setup-day")) document.getElementById("newsletter-setup-day").value = newsletterSetupSelection.day;
         if (document.getElementById("newsletter-setup-teacher")) document.getElementById("newsletter-setup-teacher").value = newsletterSetupSelection.teacher;
       }
-      if (newsletterSetupStep === 5) content.innerHTML = `<div class="newsletter-setup-copy"><h2>Your newsletter is ready to design</h2><p>Review the starting choices before opening the editing tools and live preview.</p></div><div class="newsletter-setup-review"><div><small>Starting point</small><strong>${newsletterSetupSelection.mode === "template" ? newsletterTemplateLabel(newsletterSetupSelection.template) : "Create a New One"}</strong></div><div><small>Audience</small><strong>${newsletterAudienceLabel(newsletterSetupSelection.audience)}</strong></div><div><small>Recipients</small><strong>${newsletterTargetLabel()}</strong></div><div><small>Delivery</small><strong>${newsletterSetupSelection.audience === "teachers" ? (newsletterSetupSelection.targetMode === "all" ? "Clickable Announcement" : "Private message from Admin") : "Newsletter delivery"}</strong></div></div>`;
     };
     const updateNewsletterCurrentSetup = () => {
       setText("newsletter-current-template", newsletterSetupSelection.mode === "blank" ? "Create a New Newsletter" : newsletterTemplateLabel(newsletterDraft.template));
-      setText("newsletter-current-audience", `${newsletterAudienceLabel(newsletterDraft.audience)} · ${newsletterDraft.school === "all" ? "All schools" : rosterSchoolNickname(newsletterDraft.school)} · ${newsletterDraft.teacher === "all" ? "All teachers" : rosterTeacherName(newsletterDraft.teacher)}`);
+      setText("newsletter-selected-template", newsletterTemplateLabel(newsletterDraft.template));
+      setText("newsletter-current-audience", newsletterAudienceLabel(newsletterDraft.audience));
     };
 
     const saveNewsletterDraft = () => {
@@ -24168,54 +24464,89 @@
       }, 220);
     };
 
+    const newsletterEmailHtml = (context = newsletterSampleContext()) => {
+      const accent = newsletterColors[newsletterDraft.color] || newsletterColors.berry;
+      const personalizeHtml = (html, fallback = "") => newsletterPersonalize(html || rosterSafe(fallback), context);
+      const sections = newsletterDraft.sections.map((section) => newsletterSectionMarkup(section, context)).join("");
+      return `<!doctype html><html><body style="margin:0;background:#f3ece8;color:#271e1c;"><div style="max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle()};font-size:${newsletterFontSize()};line-height:1.65;"><header style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle()};">${personalizeHtml(newsletterDraft.headlineHtml, newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(newsletterDraft.subjectHtml, newsletterDraft.subject || "")}</p></header><main style="padding:30px;"><div style="white-space:pre-wrap;">${personalizeHtml(newsletterDraft.messageHtml, newsletterDraft.message || "")}</div>${sections}</main><footer style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+    };
+    const newsletterRecipientMessages = () => {
+      const records = newsletterFilteredRecords();
+      const messages = [];
+      const seen = new Set();
+      const push = (email, name, record) => {
+        const normalized = String(email || "").trim().toLowerCase();
+        if (!normalized || seen.has(normalized)) return;
+        seen.add(normalized);
+        const context = newsletterContextForRecord(record);
+        messages.push({ to: normalized, name: String(name || "").trim(), subject: newsletterPersonalize(newsletterDraft.subject || newsletterDraft.headline || "Dance Techniques Newsletter", context), html: newsletterEmailHtml(context) });
+      };
+      if (["parents", "future"].includes(newsletterDraft.audience)) records.forEach((record) => push(record.student.parentEmail, record.student.parentName || `${record.student.parentFirstName || ""} ${record.student.parentLastName || ""}`, record));
+      if (newsletterDraft.audience === "schools") {
+        records.forEach((record) => {
+          const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, record.rosterClass.schoolName) || enrollmentSchoolNameMatches(item.nickname, record.rosterClass.schoolName)) || {};
+          push(school.email, school.directorName, record);
+        });
+      }
+      if (newsletterDraft.audience === "teachers") {
+        records.forEach((record) => {
+          const teacher = teachers.find((item) => item.id === record.rosterClass.teacherId) || {};
+          push(teacher.email, `${teacher.firstName || ""} ${teacher.lastName || ""}`, record);
+        });
+      }
+      return messages;
+    };
+    const sendNewsletterMessages = async ({ messages, mode, confirmed = false }) => {
+      if (!window.dtSupabase) throw new Error("Sign in to the live Director Dashboard before sending.");
+      const { data, error } = await window.dtSupabase.functions.invoke("send-newsletter", { body: { messages, mode, confirmed, sendId: crypto.randomUUID() } });
+      if (error) throw new Error(data?.message || error.message || "The newsletter service could not be reached.");
+      if (!data?.ok) throw new Error(data?.message || "The newsletter could not be sent.");
+      return data;
+    };
+
     const renderNewsletterStudio = () => {
-      const schoolSelect = document.getElementById("newsletter-school-filter");
-      const teacherSelect = document.getElementById("newsletter-teacher-filter");
-      if (!schoolSelect || !teacherSelect) return;
       updateNewsletterCurrentSetup();
-      const schools = [...new Set(boutiqueKitRecords().map(({ rosterClass }) => rosterClass.schoolName).filter(Boolean))].sort();
-      const teacherIds = [...new Set(boutiqueKitRecords().map(({ rosterClass }) => rosterClass.teacherId).filter(Boolean))].sort((a, b) => rosterTeacherName(a).localeCompare(rosterTeacherName(b)));
-      schoolSelect.innerHTML = `<option value="all">All schools</option>${schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}`;
-      teacherSelect.innerHTML = `<option value="all">All teachers</option>${teacherIds.map((id) => `<option value="${rosterSafe(id)}">${rosterSafe(rosterTeacherName(id))}</option>`).join("")}`;
-      newsletterDraft.school = schools.includes(newsletterDraft.school) ? newsletterDraft.school : "all";
-      newsletterDraft.teacher = teacherIds.includes(newsletterDraft.teacher) ? newsletterDraft.teacher : "all";
-      document.getElementById("newsletter-audience").value = newsletterDraft.audience;
-      schoolSelect.value = newsletterDraft.school;
-      teacherSelect.value = newsletterDraft.teacher;
-      document.getElementById("newsletter-subject").value = newsletterDraft.subject;
-      document.getElementById("newsletter-headline").value = newsletterDraft.headline;
-      document.getElementById("newsletter-message").value = newsletterDraft.message;
       document.getElementById("newsletter-font").value = newsletterDraft.font;
-      document.getElementById("newsletter-title-font").value = newsletterDraft.titleFont || "avenir-bold";
+      document.getElementById("newsletter-font").style.fontFamily = newsletterFontStyle();
+      document.getElementById("newsletter-font").style.fontWeight = newsletterFontWeight();
       document.getElementById("newsletter-text-size").value = newsletterDraft.textSize;
-      document.getElementById("newsletter-video-url").value = newsletterDraft.videoUrl;
-      document.getElementById("newsletter-cta-label").value = newsletterDraft.ctaLabel;
-      document.getElementById("newsletter-cta-url").value = newsletterDraft.ctaUrl;
-      document.querySelectorAll("[data-newsletter-template]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterTemplate === newsletterDraft.template));
+      const availableTemplates = newsletterTemplatesForAudience(newsletterDraft.audience);
+      document.querySelectorAll("[data-newsletter-template]").forEach((button) => {
+        button.hidden = !availableTemplates.includes(button.dataset.newsletterTemplate);
+        button.classList.toggle("is-selected", button.dataset.newsletterTemplate === newsletterDraft.template);
+      });
       document.querySelectorAll("[data-newsletter-device]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterDevice === newsletterDraft.device));
       document.querySelectorAll("[data-newsletter-color]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterColor === newsletterDraft.color));
-      renderNewsletterSectionEditors();
+      const sendButton = document.getElementById("newsletter-send");
+      if (sendButton) {
+        sendButton.disabled = !window.dtSupabase;
+        sendButton.textContent = window.dtSupabase ? "Send Newsletter" : "Sign In to Send";
+      }
       const records = newsletterFilteredRecords();
       const parentCount = new Set(records.map(({ student }) => student.parentEmail).filter(Boolean)).size;
       const schoolCount = new Set(records.map(({ rosterClass }) => rosterClass.schoolName).filter(Boolean)).size;
-      setText("newsletter-recipient-summary", newsletterDraft.audience === "parents" ? `${parentCount} parent email${parentCount === 1 ? "" : "s"} match these filters` : newsletterDraft.audience === "schools" ? `${schoolCount} partner school${schoolCount === 1 ? "" : "s"} match these filters` : `${parentCount} parent email${parentCount === 1 ? "" : "s"} and ${schoolCount} partner school${schoolCount === 1 ? "" : "s"}`);
+      setText("newsletter-recipient-summary", ["parents", "future"].includes(newsletterDraft.audience) ? `${parentCount} parent email${parentCount === 1 ? "" : "s"} selected` : newsletterDraft.audience === "schools" ? `${schoolCount} partner school${schoolCount === 1 ? "" : "s"} selected` : `${parentCount} parent email${parentCount === 1 ? "" : "s"} and ${schoolCount} partner school${schoolCount === 1 ? "" : "s"}`);
       setText("newsletter-preview-as", newsletterDraft.audience === "schools" ? "Previewing as a sample school director" : "Previewing as a sample parent");
       const videoId = newsletterYouTubeId(newsletterDraft.videoUrl);
       const videoMarkup = newsletterDraft.videoUrl ? `<a class="newsletter-video-card" href="${rosterSafe(newsletterDraft.videoUrl)}" target="_blank" rel="noopener">${videoId ? `<img src="https://i.ytimg.com/vi/${rosterSafe(videoId)}/hqdefault.jpg" alt="YouTube video preview">` : `<span style="display:block;aspect-ratio:16/9;"></span>`}<span class="newsletter-video-play">▶</span></a>` : "";
       const ctaMarkup = newsletterDraft.ctaLabel && newsletterDraft.ctaUrl ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(newsletterDraft.ctaUrl)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:var(--newsletter-accent);color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterDraft.ctaLabel)}</a></p>` : "";
-      const sectionsMarkup = newsletterDraft.sections.map(newsletterSectionMarkup).join("");
+      const messagePosition = Math.max(0, Math.min(Number(newsletterDraft.messagePosition || 0), newsletterDraft.sections.length));
+      const editableSections = newsletterDraft.sections.map(newsletterEditableSectionMarkup);
+      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message">${newsletterDraft.messageHtml || rosterSafe(newsletterDraft.message || "")}</div></section>`;
+      editableSections.splice(messagePosition, 0, messageMarkup);
+      const sectionsMarkup = editableSections.join("");
       const preview = document.getElementById("newsletter-preview-document");
-      preview.className = `newsletter-preview-document template-${newsletterDraft.template} ${newsletterDraft.device === "mobile" ? "is-mobile" : ""} ${newsletterDraft.titleFont === "bodoni-smallcaps" ? "title-font-bodoni" : ""}`;
+      preview.className = `newsletter-preview-document template-${newsletterDraft.template} ${newsletterDraft.device === "mobile" ? "is-mobile" : ""} ${newsletterDraft.font === "bodoni-smallcaps" ? "title-font-bodoni" : ""}`;
       preview.style.setProperty("--newsletter-accent", newsletterColors[newsletterDraft.color] || newsletterColors.berry);
       preview.style.setProperty("--newsletter-title-font", newsletterTitleFontStyle());
       preview.style.setProperty("--newsletter-body-font", newsletterFontStyle());
       preview.style.setProperty("--newsletter-body-weight", newsletterFontWeight());
       preview.style.setProperty("--newsletter-body-size", newsletterFontSize());
-      preview.innerHTML = `<header class="newsletter-preview-header"><img src="assets/dance-techniques-logo-only.png" alt=""><h1>${rosterSafe(newsletterPersonalize(newsletterDraft.headline) || "Dance Techniques Newsletter")}</h1><p>${rosterSafe(newsletterPersonalize(newsletterDraft.subject) || "A special update for our dance family")}</p></header><main class="newsletter-preview-content"><p>${rosterSafe(newsletterPersonalize(newsletterDraft.message))}</p>${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>`;
+      preview.innerHTML = `<header class="newsletter-preview-header"><img src="assets/dance-techniques-logo-only.png" alt=""><h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>`;
     };
 
     const updateNewsletterDraftFromForm = () => {
-      newsletterDraft = { ...newsletterDraft, audience: document.getElementById("newsletter-audience")?.value || "parents", school: document.getElementById("newsletter-school-filter")?.value || "all", teacher: document.getElementById("newsletter-teacher-filter")?.value || "all", font: document.getElementById("newsletter-font")?.value || "avenir-light", titleFont: document.getElementById("newsletter-title-font")?.value || "avenir-bold", textSize: document.getElementById("newsletter-text-size")?.value || "standard", subject: document.getElementById("newsletter-subject")?.value || "", headline: document.getElementById("newsletter-headline")?.value || "", message: document.getElementById("newsletter-message")?.value || "", videoUrl: document.getElementById("newsletter-video-url")?.value || "", ctaLabel: document.getElementById("newsletter-cta-label")?.value || "", ctaUrl: document.getElementById("newsletter-cta-url")?.value || "" };
+      newsletterDraft = { ...newsletterDraft, font: document.getElementById("newsletter-font")?.value || "avenir-light", textSize: document.getElementById("newsletter-text-size")?.value || "12" };
       renderNewsletterStudio();
       saveNewsletterDraft();
     };
@@ -24864,7 +25195,13 @@
       if (audience) {
         newsletterSetupSelection.audience = audience.dataset.newsletterSetupAudience;
         newsletterSetupSelection.targetMode = "all";
-        if (newsletterSetupSelection.audience === "schools") newsletterSetupSelection.teacher = "all";
+        newsletterSetupSelection.day = "all";
+        newsletterSetupSelection.schools = [];
+        newsletterSetupSelection.teachers = [];
+        newsletterSetupSelection.classes = [];
+        newsletterSetupSelection.students = [];
+        newsletterSetupSelection.school = "all";
+        newsletterSetupSelection.teacher = "all";
       }
       const recipientStudent = event.target.closest("[data-newsletter-recipient-student]");
       if (recipientStudent) {
@@ -24895,7 +25232,7 @@
       }
       const selectAllVisible = event.target.closest("[data-newsletter-select-all-visible]");
       if (selectAllVisible) {
-        const records = boutiqueKitRecords();
+        const records = newsletterAudienceRecords(newsletterSetupSelection.audience);
         const kind = selectAllVisible.dataset.newsletterSelectAllVisible;
         if (kind === "schools") {
           newsletterSetupSelection.schools = [...new Set(records.filter(({ rosterClass }) => (newsletterSetupSelection.day === "all" || rosterClass.day === newsletterSetupSelection.day) && (newsletterSetupSelection.teacher === "all" || rosterClass.teacherId === newsletterSetupSelection.teacher)).map(({ rosterClass }) => rosterClass.schoolName))];
@@ -24919,6 +25256,13 @@
         newsletterSetupSelection.teachers = [];
         newsletterSetupSelection.classes = [];
         newsletterSetupSelection.students = [];
+      }
+      if (start && newsletterSetupStep === 2) {
+        newsletterSetupStep = newsletterSetupSelection.mode === "blank" ? 4 : 3;
+        if (newsletterSetupStep === 4) window.setTimeout(() => document.getElementById("newsletter-setup-next")?.click(), 0);
+      } else if (template && newsletterSetupStep === 3) {
+        newsletterSetupStep = 4;
+        window.setTimeout(() => document.getElementById("newsletter-setup-next")?.click(), 0);
       }
       if (start || category || template || audience || recipientStudent || recipientSchool || recipientTeacher || selectAllVisible || allRecipients) renderNewsletterSetup();
     });
@@ -24951,7 +25295,7 @@
       if (event.target.id === "newsletter-setup-classes") {
         newsletterSetupSelection.classes = [...event.target.selectedOptions].map((option) => option.value);
         if (newsletterSetupSelection.classes.length) {
-          const allowedStudentIds = new Set(boutiqueKitRecords().filter(({ rosterClass }) => newsletterSetupSelection.classes.includes(rosterClass.id)).map(({ student }) => student.id));
+          const allowedStudentIds = new Set(newsletterAudienceRecords(newsletterSetupSelection.audience).filter(({ rosterClass }) => newsletterSetupSelection.classes.includes(rosterClass.id)).map(({ student }) => student.id));
           newsletterSetupSelection.students = newsletterSetupSelection.students.filter((id) => allowedStudentIds.has(id));
         }
         renderNewsletterSetup();
@@ -24963,19 +25307,22 @@
       }
     });
     document.getElementById("newsletter-setup-back")?.addEventListener("click", () => {
-      newsletterSetupStep = newsletterSetupSelection.mode === "blank" && newsletterSetupStep === 4 ? 1 : Math.max(1, newsletterSetupStep - 1);
+      newsletterSetupStep = Math.max(1, newsletterSetupStep - 1);
       renderNewsletterSetup();
     });
     document.getElementById("newsletter-setup-next")?.addEventListener("click", () => {
-      if (newsletterSetupStep === 1 && !newsletterSetupSelection.mode) {
-        showToast("Choose Use a Template or Create a New One first.");
+      if (newsletterSetupStep === 1) {
+        newsletterSetupStep = 2;
+        renderNewsletterSetup();
         return;
       }
-      if (newsletterSetupStep < 5) {
+      if (newsletterSetupStep < 4) {
         newsletterSetupStep = newsletterSetupSelection.mode === "blank" && newsletterSetupStep === 1 ? 4 : newsletterSetupStep + 1;
         renderNewsletterSetup();
         return;
       }
+      const availableTemplates = newsletterTemplatesForAudience(newsletterSetupSelection.audience);
+      if (!availableTemplates.includes(newsletterSetupSelection.template)) newsletterSetupSelection.template = availableTemplates[0];
       if (newsletterSetupSelection.mode === "template") newsletterDraft = { ...newsletterDraft, ...newsletterTemplates[newsletterSetupSelection.template], template: newsletterSetupSelection.template };
       else newsletterDraft = { ...newsletterDraft, template: "monthly", subject: "", headline: "Dance Techniques Newsletter", message: "Hi [Parent First Name],\n\n", sections: [], color: "berry" };
       newsletterDraft.audience = newsletterSetupSelection.audience;
@@ -24991,7 +25338,7 @@
       saveNewsletterDraft();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
-    document.getElementById("newsletter-change-setup")?.addEventListener("click", () => {
+    document.getElementById("newsletter-change-audience")?.addEventListener("click", () => {
       newsletterSetupComplete = false;
       newsletterSetupStep = 1;
       newsletterSetupSelection = { mode: newsletterDraft.template ? "template" : "blank", category: newsletterCategoryForTemplate(newsletterDraft.template), template: newsletterDraft.template || "monthly", audience: newsletterDraft.audience, targetMode: newsletterDraft.targeting?.mode || "all", day: newsletterDraft.targeting?.day || "all", schools: newsletterDraft.targeting?.schools || [], teachers: newsletterDraft.targeting?.teachers || [], classes: newsletterDraft.targeting?.classes || [], students: newsletterDraft.targeting?.students || [], school: newsletterDraft.school, teacher: newsletterDraft.teacher };
@@ -24999,10 +25346,22 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    ["newsletter-audience", "newsletter-school-filter", "newsletter-teacher-filter", "newsletter-font", "newsletter-title-font", "newsletter-text-size"].forEach((id) => {
-      document.getElementById(id)?.addEventListener("change", updateNewsletterDraftFromForm);
+    ["newsletter-font", "newsletter-text-size"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("change", (event) => {
+        if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
+          if (id === "newsletter-text-size") {
+            const pointSize = Number(event.target.value) || 12;
+            const commandSize = pointSize <= 8 ? "1" : pointSize <= 10 ? "2" : pointSize <= 12 ? "3" : pointSize <= 14 ? "4" : pointSize <= 18 ? "5" : pointSize <= 24 ? "6" : "7";
+            document.execCommand("fontSize", false, commandSize);
+          }
+          else document.execCommand("fontName", false, event.target.value === "parisienne" ? "Parisienne" : event.target.value === "bodoni-smallcaps" ? "Bodoni 72 Smallcaps" : "Avenir Next");
+          newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
+          return;
+        }
+        updateNewsletterDraftFromForm();
+      });
     });
-    ["newsletter-subject", "newsletter-headline", "newsletter-message", "newsletter-video-url", "newsletter-cta-label", "newsletter-cta-url"].forEach((id) => {
+    ["newsletter-video-url", "newsletter-cta-label", "newsletter-cta-url"].forEach((id) => {
       const field = document.getElementById(id);
       field?.addEventListener("focus", () => { newsletterActiveField = id; });
       field?.addEventListener("input", () => {
@@ -25017,32 +25376,178 @@
     document.getElementById("newsletter-field-buttons")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-newsletter-field]");
       if (!button) return;
-      const field = document.getElementById(newsletterActiveField) || document.getElementById("newsletter-message");
       const token = button.dataset.newsletterField || "";
-      const start = Number.isInteger(field.selectionStart) ? field.selectionStart : field.value.length;
-      const end = Number.isInteger(field.selectionEnd) ? field.selectionEnd : start;
-      field.value = `${field.value.slice(0, start)}${token}${field.value.slice(end)}`;
+      const field = newsletterActivePreviewTarget && document.contains(newsletterActivePreviewTarget)
+        ? newsletterActivePreviewTarget
+        : document.querySelector('[data-newsletter-preview-field="message"]');
+      if (!field) return;
       field.focus();
-      field.setSelectionRange(start + token.length, start + token.length);
-      updateNewsletterDraftFromForm();
+      const selection = window.getSelection();
+      if (newsletterSavedSelection && field.contains(newsletterSavedSelection.commonAncestorContainer)) {
+        selection?.removeAllRanges();
+        selection?.addRange(newsletterSavedSelection);
+      }
+      const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      if (!range || !field.contains(range.commonAncestorContainer)) {
+        const fallbackRange = document.createRange();
+        fallbackRange.selectNodeContents(field);
+        fallbackRange.collapse(false);
+        selection?.removeAllRanges();
+        selection?.addRange(fallbackRange);
+      }
+      document.execCommand("insertText", false, token);
+      field.dispatchEvent(new Event("input", { bubbles: true }));
+      document.getElementById("newsletter-field-popover").hidden = true;
+    });
+    document.addEventListener("selectionchange", () => {
+      const selection = window.getSelection();
+      if (!selection?.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      const preview = document.getElementById("newsletter-preview-document");
+      if (preview?.contains(range.commonAncestorContainer)) newsletterSavedSelection = range.cloneRange();
+    });
+    const restoreNewsletterSelection = () => {
+      if (!newsletterSavedSelection) return false;
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(newsletterSavedSelection);
+      return true;
+    };
+    document.getElementById("newsletter-inline-toolbar")?.addEventListener("click", (event) => {
+      const command = event.target.closest("[data-newsletter-command]")?.dataset.newsletterCommand;
+      if (command) {
+        restoreNewsletterSelection();
+        document.execCommand(command, false);
+        newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+    document.getElementById("newsletter-open-fields")?.addEventListener("click", () => {
+      const popover = document.getElementById("newsletter-field-popover");
+      popover.hidden = !popover.hidden;
+    });
+    document.getElementById("newsletter-add-link")?.addEventListener("click", () => {
+      if (!restoreNewsletterSelection()) return showToast("Highlight text in the Live Preview first.");
+      const url = window.prompt("Paste the link for the highlighted text:", "https://");
+      if (!url) return;
+      document.execCommand("createLink", false, url);
+      newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("focusin", (event) => {
+      const editable = event.target.closest("[data-newsletter-preview-field], [data-newsletter-preview-section-field]");
+      if (!editable) return;
+      newsletterActivePreviewTarget = editable;
+      newsletterActiveField = editable.dataset.newsletterPreviewField || editable.dataset.newsletterPreviewSectionField || "message";
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("input", (event) => {
+      const draftField = event.target.closest("[data-newsletter-preview-field]");
+      if (draftField) {
+        const key = draftField.dataset.newsletterPreviewField;
+        if (["subject", "headline", "message"].includes(key)) {
+          newsletterDraft[key] = draftField.innerText.replace(/\u00a0/g, " ");
+          newsletterDraft[`${key}Html`] = draftField.innerHTML;
+        }
+        saveNewsletterDraft();
+        return;
+      }
+      const sectionField = event.target.closest("[data-newsletter-preview-section-field]");
+      const sectionEditor = event.target.closest("[data-newsletter-preview-section]");
+      if (!sectionField || !sectionEditor) return;
+      const section = newsletterDraft.sections[Number(sectionEditor.dataset.newsletterPreviewSection)];
+      const key = sectionField.dataset.newsletterPreviewSectionField;
+      if (!section || !key) return;
+      section[key] = sectionField instanceof HTMLInputElement ? sectionField.value : sectionField.innerText.replace(/\u00a0/g, " ");
+      if (!(sectionField instanceof HTMLInputElement)) section[`${key}Html`] = sectionField.innerHTML;
+      saveNewsletterDraft();
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("change", (event) => {
+      if (!event.target.matches("[data-newsletter-preview-section-field]")) return;
+      renderNewsletterStudio();
+      saveNewsletterDraft();
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("click", (event) => {
+      if (event.target.closest("[data-newsletter-preview-remove-message]")) {
+        newsletterDraft.message = "";
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        return;
+      }
+      const remove = event.target.closest("[data-newsletter-preview-remove]");
+      if (!remove) return;
+      newsletterDraft.sections.splice(Number(remove.dataset.newsletterPreviewRemove), 1);
+      renderNewsletterStudio();
+      saveNewsletterDraft();
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("dragstart", (event) => {
+      if (event.target.closest("[data-newsletter-preview-message]")) {
+        newsletterDragIndex = -2;
+        event.dataTransfer?.setData("text/plain", "message");
+        return;
+      }
+      const section = event.target.closest("[data-newsletter-preview-section]");
+      if (!section) return;
+      newsletterDragIndex = Number(section.dataset.newsletterPreviewSection);
+      section.classList.add("is-dragging");
+      event.dataTransfer?.setData("text/plain", String(newsletterDragIndex));
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("dragend", (event) => {
+      event.target.closest("[data-newsletter-preview-section]")?.classList.remove("is-dragging");
+      newsletterDragIndex = -1;
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("dragover", (event) => {
+      if (event.target.closest("[data-newsletter-preview-section], [data-newsletter-preview-message]")) event.preventDefault();
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("drop", (event) => {
+      const target = event.target.closest("[data-newsletter-preview-section]");
+      const targetMessage = event.target.closest("[data-newsletter-preview-message]");
+      if (!target && !targetMessage) return;
+      event.preventDefault();
+      if (newsletterDragIndex === -2 && target) {
+        newsletterDraft.messagePosition = Number(target.dataset.newsletterPreviewSection);
+        newsletterDragIndex = -1;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        return;
+      }
+      if (targetMessage && newsletterDragIndex >= 0) {
+        newsletterDraft.messagePosition = newsletterDragIndex;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        return;
+      }
+      const targetIndex = Number(target.dataset.newsletterPreviewSection);
+      if (newsletterDragIndex < 0 || targetIndex < 0 || newsletterDragIndex === targetIndex) return;
+      newsletterDraft.sections.splice(targetIndex, 0, newsletterDraft.sections.splice(newsletterDragIndex, 1)[0]);
+      newsletterDragIndex = -1;
+      renderNewsletterStudio();
+      saveNewsletterDraft();
     });
     document.getElementById("newsletter-color-swatches")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-newsletter-color]");
       if (!button) return;
+      if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
+        document.execCommand("foreColor", false, newsletterColors[button.dataset.newsletterColor] || newsletterColors.berry);
+        newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
+        return;
+      }
       newsletterDraft.color = button.dataset.newsletterColor || "berry";
       renderNewsletterStudio();
       saveNewsletterDraft();
     });
-    document.querySelector(".newsletter-add-section-buttons")?.addEventListener("click", (event) => {
+    document.querySelector(".newsletter-section-builder")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-newsletter-add-section]");
       if (!button) return;
       const type = button.dataset.newsletterAddSection || "text";
       const defaults = {
-        title: { title: "New Section" }, personalized: { title: "Just for [Dancer Preferred Name]", text: "A special note for your dance family." }, button: { linkText: "Open Link" }, character: { title: "A Little DT Magic", text: "🩰" }, quote: { text: "Movement is the language of joy." }, reminder: { title: "Important Reminder" }, calendar: { title: "Save the Date" }, social: { title: "Follow Along", linkText: "Follow Dance Techniques" }
+        title: { title: "New Section" }, section: { title: "New Section", text: "Add your section details here." }, button: { linkText: "Open Link" }, character: { title: "A Little DT Magic", text: "🩰" }, quote: { text: "Movement is the language of joy." }, reminder: { title: "Important Reminder" }, calendar: { title: "Save the Date" }, social: { title: "Follow Along", linkText: "Follow Dance Techniques" }
       };
       newsletterDraft.sections.push({ type, title: "", text: "", linkText: "", url: "", ...(defaults[type] || {}) });
       renderNewsletterStudio();
       saveNewsletterDraft();
+      window.setTimeout(() => {
+        const added = document.querySelector(`[data-newsletter-preview-section="${newsletterDraft.sections.length - 1}"]`);
+        (added?.querySelector("[contenteditable], input") || added)?.focus();
+        added?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 0);
     });
     document.getElementById("newsletter-section-list")?.addEventListener("click", (event) => {
       const remove = event.target.closest("[data-newsletter-remove-section]");
@@ -25092,6 +25597,7 @@
       newsletterDraft = { ...newsletterDraft, ...newsletterTemplates[template], template };
       renderNewsletterStudio();
       saveNewsletterDraft();
+      document.getElementById("newsletter-change-template")?.removeAttribute("open");
     }));
     document.querySelectorAll("[data-newsletter-device]").forEach((button) => button.addEventListener("click", () => {
       newsletterDraft.device = button.dataset.newsletterDevice || "desktop";
@@ -25110,9 +25616,43 @@
       saveNewsletterDraft();
       showToast("A fresh newsletter draft is ready.");
     });
-    document.getElementById("newsletter-test-send")?.addEventListener("click", () => {
-      showToast("Your preview is ready. We’ll connect the email provider before test sending.");
+    document.getElementById("newsletter-test-send")?.addEventListener("click", async () => {
+      const button = document.getElementById("newsletter-test-send");
+      const defaultEmail = window.dtCurrentProfile?.email || "dancetechniquesllc@gmail.com";
+      const testEmail = window.prompt("Send the test newsletter to:", defaultEmail);
+      if (testEmail === null) return;
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testEmail.trim())) return showToast("Enter a valid test email.");
+      button.disabled = true;
+      button.textContent = "Sending Test…";
+      try {
+        const context = newsletterSampleContext();
+        await sendNewsletterMessages({ mode: "test", messages: [{ to: testEmail.trim(), name: "Dance Techniques Test", subject: `[TEST] ${newsletterPersonalize(newsletterDraft.subject || newsletterDraft.headline || "Dance Techniques Newsletter", context)}`, html: newsletterEmailHtml(context) }] });
+        showToast(`Test newsletter sent to ${testEmail.trim()}.`);
+      } catch (error) {
+        showToast(error.message || "The test newsletter could not be sent.");
+      } finally {
+        button.disabled = false;
+        button.textContent = "Send Test";
+      }
     });
+    document.getElementById("newsletter-send")?.addEventListener("click", async () => {
+      const button = document.getElementById("newsletter-send");
+      const messages = newsletterRecipientMessages();
+      if (!messages.length) return showToast("No valid recipient email addresses match this audience.");
+      if (messages.length > 1000) return showToast("This send has more than 1,000 recipients. Narrow the audience or send it in groups.");
+      if (!window.confirm(`Send this newsletter to ${messages.length} recipient${messages.length === 1 ? "" : "s"} now?`)) return;
+      button.disabled = true;
+      button.textContent = "Sending…";
+      try {
+        const result = await sendNewsletterMessages({ mode: "send", messages, confirmed: true });
+        showToast(`Newsletter sent to ${result.sent} recipient${result.sent === 1 ? "" : "s"}.`);
+      } catch (error) {
+        showToast(error.message || "The newsletter could not be sent.");
+      } finally {
+        renderNewsletterStudio();
+      }
+    });
+    window.addEventListener("dt-auth-ready", renderNewsletterStudio);
     document.getElementById("newsletter-dt-touch")?.addEventListener("click", () => {
       newsletterDtTouchOriginal = newsletterDraft.message || "";
       const audience = newsletterDraft.audience === "schools" ? "partner_school_directors" : "parents_guardians";
@@ -25307,7 +25847,7 @@
       if (assignClassButton) {
         const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
         const rosterClass = rosterClasses.find((candidate) => candidate.id === assignClassButton.dataset.enrollmentAssignClass);
-        if (!item || !rosterClass) return;
+        if (explainBlockedClassAssignment(item, rosterClass)) return;
         item.matched_dance_class_id = rosterClass.id;
         item.matched_teacher_id = rosterClass.teacherId || "";
         enrollmentClassPreviewId = "";
@@ -25383,7 +25923,7 @@
       if (!assignClassButton) return;
       const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
       const rosterClass = rosterClasses.find((candidate) => candidate.id === assignClassButton.dataset.enrollmentAssignClass);
-      if (!item || !rosterClass) return;
+      if (explainBlockedClassAssignment(item, rosterClass)) return;
       item.matched_dance_class_id = rosterClass.id;
       item.matched_teacher_id = rosterClass.teacherId || "";
       enrollmentClassPreviewId = "";
@@ -26455,6 +26995,12 @@
         openProspectiveFollowup();
         return;
       }
+      const multiClassButton = event.target.closest("[data-roster-multi-class-open]");
+      if (multiClassButton) {
+        rosterMultiClassSchoolName = multiClassButton.dataset.rosterMultiClassOpen;
+        renderRosterMultiClassEdit();
+        return;
+      }
       const classButton = event.target.closest("[data-roster-class]");
       if (classButton) {
         selectedRosterClassId = classButton.dataset.rosterClass;
@@ -26546,6 +27092,81 @@
         if (!student) return;
         openRosterStudentEditor(rosterClass, student);
       }
+    });
+    document.getElementById("roster-multi-class-close")?.addEventListener("click", closeRosterMultiClassEdit);
+    document.getElementById("roster-multi-class-cancel")?.addEventListener("click", closeRosterMultiClassEdit);
+    document.getElementById("roster-multi-class-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "roster-multi-class-overlay") closeRosterMultiClassEdit();
+    });
+    document.getElementById("roster-multi-sort")?.addEventListener("change", (event) => {
+      rosterMultiClassSort = event.target.value;
+      renderRosterMultiClassEdit();
+    });
+    document.getElementById("roster-multi-classroom-filter")?.addEventListener("change", (event) => {
+      rosterMultiClassClassroomFilter = event.target.value;
+      renderRosterMultiClassEdit();
+    });
+    document.getElementById("roster-multi-age-filter")?.addEventListener("change", (event) => {
+      rosterMultiClassAgeFilter = event.target.value;
+      renderRosterMultiClassEdit();
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("dragstart", (event) => {
+      const studentCard = event.target.closest("[data-roster-multi-student]");
+      if (!studentCard) return;
+      rosterMultiClassDragStudent = {
+        studentId: studentCard.dataset.rosterMultiStudent,
+        sourceClassId: studentCard.dataset.rosterMultiSourceClass
+      };
+      studentCard.classList.add("is-dragging");
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", rosterMultiClassDragStudent.studentId);
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("dragover", (event) => {
+      const targetSection = event.target.closest("[data-roster-multi-drop-class]");
+      if (!targetSection || !rosterMultiClassDragStudent) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      document.querySelectorAll(".roster-multi-class-section.is-drop-target").forEach((section) => section.classList.remove("is-drop-target"));
+      targetSection.classList.add("is-drop-target");
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("dragleave", (event) => {
+      const targetSection = event.target.closest("[data-roster-multi-drop-class]");
+      if (targetSection && !targetSection.contains(event.relatedTarget)) targetSection.classList.remove("is-drop-target");
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("dragend", () => {
+      rosterMultiClassDragStudent = null;
+      document.querySelectorAll(".roster-multi-student.is-dragging, .roster-multi-class-section.is-drop-target").forEach((element) => element.classList.remove("is-dragging", "is-drop-target"));
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("drop", async (event) => {
+      const targetSection = event.target.closest("[data-roster-multi-drop-class]");
+      const dragged = rosterMultiClassDragStudent;
+      if (!targetSection || !dragged) return;
+      event.preventDefault();
+      const sourceClass = rosterClasses.find((item) => item.id === dragged.sourceClassId);
+      const targetClass = rosterClasses.find((item) => item.id === targetSection.dataset.rosterMultiDropClass);
+      const student = sourceClass?.students.find((item) => item.id === dragged.studentId);
+      if (!sourceClass || !targetClass || !student || sourceClass.id === targetClass.id) {
+        rosterMultiClassDragStudent = null;
+        return renderRosterMultiClassEdit();
+      }
+      if (rosterEnrolled(targetClass).length >= Number(targetClass.capacity || 12)) {
+        rosterMultiClassDragStudent = null;
+        renderRosterMultiClassEdit();
+        window.alert(`${targetClass.name} is full. Increase its capacity or choose another class before moving ${rosterStudentFirstName(student)}.`);
+        return;
+      }
+      const sourceCount = rosterEnrolled(sourceClass).length;
+      const targetCount = rosterEnrolled(targetClass).length;
+      sourceClass.students.splice(sourceClass.students.indexOf(student), 1);
+      targetClass.students.push(student);
+      syncRosterCountToSource(sourceClass, { previousCount: sourceCount });
+      syncRosterCountToSource(targetClass, { previousCount: targetCount });
+      rosterMultiClassDragStudent = null;
+      renderRosterMultiClassEdit();
+      renderClassesAndRosters();
+      scheduleAppDataSave();
+      await saveSharedStudent(student, targetClass);
+      showToast(`${rosterStudentFirstName(student)} moved to ${targetClass.name}`);
     });
     document.getElementById("roster-class-profile-overlay")?.addEventListener("click", (event) => {
       if (event.target.id !== "roster-class-profile-overlay") return;
@@ -27343,6 +27964,7 @@
       await loadCloudAppData(profile);
       await loadEnrollmentIntakeQueue(profile);
       await loadNotificationSystem(profile);
+      await ensureEmailPlanUpgradeNotification(profile);
       subscribeEnrollmentIntakeQueue(profile);
       subscribeNotificationSystem(profile);
       loadSharedMusicLibrary(profile);
