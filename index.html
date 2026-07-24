@@ -4268,7 +4268,7 @@
     .announcement-actions {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
       gap: 10px;
       margin-top: 10px;
     }
@@ -4285,7 +4285,7 @@
     .team-talk-group-button {
       border: 1px solid var(--border);
       border-radius: 999px;
-      background: transparent;
+      background: var(--blush);
       color: var(--rose);
       font-size: 11.5px;
       font-weight: 850;
@@ -11465,6 +11465,7 @@
                         <h3>Announcements</h3>
                         <p class="subtle" id="teacher-announcement-date">No announcements yet</p>
                       </div>
+                      <button class="past-announcements-button" type="button" data-open-announcement-history>Past Announcements</button>
                     </div>
                     <div id="teacher-latest-announcement"></div>
                   </div>
@@ -19229,7 +19230,6 @@
               <button class="reaction-btn ${latest.reaction === "up" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="up" aria-label="Like announcement">&#128077;</button>
               <button class="reaction-btn ${latest.reaction === "down" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="down" aria-label="Dislike announcement">&#128078;</button>
             </div>
-            <button class="past-announcements-button" type="button" data-open-announcement-history>Past Announcements</button>
           </div>
         </article>
       `;

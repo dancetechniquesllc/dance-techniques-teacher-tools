@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v138-inbox-card-layout";
+const CACHE_NAME = "my-dance-techniques-v139-announcement-history-button";
 const CORE_ASSETS = [
   "./",
   "./index.html",
