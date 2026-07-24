@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v143-team-talk-senders";
+const CACHE_NAME = "my-dance-techniques-v145-vector-reaction-icons";
 const CORE_ASSETS = [
   "./",
   "./index.html",
