@@ -3992,6 +3992,10 @@
       gap: 8px;
     }
 
+    #teacher-thread-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .pinned-thread-list {
       margin-bottom: 12px;
     }
@@ -4013,6 +4017,72 @@
       background: var(--surface);
       color: var(--fg);
       text-align: left;
+    }
+
+    .teacher-inbox-card {
+      grid-template-columns: 42px minmax(0, 1fr);
+      align-items: start;
+      min-height: 150px;
+      padding: 12px;
+      border-radius: 16px;
+    }
+
+    .message-profile-bubble {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--blush);
+      color: var(--rose);
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .thread-preview-bubble {
+      position: relative;
+      display: block;
+      width: fit-content;
+      max-width: 100%;
+      margin-top: 9px;
+      padding: 8px 10px;
+      border-radius: 13px;
+      background: var(--blush);
+      font-size: 11.5px;
+      line-height: 1.3;
+    }
+
+    .thread-preview-bubble.sent {
+      margin-left: auto;
+      border: 1.5px solid oklch(78% 0.07 20);
+      background: transparent;
+    }
+
+    .thread-preview-bubble::after {
+      content: "";
+      position: absolute;
+      left: -4px;
+      bottom: 5px;
+      width: 9px;
+      height: 9px;
+      background: var(--blush);
+      transform: rotate(45deg);
+    }
+
+    .thread-preview-bubble.sent::after {
+      right: -5px;
+      left: auto;
+      border-top: 1.5px solid oklch(78% 0.07 20);
+      border-right: 1.5px solid oklch(78% 0.07 20);
+      background: var(--surface);
+    }
+
+    .thread-preview-time {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 10.5px;
+      text-align: right;
     }
 
     .thread-button.active {
@@ -4044,9 +4114,8 @@
 
     .message-thread {
       padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
+      border: 0;
+      background: transparent;
     }
 
     .message-thread.hidden {
@@ -4055,20 +4124,33 @@
 
     .message-stack {
       display: grid;
-      gap: 8px;
+      gap: 10px;
       margin-top: 10px;
+      padding-bottom: 86px;
     }
 
     .message-bubble {
+      position: relative;
+      width: fit-content;
+      max-width: 82%;
       padding: 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--surface);
+      border: 0;
+      border-radius: 17px 17px 17px 5px;
+      background: var(--blush);
     }
 
     .message-bubble.mine {
-      border-color: oklch(82% 0.045 20);
-      background: var(--blush);
+      justify-self: end;
+      border: 1.5px solid oklch(78% 0.07 20);
+      border-radius: 17px 17px 5px 17px;
+      background: transparent;
+    }
+
+    .message-bubble-sender {
+      margin-bottom: 3px;
+      color: var(--rose);
+      font-size: 10.5px;
+      font-weight: 850;
     }
 
     .message-bubble p {
@@ -4078,10 +4160,27 @@
     }
 
     .reaction-row {
+      position: absolute;
+      z-index: 2;
+      top: -35px;
+      right: 4px;
       display: flex;
       gap: 6px;
-      justify-content: flex-end;
-      margin-top: 8px;
+      padding: 4px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      box-shadow: 0 7px 18px oklch(22% 0.03 245 / 0.14);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(4px);
+      transition: 140ms ease;
+    }
+
+    .message-bubble.reaction-open .reaction-row {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
     }
 
     .reaction-btn {
@@ -4114,6 +4213,53 @@
 
     .announcement-card .thread-list {
       margin-top: 8px;
+    }
+
+    .latest-announcement {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--surface);
+    }
+
+    .latest-announcement p {
+      margin: 8px 0 0;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .announcement-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .announcement-actions .reaction-row {
+      position: static;
+      opacity: 1;
+      pointer-events: auto;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .past-announcements-button,
+    .team-talk-group-button {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--rose);
+      font-size: 11.5px;
+      font-weight: 850;
+    }
+
+    .team-talk-group-button {
+      width: fit-content;
+      margin: 8px 0 12px;
+      border: 0;
+      background: oklch(82% 0.055 20);
+      color: oklch(40% 0.09 350);
     }
 
     .message-read-receipt {
@@ -4172,7 +4318,13 @@
     }
 
     .reply-composer {
+      position: sticky;
+      bottom: 8px;
+      z-index: 4;
       margin-top: 10px;
+      border-radius: 18px;
+      background: oklch(99% 0.008 25 / 0.96);
+      box-shadow: 0 10px 28px oklch(22% 0.03 245 / 0.12);
     }
 
     .reply-composer textarea {
@@ -11272,16 +11424,17 @@
                 <section class="panel">
                   <div class="announcement-card">
                     <div class="section-title">
-                      <h3>Announcements</h3>
-                      <span class="status private">Read only</span>
+                      <div>
+                        <h3>Announcements</h3>
+                        <p class="subtle" id="teacher-announcement-date">No announcements yet</p>
+                      </div>
                     </div>
-                    <div class="thread-list" id="teacher-announcement-thread-list"></div>
+                    <div id="teacher-latest-announcement"></div>
                   </div>
                   <div class="section-title">
                     <h3>Team Talk</h3>
-                    <span class="status group-chat">Group Chat</span>
                   </div>
-                  <div class="thread-list pinned-thread-list" id="teacher-pinned-thread-list"></div>
+                  <button class="team-talk-group-button" type="button" data-teacher-thread="team-meeting">Group Chat</button>
                   <div class="section-title">
                     <h3>Inbox</h3>
                     <button class="plus-circle" type="button" id="open-private-message" aria-label="New private message">+</button>
@@ -18947,16 +19100,25 @@
     };
     const teacherTitleNames = ["Lexi", "Tiffany", "Erika", "Makayla"];
     const personDisplayName = (name) => teacherTitleNames.includes(name) ? `Ms. ${name}` : name;
-    const messageSenderDisplayName = (message, thread) => (
-      thread.type === "announcement" && message.from === "Admin" ? "Ms. Tiffany & Ms. Lexi" : personDisplayName(message.from)
-    );
+    const messageSenderDisplayName = (message) => message.from === "Admin" ? "Admin" : personDisplayName(message.from);
     const messageMetaLine = (message, thread) => (
       thread.type === "announcement" ? message.time : `${message.role} • ${message.time}`
     );
+    const announcementDateTimeLabel = (message) => {
+      if (message?.createdAt) {
+        const date = new Date(message.createdAt);
+        return `${date.toLocaleDateString([], { month: "short", day: "numeric" })} - ${date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`;
+      }
+      return String(message?.time || "").replace(/^(Today|Yesterday|Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+/, "$1 - ");
+    };
     const messageThreadNameFor = (thread, viewerName) => {
       if (thread.type === "team" || thread.type === "announcement") return thread.title;
       const others = thread.participants.filter((participant) => participant !== viewerName);
       return others.map(personDisplayName).join(" + ") || thread.title;
+    };
+    const readReceiptNamesFor = (thread, message) => {
+      if (thread.type === "announcement" || thread.type === "team") return readReceiptTeacherNames;
+      return thread.participants.filter((participant) => participant !== message.from && participant !== "Admins");
     };
 
     const renderThreadButtons = (containerId, threads, selectedId, dataAttribute, viewerName) => {
@@ -18965,7 +19127,22 @@
       container.innerHTML = threads.map((thread) => {
         const latest = latestThreadMessage(thread);
         const unread = isThreadUnreadFor(thread, viewerName);
-        const previewText = latest ? `${escapeText(messageSenderDisplayName(latest, thread))} • ${escapeText(latest.time)}` : "";
+        if (containerId === "teacher-thread-list") {
+          const title = messageThreadNameFor(thread, viewerName);
+          const initials = title.replace(/^Ms\.\s*/i, "").split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "DT";
+          const sent = latest?.from === viewerName;
+          return `
+            <button class="thread-button teacher-inbox-card ${thread.id === selectedId ? "active" : ""}" type="button" ${dataAttribute}="${escapeText(thread.id)}">
+              <span class="message-profile-bubble" aria-hidden="true">${escapeText(initials)}</span>
+              <span>
+                <strong>${escapeText(title)}</strong>
+                ${latest ? `<span class="thread-preview-bubble ${sent ? "sent" : ""}">${escapeText(latest.text || "Open this message")}</span><small class="thread-preview-time">${escapeText(latest.time)}</small>` : `<small>No messages yet</small>`}
+              </span>
+              ${unread ? `<span class="status message-unread-badge">1</span>` : ""}
+            </button>
+          `;
+        }
+        const previewText = latest ? `${escapeText(messageSenderDisplayName(latest))} • ${escapeText(latest.time)}` : "";
         const scopeBadge = unread
           ? `<span class="status message-unread-badge">1</span>`
           : (viewerName === "Admin" ? `<span class="status ${thread.type === "team" ? "group-chat" : messageThreadStatusClass(thread)}">${thread.type === "team" ? "Group Chat" : (thread.type === "announcement" ? "Announcement" : "Private")}</span>` : "");
@@ -18979,6 +19156,64 @@
           </button>
         `;
       }).join("");
+    };
+
+    const renderLatestTeacherAnnouncement = (thread, viewerName) => {
+      const target = document.getElementById("teacher-latest-announcement");
+      const latest = thread ? latestThreadMessage(thread) : null;
+      setText("teacher-announcement-date", latest ? announcementDateTimeLabel(latest) : "No announcements yet");
+      if (!target) return;
+      if (!latest) {
+        target.innerHTML = `<div class="latest-announcement"><p>No announcements yet.</p></div>`;
+        return;
+      }
+      const messageIndex = thread.messages.length - 1;
+      target.innerHTML = `
+        <article class="latest-announcement">
+          <strong>Admin</strong>
+          ${latest.html ? `<div class="rich-announcement-body">${latest.html}</div>` : `<p>${escapeText(latest.text)}</p>`}
+          <div class="announcement-actions">
+            <div class="reaction-row" aria-label="Announcement reactions">
+              <button class="reaction-btn ${latest.reaction === "up" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="up" aria-label="Like announcement">&#128077;</button>
+              <button class="reaction-btn ${latest.reaction === "down" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="down" aria-label="Dislike announcement">&#128078;</button>
+            </div>
+            <button class="past-announcements-button" type="button" data-open-announcement-history>Past Announcements</button>
+          </div>
+        </article>
+      `;
+    };
+
+    const openAnnouncementHistory = () => {
+      const thread = messageThreads.find((entry) => entry.id === announcementThreadId);
+      if (!thread) return;
+      let modal = document.getElementById("announcement-history-modal");
+      if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "announcement-history-modal";
+        modal.className = "library-edit-modal";
+        modal.innerHTML = `
+          <section class="library-edit-panel" role="dialog" aria-modal="true" aria-labelledby="announcement-history-title">
+            <div class="library-edit-header">
+              <div><h3 id="announcement-history-title">Past Announcements</h3><p>Dance Techniques announcement history</p></div>
+              <button class="library-icon-button" type="button" data-announcement-history-close aria-label="Close announcement history">×</button>
+            </div>
+            <div class="library-edit-body" id="announcement-history-list"></div>
+          </section>
+        `;
+        document.body.appendChild(modal);
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal || event.target.closest("[data-announcement-history-close]")) modal.classList.remove("open");
+        });
+      }
+      const messages = thread.messages.slice().reverse();
+      modal.querySelector("#announcement-history-list").innerHTML = messages.map((message) => `
+        <article class="latest-announcement">
+          <strong>Admin</strong>
+          <small>${escapeText(announcementDateTimeLabel(message))}</small>
+          ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}
+        </article>
+      `).join("");
+      modal.classList.add("open");
     };
 
     const renderMessageStack = (thread, titleId, participantsId, scopeId, stackId, viewerName) => {
@@ -19000,14 +19235,16 @@
       if (!stack) return;
       stack.innerHTML = thread.messages.map((message, messageIndex) => {
         const readBy = Array.isArray(message.readBy) ? message.readBy : [];
-        const receipt = viewerName === "Admin" && message.from === "Admin" ? `
+        const receiptNames = readReceiptNamesFor(thread, message);
+        const viewedCount = receiptNames.filter((name) => readBy.includes(name)).length;
+        const receipt = viewerName === "Admin" ? `
           <button class="message-read-receipt" type="button" data-read-receipt-thread="${escapeText(thread.id)}" data-read-receipt-message="${messageIndex}">
-            ✔ ${readBy.length} of ${readReceiptTeacherNames.length} teachers viewed
+            ✔ ${viewedCount} of ${receiptNames.length} viewed
           </button>
         ` : "";
         return `
-          <div class="message-bubble ${message.from === viewerName ? "mine" : ""}">
-            <strong>${escapeText(messageSenderDisplayName(message, thread))} <small>${escapeText(messageMetaLine(message, thread))}</small></strong>
+          <div class="message-bubble ${message.from === viewerName ? "mine" : ""}" data-message-hold>
+            <div class="message-bubble-sender">${escapeText(messageSenderDisplayName(message))} · ${escapeText(message.time)}</div>
             ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}
             ${receipt}
             <div class="reaction-row" aria-label="Message reactions">
@@ -19050,8 +19287,7 @@
       if (selectedTeacherMessageThreadId && !threads.some((thread) => thread.id === selectedTeacherMessageThreadId)) selectedTeacherMessageThreadId = "";
       if (selectedTeacherMessageThreadId) clearThreadUnreadFor(selectedTeacherMessageThreadId, viewerName);
       const activeThread = threads.find((thread) => thread.id === selectedTeacherMessageThreadId);
-      renderThreadButtons("teacher-announcement-thread-list", announcementThreads, selectedTeacherMessageThreadId, "data-teacher-thread", viewerName);
-      renderThreadButtons("teacher-pinned-thread-list", pinnedThreads, selectedTeacherMessageThreadId, "data-teacher-thread", viewerName);
+      renderLatestTeacherAnnouncement(announcementThreads[0], viewerName);
       renderThreadButtons("teacher-thread-list", inboxThreads, selectedTeacherMessageThreadId, "data-teacher-thread", viewerName);
       renderMessageStack(
         activeThread,
@@ -19171,7 +19407,10 @@
       overlay.querySelector(".mini-app-notification-close")?.focus();
     };
 
-    document.querySelector(".messages-tile")?.addEventListener("click", openMessagesMiniAppNotifications);
+    document.querySelector(".messages-tile")?.addEventListener("click", () => {
+      renderTeacherMessages();
+      openMessagesMiniAppNotifications();
+    });
     document.querySelector(".classes-tile")?.addEventListener("click", () => openNotificationMiniAppNotifications("classes"));
     document.querySelector(".rosters-tile")?.addEventListener("click", () => openNotificationMiniAppNotifications("rosters"));
 
@@ -19296,6 +19535,7 @@
         from: "Admin",
         role: "Admin",
         time: "Just now",
+        createdAt: new Date().toISOString(),
         text,
         readBy: []
       });
@@ -19386,6 +19626,7 @@
         from: "Admin",
         role: "Admin",
         time: "Just now",
+        createdAt: new Date().toISOString(),
         text,
         html,
         readBy: []
@@ -19432,9 +19673,9 @@
       showToast(`Response sent to ${teacher.displayName || fullName(teacher)}`);
     };
 
-    const receiptRowsMarkup = (message) => {
+    const receiptRowsMarkup = (thread, message) => {
       const readBy = Array.isArray(message?.readBy) ? message.readBy : [];
-      return readReceiptTeacherNames.map((teacher) => {
+      return readReceiptNamesFor(thread, message).map((teacher) => {
         const viewed = readBy.includes(teacher);
         return `
           <div class="receipt-row ${viewed ? "" : "not-read"}">
@@ -19472,8 +19713,10 @@
         });
       }
       const readBy = Array.isArray(message.readBy) ? message.readBy : [];
-      modal.querySelector("#read-receipt-summary").textContent = `${readBy.length} of ${readReceiptTeacherNames.length} teachers viewed this message.`;
-      modal.querySelector(".receipt-list").innerHTML = receiptRowsMarkup(message);
+      const receiptNames = readReceiptNamesFor(thread, message);
+      const viewedCount = receiptNames.filter((name) => readBy.includes(name)).length;
+      modal.querySelector("#read-receipt-summary").textContent = `${viewedCount} of ${receiptNames.length} viewed this message.`;
+      modal.querySelector(".receipt-list").innerHTML = receiptRowsMarkup(thread, message);
       modal.classList.add("open");
     };
 
@@ -21285,12 +21528,20 @@
           <span class="status ${messageThreadStatusClass(thread)}">${readOnly ? "View only" : "Reply"}</span>
         </div>
         <div class="message-stack">
-          ${thread.messages.map((message) => `
+          ${thread.messages.map((message, messageIndex) => {
+            const readBy = Array.isArray(message.readBy) ? message.readBy : [];
+            const receiptNames = readReceiptNamesFor(thread, message);
+            const viewedCount = receiptNames.filter((name) => readBy.includes(name)).length;
+            return `
             <div class="message-bubble ${message.from === "Admin" ? "mine" : ""}">
-              <strong>${escapeText(messageSenderDisplayName(message, thread))} <small>${escapeText(messageMetaLine(message, thread))}</small></strong>
+              <div class="message-bubble-sender">${escapeText(messageSenderDisplayName(message))} · ${escapeText(message.time)}</div>
               ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}
+              <button class="message-read-receipt" type="button" data-read-receipt-thread="${escapeText(thread.id)}" data-read-receipt-message="${messageIndex}">
+                ✔ ${viewedCount} of ${receiptNames.length} viewed
+              </button>
             </div>
-          `).join("") || `<p class="hint-text">No messages yet.</p>`}
+          `;
+          }).join("") || `<p class="hint-text">No messages yet.</p>`}
         </div>
       </section>
     `;
@@ -21719,6 +21970,7 @@
     document.getElementById("teacher-announcement-thread-list")?.addEventListener("click", selectTeacherMessageThread);
     document.getElementById("teacher-pinned-thread-list")?.addEventListener("click", selectTeacherMessageThread);
     document.getElementById("teacher-thread-list")?.addEventListener("click", selectTeacherMessageThread);
+    document.querySelector('[data-teacher-thread="team-meeting"]')?.addEventListener("click", selectTeacherMessageThread);
 
     document.getElementById("admin-thread-list")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-admin-thread]");
@@ -21758,6 +22010,10 @@
     });
 
     document.addEventListener("click", (event) => {
+      if (event.target.closest("[data-open-announcement-history]")) {
+        openAnnouncementHistory();
+        return;
+      }
       const receiptButton = event.target.closest("[data-read-receipt-thread]");
       if (receiptButton) {
         openReadReceiptModal(receiptButton.dataset.readReceiptThread, receiptButton.dataset.readReceiptMessage);
@@ -21766,6 +22022,33 @@
       const button = event.target.closest("[data-react-thread]");
       if (!button) return;
       reactToMessage(button.dataset.reactThread, button.dataset.reactMessage, button.dataset.reaction);
+    });
+
+    let messageReactionHoldTimer = null;
+    const cancelMessageReactionHold = () => {
+      clearTimeout(messageReactionHoldTimer);
+      messageReactionHoldTimer = null;
+    };
+    document.addEventListener("pointerdown", (event) => {
+      const bubble = event.target.closest("[data-message-hold]");
+      if (!bubble || event.target.closest("button")) return;
+      cancelMessageReactionHold();
+      messageReactionHoldTimer = window.setTimeout(() => {
+        document.querySelectorAll("[data-message-hold].reaction-open").forEach((item) => {
+          if (item !== bubble) item.classList.remove("reaction-open");
+        });
+        bubble.classList.add("reaction-open");
+        messageReactionHoldTimer = null;
+      }, 450);
+    });
+    document.addEventListener("pointerup", cancelMessageReactionHold);
+    document.addEventListener("pointercancel", cancelMessageReactionHold);
+    document.addEventListener("pointermove", cancelMessageReactionHold);
+    document.addEventListener("contextmenu", (event) => {
+      const bubble = event.target.closest("[data-message-hold]");
+      if (!bubble) return;
+      event.preventDefault();
+      bubble.classList.add("reaction-open");
     });
 
     const updateProfileField = (event) => {
