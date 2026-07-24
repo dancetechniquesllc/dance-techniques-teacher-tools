@@ -6290,7 +6290,10 @@
     .newsletter-preview-document.is-boy-version .newsletter-preview-footer { border-color: #b9c3b2; background: #e7ece3; }
     .newsletter-preview-document.title-font-bodoni .newsletter-preview-header h1,
     .newsletter-preview-document.title-font-bodoni .newsletter-preview-header p,
-    .newsletter-preview-document.title-font-bodoni .newsletter-content-section h2 { color: #5e5e5e; text-transform: lowercase; }
+    .newsletter-preview-document.title-font-bodoni .newsletter-content-section h2 { color: #5e5e5e; }
+    .newsletter-preview-document.title-font-bodoni .newsletter-preview-header,
+    .newsletter-preview-document.title-font-bodoni .newsletter-preview-content,
+    .newsletter-preview-document.title-font-bodoni .newsletter-preview-footer { text-transform: lowercase; }
     .newsletter-preview-header { padding: 28px 28px 22px; background: linear-gradient(135deg, #e4b4ae, #f6dcd7); text-align: center; }
     .newsletter-preview-header img { width: 150px; max-height: 70px; object-fit: contain; }
     .newsletter-preview-header h1 { margin: 12px 0 4px; font-family: var(--newsletter-title-font, inherit); font-size: 29px; }
@@ -26300,8 +26303,42 @@
       preview.innerHTML = `<header class="newsletter-preview-header"><img src="assets/dance-techniques-logo-only.png" alt=""><h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>`;
     };
 
+    const newsletterLowercaseText = (value = "") => {
+      const tokens = [];
+      return String(value || "").replace(/\[[^\]]+\]/g, (token) => `\uE000${tokens.push(token) - 1}\uE001`).toLocaleLowerCase("en-US").replace(/\uE000(\d+)\uE001/g, (_, index) => tokens[Number(index)] || "");
+    };
+    const newsletterLowercaseHtml = (html = "") => {
+      if (!html) return "";
+      const template = document.createElement("template");
+      template.innerHTML = html;
+      const lowercaseChildren = (node) => [...node.childNodes].forEach((child) => {
+        if (child.nodeType === 3) child.nodeValue = newsletterLowercaseText(child.nodeValue);
+        else lowercaseChildren(child);
+      });
+      lowercaseChildren(template.content);
+      return template.innerHTML;
+    };
+    const lowercaseNewsletterDraftCopy = () => {
+      ["subject", "headline", "message", "ctaLabel"].forEach((key) => {
+        if (key in newsletterDraft) newsletterDraft[key] = newsletterLowercaseText(newsletterDraft[key]);
+      });
+      ["subjectHtml", "headlineHtml", "messageHtml"].forEach((key) => {
+        if (newsletterDraft[key]) newsletterDraft[key] = newsletterLowercaseHtml(newsletterDraft[key]);
+      });
+      newsletterDraft.sections = (newsletterDraft.sections || []).map((section) => {
+        const next = { ...section };
+        ["title", "text", "linkText"].forEach((key) => {
+          if (key in next) next[key] = newsletterLowercaseText(next[key]);
+          if (next[`${key}Html`]) next[`${key}Html`] = newsletterLowercaseHtml(next[`${key}Html`]);
+        });
+        return next;
+      });
+    };
+
     const updateNewsletterDraftFromForm = () => {
-      newsletterDraft = { ...newsletterDraft, font: document.getElementById("newsletter-font")?.value || "avenir-light", textSize: document.getElementById("newsletter-text-size")?.value || "12" };
+      const font = document.getElementById("newsletter-font")?.value || "avenir-light";
+      newsletterDraft = { ...newsletterDraft, font, textSize: document.getElementById("newsletter-text-size")?.value || "12" };
+      if (font === "bodoni-smallcaps") lowercaseNewsletterDraftCopy();
       renderNewsletterStudio();
       saveNewsletterDraft();
     };
@@ -27111,7 +27148,10 @@
             const commandSize = pointSize <= 8 ? "1" : pointSize <= 10 ? "2" : pointSize <= 12 ? "3" : pointSize <= 14 ? "4" : pointSize <= 18 ? "5" : pointSize <= 24 ? "6" : "7";
             document.execCommand("fontSize", false, commandSize);
           }
-          else document.execCommand("fontName", false, event.target.value === "parisienne" ? "Parisienne" : event.target.value === "bodoni-smallcaps" ? "Bodoni 72 Smallcaps" : "Avenir Next");
+          else {
+            document.execCommand("fontName", false, event.target.value === "parisienne" ? "Parisienne" : event.target.value === "bodoni-smallcaps" ? "Bodoni 72 Smallcaps" : "Avenir Next");
+            if (event.target.value === "bodoni-smallcaps" && newsletterActivePreviewTarget) newsletterActivePreviewTarget.innerHTML = newsletterLowercaseHtml(newsletterActivePreviewTarget.innerHTML);
+          }
           newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
           return;
         }
