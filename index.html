@@ -6261,8 +6261,20 @@
     .newsletter-preview-document.template-recital .newsletter-preview-header { background: linear-gradient(135deg, #f2c1bc, #f9e4b7); }
     .newsletter-preview-document.template-summer .newsletter-preview-header,
     .newsletter-preview-document.template-partnership .newsletter-preview-header { background: linear-gradient(135deg, #dcead9, #f6e9df); }
-    .newsletter-preview-document.template-costume .newsletter-preview-header,
-    .newsletter-preview-document.template-welcome .newsletter-preview-header { background: linear-gradient(135deg, #f8d9dd, #fff3ed); }
+    .newsletter-preview-document.template-costume .newsletter-preview-header { background: linear-gradient(135deg, #f8d9dd, #fff3ed); }
+    .newsletter-preview-document.template-welcome { background: #fffaf4; }
+    .newsletter-preview-document.template-welcome .newsletter-preview-header { padding: 34px 34px 28px; border-bottom: 1px solid #dfb9b2; background: linear-gradient(180deg, #f8e4df 0%, #fffaf4 100%); }
+    .newsletter-preview-document.template-welcome .newsletter-preview-header img { width: 132px; }
+    .newsletter-preview-document.template-welcome .newsletter-preview-header h1 { max-width: 520px; margin: 16px auto 7px; color: #211817; font-family: "Bodoni 72", Didot, Georgia, serif; font-size: 32px; font-weight: 500; letter-spacing: .01em; line-height: 1.08; }
+    .newsletter-preview-document.template-welcome .newsletter-preview-header p { color: #8b4e61; font-size: 13px; font-weight: 700; letter-spacing: .11em; text-transform: uppercase; }
+    .newsletter-preview-document.template-welcome .newsletter-preview-content { padding: 32px 38px 38px; color: #322724; line-height: 1.72; }
+    .newsletter-preview-document.template-welcome .newsletter-content-section h2 { color: #65103f; font-family: "Bodoni 72", Didot, Georgia, serif; font-size: 22px; font-weight: 500; letter-spacing: .01em; }
+    .newsletter-preview-document.template-welcome .newsletter-content-section.is-highlight { border: 1px solid #e4c2bb; background: #f8e6e1; }
+    .newsletter-preview-document.template-welcome .newsletter-content-section.is-reminder { border: 1px solid #dba9a1; border-radius: 4px; background: #fffdf9; }
+    .newsletter-preview-document.template-welcome .newsletter-content-section.is-divider { position: relative; height: 18px; margin: 28px 0; background: none; }
+    .newsletter-preview-document.template-welcome .newsletter-content-section.is-divider::before { content: ""; position: absolute; top: 50%; right: 0; left: 0; height: 1px; background: #dba9a1; }
+    .newsletter-preview-document.template-welcome .newsletter-content-section.is-divider::after { content: ""; position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; border: 6px solid #fffaf4; background: #dba9a1; box-sizing: content-box; transform: translate(-50%, -50%) rotate(45deg); }
+    .newsletter-preview-document.template-welcome .newsletter-preview-footer { border-color: #dfb9b2; background: #f8e4df; color: #694e49; }
     .newsletter-preview-document.title-font-bodoni .newsletter-preview-header h1,
     .newsletter-preview-document.title-font-bodoni .newsletter-preview-header p,
     .newsletter-preview-document.title-font-bodoni .newsletter-content-section h2 { color: #5e5e5e; text-transform: lowercase; }
@@ -12273,7 +12285,7 @@
                   <div class="newsletter-template-grid" aria-label="Newsletter templates">
                     <button class="newsletter-template is-selected" type="button" data-newsletter-template="monthly">Monthly Newsletter</button>
                     <button class="newsletter-template" type="button" data-newsletter-template="birthday">Birthday Ballerina</button>
-                    <button class="newsletter-template" type="button" data-newsletter-template="welcome">Parent Welcome</button>
+                    <button class="newsletter-template" type="button" data-newsletter-template="welcome">Welcome to Dance Techniques</button>
                     <button class="newsletter-template" type="button" data-newsletter-template="trial-complete">Trial Complete</button>
                     <button class="newsletter-template" type="button" data-newsletter-template="fall">Fall Enrollment</button>
                     <button class="newsletter-template" type="button" data-newsletter-template="recital">Recital Information</button>
@@ -25904,7 +25916,39 @@
     const newsletterTemplates = {
       monthly: { headline: "What’s Happening at Dance Techniques", subject: "Your monthly Dance Techniques update", message: "Hi [Parent First Name],\n\nHere is everything happening in [Dancer Preferred Name]’s dance world this month!", color: "berry" },
       birthday: { headline: "A Birthday Ballerina Celebration", subject: "We’re celebrating [Dancer Preferred Name]!", message: "Hi [Parent First Name],\n\nWe are so excited to celebrate your birthday ballerina during dance class!", color: "gold" },
-      welcome: { headline: "Welcome to Dance Techniques", subject: "Welcome to your Dance Techniques family", message: "Hi [Parent First Name],\n\nWe cannot wait to welcome [Dancer Preferred Name] to class with [Teacher Name]!", color: "blush" },
+      welcome: {
+        headline: "Welcome to the Dance Techniques Family",
+        subject: "Where Young Dancers Take Their First Steps",
+        message: "Hi [Parent First Name],\n\nWe are so excited to welcome [Dancer Preferred Name] to Dance Techniques. Our classes are thoughtfully designed to build confidence, coordination, creativity, and a lifelong love of movement—all within the comfort of your child’s school.",
+        color: "blush",
+        audience: "parents",
+        font: "avenir-light",
+        textSize: "12",
+        sections: [
+          { type: "personalized", title: "Your Dance Details", text: "Dancer: [Dancer Preferred Name]\nSchool: [School Nickname]\nTeacher: [Teacher Name]\nDance Day: [Dance Day]\nClass Time: [Dance Time]\n\nIf the school listed above is not correct, please reply to this email so our team can update your dancer’s enrollment." },
+          { type: "divider" },
+          { type: "text", title: "Download Brightwheel", text: "Brightwheel is required for every Dance Techniques family. It is where you will receive class communication, photos, teacher messages, billing statements, and payment reminders. Please enable AutoPay so your account stays current throughout the season.\n\nAfter enrollment, your Brightwheel invitation may take up to two business days to arrive. Use the invitation code in that email to connect to your dancer’s profile." },
+          { type: "button", linkText: "Download Brightwheel", url: "https://mybrightwheel.com/" },
+          { type: "divider" },
+          { type: "text", title: "Dance Shoes", text: "Your dancer will need pink leather ballet shoes and black tap shoes. We recommend ordering approximately one half-size larger than their everyday shoe size to allow for comfortable movement and growth. Please label both shoes with your dancer’s first and last name." },
+          { type: "button", linkText: "Shop Our Favorite Styles", url: "https://www.dancetechniques.info/" },
+          { type: "text", title: "What to Wear", text: "Every new dancer receives a Dance Techniques T-shirt and Dance Bag. New-season items are delivered in August. Families may also shop our boutique for additional Dance Techniques apparel and dance-day favorites." },
+          { type: "text", title: "What Goes in the Dance Bag?", text: "Please pack ballet shoes, tap shoes, an extra pair of socks, and an optional tutu. Keeping the bag simple helps dancers change shoes confidently and keeps class moving smoothly." },
+          { type: "reminder", title: "Please Leave These at School", text: "Toys, snacks, water bottles, diapers, extra school clothes, and classroom supplies should remain with your child’s school belongings rather than inside the Dance Techniques bag." },
+          { type: "text", title: "Boutique Deliveries", text: "Boutique orders placed by Friday at 4:00 PM are delivered the following week. We will also share Registration Day opportunities when families can see featured items in person." },
+          { type: "text", title: "Label Everything", text: "Please label every shoe, shirt, bag, tutu, and personal item with your dancer’s first and last name. Clear labels help our teaching team return items quickly and accurately." },
+          { type: "divider" },
+          { type: "text", title: "Dance Day Attire", text: "Dancers may wear their Dance Techniques shirt with comfortable bottoms that allow them to move freely. School uniforms are always approved. Tights and leotards are not required.\n\nSimple dance-day attire makes transitions easier, supports independence, and allows every dancer to participate comfortably without adding another uniform requirement for families." },
+          { type: "divider" },
+          { type: "text", title: "The Recital Experience", text: "Our annual recital is the joyful culmination of the Dance Techniques season. Dancers have the opportunity to perform on a professional stage, celebrate what they have learned, and experience the confidence that comes from working toward something special with their class.\n\nWe make recital preparation family-friendly by providing the performance pieces your dancer needs and communicating each milestone well in advance." },
+          { type: "calendar", title: "Save the Date", text: "Saturday, May 22, 2027\nRockwall-Heath High School\nPerformance time to be announced" },
+          { type: "reminder", title: "The $125 Recital Experience Includes", text: "A performance costume; tights or socks; hairpiece and accessories; official recital T-shirt; professional performance video; professional class group photo; dancer medal; keepsake program; unlimited guest admission; and a fully produced Dance Techniques performance experience." },
+          { type: "text", title: "Recital Billing", text: "The $125 recital fee is added at enrollment. Families may pay during the fall, divide the fee into installments, or allow the remaining balance to draft on January 1, 2027." },
+          { type: "divider" },
+          { type: "text", title: "We Can’t Wait to Dance With You", text: "Thank you for trusting Dance Techniques with these first dance steps. We are honored to partner with your family and [School Nickname] as [Dancer Preferred Name] learns, grows, and shines. If you ever need support, our team is here to help through Brightwheel." },
+          { type: "quote", title: "", text: "With love,\nLexi King & Tiffany Edwards\nDance Techniques\n\nHelping Your School Shine—One Dance Step at a Time." }
+        ]
+      },
       "trial-complete": { headline: "Your Dancer’s Trial Is Complete", subject: "A lovely next step for [Dancer Preferred Name]", message: "Hi [Parent First Name],\n\nWe loved having [Dancer Preferred Name] join us for a trial class! We would love to help you with the next step.", color: "blush" },
       fall: { headline: "Fall Enrollment Is Here", subject: "A beautiful new dance season is waiting", message: "Dance season is just around the corner! Save your dancer’s place for a season of movement, confidence, and joy.", color: "berry" },
       recital: { headline: "Recital Information", subject: "Everything your dance family needs for recital", message: "Hi [Parent First Name],\n\nOur dancers have been working so hard, and recital time is almost here!", color: "gold" },
@@ -25927,7 +25971,7 @@
       if (section.type === "divider") return `<div class="newsletter-content-section is-divider" aria-hidden="true"></div>`;
       if (section.type === "photo") return section.url ? `<section class="newsletter-content-section"><img class="newsletter-block-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">${section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text))}</p>` : ""}</section>` : `<section class="newsletter-content-section is-highlight"><p>Photo or Resource Library image</p></section>`;
       if (section.type === "youtube") { const id = newsletterYouTubeId(section.url); return section.url ? `<a class="newsletter-video-card" href="${rosterSafe(section.url)}" target="_blank" rel="noopener">${id ? `<img src="https://i.ytimg.com/vi/${rosterSafe(id)}/hqdefault.jpg" alt="YouTube video preview">` : ""}<span class="newsletter-video-play">▶</span></a>` : ""; }
-      if (section.type === "button") return section.linkText && section.url ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:var(--newsletter-accent);color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
+      if (section.type === "button") return section.linkText && section.url ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:${newsletterDraft.template === "welcome" ? "#65103f" : "var(--newsletter-accent)"};color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
       if (section.type === "character") return `<section class="newsletter-content-section is-character"><span class="newsletter-character-graphic">${rosterSafe(section.text || "🩰")}</span>${section.title ? `<h2>${rosterSafe(section.title)}</h2>` : ""}</section>`;
       const title = section.title ? `<h2>${rosterSafe(newsletterPersonalize(section.title, context))}</h2>` : "";
       const body = section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text, context))}</p>` : "";
@@ -26008,7 +26052,7 @@
     let newsletterSetupStep = 1;
     let newsletterSetupComplete = false;
     let newsletterSetupSelection = { mode: "", category: "parent", template: newsletterDraft.template || "monthly", audience: newsletterDraft.audience || "parents", targetMode: "all", day: "all", schools: [], teachers: [], classes: [], students: [], school: newsletterDraft.school || "all", teacher: newsletterDraft.teacher || "all" };
-    const newsletterTemplateLabel = (template) => ({ monthly: "Monthly Newsletter", birthday: "Birthday Ballerina", welcome: "Parent Welcome", "trial-complete": "Trial Complete", fall: "Fall Enrollment", recital: "Recital Information", costume: "Costume Week", picture: "Picture Week", "save-date": "Save the Date", summer: "Summer Session", partnership: "Partnership Welcome", "no-class-school": "No Class Reminder", "save-date-school": "Save the Date to Partner Schools" }[template] || "Start Fresh");
+    const newsletterTemplateLabel = (template) => ({ monthly: "Monthly Newsletter", birthday: "Birthday Ballerina", welcome: "Welcome to Dance Techniques", "trial-complete": "Trial Complete", fall: "Fall Enrollment", recital: "Recital Information", costume: "Costume Week", picture: "Picture Week", "save-date": "Save the Date", summer: "Summer Session", partnership: "Partnership Welcome", "no-class-school": "No Class Reminder", "save-date-school": "Save the Date to Partner Schools" }[template] || "Start Fresh");
     const newsletterTemplateCategories = [
       { key: "parent", label: "Parent Communication", description: "Everyday updates, celebrations, and warm family welcomes.", templates: ["monthly", "birthday", "welcome", "trial-complete"] },
       { key: "enrollment", label: "Enrollment & Sessions", description: "Promote upcoming seasons and registration opportunities.", templates: ["fall", "summer"] },
@@ -26118,7 +26162,11 @@
       const accent = newsletterColors[newsletterDraft.color] || newsletterColors.berry;
       const personalizeHtml = (html, fallback = "") => newsletterPersonalize(html || rosterSafe(fallback), context);
       const sections = newsletterDraft.sections.map((section) => newsletterSectionMarkup(section, context)).join("");
-      return `<!doctype html><html><body style="margin:0;background:#f3ece8;color:#271e1c;"><div style="max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle()};font-size:${newsletterFontSize()};line-height:1.65;"><header style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle()};">${personalizeHtml(newsletterDraft.headlineHtml, newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(newsletterDraft.subjectHtml, newsletterDraft.subject || "")}</p></header><main style="padding:30px;"><div style="white-space:pre-wrap;">${personalizeHtml(newsletterDraft.messageHtml, newsletterDraft.message || "")}</div>${sections}</main><footer style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+      const templateClass = `template-${String(newsletterDraft.template || "monthly").replace(/[^a-z0-9-]/gi, "")}`;
+      return `<!doctype html><html><head><style>
+        .newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p{margin:0;white-space:pre-wrap}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}
+        .template-welcome .newsletter-header{padding:38px 32px 30px!important;border-bottom:1px solid #dfb9b2;background:#f8e4df!important}.template-welcome .newsletter-header h1{max-width:520px;margin:0 auto 8px!important;color:#211817!important;font-family:Didot,Georgia,serif!important;font-size:32px;font-weight:500;line-height:1.08}.template-welcome .newsletter-header p{color:#8b4e61!important;font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.template-welcome .newsletter-main{padding:32px 38px 38px!important}.template-welcome .newsletter-content-section h2{color:#65103f;font-family:Didot,Georgia,serif;font-size:22px;font-weight:500}.template-welcome .newsletter-content-section.is-highlight{border:1px solid #e4c2bb;background:#f8e6e1}.template-welcome .newsletter-content-section.is-reminder{border:1px solid #dba9a1;border-radius:4px;background:#fffdf9}.template-welcome .newsletter-content-section.is-divider{background:#dba9a1}.template-welcome .newsletter-footer{border-top:1px solid #dfb9b2;background:#f8e4df!important}
+      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle()};font-size:${newsletterFontSize()};line-height:1.65;"><header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle()};">${personalizeHtml(newsletterDraft.headlineHtml, newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(newsletterDraft.subjectHtml, newsletterDraft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="white-space:pre-wrap;">${personalizeHtml(newsletterDraft.messageHtml, newsletterDraft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
     };
     const newsletterRecipientMessages = () => {
       const records = newsletterFilteredRecords();
