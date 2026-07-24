@@ -8702,6 +8702,38 @@
 
     .admin-section-page > .admin-card-header > .admin-page-actions:not(:has([data-curriculum-preview])) { display: none; }
     #admin-home-teacher-profiles > .admin-card-header > .admin-page-actions { display: flex; }
+    #admin-home-teacher-profiles > .admin-card-header { position: relative; }
+    .teaching-team-admin-profile-button {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      padding: 10px;
+      border: 0;
+      border-radius: 50%;
+      background: var(--blush);
+      box-shadow: 0 7px 18px rgba(85, 42, 49, .13);
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+    .teaching-team-admin-profile-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 9px 22px rgba(85, 42, 49, .18);
+    }
+    .teaching-team-admin-profile-button:focus-visible {
+      outline: 3px solid var(--berry);
+      outline-offset: 3px;
+    }
+    .teaching-team-admin-profile-button img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      mix-blend-mode: multiply;
+    }
     .admin-section-page > .admin-card-header .admin-section-nav,
     .admin-section-page > .admin-card-header [data-admin-tools-home] { display: none; }
 
@@ -12012,7 +12044,7 @@
                   <div><h3>Notification Preferences</h3><p class="subtle">Choose phone alerts and personal quiet hours.</p></div>
                   <span class="status private" id="push-device-label">In-App</span>
                 </div>
-                <button class="primary" id="enable-push-notifications" type="button">Enable Phone Notifications</button>
+                <button class="primary" id="enable-push-notifications" data-enable-push-notifications type="button">Enable Phone Notifications</button>
                 <p class="subtle push-device-status" id="push-device-status">Notifications will always remain available inside Teacher Tools.</p>
                 <div class="notification-preference-list">
                   <label class="notification-preference-row"><span><strong>Messages</strong><small>Direct messages and replies</small></span><input type="checkbox" data-notification-preference="messages_push" checked></label>
@@ -12649,6 +12681,9 @@
 
           <section class="admin-profile-card admin-section-page" id="admin-home-teacher-profiles">
             <div class="admin-card-header">
+              <button class="teaching-team-admin-profile-button" type="button" data-open-director-profile aria-label="Open Dance Techniques Admin profile and settings" title="Dance Techniques Admin Profile">
+                <img src="assets/dance-techniques-logo-only.png" alt="">
+              </button>
               <div>
                 <h3>Teaching Team</h3>
                 <p>View and update teacher information, schedules, schools, payroll, and more.</p>
@@ -13333,6 +13368,33 @@
                 <p class="auth-message full-field" data-account-password-message></p>
                 <button class="primary full-field" data-account-password-submit type="submit">Change My Password</button>
               </form>
+            </div>
+          </section>
+
+          <section class="admin-profile-card" data-director-account-settings hidden>
+            <div>
+              <div class="admin-card-header">
+                <div>
+                  <h3>Desktop &amp; Push Notifications</h3>
+                  <p>Choose the Director Dashboard alerts sent to this device.</p>
+                </div>
+                <span class="status private" data-push-device-label>In-App</span>
+              </div>
+              <button class="primary" type="button" data-enable-push-notifications>Enable Desktop Notifications</button>
+              <p class="subtle push-device-status" data-push-device-status>Notifications will always remain available inside the Director Dashboard.</p>
+              <div class="notification-preference-list">
+                <label class="notification-preference-row"><span><strong>Messages</strong><small>Direct messages and replies</small></span><input type="checkbox" data-notification-preference="messages_push" checked></label>
+                <label class="notification-preference-row"><span><strong>Roster Updates</strong><small>Same-day dancers and roster changes</small></span><input type="checkbox" data-notification-preference="roster_updates_push" checked></label>
+                <label class="notification-preference-row"><span><strong>Schedule Changes</strong><small>Closures, cancellations, and approvals</small></span><input type="checkbox" data-notification-preference="schedule_changes_push" checked></label>
+                <label class="notification-preference-row"><span><strong>Curriculum &amp; Music</strong><small>New teaching materials</small></span><input type="checkbox" data-notification-preference="curriculum_music_push" checked></label>
+                <label class="notification-preference-row"><span><strong>Studio Announcements</strong><small>Required for Dance Techniques Admin</small></span><input type="checkbox" checked disabled></label>
+                <label class="notification-preference-row"><span><strong>Quiet Hours</strong><small>Pause routine desktop notifications</small></span><input type="checkbox" data-notification-preference="quiet_hours_enabled" checked></label>
+                <label class="notification-preference-row"><span><strong>Urgent Alert Override</strong><small>Allow urgent alerts during quiet hours</small></span><input type="checkbox" data-notification-preference="urgent_bypass_quiet_hours" checked></label>
+              </div>
+              <div class="notification-time-row">
+                <label>Quiet Hours Start<input type="time" data-notification-preference="quiet_hours_start" value="20:00"></label>
+                <label>Quiet Hours End<input type="time" data-notification-preference="quiet_hours_end" value="07:00"></label>
+              </div>
             </div>
           </section>
 
@@ -14727,6 +14789,16 @@
       const permission = typeof Notification === "undefined" ? "unsupported" : Notification.permission;
       setText("push-device-label", permission === "granted" ? "Phone Push On" : "In-App");
       setText("push-device-status", permission === "granted" ? "Phone notifications are enabled on this device." : permission === "denied" ? "Phone notifications are blocked in this device’s browser settings." : "Notifications will always remain available inside Teacher Tools.");
+      document.querySelectorAll("[data-push-device-label]").forEach((label) => {
+        label.textContent = permission === "granted" ? "Desktop Push On" : "In-App";
+      });
+      document.querySelectorAll("[data-push-device-status]").forEach((status) => {
+        status.textContent = permission === "granted"
+          ? "Desktop notifications are enabled on this device."
+          : permission === "denied"
+            ? "Desktop notifications are blocked in this browser’s site settings."
+            : "Notifications will always remain available inside the Director Dashboard.";
+      });
     };
 
     const saveNotificationPreferences = async () => {
@@ -15081,7 +15153,7 @@
       }
     });
 
-    document.getElementById("enable-push-notifications")?.addEventListener("click", enablePhonePushNotifications);
+    document.querySelectorAll("[data-enable-push-notifications]").forEach((button) => button.addEventListener("click", enablePhonePushNotifications));
     document.getElementById("notification-preferences-panel")?.addEventListener("change", (event) => {
       const field = event.target.closest("[data-notification-preference]");
       if (!field) return;
@@ -20657,11 +20729,15 @@
       });
       const deactivate = document.getElementById("deactivate-profile");
       if (deactivate) deactivate.textContent = profileTeacher.status === "active" ? "Deactivate" : "Reactivate";
-      const isOwnAccount = Boolean(window.dtCurrentProfile?.id && window.dtCurrentProfile.id === profileTeacher.id);
+      const isOwnAccount = document.body.dataset.tourMode === "true"
+        || Boolean(window.dtCurrentProfile?.id && window.dtCurrentProfile.id === profileTeacher.id);
       document.querySelectorAll("[data-account-security]").forEach((section) => {
         section.hidden = !isOwnAccount;
         const card = section.closest(".panel, .admin-profile-card");
         if (card) card.hidden = !isOwnAccount;
+      });
+      document.querySelectorAll("[data-director-account-settings]").forEach((section) => {
+        section.hidden = !(isOwnAccount || isCompanyTeacherProfile(profileTeacher));
       });
       const inviteButton = document.getElementById("profile-invite-text-button");
       if (inviteButton) {
@@ -27599,6 +27675,14 @@
         updateAdminSectionNav("teacher-profiles");
         window.scrollTo({ top: 0, behavior: "smooth" });
       });
+    });
+
+    document.querySelector("[data-open-director-profile]")?.addEventListener("click", () => {
+      const signedInProfile = teachers.find((teacher) => isCompanyTeacherProfile(teacher))
+        || teachers.find((teacher) => teacher.id === window.dtCurrentProfile?.id)
+        || profileTeacher;
+      openTeacherProfile(signedInProfile.id);
+      renderNotificationPreferences();
     });
 
     const escapeBuilderText = (value) => String(value || "").replace(/[&<>"']/g, (char) => ({
