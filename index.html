@@ -6537,37 +6537,7 @@
       width: clamp(260px, 34vw, 430px);
       max-width: 100%;
       height: auto;
-    }
-
-    .director-dashboard-title-lockup {
-      display: grid;
-      grid-template-columns: 34px minmax(0, auto) 34px;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      width: 100%;
       margin-inline: auto;
-    }
-
-    .director-dashboard-title-sparkle {
-      width: 34px;
-      height: 34px;
-      fill: #dba9a1;
-      stroke: currentColor;
-      stroke-width: 1.55;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    @media (max-width: 520px) {
-      .director-dashboard-title-lockup {
-        grid-template-columns: 24px minmax(0, auto) 24px;
-        gap: 8px;
-      }
-      .director-dashboard-title-sparkle {
-        width: 24px;
-        height: 24px;
-      }
     }
 
     .director-dashboard-header {
@@ -12126,10 +12096,8 @@
         <div class="admin-home-page" aria-label="Main admin page">
           <section class="admin-profile-card" id="admin-tools-menu">
             <div class="admin-card-header director-dashboard-header">
-              <div class="director-dashboard-title-lockup">
-                <svg class="director-dashboard-title-sparkle" aria-hidden="true"><use href="#icon-tempo"></use></svg>
+              <div>
                 <img class="director-dashboard-title" src="assets/director-dashboard-title.png" alt="Director Dashboard">
-                <svg class="director-dashboard-title-sparkle" aria-hidden="true"><use href="#icon-tempo"></use></svg>
               </div>
             </div>
             <div class="admin-tool-group">
