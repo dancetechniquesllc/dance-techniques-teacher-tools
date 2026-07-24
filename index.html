@@ -19296,7 +19296,6 @@
       const messageIndex = thread.messages.length - 1;
       target.innerHTML = `
         <article class="latest-announcement">
-          <strong>Admin</strong>
           ${latest.html ? `<div class="rich-announcement-body">${latest.html}</div>` : `<p>${escapeText(latest.text)}</p>`}
           <div class="announcement-actions">
             <div class="reaction-row" aria-label="Announcement reactions">
@@ -19349,7 +19348,6 @@
       const messages = thread.messages.slice().reverse();
       modal.querySelector("#announcement-history-list").innerHTML = messages.map((message) => `
         <article class="latest-announcement">
-          <strong>Admin</strong>
           <small>${escapeText(announcementDateTimeLabel(message))}</small>
           ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}
         </article>
