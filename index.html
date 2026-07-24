@@ -19264,9 +19264,11 @@
       teacher.displayName === name ||
       teacher.displayName === personDisplayName(name)
     ));
-    const messageAssignedColor = (name) => {
+    const adminMessageColor = "#dba9a1";
+    const messageAssignedColor = (name, role = "") => {
+      if (name === "Admin" || role === "Admin") return adminMessageColor;
       const teacher = messageTeacherForName(name);
-      return teacher ? teacherProfileColor(teacher) : "#dba9a1";
+      return teacher ? teacherProfileColor(teacher) : adminMessageColor;
     };
 
     const renderThreadButtons = (containerId, threads, selectedId, dataAttribute, viewerName) => {
@@ -19287,7 +19289,7 @@
           ));
           const profileColor = otherTeacher ? teacherProfileColor(otherTeacher) : "#dba9a1";
           const profilePhoto = otherTeacher?.photo || "";
-          const latestColor = messageAssignedColor(latest?.from || otherName);
+          const latestColor = messageAssignedColor(latest?.from || otherName, latest?.role);
           const latestTextColor = coordinatedInitialColor(latestColor);
           const profileMarkup = otherName === "Admin"
             ? `<span class="message-profile-bubble" style="border-color:${escapeText(profileColor)}"><img src="./assets/dance-techniques-logo-only.png" alt="Dance Techniques"></span>`
@@ -19353,7 +19355,7 @@
         target.innerHTML = `<small class="team-talk-preview-meta">No Team Talk messages yet</small>`;
         return;
       }
-      const color = messageAssignedColor(latest.from);
+      const color = messageAssignedColor(latest.from, latest.role);
       target.innerHTML = `
         <span class="team-talk-preview-bubble" style="background:${escapeText(color)};color:${escapeText(coordinatedInitialColor(color))}">${escapeText(latest.text || "Open Team Talk")}</span>
         <small class="team-talk-preview-meta">${escapeText(messageSenderDisplayName(latest))} - ${escapeText(announcementDateTimeLabel(latest))}</small>
@@ -19446,7 +19448,7 @@
         ` : "";
         const isTeamMessage = thread.type === "team";
         const isColoredMessage = thread.type === "team" || thread.type === "private";
-        const messageColor = isColoredMessage ? messageAssignedColor(message.from) : "";
+        const messageColor = isColoredMessage ? messageAssignedColor(message.from, message.role) : "";
         const messageStyle = isColoredMessage ? ` style="--team-message-color:${escapeText(messageColor)};--team-message-text:${escapeText(coordinatedInitialColor(messageColor))}"` : "";
         return `
           <div class="message-bubble ${message.from === viewerName ? "mine" : ""}${isColoredMessage ? " colored-message" : ""}" data-message-hold${messageStyle}>

@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v149-message-colors-icons";
+const CACHE_NAME = "my-dance-techniques-v150-admin-signature-blush";
 const CORE_ASSETS = [
   "./",
   "./index.html",
