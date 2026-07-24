@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v93-duplicate-first-names";
+const CACHE_NAME = "my-dance-techniques-v106-teacher-card-schedule-order";
 const CORE_ASSETS = [
   "./",
   "./index.html",

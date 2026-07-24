@@ -6540,7 +6540,7 @@
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 8px;
-      margin-top: 7px;
+      margin-bottom: 2px;
     }
 
     #admin-teacher-profile-list .teacher-school-bubbles {
@@ -6943,6 +6943,11 @@
       background: oklch(95% 0.05 55);
       color: oklch(42% 0.11 45);
       border-color: oklch(78% 0.1 55);
+    }
+    .school-library-assignment[style*="--teacher-assigned-color"] {
+      background: color-mix(in srgb, var(--teacher-assigned-color) 32%, white);
+      color: color-mix(in srgb, var(--teacher-assigned-color) 42%, black);
+      border-color: color-mix(in srgb, var(--teacher-assigned-color) 70%, white);
     }
 
     .school-library-assignment.unassigned {
@@ -8626,10 +8631,16 @@
 
     .profile-compact-row {
       display: grid;
-      grid-template-columns: minmax(76px, .55fr) minmax(150px, 1fr) minmax(145px, .95fr) minmax(130px, .85fr);
+      grid-template-columns: minmax(76px, .55fr) minmax(140px, .9fr) minmax(105px, .55fr) minmax(160px, .9fr) minmax(150px, .75fr);
       gap: 10px;
       align-items: end;
     }
+    #profile-pay-tier-description:empty { display: none; }
+    .profile-color-field { min-width: 0; display: grid; gap: 6px; color: var(--fg); font-size: 12px; font-weight: 750; }
+    .profile-color-button { position: relative; min-height: 42px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--border); border-radius: 8px; background: transparent; color: var(--fg); cursor: pointer; }
+    .profile-color-button.has-color { background: var(--teacher-color); border-color: color-mix(in srgb, var(--teacher-color) 65%, var(--fg)); }
+    .profile-color-button input { position: absolute; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; opacity: 0; cursor: pointer; }
+    .profile-color-button span { position: relative; z-index: 1; pointer-events: none; padding: 5px 8px; border-radius: 999px; background: color-mix(in srgb, var(--surface) 82%, transparent); font-size: 11px; font-weight: 850; }
 
     .full-field {
       grid-column: 1 / -1;
@@ -11265,12 +11276,12 @@
                 <div class="calendar-grid schedule-week-grid" id="schedule-week-grid"></div>
               </section>
 
-              <div class="class-calendar" aria-label="Lexi class calendar">
+              <div class="class-calendar" id="classes-calendar" aria-label="Teacher class calendar">
                 <div class="calendar-top">
                   <button id="classes-prev-month" aria-label="Previous month">&larr; Prev</button>
                   <div class="calendar-title">
                     <h3 id="classes-calendar-title">August 2026</h3>
-                    <span>Lexi's schedule</span>
+                    <span id="classes-calendar-teacher">Teacher schedule</span>
                     <small id="classes-calendar-count">1 of 10</small>
                   </div>
                   <button id="classes-next-month" aria-label="Next month">Next &rarr;</button>
@@ -11959,9 +11970,9 @@
               <label class="school-library-filter-control">AM/PM
                 <select id="school-library-time-filter" aria-label="Filter partner schools by AM or PM"></select>
               </label>
-              <button class="primary" type="button" id="add-library-school">Add School</button>
+              <button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="school-library-teacher-filter,school-library-isd-filter,school-library-day-filter,school-library-time-filter">Reset Filter</button>
             </div>
-            <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="school-library-teacher-filter,school-library-isd-filter,school-library-day-filter,school-library-time-filter">Reset Filter</button></div>
+            <div class="dashboard-filter-reset-row"><button class="primary" type="button" id="add-library-school">Add School</button></div>
             <div class="school-library-list" id="admin-school-library-list" aria-label="Admin school library"></div>
           </section>
 
@@ -12858,7 +12869,7 @@
                 <label>Birthday
                   <input id="profile-birthday" data-profile-field="birthday" type="date" autocomplete="bday">
                 </label>
-                <label>Teacher type
+                <label>Role
                   <select id="profile-teacher-type" data-profile-field="teacherType">
                     <option>Admin</option>
                     <option>Director</option>
@@ -12874,6 +12885,12 @@
                     <option value="tier_d_director">Tier D — Director</option>
                   </select>
                   <small id="profile-pay-tier-description" class="subtle"></small>
+                </label>
+                <label class="profile-color-field">Teacher color
+                  <span class="profile-color-button" id="profile-color-button">
+                    <input id="profile-color-input" type="color" aria-label="Choose teacher bubble color">
+                    <span id="profile-color-button-label">Choose Color</span>
+                  </span>
                 </label>
               </div>
               <label class="full-field">Address
@@ -13782,7 +13799,7 @@
       copy.firstName = profile.firstName;
       copy.lastName = profile.lastName;
       copy.displayName = `Ms. ${profile.firstName}`;
-      copy.email = `${profile.id}@dancetechniques.example`;
+      copy.email = profile.email || `${profile.id}@dancetechniques.example`;
       copy.phone = "";
       copy.tshirtSize = "";
       copy.birthday = "";
@@ -13861,9 +13878,9 @@
 
     teachers.push(
       duplicateTeacherProfile(teachers[0], { id: "tiffany", firstName: "Tiffany", lastName: "Edwards" }),
-      duplicateTeacherProfile(teachers[0], { id: "judy", firstName: "Judy", lastName: "Coulter" }),
-      duplicateTeacherProfile(teachers[0], { id: "erika", firstName: "Erika", lastName: "Webb" }),
-      duplicateTeacherProfile(teachers[0], { id: "makayla", firstName: "Makayla", lastName: "Sifuentes" })
+      duplicateTeacherProfile(teachers[0], { id: "judy", firstName: "Judy", lastName: "Coulter", email: "Sotdance@gmail.com" }),
+      duplicateTeacherProfile(teachers[0], { id: "erika", firstName: "Erika", lastName: "Webb", email: "dancewitherika13@gmail.com" }),
+      duplicateTeacherProfile(teachers[0], { id: "makayla", firstName: "Makayla", lastName: "Sifuentes", email: "makaylaksifuentes@gmail.com" })
     );
 
     const tiffanyProfile = teachers.find((teacher) => teacher.id === "tiffany");
@@ -14527,14 +14544,33 @@
       }
       if (teacherSelect) {
         const teacherIds = new Set(enrollmentIntakeQueue.map(enrollmentMatchedTeacherId).filter(Boolean));
-        teacherSelect.innerHTML = `<option value="all">All teachers</option>${teachers.filter((teacher) => teacherIds.has(teacher.id)).map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacher.displayName || fullName(teacher))}</option>`).join("")}`;
+        teacherSelect.innerHTML = `<option value="all">All teachers</option>${teacherFilterProfiles().filter((teacher) => teacherIds.has(teacher.id)).map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacher.displayName || fullName(teacher))}</option>`).join("")}`;
         teacherSelect.value = enrollmentTeacherFilter;
       }
     };
 
+    const hiddenEnrollmentMetadataKeys = new Set([
+      "builddate", "eventobserver", "eventobserverpayment", "jsexecutiontracker", "path",
+      "paymentdiscountvalue", "paymenttotalchecksum", "paymentversion", "slug",
+      "squarenonce", "squarepm", "squarepaymentmethod", "submitdate", "submitsource",
+      "timetosubmit", "transactionid", "uploadserverurl", "validatednewrequiredfieldids",
+      "visitedpages", "formid", "eventid", "simple_spc", "teacherfeedback",
+      "trialattendancepending", "trialcompleted", "trialcompletedat",
+      "futuredancerarchived", "futuredancerarchivedat", "parentcontacthistory"
+    ]);
+    const additionalInformationFieldIsVisible = (label) => {
+      const normalized = String(label || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
+      if (!normalized || hiddenEnrollmentMetadataKeys.has(normalized)) return false;
+      return !normalized.startsWith("eventobserver")
+        && !normalized.startsWith("jsexecutiontracker")
+        && !normalized.startsWith("payment")
+        && !normalized.startsWith("square");
+    };
+    const visibleAdditionalInformationEntries = (information) => Object.entries(
+      information && typeof information === "object" && !Array.isArray(information) ? information : {}
+    ).filter(([label]) => additionalInformationFieldIsVisible(label));
     const renderAdditionalInformationFields = (information, attributeName) => {
-      const entries = Object.entries(information && typeof information === "object" && !Array.isArray(information) ? information : {})
-        .filter(([label]) => String(label || "").trim())
+      const entries = visibleAdditionalInformationEntries(information)
         .sort(([left], [right]) => left.localeCompare(right, undefined, { numeric: true }));
       return entries.map(([label, value]) => {
         const text = String(value ?? "");
@@ -14695,7 +14731,7 @@
         const isAssigned = rosterClass.id === selectedClassId;
         return `<article class="roster-class-card enrollment-placement-class-card ${isAssigned ? "is-assigned" : ""}">
           <span class="roster-class-day-bubble" title="${escapeText(rosterClass.day || "Dance day not set")}">${escapeText(dayBubble)}</span>
-          <span class="roster-class-badge" title="${escapeText(teacherName)}">${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="${escapeText(teacherName)}">` : escapeText(initialsFor(teacher) || "T")}</span>
+          <span class="roster-class-badge teacher-identity-bubble ${teacherProfileColorClass(teacher)}" title="${escapeText(teacherName)}">${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="${escapeText(teacherName)}">` : escapeText(initialsFor(teacher) || "T")}</span>
           <strong>${escapeText(rosterClass.name)}</strong>
           <small>${escapeText(teacherName)}</small>
           <small>${escapeText(rosterClass.day || "Day not set")} · ${escapeText(rosterClass.time || "Time not set")}</small>
@@ -15042,6 +15078,7 @@
         const isCompanyProfile = item.full_name.trim().toLowerCase() === "dance techniques";
         teacher.displayName = item.role === "admin" || isCompanyProfile ? item.full_name.trim() : `Ms. ${teacher.firstName}`;
         teacher.teacherType = item.role === "teacher" ? "Teacher" : (item.role === "director" ? "Director" : "Admin");
+        teacher.color = item.color || teacher.color || "";
         teacher.phone = item.phone || teacher.phone || "";
         teacher.schools = assignments.filter((assignment) => assignment.teacher_id === item.id).map((assignment) => {
           const school = schoolById.get(assignment.partner_school_id) || {};
@@ -16135,10 +16172,30 @@
       return entries;
     };
 
-    const flattenLexiSchedule = () => lexiSchedule.filter((school) => (
-      profileTeacher.schools.some((entry) => entry.name === school.school)
-    )).flatMap((school) => {
-      const profileSchool = profileTeacher.schools.find((entry) => entry.name === school.school);
+    const generatedScheduleSourceForSchool = (profileSchool) => {
+      const start = profileSchool.seasonStartDate || "2026-08-31";
+      const firstClassDate = scheduleDateForSchool(start, profileSchool);
+      return {
+        school: profileSchool.name,
+        nickname: profileSchool.nickname || profileSchool.name,
+        day: dayLabelForSchool(profileSchool, "To schedule"),
+        timeBlock: profileSchool.timeBlock || "AM",
+        isd: profileSchool.isd || "",
+        teacher: profileTeacher.firstName || teacherNickname(profileTeacher),
+        events: curriculumDatabase.weeks.slice(0, 20).map((record, index) => [
+          `W${record.week}`,
+          record.style,
+          addCalendarDays(firstClassDate, index * 7)
+        ])
+      };
+    };
+
+    const scheduleSourcesForTeacher = () => (profileTeacher.schools || []).map((profileSchool) => {
+      const established = lexiSchedule.find((school) => enrollmentSchoolNameMatches(school.school, profileSchool.name));
+      return { school: established || generatedScheduleSourceForSchool(profileSchool), profileSchool };
+    });
+
+    const flattenLexiSchedule = () => scheduleSourcesForTeacher().flatMap(({ school, profileSchool }) => {
       const curriculumEvents = curriculumEventsForSeasonStart(school, profileSchool);
       const lastCurriculumDate = curriculumEvents[curriculumEvents.length - 1]?.[2];
       const schoolEvents = [
@@ -16157,7 +16214,7 @@
         day: override ? weekdayLabelFromDate(eventDate) : dayLabelForSchool(profileSchool, school.day),
         isd: profileSchool?.isd || school.isd,
         address: profileSchool?.address || school.school,
-        teacher: school.teacher,
+        teacher: profileTeacher.firstName || teacherNickname(profileTeacher),
         classCount: classCountForSchool(school.school, profileSchool),
         timeBlock: eventTimeBlock,
         week,
@@ -16971,6 +17028,7 @@
     };
 
     const renderLexiSchedule = () => {
+      syncTeachingTeamSchools();
       const today = new Date(homeWidgetDate);
       const allEvents = flattenLexiSchedule();
       const nextEvent = nextClassForReferenceTime(allEvents, today);
@@ -16989,6 +17047,8 @@
 
       document.getElementById("classes-calendar-title").textContent = monthName(month);
       document.getElementById("classes-calendar-count").textContent = `${classesCalendarIndex + 1} of ${calendarMonths.length}`;
+      setText("classes-calendar-teacher", `${teacherNickname(profileTeacher)}’s schedule`);
+      document.getElementById("classes-calendar")?.setAttribute("aria-label", `${teacherNickname(profileTeacher)} class calendar`);
       document.getElementById("classes-prev-month").disabled = classesCalendarIndex === 0;
       document.getElementById("classes-next-month").disabled = classesCalendarIndex === calendarMonths.length - 1;
       renderNotificationPreview(nextEvent, today);
@@ -17833,6 +17893,7 @@
         full_name: fullName(teacher),
         phone: teacher.phone || null,
         role: teacher.teacherType === "Admin" ? "admin" : teacher.teacherType === "Director" ? "director" : "teacher",
+        color: teacher.color || null,
         active: teacher.status !== "inactive"
       };
       const [profileResult, stateResult, tierResult] = await Promise.all([
@@ -18079,6 +18140,12 @@
       return "private";
     };
     const fullName = (teacher) => `${teacher.firstName} ${teacher.lastName}`.trim();
+    const isCompanyTeacherProfile = (teacher) => (teacher?.displayName || fullName(teacher || {})).trim().toLowerCase() === "dance techniques";
+    const teacherFilterProfiles = () => teachers.filter((teacher) => !isCompanyTeacherProfile(teacher));
+    const teacherFilterIdIsVisible = (teacherId) => {
+      const teacher = teachers.find((candidate) => candidate.id === teacherId);
+      return !teacher || !isCompanyTeacherProfile(teacher);
+    };
     const repairTeacherNickname = (teacher) => {
       if (!teacher) return teacher;
       const firstName = String(teacher.firstName || "").trim();
@@ -19280,6 +19347,7 @@
         if (key in profileTeacher) field.value = profileTeacher[key] || "";
       });
       renderPaymentTierDescription();
+      renderTeacherColorPicker();
     };
 
     const paymentTierDescriptions = {
@@ -19290,7 +19358,62 @@
     };
     const renderPaymentTierDescription = () => {
       const description = document.getElementById("profile-pay-tier-description");
-      if (description) description.textContent = paymentTierDescriptions[profileTeacher?.payTier] || "Assign this only in the official Director Dashboard.";
+      if (description) description.textContent = paymentTierDescriptions[profileTeacher?.payTier] || "";
+    };
+    const teacherColorPalette = {
+      tiffany: "#dba8df",
+      lexi: "#a9d9b8",
+      judy: "#aacfe5",
+      makayla: "#ead17e",
+      erika: "#e7b493"
+    };
+    const teacherColorValue = (teacher) => {
+      const saved = String(teacher?.color || "").trim().toLowerCase();
+      if (/^#[0-9a-f]{6}$/.test(saved)) return saved;
+      if (teacherColorPalette[saved]) return teacherColorPalette[saved];
+      return "";
+    };
+    const teacherProfileColor = (teacher) => teacherColorValue(teacher) || "#dba9a1";
+    const coordinatedInitialColor = (backgroundColor) => {
+      const hex = String(backgroundColor || "#dba9a1").replace("#", "");
+      const channels = [0, 2, 4].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16));
+      const luminance = (0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]) / 255;
+      const target = luminance < 0.48 ? 255 : 0;
+      const mix = luminance < 0.48 ? 0.72 : 0.52;
+      const coordinated = channels.map((channel) => Math.round(channel + (target - channel) * mix));
+      return `#${coordinated.map((channel) => channel.toString(16).padStart(2, "0")).join("")}`;
+    };
+    const teacherProfileColorClass = (teacherOrId) => {
+      const id = typeof teacherOrId === "object" ? teacherOrId?.id : teacherOrId;
+      const safeId = String(id || "unassigned").toLowerCase().replace(/[^a-z0-9_-]+/g, "-");
+      return `teacher-profile-color-${safeId || "unassigned"}`;
+    };
+    const syncTeacherProfileColorRules = () => {
+      let style = document.getElementById("teacher-profile-color-rules");
+      if (!style) {
+        style = document.createElement("style");
+        style.id = "teacher-profile-color-rules";
+        document.head.append(style);
+      }
+      const teacherRules = teachers.map((teacher) => {
+        const selector = `.${teacherProfileColorClass(teacher)}`;
+        const color = teacherProfileColor(teacher);
+        return `${selector}:not(.is-prospect-heart):not(:has(img)){background:${color} !important;color:${coordinatedInitialColor(color)} !important;}\n.teacher-identity-bubble${selector}:has(img){border:3px solid ${color} !important;}`;
+      });
+      teacherRules.push(`.${teacherProfileColorClass("")}:not(.is-prospect-heart):not(:has(img)){background:#dba9a1 !important;color:${coordinatedInitialColor("#dba9a1")} !important;}`);
+      style.textContent = teacherRules.join("\n");
+    };
+    const renderTeacherColorPicker = () => {
+      const color = teacherColorValue(profileTeacher);
+      const input = document.getElementById("profile-color-input");
+      const button = document.getElementById("profile-color-button");
+      const label = document.getElementById("profile-color-button-label");
+      if (input) input.value = color || "#d9a4a4";
+      if (button) {
+        button.classList.toggle("has-color", Boolean(color));
+        button.style.setProperty("--teacher-color", color || "transparent");
+      }
+      if (label) label.textContent = color ? "Selected Color" : "Choose Color";
     };
 
     const renderProfileHero = () => {
@@ -19312,15 +19435,26 @@
         loginBadge.className = `status ${inviteStatusClass(loginStatus)}`;
       }
       const avatarText = profileTeacher.photo ? "" : (initialsFor(profileTeacher)?.[0] || "T").toUpperCase();
+      syncTeacherProfileColorRules();
       ["admin-avatar-upload", "teacher-header-photo", "teacher-profile-photo"].forEach((id) => {
         const avatar = document.getElementById(id);
         if (!avatar) return;
         avatar.textContent = avatarText;
+        avatar.classList.add("teacher-identity-bubble");
         avatar.style.backgroundImage = profileTeacher.photo ? `url("${profileTeacher.photo}")` : "";
+        avatar.style.backgroundColor = profileTeacher.photo ? "" : teacherProfileColor(profileTeacher);
+        avatar.style.color = profileTeacher.photo ? "" : coordinatedInitialColor(teacherProfileColor(profileTeacher));
+        avatar.style.borderColor = profileTeacher.photo ? teacherProfileColor(profileTeacher) : "";
+        avatar.style.borderWidth = profileTeacher.photo ? "3px" : "";
       });
       document.querySelectorAll("[data-profile-avatar]").forEach((avatar) => {
         avatar.textContent = avatarText;
+        avatar.classList.add("teacher-identity-bubble");
         avatar.style.backgroundImage = profileTeacher.photo ? `url("${profileTeacher.photo}")` : "";
+        avatar.style.backgroundColor = profileTeacher.photo ? "" : teacherProfileColor(profileTeacher);
+        avatar.style.color = profileTeacher.photo ? "" : coordinatedInitialColor(teacherProfileColor(profileTeacher));
+        avatar.style.borderColor = profileTeacher.photo ? teacherProfileColor(profileTeacher) : "";
+        avatar.style.borderWidth = profileTeacher.photo ? "3px" : "";
         avatar.setAttribute("aria-label", `Open ${displayName} profile`);
       });
       const deactivate = document.getElementById("deactivate-profile");
@@ -19433,20 +19567,20 @@
         ${[...teachingTeam].sort((a, b) => (a.firstName || "").localeCompare(b.firstName || "", undefined, { sensitivity: "base" })).map((teacher) => `
           <button class="teacher-row" type="button" data-admin-open-profile="${escapeText(teacher.id)}">
             <span class="teacher-card-main">
-              <span class="teacher-card-photo" aria-hidden="true">
+              <span class="teacher-week-bubbles" aria-label="${escapeText(`${teacherNickname(teacher)} weekly school schedule`)}">
+                ${[[1, "M", "Monday"], [2, "T", "Tuesday"], [3, "W", "Wednesday"], [4, "Th", "Thursday"], [5, "F", "Friday"]].map(([day, short, label]) => {
+                  const hasSchool = teacher.schools.some((school) => Number(school.dayOfWeek) === day);
+                  return `<span class="teacher-week-bubble${hasSchool ? " has-school" : ""}" title="${escapeText(`${label}: ${hasSchool ? "School assigned" : "No school assigned"}`)}">${short}</span>`;
+                }).join("")}
+              </span>
+              <span class="teacher-schedule-divider" aria-hidden="true"></span>
+              <span class="teacher-card-photo teacher-identity-bubble ${teacherProfileColorClass(teacher)}" aria-hidden="true">
                 ${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(initialsFor(teacher))}
               </span>
               <span class="teacher-card-copy">
                 <strong>${escapeText(teacherNickname(teacher))}</strong>
                 <small class="teacher-school-count">${teacher.schools.length} Partner School${teacher.schools.length === 1 ? "" : "s"}</small>
                 ${teacher.schools.length ? `<span class="teacher-school-bubbles" aria-label="Assigned partner schools">${[...teacher.schools].sort((a, b) => (a.nickname || a.name || "").localeCompare(b.nickname || b.name || "")).map((school) => `<span class="teacher-school-bubble">${escapeText(school.nickname || school.name)}</span>`).join("")}</span>` : ""}
-                <span class="teacher-schedule-divider" aria-hidden="true"></span>
-                <span class="teacher-week-bubbles" aria-label="${escapeText(`${teacherNickname(teacher)} weekly school schedule`)}">
-                  ${[[1, "M", "Monday"], [2, "T", "Tuesday"], [3, "W", "Wednesday"], [4, "Th", "Thursday"], [5, "F", "Friday"]].map(([day, short, label]) => {
-                    const hasSchool = teacher.schools.some((school) => Number(school.dayOfWeek) === day);
-                    return `<span class="teacher-week-bubble${hasSchool ? " has-school" : ""}" title="${escapeText(`${label}: ${hasSchool ? "School assigned" : "No school assigned"}`)}">${short}</span>`;
-                  }).join("")}
-                </span>
               </span>
             </span>
           </button>
@@ -19461,14 +19595,11 @@
     };
 
     const teacherAssignmentColorClass = (teacherId) => {
-      const colorClasses = {
-        tiffany: "teacher-tiffany",
-        lexi: "teacher-lexi",
-        judy: "teacher-judy",
-        makayla: "teacher-makayla",
-        erika: "teacher-erika"
-      };
-      return colorClasses[teacherId] || "";
+      return teacherId ? teacherProfileColorClass(teacherId) : "";
+    };
+    const teacherAssignmentStyle = (teacherId) => {
+      const teacher = teachers.find((item) => item.id === teacherId);
+      return teacher ? `style="--teacher-assigned-color:${escapeText(teacherProfileColor(teacher))}"` : "";
     };
 
     const schoolDaySortValue = (school) => {
@@ -19487,7 +19618,7 @@
         teacherFilter.innerHTML = `
           <option value="all">All Teachers</option>
           <option value="unassigned">Unassigned</option>
-          ${[...teachers].sort((a, b) => teacherNickname(a).localeCompare(teacherNickname(b))).map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherNickname(teacher))}</option>`).join("")}
+          ${teacherFilterProfiles().sort((a, b) => teacherNickname(a).localeCompare(teacherNickname(b))).map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherNickname(teacher))}</option>`).join("")}
         `;
         teacherFilter.value = schoolLibraryFilters.teacher;
       }
@@ -19544,7 +19675,7 @@
                 <small>${escapeText(school.directorName || "Director not entered").replaceAll("/", "/<br>")}</small>
                 <small class="school-directory-isd">${escapeText(isdLabel)}</small>
                 <span class="school-directory-preview-tags">
-                  <span class="status school-library-assignment ${assignmentClass}">${escapeText(assignment)}</span>
+                  <span class="status school-library-assignment ${assignmentClass}" ${teacherAssignmentStyle(school.assignedTeacherId)}>${escapeText(assignment)}</span>
                 </span>
               </span>
               <span class="school-profile-modal-title">Partner School Profile</span>
@@ -19575,7 +19706,7 @@
                 <span class="calendar-field-label">AM/PM</span>
               </label>
               <span class="school-library-bubble-stack">
-                <span class="status school-library-assignment ${assignmentClass}">${escapeText(assignment)}</span>
+                <span class="status school-library-assignment ${assignmentClass}" ${teacherAssignmentStyle(school.assignedTeacherId)}>${escapeText(assignment)}</span>
                 <span class="status school-library-isd-bubble">${escapeText(isdLabel)}</span>
               </span>
             </summary>
@@ -19602,7 +19733,7 @@
               <label class="calendar-field school-profile-teacher">
                 <select aria-label="Assigned teacher for ${escapeText(school.name || "school")}" data-school-library-field="assignedTeacherId">
                   <option value="" ${school.assignedTeacherId ? "" : "selected"}>UNASSIGNED</option>
-                  ${teachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === school.assignedTeacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}
+                  ${teacherFilterProfiles().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === school.assignedTeacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}
                 </select>
                 <span class="calendar-field-label">Assigned Teacher</span>
               </label>
@@ -19682,6 +19813,9 @@
       if (teacherBubble) {
         teacherBubble.textContent = assignment;
         teacherBubble.className = `status school-library-assignment ${assignmentClass}`;
+        const teacher = teachers.find((item) => item.id === school.assignedTeacherId);
+        if (teacher) teacherBubble.style.setProperty("--teacher-assigned-color", teacherProfileColor(teacher));
+        else teacherBubble.style.removeProperty("--teacher-assigned-color");
       }
       if (isdBubble) isdBubble.textContent = school.isd || "No ISD";
     };
@@ -20368,7 +20502,8 @@
       const todayKey = isoDate(homeWidgetDate);
       const todayDate = new Date(`${todayKey}T12:00:00`);
       const dateLabel = todayDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
-      list.innerHTML = teachers.map((teacher, index) => {
+      const myDayTeachers = teachers.filter((teacher) => (teacher.displayName || fullName(teacher)).trim().toLowerCase() !== "dance techniques");
+      list.innerHTML = myDayTeachers.map((teacher) => {
         profileTeacher = teacher;
         const dayEvents = eventsForTeachingDate(todayKey);
         const previewMarkup = dayEvents.length ? dayEvents.map((event) => myDayEventMarkup(event, dateLabel, true)).join("") : `
@@ -20388,7 +20523,7 @@
             </div>
           </details>
         `;
-      }).join("");
+      }).join("") || `<div class="teacher-class-empty">No teacher profiles are available to preview.</div>`;
       profileTeacher = originalProfileTeacher;
     };
 
@@ -20930,6 +21065,13 @@
     document.getElementById("profile-personal-form")?.addEventListener("input", updateProfileField);
     document.getElementById("profile-login-form")?.addEventListener("input", updateProfileField);
     document.getElementById("teacher-profile-form")?.addEventListener("input", updateProfileField);
+    document.getElementById("profile-color-input")?.addEventListener("input", (event) => {
+      profileTeacher.color = event.target.value;
+      renderTeacherColorPicker();
+      renderTeacherProfileList();
+      renderSchoolLibrary();
+      markUnsavedEdits();
+    });
 
     document.getElementById("profile-notes")?.addEventListener("input", (event) => {
       profileTeacher.notes = event.target.value;
@@ -21798,7 +21940,7 @@
       const weekdayOrder = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
       filterOptions("boutique-order-day-filter", [...new Set(assignedRecords.map((record) => record.rosterClass.day).filter(Boolean))].sort((a, b) => weekdayOrder.indexOf(a) - weekdayOrder.indexOf(b)), "All days");
       filterOptions("boutique-order-school-filter", [...new Set(assignedRecords.map((record) => record.rosterClass.schoolName).filter(Boolean))].sort(), "All schools", rosterSchoolNickname);
-      filterOptions("boutique-order-teacher-filter", [...new Set(assignedRecords.map((record) => record.rosterClass.teacherId).filter(Boolean))].sort((a, b) => rosterTeacherName(a).localeCompare(rosterTeacherName(b))), "All teachers", rosterTeacherName);
+      filterOptions("boutique-order-teacher-filter", [...new Set(assignedRecords.map((record) => record.rosterClass.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))].sort((a, b) => rosterTeacherName(a).localeCompare(rosterTeacherName(b))), "All teachers", rosterTeacherName);
       filterOptions("boutique-order-size-filter", [...new Set(boutiqueOrders.flatMap(boutiqueOrderSizes))].sort(boutiqueShirtSizeSort), "All sizes");
       const visible = filteredDirectorBoutiqueOrders();
       setText("boutique-order-visible-count", `${visible.length} order${visible.length === 1 ? "" : "s"}`);
@@ -23173,11 +23315,21 @@
     const rosterClassInitials = (rosterClass) => String(rosterClass?.name || "Class").split(/\s+/).filter((part) => /^[A-Za-z0-9]/.test(part)).map((part) => (/^\d+$/.test(part) ? part : part[0] || "")).join("").slice(0, 3).toUpperCase();
     const rosterStudentKitPending = (student) => student?.status === "enrolled" && !student?.kitReceived;
     const rosterStudentBoutiqueStatus = () => "";
+    const rosterStudentTeacher = (student) => {
+      const rosterClass = rosterClasses.find((item) => item.students.some((candidate) => candidate === student || (candidate?.id && candidate.id === student?.id)));
+      if (!rosterClass) return null;
+      const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, rosterClass.schoolName)
+        || enrollmentSchoolNameMatches(item.nickname, rosterClass.schoolName));
+      const teacher = teachers.find((item) => item.id === school?.assignedTeacherId) || null;
+      return teacher && teacherColorValue(teacher) ? teacher : null;
+    };
     const rosterStudentBadgeClasses = (student) => {
       const boutiqueStatus = rosterStudentBoutiqueStatus(student);
       const isBirthdayWeek = birthdayFallsThisWeek(student?.birthdate);
       const isMale = String(student?.gender || "").toLowerCase() === "male";
-      return [student?.status !== "enrolled" ? "is-prospect-heart" : "", isBirthdayWeek ? "is-birthday-week" : "", isBirthdayWeek && isMale ? "is-male-birthday" : "", student?.medicalNotes ? "has-medical" : "", rosterStudentKitPending(student) ? (student?.kitPickedUp ? "has-kit-picked-up" : student?.kitReady ? "has-kit-ready" : "has-kit-waiting") : "", boutiqueStatus ? `has-boutique-${boutiqueStatus}` : ""].filter(Boolean).join(" ");
+      const teacher = rosterStudentTeacher(student);
+      syncTeacherProfileColorRules();
+      return [teacherProfileColorClass(teacher), student?.status !== "enrolled" ? "is-prospect-heart" : "", isBirthdayWeek ? "is-birthday-week" : "", isBirthdayWeek && isMale ? "is-male-birthday" : "", student?.medicalNotes ? "has-medical" : "", rosterStudentKitPending(student) ? (student?.kitPickedUp ? "has-kit-picked-up" : student?.kitReady ? "has-kit-ready" : "has-kit-waiting") : "", boutiqueStatus ? `has-boutique-${boutiqueStatus}` : ""].filter(Boolean).join(" ");
     };
     const rosterStudentBadgeTitle = (student) => {
       const boutiqueStatus = rosterStudentBoutiqueStatus(student);
@@ -23277,7 +23429,7 @@
       const schools = [...new Set(rosterClasses.filter((item) => item.sourceActive !== false).map((item) => item.schoolName).filter(Boolean))].sort();
       schoolFilter.innerHTML = `<option value="all">All partner schools</option>${schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}`;
       schoolFilter.value = schools.includes(currentSchool) ? currentSchool : "all";
-      const assignedTeacherIds = [...new Set(rosterClasses.filter((item) => item.sourceActive !== false).map((item) => item.teacherId).filter(Boolean))];
+      const assignedTeacherIds = [...new Set(rosterClasses.filter((item) => item.sourceActive !== false).map((item) => item.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))];
       teacherFilter.innerHTML = `<option value="all">All teachers</option>${assignedTeacherIds.map((teacherId) => `<option value="${rosterSafe(teacherId)}">${rosterSafe(rosterTeacherName(teacherId))}</option>`).join("")}`;
       teacherFilter.value = assignedTeacherIds.includes(currentTeacher) ? currentTeacher : "all";
       const term = search.value.trim().toLowerCase();
@@ -23543,7 +23695,7 @@
       const additionalInformationPanel = document.getElementById("roster-edit-additional-information");
       if (additionalInformationPanel) {
         additionalInformationPanel.innerHTML = renderAdditionalInformationFields(additionalInformation, "data-profile-additional-information");
-        additionalInformationPanel.hidden = !Object.keys(additionalInformation && typeof additionalInformation === "object" ? additionalInformation : {}).length;
+        additionalInformationPanel.hidden = !visibleAdditionalInformationEntries(additionalInformation).length;
       }
       document.getElementById("roster-edit-jotform-id").value = intakeRecord?.jotform_submission_id || intakeRecord?.source_record_id || "Not linked";
       document.getElementById("roster-edit-submitted-at").value = intakeRecord?.submitted_at ? enrollmentDateLabel(intakeRecord.submitted_at) : "Not linked";
@@ -23833,7 +23985,7 @@
       }
       if (teacherSelect) {
         const current = teacherSelect.value || "all";
-        const teacherIds = [...new Set(records.map(({ rosterClass }) => rosterClass.teacherId))].filter(Boolean).sort((left, right) => rosterTeacherName(left).localeCompare(rosterTeacherName(right)));
+        const teacherIds = [...new Set(records.map(({ rosterClass }) => rosterClass.teacherId))].filter((id) => id && teacherFilterIdIsVisible(id)).sort((left, right) => rosterTeacherName(left).localeCompare(rosterTeacherName(right)));
         teacherSelect.innerHTML = `<option value="all">All teachers</option>${teacherIds.map((id) => `<option value="${rosterSafe(id)}">${rosterSafe(rosterTeacherName(id))}</option>`).join("")}`;
         teacherSelect.value = teacherIds.includes(current) ? current : "all";
       }
@@ -24082,7 +24234,7 @@
         ...schoolLibrary.map((school) => school.name).filter(Boolean),
         ...activeRosterClasses.map((item) => item.schoolName).filter(Boolean)
       ])].sort();
-      const assignedTeacherIds = [...new Set(activeRosterClasses.map((item) => item.teacherId))];
+      const assignedTeacherIds = [...new Set(activeRosterClasses.map((item) => item.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))];
       if (schoolSelect) {
         schoolSelect.innerHTML = `<option value="all">All partner schools</option>${schoolNames.map((name) => `<option value="${rosterSafe(name)}">${rosterSafe(name)}</option>`).join("")}`;
         schoolSelect.value = rosterSchoolFilter;
@@ -24187,7 +24339,7 @@
           <button class="roster-profile-close" type="button" data-close-roster-class-profile aria-label="Close Class Profile">×</button>
         </div>
         <div class="roster-meta">
-          <span class="school-library-assignment ${teacherAssignmentColorClass(selected.teacherId)}">Teacher · ${rosterSafe(rosterTeacherName(selected.teacherId))}</span>
+          <span class="school-library-assignment ${teacherAssignmentColorClass(selected.teacherId)}" ${teacherAssignmentStyle(selected.teacherId)}>Teacher · ${rosterSafe(rosterTeacherName(selected.teacherId))}</span>
           <span>${rosterSafe(selected.day)} · ${rosterSafe(selected.time || "Time not set")}</span>
           <span>${enrolled.length}/${selected.capacity} Enrolled</span>
           ${selected.ageGroup ? `<span>${rosterSafe(selected.ageGroup)}</span>` : ""}${selected.level ? `<span>Level ${rosterSafe(selected.level)}</span>` : ""}
@@ -24401,7 +24553,7 @@
       if (newsletterSetupStep === 1) {
         const recipientRecords = newsletterAudienceRecords(newsletterSetupSelection.audience);
         const schools = [...new Set(recipientRecords.map(({ rosterClass }) => rosterClass.schoolName).filter(Boolean))].sort();
-        const teacherIds = [...new Set(recipientRecords.map(({ rosterClass }) => rosterClass.teacherId).filter(Boolean))].sort((a, b) => rosterTeacherName(a).localeCompare(rosterTeacherName(b)));
+        const teacherIds = [...new Set(recipientRecords.map(({ rosterClass }) => rosterClass.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))].sort((a, b) => rosterTeacherName(a).localeCompare(rosterTeacherName(b)));
         const newsletterWeekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
         const days = [...new Set(recipientRecords.map(({ rosterClass }) => rosterClass.day).filter(Boolean))].sort((a, b) => newsletterWeekdays.indexOf(a) - newsletterWeekdays.indexOf(b));
         const classes = [...new Map(recipientRecords.map(({ rosterClass }) => [rosterClass.id, rosterClass])).values()];
@@ -24433,7 +24585,7 @@
         if (newsletterSetupSelection.targetMode === "teachers") targetFields = `<label class="full">Teachers<select id="newsletter-setup-teachers" multiple>${teacherIds.map((id) => `<option value="${rosterSafe(id)}" ${newsletterSetupSelection.teachers.includes(id) ? "selected" : ""}>${rosterSafe(rosterTeacherName(id))}</option>`).join("")}</select></label>`;
         if (newsletterSetupSelection.targetMode === "custom") targetFields = `${schoolMulti}<label class="full">Classes Within Those Schools<select id="newsletter-setup-classes" multiple>${classes.map((item) => `<option value="${rosterSafe(item.id)}" ${newsletterSetupSelection.classes.includes(item.id) ? "selected" : ""}>${rosterSafe(rosterSchoolNickname(item.schoolName))} · ${rosterSafe(item.name)}</option>`).join("")}</select></label><div class="newsletter-recipient-students"><div class="newsletter-recipient-students-head"><strong>Select Individual Dancers${newsletterSetupSelection.classes.length ? " Within the Chosen Classes" : ""}</strong><button class="newsletter-select-all" type="button" data-newsletter-select-all-visible="students">Select All Filtered</button></div><div class="newsletter-recipient-student-grid">${visibleStudentRecords.map(({ rosterClass, student }) => `<button class="newsletter-recipient-student${newsletterSetupSelection.students.includes(student.id) ? " is-selected" : ""}" type="button" data-newsletter-recipient-student="${rosterSafe(student.id)}" aria-pressed="${newsletterSetupSelection.students.includes(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small></button>`).join("") || `<p class="subtle">Choose a class to see its dancers.</p>`}</div></div>`;
         const schoolCardBuilder = `<div class="newsletter-setup-form"><div class="newsletter-filter-controls"><label>Filter by Teacher<select id="newsletter-setup-teacher"><option value="all">Choose a teacher</option>${teacherIds.map((id) => `<option value="${rosterSafe(id)}">${rosterSafe(rosterTeacherName(id))}</option>`).join("")}</select></label><label>Filter by Dance Day<select id="newsletter-setup-day"><option value="all">Choose a dance day</option>${days.map((day) => `<option value="${rosterSafe(day)}">${rosterSafe(day)}</option>`).join("")}</select></label><button class="newsletter-select-all" type="button" data-newsletter-select-all-visible="schools" ${schoolFiltersActive && visibleSchools.length ? "" : "disabled"}>Select All Filtered</button></div><div class="dashboard-filter-reset-row full"><button class="dashboard-filter-reset" type="button" data-reset-newsletter-recipient-filter>Reset Filter</button></div>${schoolFiltersActive ? `<div class="newsletter-recipient-school-grid full">${visibleSchools.map((schoolName) => { const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, schoolName) || enrollmentSchoolNameMatches(item.nickname, schoolName)) || {}; const schoolDays = [...new Set(recipientRecords.filter(({ rosterClass }) => rosterClass.schoolName === schoolName).map(({ rosterClass }) => rosterClass.day).filter(Boolean))]; const dayShort = { Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" }; const dayBubble = schoolDays.map((day) => dayShort[day] || day.slice(0, 2)).join("·"); return `<button class="newsletter-recipient-school${newsletterSetupSelection.schools.includes(schoolName) ? " is-selected" : ""}" type="button" data-newsletter-recipient-school="${rosterSafe(schoolName)}"><span class="school-check">✓</span><span class="boutique-kit-day-bubble" title="${rosterSafe(schoolDays.join(" · ") || "Dance day not set")}">${rosterSafe(dayBubble || "—")}</span><span class="newsletter-school-icon" aria-hidden="true"><svg><use href="#icon-partner-schools"></use></svg></span><strong>${rosterSafe(rosterSchoolNickname(schoolName))}</strong><small>${rosterSafe(school.directorName || "Director not entered")}</small></button>`; }).join("") || `<p class="subtle">No partner schools match those filters.</p>`}</div>` : `<p class="subtle full">Choose a teacher or dance day to view partner school cards.</p>`}</div>`;
-        const teacherCardBuilder = `<div class="newsletter-setup-form"><div class="newsletter-filter-controls"><label>Filter by Dance Day<select id="newsletter-setup-day"><option value="all">All dance days</option>${days.map((day) => `<option value="${rosterSafe(day)}">${rosterSafe(day)}</option>`).join("")}</select></label><span></span><button class="newsletter-select-all" type="button" data-newsletter-select-all-visible="teachers">Select All Filtered</button></div><div class="dashboard-filter-reset-row full"><button class="dashboard-filter-reset" type="button" data-reset-newsletter-recipient-filter>Reset Filter</button></div><div class="newsletter-recipient-school-grid">${visibleTeacherIds.map((teacherId) => { const teacher = teachers.find((item) => item.id === teacherId) || {}; const teacherSchools = [...new Set(recipientRecords.filter(({ rosterClass }) => rosterClass.teacherId === teacherId).map(({ rosterClass }) => rosterSchoolNickname(rosterClass.schoolName)))]; return `<button class="newsletter-recipient-school newsletter-recipient-teacher${newsletterSetupSelection.teachers.includes(teacherId) ? " is-selected" : ""}" type="button" data-newsletter-recipient-teacher="${rosterSafe(teacherId)}"><span class="school-check">✓</span><span class="teacher-card-photo">${teacher.photo ? `<img src="${rosterSafe(teacher.photo)}" alt="">` : rosterSafe(initialsFor(teacher))}</span><strong>${rosterSafe(rosterTeacherName(teacherId))}</strong><small>${rosterSafe(teacherSchools.join(" · ") || "No schools assigned")}</small></button>`; }).join("")}</div></div>`;
+        const teacherCardBuilder = `<div class="newsletter-setup-form"><div class="newsletter-filter-controls"><label>Filter by Dance Day<select id="newsletter-setup-day"><option value="all">All dance days</option>${days.map((day) => `<option value="${rosterSafe(day)}">${rosterSafe(day)}</option>`).join("")}</select></label><span></span><button class="newsletter-select-all" type="button" data-newsletter-select-all-visible="teachers">Select All Filtered</button></div><div class="dashboard-filter-reset-row full"><button class="dashboard-filter-reset" type="button" data-reset-newsletter-recipient-filter>Reset Filter</button></div><div class="newsletter-recipient-school-grid">${visibleTeacherIds.map((teacherId) => { const teacher = teachers.find((item) => item.id === teacherId) || {}; const teacherSchools = [...new Set(recipientRecords.filter(({ rosterClass }) => rosterClass.teacherId === teacherId).map(({ rosterClass }) => rosterSchoolNickname(rosterClass.schoolName)))]; return `<button class="newsletter-recipient-school newsletter-recipient-teacher${newsletterSetupSelection.teachers.includes(teacherId) ? " is-selected" : ""}" type="button" data-newsletter-recipient-teacher="${rosterSafe(teacherId)}"><span class="school-check">✓</span><span class="teacher-card-photo teacher-identity-bubble ${teacherProfileColorClass(teacher)}">${teacher.photo ? `<img src="${rosterSafe(teacher.photo)}" alt="">` : rosterSafe(initialsFor(teacher))}</span><strong>${rosterSafe(rosterTeacherName(teacherId))}</strong><small>${rosterSafe(teacherSchools.join(" · ") || "No schools assigned")}</small></button>`; }).join("")}</div></div>`;
         const builderMarkup = newsletterSetupSelection.audience === "schools" ? schoolCardBuilder : newsletterSetupSelection.audience === "teachers" ? teacherCardBuilder : `<div class="newsletter-setup-form"><label class="full">Send To<select id="newsletter-setup-target-mode">${targetingOptions.map(([value, label]) => `<option value="${value}">${label}</option>`).join("")}</select></label>${targetFields}</div>`;
         const allRecipientAction = newsletterSetupSelection.audience === "schools"
           ? `<button class="newsletter-all-recipient-card${newsletterSetupSelection.targetMode === "all" && newsletterSetupSelection.day === "all" && newsletterSetupSelection.teacher === "all" ? " is-selected" : ""}" type="button" data-newsletter-recipient-all="schools"><strong>All Partner Schools</strong><small>Every active school</small></button>`
@@ -24615,7 +24767,7 @@
       const search = document.getElementById("partnership-payment-search");
       if (search && search.value !== schoolPartnershipPaymentState.search) search.value = schoolPartnershipPaymentState.search;
       const teacher = document.getElementById("partnership-payment-teacher");
-      if (teacher) { const ids = [...new Set(schoolLibrary.map((school) => school.assignedTeacherId).filter(Boolean))]; teacher.innerHTML = `<option value="all">All Teachers</option>${ids.map((id) => `<option value="${escapeText(id)}">${escapeText(rosterTeacherName(id))}</option>`).join("")}`; teacher.value = schoolPartnershipPaymentState.teacher; }
+      if (teacher) { const ids = [...new Set(schoolLibrary.map((school) => school.assignedTeacherId).filter((id) => id && teacherFilterIdIsVisible(id)))]; teacher.innerHTML = `<option value="all">All Teachers</option>${ids.map((id) => `<option value="${escapeText(id)}">${escapeText(rosterTeacherName(id))}</option>`).join("")}`; teacher.value = schoolPartnershipPaymentState.teacher; }
       const day = document.getElementById("partnership-payment-day");
       if (day) { const values = [...new Set(schoolLibrary.map((school) => String(school.dayOfWeek || "")).filter(Boolean))].sort(); day.innerHTML = `<option value="all">All Dance Days</option>${values.map((value) => `<option value="${escapeText(value)}">${escapeText(weekdayNames[Number(value)] || "Unassigned")}</option>`).join("")}`; day.value = schoolPartnershipPaymentState.day; }
       const status = document.getElementById("partnership-payment-status"); if (status) status.value = schoolPartnershipPaymentState.status;
@@ -24674,7 +24826,7 @@
     const payrollFilterOptions = (values, selected, labelFor = (value) => value) => [...new Set(values.filter(Boolean))].sort((a, b) => labelFor(a).localeCompare(labelFor(b))).map((value) => `<option value="${escapeText(value)}" ${selected === value ? "selected" : ""}>${escapeText(labelFor(value))}</option>`).join("");
     const payrollFilterRowMarkup = (type, { includeStatus = false } = {}) => {
       const filters = payrollFilterState(type);
-      const teacherIds = [...new Set(rosterClasses.map((item) => item.teacherId).filter(Boolean))];
+      const teacherIds = [...new Set(rosterClasses.map((item) => item.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))];
       const schoolNames = rosterClasses.map((item) => item.schoolName);
       const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].filter((day) => rosterClasses.some((item) => item.day === day));
       return `<div class="payroll-filter-row">
@@ -24823,7 +24975,7 @@
       .map((teacher) => {
         const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
         const initials = `${teacher.firstName?.[0] || ""}${teacher.lastName?.[0] || ""}`.toUpperCase();
-        return `<article class="payroll-stub-teacher-card"><div class="payroll-stub-teacher-heading"><span class="roster-student-photo">${escapeText(initials)}</span><span><strong>${escapeText(fullName(teacher))}</strong><small>${escapeText(payrollTierLabels[teacher.payTier] || "Payment tier not assigned")}</small></span></div><div class="payroll-stub-records">${stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`}</div></article>`;
+        return `<article class="payroll-stub-teacher-card"><div class="payroll-stub-teacher-heading"><span class="roster-student-photo teacher-identity-bubble ${teacherProfileColorClass(teacher)}">${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(initials)}</span><span><strong>${escapeText(fullName(teacher))}</strong><small>${escapeText(payrollTierLabels[teacher.payTier] || "Payment tier not assigned")}</small></span></div><div class="payroll-stub-records">${stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`}</div></article>`;
       }).join("");
 
     const renderPayrollStubLibrary = () => {
@@ -26016,9 +26168,11 @@
         const editableFields = ["student_first_name", "student_last_name", "student_preferred_name", "student_birth_date", "student_gender", "tshirt_size", "student_classroom", "official_classroom", "parent_first_name", "parent_last_name", "parent_relationship", "parent_phone", "parent_email", "requested_school_name", "requested_dance_style", "tuition_discount", "payment_status", "medical_notes", "registration_notes"];
         const values = new FormData(editForm);
         editableFields.forEach((field) => { item[field] = String(values.get(field) || "").trim(); });
-        item.additional_information = Object.fromEntries([...editForm.querySelectorAll("[data-enrollment-additional-information]")]
+        const hiddenAdditionalInformation = Object.fromEntries(Object.entries(item.additional_information || {})
+          .filter(([label]) => !additionalInformationFieldIsVisible(label)));
+        item.additional_information = { ...hiddenAdditionalInformation, ...Object.fromEntries([...editForm.querySelectorAll("[data-enrollment-additional-information]")]
           .map((field) => [field.dataset.enrollmentAdditionalInformation, field.value.trim()])
-          .filter(([label]) => label));
+          .filter(([label]) => label)) };
         item.parent_name = [item.parent_first_name, item.parent_last_name].filter(Boolean).join(" ");
         item.editing_enrollment = false;
         await syncEnrollmentIntakeToStudent(item);
