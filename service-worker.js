@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v150-admin-signature-blush";
+const CACHE_NAME = "my-dance-techniques-v151-team-talk-heart";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -22,6 +22,7 @@ const CORE_ASSETS = [
   "./assets/app-icon-partner-schools.png",
   "./assets/dance-techniques-blush-logo.png",
   "./assets/dance-techniques-logo-only.png",
+  "./assets/team-talk-blush-logo.png",
   "./assets/director-dashboard-title.png",
   "./assets/birthday-crown-ring.png",
   "./assets/birthday-crown-ring-sage.png",
