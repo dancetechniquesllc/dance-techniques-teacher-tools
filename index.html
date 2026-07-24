@@ -4096,15 +4096,16 @@
       margin-top: 9px;
       padding: 8px 10px;
       border-radius: 13px;
-      background: var(--blush);
+      background: var(--thread-card-color, var(--blush));
+      color: var(--thread-card-text, var(--fg));
       font-size: 11.5px;
       line-height: 1.3;
     }
 
     .thread-preview-bubble.sent {
       margin-left: auto;
-      border: 1.5px solid oklch(78% 0.07 20);
-      background: transparent;
+      border: 0;
+      background: var(--thread-card-color, var(--blush));
     }
 
     .thread-preview-bubble::after {
@@ -4114,27 +4115,19 @@
       bottom: 7px;
       width: 8px;
       height: 10px;
-      background: var(--blush);
+      background: var(--thread-card-color, var(--blush));
       clip-path: polygon(100% 0, 100% 100%, 0 35%);
     }
 
     .thread-preview-bubble.sent::after {
       right: -8px;
       left: auto;
-      background: oklch(78% 0.07 20);
+      background: var(--thread-card-color, var(--blush));
       clip-path: polygon(0 0, 100% 35%, 0 100%);
     }
 
     .thread-preview-bubble.sent::before {
-      content: "";
-      position: absolute;
-      z-index: 1;
-      right: -5px;
-      bottom: 9px;
-      width: 6px;
-      height: 7px;
-      background: var(--surface);
-      clip-path: polygon(0 0, 100% 35%, 0 100%);
+      display: none;
     }
 
     .thread-preview-time {
@@ -4273,10 +4266,19 @@
     }
 
     .reaction-icon {
-      width: 15px;
-      height: 15px;
+      width: 16px;
+      height: 16px;
       display: block;
       fill: currentColor;
+      shape-rendering: geometricPrecision;
+    }
+
+    .reaction-icon path {
+      stroke: currentColor;
+      stroke-width: 1.15;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      paint-order: stroke fill;
     }
 
     .reaction-icon.down {
@@ -4300,6 +4302,12 @@
 
     .announcement-card .thread-list {
       margin-top: 8px;
+    }
+
+    .team-talk-card {
+      width: 100%;
+      color: var(--fg);
+      text-align: left;
     }
 
     .latest-announcement {
@@ -4368,14 +4376,14 @@
       text-align: center;
     }
 
-    .message-bubble.team-message,
-    .message-bubble.team-message.mine {
+    .message-bubble.colored-message,
+    .message-bubble.colored-message.mine {
       border: 0;
       background: var(--team-message-color);
       color: var(--team-message-text);
     }
 
-    .message-bubble.team-message .message-bubble-sender {
+    .message-bubble.colored-message .message-bubble-sender {
       color: var(--team-message-text);
     }
 
@@ -11549,13 +11557,13 @@
                     </div>
                     <div id="teacher-latest-announcement"></div>
                   </div>
-                  <div class="team-talk-card">
+                  <button class="team-talk-card" type="button" data-teacher-thread="team-meeting">
                     <div class="section-title">
                       <h3>Team Talk</h3>
-                      <button class="team-talk-group-button" type="button" data-teacher-thread="team-meeting">Group Chat</button>
+                      <span class="team-talk-group-button">Group Chat</span>
                     </div>
                     <div id="teacher-team-talk-preview"></div>
-                  </div>
+                  </button>
                   <div class="section-title">
                     <h3>Inbox</h3>
                     <button class="plus-circle" type="button" id="open-private-message" aria-label="New private message">+</button>
@@ -19279,6 +19287,8 @@
           ));
           const profileColor = otherTeacher ? teacherProfileColor(otherTeacher) : "#dba9a1";
           const profilePhoto = otherTeacher?.photo || "";
+          const latestColor = messageAssignedColor(latest?.from || otherName);
+          const latestTextColor = coordinatedInitialColor(latestColor);
           const profileMarkup = otherName === "Admin"
             ? `<span class="message-profile-bubble" style="border-color:${escapeText(profileColor)}"><img src="./assets/dance-techniques-logo-only.png" alt="Dance Techniques"></span>`
             : profilePhoto
@@ -19289,7 +19299,7 @@
               ${profileMarkup}
               <span class="teacher-inbox-content">
                 <strong>${escapeText(title)}</strong>
-                ${latest ? `<span class="thread-preview-bubble ${sent ? "sent" : ""}">${escapeText(latest.text || "Open this message")}</span><small class="thread-preview-time">${escapeText(inboxTimeDateLabel(latest.time))}</small>` : `<small>No messages yet</small>`}
+                ${latest ? `<span class="thread-preview-bubble ${sent ? "sent" : ""}" style="--thread-card-color:${escapeText(latestColor)};--thread-card-text:${escapeText(latestTextColor)}">${escapeText(latest.text || "Open this message")}</span><small class="thread-preview-time">${escapeText(inboxTimeDateLabel(latest.time))}</small>` : `<small>No messages yet</small>`}
               </span>
               ${unread ? `<span class="status message-unread-badge">1</span>` : ""}
             </button>
@@ -19435,10 +19445,11 @@
           </button>
         ` : "";
         const isTeamMessage = thread.type === "team";
-        const teamColor = isTeamMessage ? messageAssignedColor(message.from) : "";
-        const teamStyle = isTeamMessage ? ` style="--team-message-color:${escapeText(teamColor)};--team-message-text:${escapeText(coordinatedInitialColor(teamColor))}"` : "";
+        const isColoredMessage = thread.type === "team" || thread.type === "private";
+        const messageColor = isColoredMessage ? messageAssignedColor(message.from) : "";
+        const messageStyle = isColoredMessage ? ` style="--team-message-color:${escapeText(messageColor)};--team-message-text:${escapeText(coordinatedInitialColor(messageColor))}"` : "";
         return `
-          <div class="message-bubble ${message.from === viewerName ? "mine" : ""}${isTeamMessage ? " team-message" : ""}" data-message-hold${teamStyle}>
+          <div class="message-bubble ${message.from === viewerName ? "mine" : ""}${isColoredMessage ? " colored-message" : ""}" data-message-hold${messageStyle}>
             <div class="message-bubble-sender">${isTeamMessage ? escapeText(messageSenderDisplayName(message)) : escapeText(message.time)}</div>
             ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}
             ${receipt}
