@@ -6186,6 +6186,7 @@
     .newsletter-brand-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 11px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-soft); }
     .newsletter-brand-controls .newsletter-color-control,
     .newsletter-brand-controls .newsletter-inline-toolbar { grid-column: 1 / -1; }
+    .newsletter-color-control { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 800; }
     #newsletter-font option[value="parisienne"] { font-family: "Parisienne", cursive; }
     #newsletter-font option[value="bodoni-smallcaps"] { font-family: "Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif; font-variant: small-caps; }
     #newsletter-font option[value="avenir-bold"] { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-weight: 800; }
@@ -6194,8 +6195,9 @@
     .newsletter-color-swatches { display: flex; flex-wrap: nowrap; gap: 7px; align-items: center; }
     .newsletter-color-swatch { width: 29px; height: 29px; min-height: 29px; padding: 0; border: 3px solid white; border-radius: 999px; box-shadow: 0 0 0 1px var(--border); }
     .newsletter-color-swatch.is-selected { box-shadow: 0 0 0 2px var(--fg); }
-    .newsletter-color-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-    .newsletter-add-sparkle { min-height: 30px; padding: 5px 10px; border: 0; border-radius: 999px; background: var(--blush); color: #160f0d; font-size: 10px; }
+    .newsletter-color-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .newsletter-color-row .newsletter-dt-touch { flex: 0 0 auto; min-height: 32px; }
+    .newsletter-add-sparkle, .newsletter-spell-check { min-height: 30px; padding: 5px 10px; border: 0; border-radius: 999px; background: var(--blush); color: #160f0d; font-size: 10px; }
     .newsletter-add-sparkle .signature-sparkle { display: inline-block; margin-right: 4px; color: #160f0d; font-size: 14px; line-height: .7; }
     .newsletter-link-icon { width: 14px; height: 14px; margin-right: 4px; fill: none; stroke: #160f0d; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; vertical-align: -3px; }
     .newsletter-section-builder { display: grid; gap: 9px; }
@@ -6269,7 +6271,6 @@
     .newsletter-preview-drag-handle { cursor: grab; }
     .newsletter-inline-toolbar { position: relative; display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); }
     .newsletter-inline-toolbar > button { min-height: 30px; padding: 5px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
-    .newsletter-inline-toolbar .newsletter-dt-touch { margin-left: auto; background: linear-gradient(135deg, var(--berry), #9b4669); color: white; }
     .newsletter-field-popover { position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; width: min(420px, 90vw); display: grid; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: white; box-shadow: var(--shadow); }
     .newsletter-field-popover[hidden] { display: none; }
     .newsletter-preview-inline-input { width: 100%; margin-top: 7px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px; background: white; font: inherit; }
@@ -12345,14 +12346,15 @@
                 <div class="newsletter-brand-controls">
                   <label>Fonts<select id="newsletter-font"><option value="parisienne">Parisienne</option><option value="bodoni-smallcaps">Bodoni 72 Smallcaps</option><option value="avenir-bold">Avenir Bold</option><option value="avenir-light">Avenir Light</option><option value="avenir-ultra-light">Avenir Ultra Light</option></select></label>
                   <label>Text Size<select id="newsletter-text-size"><option value="8">8pt</option><option value="10">10pt</option><option value="12">12pt</option><option value="14">14pt</option><option value="16">16pt</option><option value="18">18pt</option><option value="20">20pt</option><option value="24">24pt</option><option value="28">28pt</option><option value="32">32pt</option></select></label>
-                  <label class="newsletter-color-control"><span class="newsletter-color-heading"><span>Approved Color</span><button class="newsletter-add-sparkle" type="button" id="newsletter-add-sparkle" title="Add a Sparkle"><span class="signature-sparkle" aria-hidden="true">✦</span>Add a Sparkle</button></span><span class="newsletter-color-swatches" id="newsletter-color-swatches"><button class="newsletter-color-swatch" type="button" data-newsletter-color="black" style="background:#160f0d" aria-label="Black"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="soft-grey" style="background:#5e5e5e" aria-label="Soft Dark Grey"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="berry" style="background:#65103f" aria-label="Berry"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="dusty-mauve" style="background:#9b687a" aria-label="Dusty Mauve"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="blush" style="background:#dba9a1" aria-label="Blush"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="sage" style="background:#68775f" aria-label="Sage · Bopper"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="gold" style="background:#d58c24" aria-label="Gold · Skiplynn"></button></span></label>
+                  <div class="newsletter-color-control"><span>Approved Color</span><div class="newsletter-color-row"><span class="newsletter-color-swatches" id="newsletter-color-swatches"><button class="newsletter-color-swatch" type="button" data-newsletter-color="black" style="background:#160f0d" aria-label="Black"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="soft-grey" style="background:#5e5e5e" aria-label="Soft Dark Grey"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="berry" style="background:#65103f" aria-label="Berry"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="dusty-mauve" style="background:#9b687a" aria-label="Dusty Mauve"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="blush" style="background:#dba9a1" aria-label="Blush"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="sage" style="background:#68775f" aria-label="Sage · Bopper"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="gold" style="background:#d58c24" aria-label="Gold · Skiplynn"></button></span><button class="newsletter-dt-touch" type="button" id="newsletter-dt-touch">✦ DT Touch ✦</button></div></div>
                   <div class="newsletter-inline-toolbar" id="newsletter-inline-toolbar" aria-label="Text editing toolbar">
                   <button type="button" data-newsletter-command="bold" aria-label="Bold"><strong>B</strong></button>
                   <button type="button" data-newsletter-command="italic" aria-label="Italic"><em>I</em></button>
                   <button type="button" data-newsletter-command="underline" aria-label="Underline"><u>U</u></button>
                   <button type="button" id="newsletter-add-link"><svg class="newsletter-link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5l3-3"></path><path d="M7.4 16.6l-1.3 1.3a4 4 0 0 1-5.7-5.7l3.5-3.5a4 4 0 0 1 5.7 0"></path><path d="M16.6 7.4l1.3-1.3a4 4 0 0 1 5.7 5.7l-3.5 3.5a4 4 0 0 1-5.7 0"></path></svg>Hyperlink</button>
                   <button type="button" id="newsletter-open-fields">＋ Personalized Field</button>
-                  <button class="newsletter-dt-touch" type="button" id="newsletter-dt-touch">✦ DT Touch ✦</button>
+                  <button class="newsletter-add-sparkle" type="button" id="newsletter-add-sparkle" title="Add a Sparkle"><span class="signature-sparkle" aria-hidden="true">✦</span>Add a Sparkle</button>
+                  <button class="newsletter-spell-check" type="button" id="newsletter-spell-check">Spell Check</button>
                   <div class="newsletter-field-popover" id="newsletter-field-popover" hidden>
                     <strong>Insert Personalized Field</strong>
                     <div class="newsletter-field-buttons" id="newsletter-field-buttons">
@@ -26360,11 +26362,37 @@
         return next;
       });
     };
+    const newsletterClearInlineFontHtml = (html = "") => {
+      if (!html) return "";
+      const template = document.createElement("template");
+      template.innerHTML = html;
+      template.content.querySelectorAll("font").forEach((font) => font.replaceWith(...font.childNodes));
+      template.content.querySelectorAll("[style]").forEach((element) => {
+        element.style.removeProperty("font-family");
+        element.style.removeProperty("font-variant");
+        element.style.removeProperty("text-transform");
+        if (!element.getAttribute("style")?.trim()) element.removeAttribute("style");
+      });
+      return template.innerHTML;
+    };
+    const clearNewsletterInlineFonts = () => {
+      ["subjectHtml", "headlineHtml", "messageHtml"].forEach((key) => {
+        if (newsletterDraft[key]) newsletterDraft[key] = newsletterClearInlineFontHtml(newsletterDraft[key]);
+      });
+      newsletterDraft.sections = (newsletterDraft.sections || []).map((section) => {
+        const next = { ...section };
+        ["titleHtml", "textHtml", "linkTextHtml"].forEach((key) => {
+          if (next[key]) next[key] = newsletterClearInlineFontHtml(next[key]);
+        });
+        return next;
+      });
+    };
 
     const updateNewsletterDraftFromForm = () => {
       const font = document.getElementById("newsletter-font")?.value || "avenir-light";
       newsletterDraft = { ...newsletterDraft, font, textSize: document.getElementById("newsletter-text-size")?.value || "12" };
       if (font === "bodoni-smallcaps") lowercaseNewsletterDraftCopy();
+      else clearNewsletterInlineFonts();
       renderNewsletterStudio();
       saveNewsletterDraft();
     };
@@ -27169,16 +27197,14 @@
 
     ["newsletter-font", "newsletter-text-size"].forEach((id) => {
       document.getElementById(id)?.addEventListener("change", (event) => {
+        if (id === "newsletter-font") {
+          updateNewsletterDraftFromForm();
+          return;
+        }
         if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
-          if (id === "newsletter-text-size") {
-            const pointSize = Number(event.target.value) || 12;
-            const commandSize = pointSize <= 8 ? "1" : pointSize <= 10 ? "2" : pointSize <= 12 ? "3" : pointSize <= 14 ? "4" : pointSize <= 18 ? "5" : pointSize <= 24 ? "6" : "7";
-            document.execCommand("fontSize", false, commandSize);
-          }
-          else {
-            document.execCommand("fontName", false, event.target.value === "parisienne" ? "Parisienne" : event.target.value === "bodoni-smallcaps" ? "Bodoni 72 Smallcaps" : "Avenir Next");
-            if (event.target.value === "bodoni-smallcaps" && newsletterActivePreviewTarget) newsletterActivePreviewTarget.innerHTML = newsletterLowercaseHtml(newsletterActivePreviewTarget.innerHTML);
-          }
+          const pointSize = Number(event.target.value) || 12;
+          const commandSize = pointSize <= 8 ? "1" : pointSize <= 10 ? "2" : pointSize <= 12 ? "3" : pointSize <= 14 ? "4" : pointSize <= 18 ? "5" : pointSize <= 24 ? "6" : "7";
+          document.execCommand("fontSize", false, commandSize);
           newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
           return;
         }
@@ -27260,6 +27286,15 @@
       if (!newsletterActivePreviewTarget || !restoreNewsletterSelection()) return showToast("Place your cursor in the Live Preview first.");
       document.execCommand("insertHTML", false, '<span style="color:#dba9a1;">✦</span>');
       newsletterActivePreviewTarget.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    document.getElementById("newsletter-spell-check")?.addEventListener("click", () => {
+      document.querySelectorAll("#newsletter-preview-document [contenteditable='true']").forEach((field) => {
+        field.setAttribute("lang", "en");
+        field.setAttribute("spellcheck", "false");
+        field.setAttribute("spellcheck", "true");
+      });
+      newsletterActivePreviewTarget?.focus();
+      showToast("Spell check is on. Misspelled words will be underlined.");
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("focusin", (event) => {
       const editable = event.target.closest("[data-newsletter-preview-field], [data-newsletter-preview-section-field]");
