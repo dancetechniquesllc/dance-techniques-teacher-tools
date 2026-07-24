@@ -14287,6 +14287,13 @@
       const isLeader = ["admin", "director"].includes(window.dtCurrentProfile?.role) || document.body.dataset.mode === "admin";
       const target = notificationActionTarget(item);
       closeNotificationPanels();
+      if (target.open === "notifications") {
+        const notificationPanel = isLeader
+          ? document.querySelector(".director-session-notifications")
+          : document.querySelector(".teacher-shell .teacher-notifications");
+        if (notificationPanel) notificationPanel.open = true;
+        return;
+      }
       if (target.enrollmentId && isLeader) {
         document.body.dataset.mode = "admin";
         document.querySelectorAll("[data-mode-btn]").forEach((button) => button.classList.toggle("active", button.dataset.modeBtn === "admin"));
@@ -14386,6 +14393,24 @@
       if (isLeader) openAdminToolsHome();
       else { document.body.dataset.mode = "teacher"; setTab("home"); }
       showToast("Opened the closest matching area");
+    };
+
+    let dashboardDeepLinkHandled = false;
+    const openDashboardDeepLink = () => {
+      if (dashboardDeepLinkHandled) return;
+      const params = new URLSearchParams(window.location.search);
+      const open = params.get("open");
+      if (!open) return;
+      dashboardDeepLinkHandled = true;
+      openNotificationAction({
+        id: params.get("notificationId") || "",
+        notification_type: params.get("type") || "deep_link",
+        action_url: window.location.href,
+        metadata: {}
+      });
+      ["open", "id", "notificationId", "type"].forEach((key) => params.delete(key));
+      const nextQuery = params.toString();
+      window.history.replaceState({}, "", `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`);
     };
 
     const markAllNotificationsRead = async () => {
@@ -28611,6 +28636,7 @@
       subscribeNotificationSystem(profile);
       loadSharedMusicLibrary(profile);
       clearUnsavedEdits();
+      openDashboardDeepLink();
     };
 
     document.addEventListener("click", (event) => {
@@ -28666,6 +28692,7 @@
     renderEnrollmentQueue();
     renderNotificationCenter();
     renderNotificationPreferences();
+    if (document.body.dataset.tourMode === "true") openDashboardDeepLink();
     if (document.body.dataset.tourMode === "true"
       && ["127.0.0.1", "localhost"].includes(location.hostname)
       && new URLSearchParams(location.search).get("enrollment-preview") === "csv") {

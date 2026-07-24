@@ -20,6 +20,7 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 - Teacher profiles and school assignments
 - Partner School cards, teacher/ISD bubbles, and sorting
 - Schedule, curriculum, messages, pay-stub placeholders, and admin tools
+- Notification and phone-push links that open the intended Director Dashboard or Teacher Tools workflow after sign-in
 - Shared Supabase-backed Classes & Rosters for signed-in accounts, with browser-local saving retained for the safe local tour and unfinished prototype sections
 - Private-by-default shared-roster loading: signed-in users never see fictional roster records while live role-filtered data is opening or unavailable
 - Supabase email/password sign-in with inactive-account approval gating
