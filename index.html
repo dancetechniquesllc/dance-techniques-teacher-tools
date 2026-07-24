@@ -12356,7 +12356,7 @@
                   <div class="newsletter-field-popover" id="newsletter-field-popover" hidden>
                     <strong>Insert Personalized Field</strong>
                     <div class="newsletter-field-buttons" id="newsletter-field-buttons">
-                      <button type="button" data-newsletter-field="[Parent First Name]">Parent First Name</button><button type="button" data-newsletter-field="[Dancer Preferred Name]">Dancer Preferred Name</button><button type="button" data-newsletter-field="[School Nickname]">School Nickname</button><button type="button" data-newsletter-field="[Teacher Name]">Teacher Name</button><button type="button" data-newsletter-field="[Dance Day]">Dance Day</button><button type="button" data-newsletter-field="[Dance Time]">Dance Time</button><button type="button" data-newsletter-field="[Director First Name]">Director First Name</button>
+                      <button type="button" data-newsletter-field="[Parent First Name]">Parent First Name</button><button type="button" data-newsletter-field="[Dancer Name]">Dancer Name</button><button type="button" data-newsletter-field="[School Nickname]">School Nickname</button><button type="button" data-newsletter-field="[Teacher Name]">Teacher Name</button><button type="button" data-newsletter-field="[Dance Day]">Dance Day</button><button type="button" data-newsletter-field="[Dance Time]">Dance Time</button><button type="button" data-newsletter-field="[Director First Name]">Director First Name</button>
                     </div>
                   </div>
                 </div>
@@ -25928,7 +25928,7 @@
     };
 
     const newsletterStorageKey = "dt-newsletter-studio-draft-v1";
-    const newsletterDefaultDraft = { template: "monthly", audience: "parents", school: "all", teacher: "all", subject: "", headline: "What’s Happening at Dance Techniques", message: "Hi [Parent First Name],\n\nWe loved dancing with [Dancer Preferred Name] this week!", font: "avenir-light", textSize: "12", color: "berry", sections: [], graphics: [], videoUrl: "", ctaLabel: "", ctaUrl: "", device: "desktop" };
+    const newsletterDefaultDraft = { template: "monthly", audience: "parents", school: "all", teacher: "all", subject: "", headline: "What’s Happening at Dance Techniques", message: "Hi [Parent First Name],\n\nWe loved dancing with [Dancer Name] this week!", font: "avenir-light", textSize: "12", color: "berry", sections: [], graphics: [], videoUrl: "", ctaLabel: "", ctaUrl: "", device: "desktop" };
     let newsletterDraft = { ...newsletterDefaultDraft };
     let newsletterSaveTimer = 0;
     let newsletterActiveField = "message";
@@ -25948,18 +25948,18 @@
     newsletterDraft.ctaUrl = "";
 
     const newsletterTemplates = {
-      monthly: { headline: "What’s Happening at Dance Techniques", subject: "Your monthly Dance Techniques update", message: "Hi [Parent First Name],\n\nHere is everything happening in [Dancer Preferred Name]’s dance world this month!", color: "berry" },
-      birthday: { headline: "A Birthday Ballerina Celebration", subject: "We’re celebrating [Dancer Preferred Name]!", message: "Hi [Parent First Name],\n\nWe are so excited to celebrate your birthday ballerina during dance class!", color: "gold" },
+      monthly: { headline: "What’s Happening at Dance Techniques", subject: "Your monthly Dance Techniques update", message: "Hi [Parent First Name],\n\nHere is everything happening in [Dancer Name]’s dance world this month!", color: "berry" },
+      birthday: { headline: "A Birthday Ballerina Celebration", subject: "We’re celebrating [Dancer Name]!", message: "Hi [Parent First Name],\n\nWe are so excited to celebrate your birthday ballerina during dance class!", color: "gold" },
       welcome: {
         headline: "Welcome to the Dance Techniques Family",
         subject: "Where Young Dancers Take Their First Steps",
-        message: "Hi [Parent First Name],\n\nWe are so excited to welcome [Dancer Preferred Name] to Dance Techniques. Our classes are thoughtfully designed to build confidence, coordination, creativity, and a lifelong love of movement—all within the comfort of your child’s school.",
+        message: "Hi [Parent First Name],\n\nWe are so excited to welcome [Dancer Name] to Dance Techniques. Our classes are thoughtfully designed to build confidence, coordination, creativity, and a lifelong love of movement—all within the comfort of your child’s school.",
         color: "blush",
         audience: "parents",
         font: "avenir-light",
         textSize: "12",
         sections: [
-          { type: "personalized", title: "Your Dance Details", text: "Dancer: [Dancer Preferred Name]\nSchool: [School Nickname]\nTeacher: [Teacher Name]\nDance Day: [Dance Day]\nClass Time: [Dance Time]\n\nIf the school listed above is not correct, please reply to this email so our team can update your dancer’s enrollment." },
+          { type: "personalized", title: "Your Dance Details", text: "Dancer: [Dancer Name]\nSchool: [School Nickname]\nTeacher: [Teacher Name]\nDance Day: [Dance Day]\nClass Time: [Dance Time]\n\nIf the school listed above is not correct, please reply to this email so our team can update your dancer’s enrollment." },
           { type: "divider" },
           { type: "text", title: "Download Brightwheel", text: "Brightwheel is required for every Dance Techniques family. It is where you will receive class communication, photos, teacher messages, billing statements, and payment reminders. Please enable AutoPay so your account stays current throughout the season.\n\nAfter enrollment, your Brightwheel invitation may take up to two business days to arrive. Use the invitation code in that email to connect to your dancer’s profile." },
           { type: "button", linkText: "Download Brightwheel", url: "https://mybrightwheel.com/" },
@@ -25979,15 +25979,15 @@
           { type: "reminder", title: "The $125 Recital Experience Includes", text: "A performance costume; tights or socks; hairpiece and accessories; official recital T-shirt; professional performance video; professional class group photo; dancer medal; keepsake program; unlimited guest admission; and a fully produced Dance Techniques performance experience." },
           { type: "text", title: "Recital Billing", text: "The $125 recital fee is added at enrollment. Families may pay during the fall, divide the fee into installments, or allow the remaining balance to draft on January 1, 2027." },
           { type: "divider" },
-          { type: "text", title: "We Can’t Wait to Dance With You", text: "Thank you for trusting Dance Techniques with these first dance steps. We are honored to partner with your family and [School Nickname] as [Dancer Preferred Name] learns, grows, and shines. If you ever need support, our team is here to help through Brightwheel." },
+          { type: "text", title: "We Can’t Wait to Dance With You", text: "Thank you for trusting Dance Techniques with these first dance steps. We are honored to partner with your family and [School Nickname] as [Dancer Name] learns, grows, and shines. If you ever need support, our team is here to help through Brightwheel." },
           { type: "quote", title: "", text: "With love,\nLexi King & Tiffany Edwards\nDance Techniques\n\nHelping Your School Shine—One Dance Step at a Time." }
         ]
       },
-      "trial-complete": { headline: "Your Dancer’s Trial Is Complete", subject: "A lovely next step for [Dancer Preferred Name]", message: "Hi [Parent First Name],\n\nWe loved having [Dancer Preferred Name] join us for a trial class! We would love to help you with the next step.", color: "blush" },
+      "trial-complete": { headline: "Your Dancer’s Trial Is Complete", subject: "A lovely next step for [Dancer Name]", message: "Hi [Parent First Name],\n\nWe loved having [Dancer Name] join us for a trial class! We would love to help you with the next step.", color: "blush" },
       fall: { headline: "Fall Enrollment Is Here", subject: "A beautiful new dance season is waiting", message: "Dance season is just around the corner! Save your dancer’s place for a season of movement, confidence, and joy.", color: "berry" },
       recital: { headline: "Recital Information", subject: "Everything your dance family needs for recital", message: "Hi [Parent First Name],\n\nOur dancers have been working so hard, and recital time is almost here!", color: "gold" },
-      costume: { headline: "Costume Week", subject: "Costume Week details for [Dancer Preferred Name]", message: "Hi [Parent First Name],\n\nIt is time for a little extra sparkle! Here is what you need to know for Costume Week.", color: "blush" },
-      picture: { headline: "Picture Week", subject: "Picture Week details for [Dancer Preferred Name]", message: "Hi [Parent First Name],\n\nPicture Week is almost here! Here is everything your dancer needs for a smooth and picture-perfect Dance Day.", color: "dusty-mauve" },
+      costume: { headline: "Costume Week", subject: "Costume Week details for [Dancer Name]", message: "Hi [Parent First Name],\n\nIt is time for a little extra sparkle! Here is what you need to know for Costume Week.", color: "blush" },
+      picture: { headline: "Picture Week", subject: "Picture Week details for [Dancer Name]", message: "Hi [Parent First Name],\n\nPicture Week is almost here! Here is everything your dancer needs for a smooth and picture-perfect Dance Day.", color: "dusty-mauve" },
       "save-date": { headline: "Save the Date", subject: "Save the date for a special Dance Techniques event", message: "Hi [Parent First Name],\n\nA special Dance Techniques moment is coming! Please save the date, and we’ll share all the lovely details soon.", color: "dusty-mauve" },
       summer: { headline: "Summer Session", subject: "Keep dancing all summer long", message: "Summer is made for sunshine, smiles, and dancing! Summer Session registration is now open.", color: "gold" },
       partnership: { headline: "Welcome to Our Dance Partnership", subject: "A joyful new partnership with Dance Techniques", message: "Hi [Director First Name],\n\nWe are honored to bring the joy of dance to [School Nickname].", color: "sage", audience: "schools" },
@@ -26111,6 +26111,8 @@
       const student = record?.student || {};
       return {
         "[Parent First Name]": student.parentFirstName || String(student.parentName || "Dance Family").split(" ")[0] || "Dance Family",
+        "[Dancer Name]": rosterStudentFirstName(student) || "your dancer",
+        "[Dancer First Name]": student.firstName || student.first_name || rosterStudentFirstName(student) || "your dancer",
         "[Dancer Preferred Name]": rosterStudentFirstName(student) || "your dancer",
         "[School Nickname]": school.nickname || rosterSchoolNickname(record?.rosterClass.schoolName || "your school"),
         "[Teacher Name]": record ? rosterTeacherName(record.rosterClass.teacherId) : "your Dance Techniques teacher",
