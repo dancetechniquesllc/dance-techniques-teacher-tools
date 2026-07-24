@@ -4020,29 +4020,51 @@
     }
 
     .teacher-inbox-card {
-      grid-template-columns: 42px minmax(0, 1fr);
-      align-items: start;
-      min-height: 150px;
-      padding: 12px;
+      position: relative;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      align-content: start;
+      min-height: 190px;
+      padding: 14px 12px 32px;
       border-radius: 16px;
+      text-align: center;
     }
 
     .message-profile-bubble {
-      width: 42px;
-      height: 42px;
+      width: 52px;
+      height: 52px;
       display: grid;
       place-items: center;
       border-radius: 999px;
       background: var(--blush);
       color: var(--rose);
+      border: 3px solid var(--rose);
+      background-position: center;
+      background-size: cover;
       font-size: 13px;
       font-weight: 900;
+    }
+
+    .message-profile-bubble img {
+      width: 100%;
+      height: 100%;
+      border-radius: inherit;
+      object-fit: cover;
+    }
+
+    .teacher-inbox-content {
+      width: 100%;
+    }
+
+    .teacher-inbox-content > strong {
+      margin-top: 6px;
+      text-align: center;
     }
 
     .thread-preview-bubble {
       position: relative;
       display: block;
-      width: fit-content;
+      width: 100%;
       max-width: 100%;
       margin-top: 9px;
       padding: 8px 10px;
@@ -4078,11 +4100,26 @@
     }
 
     .thread-preview-time {
+      position: absolute;
+      right: 8px;
+      bottom: 9px;
+      left: 8px;
       display: block;
-      margin-top: 7px;
       color: var(--muted);
       font-size: 10.5px;
-      text-align: right;
+      text-align: center;
+    }
+
+    .teacher-inbox-card > .message-unread-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border-radius: 999px;
     }
 
     .thread-button.active {
@@ -19120,6 +19157,10 @@
       if (thread.type === "announcement" || thread.type === "team") return readReceiptTeacherNames;
       return thread.participants.filter((participant) => participant !== message.from && participant !== "Admins");
     };
+    const inboxTimeDateLabel = (value = "") => {
+      const match = String(value).match(/^(Today|Yesterday|Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+(.+)$/);
+      return match ? `${match[2]} - ${match[1]}` : value;
+    };
 
     const renderThreadButtons = (containerId, threads, selectedId, dataAttribute, viewerName) => {
       const container = document.getElementById(containerId);
@@ -19131,12 +19172,23 @@
           const title = messageThreadNameFor(thread, viewerName);
           const initials = title.replace(/^Ms\.\s*/i, "").split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "DT";
           const sent = latest?.from === viewerName;
+          const otherName = thread.participants.find((participant) => participant !== viewerName && participant !== "Admins") || "";
+          const otherTeacher = teachers.find((teacher) => (
+            teacher.firstName === otherName ||
+            teacher.displayName === otherName ||
+            teacher.displayName === personDisplayName(otherName)
+          ));
+          const profileColor = otherTeacher ? teacherProfileColor(otherTeacher) : "#dba9a1";
+          const profilePhoto = otherTeacher?.photo || "";
+          const profileMarkup = profilePhoto
+            ? `<span class="message-profile-bubble" style="border-color:${escapeText(profileColor)}"><img src="${escapeText(profilePhoto)}" alt=""></span>`
+            : `<span class="message-profile-bubble" aria-hidden="true" style="background-color:${escapeText(profileColor)};border-color:${escapeText(profileColor)};color:${escapeText(coordinatedInitialColor(profileColor))}">${escapeText(initials)}</span>`;
           return `
             <button class="thread-button teacher-inbox-card ${thread.id === selectedId ? "active" : ""}" type="button" ${dataAttribute}="${escapeText(thread.id)}">
-              <span class="message-profile-bubble" aria-hidden="true">${escapeText(initials)}</span>
-              <span>
+              ${profileMarkup}
+              <span class="teacher-inbox-content">
                 <strong>${escapeText(title)}</strong>
-                ${latest ? `<span class="thread-preview-bubble ${sent ? "sent" : ""}">${escapeText(latest.text || "Open this message")}</span><small class="thread-preview-time">${escapeText(latest.time)}</small>` : `<small>No messages yet</small>`}
+                ${latest ? `<span class="thread-preview-bubble ${sent ? "sent" : ""}">${escapeText(latest.text || "Open this message")}</span><small class="thread-preview-time">${escapeText(inboxTimeDateLabel(latest.time))}</small>` : `<small>No messages yet</small>`}
               </span>
               ${unread ? `<span class="status message-unread-badge">1</span>` : ""}
             </button>
