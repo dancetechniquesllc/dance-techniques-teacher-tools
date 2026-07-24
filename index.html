@@ -6237,6 +6237,11 @@
     .newsletter-preview-device { display: flex; gap: 6px; }
     .newsletter-preview-device button { min-height: 32px; padding: 5px 10px; border-radius: 999px; font-size: 10px; }
     .newsletter-preview-device button.is-selected { background: var(--fg); color: white; }
+    .newsletter-gender-versions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; padding: 7px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); }
+    .newsletter-gender-version { min-height: 42px; padding: 8px 12px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: var(--muted); font-size: 11px; }
+    .newsletter-gender-version.is-selected[data-newsletter-gender-version="female"] { border-color: #dba9a1; background: #f8e4df; color: #65103f; }
+    .newsletter-gender-version.is-selected[data-newsletter-gender-version="male"] { border-color: #68775f; background: #e7ece3; color: #3f4b39; }
+    .newsletter-version-note { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 10px; font-weight: 500; text-align: center; }
     .newsletter-preview-panel { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: hidden; }
     .newsletter-preview-stage { display: grid; place-items: start center; min-height: 0; max-height: calc(100vh - 285px); padding: 20px; border-radius: 14px; background: #e9e3df; overflow: auto; }
     .newsletter-preview-document { width: min(100%, 680px); min-height: 600px; border-radius: 14px; overflow: hidden; background: #fffaf6; box-shadow: 0 12px 34px rgb(58 29 22 / .14); transition: width .18s ease; }
@@ -6275,6 +6280,14 @@
     .newsletter-preview-document.template-welcome .newsletter-content-section.is-divider::before { content: ""; position: absolute; top: 50%; right: 0; left: 0; height: 1px; background: #dba9a1; }
     .newsletter-preview-document.template-welcome .newsletter-content-section.is-divider::after { content: ""; position: absolute; top: 50%; left: 50%; width: 9px; height: 9px; border: 6px solid #fffaf4; background: #dba9a1; box-sizing: content-box; transform: translate(-50%, -50%) rotate(45deg); }
     .newsletter-preview-document.template-welcome .newsletter-preview-footer { border-color: #dfb9b2; background: #f8e4df; color: #694e49; }
+    .newsletter-preview-document.is-boy-version .newsletter-preview-header { border-color: #aeb9a6; background: linear-gradient(180deg, #e7ece3 0%, #fffaf4 100%); }
+    .newsletter-preview-document.is-boy-version .newsletter-preview-header p,
+    .newsletter-preview-document.is-boy-version .newsletter-content-section h2 { color: #526149; }
+    .newsletter-preview-document.is-boy-version .newsletter-content-section.is-highlight { border-color: #b9c3b2; background: #e7ece3; }
+    .newsletter-preview-document.is-boy-version .newsletter-content-section.is-reminder { border-color: #68775f; }
+    .newsletter-preview-document.is-boy-version .newsletter-content-section.is-divider::before,
+    .newsletter-preview-document.is-boy-version .newsletter-content-section.is-divider::after { background: #68775f; }
+    .newsletter-preview-document.is-boy-version .newsletter-preview-footer { border-color: #b9c3b2; background: #e7ece3; }
     .newsletter-preview-document.title-font-bodoni .newsletter-preview-header h1,
     .newsletter-preview-document.title-font-bodoni .newsletter-preview-header p,
     .newsletter-preview-document.title-font-bodoni .newsletter-content-section h2 { color: #5e5e5e; text-transform: lowercase; }
@@ -12309,6 +12322,11 @@
                 <div class="newsletter-editor-actions"><button class="secondary" type="button" id="newsletter-reset">New Draft</button><button class="secondary" type="button" id="newsletter-test-send">Send Test</button><button class="secondary" type="button" id="newsletter-change-audience">Change Audience</button><button type="button" id="newsletter-send" disabled>Connect Email Provider to Send</button></div>
               </article>
               <article class="admin-card newsletter-preview-panel">
+                <div class="newsletter-gender-versions" aria-label="Newsletter gender versions">
+                  <button class="newsletter-gender-version is-selected" type="button" data-newsletter-gender-version="female">Girl Version · Blush</button>
+                  <button class="newsletter-gender-version" type="button" data-newsletter-gender-version="male">Boy Version · Sage</button>
+                  <p class="newsletter-version-note">Edit each version separately. One send delivers the matching version to each dancer’s family.</p>
+                </div>
                 <div class="newsletter-brand-controls">
                   <label>Fonts<select id="newsletter-font"><option value="parisienne">Parisienne</option><option value="bodoni-smallcaps">Bodoni 72 Smallcaps</option><option value="avenir-bold">Avenir Bold</option><option value="avenir-light">Avenir Light</option><option value="avenir-ultra-light">Avenir Ultra Light</option></select></label>
                   <label>Text Size<select id="newsletter-text-size"><option value="8">8pt</option><option value="10">10pt</option><option value="12">12pt</option><option value="14">14pt</option><option value="16">16pt</option><option value="18">18pt</option><option value="20">20pt</option><option value="24">24pt</option><option value="28">28pt</option><option value="32">32pt</option></select></label>
@@ -25962,16 +25980,48 @@
     };
     if (!newsletterTemplates[newsletterDraft.template]) newsletterDraft.template = "monthly";
 
+    const newsletterVariantFields = ["template", "subject", "subjectHtml", "headline", "headlineHtml", "message", "messageHtml", "font", "textSize", "color", "sections", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl"];
+    const newsletterVariantSnapshot = (source = newsletterDraft, colorOverride = "") => Object.fromEntries(newsletterVariantFields.map((key) => [key, key === "sections" ? structuredClone(source.sections || []) : source[key]]).filter(([, value]) => value !== undefined).map(([key, value]) => [key, key === "color" && colorOverride ? colorOverride : value]));
+    let newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
+    if (!newsletterDraft.genderVersions?.female || !newsletterDraft.genderVersions?.male) {
+      const initialFemale = newsletterVariantSnapshot(newsletterDraft);
+      newsletterDraft.genderVersions = {
+        female: initialFemale,
+        male: newsletterVariantSnapshot(newsletterDraft, "sage")
+      };
+    }
+    const persistNewsletterActiveVersion = () => {
+      newsletterDraft.genderVersions ||= {};
+      newsletterDraft.genderVersions[newsletterGenderView] = newsletterVariantSnapshot(newsletterDraft, newsletterGenderView === "male" ? (newsletterDraft.color || "sage") : "");
+      newsletterDraft.genderView = newsletterGenderView;
+    };
+    const loadNewsletterGenderVersion = (gender) => {
+      persistNewsletterActiveVersion();
+      newsletterGenderView = gender === "male" ? "male" : "female";
+      const version = newsletterDraft.genderVersions?.[newsletterGenderView] || newsletterVariantSnapshot(newsletterDraft, newsletterGenderView === "male" ? "sage" : "");
+      newsletterDraft = { ...newsletterDraft, ...structuredClone(version), genderView: newsletterGenderView };
+      if (newsletterGenderView === "male" && !newsletterDraft.color) newsletterDraft.color = "sage";
+    };
+    const resetNewsletterGenderVersions = (source) => {
+      const female = newsletterVariantSnapshot(source);
+      const male = newsletterVariantSnapshot(source, "sage");
+      newsletterDraft = { ...newsletterDraft, ...structuredClone(newsletterGenderView === "male" ? male : female), genderVersions: { female, male }, genderView: newsletterGenderView };
+    };
+    const newsletterVersionForGender = (gender) => {
+      persistNewsletterActiveVersion();
+      return structuredClone(newsletterDraft.genderVersions?.[String(gender || "").toLowerCase() === "male" ? "male" : "female"] || newsletterDraft);
+    };
+
     const newsletterColors = { black: "#160f0d", "soft-grey": "#5e5e5e", berry: "#65103f", "dusty-mauve": "#9b687a", blush: "#dba9a1", sage: "#68775f", gold: "#d58c24" };
-    const newsletterFontStyle = () => newsletterDraft.font === "parisienne" ? '"Parisienne", cursive' : newsletterDraft.font === "bodoni-smallcaps" ? '"Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif' : newsletterDraft.font === "avenir-ultra-light" ? '"Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : newsletterDraft.font === "avenir-light" ? '"Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
-    const newsletterTitleFontStyle = () => newsletterFontStyle();
-    const newsletterFontWeight = () => newsletterDraft.font === "avenir-bold" ? "800" : newsletterDraft.font === "avenir-ultra-light" ? "200" : "400";
-    const newsletterFontSize = () => `${Number(newsletterDraft.textSize) || 12}pt`;
-    const newsletterSectionMarkup = (section, context = newsletterSampleContext()) => {
+    const newsletterFontStyle = (draft = newsletterDraft) => draft.font === "parisienne" ? '"Parisienne", cursive' : draft.font === "bodoni-smallcaps" ? '"Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif' : draft.font === "avenir-ultra-light" ? '"Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : draft.font === "avenir-light" ? '"Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
+    const newsletterTitleFontStyle = (draft = newsletterDraft) => newsletterFontStyle(draft);
+    const newsletterFontWeight = (draft = newsletterDraft) => draft.font === "avenir-bold" ? "800" : draft.font === "avenir-ultra-light" ? "200" : "400";
+    const newsletterFontSize = (draft = newsletterDraft) => `${Number(draft.textSize) || 12}pt`;
+    const newsletterSectionMarkup = (section, context = newsletterSampleContext(), draft = newsletterDraft) => {
       if (section.type === "divider") return `<div class="newsletter-content-section is-divider" aria-hidden="true"></div>`;
       if (section.type === "photo") return section.url ? `<section class="newsletter-content-section"><img class="newsletter-block-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">${section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text))}</p>` : ""}</section>` : `<section class="newsletter-content-section is-highlight"><p>Photo or Resource Library image</p></section>`;
       if (section.type === "youtube") { const id = newsletterYouTubeId(section.url); return section.url ? `<a class="newsletter-video-card" href="${rosterSafe(section.url)}" target="_blank" rel="noopener">${id ? `<img src="https://i.ytimg.com/vi/${rosterSafe(id)}/hqdefault.jpg" alt="YouTube video preview">` : ""}<span class="newsletter-video-play">▶</span></a>` : ""; }
-      if (section.type === "button") return section.linkText && section.url ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:${newsletterDraft.template === "welcome" ? "#65103f" : "var(--newsletter-accent)"};color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
+      if (section.type === "button") return section.linkText && section.url ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:${draft.template === "welcome" ? (draft.genderView === "male" ? "#526149" : "#65103f") : "var(--newsletter-accent)"};color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
       if (section.type === "character") return `<section class="newsletter-content-section is-character"><span class="newsletter-character-graphic">${rosterSafe(section.text || "🩰")}</span>${section.title ? `<h2>${rosterSafe(section.title)}</h2>` : ""}</section>`;
       const title = section.title ? `<h2>${rosterSafe(newsletterPersonalize(section.title, context))}</h2>` : "";
       const body = section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text, context))}</p>` : "";
@@ -26150,6 +26200,7 @@
 
     const saveNewsletterDraft = () => {
       clearTimeout(newsletterSaveTimer);
+      persistNewsletterActiveVersion();
       const state = document.getElementById("newsletter-save-state");
       if (state) state.textContent = "Saving…";
       newsletterSaveTimer = window.setTimeout(() => {
@@ -26158,28 +26209,33 @@
       }, 220);
     };
 
-    const newsletterEmailHtml = (context = newsletterSampleContext()) => {
-      const accent = newsletterColors[newsletterDraft.color] || newsletterColors.berry;
+    const newsletterEmailHtml = (context = newsletterSampleContext(), draft = newsletterDraft) => {
+      const accent = newsletterColors[draft.color] || newsletterColors.berry;
       const personalizeHtml = (html, fallback = "") => newsletterPersonalize(html || rosterSafe(fallback), context);
-      const sections = newsletterDraft.sections.map((section) => newsletterSectionMarkup(section, context)).join("");
-      const templateClass = `template-${String(newsletterDraft.template || "monthly").replace(/[^a-z0-9-]/gi, "")}`;
+      const sections = draft.sections.map((section) => newsletterSectionMarkup(section, context, draft)).join("");
+      const templateClass = `template-${String(draft.template || "monthly").replace(/[^a-z0-9-]/gi, "")}${draft.genderView === "male" ? " is-boy-version" : ""}`;
+      const versionStyles = draft.genderView === "male" ? `.is-boy-version .newsletter-header{border-color:#aeb9a6!important;background:#e7ece3!important}.is-boy-version .newsletter-header p,.is-boy-version .newsletter-content-section h2{color:#526149!important}.is-boy-version .newsletter-content-section.is-highlight{border-color:#b9c3b2;background:#e7ece3}.is-boy-version .newsletter-content-section.is-reminder{border-color:#68775f}.is-boy-version .newsletter-content-section.is-divider{background:#68775f}.is-boy-version .newsletter-footer{border-color:#b9c3b2;background:#e7ece3!important}` : "";
       return `<!doctype html><html><head><style>
         .newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p{margin:0;white-space:pre-wrap}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}
         .template-welcome .newsletter-header{padding:38px 32px 30px!important;border-bottom:1px solid #dfb9b2;background:#f8e4df!important}.template-welcome .newsletter-header h1{max-width:520px;margin:0 auto 8px!important;color:#211817!important;font-family:Didot,Georgia,serif!important;font-size:32px;font-weight:500;line-height:1.08}.template-welcome .newsletter-header p{color:#8b4e61!important;font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.template-welcome .newsletter-main{padding:32px 38px 38px!important}.template-welcome .newsletter-content-section h2{color:#65103f;font-family:Didot,Georgia,serif;font-size:22px;font-weight:500}.template-welcome .newsletter-content-section.is-highlight{border:1px solid #e4c2bb;background:#f8e6e1}.template-welcome .newsletter-content-section.is-reminder{border:1px solid #dba9a1;border-radius:4px;background:#fffdf9}.template-welcome .newsletter-content-section.is-divider{background:#dba9a1}.template-welcome .newsletter-footer{border-top:1px solid #dfb9b2;background:#f8e4df!important}
-      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle()};font-size:${newsletterFontSize()};line-height:1.65;"><header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle()};">${personalizeHtml(newsletterDraft.headlineHtml, newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(newsletterDraft.subjectHtml, newsletterDraft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="white-space:pre-wrap;">${personalizeHtml(newsletterDraft.messageHtml, newsletterDraft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+        ${versionStyles}
+      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.65;"><header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle(draft)};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
     };
     const newsletterRecipientMessages = () => {
       const records = newsletterFilteredRecords();
       const messages = [];
       const seen = new Set();
-      const push = (email, name, record) => {
+      const push = (email, name, record, gender = "") => {
         const normalized = String(email || "").trim().toLowerCase();
-        if (!normalized || seen.has(normalized)) return;
-        seen.add(normalized);
+        const normalizedGender = String(gender || "").toLowerCase() === "male" ? "male" : "female";
+        const dedupeKey = `${normalized}::${["parents", "future"].includes(newsletterDraft.audience) ? normalizedGender : "shared"}`;
+        if (!normalized || seen.has(dedupeKey)) return;
+        seen.add(dedupeKey);
         const context = newsletterContextForRecord(record);
-        messages.push({ to: normalized, name: String(name || "").trim(), subject: newsletterPersonalize(newsletterDraft.subject || newsletterDraft.headline || "Dance Techniques Newsletter", context), html: newsletterEmailHtml(context) });
+        const version = ["parents", "future"].includes(newsletterDraft.audience) ? newsletterVersionForGender(normalizedGender) : newsletterVersionForGender("female");
+        messages.push({ to: normalized, name: String(name || "").trim(), subject: newsletterPersonalize(version.subject || version.headline || "Dance Techniques Newsletter", context), html: newsletterEmailHtml(context, { ...version, genderView: normalizedGender }) });
       };
-      if (["parents", "future"].includes(newsletterDraft.audience)) records.forEach((record) => push(record.student.parentEmail, record.student.parentName || `${record.student.parentFirstName || ""} ${record.student.parentLastName || ""}`, record));
+      if (["parents", "future"].includes(newsletterDraft.audience)) records.forEach((record) => push(record.student.parentEmail, record.student.parentName || `${record.student.parentFirstName || ""} ${record.student.parentLastName || ""}`, record, record.student.gender));
       if (newsletterDraft.audience === "schools") {
         records.forEach((record) => {
           const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, record.rosterClass.schoolName) || enrollmentSchoolNameMatches(item.nickname, record.rosterClass.schoolName)) || {};
@@ -26215,6 +26271,7 @@
       });
       document.querySelectorAll("[data-newsletter-device]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterDevice === newsletterDraft.device));
       document.querySelectorAll("[data-newsletter-color]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterColor === newsletterDraft.color));
+      document.querySelectorAll("[data-newsletter-gender-version]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterGenderVersion === newsletterGenderView));
       const sendButton = document.getElementById("newsletter-send");
       if (sendButton) {
         sendButton.disabled = !window.dtSupabase;
@@ -26234,7 +26291,7 @@
       editableSections.splice(messagePosition, 0, messageMarkup);
       const sectionsMarkup = editableSections.join("");
       const preview = document.getElementById("newsletter-preview-document");
-      preview.className = `newsletter-preview-document template-${newsletterDraft.template} ${newsletterDraft.device === "mobile" ? "is-mobile" : ""} ${newsletterDraft.font === "bodoni-smallcaps" ? "title-font-bodoni" : ""}`;
+      preview.className = `newsletter-preview-document template-${newsletterDraft.template} ${newsletterGenderView === "male" ? "is-boy-version" : "is-girl-version"} ${newsletterDraft.device === "mobile" ? "is-mobile" : ""} ${newsletterDraft.font === "bodoni-smallcaps" ? "title-font-bodoni" : ""}`;
       preview.style.setProperty("--newsletter-accent", newsletterColors[newsletterDraft.color] || newsletterColors.berry);
       preview.style.setProperty("--newsletter-title-font", newsletterTitleFontStyle());
       preview.style.setProperty("--newsletter-body-font", newsletterFontStyle());
@@ -27021,8 +27078,10 @@
       }
       const availableTemplates = newsletterTemplatesForAudience(newsletterSetupSelection.audience);
       if (!availableTemplates.includes(newsletterSetupSelection.template)) newsletterSetupSelection.template = availableTemplates[0];
-      if (newsletterSetupSelection.mode === "template") newsletterDraft = { ...newsletterDraft, ...newsletterTemplates[newsletterSetupSelection.template], template: newsletterSetupSelection.template };
-      else newsletterDraft = { ...newsletterDraft, template: "monthly", subject: "", headline: "Dance Techniques Newsletter", message: "Hi [Parent First Name],\n\n", sections: [], color: "berry" };
+      const selectedNewsletterStart = newsletterSetupSelection.mode === "template"
+        ? { ...newsletterDraft, ...newsletterTemplates[newsletterSetupSelection.template], template: newsletterSetupSelection.template }
+        : { ...newsletterDraft, template: "monthly", subject: "", headline: "Dance Techniques Newsletter", message: "Hi [Parent First Name],\n\n", sections: [], color: "berry" };
+      resetNewsletterGenderVersions(selectedNewsletterStart);
       newsletterDraft.audience = newsletterSetupSelection.audience;
       newsletterDraft.school = newsletterSetupSelection.school;
       newsletterDraft.teacher = newsletterSetupSelection.teacher;
@@ -27231,6 +27290,13 @@
       renderNewsletterStudio();
       saveNewsletterDraft();
     });
+    document.querySelector(".newsletter-gender-versions")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-newsletter-gender-version]");
+      if (!button || button.dataset.newsletterGenderVersion === newsletterGenderView) return;
+      loadNewsletterGenderVersion(button.dataset.newsletterGenderVersion);
+      renderNewsletterStudio();
+      saveNewsletterDraft();
+    });
     document.querySelector(".newsletter-section-builder")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-newsletter-add-section]");
       if (!button) return;
@@ -27292,7 +27358,7 @@
     });
     document.querySelectorAll("[data-newsletter-template]").forEach((button) => button.addEventListener("click", () => {
       const template = button.dataset.newsletterTemplate || "monthly";
-      newsletterDraft = { ...newsletterDraft, ...newsletterTemplates[template], template };
+      resetNewsletterGenderVersions({ ...newsletterDraft, ...newsletterTemplates[template], template });
       renderNewsletterStudio();
       saveNewsletterDraft();
       document.getElementById("newsletter-change-template")?.removeAttribute("open");
@@ -27310,6 +27376,8 @@
     document.getElementById("newsletter-reset")?.addEventListener("click", () => {
       if (!window.confirm("Start a new newsletter draft? Your current draft will be cleared.")) return;
       newsletterDraft = { ...newsletterDefaultDraft };
+      newsletterGenderView = "female";
+      resetNewsletterGenderVersions(newsletterDraft);
       renderNewsletterStudio();
       saveNewsletterDraft();
       showToast("A fresh newsletter draft is ready.");
@@ -27324,8 +27392,13 @@
       button.textContent = "Sending Test…";
       try {
         const context = newsletterSampleContext();
-        await sendNewsletterMessages({ mode: "test", messages: [{ to: testEmail.trim(), name: "Dance Techniques Test", subject: `[TEST] ${newsletterPersonalize(newsletterDraft.subject || newsletterDraft.headline || "Dance Techniques Newsletter", context)}`, html: newsletterEmailHtml(context) }] });
-        showToast(`Test newsletter sent to ${testEmail.trim()}.`);
+        const girlVersion = newsletterVersionForGender("female");
+        const boyVersion = newsletterVersionForGender("male");
+        await sendNewsletterMessages({ mode: "test", messages: [
+          { to: testEmail.trim(), name: "Dance Techniques Girl Version Test", subject: `[TEST · GIRL] ${newsletterPersonalize(girlVersion.subject || girlVersion.headline || "Dance Techniques Newsletter", context)}`, html: newsletterEmailHtml(context, { ...girlVersion, genderView: "female" }) },
+          { to: testEmail.trim(), name: "Dance Techniques Boy Version Test", subject: `[TEST · BOY] ${newsletterPersonalize(boyVersion.subject || boyVersion.headline || "Dance Techniques Newsletter", context)}`, html: newsletterEmailHtml(context, { ...boyVersion, genderView: "male" }) }
+        ] });
+        showToast(`Girl and boy test newsletters sent to ${testEmail.trim()}.`);
       } catch (error) {
         showToast(error.message || "The test newsletter could not be sent.");
       } finally {
