@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v108-school-teacher-badges";
+const CACHE_NAME = "my-dance-techniques-v109-required-team-directory";
 const CORE_ASSETS = [
   "./",
   "./index.html",

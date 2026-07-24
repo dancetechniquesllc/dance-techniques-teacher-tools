@@ -13885,12 +13885,13 @@
       };
     };
 
-    teachers.push(
-      duplicateTeacherProfile(teachers[0], { id: "tiffany", firstName: "Tiffany", lastName: "Edwards" }),
-      duplicateTeacherProfile(teachers[0], { id: "judy", firstName: "Judy", lastName: "Coulter", email: "Sotdance@gmail.com" }),
-      duplicateTeacherProfile(teachers[0], { id: "erika", firstName: "Erika", lastName: "Webb", email: "dancewitherika13@gmail.com" }),
-      duplicateTeacherProfile(teachers[0], { id: "makayla", firstName: "Makayla", lastName: "Sifuentes", email: "makaylaksifuentes@gmail.com" })
-    );
+    const teachingTeamDirectorySeeds = [
+      { id: "tiffany", firstName: "Tiffany", lastName: "Edwards" },
+      { id: "judy", firstName: "Judy", lastName: "Coulter", email: "Sotdance@gmail.com" },
+      { id: "erika", firstName: "Erika", lastName: "Webb", email: "dancewitherika13@gmail.com" },
+      { id: "makayla", firstName: "Makayla", lastName: "Sifuentes", email: "makaylaksifuentes@gmail.com" }
+    ];
+    teachers.push(...teachingTeamDirectorySeeds.map((profile) => duplicateTeacherProfile(teachers[0], profile)));
 
     const tiffanyProfile = teachers.find((teacher) => teacher.id === "tiffany");
     if (tiffanyProfile) {
@@ -15103,11 +15104,21 @@
         });
         return teacher;
       });
-      const missingDirectoryTeachers = preservedTeacherDirectory.filter((savedTeacher) => (
+      const preservedMissingTeachers = preservedTeacherDirectory.filter((savedTeacher) => (
         !isCompanyTeacherProfile(savedTeacher)
         && !liveTeachers.some((liveTeacher) => liveTeacher.firstName?.trim().toLowerCase() === savedTeacher.firstName?.trim().toLowerCase())
       ));
-      replaceCollection(teachers, [...liveTeachers, ...missingDirectoryTeachers]);
+      const knownTeacherNames = new Set([
+        ...liveTeachers.map((teacher) => teacher.firstName?.trim().toLowerCase()),
+        ...preservedMissingTeachers.map((teacher) => teacher.firstName?.trim().toLowerCase())
+      ].filter(Boolean));
+      const fallbackSource = preservedTeacherDirectory.find((teacher) => teacher.firstName?.trim().toLowerCase() === "lexi")
+        || preservedTeacherDirectory[0]
+        || teachers[0];
+      const requiredDirectoryTeachers = teachingTeamDirectorySeeds
+        .filter((profile) => !knownTeacherNames.has(profile.firstName.toLowerCase()))
+        .map((profile) => duplicateTeacherProfile(fallbackSource, profile));
+      replaceCollection(teachers, [...liveTeachers, ...preservedMissingTeachers, ...requiredDirectoryTeachers]);
       const signedInTeacher = teachers.find((teacher) => teacher.id === profile.id);
       if (!signedInTeacher) {
         sharedRosterReady = false;
