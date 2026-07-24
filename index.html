@@ -4083,20 +4083,31 @@
     .thread-preview-bubble::after {
       content: "";
       position: absolute;
-      left: -4px;
-      bottom: 5px;
-      width: 9px;
-      height: 9px;
+      left: -7px;
+      bottom: 7px;
+      width: 8px;
+      height: 10px;
       background: var(--blush);
-      transform: rotate(45deg);
+      clip-path: polygon(100% 0, 100% 100%, 0 35%);
     }
 
     .thread-preview-bubble.sent::after {
-      right: -5px;
+      right: -8px;
       left: auto;
-      border-top: 1.5px solid oklch(78% 0.07 20);
-      border-right: 1.5px solid oklch(78% 0.07 20);
+      background: oklch(78% 0.07 20);
+      clip-path: polygon(0 0, 100% 35%, 0 100%);
+    }
+
+    .thread-preview-bubble.sent::before {
+      content: "";
+      position: absolute;
+      z-index: 1;
+      right: -5px;
+      bottom: 9px;
+      width: 6px;
+      height: 7px;
       background: var(--surface);
+      clip-path: polygon(0 0, 100% 35%, 0 100%);
     }
 
     .thread-preview-time {
@@ -19184,7 +19195,9 @@
           ));
           const profileColor = otherTeacher ? teacherProfileColor(otherTeacher) : "#dba9a1";
           const profilePhoto = otherTeacher?.photo || "";
-          const profileMarkup = profilePhoto
+          const profileMarkup = otherName === "Admin"
+            ? `<span class="message-profile-bubble" style="border-color:${escapeText(profileColor)}"><img src="./assets/dance-techniques-logo-only.png" alt="Dance Techniques"></span>`
+            : profilePhoto
             ? `<span class="message-profile-bubble" style="border-color:${escapeText(profileColor)}"><img src="${escapeText(profilePhoto)}" alt=""></span>`
             : `<span class="message-profile-bubble" aria-hidden="true" style="background-color:${escapeText(profileColor)};border-color:${escapeText(profileColor)};color:${escapeText(coordinatedInitialColor(profileColor))}">${escapeText(initials)}</span>`;
           return `
@@ -19230,6 +19243,7 @@
           ${latest.html ? `<div class="rich-announcement-body">${latest.html}</div>` : `<p>${escapeText(latest.text)}</p>`}
           <div class="announcement-actions">
             <div class="reaction-row" aria-label="Announcement reactions">
+              <button class="reaction-btn ${latest.reaction === "heart" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="heart" aria-label="Heart announcement">&#10084;&#65039;</button>
               <button class="reaction-btn ${latest.reaction === "up" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="up" aria-label="Like announcement">&#128077;</button>
               <button class="reaction-btn ${latest.reaction === "down" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="down" aria-label="Dislike announcement">&#128078;</button>
             </div>
@@ -19303,6 +19317,7 @@
             ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}
             ${receipt}
             <div class="reaction-row" aria-label="Message reactions">
+              <button class="reaction-btn ${message.reaction === "heart" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="heart" aria-label="Heart" title="Heart">&#10084;&#65039;</button>
               <button class="reaction-btn ${message.reaction === "up" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="up" aria-label="Thumbs up" title="Thumbs up">&#128077;</button>
               <button class="reaction-btn ${message.reaction === "down" ? "active" : ""}" type="button" data-react-thread="${escapeText(thread.id)}" data-react-message="${messageIndex}" data-reaction="down" aria-label="Thumbs down" title="Thumbs down">&#128078;</button>
             </div>

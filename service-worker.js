@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v140-team-talk-card";
+const CACHE_NAME = "my-dance-techniques-v141-message-reactions-logo";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -17,6 +17,7 @@ const CORE_ASSETS = [
   "./assets/app-icon-curriculum.png",
   "./assets/app-icon-schedule.png",
   "./assets/app-icon-messages.png",
+  "./assets/dance-techniques-logo-only.png",
   "./assets/app-icon-payday.png",
   "./assets/app-icon-partner-schools.png",
   "./assets/dance-techniques-blush-logo.png",
