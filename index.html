@@ -13440,10 +13440,10 @@
                 <label>Payment tier
                   <select id="profile-pay-tier" data-profile-field="payTier">
                     <option value="">None Selected</option>
-                    <option value="tier_a_founding_teacher">Tier A — Founding Teacher</option>
-                    <option value="tier_b_teacher">Tier B — Teacher</option>
-                    <option value="tier_c_administrator">Tier C — Administrator</option>
-                    <option value="tier_d_director">Tier D — Director</option>
+                    <option value="tier_a_founding_teacher">Founding Teacher</option>
+                    <option value="tier_b_teacher">Teacher</option>
+                    <option value="tier_c_administrator">Administrator</option>
+                    <option value="tier_d_director">Director</option>
                   </select>
                   <small id="profile-pay-tier-description" class="subtle"></small>
                 </label>
@@ -26287,10 +26287,10 @@
       ["Pay & Pay Stubs", "Record payment and finalize pay stubs."]
     ];
     const payrollTierLabels = {
-      tier_a_founding_teacher: "Tier A — Founding Teacher",
-      tier_b_teacher: "Tier B — Teacher",
-      tier_c_administrator: "Tier C — Administrator",
-      tier_d_director: "Tier D — Director"
+      tier_a_founding_teacher: "Founding Teacher",
+      tier_b_teacher: "Teacher",
+      tier_c_administrator: "Administrator",
+      tier_d_director: "Director"
     };
     const payrollTierIsAssigned = (tier) => Boolean(payrollTierLabels[tier]);
     const payrollCurrency = (amount) => Number(amount || 0).toLocaleString("en-US", { style: "currency", currency: "USD" });
