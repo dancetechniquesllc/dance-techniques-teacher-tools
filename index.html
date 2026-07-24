@@ -6599,6 +6599,32 @@
 
     #admin-tools-menu .admin-tool-card > .status { display: none; }
 
+    #admin-tools-menu .admin-tool-card {
+      min-height: 154px;
+      align-content: center;
+      justify-items: center;
+      padding: 16px;
+    }
+
+    #admin-tools-menu .admin-tool-card-title {
+      width: 100%;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: center;
+      gap: 8px;
+      text-align: center;
+    }
+
+    #admin-tools-menu .admin-tool-card-title .admin-nav-icon {
+      width: 48px;
+      height: 48px;
+      flex-basis: 48px;
+    }
+
+    #admin-tools-menu .admin-tool-card-title > span {
+      width: 100%;
+      text-align: center;
+    }
+
     .admin-tool-card.is-disabled {
       cursor: not-allowed;
       background: oklch(95% 0.004 245);
@@ -12019,21 +12045,21 @@
       <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;overflow:hidden">
         <symbol id="icon-dd-home" viewBox="0 0 32 32"><rect x="5" y="5" width="9" height="9" rx="1"/><rect x="18" y="5" width="9" height="9" rx="1"/><rect x="5" y="18" width="9" height="9" rx="1"/><rect x="18" y="18" width="9" height="9" rx="1"/></symbol>
         <symbol id="icon-teaching-team" viewBox="0 0 32 32"><circle class="icon-line" cx="11" cy="10" r="4"/><path style="fill:#dba9a1;stroke:currentColor" d="M4 25v-2c0-4 3-7 7-7s7 3 7 7v2z"/><circle class="icon-line" cx="23" cy="11" r="3"/><path style="fill:#dba9a1;stroke:currentColor" d="M20 18c1-.7 2-1 3-1 3 0 5 2 5 5v2h-7"/></symbol>
-        <symbol id="icon-partner-schools" viewBox="0 0 32 32"><path class="icon-line" d="M5 14 16 5l11 9M7 12v12c0 2 1 3 3 3h12c2 0 3-1 3-3V12"/><path class="icon-line" transform="translate(10.4 14.2) scale(.175)" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/></symbol>
+        <symbol id="icon-partner-schools" viewBox="0 0 32 32"><path class="icon-line" d="M5 14 16 5l11 9M7 12v12c0 2 1 3 3 3h12c2 0 3-1 3-3V12"/><path class="icon-line" stroke-width="1.55" vector-effect="non-scaling-stroke" transform="translate(10.4 14.2) scale(.175)" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/></symbol>
         <symbol id="icon-classes-rosters" viewBox="0 0 32 32"><rect class="icon-line" x="7" y="6" width="18" height="23" rx="3"/><rect style="fill:#dba9a1;stroke:currentColor" x="11" y="4" width="10" height="5" rx="2.5"/><circle style="fill:#dba9a1;stroke:currentColor" cx="11.5" cy="14" r="1.5"/><circle style="fill:#dba9a1;stroke:currentColor" cx="11.5" cy="20" r="1.5"/><path class="icon-line" d="M15 14h6M15 20h6M11 25h10"/></symbol>
-        <symbol id="icon-student-library" viewBox="0 0 64 58"><path class="icon-line" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/><circle class="icon-line" cx="32" cy="24" r="6"/><path class="icon-line" d="M20 44c2-8 6-13 12-13s10 5 12 13"/></symbol>
+        <symbol id="icon-student-library" viewBox="0 0 64 58"><path class="icon-line" stroke-width="3.1" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/><circle class="icon-line" stroke-width="3.1" cx="32" cy="24" r="6"/><path class="icon-line" stroke-width="3.1" d="M20 44c2-8 6-13 12-13s10 5 12 13"/></symbol>
         <symbol id="icon-my-day" viewBox="0 0 32 32"><rect class="icon-line" x="8" y="3" width="16" height="27" rx="4"/><path class="icon-line" d="M13.5 5.5h5M14 27.5h4"/><path style="fill:#dba9a1;stroke:currentColor" d="M11.5 19a4.5 4.5 0 0 1 9 0h-9Z"/><path class="icon-line" d="M16 10v3m-6 1 2.2 2.2m9.8-2.2-2.2 2.2M9 19h2.5m9 0H23M11 22h10m-8 3h6"/></symbol>
         <symbol id="icon-schedule-changes" viewBox="0 0 32 32"><rect class="icon-line" x="5" y="6" width="22" height="22" rx="3"/><path style="fill:#dba9a1;stroke:currentColor" d="M5 10c0-2 1-4 3-4h16c2 0 3 2 3 4v4H5v-4Z"/><path class="icon-line" d="M10 3v6M22 3v6M10 20h12m0 0-3-3m3 3-3 3M22 25H10m0 0 3-3m-3 3 3 3"/></symbol>
         <symbol id="icon-class-progress" viewBox="0 0 32 32"><path class="icon-line" d="M4 28h24"/><rect class="icon-line" x="7" y="21" width="5" height="7" rx="1"/><rect style="fill:#dba9a1;stroke:currentColor" x="14" y="15" width="5" height="13" rx="1"/><rect class="icon-line" x="21" y="9" width="5" height="19" rx="1"/><path class="icon-line" d="m6 12 3 3 6-7"/></symbol>
         <symbol id="icon-messages" viewBox="0 0 32 32"><path d="M4 6h18v14H11l-5 5v-5H4z"/><path d="M13 23h8l5 4v-4h2V11h-3"/></symbol>
         <symbol id="icon-tempo" viewBox="0 0 32 32"><path style="fill:#dba9a1;stroke:currentColor" d="M16 3c1 7 4 11 13 13-9 2-12 6-13 13-1-7-4-11-13-13 9-2 12-6 13-13Z"/></symbol>
-        <symbol id="icon-curriculum" viewBox="0 0 120 120"><path class="icon-line" stroke-width="5" d="M60 25C48 7 32 5 25 14c-6 9 5 22 28 24m7-13C72 7 88 5 95 14c6 9-5 22-28 24M53 38C35 39 22 49 19 72l-3 18m51-52c18 1 31 11 34 34l3 18M53 38c-13 3-20 12-21 27l-2 35c0 10 6 16 15 16 8 0 13-6 14-16l1-42m7-20c13 3 20 12 21 27l2 35c0 10-6 16-15 16-8 0-13-6-14-16l-1-42M31 67l28 20M89 67 61 87M34 57l24 20M86 57 62 77"/><path style="fill:#dba9a1;stroke:currentColor" stroke-width="5" d="M30 83v17c0 10 6 16 15 16 8 0 13-6 14-16l.5-17c-9 5-19 5-29.5 0Zm60 0v17c0 10-6 16-15 16-8 0-13-6-14-16l-.5-17c9 5 19 5 29.5 0Z"/></symbol>
-        <symbol id="icon-newsletter" viewBox="0 0 32 32"><rect class="icon-line" x="3" y="7" width="26" height="19" rx="3"/><path class="icon-line" d="m4 9 12 10L28 9M6 23l7-7m13 7-7-7"/><path style="fill:#dba9a1;stroke:currentColor" stroke-width="1.3" transform="translate(8.3 11.5) scale(.24)" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/></symbol>
+        <symbol id="icon-curriculum" viewBox="0 0 1117 1409"><image href="assets/curriculum-ballet-shoes.png" width="1117" height="1409" preserveAspectRatio="xMidYMid meet" style="mix-blend-mode:multiply"/></symbol>
+        <symbol id="icon-newsletter" viewBox="0 0 32 32"><rect class="icon-line" x="3" y="7" width="26" height="19" rx="3"/><path class="icon-line" d="m4 9 12 10L28 9M6 23l7-7m13 7-7-7"/><path style="fill:#dba9a1;stroke:currentColor" stroke-width="1.55" vector-effect="non-scaling-stroke" transform="translate(8.3 11.5) scale(.24)" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/></symbol>
         <symbol id="icon-tunes" viewBox="0 0 32 32"><path class="icon-line" d="M13 24V8m13-3v16"/><path style="fill:#dba9a1;stroke:currentColor" d="M13 8 26 5v4l-13 3Z"/><ellipse class="icon-line" cx="9" cy="25" rx="4" ry="3"/><ellipse class="icon-line" cx="22" cy="22" rx="4" ry="3"/></symbol>
-        <symbol id="icon-costume-catalog" viewBox="0 0 32 32"><path class="icon-line" d="M13 8a3 3 0 1 1 4.5 2.6L16 12v2M16 14 6.5 21.5c-1.5 1.2-.7 3.5 1.2 3.5h16.6c1.9 0 2.7-2.3 1.2-3.5L16 14Z"/><path class="icon-line" stroke-width="1.3" transform="translate(11.2 16.7) scale(.15)" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/></symbol>
-        <symbol id="icon-resource-library" viewBox="0 0 32 32"><path style="fill:#dba9a1;stroke:currentColor" d="M3 7h11l3 4h10v14H3Z"/><path class="icon-line" d="M3 12h10l3 4h13v11H3Z"/></symbol>
+        <symbol id="icon-costume-catalog" viewBox="0 0 32 32"><path class="icon-line" d="M13 8a3 3 0 1 1 4.5 2.6L16 12v2M16 14 6.5 21.5c-1.5 1.2-.7 3.5 1.2 3.5h16.6c1.9 0 2.7-2.3 1.2-3.5L16 14Z"/><path class="icon-line" stroke-width="1.55" vector-effect="non-scaling-stroke" transform="translate(11.2 16.7) scale(.15)" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/></symbol>
+        <symbol id="icon-resource-library" viewBox="0 0 32 32"><path style="fill:#dba9a1;stroke:currentColor" d="M3 7h11l3 4h10v14H3Z"/><path style="fill:#fff8f4;stroke:currentColor" d="M3 12h10l3 4h13v11H3Z"/></symbol>
         <symbol id="icon-finance-folio" viewBox="0 0 32 32"><circle style="fill:#dba9a1;stroke:currentColor" cx="16" cy="16" r="12"/><path class="icon-line" d="M16 8v16m4-12c-1-1-2-2-4-2-3 0-4 1-4 3s2 3 4 3c3 1 4 2 4 4s-2 3-4 3c-2 0-3-1-4-2"/></symbol>
-        <symbol id="icon-boutique-backend" viewBox="0 0 32 32"><path class="icon-line" d="M7 11h18l2 17H5zM11 12V9a5 5 0 0 1 10 0v3"/><path class="icon-line" stroke-width="1.3" transform="translate(10.8 15.2) scale(.16)" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/></symbol>
+        <symbol id="icon-boutique-backend" viewBox="0 0 32 32"><path class="icon-line" d="M7 11h18l2 17H5zM11 12V9a5 5 0 0 1 10 0v3"/><path class="icon-line" stroke-width="1.55" vector-effect="non-scaling-stroke" transform="translate(10.8 15.2) scale(.16)" d="M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z"/></symbol>
         <symbol id="icon-tshirt" viewBox="0 0 32 32"><path d="m10 6 4-2c.6 1.5 1.3 2.2 2 2.2S17.4 5.5 18 4l4 2 6 4-3.5 5-3-1.8V28h-11V13.2L7.5 15 4 10z"/></symbol>
       </svg>
 
