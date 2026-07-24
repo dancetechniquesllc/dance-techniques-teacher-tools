@@ -419,11 +419,84 @@
     .notification-item { width:100%; display:grid; grid-template-columns:8px 1fr; gap:9px; padding:10px; border:1px solid var(--border); border-radius:11px; background:var(--cream); color:var(--fg); text-align:left; cursor:pointer; }
     .notification-item.is-read { opacity:.68; }
     .notification-item-dot { width:8px; height:8px; margin-top:5px; border-radius:999px; background:var(--berry); }
-    .notification-item.urgent .notification-item-dot { background:#c94343; }
+    .notification-item.urgent .notification-item-dot {
+      width:18px;
+      height:18px;
+      margin-top:0;
+      display:grid;
+      place-items:center;
+      background:#c94343;
+      color:white;
+      font-size:12px;
+      font-weight:950;
+      line-height:1;
+    }
+    .notification-item.urgent .notification-item-dot::before { content:"!"; }
+    .notification-item.urgent { grid-template-columns:18px 1fr; }
     .notification-item-copy { display:grid; gap:3px; }
     .notification-item-copy strong { font-size:13px; }
     .notification-item-copy small { color:var(--muted); font-size:11px; line-height:1.35; }
+    .notification-preview-type { display:none; color:var(--berry) !important; font-size:9px !important; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+    .notification-take-today { display:block; color:#b53636 !important; font-size:10px !important; font-weight:900; letter-spacing:.1em; text-transform:uppercase; }
+    .notification-take-today-time { color:var(--fg); letter-spacing:0; text-transform:none; }
+    .notification-format-heading { display:block; color:var(--berry) !important; font-size:10px !important; font-weight:900; letter-spacing:.08em; text-transform:uppercase; }
+    .notification-item.urgent .notification-format-heading { color:#b53636 !important; }
+    .notification-format-date { color:var(--fg); letter-spacing:0; text-transform:none; }
     .notification-empty { padding:18px 10px; color:var(--muted); font-size:12px; text-align:center; }
+    .mini-app-notification-overlay {
+      position:fixed;
+      z-index:220;
+      inset:0;
+      display:none;
+      place-items:center;
+      padding:16px;
+      background:rgb(35 25 25 / .38);
+    }
+    .mini-app-notification-overlay.open { display:grid; }
+    .mini-app-notification-dialog {
+      width:min(520px, 100%);
+      max-height:min(720px, calc(100dvh - 32px));
+      display:grid;
+      grid-template-rows:auto minmax(0, 1fr) auto;
+      gap:12px;
+      padding:18px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:var(--bg);
+      box-shadow:0 22px 60px rgb(45 25 25 / .24);
+    }
+    .mini-app-notification-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .mini-app-notification-head h3 { margin:0; font-family:var(--font-body); font-size:22px; }
+    .mini-app-notification-head p { margin:4px 0 0; color:var(--muted); font-size:12px; }
+    .mini-app-notification-close { width:38px; min-height:38px; padding:0; border-radius:999px; background:var(--blush); color:var(--berry); font-size:24px; }
+    .mini-app-notification-list { min-height:0; display:grid; gap:8px; overflow:auto; }
+    .mini-app-notification-message {
+      width:100%;
+      display:grid;
+      gap:4px;
+      padding:13px;
+      border:1px solid var(--border);
+      border-radius:12px;
+      background:var(--cream);
+      color:var(--fg);
+      text-align:left;
+    }
+    .mini-app-notification-message strong { font-size:14px; }
+    .mini-app-notification-message small { color:var(--muted); font-size:11px; }
+    .mini-app-notification-message span { font-size:12px; line-height:1.4; }
+    .mini-app-notification-message .mini-app-notification-reminder { color:var(--berry); font-size:11px; font-weight:850; text-align:center; }
+    .mini-app-notification-done { width:100%; min-height:44px; border-radius:999px; background:var(--berry); color:white; }
+    body[data-notification-showcase="true"] .teacher-notification-panel {
+      width: min(760px, calc(100vw - 52px));
+    }
+    body[data-notification-showcase="true"] .notification-center-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-height: min(680px, 72vh);
+    }
+    body[data-notification-showcase="true"] .notification-preview-type { display:block; }
+    @media (max-width: 720px) {
+      body[data-notification-showcase="true"] .notification-center-list { grid-template-columns: 1fr; }
+    }
     .notification-preference-list { display:grid; gap:0; }
     .notification-preference-row { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 0; border-bottom:1px solid var(--border); }
     .notification-preference-row:last-child { border-bottom:0; }
@@ -1674,6 +1747,8 @@
       font-weight: 850;
       box-shadow: 0 6px 14px oklch(22% 0.04 25 / 0.2);
     }
+    .app-badge[hidden],
+    .app-badge:empty { display: none; }
 
     .status.message-unread-badge,
     .message-unread-badge {
@@ -2075,16 +2150,19 @@
     .teacher-roster-active-card > summary { position: relative; display: block; padding: 14px 14px 14px 43px; }
     .teacher-roster-active-card > summary::-webkit-details-marker { display: none; }
     .teacher-roster-active-card > summary::before {
-      content: "▶";
+      content: "";
       position: absolute;
-      top: 18px;
-      left: 15px;
-      color: #000;
-      font-size: 17px;
-      font-weight: 950;
-      line-height: 1;
+      top: 19px;
+      left: 17px;
+      width: 0;
+      height: 0;
+      border-top: 7px solid transparent;
+      border-bottom: 7px solid transparent;
+      border-left: 10px solid #000;
+      transform-origin: 35% 50%;
+      transition: transform .16s ease;
     }
-    .teacher-roster-active-card[open] > summary::before { content: "▼"; }
+    .teacher-roster-active-card[open] > summary::before { transform: rotate(90deg); }
     .teacher-roster-active-card:not([open]) > summary { padding-bottom: 62px; }
     .teacher-roster-active-card > summary .teacher-roster-active-heading { width: 100%; margin: 0; }
     .teacher-roster-active-heading { position: relative; display: block; min-height: 68px; margin-bottom: 12px; }
@@ -10961,6 +11039,7 @@
                 <button class="app-tile rosters-tile" data-tab-jump="rosters" aria-label="Open Rosters">
                   <span class="app-icon image-icon rosters" aria-hidden="true">
                     <img src="assets/app-icon-rosters.png" alt="">
+                    <span class="app-badge" id="rosters-home-badge" hidden></span>
                   </span>
                   <span class="app-label">Rosters</span>
                 </button>
@@ -14165,7 +14244,31 @@
       urgent_bypass_quiet_hours: true
     };
     let notificationPreferences = { ...defaultNotificationPreferences };
-    let notificationCenterItems = document.body.dataset.tourMode === "true" ? [
+    const notificationShowcaseMode = document.body.dataset.tourMode === "true"
+      && new URLSearchParams(window.location.search).get("notification-preview") === "all";
+    if (notificationShowcaseMode) document.body.dataset.notificationShowcase = "true";
+    const notificationShowcaseItems = [
+      { id: "preview-same-day", title: "New Dancer", message: "Avery Sample at Primrose Rockwall", preview_audience: "TT", notification_type: "same_day_enrollment", priority: "urgent", action_url: "/?open=enrollment&id=tour-enrollment-1", metadata: { enrollment_id: "tour-enrollment-1" } },
+      { id: "preview-new-enrollment", title: "Mia Bennett in Ages 3–5 at Primrose North Rockwall", message: "", preview_heading: "NEW ENROLLMENT", preview_date: "date_time", preview_audience: "TT + DD", notification_type: "new_enrollment", priority: "routine", action_url: "/?open=enrollment&id=tour-enrollment-1", metadata: { enrollment_id: "tour-enrollment-1" } },
+      { id: "preview-enrollment-digest", title: "3 New Enrollments", message: "", preview_heading: "NEW ENROLLMENTS BATCH", preview_date: "date", preview_audience: "TT + DD", notification_type: "enrollment_digest", priority: "routine", action_url: "/?open=enrollments" },
+      { id: "preview-unpaid", title: "Nora Parker at Primrose North Rockwall", message: "Payment Unsuccessful", preview_heading: "UNPAID ENROLLMENT FEE", preview_audience: "DD", notification_type: "unpaid_enrollment_fee", priority: "routine", action_url: "/?open=enrollment&id=tour-enrollment-1", metadata: { enrollment_id: "tour-enrollment-1" } },
+      { id: "preview-provisional", title: "Avery Sample participated today at Primrose School of Rockwall", message: "", preview_heading: "NEW DANCER PARTICIPATION", preview_date: "date", preview_audience: "DD", notification_type: "provisional_acknowledged", priority: "urgent", action_url: "/?open=enrollment&id=tour-enrollment-1", metadata: { enrollment_id: "tour-enrollment-1" } },
+      { id: "preview-intake-failed", title: "Check Jotform for Enrollment Details", message: "", preview_heading: "JOTFORM IMPORT PROBLEM", preview_date: "date", preview_audience: "DD", notification_type: "jotform_intake_failed", priority: "urgent", action_url: "/?open=enrollments" },
+      { id: "preview-message", title: "New direct message", message: "Lexi sent you a private message.", notification_type: "direct_message", priority: "routine", action_url: "/?open=messages" },
+      { id: "preview-announcement", title: "Teaching Team Message", message: "", preview_heading: "DT ANNOUNCEMENT", preview_date: "date_time", preview_audience: "TT", notification_type: "studio_announcement", priority: "routine", action_url: "/?open=messages" },
+      { id: "preview-schedule-request", title: "Ms. Erika rescheduled Primrose Rowlett from Thursday, July 23 to Friday, July 31", message: "", preview_heading: "CLASS RESCHEDULED", preview_date: "date_time", preview_audience: "DD", notification_type: "schedule_change_request", priority: "urgent", action_url: "/?open=schedule-changes" },
+      { id: "preview-rescheduled-reminder", title: "Make Up Class at Primrose Rowlett TOMORROW!", message: "You rescheduled class on Thursday, July 23 for Teacher illness", preview_heading: "SCHEDULE CHANGE REMINDER", preview_date: "date_time", preview_footer: "✦ Please remind parents via Brightwheel ✦", preview_audience: "TT", notification_type: "schedule_rescheduled_reminder", priority: "urgent", action_url: "/?open=schedule" },
+      { id: "preview-cancelled-reminder", title: "NO Class Tomorrow at Primrose North for School closure", message: "Make Up Class: Friday, July 31", preview_heading: "SCHEDULE CHANGE REMINDER", preview_date: "date_time", preview_footer: "✦ Please remind parents via Brightwheel ✦", preview_audience: "TT", notification_type: "schedule_cancelled_reminder", priority: "urgent", action_url: "/?open=schedule" },
+      { id: "preview-roster-change", title: "Update in Brightwheel", message: "Ms. Erika moved Grace Turner from Under 3 to Ages 3–5 at Primrose Rowlett", preview_heading: "ROSTER CHANGE", preview_date: "date_time", preview_audience: "DD", notification_type: "roster_class_change", priority: "routine", action_url: "/?open=student&id=grace-t", metadata: { student_id: "grace-t", target_class_id: "rowlett-beginners" } },
+      { id: "preview-kit-pickup", title: "2 Ready for Pick up", message: "", preview_heading: "T-SHIRTS & BAGS", preview_date: "date_time", preview_audience: "TT", notification_type: "kit_pickup_digest", priority: "routine", action_url: "/?open=orders" },
+      { id: "preview-email-plan", title: "295 Families to Email", message: "Brevo must be upgraded to the $9/Month plan to send 300+ emails.", preview_heading: "UPGRADE BREVO", preview_date: "date", preview_audience: "DD", notification_type: "email_plan_upgrade", priority: "urgent", action_url: "/?open=newsletter-studio" },
+      { id: "preview-general", title: "Dance Techniques Update", message: "", preview_heading: "NOTIFICATION", preview_date: "date_time", preview_audience: "TT + DD", notification_type: "general", priority: "routine", action_url: "/?open=notifications" }
+    ].map((item, index) => ({
+      ...item,
+      created_at: new Date(Date.now() - index * 17 * 60000).toISOString(),
+      read_at: index === 7 || index === 11 ? new Date().toISOString() : null
+    }));
+    let notificationCenterItems = notificationShowcaseMode ? notificationShowcaseItems : document.body.dataset.tourMode === "true" ? [
       { id: "tour-notification-enrollment", title: "New dancer for today", message: "Avery Sample enrolled for Primrose Rockwall today.", notification_type: "same_day_enrollment", priority: "urgent", metadata: { enrollment_id: "tour-enrollment-1" }, created_at: new Date().toISOString(), read_at: null },
       { id: "tour-notification-announcement", title: "Dance Techniques announcement", message: "Fall enrollment is officially open.", notification_type: "studio_announcement", priority: "routine", created_at: new Date(Date.now() - 3600000).toISOString(), read_at: null }
     ] : [];
@@ -14174,9 +14277,55 @@
       const date = new Date(value || Date.now());
       return Number.isNaN(date.valueOf()) ? "" : date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     };
+    const notificationDateLabel = (value) => {
+      const date = new Date(value || Date.now());
+      return Number.isNaN(date.valueOf()) ? "" : date.toLocaleDateString([], { month: "short", day: "numeric" });
+    };
+    const notificationClassDateLabel = (value) => {
+      if (!value) return "Date TBD";
+      const date = new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00` : value);
+      return Number.isNaN(date.valueOf()) ? value : date.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+    };
+    const miniAppNotificationTypes = {
+      rosters: new Set(["roster_class_change"]),
+      classes: new Set(["schedule_change_request", "schedule_rescheduled_reminder", "schedule_cancelled_reminder", "school_closure"])
+    };
+    const unreadMiniAppNotifications = (miniApp) => {
+      const types = miniAppNotificationTypes[miniApp];
+      if (!types) return [];
+      return notificationCenterItems.filter((item) => (
+        types.has(item.notification_type)
+        && !item.read_at
+        && !item.dismissed_at
+        && (!item.expires_at || new Date(item.expires_at) > new Date())
+      ));
+    };
+    const setMiniAppBadgeCount = (badgeId, count) => {
+      const badge = document.getElementById(badgeId);
+      if (!badge) return;
+      badge.textContent = count ? String(count > 99 ? "99+" : count) : "";
+      badge.hidden = count === 0;
+    };
+    const updateNotificationMiniAppBadges = () => {
+      setMiniAppBadgeCount("rosters-home-badge", unreadMiniAppNotifications("rosters").length);
+      setMiniAppBadgeCount("classes-home-badge", unreadMiniAppNotifications("classes").length);
+    };
 
     const renderNotificationCenter = () => {
-      const visibleItems = notificationCenterItems.filter((item) => !item.dismissed_at && (!item.expires_at || new Date(item.expires_at) > new Date()));
+      const directMessageItems = notificationShowcaseMode
+        ? notificationCenterItems.filter((item) => item.notification_type === "direct_message" && !item.read_at)
+        : [];
+      const messageBubble = document.getElementById("admin-messages-shortcut-bubble");
+      if (notificationShowcaseMode && messageBubble) {
+        messageBubble.textContent = directMessageItems.length > 99 ? "99+" : String(directMessageItems.length);
+        messageBubble.classList.toggle("active", directMessageItems.length > 0);
+        messageBubble.setAttribute("aria-label", `${directMessageItems.length} unread direct message${directMessageItems.length === 1 ? "" : "s"}`);
+      }
+      const visibleItems = notificationCenterItems.filter((item) => (
+        (!notificationShowcaseMode || item.notification_type !== "direct_message")
+        && !item.dismissed_at
+        && (!item.expires_at || new Date(item.expires_at) > new Date())
+      ));
       const unread = visibleItems.filter((item) => !item.read_at).length;
       document.querySelectorAll("[data-notification-unread]").forEach((badge) => {
         badge.textContent = unread > 99 ? "99+" : String(unread);
@@ -14189,16 +14338,38 @@
             ? (enrollmentIntakeQueue.find((entry) => entry.id === item.metadata.enrollment_id) || { id: item.metadata.enrollment_id, ...item.metadata })
             : null;
           const canInclude = item.notification_type === "same_day_enrollment" && enrollment && !enrollment.provisional_included_at;
-          const preparationDetails = item.notification_type === "same_day_enrollment" && enrollment
-            ? [enrollment.student_birth_date ? enrollmentAgeLabel(enrollment.student_birth_date) : "", enrollment.student_classroom, enrollment.medical_notes ? `Medical: ${enrollment.medical_notes}` : ""].filter(Boolean).join(" · ")
+          const sameDayDancerName = item.notification_type === "same_day_enrollment" && enrollment
+            ? [enrollment.student_first_name, enrollment.student_last_name].filter(Boolean).join(" ")
+            : "";
+          const sameDaySchool = item.notification_type === "same_day_enrollment" && enrollment
+            ? enrollment.requested_school_name
+            : "";
+          const sameDayAge = item.notification_type === "same_day_enrollment" && enrollment?.student_birth_date
+            ? enrollmentAgeLabel(enrollment.student_birth_date)
+            : "";
+          const sameDayClassroom = item.notification_type === "same_day_enrollment" && enrollment
+            ? enrollment.student_classroom
+            : "";
+          const shownTitle = item.notification_type === "same_day_enrollment"
+            ? ["New Dancer", sameDayDancerName].filter(Boolean).join(" · ")
+            : item.title;
+          const shownMessage = item.notification_type === "same_day_enrollment"
+            ? `in ${sameDayClassroom || "Classroom"}${sameDaySchool ? ` at ${sameDaySchool}` : ""}${sameDayAge ? ` (${sameDayAge})` : ""}`
+            : item.message;
+          const previewDate = item.preview_date === "date"
+            ? notificationDateLabel(item.created_at)
+            : item.preview_date === "date_time" ? notificationTimeLabel(item.created_at) : "";
+          const previewHeading = notificationShowcaseMode && item.preview_heading
+            ? `<small class="notification-format-heading">${escapeText(item.preview_heading)}${previewDate ? ` <span class="notification-format-date">· ${escapeText(previewDate)}</span>` : ""}</small>`
             : "";
           return `<div class="notification-item ${item.read_at ? "is-read" : ""} ${item.priority === "urgent" ? "urgent" : ""}" data-notification-id="${escapeText(item.id)}">
             <span class="notification-item-dot" aria-hidden="true"></span>
-            <span class="notification-item-copy"><strong>${escapeText(item.title)}</strong><small>${escapeText(item.message)}</small>${preparationDetails ? `<small>${escapeText(preparationDetails)}</small>` : ""}<small>${escapeText(notificationTimeLabel(item.created_at))}</small>
+            <span class="notification-item-copy">${item.notification_type === "same_day_enrollment" ? `<small class="notification-take-today">TAKE TODAY <span class="notification-take-today-time">· ${escapeText(notificationTimeLabel(item.created_at))}</span></small>` : previewHeading || `<small class="notification-preview-type">${escapeText(item.notification_type.replaceAll("_", " "))} · ${escapeText(item.priority)}</small>`}<strong>${escapeText(shownTitle)}</strong>${shownMessage ? `<small>${escapeText(shownMessage)}</small>` : ""}${item.notification_type === "same_day_enrollment" || previewHeading ? "" : `<small>${escapeText(notificationTimeLabel(item.created_at))}</small>`}
             ${canInclude ? `<button class="secondary provisional-included-button" type="button" data-include-provisional="${escapeText(enrollment.id)}">♡ Included in Class</button>` : enrollment?.provisional_included_at ? `<button class="secondary provisional-included-button is-included" type="button" disabled>♥ Included in Class</button>` : ""}</span>
           </div>`;
         }).join("") : `<div class="notification-empty">You’re all caught up.</div>`;
       });
+      updateNotificationMiniAppBadges();
     };
 
     const loadNotificationSystem = async (profile = window.dtCurrentProfile) => {
@@ -14477,6 +14648,49 @@
     const notificationEligibleIds = (items) => items.map((teacher) => teacher.id).filter((id) => document.body.dataset.tourMode === "true" || isUuid(id));
     const directorNotificationRecipientIds = () => notificationEligibleIds(teachers.filter((teacher) => ["Admin", "Director"].includes(teacher.teacherType)));
     const teacherNotificationRecipientIds = () => notificationEligibleIds(teachers.filter((teacher) => teacher.status !== "inactive" && teacher.teacherType === "Teacher"));
+    const queueRosterChangeNotifications = async (student, sourceClass, targetClass, changedInTeacherTools) => {
+      if (!student || !sourceClass || !targetClass) return;
+      const dancerName = rosterStudentFullName(student);
+      const schoolName = rosterSchoolNickname(targetClass.schoolName);
+      const movement = `${dancerName} from ${sourceClass.name} to ${targetClass.name} at ${schoolName}`;
+      const metadata = {
+        student_id: student.id,
+        source_class_id: sourceClass.id,
+        target_class_id: targetClass.id,
+        school_name: targetClass.schoolName
+      };
+      if (changedInTeacherTools) {
+        const teacherName = profileTeacher.displayName || teacherNickname(profileTeacher) || fullName(profileTeacher);
+        await Promise.all([
+          queueAppNotifications(directorNotificationRecipientIds().filter((id) => id !== profileTeacher.id), {
+            title: "ROSTER CHANGE",
+            message: `${teacherName} moved ${movement}`,
+            notification_type: "roster_class_change",
+            priority: "routine",
+            action_url: `/?open=student&id=${encodeURIComponent(student.id)}`,
+            metadata: { ...metadata, changed_by_teacher_id: profileTeacher.id, actor_label: teacherName }
+          }),
+          queueAppNotifications([profileTeacher.id], {
+            title: "ROSTER CHANGE",
+            message: `You moved ${movement}`,
+            notification_type: "roster_class_change",
+            priority: "routine",
+            action_url: `/?open=student&id=${encodeURIComponent(student.id)}`,
+            metadata: { ...metadata, changed_by_teacher_id: profileTeacher.id, actor_label: "You" }
+          })
+        ]);
+        return;
+      }
+      const teacherIds = [...new Set([sourceClass.teacherId, targetClass.teacherId].filter((id) => id && id !== window.dtCurrentProfile?.id))];
+      await queueAppNotifications(teacherIds, {
+        title: "ROSTER CHANGE",
+        message: `Admin moved ${movement}`,
+        notification_type: "roster_class_change",
+        priority: "routine",
+        action_url: `/?open=student&id=${encodeURIComponent(student.id)}`,
+        metadata: { ...metadata, actor_label: "Admin" }
+      });
+    };
 
     const acknowledgeProvisionalEnrollment = async (enrollmentId) => {
       let enrollment = enrollmentIntakeQueue.find((item) => item.id === enrollmentId);
@@ -16376,6 +16590,11 @@
     };
 
     const dateIsClosedForSchool = (dateString, school, profileSchool) => {
+      const hasClassOverride = closureClassOverridesForTeacher().some((override) => (
+        override.date === dateString &&
+        enrollmentSchoolNameMatches(override.schoolName, school.school)
+      ));
+      if (hasClassOverride) return false;
       const matchesSchool = (closure) => (
         (!closure.school || closure.school === school.school) &&
         (!closure.isd || closure.isd === (profileSchool?.isd || school.isd))
@@ -16411,11 +16630,15 @@
         effectiveDate: scheduleDateForSchool(date, profileSchool)
       }));
       const overrides = closureClassOverridesForTeacher()
-        .filter((override) => override.schoolName === school.school)
+        .filter((override) => enrollmentSchoolNameMatches(override.schoolName, school.school))
         .sort((a, b) => a.date.localeCompare(b.date));
       overrides.forEach((override) => {
-        const alreadyOnDate = entries.some((entry) => entry.effectiveDate === override.date);
-        if (alreadyOnDate) return;
+        const curriculumAlreadyOnDate = entries.some((entry) => (
+          entry.effectiveDate === override.date &&
+          entry.week &&
+          entry.curriculum
+        ));
+        if (curriculumAlreadyOnDate) return;
         const startIndex = entries.findIndex((entry) => entry.effectiveDate > override.date && entry.week && entry.curriculum);
         if (startIndex < 0) return;
         const previousDates = entries.map((entry) => entry.effectiveDate);
@@ -16899,17 +17122,7 @@
     };
     let classesCalendarIndex = calendarIndexForDate(homeWidgetDate);
 
-    const scheduleClosures = [
-      {
-        date: "2026-09-07",
-        school: "Primrose North Rockwall",
-        nickname: "Primrose North",
-        isd: "Rockwall ISD",
-        reason: "Labor Day",
-        week: "W2",
-        curriculum: "Tap"
-      }
-    ];
+    const scheduleClosures = [];
 
     const noClassWeeks = [
       { monday: "2026-10-12", reason: "Fall Break", isd: "Rockwall ISD" },
@@ -16924,6 +17137,7 @@
     ];
 
     const noClassDates = [
+      { date: "2026-09-07", reason: "Labor Day", isd: "Rockwall ISD" },
       { date: "2026-09-07", reason: "Labor Day", isd: "Garland ISD" },
       { date: "2026-09-28", reason: "Staff Development", isd: "Rockwall ISD" },
       { date: "2026-10-26", reason: "Staff Development", isd: "Rockwall ISD" },
@@ -17060,7 +17274,7 @@
 
     const closureOverrideMatches = (schoolName, closure, dateKey) => closureClassOverridesForTeacher().some((override) => (
       override.date === dateKey &&
-      override.schoolName === schoolName &&
+      enrollmentSchoolNameMatches(override.schoolName, schoolName) &&
       (!closure.isd || override.isd === closure.isd) &&
       (!closure.reason || override.reason === closure.reason)
     ));
@@ -17660,6 +17874,8 @@
         ));
         if (!exists) profileTeacher.closureClassOverrides.push(schoolOverride);
       });
+      saveAppData();
+      scheduleCloudAppDataSave();
       renderHomeWidget();
       renderLexiSchedule();
       renderMyDay();
@@ -18341,6 +18557,7 @@
     let scheduleDirty = false;
     let selectedTeacherMessageThreadId = "";
     let selectedAdminMessageThreadId = "team-meeting";
+    let notificationShowcaseMessagesSeeded = false;
     let messageActivitySequence = Math.max(...messageThreads.map((thread) => thread.activityOrder || 0));
     let curriculumStyleFilter = "all";
 
@@ -18691,7 +18908,8 @@
       if (b.id === pinnedMessageThreadId) return 1;
       return (b.activityOrder || 0) - (a.activityOrder || 0);
     });
-    const teacherVisibleMessageThreads = () => orderedMessageThreads(messageThreads.filter((thread) => thread.type === "team" || thread.type === "announcement" || thread.participants.includes("Lexi")));
+    const teacherMessageViewerName = () => profileTeacher?.firstName || "Lexi";
+    const teacherVisibleMessageThreads = (viewerName = teacherMessageViewerName()) => orderedMessageThreads(messageThreads.filter((thread) => thread.type === "team" || thread.type === "announcement" || thread.participants.includes(viewerName)));
     const latestThreadMessage = (thread) => thread.messages[thread.messages.length - 1];
     const messageThreadStatusClass = (thread) => thread.type === "team" ? "ok" : (thread.type === "announcement" ? "pending" : "private");
     const isThreadUnreadFor = (thread, viewerName) => thread.unreadFor?.includes(viewerName);
@@ -18719,7 +18937,8 @@
     const updateMessagesHomeBadge = () => {
       const badge = document.getElementById("messages-home-badge");
       if (!badge) return;
-      const count = unreadThreadCountFor("Lexi", teacherVisibleMessageThreads());
+      const viewerName = teacherMessageViewerName();
+      const count = unreadThreadCountFor(viewerName, teacherVisibleMessageThreads(viewerName));
       badge.textContent = String(count);
       badge.style.display = count ? "grid" : "none";
     };
@@ -18810,27 +19029,148 @@
     };
 
     const renderTeacherMessages = () => {
-      const threads = teacherVisibleMessageThreads();
+      const viewerName = teacherMessageViewerName();
+      if (notificationShowcaseMode && !notificationShowcaseMessagesSeeded) {
+        messageThreads.forEach((thread) => {
+          thread.unreadFor = (thread.unreadFor || []).filter((name) => name !== viewerName);
+        });
+        [pinnedMessageThreadId, announcementThreadId].forEach((threadId) => {
+          const thread = messageThreads.find((item) => item.id === threadId);
+          if (thread) thread.unreadFor = [...new Set([...(thread.unreadFor || []), viewerName])];
+        });
+        notificationShowcaseMessagesSeeded = true;
+      }
+      const threads = teacherVisibleMessageThreads(viewerName);
       const announcementThreads = threads.filter((thread) => thread.id === announcementThreadId);
       const pinnedThreads = threads.filter((thread) => thread.id === pinnedMessageThreadId);
       const inboxThreads = threads.filter((thread) => thread.id !== pinnedMessageThreadId && thread.id !== announcementThreadId);
       if (selectedTeacherMessageThreadId && !threads.some((thread) => thread.id === selectedTeacherMessageThreadId)) selectedTeacherMessageThreadId = "";
-      if (selectedTeacherMessageThreadId) clearThreadUnreadFor(selectedTeacherMessageThreadId, "Lexi");
+      if (selectedTeacherMessageThreadId) clearThreadUnreadFor(selectedTeacherMessageThreadId, viewerName);
       const activeThread = threads.find((thread) => thread.id === selectedTeacherMessageThreadId);
-      renderThreadButtons("teacher-announcement-thread-list", announcementThreads, selectedTeacherMessageThreadId, "data-teacher-thread", "Lexi");
-      renderThreadButtons("teacher-pinned-thread-list", pinnedThreads, selectedTeacherMessageThreadId, "data-teacher-thread", "Lexi");
-      renderThreadButtons("teacher-thread-list", inboxThreads, selectedTeacherMessageThreadId, "data-teacher-thread", "Lexi");
+      renderThreadButtons("teacher-announcement-thread-list", announcementThreads, selectedTeacherMessageThreadId, "data-teacher-thread", viewerName);
+      renderThreadButtons("teacher-pinned-thread-list", pinnedThreads, selectedTeacherMessageThreadId, "data-teacher-thread", viewerName);
+      renderThreadButtons("teacher-thread-list", inboxThreads, selectedTeacherMessageThreadId, "data-teacher-thread", viewerName);
       renderMessageStack(
         activeThread,
         "teacher-message-title",
         "teacher-message-participants",
         "teacher-message-scope",
         "teacher-message-stack",
-        "Lexi"
+        viewerName
       );
       renderTeacherReplyComposer(activeThread);
       updateMessagesHomeBadge();
     };
+
+    const ensureMiniAppNotificationPopup = () => {
+      let overlay = document.getElementById("mini-app-notification-overlay");
+      if (overlay) return overlay;
+      overlay = document.createElement("div");
+      overlay.id = "mini-app-notification-overlay";
+      overlay.className = "mini-app-notification-overlay";
+      overlay.setAttribute("aria-hidden", "true");
+      overlay.innerHTML = `
+        <section class="mini-app-notification-dialog" role="dialog" aria-modal="true" aria-labelledby="mini-app-notification-title">
+          <div class="mini-app-notification-head">
+            <div><h3 id="mini-app-notification-title">Messages</h3><p id="mini-app-notification-subtitle">New items for this mini app</p></div>
+            <button class="mini-app-notification-close" type="button" data-mini-app-notification-close aria-label="Close notifications">×</button>
+          </div>
+          <div class="mini-app-notification-list" id="mini-app-notification-list"></div>
+          <button class="mini-app-notification-done" type="button" data-mini-app-notification-close>Done</button>
+        </section>
+      `;
+      document.body.appendChild(overlay);
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay || event.target.closest("[data-mini-app-notification-close]")) {
+          overlay.classList.remove("open");
+          overlay.setAttribute("aria-hidden", "true");
+          return;
+        }
+        const threadButton = event.target.closest("[data-mini-app-message-thread]");
+        if (threadButton) {
+          selectedTeacherMessageThreadId = threadButton.dataset.miniAppMessageThread;
+          overlay.classList.remove("open");
+          overlay.setAttribute("aria-hidden", "true");
+          renderTeacherMessages();
+          setTab("teacher-conversation");
+          return;
+        }
+        const notificationButton = event.target.closest("[data-mini-app-notification-id]");
+        if (!notificationButton) return;
+        const item = notificationCenterItems.find((entry) => entry.id === notificationButton.dataset.miniAppNotificationId);
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+        openNotificationAction(item);
+      });
+      return overlay;
+    };
+
+    const openMessagesMiniAppNotifications = () => {
+      const viewerName = teacherMessageViewerName();
+      const unreadThreads = teacherVisibleMessageThreads(viewerName).filter((thread) => isThreadUnreadFor(thread, viewerName));
+      if (!unreadThreads.length) return;
+      const overlay = ensureMiniAppNotificationPopup();
+      setText("mini-app-notification-title", "Messages");
+      setText("mini-app-notification-subtitle", `${unreadThreads.length} new message${unreadThreads.length === 1 ? "" : "s"}`);
+      const list = document.getElementById("mini-app-notification-list");
+      if (list) {
+        list.innerHTML = unreadThreads.map((thread) => {
+          const latest = latestThreadMessage(thread);
+          return `<button class="mini-app-notification-message" type="button" data-mini-app-message-thread="${escapeText(thread.id)}"><strong>${escapeText(messageThreadNameFor(thread, viewerName))}</strong>${latest ? `<small>${escapeText(messageSenderDisplayName(latest, thread))} · ${escapeText(latest.time)}</small><span>${escapeText(latest.text || "Open this message")}</span>` : ""}</button>`;
+        }).join("");
+      }
+      unreadThreads.forEach((thread) => clearThreadUnreadFor(thread.id, viewerName));
+      updateMessagesHomeBadge();
+      scheduleAppDataSave();
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      overlay.querySelector(".mini-app-notification-close")?.focus();
+    };
+
+    const miniAppNotificationHeading = (item) => {
+      if (item.preview_heading) return `${item.preview_heading}${item.preview_date === "date" ? ` · ${notificationDateLabel(item.created_at)}` : item.preview_date === "date_time" ? ` · ${notificationTimeLabel(item.created_at)}` : ""}`;
+      return item.title;
+    };
+    const miniAppNotificationPerspectiveCopy = (item, value) => {
+      if (!value || document.body.dataset.mode !== "teacher") return value || "";
+      if (notificationShowcaseMode && ["schedule_change_request", "roster_class_change"].includes(item.notification_type)) {
+        return value.replace(/^Ms\.\s+\S+\s+(rescheduled|moved)\b/, "You $1");
+      }
+      if (item.metadata?.changed_by_teacher_id && item.metadata.changed_by_teacher_id === profileTeacher?.id) {
+        return value.replace(/^Ms\.\s+\S+\s+(rescheduled|moved)\b/, "You $1");
+      }
+      return value;
+    };
+
+    const openNotificationMiniAppNotifications = (miniApp) => {
+      const items = unreadMiniAppNotifications(miniApp);
+      if (!items.length) return;
+      const overlay = ensureMiniAppNotificationPopup();
+      const label = miniApp === "classes" ? "Schedule" : "Rosters";
+      setText("mini-app-notification-title", label);
+      setText("mini-app-notification-subtitle", `${items.length} new change${items.length === 1 ? "" : "s"}`);
+      const list = document.getElementById("mini-app-notification-list");
+      if (list) {
+        list.innerHTML = items.map((item) => `
+          <button class="mini-app-notification-message" type="button" data-mini-app-notification-id="${escapeText(item.id)}">
+            <strong>${escapeText(miniAppNotificationHeading(item))}</strong>
+            ${item.preview_heading && item.title ? `<span>${escapeText(miniAppNotificationPerspectiveCopy(item, item.title))}</span>` : ""}
+            ${item.message ? `<small>${escapeText(miniAppNotificationPerspectiveCopy(item, item.message))}</small>` : ""}
+            ${item.preview_footer ? `<span class="mini-app-notification-reminder">${escapeText(item.preview_footer)}</span>` : ""}
+            ${item.preview_date || item.preview_hide_timestamp ? "" : `<small>${escapeText(notificationTimeLabel(item.created_at))}</small>`}
+          </button>
+        `).join("");
+      }
+      items.forEach((item) => markNotificationRead(item.id));
+      updateNotificationMiniAppBadges();
+      overlay.classList.add("open");
+      overlay.setAttribute("aria-hidden", "false");
+      overlay.querySelector(".mini-app-notification-close")?.focus();
+    };
+
+    document.querySelector(".messages-tile")?.addEventListener("click", openMessagesMiniAppNotifications);
+    document.querySelector(".classes-tile")?.addEventListener("click", () => openNotificationMiniAppNotifications("classes"));
+    document.querySelector(".rosters-tile")?.addEventListener("click", () => openNotificationMiniAppNotifications("rosters"));
 
     const renderAdminMessages = () => {
       if (!messageThreads.some((thread) => thread.id === selectedAdminMessageThreadId)) selectedAdminMessageThreadId = "team-meeting";
@@ -22131,24 +22471,36 @@
       showRescheduleReminder(override);
       clearUnsavedEdits();
       showToast(action === "date_tbd" ? "Class saved with Date TBD" : (action === "cancel" ? "Class cancelled with no make-up" : "Class moved on the calendar"));
-      const scheduleIsUrgent = [override.originalDate, override.newDate].filter(Boolean).includes(isoDate(new Date()));
       const signedInRole = window.dtCurrentProfile?.role;
+      const scheduleSchool = schoolNicknameByName(override.schoolName);
+      const originalClassDate = notificationClassDateLabel(override.originalDate);
+      const rescheduledClassDate = notificationClassDateLabel(override.newDate);
       if (signedInRole === "teacher") {
+        const teacherName = profileTeacher.displayName || teacherNickname(profileTeacher) || fullName(profileTeacher);
         queueAppNotifications(directorNotificationRecipientIds(), {
-          title: "Schedule change request",
-          message: `${profileTeacher.displayName || fullName(profileTeacher)} submitted a change for ${override.schoolName}.`,
+          title: "CLASS RESCHEDULED",
+          message: `${teacherName} rescheduled ${scheduleSchool} from ${originalClassDate} to ${rescheduledClassDate}`,
           notification_type: "schedule_change_request",
-          priority: scheduleIsUrgent ? "urgent" : "routine",
+          priority: "urgent",
           action_url: "/?open=schedule-changes",
-          metadata: { school_name: override.schoolName, original_date: override.originalDate, new_date: override.newDate, status: override.status }
+          metadata: { school_name: override.schoolName, original_date: override.originalDate, new_date: override.newDate, status: override.status, changed_by_teacher_id: profileTeacher.id, actor_label: teacherName }
+        });
+        queueAppNotifications([profileTeacher.id], {
+          title: "CLASS RESCHEDULED",
+          message: `You rescheduled ${scheduleSchool} from ${originalClassDate} to ${rescheduledClassDate}`,
+          notification_type: "schedule_change_request",
+          priority: "urgent",
+          action_url: "/?open=schedule",
+          metadata: { school_name: override.schoolName, original_date: override.originalDate, new_date: override.newDate, status: override.status, changed_by_teacher_id: profileTeacher.id, actor_label: "You" }
         });
       } else if (["admin", "director"].includes(signedInRole) && isUuid(profileTeacher?.id)) {
         queueAppNotifications([profileTeacher.id], {
-          title: override.status === "cancelled" ? "Schedule change declined" : "Schedule change approved",
-          message: `${override.schoolName} was updated by the Director Dashboard.`,
-          notification_type: "schedule_change_decision",
-          priority: scheduleIsUrgent ? "urgent" : "routine",
-          action_url: "/?open=schedule"
+          title: "CLASS RESCHEDULED",
+          message: `Admin rescheduled ${scheduleSchool} from ${originalClassDate} to ${rescheduledClassDate}`,
+          notification_type: "schedule_change_request",
+          priority: "urgent",
+          action_url: "/?open=schedule",
+          metadata: { school_name: override.schoolName, original_date: override.originalDate, new_date: override.newDate, status: override.status, actor_label: "Admin" }
         });
       }
     });
@@ -27815,24 +28167,7 @@
       if (rosterMultiClassOpenedFromTeacherTools) renderTeacherRosters();
       scheduleAppDataSave();
       await saveSharedStudent(student, targetClass);
-      if (rosterMultiClassOpenedFromTeacherTools) {
-        const directorIds = teachers
-          .filter((teacher) => ["Admin", "Director"].includes(teacher.teacherType) && teacher.id !== profileTeacher.id)
-          .map((teacher) => teacher.id);
-        await queueAppNotifications(directorIds, {
-          title: "Dancer moved to a different class",
-          message: `${profileTeacher.displayName || fullName(profileTeacher)} moved ${rosterStudentFullName(student)} from ${sourceClass.name} to ${targetClass.name} at ${rosterSchoolNickname(targetClass.schoolName)}.`,
-          notification_type: "roster_class_change",
-          priority: "routine",
-          metadata: {
-            student_id: student.id,
-            source_class_id: sourceClass.id,
-            target_class_id: targetClass.id,
-            school_name: targetClass.schoolName,
-            changed_by_teacher_id: profileTeacher.id
-          }
-        });
-      }
+      await queueRosterChangeNotifications(student, sourceClass, targetClass, rosterMultiClassOpenedFromTeacherTools);
       showToast(`${rosterStudentFirstName(student)} moved to ${targetClass.name}`);
     });
     document.getElementById("roster-class-profile-overlay")?.addEventListener("click", (event) => {
@@ -28155,7 +28490,8 @@
         await archiveEditingRosterStudent();
         return;
       }
-      if (targetClass.id !== rosterClass.id) {
+      const studentMovedClasses = targetClass.id !== rosterClass.id;
+      if (studentMovedClasses) {
         rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
         targetClass.students.push(student);
         selectedRosterClassId = targetClass.id;
@@ -28171,7 +28507,10 @@
       renderStudentLibrary();
       scheduleAppDataSave();
       await saveSharedStudent(student, targetClass);
-      showToast(targetClass.id !== rosterClass.id ? `Student moved to ${targetClass.name}` : "Student updated");
+      if (studentMovedClasses) {
+        await queueRosterChangeNotifications(student, rosterClass, targetClass, window.dtCurrentProfile?.role === "teacher");
+      }
+      showToast(studentMovedClasses ? `Student moved to ${targetClass.name}` : "Student updated");
     });
 
     document.getElementById("roster-prospects-close")?.addEventListener("click", closeProspectiveFollowup);

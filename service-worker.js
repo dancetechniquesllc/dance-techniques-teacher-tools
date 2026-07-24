@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v131-notification-deep-links";
+const CACHE_NAME = "my-dance-techniques-v133-schedule-calendar-fixes";
 const CORE_ASSETS = [
   "./",
   "./index.html",
