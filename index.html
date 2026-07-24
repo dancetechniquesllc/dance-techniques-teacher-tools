@@ -6252,6 +6252,7 @@
     .newsletter-preview-stage { display: grid; place-items: start center; min-height: 0; max-height: calc(100vh - 285px); padding: 20px; border-radius: 14px; background: #e9e3df; overflow: auto; }
     .newsletter-preview-document { position: relative; width: min(100%, 680px); min-height: 600px; border-radius: 14px; overflow: hidden; background: #fffaf6; box-shadow: 0 12px 34px rgb(58 29 22 / .14); transition: width .18s ease; }
     .newsletter-floating-graphic { position: absolute; z-index: 8; display: grid; gap: 5px; min-width: 70px; padding: 5px; border: 1px dashed transparent; border-radius: 9px; cursor: grab; transform: translate(-50%, -50%); }
+    .newsletter-floating-graphic.is-locked { cursor: default; }
     .newsletter-floating-graphic:hover, .newsletter-floating-graphic:focus-within { border-color: var(--newsletter-accent); background: rgb(255 250 246 / .88); }
     .newsletter-floating-graphic img { display: block; width: 100%; height: auto; object-fit: contain; pointer-events: none; }
     .newsletter-floating-graphic-placeholder { min-height: 76px; display: grid; place-items: center; padding: 9px; border: 1px dashed var(--newsletter-accent); border-radius: 8px; background: #fffaf6; color: var(--muted); font-size: 10px; text-align: center; }
@@ -6259,6 +6260,13 @@
     .newsletter-floating-graphic:hover .newsletter-floating-graphic-controls, .newsletter-floating-graphic:focus-within .newsletter-floating-graphic-controls { opacity: 1; }
     .newsletter-floating-graphic-controls input { min-width: 0; height: 28px; padding: 4px 6px; font-size: 9px; }
     .newsletter-floating-graphic-controls button { width: 28px; min-height: 28px; padding: 0; border-radius: 999px; background: var(--blush); color: var(--berry); }
+    .newsletter-floating-graphic-controls .newsletter-graphic-anchor { color: #160f0d; }
+    .newsletter-floating-graphic-controls .newsletter-graphic-anchor.is-locked { background: #160f0d; color: var(--ivory); }
+    .newsletter-graphic-anchor svg { width: 15px; height: 15px; fill: currentColor; pointer-events: none; }
+    .newsletter-preview-editable[data-newsletter-preview-section-field],
+    .newsletter-preview-editable[data-newsletter-preview-field="message"] { width: 100%; min-width: 120px; max-width: 100%; resize: horizontal; overflow: auto; }
+    .newsletter-preview-editable[data-newsletter-preview-section-field]:focus,
+    .newsletter-preview-editable[data-newsletter-preview-field="message"]:focus { outline: 1px dashed var(--newsletter-accent); outline-offset: 4px; }
     .newsletter-preview-editable { border-radius: 7px; outline: 1px dashed transparent; white-space: pre-wrap; transition: outline-color .15s ease, background .15s ease; }
     .newsletter-preview-editable:hover { outline-color: color-mix(in srgb, var(--newsletter-accent) 52%, transparent); }
     .newsletter-preview-editable:focus { outline: 2px solid var(--newsletter-accent); background: rgb(255 255 255 / .52); }
@@ -12332,7 +12340,7 @@
                   <div class="newsletter-block-categories">
                     <div class="newsletter-block-category"><strong>Information</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="title">+ Title</button><button type="button" data-newsletter-add-section="text">+ Text</button><button type="button" data-newsletter-add-section="quote">+ Quote Box</button><button type="button" data-newsletter-add-section="calendar">+ Calendar</button><button type="button" data-newsletter-add-section="reminder">+ Important Reminder</button></div></div>
                     <div class="newsletter-block-category"><strong>Layout</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="button">+ Button</button><button type="button" data-newsletter-add-section="divider">+ Divider</button><button type="button" data-newsletter-add-section="section">+ Section</button></div></div>
-                    <div class="newsletter-block-category"><strong>Media</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="photo">+ Add Picture</button><button type="button" data-newsletter-add-graphic>+ Add Graphic</button><button type="button" data-newsletter-add-section="youtube">+ YouTube</button><button type="button" data-newsletter-add-section="social">+ Social Links</button><button type="button" disabled title="Resource Library is coming next">+ Resource Library</button></div></div>
+                    <div class="newsletter-block-category"><strong>Media</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="photo">+ Add Picture</button><button type="button" data-newsletter-add-graphic>+ Add Graphic</button><button type="button" data-newsletter-add-twirla>+ Twirla Peeking</button><button type="button" data-newsletter-add-section="youtube">+ YouTube</button><button type="button" data-newsletter-add-section="social">+ Social Links</button><button type="button" disabled title="Resource Library is coming next">+ Resource Library</button></div></div>
                   </div>
                 </div>
                 <div class="newsletter-editor-actions"><button class="secondary" type="button" id="newsletter-reset">New Draft</button><button class="secondary" type="button" id="newsletter-test-send">Send Test</button><button class="secondary" type="button" id="newsletter-change-audience">Change Audience</button><button type="button" id="newsletter-send" disabled>Connect Email Provider to Send</button></div>
@@ -25998,7 +26006,7 @@
     };
     if (!newsletterTemplates[newsletterDraft.template]) newsletterDraft.template = "monthly";
 
-    const newsletterVariantFields = ["template", "subject", "subjectHtml", "headline", "headlineHtml", "message", "messageHtml", "font", "textSize", "color", "sections", "graphics", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl"];
+    const newsletterVariantFields = ["template", "subject", "subjectHtml", "headline", "headlineHtml", "message", "messageHtml", "messageWidth", "font", "textSize", "color", "sections", "graphics", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl"];
     const newsletterVariantSnapshot = (source = newsletterDraft, colorOverride = "") => Object.fromEntries(newsletterVariantFields.map((key) => [key, ["sections", "graphics"].includes(key) ? structuredClone(source[key] || []) : source[key]]).filter(([, value]) => value !== undefined).map(([key, value]) => [key, key === "color" && colorOverride ? colorOverride : value]));
     let newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
     if (!newsletterDraft.genderVersions?.female || !newsletterDraft.genderVersions?.male) {
@@ -26041,8 +26049,10 @@
       if (section.type === "youtube") { const id = newsletterYouTubeId(section.url); return section.url ? `<a class="newsletter-video-card" href="${rosterSafe(section.url)}" target="_blank" rel="noopener">${id ? `<img src="https://i.ytimg.com/vi/${rosterSafe(id)}/hqdefault.jpg" alt="YouTube video preview">` : ""}<span class="newsletter-video-play">▶</span></a>` : ""; }
       if (section.type === "button") return section.linkText && section.url ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:${draft.template === "welcome" ? (draft.genderView === "male" ? "#526149" : "#65103f") : "var(--newsletter-accent)"};color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
       if (section.type === "character") return `<section class="newsletter-content-section is-character"><span class="newsletter-character-graphic">${rosterSafe(section.text || "🩰")}</span>${section.title ? `<h2>${rosterSafe(section.title)}</h2>` : ""}</section>`;
-      const title = section.title ? `<h2>${rosterSafe(newsletterPersonalize(section.title, context))}</h2>` : "";
-      const body = section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text, context))}</p>` : "";
+      const titleWidth = Math.max(20, Math.min(100, Number(section.titleWidth) || 100));
+      const textWidth = Math.max(20, Math.min(100, Number(section.textWidth) || 100));
+      const title = section.title ? `<h2 style="width:${titleWidth}%;max-width:100%;">${rosterSafe(newsletterPersonalize(section.title, context))}</h2>` : "";
+      const body = section.text ? `<p style="width:${textWidth}%;max-width:100%;">${rosterSafe(newsletterPersonalize(section.text, context))}</p>` : "";
       const link = section.type === "social" && section.linkText && section.url ? `<p><a href="${rosterSafe(section.url)}" style="color:var(--newsletter-accent);font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
       const extraClass = section.type === "quote" ? " is-quote" : section.type === "reminder" || section.type === "calendar" ? " is-reminder" : section.type === "personalized" ? " is-highlight" : "";
       return `<section class="newsletter-content-section${extraClass}">${title}${body}${link}</section>`;
@@ -26059,9 +26069,9 @@
       return `<section class="newsletter-preview-section-editor newsletter-content-section${extraClass}" draggable="true" data-newsletter-preview-section="${index}">
         <span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
         ${divider}${image}
-        ${titleAllowed ? `<h2 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="title" data-placeholder="Section title">${section.titleHtml || rosterSafe(section.title || "")}</h2>` : ""}
-        ${textAllowed ? `<div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="text" data-placeholder="Write this section…">${section.textHtml || rosterSafe(section.text || "")}</div>` : ""}
-        ${linkTextAllowed ? `<div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="linkText" data-placeholder="Button or link text">${section.linkTextHtml || rosterSafe(section.linkText || "")}</div>` : ""}
+        ${titleAllowed ? `<h2 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="title" data-placeholder="Section title" style="width:${Math.max(20, Math.min(100, Number(section.titleWidth) || 100))}%">${section.titleHtml || rosterSafe(section.title || "")}</h2>` : ""}
+        ${textAllowed ? `<div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="text" data-placeholder="Write this section…" style="width:${Math.max(20, Math.min(100, Number(section.textWidth) || 100))}%">${section.textHtml || rosterSafe(section.text || "")}</div>` : ""}
+        ${linkTextAllowed ? `<div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="linkText" data-placeholder="Button or link text" style="width:${Math.max(20, Math.min(100, Number(section.linkTextWidth) || 100))}%">${section.linkTextHtml || rosterSafe(section.linkText || "")}</div>` : ""}
         ${urlAllowed ? `<input class="newsletter-preview-inline-input" data-newsletter-preview-section-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="${type === "photo" ? "Image URL" : type === "youtube" ? "YouTube URL" : "Link URL"}">` : ""}
       </section>`;
     };
@@ -26069,9 +26079,10 @@
       const x = Math.max(5, Math.min(95, Number(graphic.x) || 50));
       const y = Math.max(3, Math.min(97, Number(graphic.y) || 18));
       const width = Math.max(60, Math.min(320, Number(graphic.width) || 120));
-      return `<div class="newsletter-floating-graphic" draggable="true" data-newsletter-floating-graphic="${index}" style="left:${x}%;top:${y}%;width:${width}px;">
+      const locked = Boolean(graphic.locked);
+      return `<div class="newsletter-floating-graphic ${locked ? "is-locked" : ""}" draggable="${locked ? "false" : "true"}" data-newsletter-floating-graphic="${index}" style="left:${x}%;top:${y}%;width:${width}px;">
         ${graphic.url ? `<img src="${rosterSafe(graphic.url)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}">` : `<span class="newsletter-floating-graphic-placeholder">Paste a graphic URL below, then drag this anywhere.</span>`}
-        <span class="newsletter-floating-graphic-controls"><input type="url" data-newsletter-graphic-url="${index}" value="${rosterSafe(graphic.url || "")}" placeholder="Graphic URL"><button type="button" data-newsletter-remove-graphic="${index}" aria-label="Remove graphic">×</button></span>
+        <span class="newsletter-floating-graphic-controls"><input type="url" data-newsletter-graphic-url="${index}" value="${rosterSafe(graphic.url || "")}" placeholder="Graphic URL"><button class="newsletter-graphic-anchor ${locked ? "is-locked" : ""}" type="button" data-newsletter-toggle-graphic-lock="${index}" aria-label="${locked ? "Unfreeze graphic position" : "Freeze graphic position"}" title="${locked ? "Unfreeze position" : "Freeze position"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2h2v4.08a4 4 0 0 1 2.92 2.92H20v2h-4.08A4 4 0 0 1 13 13.92V20a7 7 0 0 0 5.83-3.13l-2.12-2.12 1.41-1.41L22 17.22A9 9 0 0 1 12 23a9 9 0 0 1-10-5.78l3.88-3.88 1.41 1.41-2.12 2.12A7 7 0 0 0 11 20v-6.08A4 4 0 0 1 8.08 11H4V9h4.08A4 4 0 0 1 11 6.08V2Zm1 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path></svg></button><button type="button" data-newsletter-remove-graphic="${index}" aria-label="Remove graphic">×</button></span>
       </div>`;
     };
     const renderNewsletterSectionEditors = () => {
@@ -26242,14 +26253,17 @@
       const accent = newsletterColors[draft.color] || newsletterColors.berry;
       const personalizeHtml = (html, fallback = "") => newsletterPersonalize(html || rosterSafe(fallback), context);
       const sections = draft.sections.map((section) => newsletterSectionMarkup(section, context, draft)).join("");
-      const graphics = (draft.graphics || []).filter((graphic) => graphic.url).map((graphic) => `<img src="${rosterSafe(graphic.url)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:${Math.max(5, Math.min(95, Number(graphic.x) || 50))}%;top:${Math.max(3, Math.min(97, Number(graphic.y) || 18))}%;width:${Math.max(60, Math.min(320, Number(graphic.width) || 120))}px;height:auto;transform:translate(-50%,-50%);">`).join("");
+      const graphics = (draft.graphics || []).filter((graphic) => graphic.url).map((graphic) => {
+        const source = String(graphic.url).startsWith("assets/") ? `https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/${graphic.url}` : graphic.url;
+        return `<img src="${rosterSafe(source)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:${Math.max(5, Math.min(95, Number(graphic.x) || 50))}%;top:${Math.max(3, Math.min(97, Number(graphic.y) || 18))}%;width:${Math.max(60, Math.min(320, Number(graphic.width) || 120))}px;height:auto;transform:translate(-50%,-50%);">`;
+      }).join("");
       const templateClass = `template-${String(draft.template || "monthly").replace(/[^a-z0-9-]/gi, "")}${draft.genderView === "male" ? " is-boy-version" : ""}`;
       const versionStyles = draft.genderView === "male" ? `.is-boy-version .newsletter-header{border-color:#aeb9a6!important;background:#e7ece3!important}.is-boy-version .newsletter-header p,.is-boy-version .newsletter-content-section h2{color:#526149!important}.is-boy-version .newsletter-content-section.is-highlight{border-color:#b9c3b2;background:#e7ece3}.is-boy-version .newsletter-content-section.is-reminder{border-color:#68775f}.is-boy-version .newsletter-content-section.is-divider{background:#68775f}.is-boy-version .newsletter-footer{border-color:#b9c3b2;background:#e7ece3!important}` : "";
       return `<!doctype html><html><head><style>
         .newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p{margin:0;white-space:pre-wrap}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}
         .template-welcome .newsletter-header{padding:38px 32px 30px!important;border-bottom:1px solid #dfb9b2;background:#f8e4df!important}.template-welcome .newsletter-header h1{max-width:520px;margin:0 auto 8px!important;color:#211817!important;font-family:Didot,Georgia,serif!important;font-size:32px;font-weight:500;line-height:1.08}.template-welcome .newsletter-header p{color:#8b4e61!important;font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.template-welcome .newsletter-main{padding:32px 38px 38px!important}.template-welcome .newsletter-content-section h2{color:#65103f;font-family:Didot,Georgia,serif;font-size:22px;font-weight:500}.template-welcome .newsletter-content-section.is-highlight{border:1px solid #e4c2bb;background:#f8e6e1}.template-welcome .newsletter-content-section.is-reminder{border:1px solid #dba9a1;border-radius:4px;background:#fffdf9}.template-welcome .newsletter-content-section.is-divider{background:#dba9a1}.template-welcome .newsletter-footer{border-top:1px solid #dfb9b2;background:#f8e4df!important}
         ${versionStyles}
-      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.65;">${graphics}<header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle(draft)};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.65;">${graphics}<header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle(draft)};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="width:${Math.max(20, Math.min(100, Number(draft.messageWidth) || 100))}%;max-width:100%;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
     };
     const newsletterRecipientMessages = () => {
       const records = newsletterFilteredRecords();
@@ -26318,7 +26332,7 @@
       const messagePosition = Math.max(0, Math.min(Number(newsletterDraft.messagePosition || 0), newsletterDraft.sections.length));
       const editableSections = newsletterDraft.sections.map(newsletterEditableSectionMarkup);
       const floatingGraphicsMarkup = (newsletterDraft.graphics || []).map(newsletterFloatingGraphicMarkup).join("");
-      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message">${newsletterDraft.messageHtml || rosterSafe(newsletterDraft.message || "")}</div></section>`;
+      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message" style="width:${Math.max(20, Math.min(100, Number(newsletterDraft.messageWidth) || 100))}%">${newsletterDraft.messageHtml || rosterSafe(newsletterDraft.message || "")}</div></section>`;
       editableSections.splice(messagePosition, 0, messageMarkup);
       const sectionsMarkup = editableSections.join("");
       const preview = document.getElementById("newsletter-preview-document");
@@ -27337,6 +27351,16 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("click", (event) => {
+      const toggleGraphicLock = event.target.closest("[data-newsletter-toggle-graphic-lock]");
+      if (toggleGraphicLock) {
+        const graphic = newsletterDraft.graphics?.[Number(toggleGraphicLock.dataset.newsletterToggleGraphicLock)];
+        if (!graphic) return;
+        graphic.locked = !graphic.locked;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        showToast(graphic.locked ? "Graphic position frozen." : "Graphic position unlocked.");
+        return;
+      }
       const removeGraphic = event.target.closest("[data-newsletter-remove-graphic]");
       if (removeGraphic) {
         newsletterDraft.graphics.splice(Number(removeGraphic.dataset.newsletterRemoveGraphic), 1);
@@ -27360,6 +27384,11 @@
       const graphic = event.target.closest("[data-newsletter-floating-graphic]");
       if (graphic) {
         newsletterGraphicDragIndex = Number(graphic.dataset.newsletterFloatingGraphic);
+        if (newsletterDraft.graphics?.[newsletterGraphicDragIndex]?.locked) {
+          newsletterGraphicDragIndex = -1;
+          event.preventDefault();
+          return;
+        }
         event.dataTransfer?.setData("text/plain", `graphic:${newsletterGraphicDragIndex}`);
         return;
       }
@@ -27420,6 +27449,21 @@
       renderNewsletterStudio();
       saveNewsletterDraft();
     });
+    document.getElementById("newsletter-preview-document")?.addEventListener("pointerup", (event) => {
+      const field = event.target.closest("[data-newsletter-preview-section-field], [data-newsletter-preview-field='message']");
+      if (!field) return;
+      const container = field.closest("[data-newsletter-preview-section], [data-newsletter-preview-message]");
+      if (!container) return;
+      const width = Math.max(20, Math.min(100, (field.getBoundingClientRect().width / container.getBoundingClientRect().width) * 100));
+      if (field.dataset.newsletterPreviewField === "message") newsletterDraft.messageWidth = width;
+      else {
+        const section = newsletterDraft.sections[Number(container.dataset.newsletterPreviewSection)];
+        const key = field.dataset.newsletterPreviewSectionField;
+        if (!section || !key) return;
+        section[`${key}Width`] = width;
+      }
+      saveNewsletterDraft();
+    });
     document.getElementById("newsletter-color-swatches")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-newsletter-color]");
       if (!button) return;
@@ -27440,6 +27484,15 @@
       saveNewsletterDraft();
     });
     document.querySelector(".newsletter-section-builder")?.addEventListener("click", (event) => {
+      const addTwirla = event.target.closest("[data-newsletter-add-twirla]");
+      if (addTwirla) {
+        newsletterDraft.graphics ||= [];
+        newsletterDraft.graphics.push({ url: "assets/twirla-peeking.png", alt: "Twirla peeking", x: 18, y: 18, width: 190, locked: false });
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        showToast("Twirla is ready to move. Use the anchor to freeze her position.");
+        return;
+      }
       const addGraphic = event.target.closest("[data-newsletter-add-graphic]");
       if (addGraphic) {
         newsletterDraft.graphics ||= [];
