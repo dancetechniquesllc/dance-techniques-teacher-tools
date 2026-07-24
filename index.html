@@ -18894,14 +18894,37 @@
       profileTeacher = teachers.find((teacher) => teacher.id === currentTeacherId) || teachers[0] || profileTeacher;
     };
 
-    const applyTeacherCloudData = (persisted, teacherId, { includeMessages = true } = {}) => {
+    const applyTeacherCloudData = (persisted, teacherId, { includeMessages = true, preserveDirectorData = false } = {}) => {
       if (!persisted?.teacher || !teacherId) return;
       const liveTeacher = teachers.find((teacher) => teacher.id === teacherId);
       if (!liveTeacher) return;
       const assignedSchools = JSON.parse(JSON.stringify(liveTeacher.schools || []));
       const directorPhoto = liveTeacher.photo || "";
       const signedInEmail = window.dtCurrentProfile?.id === teacherId ? (window.dtCurrentProfile.email || "") : "";
-      Object.assign(liveTeacher, JSON.parse(JSON.stringify(persisted.teacher)), { id: teacherId });
+      const savedTeacher = JSON.parse(JSON.stringify(persisted.teacher));
+      if (preserveDirectorData) {
+        Object.entries(savedTeacher).forEach(([key, value]) => {
+          if (key === "id" || key === "schools" || Array.isArray(value)) return;
+          const currentValue = liveTeacher[key];
+          if ((currentValue === "" || currentValue == null) && value !== "" && value != null) liveTeacher[key] = value;
+        });
+        ["reschedules", "closureClassOverrides", "scheduleEvents"].forEach((key) => {
+          const combined = [...(liveTeacher[key] || [])];
+          (Array.isArray(savedTeacher[key]) ? savedTeacher[key] : []).forEach((savedItem) => {
+            const identity = savedItem.id
+              || [savedItem.schoolName, savedItem.originalDate, savedItem.newDate, savedItem.date, savedItem.status].filter(Boolean).join("|");
+            const existingIndex = combined.findIndex((item) => (
+              (identity && (item.id === identity || [item.schoolName, item.originalDate, item.newDate, item.date, item.status].filter(Boolean).join("|") === identity))
+            ));
+            if (existingIndex < 0) combined.push(savedItem);
+            else if (String(savedItem.updatedAt || "") > String(combined[existingIndex].updatedAt || "")) combined[existingIndex] = savedItem;
+          });
+          liveTeacher[key] = combined;
+        });
+      } else {
+        Object.assign(liveTeacher, savedTeacher);
+      }
+      liveTeacher.id = teacherId;
       liveTeacher.schools = assignedSchools;
       if (!liveTeacher.photo && directorPhoto) liveTeacher.photo = directorPhoto;
       if (signedInEmail) {
@@ -22410,6 +22433,7 @@
       if (field.closest("#teacher-profile-form")) markAdminDashboardReview("teacherProfiles");
       renderProfileHero();
       renderTeacherProfileList();
+      scheduleAppDataSave();
     };
 
     document.getElementById("profile-personal-form")?.addEventListener("input", updateProfileField);
@@ -22421,10 +22445,12 @@
       renderTeacherProfileList();
       renderSchoolLibrary();
       markUnsavedEdits();
+      scheduleAppDataSave();
     });
 
     document.getElementById("profile-notes")?.addEventListener("input", (event) => {
       profileTeacher.notes = event.target.value;
+      scheduleAppDataSave();
     });
 
     const updatePartnerSchoolCard = (event) => {
@@ -29577,7 +29603,7 @@
         }
         const { data: teacherStates, error: teacherStatesError } = await client.from("teacher_portal_state").select("teacher_id, payload");
         if (teacherStatesError) console.error("Teacher cloud changes could not load for the Director Dashboard", teacherStatesError);
-        else (teacherStates || []).forEach((teacherState) => applyTeacherCloudData(teacherState.payload, teacherState.teacher_id, { includeMessages: false }));
+        else (teacherStates || []).forEach((teacherState) => applyTeacherCloudData(teacherState.payload, teacherState.teacher_id, { includeMessages: false, preserveDirectorData: true }));
         teachers.forEach((teacher) => { if (currentTierByTeacher.has(teacher.id)) teacher.payTier = currentTierByTeacher.get(teacher.id); });
         const teacherPhotoResults = await Promise.all(teachers
           .filter((teacher) => teacher.photo && isUuid(teacher.id))
