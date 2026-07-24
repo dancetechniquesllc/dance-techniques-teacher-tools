@@ -14785,6 +14785,9 @@
       const rightKey = key(right);
       return Boolean(leftKey && rightKey && (leftKey === rightKey || leftKey.includes(rightKey) || rightKey.includes(leftKey)));
     };
+    const isdNameMatches = (left = "", right = "") => (
+      String(left).trim().toLowerCase() === String(right).trim().toLowerCase()
+    );
     const closestEnrollmentSchool = (requestedName = "") => {
       const normalize = (value) => String(value || "").toLowerCase().replace(/\b(school|of|the)\b/g, " ").replace(/[^a-z0-9]+/g, " ").trim();
       const requested = normalize(requestedName);
@@ -16596,14 +16599,14 @@
       ));
       if (hasClassOverride) return false;
       const matchesSchool = (closure) => (
-        (!closure.school || closure.school === school.school) &&
-        (!closure.isd || closure.isd === (profileSchool?.isd || school.isd))
+        (!closure.school || enrollmentSchoolNameMatches(closure.school, school.school)) &&
+        (!closure.isd || isdNameMatches(closure.isd, profileSchool?.isd || school.isd))
       );
       return scheduleClosures.some((closure) => closure.date === dateString && matchesSchool(closure)) ||
         noClassDates.some((closure) => closure.date === dateString && matchesSchool(closure)) ||
         noClassWeeks.some((week) => {
           const weekDates = [0, 1, 2, 3, 4].map((offset) => addCalendarDays(week.monday, offset));
-          return weekDates.includes(dateString) && (!week.isd || week.isd === (profileSchool?.isd || school.isd));
+          return weekDates.includes(dateString) && (!week.isd || isdNameMatches(week.isd, profileSchool?.isd || school.isd));
         });
     };
 
@@ -17264,10 +17267,10 @@
     const targetSchoolsForClosure = (closure, dateKey, dayEvents) => {
       if (closure.school) return [closure.school];
       const eventSchools = dayEvents
-        .filter((event) => !closure.isd || event.isd === closure.isd)
+        .filter((event) => !closure.isd || isdNameMatches(event.isd, closure.isd))
         .map((event) => event.school);
       const assignedSchools = assignedSchoolsForDate(dateKey)
-        .filter((school) => !closure.isd || school.isd === closure.isd)
+        .filter((school) => !closure.isd || isdNameMatches(school.isd, closure.isd))
         .map((school) => school.name);
       return [...new Set([...eventSchools, ...assignedSchools])];
     };
@@ -17275,7 +17278,7 @@
     const closureOverrideMatches = (schoolName, closure, dateKey) => closureClassOverridesForTeacher().some((override) => (
       override.date === dateKey &&
       enrollmentSchoolNameMatches(override.schoolName, schoolName) &&
-      (!closure.isd || override.isd === closure.isd) &&
+      (!closure.isd || isdNameMatches(override.isd, closure.isd)) &&
       (!closure.reason || override.reason === closure.reason)
     ));
 
@@ -17291,8 +17294,8 @@
     };
 
     const closureMatchesEvent = (closure, event) => (
-      (!closure.isd || closure.isd === event.isd) &&
-      (!closure.school || closure.school === event.school)
+      (!closure.isd || isdNameMatches(closure.isd, event.isd)) &&
+      (!closure.school || enrollmentSchoolNameMatches(closure.school, event.school))
     );
 
     const closuresForDate = (closures, dateKey, dayEvents) => {
@@ -17302,8 +17305,8 @@
       if (scheduledMatches.length) return scheduledMatches;
       const assignedSchools = assignedSchoolsForDate(dateKey);
       return candidates.filter((closure) => assignedSchools.some((school) => (
-        (!closure.isd || closure.isd === school.isd) &&
-        (!closure.school || closure.school === school.name)
+        (!closure.isd || isdNameMatches(closure.isd, school.isd)) &&
+        (!closure.school || enrollmentSchoolNameMatches(closure.school, school.name))
       )));
     };
 
@@ -17869,7 +17872,7 @@
         };
         const exists = profileTeacher.closureClassOverrides.some((item) => (
           item.date === schoolOverride.date &&
-          item.schoolName === schoolOverride.schoolName &&
+          enrollmentSchoolNameMatches(item.schoolName, schoolOverride.schoolName) &&
           item.reason === schoolOverride.reason
         ));
         if (!exists) profileTeacher.closureClassOverrides.push(schoolOverride);
