@@ -18977,6 +18977,7 @@
     ];
     const persistentStorageKey = "dt-teacher-tools-prototype-v1";
     const persistentStorageBackupKey = `${persistentStorageKey}:history`;
+    const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725`;
     const cloudStateRecordId = "director-dashboard";
     let pendingPersistentAdminReviewFlags = null;
     let persistenceSaveTimer = 0;
@@ -19147,14 +19148,13 @@
       return null;
     };
 
-    const appDataPayload = ({ includeRosters = true } = {}) => {
+    const appDataPayload = ({ includeRosters = true, includeOperationalData = true } = {}) => {
       const savedAt = new Date().toISOString();
       return {
         savedAt,
         currentTeacherId: profileTeacher?.id || "lexi",
-        teachers,
-        schoolLibrary,
-        ...(includeRosters ? { rosterClasses } : {}),
+        ...(includeOperationalData ? { teachers, schoolLibrary } : {}),
+        ...(includeOperationalData && includeRosters ? { rosterClasses } : {}),
         messageThreads,
         isdOptions,
         isdCalendars,
@@ -19191,7 +19191,7 @@
       const cloudWrite = isLeader
         ? client.from("portal_app_state").upsert({
             id: cloudStateRecordId,
-            payload: appDataPayload({ includeRosters: false }),
+            payload: appDataPayload({ includeRosters: false, includeOperationalData: false }),
             updated_by: profile.id
           }, { onConflict: "id" })
         : client.from("teacher_portal_state").upsert({
@@ -19325,6 +19325,25 @@
         console.error("Partner School assignments could not be synchronized", error);
         return false;
       }
+      const { data: verifiedAssignments, error: verificationError } = await client
+        .from("teacher_school_assignments")
+        .select("teacher_id,partner_school_id,active")
+        .in("partner_school_id", managedSchoolIds)
+        .eq("active", true);
+      if (verificationError) {
+        console.error("Partner School assignments could not be verified", verificationError);
+        return false;
+      }
+      const verifiedBySchool = new Map((verifiedAssignments || []).map((assignment) => [assignment.partner_school_id, assignment.teacher_id]));
+      const assignmentsMatch = desiredAssignments.every((assignment) => verifiedBySchool.get(assignment.partner_school_id) === assignment.teacher_id)
+        && (verifiedAssignments || []).every((assignment) => desiredAssignments.some((desired) => (
+          desired.partner_school_id === assignment.partner_school_id && desired.teacher_id === assignment.teacher_id
+        )));
+      if (!assignmentsMatch) {
+        console.error("Partner School assignment verification did not match the Director Dashboard.");
+        return false;
+      }
+      document.documentElement.dataset.assignmentsVerifiedAt = new Date().toISOString();
       return true;
     };
 
@@ -31648,14 +31667,23 @@
         return;
       }
       if (data?.payload) {
-        if (isLeader && cloudPayloadShouldApply(data.payload)) applyPersistedAppData(data.payload, { mergeTeachers: true });
+        const cloudSettingsPayload = isLeader ? {
+          ...clonePayload(data.payload),
+          teachers: undefined,
+          schoolLibrary: undefined,
+          rosterClasses: undefined
+        } : data.payload;
+        if (isLeader && cloudPayloadShouldApply(data.payload)) applyPersistedAppData(cloudSettingsPayload, { mergeTeachers: true });
         else if (isLeader && data?.payload && !cloudPayloadShouldApply(data.payload)) {
           console.info("Skipping older cloud payload in favor of local DD snapshot.");
         }
         else applyTeacherCloudData(data.payload, profile.id);
       }
-      const recoveredTeachers = isLeader ? restoreMissingTeachersFromHistory() : [];
-      const recoveredAssignments = isLeader ? restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true }) : false;
+      let operationalRecoveryAlreadyCompleted = false;
+      try { operationalRecoveryAlreadyCompleted = Boolean(window.localStorage?.getItem(operationalRecoveryCompletedKey)); } catch (error) {}
+      const shouldRunOperationalRecovery = isLeader && !operationalRecoveryAlreadyCompleted;
+      const recoveredTeachers = shouldRunOperationalRecovery ? restoreMissingTeachersFromHistory() : [];
+      const recoveredAssignments = shouldRunOperationalRecovery ? restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true }) : false;
       if (recoveredTeachers.length || recoveredAssignments) scheduleAppDataSave();
       if (isLeader) {
         const currentTierByTeacher = new Map();
@@ -31691,6 +31719,9 @@
         if (!assignmentsSynced) showToast("Some teacher school assignments still need attention.");
         else if (recoveredTeachers.length || recoveredAssignments) {
           showToast(`${recoveredTeachers.length ? `${recoveredTeachers.length} teacher profile${recoveredTeachers.length === 1 ? "" : "s"} and ` : ""}${recoveredAssignments ? "school assignments" : "saved records"} restored from autosave.`);
+        }
+        if (shouldRunOperationalRecovery && assignmentsSynced) {
+          try { window.localStorage?.setItem(operationalRecoveryCompletedKey, new Date().toISOString()); } catch (error) {}
         }
       }
       const removedDemoContent = stripLegacyProductionDemoContent();
