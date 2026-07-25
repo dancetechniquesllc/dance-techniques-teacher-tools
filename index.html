@@ -9346,6 +9346,25 @@
 
     .login-invite-message.success { color: oklch(42% 0.1 145); }
     .login-invite-message.error { color: var(--danger); }
+    #profile-create-live-record.live-profile-active {
+      background: #68775f;
+      border-color: #68775f;
+      color: #fffaf6;
+      cursor: default;
+      opacity: 1;
+    }
+    .teacher-live-profile-alert {
+      width: fit-content;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--berry);
+      border-radius: 999px;
+      background: var(--blush-light);
+      color: var(--berry);
+      font-size: 12px;
+      font-weight: 850;
+      letter-spacing: .01em;
+    }
 
     .profile-compact-row {
       display: grid;
@@ -13543,6 +13562,7 @@
                 <span id="admin-profile-email">lexi@dancetechniques.example</span>
                 <span id="admin-profile-phone">(214) 555-0147</span>
               </div>
+              <div class="teacher-live-profile-alert" id="profile-live-status-alert" role="alert" hidden>Live Profile Required Before Assigning Schools or Classes</div>
             </div>
           </div>
           <div class="admin-page-actions">
@@ -21513,10 +21533,15 @@
       }
       const emailInviteButton = document.getElementById("profile-send-email-invite");
       const createLiveRecordButton = document.getElementById("profile-create-live-record");
+      const hasLiveProfile = isUuid(profileTeacher.id);
       if (createLiveRecordButton) {
-        createLiveRecordButton.hidden = isUuid(profileTeacher.id);
-        createLiveRecordButton.textContent = "Create Live Profile";
+        createLiveRecordButton.hidden = false;
+        createLiveRecordButton.disabled = hasLiveProfile;
+        createLiveRecordButton.classList.toggle("live-profile-active", hasLiveProfile);
+        createLiveRecordButton.textContent = hasLiveProfile ? "Live Profile Active" : "Create Live Profile";
       }
+      const liveStatusAlert = document.getElementById("profile-live-status-alert");
+      if (liveStatusAlert) liveStatusAlert.hidden = hasLiveProfile;
       if (emailInviteButton) {
         emailInviteButton.textContent = profileTeacher.inviteStatus === "Invite sent" ? "Send Invite Again" : "Send Invite Now";
         emailInviteButton.setAttribute("aria-label", `Email a login invitation to ${fullName(profileTeacher)}`);
@@ -21592,7 +21617,11 @@
       renderProfileHero();
       renderTeacherProfileList();
       saveAppData();
-      button.hidden = true;
+      button.disabled = true;
+      button.classList.add("live-profile-active");
+      button.textContent = "Live Profile Active";
+      const liveStatusAlert = document.getElementById("profile-live-status-alert");
+      if (liveStatusAlert) liveStatusAlert.hidden = true;
       message.className = "login-invite-message success";
       message.textContent = `Live profile created for ${email}. No invitation was sent.`;
       showToast(`${fullName(profileTeacher)} is ready for school assignments`);
