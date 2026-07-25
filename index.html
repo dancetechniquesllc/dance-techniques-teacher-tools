@@ -6263,8 +6263,17 @@
     .newsletter-floating-graphic-controls .newsletter-graphic-anchor { color: #160f0d; }
     .newsletter-floating-graphic-controls .newsletter-graphic-anchor.is-locked { background: #160f0d; color: var(--ivory); }
     .newsletter-graphic-anchor svg { width: 15px; height: 15px; fill: currentColor; pointer-events: none; }
-    .newsletter-preview-editable[data-newsletter-preview-section-field],
-    .newsletter-preview-editable[data-newsletter-preview-field="message"] { width: 100%; min-width: 120px; max-width: 100%; resize: horizontal; overflow: auto; }
+    .newsletter-graphic-resize-handle,
+    .newsletter-text-resize-handle { position: absolute; z-index: 4; right: -9px; bottom: -9px; display: grid; place-items: center; width: 25px; min-height: 25px; padding: 0; border: 1px solid #160f0d; border-radius: 999px; background: var(--blush); color: #160f0d; cursor: nwse-resize; opacity: 0; transition: opacity .15s ease; touch-action: none; }
+    .newsletter-floating-graphic:hover > .newsletter-graphic-resize-handle,
+    .newsletter-floating-graphic:focus-within > .newsletter-graphic-resize-handle,
+    .newsletter-resizable-field:hover > .newsletter-text-resize-handle,
+    .newsletter-resizable-field:focus-within > .newsletter-text-resize-handle { opacity: 1; }
+    .newsletter-floating-graphic.is-locked > .newsletter-graphic-resize-handle { display: none; }
+    .newsletter-graphic-resize-handle svg,
+    .newsletter-text-resize-handle svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; pointer-events: none; }
+    .newsletter-resizable-field { position: relative; min-width: 120px; max-width: 100%; }
+    .newsletter-resizable-field > .newsletter-preview-editable { width: 100%; min-width: 0; max-width: 100%; overflow: auto; }
     .newsletter-preview-editable[data-newsletter-preview-section-field]:focus,
     .newsletter-preview-editable[data-newsletter-preview-field="message"]:focus { outline: 1px dashed var(--newsletter-accent); outline-offset: 4px; }
     .newsletter-preview-editable { border-radius: 7px; outline: 1px dashed transparent; white-space: pre-wrap; transition: outline-color .15s ease, background .15s ease; }
@@ -26066,23 +26075,26 @@
       const extraClass = type === "quote" ? " is-quote" : type === "reminder" || type === "calendar" ? " is-reminder" : type === "personalized" ? " is-highlight" : "";
       const image = type === "photo" && section.url ? `<img class="newsletter-block-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">` : "";
       const divider = type === "divider" ? `<div class="newsletter-content-section is-divider" aria-label="Divider"></div>` : "";
+      const resizeHandle = (field) => `<button class="newsletter-text-resize-handle" type="button" data-newsletter-text-resize-handle="${field}" aria-label="Resize ${field === "linkText" ? "link text" : field} box" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button>`;
+      const resizableField = (field, tag, placeholder, value) => `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${field}" style="width:${Math.max(20, Math.min(100, Number(section[`${field}Width`]) || 100))}%"><${tag} class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="${field}" data-placeholder="${placeholder}">${value}</${tag}>${resizeHandle(field)}</div>`;
       return `<section class="newsletter-preview-section-editor newsletter-content-section${extraClass}" draggable="true" data-newsletter-preview-section="${index}">
         <span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
         ${divider}${image}
-        ${titleAllowed ? `<h2 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="title" data-placeholder="Section title" style="width:${Math.max(20, Math.min(100, Number(section.titleWidth) || 100))}%">${section.titleHtml || rosterSafe(section.title || "")}</h2>` : ""}
-        ${textAllowed ? `<div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="text" data-placeholder="Write this section…" style="width:${Math.max(20, Math.min(100, Number(section.textWidth) || 100))}%">${section.textHtml || rosterSafe(section.text || "")}</div>` : ""}
-        ${linkTextAllowed ? `<div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="linkText" data-placeholder="Button or link text" style="width:${Math.max(20, Math.min(100, Number(section.linkTextWidth) || 100))}%">${section.linkTextHtml || rosterSafe(section.linkText || "")}</div>` : ""}
+        ${titleAllowed ? resizableField("title", "h2", "Section title", section.titleHtml || rosterSafe(section.title || "")) : ""}
+        ${textAllowed ? resizableField("text", "div", "Write this section…", section.textHtml || rosterSafe(section.text || "")) : ""}
+        ${linkTextAllowed ? resizableField("linkText", "div", "Button or link text", section.linkTextHtml || rosterSafe(section.linkText || "")) : ""}
         ${urlAllowed ? `<input class="newsletter-preview-inline-input" data-newsletter-preview-section-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="${type === "photo" ? "Image URL" : type === "youtube" ? "YouTube URL" : "Link URL"}">` : ""}
       </section>`;
     };
     const newsletterFloatingGraphicMarkup = (graphic, index) => {
       const x = Math.max(5, Math.min(95, Number(graphic.x) || 50));
       const y = Math.max(3, Math.min(97, Number(graphic.y) || 18));
-      const width = Math.max(60, Math.min(320, Number(graphic.width) || 120));
+      const width = Math.max(60, Math.min(500, Number(graphic.width) || 120));
       const locked = Boolean(graphic.locked);
       return `<div class="newsletter-floating-graphic ${locked ? "is-locked" : ""}" draggable="${locked ? "false" : "true"}" data-newsletter-floating-graphic="${index}" style="left:${x}%;top:${y}%;width:${width}px;">
         ${graphic.url ? `<img src="${rosterSafe(graphic.url)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}">` : `<span class="newsletter-floating-graphic-placeholder">Paste a graphic URL below, then drag this anywhere.</span>`}
         <span class="newsletter-floating-graphic-controls"><input type="url" data-newsletter-graphic-url="${index}" value="${rosterSafe(graphic.url || "")}" placeholder="Graphic URL"><button class="newsletter-graphic-anchor ${locked ? "is-locked" : ""}" type="button" data-newsletter-toggle-graphic-lock="${index}" aria-label="${locked ? "Unfreeze graphic position" : "Freeze graphic position"}" title="${locked ? "Unfreeze position" : "Freeze position"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2h2v4.08a4 4 0 0 1 2.92 2.92H20v2h-4.08A4 4 0 0 1 13 13.92V20a7 7 0 0 0 5.83-3.13l-2.12-2.12 1.41-1.41L22 17.22A9 9 0 0 1 12 23a9 9 0 0 1-10-5.78l3.88-3.88 1.41 1.41-2.12 2.12A7 7 0 0 0 11 20v-6.08A4 4 0 0 1 8.08 11H4V9h4.08A4 4 0 0 1 11 6.08V2Zm1 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path></svg></button><button type="button" data-newsletter-remove-graphic="${index}" aria-label="Remove graphic">×</button></span>
+        ${locked ? "" : `<button class="newsletter-graphic-resize-handle" type="button" data-newsletter-graphic-resize-handle="${index}" aria-label="Resize graphic" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button>`}
       </div>`;
     };
     const renderNewsletterSectionEditors = () => {
@@ -26255,7 +26267,7 @@
       const sections = draft.sections.map((section) => newsletterSectionMarkup(section, context, draft)).join("");
       const graphics = (draft.graphics || []).filter((graphic) => graphic.url).map((graphic) => {
         const source = String(graphic.url).startsWith("assets/") ? `https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/${graphic.url}` : graphic.url;
-        return `<img src="${rosterSafe(source)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:${Math.max(5, Math.min(95, Number(graphic.x) || 50))}%;top:${Math.max(3, Math.min(97, Number(graphic.y) || 18))}%;width:${Math.max(60, Math.min(320, Number(graphic.width) || 120))}px;height:auto;transform:translate(-50%,-50%);">`;
+        return `<img src="${rosterSafe(source)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:${Math.max(5, Math.min(95, Number(graphic.x) || 50))}%;top:${Math.max(3, Math.min(97, Number(graphic.y) || 18))}%;width:${Math.max(60, Math.min(500, Number(graphic.width) || 120))}px;height:auto;transform:translate(-50%,-50%);">`;
       }).join("");
       const templateClass = `template-${String(draft.template || "monthly").replace(/[^a-z0-9-]/gi, "")}${draft.genderView === "male" ? " is-boy-version" : ""}`;
       const versionStyles = draft.genderView === "male" ? `.is-boy-version .newsletter-header{border-color:#aeb9a6!important;background:#e7ece3!important}.is-boy-version .newsletter-header p,.is-boy-version .newsletter-content-section h2{color:#526149!important}.is-boy-version .newsletter-content-section.is-highlight{border-color:#b9c3b2;background:#e7ece3}.is-boy-version .newsletter-content-section.is-reminder{border-color:#68775f}.is-boy-version .newsletter-content-section.is-divider{background:#68775f}.is-boy-version .newsletter-footer{border-color:#b9c3b2;background:#e7ece3!important}` : "";
@@ -26332,7 +26344,7 @@
       const messagePosition = Math.max(0, Math.min(Number(newsletterDraft.messagePosition || 0), newsletterDraft.sections.length));
       const editableSections = newsletterDraft.sections.map(newsletterEditableSectionMarkup);
       const floatingGraphicsMarkup = (newsletterDraft.graphics || []).map(newsletterFloatingGraphicMarkup).join("");
-      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message" style="width:${Math.max(20, Math.min(100, Number(newsletterDraft.messageWidth) || 100))}%">${newsletterDraft.messageHtml || rosterSafe(newsletterDraft.message || "")}</div></section>`;
+      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-resizable-field" data-newsletter-resizable-field="message" style="width:${Math.max(20, Math.min(100, Number(newsletterDraft.messageWidth) || 100))}%"><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message">${newsletterDraft.messageHtml || rosterSafe(newsletterDraft.message || "")}</div><button class="newsletter-text-resize-handle" type="button" data-newsletter-text-resize-handle="message" aria-label="Resize message box" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button></div></section>`;
       editableSections.splice(messagePosition, 0, messageMarkup);
       const sectionsMarkup = editableSections.join("");
       const preview = document.getElementById("newsletter-preview-document");
@@ -27381,6 +27393,10 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("dragstart", (event) => {
+      if (event.target.closest("[data-newsletter-graphic-resize-handle], [data-newsletter-text-resize-handle]")) {
+        event.preventDefault();
+        return;
+      }
       const graphic = event.target.closest("[data-newsletter-floating-graphic]");
       if (graphic) {
         newsletterGraphicDragIndex = Number(graphic.dataset.newsletterFloatingGraphic);
@@ -27449,20 +27465,64 @@
       renderNewsletterStudio();
       saveNewsletterDraft();
     });
-    document.getElementById("newsletter-preview-document")?.addEventListener("pointerup", (event) => {
-      const field = event.target.closest("[data-newsletter-preview-section-field], [data-newsletter-preview-field='message']");
-      if (!field) return;
-      const container = field.closest("[data-newsletter-preview-section], [data-newsletter-preview-message]");
-      if (!container) return;
-      const width = Math.max(20, Math.min(100, (field.getBoundingClientRect().width / container.getBoundingClientRect().width) * 100));
-      if (field.dataset.newsletterPreviewField === "message") newsletterDraft.messageWidth = width;
-      else {
-        const section = newsletterDraft.sections[Number(container.dataset.newsletterPreviewSection)];
-        const key = field.dataset.newsletterPreviewSectionField;
-        if (!section || !key) return;
-        section[`${key}Width`] = width;
+    document.getElementById("newsletter-preview-document")?.addEventListener("pointerdown", (event) => {
+      const graphicHandle = event.target.closest("[data-newsletter-graphic-resize-handle]");
+      if (graphicHandle) {
+        event.preventDefault();
+        event.stopPropagation();
+        const index = Number(graphicHandle.dataset.newsletterGraphicResizeHandle);
+        const graphic = newsletterDraft.graphics?.[index];
+        const element = graphicHandle.closest("[data-newsletter-floating-graphic]");
+        if (!graphic || graphic.locked || !element) return;
+        const startX = event.clientX;
+        const startWidth = element.getBoundingClientRect().width;
+        graphicHandle.setPointerCapture?.(event.pointerId);
+        const move = (moveEvent) => {
+          const width = Math.max(60, Math.min(500, startWidth + (moveEvent.clientX - startX)));
+          graphic.width = width;
+          element.style.width = `${width}px`;
+        };
+        const finish = () => {
+          graphicHandle.removeEventListener("pointermove", move);
+          graphicHandle.removeEventListener("pointerup", finish);
+          graphicHandle.removeEventListener("pointercancel", finish);
+          saveNewsletterDraft();
+        };
+        graphicHandle.addEventListener("pointermove", move);
+        graphicHandle.addEventListener("pointerup", finish);
+        graphicHandle.addEventListener("pointercancel", finish);
+        return;
       }
-      saveNewsletterDraft();
+      const textHandle = event.target.closest("[data-newsletter-text-resize-handle]");
+      if (!textHandle) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const wrapper = textHandle.closest("[data-newsletter-resizable-field]");
+      const container = textHandle.closest("[data-newsletter-preview-section], [data-newsletter-preview-message]");
+      if (!wrapper || !container) return;
+      const startX = event.clientX;
+      const startWidth = wrapper.getBoundingClientRect().width;
+      const containerWidth = container.getBoundingClientRect().width;
+      const key = textHandle.dataset.newsletterTextResizeHandle;
+      textHandle.setPointerCapture?.(event.pointerId);
+      const move = (moveEvent) => {
+        const width = Math.max(20, Math.min(100, ((startWidth + (moveEvent.clientX - startX)) / containerWidth) * 100));
+        wrapper.style.width = `${width}%`;
+        if (key === "message") newsletterDraft.messageWidth = width;
+        else {
+          const section = newsletterDraft.sections[Number(container.dataset.newsletterPreviewSection)];
+          if (section) section[`${key}Width`] = width;
+        }
+      };
+      const finish = () => {
+        textHandle.removeEventListener("pointermove", move);
+        textHandle.removeEventListener("pointerup", finish);
+        textHandle.removeEventListener("pointercancel", finish);
+        saveNewsletterDraft();
+      };
+      textHandle.addEventListener("pointermove", move);
+      textHandle.addEventListener("pointerup", finish);
+      textHandle.addEventListener("pointercancel", finish);
     });
     document.getElementById("newsletter-color-swatches")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-newsletter-color]");
