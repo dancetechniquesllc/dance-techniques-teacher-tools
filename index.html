@@ -6192,7 +6192,7 @@
     #newsletter-font option[value="avenir-bold"] { font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-weight: 800; }
     #newsletter-font option[value="avenir-light"] { font-family: "Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-weight: 400; }
     #newsletter-font option[value="avenir-ultra-light"] { font-family: "Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif; font-weight: 200; }
-    .newsletter-color-swatches { display: flex; flex-wrap: nowrap; gap: 7px; align-items: center; }
+    .newsletter-color-swatches { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; }
     .newsletter-color-swatch { width: 29px; height: 29px; min-height: 29px; padding: 0; border: 3px solid white; border-radius: 999px; box-shadow: 0 0 0 1px var(--border); }
     .newsletter-color-swatch.is-selected { box-shadow: 0 0 0 2px var(--fg); }
     .newsletter-color-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -6294,6 +6294,8 @@
     .newsletter-preview-drag-handle { cursor: grab; }
     .newsletter-inline-toolbar { position: relative; display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); }
     .newsletter-inline-toolbar > button { min-height: 30px; padding: 5px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
+    .newsletter-inline-toolbar .newsletter-toolbar-row-break { flex-basis: 100%; height: 0; }
+    .newsletter-alignment-icon { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 2; vertical-align: -3px; }
     .newsletter-field-popover { position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; width: min(420px, 90vw); display: grid; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: white; box-shadow: var(--shadow); }
     .newsletter-field-popover[hidden] { display: none; }
     .newsletter-preview-inline-input { width: 100%; margin-top: 7px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px; background: white; font: inherit; }
@@ -12377,15 +12379,19 @@
                 <div class="newsletter-brand-controls">
                   <label>Fonts<select id="newsletter-font"><option value="parisienne">Parisienne</option><option value="bodoni-smallcaps">Bodoni 72 Smallcaps</option><option value="avenir-bold">Avenir Bold</option><option value="avenir-light">Avenir Light</option><option value="avenir-ultra-light">Avenir Ultra Light</option></select></label>
                   <label>Text Size<select id="newsletter-text-size"><option value="8">8pt</option><option value="10">10pt</option><option value="12">12pt</option><option value="14">14pt</option><option value="16">16pt</option><option value="18">18pt</option><option value="20">20pt</option><option value="24">24pt</option><option value="28">28pt</option><option value="32">32pt</option></select></label>
-                  <div class="newsletter-color-control"><span>Approved Color</span><div class="newsletter-color-row"><span class="newsletter-color-swatches" id="newsletter-color-swatches"><button class="newsletter-color-swatch" type="button" data-newsletter-color="black" style="background:#160f0d" aria-label="Black"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="soft-grey" style="background:#5e5e5e" aria-label="Soft Dark Grey"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="berry" style="background:#65103f" aria-label="Berry"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="dusty-mauve" style="background:#9b687a" aria-label="Dusty Mauve"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="blush" style="background:#dba9a1" aria-label="Blush"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="sage" style="background:#68775f" aria-label="Sage · Bopper"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="gold" style="background:#d58c24" aria-label="Gold · Skiplynn"></button></span><button class="newsletter-dt-touch" type="button" id="newsletter-dt-touch">✦ DT Touch ✦</button></div></div>
+                  <div class="newsletter-color-control"><span>Approved Color</span><div class="newsletter-color-row"><span class="newsletter-color-swatches" id="newsletter-color-swatches"><button class="newsletter-color-swatch" type="button" data-newsletter-color="black" style="background:#160f0d" aria-label="Black"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="soft-grey" style="background:#5e5e5e" aria-label="Soft Dark Grey"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="berry" style="background:#65103f" aria-label="Berry"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="dusty-mauve" style="background:#9b687a" aria-label="Dusty Mauve"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="blush" style="background:#dba9a1" aria-label="Blush"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="sage" style="background:#68775f" aria-label="Dark Sage · Bopper"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="soft-sage" style="background:#c7d2c1" aria-label="Soft Sage"></button><button class="newsletter-color-swatch" type="button" data-newsletter-color="gold" style="background:#d58c24" aria-label="Gold · Skiplynn"></button></span><button class="newsletter-dt-touch" type="button" id="newsletter-dt-touch">✦ DT Touch ✦</button></div></div>
                   <div class="newsletter-inline-toolbar" id="newsletter-inline-toolbar" aria-label="Text editing toolbar">
                   <button type="button" data-newsletter-command="bold" aria-label="Bold"><strong>B</strong></button>
                   <button type="button" data-newsletter-command="italic" aria-label="Italic"><em>I</em></button>
                   <button type="button" data-newsletter-command="underline" aria-label="Underline"><u>U</u></button>
+                  <button type="button" data-newsletter-command="justifyLeft" aria-label="Align Left" title="Align Left"><svg class="newsletter-alignment-icon" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M2 8h9M2 12h14M2 16h9"></path></svg></button>
+                  <button type="button" data-newsletter-command="justifyCenter" aria-label="Align Center" title="Align Center"><svg class="newsletter-alignment-icon" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M4.5 8h9M2 12h14M4.5 16h9"></path></svg></button>
+                  <button type="button" data-newsletter-command="justifyRight" aria-label="Align Right" title="Align Right"><svg class="newsletter-alignment-icon" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 4h14M7 8h9M2 12h14M7 16h9"></path></svg></button>
                   <button type="button" id="newsletter-add-link"><svg class="newsletter-link-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 13.5l3-3"></path><path d="M7.4 16.6l-1.3 1.3a4 4 0 0 1-5.7-5.7l3.5-3.5a4 4 0 0 1 5.7 0"></path><path d="M16.6 7.4l1.3-1.3a4 4 0 0 1 5.7 5.7l-3.5 3.5a4 4 0 0 1-5.7 0"></path></svg>Hyperlink</button>
-                  <button type="button" id="newsletter-open-fields">＋ Personalized Field</button>
                   <button class="newsletter-add-sparkle" type="button" id="newsletter-add-sparkle" title="Add a Sparkle"><span class="signature-sparkle" aria-hidden="true">✦</span>Add a Sparkle</button>
                   <button class="newsletter-spell-check" type="button" id="newsletter-spell-check">Spell Check</button>
+                  <span class="newsletter-toolbar-row-break" aria-hidden="true"></span>
+                  <button type="button" id="newsletter-open-fields">＋ Personalized Field</button>
                   <div class="newsletter-field-popover" id="newsletter-field-popover" hidden>
                     <strong>Insert Personalized Field</strong>
                     <div class="newsletter-field-buttons" id="newsletter-field-buttons">
@@ -26030,7 +26036,7 @@
     };
     if (!newsletterTemplates[newsletterDraft.template]) newsletterDraft.template = "monthly";
 
-    const newsletterVariantFields = ["template", "subject", "subjectHtml", "headline", "headlineHtml", "message", "messageHtml", "messageWidth", "messageLeft", "logoWidth", "logoColor", "font", "textSize", "color", "sections", "graphics", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl"];
+    const newsletterVariantFields = ["template", "subject", "subjectHtml", "subjectFont", "subjectTextSize", "headline", "headlineHtml", "headlineFont", "headlineTextSize", "message", "messageHtml", "messageFont", "messageTextSize", "messageWidth", "messageLeft", "logoWidth", "logoColor", "font", "textSize", "color", "sections", "graphics", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl"];
     const newsletterVariantSnapshot = (source = newsletterDraft, colorOverride = "") => Object.fromEntries(newsletterVariantFields.map((key) => [key, ["sections", "graphics"].includes(key) ? structuredClone(source[key] || []) : source[key]]).filter(([, value]) => value !== undefined).map(([key, value]) => [key, key === "color" && colorOverride ? colorOverride : value]));
     let newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
     if (!newsletterDraft.genderVersions?.female || !newsletterDraft.genderVersions?.male) {
@@ -26073,8 +26079,9 @@
       if (redo) redo.disabled = !newsletterRedoStack.length;
     };
 
-    const newsletterColors = { black: "#160f0d", "soft-grey": "#5e5e5e", berry: "#65103f", "dusty-mauve": "#9b687a", blush: "#dba9a1", sage: "#68775f", gold: "#d58c24" };
+    const newsletterColors = { black: "#160f0d", "soft-grey": "#5e5e5e", berry: "#65103f", "dusty-mauve": "#9b687a", blush: "#dba9a1", sage: "#68775f", "soft-sage": "#c7d2c1", gold: "#d58c24" };
     const newsletterFontStyle = (draft = newsletterDraft) => draft.font === "parisienne" ? '"Parisienne", cursive' : draft.font === "bodoni-smallcaps" ? '"Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif' : draft.font === "avenir-ultra-light" ? '"Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : draft.font === "avenir-light" ? '"Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
+    const newsletterInlineFontStyle = (draft = newsletterDraft) => newsletterFontStyle(draft).replaceAll('"', "'");
     const newsletterTitleFontStyle = (draft = newsletterDraft) => newsletterFontStyle(draft);
     const newsletterFontWeight = (draft = newsletterDraft) => draft.font === "avenir-bold" ? "800" : draft.font === "avenir-ultra-light" ? "200" : "400";
     const newsletterFontSize = (draft = newsletterDraft) => `${Number(draft.textSize) || 12}pt`;
@@ -26088,8 +26095,8 @@
       const textWidth = Math.max(20, Math.min(100, Number(section.textWidth) || 100));
       const titleLeft = Math.max(0, Math.min(100 - titleWidth, Number(section.titleLeft) || 0));
       const textLeft = Math.max(0, Math.min(100 - textWidth, Number(section.textLeft) || 0));
-      const title = section.title ? `<h2 style="width:${titleWidth}%;max-width:100%;margin-left:${titleLeft}%;">${rosterSafe(newsletterPersonalize(section.title, context))}</h2>` : "";
-      const body = section.text ? `<p style="width:${textWidth}%;max-width:100%;margin-left:${textLeft}%;">${rosterSafe(newsletterPersonalize(section.text, context))}</p>` : "";
+      const title = section.title ? `<h2 style="width:${titleWidth}%;max-width:100%;margin-left:${titleLeft}%;${section.titleFont ? `font-family:${newsletterInlineFontStyle({ font: section.titleFont })}!important;` : ""}${section.titleTextSize ? `font-size:${Number(section.titleTextSize)}pt!important;` : ""}">${rosterSafe(newsletterPersonalize(section.title, context))}</h2>` : "";
+      const body = section.text ? `<p style="width:${textWidth}%;max-width:100%;margin-left:${textLeft}%;${section.textFont ? `font-family:${newsletterInlineFontStyle({ font: section.textFont })}!important;` : ""}${section.textTextSize ? `font-size:${Number(section.textTextSize)}pt!important;` : ""}">${rosterSafe(newsletterPersonalize(section.text, context))}</p>` : "";
       const link = section.type === "social" && section.linkText && section.url ? `<p><a href="${rosterSafe(section.url)}" style="color:var(--newsletter-accent);font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
       const extraClass = section.type === "quote" ? " is-quote" : section.type === "reminder" || section.type === "calendar" ? " is-reminder" : section.type === "personalized" ? " is-highlight" : "";
       return `<section class="newsletter-content-section${extraClass}">${title}${body}${link}</section>`;
@@ -26107,7 +26114,9 @@
       const resizableField = (field, tag, placeholder, value) => {
         const width = Math.max(20, Math.min(100, Number(section[`${field}Width`]) || 100));
         const left = Math.max(0, Math.min(100 - width, Number(section[`${field}Left`]) || 0));
-        return `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${field}" style="width:${width}%;margin-left:${left}%"><${tag} class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="${field}" data-placeholder="${placeholder}">${value}</${tag}>${resizeHandle(field, "left")}${resizeHandle(field, "right")}</div>`;
+        const fieldFont = section[`${field}Font`] ? `font-family:${newsletterInlineFontStyle({ font: section[`${field}Font`] })}!important;` : "";
+        const fieldSize = section[`${field}TextSize`] ? `font-size:${Number(section[`${field}TextSize`])}pt!important;` : "";
+        return `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${field}" style="width:${width}%;margin-left:${left}%"><${tag} class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="${field}" data-placeholder="${placeholder}" style="${fieldFont}${fieldSize}">${value}</${tag}>${resizeHandle(field, "left")}${resizeHandle(field, "right")}</div>`;
       };
       return `<section class="newsletter-preview-section-editor newsletter-content-section${extraClass}" draggable="true" data-newsletter-preview-section="${index}">
         <span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
@@ -26334,7 +26343,7 @@
         .newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p{margin:0;white-space:pre-wrap}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}
         .template-welcome .newsletter-header{padding:38px 32px 30px!important;border-bottom:1px solid #dfb9b2;background:#f8e4df!important}.template-welcome .newsletter-header h1{max-width:520px;margin:0 auto 8px!important;color:#211817!important;font-family:Didot,Georgia,serif!important;font-size:32px;font-weight:500;line-height:1.08}.template-welcome .newsletter-header p{color:#8b4e61!important;font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.template-welcome .newsletter-main{padding:32px 38px 38px!important}.template-welcome .newsletter-content-section h2{color:#65103f;font-family:Didot,Georgia,serif;font-size:22px;font-weight:500}.template-welcome .newsletter-content-section.is-highlight{border:1px solid #e4c2bb;background:#f8e6e1}.template-welcome .newsletter-content-section.is-reminder{border:1px solid #dba9a1;border-radius:4px;background:#fffdf9}.template-welcome .newsletter-content-section.is-divider{background:#dba9a1}.template-welcome .newsletter-footer{border-top:1px solid #dfb9b2;background:#f8e4df!important}
         ${versionStyles}
-      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.65;">${graphics}<header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><div role="img" aria-label="Dance Techniques" style="width:${Math.max(60, Math.min(280, Number(draft.logoWidth) || 150))}px;max-width:80%;aspect-ratio:2.15/1;margin:0 auto;background:${newsletterColors[draft.logoColor] || newsletterColors.black};-webkit-mask:url('https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/dance-techniques-logo-only.png') center/contain no-repeat;mask:url('https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/dance-techniques-logo-only.png') center/contain no-repeat;"></div><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle(draft)};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="width:${Math.max(20, Math.min(100, Number(draft.messageWidth) || 100))}%;max-width:100%;margin-left:${Math.max(0, Math.min(100 - Math.max(20, Math.min(100, Number(draft.messageWidth) || 100)), Number(draft.messageLeft) || 0))}%;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterInlineFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.65;">${graphics}<header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><div role="img" aria-label="Dance Techniques" style="width:${Math.max(60, Math.min(280, Number(draft.logoWidth) || 150))}px;max-width:80%;aspect-ratio:2.15/1;margin:0 auto;background:${newsletterColors[draft.logoColor] || newsletterColors.black};-webkit-mask:url('https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/dance-techniques-logo-only.png') center/contain no-repeat;mask:url('https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/dance-techniques-logo-only.png') center/contain no-repeat;"></div><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterInlineFontStyle({ font: draft.headlineFont || draft.font })};font-size:${draft.headlineTextSize ? `${Number(draft.headlineTextSize)}pt` : "29px"};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};font-family:${newsletterInlineFontStyle({ font: draft.subjectFont || draft.font })};font-size:${Number(draft.subjectTextSize) || Number(draft.textSize) || 12}pt;">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="width:${Math.max(20, Math.min(100, Number(draft.messageWidth) || 100))}%;max-width:100%;margin-left:${Math.max(0, Math.min(100 - Math.max(20, Math.min(100, Number(draft.messageWidth) || 100)), Number(draft.messageLeft) || 0))}%;font-family:${newsletterInlineFontStyle({ font: draft.messageFont || draft.font })};font-size:${Number(draft.messageTextSize) || Number(draft.textSize) || 12}pt;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
     };
     const newsletterRecipientMessages = () => {
       const records = newsletterFilteredRecords();
@@ -26406,7 +26415,7 @@
       const messageWidth = Math.max(20, Math.min(100, Number(newsletterDraft.messageWidth) || 100));
       const messageLeft = Math.max(0, Math.min(100 - messageWidth, Number(newsletterDraft.messageLeft) || 0));
       const messageResizeHandle = (side) => `<button class="newsletter-text-resize-handle ${side === "left" ? "is-left" : ""}" type="button" data-newsletter-text-resize-handle="message" data-newsletter-resize-side="${side}" aria-label="Resize message box from ${side}" title="Drag ${side} edge to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button>`;
-      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-resizable-field" data-newsletter-resizable-field="message" style="width:${messageWidth}%;margin-left:${messageLeft}%"><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message">${newsletterDraft.messageHtml || rosterSafe(newsletterDraft.message || "")}</div>${messageResizeHandle("left")}${messageResizeHandle("right")}</div></section>`;
+      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-resizable-field" data-newsletter-resizable-field="message" style="width:${messageWidth}%;margin-left:${messageLeft}%"><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message" style="${newsletterDraft.messageFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.messageFont })}!important;` : ""}${newsletterDraft.messageTextSize ? `font-size:${Number(newsletterDraft.messageTextSize)}pt!important;` : ""}">${newsletterDraft.messageHtml || rosterSafe(newsletterDraft.message || "")}</div>${messageResizeHandle("left")}${messageResizeHandle("right")}</div></section>`;
       editableSections.splice(messagePosition, 0, messageMarkup);
       const sectionsMarkup = editableSections.join("");
       const preview = document.getElementById("newsletter-preview-document");
@@ -26416,7 +26425,7 @@
       preview.style.setProperty("--newsletter-body-font", newsletterFontStyle());
       preview.style.setProperty("--newsletter-body-weight", newsletterFontWeight());
       preview.style.setProperty("--newsletter-body-size", newsletterFontSize());
-      preview.innerHTML = `<header class="newsletter-preview-header"><div class="newsletter-logo-editor ${newsletterLogoSelected ? "is-selected" : ""}" role="button" tabindex="0" data-newsletter-logo-editor aria-label="Select newsletter logo" style="width:${Math.max(60, Math.min(280, Number(newsletterDraft.logoWidth) || 150))}px;--newsletter-logo-color:${newsletterColors[newsletterDraft.logoColor] || newsletterColors.black};"><span class="newsletter-logo-mark" aria-hidden="true"></span><button class="newsletter-logo-resize-handle" type="button" data-newsletter-logo-resize-handle aria-label="Resize newsletter logo" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button></div><h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>${floatingGraphicsMarkup}`;
+      preview.innerHTML = `<header class="newsletter-preview-header"><div class="newsletter-logo-editor ${newsletterLogoSelected ? "is-selected" : ""}" role="button" tabindex="0" data-newsletter-logo-editor aria-label="Select newsletter logo" style="width:${Math.max(60, Math.min(280, Number(newsletterDraft.logoWidth) || 150))}px;--newsletter-logo-color:${newsletterColors[newsletterDraft.logoColor] || newsletterColors.black};"><span class="newsletter-logo-mark" aria-hidden="true"></span><button class="newsletter-logo-resize-handle" type="button" data-newsletter-logo-resize-handle aria-label="Resize newsletter logo" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button></div><h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline" style="${newsletterDraft.headlineFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.headlineFont })}!important;` : ""}${newsletterDraft.headlineTextSize ? `font-size:${Number(newsletterDraft.headlineTextSize)}pt!important;` : ""}">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject" style="${newsletterDraft.subjectFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.subjectFont })}!important;` : ""}${newsletterDraft.subjectTextSize ? `font-size:${Number(newsletterDraft.subjectTextSize)}pt!important;` : ""}">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>${floatingGraphicsMarkup}`;
       updateNewsletterHistoryButtons();
     };
 
@@ -26484,6 +26493,34 @@
       else clearNewsletterInlineFonts();
       renderNewsletterStudio();
       saveNewsletterDraft();
+    };
+    const newsletterActiveFormatContext = () => {
+      const target = newsletterActivePreviewTarget;
+      if (!target || !document.contains(target)) return null;
+      const draftKey = target.dataset.newsletterPreviewField;
+      if (draftKey) return { owner: newsletterDraft, key: draftKey };
+      const sectionKey = target.dataset.newsletterPreviewSectionField;
+      const sectionEditor = target.closest("[data-newsletter-preview-section]");
+      const owner = sectionEditor ? newsletterDraft.sections[Number(sectionEditor.dataset.newsletterPreviewSection)] : null;
+      return owner && sectionKey ? { owner, key: sectionKey } : null;
+    };
+    const updateNewsletterActiveFieldFormat = (property, value) => {
+      const context = newsletterActiveFormatContext();
+      if (!context) return false;
+      context.owner[`${context.key}${property}`] = value;
+      if (property === "Font") {
+        if (value === "bodoni-smallcaps") {
+          context.owner[context.key] = newsletterLowercaseText(context.owner[context.key] || "");
+          if (context.owner[`${context.key}Html`]) context.owner[`${context.key}Html`] = newsletterLowercaseHtml(context.owner[`${context.key}Html`]);
+        } else if (context.owner[`${context.key}Html`]) {
+          context.owner[`${context.key}Html`] = newsletterClearInlineFontHtml(context.owner[`${context.key}Html`]);
+        }
+      }
+      newsletterActivePreviewTarget = null;
+      newsletterSavedSelection = null;
+      renderNewsletterStudio();
+      saveNewsletterDraft();
+      return true;
     };
 
     const partnershipPaymentKey = (school, month = schoolPartnershipPaymentState.month) => `${month}::${school.id || school.name}`;
@@ -27287,9 +27324,11 @@
     ["newsletter-font", "newsletter-text-size"].forEach((id) => {
       document.getElementById(id)?.addEventListener("change", (event) => {
         if (id === "newsletter-font") {
+          if (updateNewsletterActiveFieldFormat("Font", event.target.value)) return;
           updateNewsletterDraftFromForm();
           return;
         }
+        if (updateNewsletterActiveFieldFormat("TextSize", event.target.value)) return;
         if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
           const pointSize = Number(event.target.value) || 12;
           const commandSize = pointSize <= 8 ? "1" : pointSize <= 10 ? "2" : pointSize <= 12 ? "3" : pointSize <= 14 ? "4" : pointSize <= 18 ? "5" : pointSize <= 24 ? "6" : "7";
@@ -27392,6 +27431,17 @@
       document.querySelector("[data-newsletter-logo-editor]")?.classList.remove("is-selected");
       newsletterActivePreviewTarget = editable;
       newsletterActiveField = editable.dataset.newsletterPreviewField || editable.dataset.newsletterPreviewSectionField || "message";
+      const context = newsletterActiveFormatContext();
+      const font = context?.owner?.[`${context.key}Font`] || newsletterDraft.font;
+      const textSize = context?.owner?.[`${context.key}TextSize`] || newsletterDraft.textSize;
+      const fontSelect = document.getElementById("newsletter-font");
+      const sizeSelect = document.getElementById("newsletter-text-size");
+      if (fontSelect) {
+        fontSelect.value = font;
+        fontSelect.style.fontFamily = newsletterFontStyle({ font });
+        fontSelect.style.fontWeight = newsletterFontWeight({ font });
+      }
+      if (sizeSelect) sizeSelect.value = textSize;
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("input", (event) => {
       const draftField = event.target.closest("[data-newsletter-preview-field]");
