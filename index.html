@@ -15794,6 +15794,7 @@
     };
 
     const renderEnrollmentQueue = () => {
+      syncTeacherProfileColorRules();
       const newCount = enrollmentIntakeQueue.filter((item) => enrollmentWorkflowStage(item) !== "complete").length;
       setText("roster-enrollments-waiting-count", String(newCount));
       renderEnrollmentQueueFilters();
@@ -15819,9 +15820,10 @@
         const lastName = item.student_last_name || "";
         const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "DT";
         const futureDancerMatch = futureDancerMatchForEnrollment(item);
+        const assignedTeacherId = enrollmentMatchedTeacherId(item);
         return `
         <button class="enrollment-queue-item ${item.id === selectedEnrollmentIntakeId && enrollmentReviewOpen ? "is-selected" : ""}" type="button" data-enrollment-intake-open="${escapeText(item.id)}">
-          <span class="enrollment-card-avatar">${escapeText(initials)}</span>
+          <span class="enrollment-card-avatar ${teacherProfileColorClass(assignedTeacherId)}">${escapeText(initials)}</span>
           <strong>${escapeText([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "Unnamed dancer")}</strong>
           <small>${escapeText(enrollmentDisplaySchoolName(item))}</small>
           <small class="enrollment-card-age">${escapeText(item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided")}</small>
@@ -25613,7 +25615,9 @@
       if (!rosterClass) return null;
       const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, rosterClass.schoolName)
         || enrollmentSchoolNameMatches(item.nickname, rosterClass.schoolName));
-      const teacher = teachers.find((item) => item.id === school?.assignedTeacherId) || null;
+      const teacher = teachers.find((item) => item.id === rosterClass.teacherId)
+        || teachers.find((item) => item.id === school?.assignedTeacherId)
+        || null;
       return teacher && teacherColorValue(teacher) ? teacher : null;
     };
     const rosterStudentBadgeClasses = (student) => {
