@@ -240,6 +240,21 @@
 
   if ("serviceWorker" in navigator) {
     let refreshingForAppUpdate = false;
+    const checkForPublishedAppUpdate = async () => {
+      try {
+        const response = await fetch(`./index.html?app-update-check=${Date.now()}`, {
+          method: "HEAD",
+          cache: "no-store"
+        });
+        const publishedVersion = response.headers.get("etag") || response.headers.get("last-modified") || "";
+        if (!publishedVersion) return;
+        const savedVersion = window.localStorage?.getItem("dt-published-app-version") || "";
+        window.localStorage?.setItem("dt-published-app-version", publishedVersion);
+        if (savedVersion && savedVersion !== publishedVersion) window.location.reload();
+      } catch (error) {
+        console.warn("The latest app version could not be checked", error);
+      }
+    };
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (refreshingForAppUpdate) return;
       refreshingForAppUpdate = true;
@@ -248,6 +263,7 @@
     window.addEventListener("load", async () => {
       const registration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
       registration.update().catch((error) => console.warn("App update check did not finish", error));
+      checkForPublishedAppUpdate();
     });
   }
 })();
