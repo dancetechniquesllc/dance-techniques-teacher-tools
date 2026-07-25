@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v188-optional-official-classroom";
+const CACHE_NAME = "my-dance-techniques-v189-enrollment-editor-redesign";
 const CORE_ASSETS = [
   "./",
   "./index.html",

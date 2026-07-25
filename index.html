@@ -5377,9 +5377,88 @@
       font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif;
     }
 
-    .confirm-dialog.enrollment-review-dialog { position: relative; width: min(760px, calc(100vw - 28px)); max-height: min(82vh, 760px); overflow: auto; }
-    .enrollment-review-card { display: grid; gap: 9px; padding-top: 38px; font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; }
-    .enrollment-review-close { position: absolute; top: 14px; right: 14px; z-index: 3; margin: 0; }
+    .confirm-dialog.enrollment-review-dialog { position: relative; width: min(1180px, calc(100vw - 28px)); max-height: calc(100vh - 28px); overflow: auto; padding: 0; background: #fffdfb; }
+    .enrollment-review-card { display: grid; gap: 14px; padding: 22px; font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; }
+    .enrollment-review-close { display: none; }
+    .enrollment-editor-back { width: fit-content; padding: 0; border: 0; background: transparent; color: var(--rose); font-size: 13px; font-weight: 650; }
+    .enrollment-editor-hero { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 22px; align-items: center; padding: 2px 6px 6px; }
+    .enrollment-editor-avatar { width: 112px; height: 112px; display: grid; place-items: center; overflow: hidden; border-radius: 999px; background: var(--blush); color: var(--berry); font-family: var(--font-heading); font-size: 32px; font-weight: 800; }
+    .enrollment-editor-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .enrollment-editor-title { margin: 0; font-family: var(--font-heading); font-size: clamp(34px, 4vw, 54px); font-weight: 500; line-height: 1; }
+    .enrollment-editor-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0; margin-top: 17px; color: var(--muted); font-size: 13px; }
+    .enrollment-editor-meta span { padding: 0 20px; border-left: 1px solid var(--border); }
+    .enrollment-editor-meta span:first-child { padding-left: 0; border-left: 0; }
+    .enrollment-editor-meta .enrollment-editor-status { display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px; border: 1px solid var(--border); border-radius: 999px; color: var(--fg); }
+    .enrollment-editor-status::before { content: ""; width: 9px; height: 9px; border-radius: 999px; background: var(--sage); }
+    .enrollment-editor-hero-actions { display: flex; gap: 12px; align-items: center; }
+    .enrollment-editor-hero-actions button { min-width: 125px; min-height: 48px; border-radius: 9px; }
+    .enrollment-editor-hero-actions .enrollment-editor-save { min-width: 175px; border-color: var(--sage); background: var(--sage); color: white; }
+    #enrollment-data-edit-form { display: grid; gap: 14px; }
+    .enrollment-editor-section { display: grid; gap: 18px; padding: 22px 24px; border: 1px solid color-mix(in srgb, var(--border) 72%, white); border-radius: 13px; background: white; box-shadow: 0 4px 18px rgb(68 48 42 / .07); }
+    .enrollment-editor-section-heading { display: grid; grid-template-columns: auto 1fr; gap: 13px; align-items: center; }
+    .enrollment-editor-section-icon { width: 38px; height: 38px; display: grid; place-items: center; color: var(--rose); }
+    .enrollment-editor-section-icon svg { width: 31px; height: 31px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    .enrollment-editor-section-heading h4 { margin: 0; color: var(--rose); font-size: 16px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+    .enrollment-editor-section-heading p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+    .enrollment-editor-fields { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 15px 18px; }
+    .enrollment-editor-fields .enrollment-review-field { display: grid; gap: 6px; grid-column: span 4; }
+    .enrollment-editor-fields .span-3 { grid-column: span 3; }
+    .enrollment-editor-fields .span-4 { grid-column: span 4; }
+    .enrollment-editor-fields .span-5 { grid-column: span 5; }
+    .enrollment-editor-fields .span-6 { grid-column: span 6; }
+    .enrollment-editor-fields .span-7 { grid-column: span 7; }
+    .enrollment-editor-fields .span-8 { grid-column: span 8; }
+    .enrollment-editor-fields .span-12 { grid-column: 1 / -1; }
+    .enrollment-editor-fields .enrollment-review-field > span { color: var(--fg); font-size: 11px; }
+    .enrollment-editor-fields :is(input, select, textarea) { width: 100%; min-height: 46px; border-color: #dfcfca; border-radius: 7px; background: #fffefd; }
+    .enrollment-editor-fields textarea { min-height: 92px; resize: vertical; }
+    .enrollment-placement-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+    .enrollment-placement-column { position: relative; display: grid; gap: 14px; padding: 20px 22px; border-radius: 10px; }
+    .enrollment-placement-column.requested { background: linear-gradient(135deg, #fff6f3, #fffaf8); }
+    .enrollment-placement-column.official { background: linear-gradient(135deg, #f8f9f2, #fffefa); }
+    .enrollment-placement-column.requested::after { content: "→"; position: absolute; top: 50%; right: -23px; color: var(--rose); font-size: 22px; transform: translateY(-50%); }
+    .enrollment-placement-column > strong { color: var(--rose); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+    .enrollment-placement-column.official > strong { color: #7d9472; }
+    .enrollment-placement-column .enrollment-review-field { display: grid; gap: 6px; }
+    .enrollment-placement-column.requested :is(input, select) { background: #fbf7f5; }
+    .enrollment-editor-admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .enrollment-editor-history-card { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 10px 14px; border: 1px solid #dfcfca; border-radius: 7px; background: #fffefd; }
+    .enrollment-editor-finance { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .enrollment-editor-finance .enrollment-review-field { display: grid; gap: 6px; padding: 0; }
+    .enrollment-editor-finance .fee-unpaid { padding: 12px; border-radius: 9px; }
+    .enrollment-editor-section .enrollment-placement-class-section { margin-top: 0; padding-top: 0; border-top: 0; }
+    .enrollment-editor-section .enrollment-review-save-actions { display: none; }
+    .enrollment-editor-footer { display: flex; justify-content: center; align-items: center; gap: 10px; padding: 4px 12px 0; color: var(--muted); font-size: 13px; }
+    .enrollment-editor-footer-heart { color: var(--rose); font-size: 20px; }
+    .enrollment-editor-footer em { color: var(--rose); font-family: "Parisienne", cursive; font-size: 23px; }
+    @media (max-width: 820px) {
+      .enrollment-editor-hero { grid-template-columns: auto 1fr; }
+      .enrollment-editor-hero-actions { grid-column: 1 / -1; justify-content: flex-end; }
+      .enrollment-editor-avatar { width: 82px; height: 82px; }
+      .enrollment-editor-fields .span-3,
+      .enrollment-editor-fields .span-4,
+      .enrollment-editor-fields .span-5,
+      .enrollment-editor-fields .span-6,
+      .enrollment-editor-fields .span-7,
+      .enrollment-editor-fields .span-8 { grid-column: span 6; }
+      .enrollment-placement-compare, .enrollment-editor-admin-grid, .enrollment-editor-finance { grid-template-columns: 1fr; }
+      .enrollment-placement-column.requested::after { content: "↓"; top: auto; right: 50%; bottom: -27px; transform: translateX(50%); }
+    }
+    @media (max-width: 560px) {
+      .enrollment-review-card { padding: 14px; }
+      .enrollment-editor-hero { grid-template-columns: 1fr; text-align: center; }
+      .enrollment-editor-avatar { margin: auto; }
+      .enrollment-editor-meta, .enrollment-editor-hero-actions { justify-content: center; }
+      .enrollment-editor-hero-actions { display: grid; grid-template-columns: 1fr 1fr; }
+      .enrollment-editor-hero-actions button, .enrollment-editor-hero-actions .enrollment-editor-save { min-width: 0; }
+      .enrollment-editor-fields .enrollment-review-field,
+      .enrollment-editor-fields .span-3,
+      .enrollment-editor-fields .span-4,
+      .enrollment-editor-fields .span-5,
+      .enrollment-editor-fields .span-6,
+      .enrollment-editor-fields .span-7,
+      .enrollment-editor-fields .span-8 { grid-column: 1 / -1; }
+    }
 
     .enrollment-queue-item {
       position: relative;
@@ -15936,63 +16015,110 @@
       const placed = item.status === "placed";
       const historyBadge = enrollmentHistoryBadge(item.enrollment_history);
       const tuition = suggestedEnrollmentTuition(item, suggestion);
+      const enrollmentStudentName = [item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "Enrollment Review";
+      const enrollmentStudentInitials = `${(item.student_preferred_name || item.student_first_name || "D").charAt(0)}${(item.student_last_name || "T").charAt(0)}`.toUpperCase();
+      const placedStudent = rosterClasses.flatMap((rosterClass) => rosterClass.students).find((student) => student.id === item.placed_student_id);
+      const enrollmentStudentPhoto = placedStudent?.photo || "";
       detail.innerHTML = `
-        <div class="section-title"><div><h3 id="enrollment-review-title">${escapeText([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "Enrollment Review")}</h3><p>Submitted ${escapeText(enrollmentDateLabel(item.submitted_at || item.created_at))}</p></div><span class="admin-page-actions"><span class="enrollment-history-bubble ${historyBadge.style}">${historyBadge.label}</span></span></div>
+        <button class="enrollment-editor-back" type="button" data-close-enrollment-review>‹ &nbsp;Back to Student Library</button>
+        <header class="enrollment-editor-hero">
+          <span class="enrollment-editor-avatar">${enrollmentStudentPhoto ? `<img src="${escapeText(enrollmentStudentPhoto)}" alt="">` : escapeText(enrollmentStudentInitials)}</span>
+          <div>
+            <h3 class="enrollment-editor-title" id="enrollment-review-title">${escapeText(enrollmentStudentName)}</h3>
+            <div class="enrollment-editor-meta">
+              <span class="enrollment-editor-status">${placed ? "Active" : "Enrollment Review"}</span>
+              <span>${escapeText(item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided")}</span>
+              <span>${escapeText(item.student_gender || "Gender not provided")}</span>
+              <span>${escapeText(item.tshirt_size || "Size not provided")}</span>
+            </div>
+          </div>
+          <div class="enrollment-editor-hero-actions">
+            <button class="secondary" type="button" data-close-enrollment-review>Cancel</button>
+            <button class="enrollment-editor-save" type="submit" form="enrollment-data-edit-form">Save Changes</button>
+          </div>
+        </header>
         <form id="enrollment-data-edit-form">
-          <div class="enrollment-review-grid">
-            <div class="enrollment-name-edit-row">
-              <label class="enrollment-review-field"><span>Student First Name</span><input name="student_first_name" value="${escapeText(item.student_first_name || "")}"></label>
-              <label class="enrollment-review-field"><span>Preferred Name</span><input name="student_preferred_name" value="${escapeText(item.student_preferred_name || "")}"></label>
-              <label class="enrollment-review-field"><span>Student Last Name</span><input name="student_last_name" value="${escapeText(item.student_last_name || "")}"></label>
+          <section class="enrollment-editor-section">
+            <div class="enrollment-editor-section-heading">
+              <span class="enrollment-editor-section-icon"><svg viewBox="0 0 32 32"><circle cx="16" cy="9" r="5"></circle><path d="M7 27v-4c0-5 4-8 9-8s9 3 9 8v4z"></path></svg></span>
+              <div><h4>Student Information</h4><p>Basic details about your dancer.</p></div>
             </div>
-            <div class="enrollment-four-field-row enrollment-dancer-details-row">
-              <label class="enrollment-review-field"><span>Birthday${item.student_birth_date ? `: ${escapeText(enrollmentAgeLabel(item.student_birth_date))}` : ""}</span><input name="student_birth_date" type="date" value="${escapeText(item.student_birth_date || "")}"></label>
-              <label class="enrollment-review-field"><span>Gender</span><select name="student_gender">${enrollmentChoiceOptions(["Female", "Male"], item.student_gender || "")}</select></label>
-              <label class="enrollment-review-field"><span>T-Shirt Size</span><select name="tshirt_size">${enrollmentChoiceOptions(["2T", "3T", "4T", "5T", "XS", "S", "M", "L", "XL"], item.tshirt_size || "")}</select></label>
-              <label class="enrollment-review-field"><span>2025 Recital</span><select name="requested_dance_style">${recitalAnswerOptions(item.requested_dance_style || "")}</select></label>
+            <div class="enrollment-editor-fields">
+              <label class="enrollment-review-field span-4"><span>Student First Name</span><input name="student_first_name" value="${escapeText(item.student_first_name || "")}"></label>
+              <label class="enrollment-review-field span-4"><span>Preferred Name <em>(Optional)</em></span><input name="student_preferred_name" placeholder="Enter preferred name" value="${escapeText(item.student_preferred_name || "")}"></label>
+              <label class="enrollment-review-field span-4"><span>Student Last Name</span><input name="student_last_name" value="${escapeText(item.student_last_name || "")}"></label>
+              <label class="enrollment-review-field span-3"><span>Birthday</span><input name="student_birth_date" type="date" value="${escapeText(item.student_birth_date || "")}"></label>
+              <label class="enrollment-review-field span-3"><span>Gender</span><select name="student_gender">${enrollmentChoiceOptions(["Female", "Male"], item.student_gender || "")}</select></label>
+              <label class="enrollment-review-field span-3"><span>T-Shirt Size</span><select name="tshirt_size">${enrollmentChoiceOptions(["2T", "3T", "4T", "5T", "XS", "S", "M", "L", "XL"], item.tshirt_size || "")}</select></label>
+              <label class="enrollment-review-field span-3"><span>2025 Recital</span><select name="requested_dance_style">${recitalAnswerOptions(item.requested_dance_style || "")}</select></label>
+              <label class="enrollment-review-field span-6"><span>Medical Information</span><textarea name="medical_notes" placeholder="Add any medical conditions, allergies, or important health information…">${escapeText(item.medical_notes || "")}</textarea></label>
+              <label class="enrollment-review-field span-6"><span>Registration Notes</span><textarea name="registration_notes" placeholder="Add notes about this enrollment, schedule requests, transitions, etc…">${escapeText(item.registration_notes || "")}</textarea></label>
             </div>
-            <div class="enrollment-two-field-row">
-              <label class="enrollment-review-field"><span>Medical Information</span><input name="medical_notes" value="${escapeText(item.medical_notes || "")}"></label>
-              <label class="enrollment-review-field"><span>Registration Notes</span><input name="registration_notes" value="${escapeText(item.registration_notes || "")}"></label>
+          </section>
+
+          <section class="enrollment-editor-section">
+            <div class="enrollment-editor-section-heading">
+              <span class="enrollment-editor-section-icon"><svg viewBox="0 0 32 32"><path d="M4 15 16 5l12 10"></path><path d="M7 13v14h18V13M13 27v-8h6v8"></path></svg></span>
+              <div><h4>Dance Placement</h4><p>Where this dancer will attend class.</p></div>
             </div>
-            <div class="enrollment-two-field-row enrollment-row-divider-before">
-              <label class="enrollment-review-field"><span>Requested School</span><input name="requested_school_name" value="${escapeText(item.requested_school_name || "")}"></label>
-              <label class="enrollment-review-field"><span>Official School</span><select data-enrollment-placement="school" required><option value="">Select a school…</option>${enrollmentSchoolOptions(selectedSchoolId)}</select></label>
+            <div class="enrollment-placement-compare">
+              <div class="enrollment-placement-column requested">
+                <strong>Requested (From Enrollment)</strong>
+                <label class="enrollment-review-field"><span>Requested School</span><input name="requested_school_name" value="${escapeText(item.requested_school_name || "")}"></label>
+                <label class="enrollment-review-field"><span>Requested Classroom</span><input name="student_classroom" value="${escapeText(item.student_classroom || "")}"></label>
+              </div>
+              <div class="enrollment-placement-column official">
+                <strong>Official Assignment (Your Assignment)</strong>
+                <label class="enrollment-review-field"><span>Official School</span><select data-enrollment-placement="school" required><option value="">Select a school…</option>${enrollmentSchoolOptions(selectedSchoolId)}</select></label>
+                <label class="enrollment-review-field"><span>Official Classroom</span><select name="official_classroom"><option value="">Unassigned</option>${officialClassroomOptions.map((classroom) => `<option value="${escapeText(classroom)}" ${classroom === item.official_classroom ? "selected" : ""}>${escapeText(classroom)}</option>`).join("")}</select></label>
+              </div>
             </div>
-            <div class="enrollment-two-field-row">
-              <label class="enrollment-review-field"><span>Classroom</span><input name="student_classroom" value="${escapeText(item.student_classroom || "")}"></label>
-              <label class="enrollment-review-field"><span>Official Classroom</span><select name="official_classroom"><option value="">Unassigned</option>${officialClassroomOptions.map((classroom) => `<option value="${escapeText(classroom)}" ${classroom === item.official_classroom ? "selected" : ""}>${escapeText(classroom)}</option>`).join("")}</select></label>
+          </section>
+
+          <section class="enrollment-editor-section">
+            <div class="enrollment-editor-section-heading">
+              <span class="enrollment-editor-section-icon"><svg viewBox="0 0 32 32"><circle cx="11" cy="10" r="4"></circle><circle cx="22" cy="11" r="3.5"></circle><path d="M3 27v-5c0-4 3-7 8-7s8 3 8 7v5M19 18c5-1 9 2 9 6v3"></path></svg></span>
+              <div><h4>Parent Information</h4><p>Primary contact for this dancer.</p></div>
             </div>
-            <div class="enrollment-three-field-row enrollment-row-divider-before">
-              <label class="enrollment-review-field"><span>Parent First Name</span><input name="parent_first_name" value="${escapeText(item.parent_first_name || "")}"></label>
-              <label class="enrollment-review-field"><span>Parent Last Name</span><input name="parent_last_name" value="${escapeText(item.parent_last_name || "")}"></label>
-              <label class="enrollment-review-field"><span>Relationship to Student</span><input name="parent_relationship" value="${escapeText(item.parent_relationship || "")}"></label>
+            <div class="enrollment-editor-fields">
+              <label class="enrollment-review-field span-4"><span>Parent First Name</span><input name="parent_first_name" value="${escapeText(item.parent_first_name || "")}"></label>
+              <label class="enrollment-review-field span-4"><span>Parent Last Name</span><input name="parent_last_name" value="${escapeText(item.parent_last_name || "")}"></label>
+              <label class="enrollment-review-field span-4"><span>Relationship to Student</span><input name="parent_relationship" placeholder="Select relationship" value="${escapeText(item.parent_relationship || "")}"></label>
+              <label class="enrollment-review-field span-6"><span>Parent Phone</span><input name="parent_phone" value="${escapeText(item.parent_phone || "")}"></label>
+              <label class="enrollment-review-field span-6"><span>Parent Email</span><input name="parent_email" type="email" value="${escapeText(item.parent_email || "")}"></label>
+              <div class="enrollment-review-field enrollment-related-dancer-field span-6"><span>Related Dancer <em>(Sibling or Family Member in DT)</em></span><input type="search" data-enrollment-related-search aria-label="Search related enrolled students" placeholder="Search enrolled students…" autocomplete="off"><span class="enrollment-related-results" data-enrollment-related-results></span></div>
+              <div class="enrollment-review-field enrollment-related-bubble-cell span-6"><span>Selected Siblings</span><span class="enrollment-related-bubbles">${enrollmentRelatedDancerBubbles(item) || `<small>No sibling selected</small>`}</span></div>
             </div>
-            <div class="enrollment-two-field-row">
-              <label class="enrollment-review-field"><span>Parent Phone</span><input name="parent_phone" value="${escapeText(item.parent_phone || "")}"></label>
-              <label class="enrollment-review-field"><span>Parent Email</span><input name="parent_email" type="email" value="${escapeText(item.parent_email || "")}"></label>
+          </section>
+
+          <section class="enrollment-editor-section">
+            <div class="enrollment-editor-section-heading">
+              <span class="enrollment-editor-section-icon"><svg viewBox="0 0 32 32"><path d="M8 5h16v22H8z"></path><path d="M12 5V3h8v2M12 11h8M12 16h8M12 21h5"></path></svg></span>
+              <div><h4>Administrative Details</h4><p>Internal enrollment, billing, and team information.</p></div>
             </div>
-            <div class="enrollment-two-field-row">
-              <div class="enrollment-review-field enrollment-related-dancer-field"><span>Related Dancer</span><input type="search" data-enrollment-related-search aria-label="Search related enrolled students" placeholder="Search enrolled students" autocomplete="off"><span class="enrollment-related-results" data-enrollment-related-results></span></div>
-              <div class="enrollment-review-field enrollment-related-bubble-cell"><span>Selected Siblings</span><span class="enrollment-related-bubbles">${enrollmentRelatedDancerBubbles(item) || `<small>No sibling selected</small>`}</span></div>
-            </div>
-            <div class="enrollment-three-field-row enrollment-row-divider-before">
+            <div class="enrollment-editor-finance">
               <label class="enrollment-review-field ${item.payment_status === "paid" ? "" : "fee-unpaid"}"><span>Enrollment Fee Status</span><select name="payment_status"><option value="unpaid" ${item.payment_status !== "paid" ? "selected" : ""}>Unpaid</option><option value="paid" ${item.payment_status === "paid" ? "selected" : ""}>Paid</option></select></label>
               <label class="enrollment-review-field"><span>Tuition Discount</span><select name="tuition_discount"><option value="none" ${!item.tuition_discount || item.tuition_discount === "none" ? "selected" : ""}>None</option><option value="sibling" ${item.tuition_discount === "sibling" ? "selected" : ""}>Sibling</option><option value="staff" ${item.tuition_discount === "staff" ? "selected" : ""}>Staff</option><option value="director" ${item.tuition_discount === "director" ? "selected" : ""}>Director</option></select></label>
               <div class="enrollment-review-field suggested"><span>Suggested Tuition</span><strong>${tuition.beforeSeason ? `$${tuition.amount.toFixed(2)} · Full Tuition` : tuition.nextMonth ? `$${tuition.monthlyTuition.toFixed(2)} Next Month` : `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`}</strong><small>${tuition.beforeSeason ? `Season starts ${new Date(`${tuition.seasonStartDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric" })}.` : tuition.nextMonth ? "No remaining classes this month." : `${tuition.classCount} remaining ${tuition.classCount === 1 ? "class" : "classes"}.`}</small></div>
             </div>
-            ${renderAdditionalInformationFields(item.additional_information, "data-enrollment-additional-information")}
+            <div class="enrollment-editor-admin-grid">
+              <div class="enrollment-editor-fields">${renderAdditionalInformationFields(item.additional_information, "data-enrollment-additional-information")}</div>
+              <div class="enrollment-editor-history-card"><span><strong>Enrollment History</strong><small>Submitted ${escapeText(enrollmentDateLabel(item.submitted_at || item.created_at))}</small></span><span class="enrollment-history-bubble ${historyBadge.style}">${historyBadge.label}</span></div>
+            </div>
             ${item.provisional_included_at ? `<div class="enrollment-review-field suggested"><span>Teacher Acknowledgment</span><strong>♥ Included in Class</strong><small>${escapeText(enrollmentDateLabel(item.provisional_included_at))} · Official roster approval is still required.</small></div>` : ""}
-          </div>
+          </section>
           <div class="enrollment-review-save-actions"><button class="primary" type="submit">Save Changes</button></div>
         </form>
-        ${placed ? `
+        <section class="enrollment-editor-section">
+          <div class="enrollment-editor-section-heading">
+            <span class="enrollment-editor-section-icon"><svg viewBox="0 0 32 32"><path d="M5 8h22v19H5zM9 4v8M23 4v8M5 14h22"></path></svg></span>
+            <div><h4>${placed ? "Enrollment Checklist" : "Official Class Placement"}</h4><p>${placed ? "Finish the steps that activate this dancer." : "Choose the official class for this dancer."}</p></div>
+          </div>
+          ${placed ? `
           <div class="enrollment-checklist">
-            <strong>Enrollment Checklist</strong>
             ${[["brightwheel_profile_created_at", "Brightwheel Profile Created"], ["parent_invited_at", "Parent Invited"], ["invoice_sent_at", "Invoice Sent"], ["enrollment_active_at", "Enrollment Active"]].map(([field, label]) => `<button class="${item[field] ? "primary" : "secondary"}" type="button" data-enrollment-checklist="${field}">${item[field] ? "✓ " : "○ "}${label}</button>`).join("")}
           </div>` : `
           <section class="enrollment-placement-class-section">
-            <h4>Official Class Placement</h4>
             <div class="enrollment-placement-class-grid">
               ${enrollmentClassCards || `<div class="roster-empty">Choose an Official School to see its available classes.</div>`}
             </div>
@@ -16000,6 +16126,8 @@
               <button class="primary ${placementMissing.length ? "is-blocked" : ""}" type="submit" aria-disabled="${placementMissing.length ? "true" : "false"}" title="${placementMissing.length ? `Missing: ${escapeText(placementMissing.join(", "))}` : "Approve and place dancer"}">Approve & Place Dancer</button>
             </form>
           </section>`}
+        </section>
+        <footer class="enrollment-editor-footer"><span class="enrollment-editor-footer-heart">♥</span><span>Every detail helps us give your dancer</span><em>The Dance Techniques Touch.</em><span>✦</span></footer>
       `;
       renderEnrollmentClassPreview();
     };
