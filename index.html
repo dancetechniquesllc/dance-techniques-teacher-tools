@@ -30963,12 +30963,31 @@
       teacherSelect.innerHTML = `<option value="">Select a teacher…</option>${activeTeachers.map((teacher) => `<option value="${rosterSafe(teacher.id)}">${rosterSafe(fullName(teacher))}</option>`).join("")}`;
       document.getElementById("roster-class-create-age").innerHTML = optionMarkup(classAgeOptions, "Tots");
       document.getElementById("roster-class-create-level").innerHTML = optionMarkup(classLevelOptions, "1");
-      const preferredTeacherId = rosterTeacherFilter !== "all" ? rosterTeacherFilter : "";
+      const filteredSchoolName = rosterSchoolFilter !== "all" ? rosterSchoolFilter : "";
+      const filteredSchoolTeacher = filteredSchoolName
+        ? activeTeachers.find((teacher) => (teacher.schools || []).some((school) => (
+          school.name === filteredSchoolName || school.nickname === filteredSchoolName
+        )))
+        : null;
+      const preferredTeacherId = rosterTeacherFilter !== "all"
+        ? rosterTeacherFilter
+        : (filteredSchoolTeacher?.id || "");
       teacherSelect.value = activeTeachers.some((teacher) => teacher.id === preferredTeacherId) ? preferredTeacherId : "";
       document.getElementById("roster-class-create-name").value = "";
       document.getElementById("roster-class-create-time").value = "";
       document.getElementById("roster-class-create-capacity").value = "12";
       updateRosterClassCreateSchools();
+      const schoolSelect = document.getElementById("roster-class-create-school");
+      const selectedTeacher = activeTeachers.find((teacher) => teacher.id === teacherSelect.value);
+      const filteredSchool = filteredSchoolName
+        ? (selectedTeacher?.schools || []).find((school) => (
+          school.name === filteredSchoolName || school.nickname === filteredSchoolName
+        ))
+        : null;
+      if (filteredSchool && schoolSelect) {
+        schoolSelect.value = filteredSchool.name;
+        updateRosterClassCreateDetails();
+      }
       const overlay = document.getElementById("roster-class-create-overlay");
       overlay?.classList.add("active");
       overlay?.setAttribute("aria-hidden", "false");
