@@ -6207,6 +6207,7 @@
     .newsletter-block-category strong { color: var(--berry); font-size: 10px; letter-spacing: .05em; text-transform: uppercase; }
     .newsletter-add-section-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
     .newsletter-add-section-buttons button { min-height: 31px; padding: 5px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
+    .newsletter-add-section-buttons [data-newsletter-textbox-tool] { cursor: grab; }
     .newsletter-section-list { display: grid; gap: 8px; }
     .newsletter-section-editor { display: grid; gap: 8px; padding: 11px; border: 1px solid var(--border); border-radius: 11px; background: white; }
     .newsletter-section-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
@@ -12383,7 +12384,7 @@
                 <div class="newsletter-section-builder">
                   <div class="newsletter-block-categories">
                     <div class="newsletter-block-category"><strong>Information</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="title">+ Title</button><button type="button" data-newsletter-add-section="text">+ Text</button><button type="button" data-newsletter-add-section="quote">+ Quote Box</button><button type="button" data-newsletter-add-section="calendar">+ Calendar</button><button type="button" data-newsletter-add-section="reminder">+ Important Reminder</button></div></div>
-                    <div class="newsletter-block-category"><strong>Layout</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="button">+ Button</button><button type="button" data-newsletter-add-section="divider">+ Divider</button><button type="button" data-newsletter-add-section="section">+ Section</button></div></div>
+                    <div class="newsletter-block-category"><strong>Layout</strong><div class="newsletter-add-section-buttons"><button type="button" draggable="true" data-newsletter-textbox-tool>↕ Drag Text Box</button><button type="button" data-newsletter-add-section="button">+ Button</button><button type="button" data-newsletter-add-section="divider">+ Divider</button><button type="button" data-newsletter-add-section="section">+ Section</button></div></div>
                     <div class="newsletter-block-category"><strong>Media</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="photo">+ Add Picture</button><button type="button" data-newsletter-add-graphic>+ Add Graphic</button><button type="button" data-newsletter-add-twirla>+ Twirla Peeking</button><button type="button" data-newsletter-add-section="youtube">+ YouTube</button><button type="button" data-newsletter-add-section="social">+ Social Links</button><button type="button" disabled title="Resource Library is coming next">+ Resource Library</button></div></div>
                   </div>
                 </div>
@@ -26124,11 +26125,16 @@
       const textWidth = Math.max(20, Math.min(100, Number(section.textWidth) || 100));
       const titleLeft = Math.max(0, Math.min(100 - titleWidth, Number(section.titleLeft) || 0));
       const textLeft = Math.max(0, Math.min(100 - textWidth, Number(section.textLeft) || 0));
-      const title = section.title ? `<h2 style="width:${titleWidth}%;max-width:100%;margin-left:${titleLeft}%;${section.titleFont ? `font-family:${newsletterInlineFontStyle({ font: section.titleFont })}!important;` : ""}${section.titleTextSize ? `font-size:${Number(section.titleTextSize)}pt!important;` : ""}">${rosterSafe(newsletterPersonalize(section.title, context))}</h2>` : "";
-      const body = section.text ? `<p style="width:${textWidth}%;max-width:100%;margin-left:${textLeft}%;${section.textFont ? `font-family:${newsletterInlineFontStyle({ font: section.textFont })}!important;` : ""}${section.textTextSize ? `font-size:${Number(section.textTextSize)}pt!important;` : ""}">${rosterSafe(newsletterPersonalize(section.text, context))}</p>` : "";
+      const title = section.title ? `<h2 style="width:${titleWidth}%;max-width:100%;margin-left:${titleLeft}%;${section.titleFont ? `font-family:${newsletterInlineFontStyle({ font: section.titleFont })}!important;` : ""}${section.titleTextSize ? `font-size:${Number(section.titleTextSize)}pt!important;` : ""}">${newsletterPersonalize(section.titleHtml || rosterSafe(section.title), context)}</h2>` : "";
+      const body = section.text ? `<p style="width:${textWidth}%;max-width:100%;margin-left:${textLeft}%;${section.textFont ? `font-family:${newsletterInlineFontStyle({ font: section.textFont })}!important;` : ""}${section.textTextSize ? `font-size:${Number(section.textTextSize)}pt!important;` : ""}">${newsletterPersonalize(section.textHtml || rosterSafe(section.text), context)}</p>` : "";
+      const textBoxes = (section.textBoxes || []).map((box) => {
+        const width = Math.max(20, Math.min(100, Number(box.width) || 100));
+        const left = Math.max(0, Math.min(100 - width, Number(box.left) || 0));
+        return `<div style="width:${width}%;max-width:100%;margin:10px 0 0 ${left}%;${box.font ? `font-family:${newsletterInlineFontStyle({ font: box.font })}!important;` : ""}${box.textSize ? `font-size:${Number(box.textSize)}pt!important;` : ""}">${newsletterPersonalize(box.html || rosterSafe(box.text || ""), context)}</div>`;
+      }).join("");
       const link = section.type === "social" && section.linkText && section.url ? `<p><a href="${rosterSafe(section.url)}" style="color:var(--newsletter-accent);font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
       const extraClass = section.type === "quote" ? " is-quote" : section.type === "reminder" || section.type === "calendar" ? " is-reminder" : section.type === "personalized" ? " is-highlight" : "";
-      return `<section class="newsletter-content-section${extraClass}">${title}${body}${link}</section>`;
+      return `<section class="newsletter-content-section${extraClass}">${title}${body}${textBoxes}${link}</section>`;
     };
     const newsletterEditableSectionMarkup = (section, index) => {
       const type = section.type || "text";
@@ -26147,11 +26153,20 @@
         const fieldSize = section[`${field}TextSize`] ? `font-size:${Number(section[`${field}TextSize`])}pt!important;` : "";
         return `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${field}" style="width:${width}%;margin-left:${left}%"><${tag} class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="${field}" data-placeholder="${placeholder}" style="${fieldFont}${fieldSize}">${value}</${tag}>${resizeHandle(field, "left")}${resizeHandle(field, "right")}</div>`;
       };
+      const extraTextBoxes = (section.textBoxes || []).map((box, boxIndex) => {
+        const width = Math.max(20, Math.min(100, Number(box.width) || 100));
+        const left = Math.max(0, Math.min(100 - width, Number(box.left) || 0));
+        const fieldFont = box.font ? `font-family:${newsletterInlineFontStyle({ font: box.font })}!important;` : "";
+        const fieldSize = box.textSize ? `font-size:${Number(box.textSize)}pt!important;` : "";
+        const key = `textBox:${boxIndex}`;
+        return `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${key}" style="width:${width}%;margin:10px 0 0 ${left}%"><button type="button" data-newsletter-remove-textbox="${boxIndex}" aria-label="Remove text box" title="Remove text box" style="position:absolute;right:3px;top:3px;z-index:3;width:22px;min-height:22px;padding:0;border-radius:50%;background:var(--blush);color:var(--berry)">×</button><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-textbox="${boxIndex}" data-placeholder="Write in this text box…" style="${fieldFont}${fieldSize}">${box.html || rosterSafe(box.text || "New text box")}</div>${resizeHandle(key, "left")}${resizeHandle(key, "right")}</div>`;
+      }).join("");
       return `<section class="newsletter-preview-section-editor newsletter-content-section${extraClass}" draggable="true" data-newsletter-preview-section="${index}">
         <span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
         ${divider}${image}
         ${titleAllowed ? resizableField("title", "h2", "Section title", section.titleHtml || rosterSafe(section.title || "")) : ""}
         ${textAllowed ? resizableField("text", "div", "Write this section…", section.textHtml || rosterSafe(section.text || "")) : ""}
+        ${extraTextBoxes}
         ${linkTextAllowed ? resizableField("linkText", "div", "Button or link text", section.linkTextHtml || rosterSafe(section.linkText || "")) : ""}
         ${urlAllowed ? `<input class="newsletter-preview-inline-input" data-newsletter-preview-section-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="${type === "photo" ? "Image URL" : type === "youtube" ? "YouTube URL" : "Link URL"}">` : ""}
       </section>`;
@@ -26538,6 +26553,10 @@
       if (!target || !document.contains(target)) return null;
       const draftKey = target.dataset.newsletterPreviewField;
       if (draftKey) return { owner: newsletterDraft, key: draftKey };
+      const textBoxIndex = target.dataset.newsletterPreviewTextbox;
+      const textBoxSection = target.closest("[data-newsletter-preview-section]");
+      const textBoxOwner = textBoxSection && textBoxIndex !== undefined ? newsletterDraft.sections[Number(textBoxSection.dataset.newsletterPreviewSection)]?.textBoxes?.[Number(textBoxIndex)] : null;
+      if (textBoxOwner) return { owner: textBoxOwner, key: "text", directFormat: true };
       const sectionKey = target.dataset.newsletterPreviewSectionField;
       const sectionEditor = target.closest("[data-newsletter-preview-section]");
       const owner = sectionEditor ? newsletterDraft.sections[Number(sectionEditor.dataset.newsletterPreviewSection)] : null;
@@ -26546,7 +26565,8 @@
     const updateNewsletterActiveFieldFormat = (property, value) => {
       const context = newsletterActiveFormatContext();
       if (!context) return false;
-      context.owner[`${context.key}${property}`] = value;
+      const propertyKey = context.directFormat ? (property === "Font" ? "font" : "textSize") : `${context.key}${property}`;
+      context.owner[propertyKey] = value;
       if (property === "Font") {
         if (value === "bodoni-smallcaps") {
           context.owner[context.key] = newsletterLowercaseText(context.owner[context.key] || "");
@@ -27158,6 +27178,7 @@
     fetch("config/dt-touch-voice.json").then((response) => response.ok ? response.json() : {}).then((config) => { newsletterDtVoiceConfig = config || {}; }).catch((error) => console.warn("DT Voice Guide could not load", error));
     let newsletterDragIndex = -1;
     let newsletterGraphicDragIndex = -1;
+    let newsletterTextBoxDragActive = false;
     const closeNewsletterDtTouch = () => {
       const overlay = document.getElementById("newsletter-dt-touch-overlay");
       overlay?.classList.remove("active");
@@ -27362,19 +27383,25 @@
 
     ["newsletter-font", "newsletter-text-size"].forEach((id) => {
       document.getElementById(id)?.addEventListener("change", (event) => {
+        if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
+          if (id === "newsletter-font") {
+            applyNewsletterSelectionStyle({
+              fontFamily: newsletterFontStyle({ font: event.target.value }),
+              fontVariant: event.target.value === "bodoni-smallcaps" ? "small-caps" : "normal",
+              textTransform: event.target.value === "bodoni-smallcaps" ? "lowercase" : "none"
+            });
+          } else {
+            const pointSize = Number(event.target.value) || 12;
+            applyNewsletterSelectionStyle({ fontSize: `${pointSize}pt` });
+          }
+          return;
+        }
         if (id === "newsletter-font") {
           if (updateNewsletterActiveFieldFormat("Font", event.target.value)) return;
           updateNewsletterDraftFromForm();
           return;
         }
         if (updateNewsletterActiveFieldFormat("TextSize", event.target.value)) return;
-        if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
-          const pointSize = Number(event.target.value) || 12;
-          const commandSize = pointSize <= 8 ? "1" : pointSize <= 10 ? "2" : pointSize <= 12 ? "3" : pointSize <= 14 ? "4" : pointSize <= 18 ? "5" : pointSize <= 24 ? "6" : "7";
-          document.execCommand("fontSize", false, commandSize);
-          newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
-          return;
-        }
         updateNewsletterDraftFromForm();
       });
     });
@@ -27421,13 +27448,30 @@
       if (!selection?.rangeCount) return;
       const range = selection.getRangeAt(0);
       const preview = document.getElementById("newsletter-preview-document");
-      if (preview?.contains(range.commonAncestorContainer)) newsletterSavedSelection = range.cloneRange();
+      if (preview?.contains(range.commonAncestorContainer) && (!selection.isCollapsed || preview.contains(document.activeElement))) newsletterSavedSelection = range.cloneRange();
     });
     const restoreNewsletterSelection = () => {
       if (!newsletterSavedSelection) return false;
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(newsletterSavedSelection);
+      return true;
+    };
+    const applyNewsletterSelectionStyle = (styles) => {
+      if (!restoreNewsletterSelection()) return false;
+      const selection = window.getSelection();
+      if (!selection?.rangeCount || selection.isCollapsed) return false;
+      const range = selection.getRangeAt(0);
+      const span = document.createElement("span");
+      Object.assign(span.style, styles);
+      span.appendChild(range.extractContents());
+      range.insertNode(span);
+      selection.removeAllRanges();
+      const styledRange = document.createRange();
+      styledRange.selectNodeContents(span);
+      selection.addRange(styledRange);
+      newsletterSavedSelection = styledRange.cloneRange();
+      newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
       return true;
     };
     document.getElementById("newsletter-inline-toolbar")?.addEventListener("click", (event) => {
@@ -27464,17 +27508,17 @@
       showToast("Spell check is on. Misspelled words will be underlined.");
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("focusin", (event) => {
-      const editable = event.target.closest("[data-newsletter-preview-field], [data-newsletter-preview-section-field]");
+      const editable = event.target.closest("[data-newsletter-preview-field], [data-newsletter-preview-section-field], [data-newsletter-preview-textbox]");
       if (!editable) return;
       newsletterLogoSelected = false;
       newsletterLogoBadgePopoverOpen = false;
       newsletterSelectedGraphicIndex = -1;
       document.querySelector("[data-newsletter-logo-editor]")?.classList.remove("is-selected");
       newsletterActivePreviewTarget = editable;
-      newsletterActiveField = editable.dataset.newsletterPreviewField || editable.dataset.newsletterPreviewSectionField || "message";
+      newsletterActiveField = editable.dataset.newsletterPreviewField || editable.dataset.newsletterPreviewSectionField || (editable.dataset.newsletterPreviewTextbox !== undefined ? "text" : "message");
       const context = newsletterActiveFormatContext();
-      const font = context?.owner?.[`${context.key}Font`] || newsletterDraft.font;
-      const textSize = context?.owner?.[`${context.key}TextSize`] || newsletterDraft.textSize;
+      const font = (context?.directFormat ? context.owner.font : context?.owner?.[`${context.key}Font`]) || newsletterDraft.font;
+      const textSize = (context?.directFormat ? context.owner.textSize : context?.owner?.[`${context.key}TextSize`]) || newsletterDraft.textSize;
       const fontSelect = document.getElementById("newsletter-font");
       const sizeSelect = document.getElementById("newsletter-text-size");
       if (fontSelect) {
@@ -27492,6 +27536,16 @@
           newsletterDraft[key] = draftField.innerText.replace(/\u00a0/g, " ");
           newsletterDraft[`${key}Html`] = draftField.innerHTML;
         }
+        saveNewsletterDraft();
+        return;
+      }
+      const textBoxField = event.target.closest("[data-newsletter-preview-textbox]");
+      const textBoxSection = event.target.closest("[data-newsletter-preview-section]");
+      if (textBoxField && textBoxSection) {
+        const textBox = newsletterDraft.sections[Number(textBoxSection.dataset.newsletterPreviewSection)]?.textBoxes?.[Number(textBoxField.dataset.newsletterPreviewTextbox)];
+        if (!textBox) return;
+        textBox.text = textBoxField.innerText.replace(/\u00a0/g, " ");
+        textBox.html = textBoxField.innerHTML;
         saveNewsletterDraft();
         return;
       }
@@ -27591,6 +27645,15 @@
         saveNewsletterDraft();
         return;
       }
+      const removeTextBox = event.target.closest("[data-newsletter-remove-textbox]");
+      const removeTextBoxSection = event.target.closest("[data-newsletter-preview-section]");
+      if (removeTextBox && removeTextBoxSection) {
+        const section = newsletterDraft.sections[Number(removeTextBoxSection.dataset.newsletterPreviewSection)];
+        section?.textBoxes?.splice(Number(removeTextBox.dataset.newsletterRemoveTextbox), 1);
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        return;
+      }
       const remove = event.target.closest("[data-newsletter-preview-remove]");
       if (!remove) return;
       newsletterDraft.sections.splice(Number(remove.dataset.newsletterPreviewRemove), 1);
@@ -27656,6 +27719,30 @@
       if (newsletterGraphicDragIndex >= 0 || event.target.closest("[data-newsletter-preview-section], [data-newsletter-preview-message]")) event.preventDefault();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("drop", (event) => {
+      if (newsletterTextBoxDragActive) {
+        const targetSection = event.target.closest("[data-newsletter-preview-section]");
+        if (!targetSection) return;
+        event.preventDefault();
+        const section = newsletterDraft.sections[Number(targetSection.dataset.newsletterPreviewSection)];
+        if (!section) return;
+        section.textBoxes ||= [];
+        section.textBoxes.push({ text: "New text box", html: "New text box", width: 100, left: 0 });
+        newsletterTextBoxDragActive = false;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        window.setTimeout(() => {
+          const added = document.querySelector(`[data-newsletter-preview-section="${targetSection.dataset.newsletterPreviewSection}"] [data-newsletter-preview-textbox="${section.textBoxes.length - 1}"]`);
+          added?.focus({ preventScroll: true });
+          const selection = window.getSelection();
+          if (added && selection) {
+            const range = document.createRange();
+            range.selectNodeContents(added);
+            selection.removeAllRanges();
+            selection.addRange(range);
+          }
+        }, 0);
+        return;
+      }
       if (newsletterGraphicDragIndex >= 0) {
         event.preventDefault();
         const preview = document.getElementById("newsletter-preview-document");
@@ -27781,8 +27868,16 @@
         else {
           const section = newsletterDraft.sections[Number(container.dataset.newsletterPreviewSection)];
           if (section) {
-            section[`${key}Width`] = width;
-            section[`${key}Left`] = left;
+            if (key.startsWith("textBox:")) {
+              const textBox = section.textBoxes?.[Number(key.split(":")[1])];
+              if (textBox) {
+                textBox.width = width;
+                textBox.left = left;
+              }
+            } else {
+              section[`${key}Width`] = width;
+              section[`${key}Left`] = left;
+            }
           }
         }
       };
@@ -27820,6 +27915,15 @@
       loadNewsletterGenderVersion(button.dataset.newsletterGenderVersion);
       renderNewsletterStudio();
       saveNewsletterDraft();
+    });
+    document.querySelector(".newsletter-section-builder")?.addEventListener("dragstart", (event) => {
+      if (!event.target.closest("[data-newsletter-textbox-tool]")) return;
+      newsletterTextBoxDragActive = true;
+      event.dataTransfer?.setData("text/plain", "new-textbox");
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = "copy";
+    });
+    document.querySelector(".newsletter-section-builder")?.addEventListener("dragend", () => {
+      newsletterTextBoxDragActive = false;
     });
     document.querySelector(".newsletter-section-builder")?.addEventListener("click", (event) => {
       const addTwirla = event.target.closest("[data-newsletter-add-twirla]");
