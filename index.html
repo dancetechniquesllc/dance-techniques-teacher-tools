@@ -21563,9 +21563,16 @@
       button.disabled = false;
       if (error || !data?.ok || !data?.teacherId) {
         console.error("Teacher live profile could not be created", error || data);
+        let profileErrorMessage = data?.message || "";
+        if (!profileErrorMessage && error?.context) {
+          try {
+            const errorPayload = await error.context.clone().json();
+            profileErrorMessage = errorPayload?.message || "";
+          } catch (_) { /* Keep the friendly fallback below. */ }
+        }
         button.textContent = "Create Live Profile";
         message.className = "login-invite-message error";
-        message.textContent = data?.message || "The live profile couldn’t be created. Please try again.";
+        message.textContent = profileErrorMessage || "The live profile couldn’t be created. Please try again.";
         return;
       }
       profileTeacher.loginEmail = email;
