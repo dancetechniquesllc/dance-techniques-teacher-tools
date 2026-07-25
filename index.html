@@ -19413,6 +19413,10 @@
         .map((school) => [school.id, school])).values()];
       if (!targets.length) return true;
       for (const school of targets) {
+        if (school.assignedTeacherId && !isUuid(school.assignedTeacherId)) {
+          console.error(`The assignment for ${school.name || school.id} was blocked because the teacher does not have a live profile yet.`);
+          return false;
+        }
         const targetTeacherId = isUuid(school.assignedTeacherId) ? school.assignedTeacherId : null;
         const { data, error } = await client.rpc("set_school_teacher_assignment", {
           target_school_id: school.id,
@@ -23693,6 +23697,11 @@
       if (field.dataset.schoolLibraryField === "isd" && maybeAddNewIsd(field)) return;
       const fieldName = field.dataset.schoolLibraryField;
       const previousValue = school[fieldName];
+      if (fieldName === "assignedTeacherId" && field.value && !isUuid(field.value)) {
+        field.value = previousValue || "";
+        showToast("Create this teacher’s Live Profile before assigning schools.");
+        return;
+      }
       school[fieldName] = schoolLibraryFieldValue(field);
       syncPartnerSchoolReferences(school, fieldName, previousValue);
       scheduleAppDataSave();
@@ -23820,6 +23829,12 @@
       if (!school || school.assignedTeacherId) {
         setTeacherSchoolAssignmentOpen(false);
         showToast("That school is no longer available");
+        return;
+      }
+      if (!isUuid(profileTeacher.id)) {
+        setTeacherSchoolAssignmentOpen(false);
+        setProfileLoginSetupOpen(true);
+        showToast("Create this teacher’s Live Profile before assigning schools.");
         return;
       }
       school.assignedTeacherId = profileTeacher.id;
