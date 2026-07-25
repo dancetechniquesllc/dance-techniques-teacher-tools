@@ -21446,13 +21446,19 @@
       lexi: "#a9d9b8",
       judy: "#aacfe5",
       makayla: "#ead17e",
-      erika: "#e7b493"
+      erika: "#e7b493",
+      kara: "#cbb7df"
     };
     const teacherColorValue = (teacher) => {
       const saved = String(teacher?.color || "").trim().toLowerCase();
       if (/^#[0-9a-f]{6}$/.test(saved)) return saved;
       if (teacherColorPalette[saved]) return teacherColorPalette[saved];
-      return "";
+      const teacherIdentity = String(teacher?.firstName || teacher?.displayName || "")
+        .trim()
+        .toLowerCase()
+        .replace(/^ms\.\s*/, "")
+        .split(/\s+/)[0];
+      return teacherColorPalette[teacherIdentity] || "";
     };
     const teacherProfileColor = (teacher) => teacherColorValue(teacher) || "#dba9a1";
     const coordinatedInitialColor = (backgroundColor) => {

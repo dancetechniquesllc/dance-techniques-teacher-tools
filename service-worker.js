@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v183-verified-school-colors";
+const CACHE_NAME = "my-dance-techniques-v184-teacher-color-fallback";
 const CORE_ASSETS = [
   "./",
   "./index.html",
