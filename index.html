@@ -14060,6 +14060,7 @@
         <label>Invite sent date<input id="profile-invite-date" data-profile-field="inviteDate" type="date"></label>
         <div class="login-invite-actions full-field">
           <div class="login-invite-button-row">
+            <button class="secondary" type="button" id="profile-create-live-record">Create Live Profile</button>
             <button class="primary" type="button" id="profile-send-email-invite">Send Invite Now</button>
             <a class="secondary profile-invite-button" id="profile-invite-text-button" href="sms:?&body=">Text Invite</a>
           </div>
@@ -21507,6 +21508,11 @@
         inviteButton.setAttribute("aria-label", `Text invite to ${fullName(profileTeacher)}`);
       }
       const emailInviteButton = document.getElementById("profile-send-email-invite");
+      const createLiveRecordButton = document.getElementById("profile-create-live-record");
+      if (createLiveRecordButton) {
+        createLiveRecordButton.hidden = isUuid(profileTeacher.id);
+        createLiveRecordButton.textContent = "Create Live Profile";
+      }
       if (emailInviteButton) {
         emailInviteButton.textContent = profileTeacher.inviteStatus === "Invite sent" ? "Send Invite Again" : "Send Invite Now";
         emailInviteButton.setAttribute("aria-label", `Email a login invitation to ${fullName(profileTeacher)}`);
@@ -21519,6 +21525,66 @@
           : "Add a login email before sending the invitation.";
       }
       renderCalendarSyncLinks();
+    };
+
+    const createTeacherLiveProfile = async () => {
+      const button = document.getElementById("profile-create-live-record");
+      const message = document.getElementById("profile-email-invite-message");
+      const email = String(document.getElementById("profile-login-email")?.value || profileTeacher.loginEmail || "").trim().toLowerCase();
+      const client = window.dtSupabase;
+      if (!email || !email.includes("@")) {
+        message.className = "login-invite-message error";
+        message.textContent = "Add a valid login email first.";
+        document.getElementById("profile-login-email")?.focus();
+        return;
+      }
+      if (!client || document.body.dataset.tourMode === "true") {
+        message.className = "login-invite-message error";
+        message.textContent = "Sign in as an administrator to create this profile.";
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Creating…";
+      message.className = "login-invite-message";
+      message.textContent = `Creating a permanent live profile for ${fullName(profileTeacher)}. No invitation will be sent.`;
+      const localTeacherName = fullName(profileTeacher).trim().toLowerCase();
+      const { data, error } = await client.functions.invoke("send-teacher-invite", {
+        body: {
+          email,
+          fullName: fullName(profileTeacher),
+          teacherType: profileTeacher.teacherType || "Teacher",
+          provisionOnly: true
+        }
+      });
+      button.disabled = false;
+      if (error || !data?.ok || !data?.teacherId) {
+        console.error("Teacher live profile could not be created", error || data);
+        button.textContent = "Create Live Profile";
+        message.className = "login-invite-message error";
+        message.textContent = data?.message || "The live profile couldn’t be created. Please try again.";
+        return;
+      }
+      profileTeacher.loginEmail = email;
+      profileTeacher.inviteStatus = "Not invited";
+      await loadSharedClassesAndRosters(window.dtCurrentProfile);
+      const syncedTeacher = teachers.find((teacher) => (
+        teacher.id === data.teacherId
+        || (isUuid(teacher.id) && fullName(teacher).trim().toLowerCase() === localTeacherName)
+      ));
+      if (syncedTeacher) {
+        profileTeacher = syncedTeacher;
+        profileTeacher.loginEmail = email;
+        profileTeacher.inviteStatus = "Not invited";
+        await saveTeacherRecordToCloud(profileTeacher);
+      }
+      syncPersonalForm();
+      renderProfileHero();
+      renderTeacherProfileList();
+      saveAppData();
+      button.hidden = true;
+      message.className = "login-invite-message success";
+      message.textContent = `Live profile created for ${email}. No invitation was sent.`;
+      showToast(`${fullName(profileTeacher)} is ready for school assignments`);
     };
 
     const sendTeacherEmailInvite = async () => {
@@ -23821,6 +23887,7 @@
       showToast(`Text invite ready for ${profileTeacher.displayName || fullName(profileTeacher)}`);
     });
     document.getElementById("profile-send-email-invite")?.addEventListener("click", sendTeacherEmailInvite);
+    document.getElementById("profile-create-live-record")?.addEventListener("click", createTeacherLiveProfile);
     document.querySelectorAll("[data-focus-field]").forEach((button) => button.addEventListener("click", () => {
       document.getElementById(button.dataset.focusField)?.focus();
     }));
