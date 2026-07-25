@@ -6326,6 +6326,14 @@
     .newsletter-preview-document.title-font-bodoni .newsletter-preview-footer { text-transform: lowercase; }
     .newsletter-preview-header { padding: 28px 28px 22px; background: linear-gradient(135deg, #e4b4ae, #f6dcd7); text-align: center; }
     .newsletter-preview-header img { width: 150px; max-height: 70px; object-fit: contain; }
+    .newsletter-logo-editor { position: relative; display: inline-grid; place-items: center; width: 150px; max-width: 80%; padding: 5px; border: 1px dashed transparent; border-radius: 9px; cursor: pointer; }
+    .newsletter-logo-editor:hover,
+    .newsletter-logo-editor.is-selected { border-color: var(--newsletter-accent); background: rgb(255 250 246 / .58); }
+    .newsletter-logo-mark { display: block; width: 100%; aspect-ratio: 2.15 / 1; background: var(--newsletter-logo-color, #160f0d); -webkit-mask: url("assets/dance-techniques-logo-only.png") center / contain no-repeat; mask: url("assets/dance-techniques-logo-only.png") center / contain no-repeat; }
+    .newsletter-logo-editor .newsletter-logo-resize-handle { position: absolute; right: -9px; bottom: -9px; z-index: 4; display: grid; place-items: center; width: 25px; min-height: 25px; padding: 0; border: 1px solid #160f0d; border-radius: 999px; background: var(--blush); color: #160f0d; cursor: nwse-resize; opacity: 0; transition: opacity .15s ease; touch-action: none; }
+    .newsletter-logo-editor:hover .newsletter-logo-resize-handle,
+    .newsletter-logo-editor.is-selected .newsletter-logo-resize-handle { opacity: 1; }
+    .newsletter-logo-resize-handle svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; pointer-events: none; }
     .newsletter-preview-header h1 { margin: 12px 0 4px; font-family: var(--newsletter-title-font, inherit); font-size: 29px; }
     .newsletter-preview-header p { margin: 0; color: var(--newsletter-accent, var(--berry)); font-family: var(--newsletter-title-font, inherit); }
     .newsletter-preview-content { padding: 28px; color: #271e1c; font-family: var(--newsletter-body-font, "Avenir Next", "Helvetica Neue", Arial, sans-serif); font-size: var(--newsletter-body-size, 16px); font-weight: var(--newsletter-body-weight, 400); line-height: 1.65; }
@@ -25953,6 +25961,7 @@
     let newsletterActiveField = "message";
     let newsletterActivePreviewTarget = null;
     let newsletterSavedSelection = null;
+    let newsletterLogoSelected = false;
     try { newsletterDraft = { ...newsletterDefaultDraft, ...(JSON.parse(localStorage.getItem(newsletterStorageKey) || "null") || {}) }; } catch (_) { /* Start with a clean draft. */ }
     if (newsletterDraft.audience === "both") newsletterDraft.audience = "parents";
     if (["compact", "standard", "large"].includes(newsletterDraft.textSize)) newsletterDraft.textSize = newsletterDraft.textSize === "compact" ? "10" : newsletterDraft.textSize === "large" ? "14" : "12";
@@ -26015,7 +26024,7 @@
     };
     if (!newsletterTemplates[newsletterDraft.template]) newsletterDraft.template = "monthly";
 
-    const newsletterVariantFields = ["template", "subject", "subjectHtml", "headline", "headlineHtml", "message", "messageHtml", "messageWidth", "font", "textSize", "color", "sections", "graphics", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl"];
+    const newsletterVariantFields = ["template", "subject", "subjectHtml", "headline", "headlineHtml", "message", "messageHtml", "messageWidth", "logoWidth", "logoColor", "font", "textSize", "color", "sections", "graphics", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl"];
     const newsletterVariantSnapshot = (source = newsletterDraft, colorOverride = "") => Object.fromEntries(newsletterVariantFields.map((key) => [key, ["sections", "graphics"].includes(key) ? structuredClone(source[key] || []) : source[key]]).filter(([, value]) => value !== undefined).map(([key, value]) => [key, key === "color" && colorOverride ? colorOverride : value]));
     let newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
     if (!newsletterDraft.genderVersions?.female || !newsletterDraft.genderVersions?.male) {
@@ -26275,7 +26284,7 @@
         .newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p{margin:0;white-space:pre-wrap}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}
         .template-welcome .newsletter-header{padding:38px 32px 30px!important;border-bottom:1px solid #dfb9b2;background:#f8e4df!important}.template-welcome .newsletter-header h1{max-width:520px;margin:0 auto 8px!important;color:#211817!important;font-family:Didot,Georgia,serif!important;font-size:32px;font-weight:500;line-height:1.08}.template-welcome .newsletter-header p{color:#8b4e61!important;font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.template-welcome .newsletter-main{padding:32px 38px 38px!important}.template-welcome .newsletter-content-section h2{color:#65103f;font-family:Didot,Georgia,serif;font-size:22px;font-weight:500}.template-welcome .newsletter-content-section.is-highlight{border:1px solid #e4c2bb;background:#f8e6e1}.template-welcome .newsletter-content-section.is-reminder{border:1px solid #dba9a1;border-radius:4px;background:#fffdf9}.template-welcome .newsletter-content-section.is-divider{background:#dba9a1}.template-welcome .newsletter-footer{border-top:1px solid #dfb9b2;background:#f8e4df!important}
         ${versionStyles}
-      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.65;">${graphics}<header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle(draft)};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="width:${Math.max(20, Math.min(100, Number(draft.messageWidth) || 100))}%;max-width:100%;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.65;">${graphics}<header class="newsletter-header" style="padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><div role="img" aria-label="Dance Techniques" style="width:${Math.max(60, Math.min(280, Number(draft.logoWidth) || 150))}px;max-width:80%;aspect-ratio:2.15/1;margin:0 auto;background:${newsletterColors[draft.logoColor] || newsletterColors.black};-webkit-mask:url('https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/dance-techniques-logo-only.png') center/contain no-repeat;mask:url('https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/dance-techniques-logo-only.png') center/contain no-repeat;"></div><h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterTitleFontStyle(draft)};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="padding:30px;"><div style="width:${Math.max(20, Math.min(100, Number(draft.messageWidth) || 100))}%;max-width:100%;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
     };
     const newsletterRecipientMessages = () => {
       const records = newsletterFilteredRecords();
@@ -26326,7 +26335,7 @@
         button.classList.toggle("is-selected", button.dataset.newsletterTemplate === newsletterDraft.template);
       });
       document.querySelectorAll("[data-newsletter-device]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterDevice === newsletterDraft.device));
-      document.querySelectorAll("[data-newsletter-color]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterColor === newsletterDraft.color));
+      document.querySelectorAll("[data-newsletter-color]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterColor === (newsletterLogoSelected ? (newsletterDraft.logoColor || "black") : newsletterDraft.color)));
       document.querySelectorAll("[data-newsletter-gender-version]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterGenderVersion === newsletterGenderView));
       const sendButton = document.getElementById("newsletter-send");
       if (sendButton) {
@@ -26354,7 +26363,7 @@
       preview.style.setProperty("--newsletter-body-font", newsletterFontStyle());
       preview.style.setProperty("--newsletter-body-weight", newsletterFontWeight());
       preview.style.setProperty("--newsletter-body-size", newsletterFontSize());
-      preview.innerHTML = `<header class="newsletter-preview-header"><img src="assets/dance-techniques-logo-only.png" alt=""><h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>${floatingGraphicsMarkup}`;
+      preview.innerHTML = `<header class="newsletter-preview-header"><div class="newsletter-logo-editor ${newsletterLogoSelected ? "is-selected" : ""}" role="button" tabindex="0" data-newsletter-logo-editor aria-label="Select newsletter logo" style="width:${Math.max(60, Math.min(280, Number(newsletterDraft.logoWidth) || 150))}px;--newsletter-logo-color:${newsletterColors[newsletterDraft.logoColor] || newsletterColors.black};"><span class="newsletter-logo-mark" aria-hidden="true"></span><button class="newsletter-logo-resize-handle" type="button" data-newsletter-logo-resize-handle aria-label="Resize newsletter logo" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button></div><h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>${floatingGraphicsMarkup}`;
     };
 
     const newsletterLowercaseText = (value = "") => {
@@ -27325,6 +27334,8 @@
     document.getElementById("newsletter-preview-document")?.addEventListener("focusin", (event) => {
       const editable = event.target.closest("[data-newsletter-preview-field], [data-newsletter-preview-section-field]");
       if (!editable) return;
+      newsletterLogoSelected = false;
+      document.querySelector("[data-newsletter-logo-editor]")?.classList.remove("is-selected");
       newsletterActivePreviewTarget = editable;
       newsletterActiveField = editable.dataset.newsletterPreviewField || editable.dataset.newsletterPreviewSectionField || "message";
     });
@@ -27363,6 +27374,14 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("click", (event) => {
+      const logo = event.target.closest("[data-newsletter-logo-editor]");
+      if (logo) {
+        newsletterLogoSelected = true;
+        newsletterActivePreviewTarget = null;
+        logo.classList.add("is-selected");
+        document.querySelectorAll("[data-newsletter-color]").forEach((button) => button.classList.toggle("is-selected", button.dataset.newsletterColor === (newsletterDraft.logoColor || "black")));
+        return;
+      }
       const toggleGraphicLock = event.target.closest("[data-newsletter-toggle-graphic-lock]");
       if (toggleGraphicLock) {
         const graphic = newsletterDraft.graphics?.[Number(toggleGraphicLock.dataset.newsletterToggleGraphicLock)];
@@ -27393,7 +27412,7 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("dragstart", (event) => {
-      if (event.target.closest("[data-newsletter-graphic-resize-handle], [data-newsletter-text-resize-handle]")) {
+      if (event.target.closest("[data-newsletter-logo-resize-handle], [data-newsletter-graphic-resize-handle], [data-newsletter-text-resize-handle]")) {
         event.preventDefault();
         return;
       }
@@ -27466,6 +27485,33 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("pointerdown", (event) => {
+      const logoHandle = event.target.closest("[data-newsletter-logo-resize-handle]");
+      if (logoHandle) {
+        event.preventDefault();
+        event.stopPropagation();
+        const logo = logoHandle.closest("[data-newsletter-logo-editor]");
+        if (!logo) return;
+        newsletterLogoSelected = true;
+        logo.classList.add("is-selected");
+        const startX = event.clientX;
+        const startWidth = logo.getBoundingClientRect().width;
+        logoHandle.setPointerCapture?.(event.pointerId);
+        const move = (moveEvent) => {
+          const width = Math.max(60, Math.min(280, startWidth + (moveEvent.clientX - startX)));
+          newsletterDraft.logoWidth = width;
+          logo.style.width = `${width}px`;
+        };
+        const finish = () => {
+          logoHandle.removeEventListener("pointermove", move);
+          logoHandle.removeEventListener("pointerup", finish);
+          logoHandle.removeEventListener("pointercancel", finish);
+          saveNewsletterDraft();
+        };
+        logoHandle.addEventListener("pointermove", move);
+        logoHandle.addEventListener("pointerup", finish);
+        logoHandle.addEventListener("pointercancel", finish);
+        return;
+      }
       const graphicHandle = event.target.closest("[data-newsletter-graphic-resize-handle]");
       if (graphicHandle) {
         event.preventDefault();
@@ -27527,6 +27573,12 @@
     document.getElementById("newsletter-color-swatches")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-newsletter-color]");
       if (!button) return;
+      if (newsletterLogoSelected) {
+        newsletterDraft.logoColor = button.dataset.newsletterColor || "black";
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        return;
+      }
       if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
         document.execCommand("foreColor", false, newsletterColors[button.dataset.newsletterColor] || newsletterColors.berry);
         newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
