@@ -18990,6 +18990,7 @@
     const persistentStorageBackupKey = `${persistentStorageKey}:history`;
     const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725-v2`;
     const schoolScheduleRecoveryCompletedKey = `${persistentStorageKey}:school-schedule-recovery-20260725-v1`;
+    const missingSchoolDataRecoveryCompletedKey = `${persistentStorageKey}:missing-school-data-recovery-20260725-v1`;
     const cloudStateRecordId = "director-dashboard";
     let pendingPersistentAdminReviewFlags = null;
     let persistenceSaveTimer = 0;
@@ -19127,6 +19128,52 @@
       });
       if (restored.length) syncTeachingTeamSchools();
       return restored;
+    };
+    const restoreMissingSchoolDataFromHistory = () => {
+      const history = loadPersistedAppDataHistory();
+      if (!history.length) return [];
+      const recoverableFields = [
+        "nickname", "initials", "assignedTeacherId", "dayOfWeek", "timeBlock", "isd",
+        "seasonStartDate", "address", "directorName", "phone", "email",
+        "partnershipBenefit", "importantNotes", "classroomOptions"
+      ];
+      const fieldHasValue = (value) => Array.isArray(value) ? value.length > 0 : value !== "" && value != null;
+      const currentTeacherIdForHistorical = (savedTeacherId, payload) => {
+        if (!savedTeacherId) return "";
+        if (isUuid(savedTeacherId) && teachers.some((teacher) => teacher.id === savedTeacherId)) return savedTeacherId;
+        const savedTeacher = (payload.teachers || []).find((teacher) => teacher.id === savedTeacherId);
+        const savedName = savedTeacher ? fullName(savedTeacher).trim().toLowerCase() : "";
+        return teachers.find((teacher) => savedName && fullName(teacher).trim().toLowerCase() === savedName)?.id || "";
+      };
+      const restored = new Set();
+      schoolLibrary.forEach((school) => {
+        for (const entry of history) {
+          const payload = entry?.payload || {};
+          const candidates = [
+            ...(Array.isArray(payload.schoolLibrary) ? payload.schoolLibrary : []),
+            ...(Array.isArray(payload.teachers)
+              ? payload.teachers.flatMap((teacher) => Array.isArray(teacher?.schools) ? teacher.schools : [])
+              : [])
+          ];
+          const historical = candidates.find((candidate) => (
+            (school.id && candidate?.id && String(candidate.id) === String(school.id))
+            || enrollmentSchoolNameMatches(candidate?.name, school.name)
+            || enrollmentSchoolNameMatches(candidate?.nickname, school.nickname)
+          ));
+          if (!historical) continue;
+          recoverableFields.forEach((field) => {
+            if (fieldHasValue(school[field]) || !fieldHasValue(historical[field])) return;
+            const recoveredValue = field === "assignedTeacherId"
+              ? currentTeacherIdForHistorical(historical[field], payload)
+              : clonePayload(historical[field]);
+            if (!fieldHasValue(recoveredValue)) return;
+            school[field] = recoveredValue;
+            restored.add(school);
+          });
+        }
+      });
+      if (restored.size) syncTeachingTeamSchools();
+      return [...restored];
     };
     const restoreMissingTeachersFromHistory = () => {
       const sourcePayload = mostCompletePersistedHistorySnapshot();
@@ -31755,7 +31802,12 @@
       const recoveredSchoolSchedules = isLeader && !schoolScheduleRecoveryAlreadyCompleted
         ? restoreMissingSchoolSchedulesFromHistory()
         : [];
-      if (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length) scheduleAppDataSave();
+      let missingSchoolDataRecoveryAlreadyCompleted = false;
+      try { missingSchoolDataRecoveryAlreadyCompleted = Boolean(window.localStorage?.getItem(missingSchoolDataRecoveryCompletedKey)); } catch (error) {}
+      const recoveredMissingSchoolData = isLeader && !missingSchoolDataRecoveryAlreadyCompleted
+        ? restoreMissingSchoolDataFromHistory()
+        : [];
+      if (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length || recoveredMissingSchoolData.length) scheduleAppDataSave();
       if (isLeader) {
         const currentTierByTeacher = new Map();
         const { data: tierAssignments, error: tierAssignmentsError } = await client
@@ -31796,6 +31848,15 @@
             if (recoveredSchoolSchedules.length) showToast(`${recoveredSchoolSchedules.length} school schedule${recoveredSchoolSchedules.length === 1 ? "" : "s"} restored.`);
           }
         }
+        if (!missingSchoolDataRecoveryAlreadyCompleted) {
+          const missingDataRecoveryResults = await Promise.all(recoveredMissingSchoolData.map((school) => syncPartnerSchoolToDatabase(school)));
+          if (missingDataRecoveryResults.some((saved) => saved === false)) {
+            showToast("Some recovered Partner School information still needs attention.");
+          } else {
+            try { window.localStorage?.setItem(missingSchoolDataRecoveryCompletedKey, new Date().toISOString()); } catch (error) {}
+            if (recoveredMissingSchoolData.length) showToast(`${recoveredMissingSchoolData.length} Partner School record${recoveredMissingSchoolData.length === 1 ? "" : "s"} recovered.`);
+          }
+        }
         const assignmentsSynced = await syncSchoolAssignmentsToDatabase();
         if (!assignmentsSynced) showToast("Some teacher school assignments still need attention.");
         else if (recoveredTeachers.length || recoveredAssignments) {
@@ -31812,7 +31873,7 @@
         showToast(isLeader ? "Director Dashboard synced from the cloud" : "Teacher Tools synced from the cloud");
       }
       cloudPersistenceReady = true;
-      if (isLeader && (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length)) await saveCloudAppData();
+      if (isLeader && (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length || recoveredMissingSchoolData.length)) await saveCloudAppData();
       if (removedDemoContent) await saveCloudAppData();
     };
 
