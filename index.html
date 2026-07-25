@@ -18678,6 +18678,7 @@
       }
     ];
     const persistentStorageKey = "dt-teacher-tools-prototype-v1";
+    const persistentStorageBackupKey = `${persistentStorageKey}:history`;
     const cloudStateRecordId = "director-dashboard";
     let pendingPersistentAdminReviewFlags = null;
     let persistenceSaveTimer = 0;
@@ -18728,19 +18729,44 @@
     );
     let teacherToolsPreviewSnapshot = null;
 
+    const clonePayload = (value) => JSON.parse(JSON.stringify(value ?? null));
+    const hasSubstantivePersistedData = (payload) => {
+      if (!payload || typeof payload !== "object") return false;
+      const rosterCount = Array.isArray(payload.rosterClasses) ? payload.rosterClasses.length : 0;
+      const teacherCount = Array.isArray(payload.teachers) ? payload.teachers.length : 0;
+      const schoolCount = Array.isArray(payload.schoolLibrary) ? payload.schoolLibrary.length : 0;
+      const schoolEvents = Array.isArray(payload.isdCalendars) ? payload.isdCalendars.length : 0;
+      return (rosterCount + teacherCount + schoolCount + schoolEvents) > 0;
+    };
+    const loadPersistedAppDataHistory = () => {
+      try {
+        const raw = window.localStorage?.getItem(persistentStorageBackupKey);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter((entry) => entry && typeof entry === "object" && hasSubstantivePersistedData(entry.payload));
+      } catch (error) {
+        console.warn("Prototype backup data could not be loaded.", error);
+        return [];
+      }
+    };
     const readPersistedAppData = () => {
       try {
         const raw = window.localStorage?.getItem(persistentStorageKey);
-        if (raw) return JSON.parse(raw);
+        const direct = raw ? JSON.parse(raw) : null;
+        if (hasSubstantivePersistedData(direct)) return direct;
       } catch (error) {
         console.warn("Prototype saved data could not be loaded.", error);
       }
+      const history = loadPersistedAppDataHistory();
+      if (history.length) return clonePayload(history[0].payload);
       try {
         const fallback = window.name ? JSON.parse(window.name) : null;
-        return fallback?.key === persistentStorageKey ? fallback.data : null;
+        if (fallback?.key === persistentStorageKey && hasSubstantivePersistedData(fallback.data)) return fallback.data;
       } catch (error) {
         return null;
       }
+      return null;
     };
 
     const appDataPayload = ({ includeRosters = true } = {}) => {
@@ -18913,6 +18939,25 @@
       return true;
     };
 
+    const savePersistedAppDataHistory = (payload) => {
+      try {
+        if (!window.localStorage) return;
+        const existing = loadPersistedAppDataHistory().slice(0, 12);
+        existing.unshift({ savedAt: payload?.savedAt || new Date().toISOString(), payload: clonePayload(payload) });
+        const unique = [];
+        const seen = new Set();
+        for (const item of existing) {
+          const key = item.savedAt;
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(item);
+          }
+        }
+        window.localStorage.setItem(persistentStorageBackupKey, JSON.stringify(unique.slice(0, 8)));
+      } catch (error) {
+        console.warn("Could not store prototype backup.", error);
+      }
+    };
     const saveAppData = () => {
       if (isTeacherToolsPreviewSandbox()) {
         window.dtPrototypeStorageStatus = { ok: true, savedAt: "", method: "preview sandbox" };
@@ -18924,6 +18969,7 @@
       try {
         const serializedPayload = JSON.stringify(payload);
         window.localStorage?.setItem(persistentStorageKey, serializedPayload);
+        savePersistedAppDataHistory(payload);
         window.name = JSON.stringify({ key: persistentStorageKey, data: payload });
         window.dtPrototypeStorageStatus = { ok: true, savedAt, method: "localStorage" };
         document.documentElement.dataset.prototypeSaved = "localStorage";
@@ -18990,9 +19036,21 @@
       } else if (hasPersistedRosterClasses && !rosterClasses.length && persisted.rosterClasses.length === 0) {
         replaceCollection(rosterClasses, []);
       }
-      replaceCollection(messageThreads, persisted.messageThreads);
-      replaceCollection(isdCalendars, persisted.isdCalendars);
-      replaceCollection(tempoEncouragementLibrary, persisted.tempoEncouragementLibrary);
+      if (Array.isArray(persisted.messageThreads) && persisted.messageThreads.length > 0) {
+        replaceCollection(messageThreads, persisted.messageThreads);
+      } else if (Array.isArray(persisted.messageThreads) && !messageThreads.length && persisted.messageThreads.length === 0) {
+        replaceCollection(messageThreads, []);
+      }
+      if (Array.isArray(persisted.isdCalendars) && persisted.isdCalendars.length > 0) {
+        replaceCollection(isdCalendars, persisted.isdCalendars);
+      } else if (Array.isArray(persisted.isdCalendars) && !isdCalendars.length && persisted.isdCalendars.length === 0) {
+        replaceCollection(isdCalendars, []);
+      }
+      if (Array.isArray(persisted.tempoEncouragementLibrary) && persisted.tempoEncouragementLibrary.length > 0) {
+        replaceCollection(tempoEncouragementLibrary, persisted.tempoEncouragementLibrary);
+      } else if (Array.isArray(persisted.tempoEncouragementLibrary) && !tempoEncouragementLibrary.length && persisted.tempoEncouragementLibrary.length === 0) {
+        replaceCollection(tempoEncouragementLibrary, []);
+      }
       if (persisted.payrollState && typeof persisted.payrollState === "object") {
         payrollState = { ...payrollState, ...JSON.parse(JSON.stringify(persisted.payrollState)) };
       }
