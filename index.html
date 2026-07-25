@@ -18722,6 +18722,18 @@
       if (!Array.isArray(source)) return;
       target.splice(0, target.length, ...source);
     };
+    const safeReplaceCollection = (target, source) => {
+      if (!Array.isArray(source)) return false;
+      if (source.length > 0) {
+        replaceCollection(target, source);
+        return true;
+      }
+      if (!target.length) {
+        replaceCollection(target, source);
+        return true;
+      }
+      return false;
+    };
 
     const isTeacherToolsPreviewSandbox = () => (
       document.body.dataset.tourMode === "true" &&
@@ -19036,21 +19048,9 @@
       } else if (hasPersistedRosterClasses && !rosterClasses.length && persisted.rosterClasses.length === 0) {
         replaceCollection(rosterClasses, []);
       }
-      if (Array.isArray(persisted.messageThreads) && persisted.messageThreads.length > 0) {
-        replaceCollection(messageThreads, persisted.messageThreads);
-      } else if (Array.isArray(persisted.messageThreads) && !messageThreads.length && persisted.messageThreads.length === 0) {
-        replaceCollection(messageThreads, []);
-      }
-      if (Array.isArray(persisted.isdCalendars) && persisted.isdCalendars.length > 0) {
-        replaceCollection(isdCalendars, persisted.isdCalendars);
-      } else if (Array.isArray(persisted.isdCalendars) && !isdCalendars.length && persisted.isdCalendars.length === 0) {
-        replaceCollection(isdCalendars, []);
-      }
-      if (Array.isArray(persisted.tempoEncouragementLibrary) && persisted.tempoEncouragementLibrary.length > 0) {
-        replaceCollection(tempoEncouragementLibrary, persisted.tempoEncouragementLibrary);
-      } else if (Array.isArray(persisted.tempoEncouragementLibrary) && !tempoEncouragementLibrary.length && persisted.tempoEncouragementLibrary.length === 0) {
-        replaceCollection(tempoEncouragementLibrary, []);
-      }
+      safeReplaceCollection(messageThreads, persisted.messageThreads || []);
+      safeReplaceCollection(isdCalendars, persisted.isdCalendars || []);
+      safeReplaceCollection(tempoEncouragementLibrary, persisted.tempoEncouragementLibrary || []);
       if (persisted.payrollState && typeof persisted.payrollState === "object") {
         payrollState = { ...payrollState, ...JSON.parse(JSON.stringify(persisted.payrollState)) };
       }
@@ -19099,7 +19099,7 @@
         liveTeacher.email = signedInEmail;
         liveTeacher.loginEmail = signedInEmail;
       }
-      if (includeMessages) replaceCollection(messageThreads, persisted.messageThreads);
+      if (includeMessages) safeReplaceCollection(messageThreads, persisted.messageThreads || []);
     };
 
     const loadPersistedAppData = () => applyPersistedAppData(readPersistedAppData());
