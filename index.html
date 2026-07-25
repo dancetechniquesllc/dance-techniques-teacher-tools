@@ -18989,6 +18989,7 @@
     const persistentStorageKey = "dt-teacher-tools-prototype-v1";
     const persistentStorageBackupKey = `${persistentStorageKey}:history`;
     const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725-v2`;
+    const schoolScheduleRecoveryCompletedKey = `${persistentStorageKey}:school-schedule-recovery-20260725-v1`;
     const cloudStateRecordId = "director-dashboard";
     let pendingPersistentAdminReviewFlags = null;
     let persistenceSaveTimer = 0;
@@ -19098,6 +19099,34 @@
         }
       });
       return didRestore;
+    };
+    const restoreMissingSchoolSchedulesFromHistory = () => {
+      const history = loadPersistedAppDataHistory();
+      if (!history.length) return [];
+      const historicalSchools = history.flatMap((entry) => {
+        const payload = entry?.payload || {};
+        return [
+          ...(Array.isArray(payload.schoolLibrary) ? payload.schoolLibrary : []),
+          ...(Array.isArray(payload.teachers)
+            ? payload.teachers.flatMap((teacher) => Array.isArray(teacher?.schools) ? teacher.schools : [])
+            : [])
+        ];
+      });
+      const restored = [];
+      schoolLibrary.forEach((school) => {
+        if (school.dayOfWeek !== "" && school.dayOfWeek != null) return;
+        const historical = historicalSchools.find((candidate) => (
+          (school.id && candidate?.id && String(candidate.id) === String(school.id))
+          || enrollmentSchoolNameMatches(candidate?.name, school.name)
+          || enrollmentSchoolNameMatches(candidate?.nickname, school.nickname)
+        ) && candidate.dayOfWeek !== "" && candidate.dayOfWeek != null);
+        if (!historical) return;
+        school.dayOfWeek = Number(historical.dayOfWeek);
+        if (historical.timeBlock) school.timeBlock = historical.timeBlock;
+        restored.push(school);
+      });
+      if (restored.length) syncTeachingTeamSchools();
+      return restored;
     };
     const restoreMissingTeachersFromHistory = () => {
       const sourcePayload = mostCompletePersistedHistorySnapshot();
@@ -22954,11 +22983,20 @@
       renderTeacherProfileList();
       clearUnsavedEdits();
       saveAppData();
-      const [teacherSaved, cloudSaved] = await Promise.all([
+      const teacherSchoolSources = [...new Set(profileTeacher.schools.map((teacherSchool) => {
+        const sourceSchool = schoolLibrarySourceForTeacherSchool(teacherSchool);
+        if (!sourceSchool) return null;
+        ["name", "nickname", "dayOfWeek", "timeBlock", "isd", "seasonStartDate", "address", "directorName", "phone", "email", "importantNotes"].forEach((field) => {
+          if (teacherSchool[field] !== undefined) sourceSchool[field] = teacherSchool[field];
+        });
+        return sourceSchool;
+      }).filter(Boolean))];
+      const [teacherSaved, cloudSaved, schoolSaveResults] = await Promise.all([
         saveTeacherRecordToCloud(profileTeacher),
-        saveCloudAppData()
+        saveCloudAppData(),
+        Promise.all(teacherSchoolSources.map((school) => syncPartnerSchoolToDatabase(school)))
       ]);
-      if (teacherSaved === false || cloudSaved === false) showToast("Saved here, but some shared teacher information needs attention");
+      if (teacherSaved === false || cloudSaved === false || schoolSaveResults.some((saved) => saved === false)) showToast("Saved here, but some shared teacher information needs attention");
       else showToast("Teacher profile saved everywhere");
     };
 
@@ -31712,7 +31750,12 @@
         ...teachers.filter((teacher) => teacher.recoveredFromInactive)
       ].filter((teacher, index, list) => list.findIndex((candidate) => candidate.id === teacher.id) === index) : [];
       const recoveredAssignments = shouldRunOperationalRecovery ? restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true }) : false;
-      if (recoveredTeachers.length || recoveredAssignments) scheduleAppDataSave();
+      let schoolScheduleRecoveryAlreadyCompleted = false;
+      try { schoolScheduleRecoveryAlreadyCompleted = Boolean(window.localStorage?.getItem(schoolScheduleRecoveryCompletedKey)); } catch (error) {}
+      const recoveredSchoolSchedules = isLeader && !schoolScheduleRecoveryAlreadyCompleted
+        ? restoreMissingSchoolSchedulesFromHistory()
+        : [];
+      if (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length) scheduleAppDataSave();
       if (isLeader) {
         const currentTierByTeacher = new Map();
         const { data: tierAssignments, error: tierAssignmentsError } = await client
@@ -31744,6 +31787,15 @@
             showToast("Recovered teacher profiles are visible, but some still need their shared login records restored.");
           }
         }
+        if (!schoolScheduleRecoveryAlreadyCompleted) {
+          const scheduleRecoveryResults = await Promise.all(recoveredSchoolSchedules.map((school) => syncPartnerSchoolToDatabase(school)));
+          if (scheduleRecoveryResults.some((saved) => saved === false)) {
+            showToast("Some recovered school days still need attention.");
+          } else {
+            try { window.localStorage?.setItem(schoolScheduleRecoveryCompletedKey, new Date().toISOString()); } catch (error) {}
+            if (recoveredSchoolSchedules.length) showToast(`${recoveredSchoolSchedules.length} school schedule${recoveredSchoolSchedules.length === 1 ? "" : "s"} restored.`);
+          }
+        }
         const assignmentsSynced = await syncSchoolAssignmentsToDatabase();
         if (!assignmentsSynced) showToast("Some teacher school assignments still need attention.");
         else if (recoveredTeachers.length || recoveredAssignments) {
@@ -31760,7 +31812,7 @@
         showToast(isLeader ? "Director Dashboard synced from the cloud" : "Teacher Tools synced from the cloud");
       }
       cloudPersistenceReady = true;
-      if (isLeader && (recoveredTeachers.length || recoveredAssignments)) await saveCloudAppData();
+      if (isLeader && (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length)) await saveCloudAppData();
       if (removedDemoContent) await saveCloudAppData();
     };
 
