@@ -6258,11 +6258,11 @@
     .newsletter-preview-document { position: relative; width: min(100%, 680px); min-height: 600px; border-radius: 14px; overflow: hidden; background: #fffaf6; box-shadow: 0 12px 34px rgb(58 29 22 / .14); transition: width .18s ease; }
     .newsletter-floating-graphic { position: absolute; z-index: 8; display: grid; gap: 5px; min-width: 70px; padding: 5px; border: 1px dashed transparent; border-radius: 9px; cursor: grab; transform: translate(-50%, -50%); }
     .newsletter-floating-graphic.is-locked { cursor: default; }
-    .newsletter-floating-graphic:hover, .newsletter-floating-graphic:focus-within { border-color: var(--newsletter-accent); background: rgb(255 250 246 / .88); }
+    .newsletter-floating-graphic:hover, .newsletter-floating-graphic:focus-within, .newsletter-floating-graphic.is-selected { border-color: var(--newsletter-accent); background: rgb(255 250 246 / .88); outline: none; }
     .newsletter-floating-graphic img { display: block; width: 100%; height: auto; object-fit: contain; pointer-events: none; }
     .newsletter-floating-graphic-placeholder { min-height: 76px; display: grid; place-items: center; padding: 9px; border: 1px dashed var(--newsletter-accent); border-radius: 8px; background: #fffaf6; color: var(--muted); font-size: 10px; text-align: center; }
     .newsletter-floating-graphic-controls { display: flex; gap: 4px; opacity: 0; transition: opacity .15s ease; }
-    .newsletter-floating-graphic:hover .newsletter-floating-graphic-controls, .newsletter-floating-graphic:focus-within .newsletter-floating-graphic-controls { opacity: 1; }
+    .newsletter-floating-graphic:hover .newsletter-floating-graphic-controls, .newsletter-floating-graphic:focus-within .newsletter-floating-graphic-controls, .newsletter-floating-graphic.is-selected .newsletter-floating-graphic-controls { opacity: 1; }
     .newsletter-floating-graphic-controls input { min-width: 0; height: 28px; padding: 4px 6px; font-size: 9px; }
     .newsletter-floating-graphic-controls button { width: 28px; min-height: 28px; padding: 0; border-radius: 999px; background: var(--blush); color: var(--berry); }
     .newsletter-floating-graphic-controls .newsletter-graphic-anchor { color: #160f0d; }
@@ -6273,6 +6273,7 @@
     .newsletter-text-resize-handle.is-left { right: auto; left: -9px; cursor: nesw-resize; }
     .newsletter-floating-graphic:hover > .newsletter-graphic-resize-handle,
     .newsletter-floating-graphic:focus-within > .newsletter-graphic-resize-handle,
+    .newsletter-floating-graphic.is-selected > .newsletter-graphic-resize-handle,
     .newsletter-resizable-field:hover > .newsletter-text-resize-handle,
     .newsletter-resizable-field:focus-within > .newsletter-text-resize-handle { opacity: 1; }
     .newsletter-floating-graphic.is-locked > .newsletter-graphic-resize-handle { display: none; }
@@ -25993,6 +25994,7 @@
     let newsletterSavedSelection = null;
     let newsletterLogoSelected = false;
     let newsletterLogoBadgePopoverOpen = false;
+    let newsletterSelectedGraphicIndex = -1;
     try { newsletterDraft = { ...newsletterDefaultDraft, ...(JSON.parse(localStorage.getItem(newsletterStorageKey) || "null") || {}) }; } catch (_) { /* Start with a clean draft. */ }
     if (newsletterDraft.audience === "both") newsletterDraft.audience = "parents";
     if (["compact", "standard", "large"].includes(newsletterDraft.textSize)) newsletterDraft.textSize = newsletterDraft.textSize === "compact" ? "10" : newsletterDraft.textSize === "large" ? "14" : "12";
@@ -26159,7 +26161,7 @@
       const y = Math.max(3, Math.min(97, Number(graphic.y) || 18));
       const width = Math.max(60, Math.min(500, Number(graphic.width) || 120));
       const locked = Boolean(graphic.locked);
-      return `<div class="newsletter-floating-graphic ${locked ? "is-locked" : ""}" draggable="${locked ? "false" : "true"}" data-newsletter-floating-graphic="${index}" style="left:${x}%;top:${y}%;width:${width}px;">
+      return `<div class="newsletter-floating-graphic ${locked ? "is-locked" : ""} ${newsletterSelectedGraphicIndex === index ? "is-selected" : ""}" tabindex="0" role="button" aria-label="Select ${rosterSafe(graphic.alt || "newsletter graphic")} for positioning" draggable="${locked ? "false" : "true"}" data-newsletter-floating-graphic="${index}" style="left:${x}%;top:${y}%;width:${width}px;">
         ${graphic.url ? `<img src="${rosterSafe(graphic.url)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}">` : `<span class="newsletter-floating-graphic-placeholder">Paste a graphic URL below, then drag this anywhere.</span>`}
         <span class="newsletter-floating-graphic-controls"><input type="url" data-newsletter-graphic-url="${index}" value="${rosterSafe(graphic.url || "")}" placeholder="Graphic URL"><button class="newsletter-graphic-anchor ${locked ? "is-locked" : ""}" type="button" data-newsletter-toggle-graphic-lock="${index}" aria-label="${locked ? "Unfreeze graphic position" : "Freeze graphic position"}" title="${locked ? "Unfreeze position" : "Freeze position"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2h2v4.08a4 4 0 0 1 2.92 2.92H20v2h-4.08A4 4 0 0 1 13 13.92V20a7 7 0 0 0 5.83-3.13l-2.12-2.12 1.41-1.41L22 17.22A9 9 0 0 1 12 23a9 9 0 0 1-10-5.78l3.88-3.88 1.41 1.41-2.12 2.12A7 7 0 0 0 11 20v-6.08A4 4 0 0 1 8.08 11H4V9h4.08A4 4 0 0 1 11 6.08V2Zm1 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path></svg></button><button type="button" data-newsletter-remove-graphic="${index}" aria-label="Remove graphic">×</button></span>
         ${locked ? "" : `<button class="newsletter-graphic-resize-handle" type="button" data-newsletter-graphic-resize-handle="${index}" aria-label="Resize graphic" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button>`}
@@ -27466,6 +27468,7 @@
       if (!editable) return;
       newsletterLogoSelected = false;
       newsletterLogoBadgePopoverOpen = false;
+      newsletterSelectedGraphicIndex = -1;
       document.querySelector("[data-newsletter-logo-editor]")?.classList.remove("is-selected");
       newsletterActivePreviewTarget = editable;
       newsletterActiveField = editable.dataset.newsletterPreviewField || editable.dataset.newsletterPreviewSectionField || "message";
@@ -27550,6 +27553,7 @@
       if (logo) {
         newsletterLogoSelected = true;
         newsletterLogoBadgePopoverOpen = false;
+        newsletterSelectedGraphicIndex = -1;
         newsletterActivePreviewTarget = null;
         renderNewsletterStudio();
         return;
@@ -27567,8 +27571,18 @@
       const removeGraphic = event.target.closest("[data-newsletter-remove-graphic]");
       if (removeGraphic) {
         newsletterDraft.graphics.splice(Number(removeGraphic.dataset.newsletterRemoveGraphic), 1);
+        newsletterSelectedGraphicIndex = -1;
         renderNewsletterStudio();
         saveNewsletterDraft();
+        return;
+      }
+      const selectedGraphic = event.target.closest("[data-newsletter-floating-graphic]");
+      if (selectedGraphic && !event.target.closest("input, button")) {
+        newsletterLogoSelected = false;
+        newsletterLogoBadgePopoverOpen = false;
+        newsletterSelectedGraphicIndex = Number(selectedGraphic.dataset.newsletterFloatingGraphic);
+        document.querySelectorAll("[data-newsletter-floating-graphic]").forEach((graphic) => graphic.classList.toggle("is-selected", graphic === selectedGraphic));
+        selectedGraphic.focus({ preventScroll: true });
         return;
       }
       if (event.target.closest("[data-newsletter-preview-remove-message]")) {
@@ -27581,6 +27595,29 @@
       if (!remove) return;
       newsletterDraft.sections.splice(Number(remove.dataset.newsletterPreviewRemove), 1);
       renderNewsletterStudio();
+      saveNewsletterDraft();
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) || event.target.closest("input, textarea, [contenteditable='true']")) return;
+      const graphicElement = event.target.closest("[data-newsletter-floating-graphic]") || document.querySelector(".newsletter-floating-graphic.is-selected");
+      const index = graphicElement ? Number(graphicElement.dataset.newsletterFloatingGraphic) : newsletterSelectedGraphicIndex;
+      const graphic = newsletterDraft.graphics?.[index];
+      if (!graphic || index !== newsletterSelectedGraphicIndex) return;
+      event.preventDefault();
+      if (graphic.locked) {
+        showToast("Unfreeze the graphic before nudging it.");
+        return;
+      }
+      const preview = document.getElementById("newsletter-preview-document");
+      const step = event.shiftKey ? 5 : 1;
+      const xStep = (step / Math.max(1, preview.clientWidth)) * 100;
+      const yStep = (step / Math.max(1, preview.clientHeight)) * 100;
+      const xChange = event.key === "ArrowLeft" ? -xStep : event.key === "ArrowRight" ? xStep : 0;
+      const yChange = event.key === "ArrowUp" ? -yStep : event.key === "ArrowDown" ? yStep : 0;
+      graphic.x = Math.max(5, Math.min(95, (Number(graphic.x) || 50) + xChange));
+      graphic.y = Math.max(3, Math.min(97, (Number(graphic.y) || 18) + yChange));
+      graphicElement.style.left = `${graphic.x}%`;
+      graphicElement.style.top = `${graphic.y}%`;
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("dragstart", (event) => {
