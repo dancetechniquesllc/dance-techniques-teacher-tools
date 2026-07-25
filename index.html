@@ -15910,8 +15910,7 @@
       const placementMissing = [
         !selectedSchoolId ? "Official School" : "",
         !selectedClassId ? "Assigned Class" : "",
-        !selectedTeacherId ? "Class Teacher" : "",
-        !item.official_classroom ? "Official Classroom" : ""
+        !selectedTeacherId ? "Class Teacher" : ""
       ].filter(Boolean);
       const enrollmentClassCards = [...schoolClasses].sort((left, right) => (left.time || "").localeCompare(right.time || "") || left.name.localeCompare(right.name, undefined, { numeric: true })).map((rosterClass) => {
         const enrolledCount = rosterEnrolled(rosterClass).length;
@@ -16110,8 +16109,7 @@
       return [
         !item.matched_partner_school_id ? "Official School" : "",
         !item.matched_dance_class_id ? "Assigned Class" : "",
-        !rosterClass?.teacherId ? "Class Teacher" : "",
-        !item.official_classroom ? "Official Classroom" : ""
+        !rosterClass?.teacherId ? "Class Teacher" : ""
       ].filter(Boolean);
     };
     const explainBlockedEnrollmentPlacement = (item) => {
