@@ -16008,6 +16008,12 @@
       (notesResult.data || []).forEach((note) => { if (!notesByStudent.has(note.student_id)) notesByStudent.set(note.student_id, note); });
       const schoolById = new Map(schools.map((school) => [school.id, school]));
       const assignmentById = new Map(assignments.map((assignment) => [assignment.id, assignment]));
+      const localSchoolAssignmentsById = new Map();
+      schoolLibrary.forEach((school) => {
+        if (school?.id) {
+          localSchoolAssignmentsById.set(String(school.id), school.assignedTeacherId || "");
+        }
+      });
 
       const preservedTeacherDirectory = teachers.map((teacher) => JSON.parse(JSON.stringify(teacher)));
       const liveTeachers = profiles.map((item) => {
@@ -16066,15 +16072,20 @@
       }
       document.body.dataset.currentTeacherId = profileTeacher.id;
       if (schools.length) {
-        replaceCollection(schoolLibrary, schools.map((school, index) => ({
+        const mergedSchools = schools.map((school, index) => {
+          const resolvedSchoolId = String(school.id || "");
+          const localAssignedTeacherId = localSchoolAssignmentsById.get(resolvedSchoolId);
+          return {
           id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
           initials: school.initials || "",
           isd: school.district || "", directorName: school.director_name || "", phone: school.director_phone || "", email: school.director_email || "",
           dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", seasonStartDate: school.season_start_date || "",
-          assignedTeacherId: assignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id || "",
+          assignedTeacherId: localAssignedTeacherId != null ? localAssignedTeacherId : (assignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id || ""),
           classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "",
           importantNotes: school.important_notes || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
-        })));
+          };
+        });
+        replaceCollection(schoolLibrary, mergedSchools);
       } else if (schoolLibrary.length) {
         console.error("The shared partner-school table is empty; the preserved directory remains visible and will not be overwritten.");
       }
