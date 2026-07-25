@@ -14728,7 +14728,8 @@
       { id: "tiffany", firstName: "Tiffany", lastName: "Edwards" },
       { id: "judy", firstName: "Judy", lastName: "Coulter", email: "Sotdance@gmail.com" },
       { id: "erika", firstName: "Erika", lastName: "Webb", email: "dancewitherika13@gmail.com" },
-      { id: "makayla", firstName: "Makayla", lastName: "Sifuentes", email: "makaylaksifuentes@gmail.com" }
+      { id: "makayla", firstName: "Makayla", lastName: "Sifuentes", email: "makaylaksifuentes@gmail.com" },
+      { id: "kara", firstName: "Kara", lastName: "Rogers" }
     ];
     teachers.push(...teachingTeamDirectorySeeds.map((profile) => duplicateTeacherProfile(teachers[0], profile)));
 
@@ -16174,9 +16175,9 @@
       if (!client || !profile || document.body.dataset.tourMode === "true") return;
       setSharedRosterState("loading", "Opening your shared roster…", "Only records available to this account will appear.");
       const [profilesResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult] = await Promise.all([
-        client.from("profiles").select("id, full_name, role, color, phone, active").eq("active", true),
+        client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("partner_schools").select("*").eq("active", true),
-        client.from("teacher_school_assignments").select("id, teacher_id, partner_school_id, active").eq("active", true),
+        client.from("teacher_school_assignments").select("id, teacher_id, partner_school_id, active, created_at, updated_at").order("updated_at", { ascending: false }),
         client.from("dance_classes").select("*").eq("status", "active"),
         client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled"]),
         client.from("student_notes").select("id, student_id, note, created_at").order("created_at", { ascending: false }),
@@ -16194,6 +16195,9 @@
       const profiles = profilesResult.data || [];
       const schools = schoolsResult.data || [];
       const assignments = assignmentsResult.data || [];
+      const activeAssignments = assignments.filter((assignment) => assignment.active !== false);
+      let recoverInactiveAssignments = false;
+      try { recoverInactiveAssignments = !window.localStorage?.getItem(operationalRecoveryCompletedKey); } catch (error) {}
       const classes = classesResult.data || [];
       archivedRosterStudents = (archivedResult.data || []).map((enrollment) => ({
         id: enrollment.students?.id || enrollment.student_id,
@@ -16228,7 +16232,10 @@
         teacher.teacherType = item.role === "teacher" ? "Teacher" : (item.role === "director" ? "Director" : "Admin");
         teacher.color = item.color || teacher.color || "";
         teacher.phone = item.phone || teacher.phone || "";
-        teacher.schools = assignments.filter((assignment) => assignment.teacher_id === item.id).map((assignment) => {
+        const hasRecoverableAssignment = recoverInactiveAssignments && assignments.some((assignment) => assignment.teacher_id === item.id);
+        teacher.status = item.active === false && !hasRecoverableAssignment ? "inactive" : "active";
+        if (item.active === false && hasRecoverableAssignment) teacher.recoveredFromInactive = true;
+        teacher.schools = activeAssignments.filter((assignment) => assignment.teacher_id === item.id).map((assignment) => {
           const school = schoolById.get(assignment.partner_school_id) || {};
           return {
             id: school.id, assignmentId: assignment.id, name: school.name || "Partner School", nickname: school.nickname || school.name,
@@ -16276,7 +16283,9 @@
         const mergedSchools = schools.map((school, index) => {
           const resolvedSchoolId = String(school.id || "");
           const localAssignedTeacherId = localSchoolAssignmentsById.get(resolvedSchoolId);
-          const databaseAssignedTeacherId = assignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id || "";
+          const databaseAssignedTeacherId = activeAssignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id
+            || (recoverInactiveAssignments ? assignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id : "")
+            || "";
           return {
           id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
           initials: school.initials || "",
@@ -18977,7 +18986,7 @@
     ];
     const persistentStorageKey = "dt-teacher-tools-prototype-v1";
     const persistentStorageBackupKey = `${persistentStorageKey}:history`;
-    const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725`;
+    const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725-v2`;
     const cloudStateRecordId = "director-dashboard";
     let pendingPersistentAdminReviewFlags = null;
     let persistenceSaveTimer = 0;
@@ -31682,7 +31691,10 @@
       let operationalRecoveryAlreadyCompleted = false;
       try { operationalRecoveryAlreadyCompleted = Boolean(window.localStorage?.getItem(operationalRecoveryCompletedKey)); } catch (error) {}
       const shouldRunOperationalRecovery = isLeader && !operationalRecoveryAlreadyCompleted;
-      const recoveredTeachers = shouldRunOperationalRecovery ? restoreMissingTeachersFromHistory() : [];
+      const recoveredTeachers = shouldRunOperationalRecovery ? [
+        ...restoreMissingTeachersFromHistory(),
+        ...teachers.filter((teacher) => teacher.recoveredFromInactive)
+      ].filter((teacher, index, list) => list.findIndex((candidate) => candidate.id === teacher.id) === index) : [];
       const recoveredAssignments = shouldRunOperationalRecovery ? restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true }) : false;
       if (recoveredTeachers.length || recoveredAssignments) scheduleAppDataSave();
       if (isLeader) {
@@ -31711,6 +31723,7 @@
         }
         if (recoveredTeachers.length) {
           const teacherRecoveryResults = await Promise.all(recoveredTeachers.map((teacher) => saveTeacherRecordToCloud(teacher)));
+          recoveredTeachers.forEach((teacher) => { delete teacher.recoveredFromInactive; });
           if (teacherRecoveryResults.some((saved) => saved === false)) {
             showToast("Recovered teacher profiles are visible, but some still need their shared login records restored.");
           }
