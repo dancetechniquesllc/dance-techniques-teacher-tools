@@ -19412,6 +19412,20 @@
       const teacher = teachers.find((candidate) => candidate.id === teacherId);
       return !teacher || !isCompanyTeacherProfile(teacher);
     };
+    const classesAndRostersTeacherDirectory = () => {
+      const directoryById = new Map();
+      teacherFilterProfiles().forEach((teacher) => {
+        if (teacher?.id) directoryById.set(String(teacher.id), teacher);
+      });
+      rosterClasses.forEach((rosterClass) => {
+        const teacherId = String(rosterClass?.teacherId || "");
+        if (!teacherId || directoryById.has(teacherId) || !teacherFilterIdIsVisible(teacherId)) return;
+        directoryById.set(teacherId, teachers.find((teacher) => String(teacher.id) === teacherId) || { id: teacherId });
+      });
+      return [...directoryById.values()].sort((left, right) => (
+        rosterTeacherName(left.id).localeCompare(rosterTeacherName(right.id), undefined, { sensitivity: "base" })
+      ));
+    };
     const repairTeacherNickname = (teacher) => {
       if (!teacher) return teacher;
       const firstName = String(teacher.firstName || "").trim();
@@ -26248,13 +26262,15 @@
         ...schoolLibrary.map((school) => school.name).filter(Boolean),
         ...activeRosterClasses.map((item) => item.schoolName).filter(Boolean)
       ])].sort();
-      const assignedTeacherIds = [...new Set(activeRosterClasses.map((item) => item.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))];
+      const rosterTeacherDirectory = classesAndRostersTeacherDirectory();
+      const rosterTeacherIds = rosterTeacherDirectory.map((teacher) => String(teacher.id));
       if (schoolSelect) {
         schoolSelect.innerHTML = `<option value="all">All partner schools</option>${schoolNames.map((name) => `<option value="${rosterSafe(name)}">${rosterSafe(name)}</option>`).join("")}`;
         schoolSelect.value = rosterSchoolFilter;
       }
       if (teacherSelect) {
-        teacherSelect.innerHTML = `<option value="all">All teachers</option>${assignedTeacherIds.map((id) => `<option value="${rosterSafe(id)}">${rosterSafe(rosterTeacherName(id))}</option>`).join("")}`;
+        if (rosterTeacherFilter !== "all" && !rosterTeacherIds.includes(String(rosterTeacherFilter))) rosterTeacherFilter = "all";
+        teacherSelect.innerHTML = `<option value="all">All teachers</option>${rosterTeacherDirectory.map((teacher) => `<option value="${rosterSafe(teacher.id)}">${rosterSafe(rosterTeacherName(teacher.id))}</option>`).join("")}`;
         teacherSelect.value = rosterTeacherFilter;
       }
 
@@ -29851,7 +29867,7 @@
     };
 
     const openRosterClassCreator = () => {
-      const activeTeachers = teachers.filter((teacher) => teacher.status === "active");
+      const activeTeachers = classesAndRostersTeacherDirectory().filter((teacher) => teacher.status !== "inactive");
       if (!activeTeachers.length) return showToast("Add an active teacher before creating a class");
       const teacherSelect = document.getElementById("roster-class-create-teacher");
       teacherSelect.innerHTML = `<option value="">Select a teacher…</option>${activeTeachers.map((teacher) => `<option value="${rosterSafe(teacher.id)}">${rosterSafe(fullName(teacher))}</option>`).join("")}`;
