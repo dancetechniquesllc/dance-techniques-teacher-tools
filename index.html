@@ -27491,8 +27491,19 @@
       if (!selection?.rangeCount || selection.isCollapsed) return false;
       const range = selection.getRangeAt(0);
       const span = document.createElement("span");
-      Object.entries(styles).forEach(([property, value]) => span.style.setProperty(property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`), value, "important"));
-      span.appendChild(range.extractContents());
+      const cssProperties = Object.entries(styles).map(([property, value]) => [property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`), value]);
+      cssProperties.forEach(([property, value]) => span.style.setProperty(property, value, "important"));
+      const contents = range.extractContents();
+      contents.querySelectorAll("font").forEach((font) => {
+        if (styles.fontFamily) font.removeAttribute("face");
+        if (styles.fontSize) font.removeAttribute("size");
+        if (styles.color) font.removeAttribute("color");
+      });
+      contents.querySelectorAll("[style]").forEach((element) => {
+        cssProperties.forEach(([property]) => element.style.removeProperty(property));
+        if (!element.getAttribute("style")?.trim()) element.removeAttribute("style");
+      });
+      span.appendChild(contents);
       range.insertNode(span);
       selection.removeAllRanges();
       const styledRange = document.createRange();
