@@ -27448,7 +27448,28 @@
       if (!selection?.rangeCount) return;
       const range = selection.getRangeAt(0);
       const preview = document.getElementById("newsletter-preview-document");
-      if (preview?.contains(range.commonAncestorContainer) && (!selection.isCollapsed || preview.contains(document.activeElement))) newsletterSavedSelection = range.cloneRange();
+      if (preview?.contains(range.commonAncestorContainer) && (!selection.isCollapsed || preview.contains(document.activeElement))) {
+        newsletterSavedSelection = range.cloneRange();
+        if (!selection.isCollapsed) {
+          const anchorElement = selection.anchorNode?.nodeType === Node.ELEMENT_NODE ? selection.anchorNode : selection.anchorNode?.parentElement;
+          const computed = anchorElement ? getComputedStyle(anchorElement) : null;
+          if (computed) {
+            const family = computed.fontFamily.toLowerCase();
+            const weight = Number(computed.fontWeight) || 400;
+            const font = family.includes("parisienne") ? "parisienne" : family.includes("bodoni") || family.includes("didot") ? "bodoni-smallcaps" : family.includes("ultra light") ? "avenir-ultra-light" : weight >= 700 ? "avenir-bold" : "avenir-light";
+            const fontSelect = document.getElementById("newsletter-font");
+            if (fontSelect) {
+              fontSelect.value = font;
+              fontSelect.style.fontFamily = newsletterFontStyle({ font });
+              fontSelect.style.fontWeight = newsletterFontWeight({ font });
+            }
+            const pointSize = parseFloat(computed.fontSize) * .75;
+            const sizeSelect = document.getElementById("newsletter-text-size");
+            const sizes = sizeSelect ? [...sizeSelect.options].map((option) => Number(option.value)) : [];
+            if (sizeSelect && sizes.length) sizeSelect.value = String(sizes.reduce((closest, size) => Math.abs(size - pointSize) < Math.abs(closest - pointSize) ? size : closest, sizes[0]));
+          }
+        }
+      }
     });
     const restoreNewsletterSelection = () => {
       if (!newsletterSavedSelection) return false;
