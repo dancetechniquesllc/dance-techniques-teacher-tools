@@ -6240,6 +6240,11 @@
     .newsletter-video-row button { min-height: 42px; }
     .newsletter-editor-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
     .newsletter-preview-controls { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .newsletter-preview-heading { display: grid; gap: 7px; }
+    .newsletter-history-controls { display: flex; gap: 6px; }
+    .newsletter-history-controls button { min-height: 30px; padding: 5px 10px; border-radius: 999px; background: var(--blush); color: #160f0d; font-size: 10px; }
+    .newsletter-history-controls button:disabled { opacity: .38; }
+    .newsletter-history-controls svg { width: 14px; height: 14px; margin-right: 4px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; vertical-align: -3px; }
     .newsletter-preview-device { display: flex; gap: 6px; }
     .newsletter-preview-device button { min-height: 32px; padding: 5px 10px; border-radius: 999px; font-size: 10px; }
     .newsletter-preview-device button.is-selected { background: var(--fg); color: white; }
@@ -12389,7 +12394,7 @@
                   </div>
                 </div>
                 </div>
-                <div class="newsletter-preview-controls"><div><h3>Live Preview</h3></div><div class="newsletter-preview-device"><button class="is-selected" type="button" data-newsletter-device="desktop">Desktop</button><button type="button" data-newsletter-device="mobile">Phone</button></div></div>
+                <div class="newsletter-preview-controls"><div class="newsletter-preview-heading"><h3>Live Preview</h3><div class="newsletter-history-controls" aria-label="Newsletter edit history"><button type="button" id="newsletter-undo" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 4 12l5 5"></path><path d="M5 12h8a7 7 0 0 1 7 7"></path></svg>Undo</button><button type="button" id="newsletter-redo" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 7 5 5-5 5"></path><path d="M19 12h-8a7 7 0 0 0-7 7"></path></svg>Redo</button></div></div><div class="newsletter-preview-device"><button class="is-selected" type="button" data-newsletter-device="desktop">Desktop</button><button type="button" data-newsletter-device="mobile">Phone</button></div></div>
                 <div class="newsletter-preview-stage"><div class="newsletter-preview-document" id="newsletter-preview-document"></div></div>
               </article>
             </div>
@@ -26056,6 +26061,17 @@
       persistNewsletterActiveVersion();
       return structuredClone(newsletterDraft.genderVersions?.[String(gender || "").toLowerCase() === "male" ? "male" : "female"] || newsletterDraft);
     };
+    const newsletterUndoStack = [];
+    const newsletterRedoStack = [];
+    let newsletterHistoryCurrent = JSON.stringify(newsletterDraft);
+    let newsletterHistorySuspended = false;
+    let newsletterLastHistoryAt = 0;
+    const updateNewsletterHistoryButtons = () => {
+      const undo = document.getElementById("newsletter-undo");
+      const redo = document.getElementById("newsletter-redo");
+      if (undo) undo.disabled = !newsletterUndoStack.length;
+      if (redo) redo.disabled = !newsletterRedoStack.length;
+    };
 
     const newsletterColors = { black: "#160f0d", "soft-grey": "#5e5e5e", berry: "#65103f", "dusty-mauve": "#9b687a", blush: "#dba9a1", sage: "#68775f", gold: "#d58c24" };
     const newsletterFontStyle = (draft = newsletterDraft) => draft.font === "parisienne" ? '"Parisienne", cursive' : draft.font === "bodoni-smallcaps" ? '"Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif' : draft.font === "avenir-ultra-light" ? '"Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : draft.font === "avenir-light" ? '"Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
@@ -26269,12 +26285,39 @@
     const saveNewsletterDraft = () => {
       clearTimeout(newsletterSaveTimer);
       persistNewsletterActiveVersion();
+      const snapshot = JSON.stringify(newsletterDraft);
+      if (!newsletterHistorySuspended && snapshot !== newsletterHistoryCurrent) {
+        const now = Date.now();
+        if (!newsletterUndoStack.length || now - newsletterLastHistoryAt > 550) newsletterUndoStack.push(newsletterHistoryCurrent);
+        if (newsletterUndoStack.length > 80) newsletterUndoStack.shift();
+        newsletterRedoStack.length = 0;
+        newsletterHistoryCurrent = snapshot;
+        newsletterLastHistoryAt = now;
+        updateNewsletterHistoryButtons();
+      }
       const state = document.getElementById("newsletter-save-state");
       if (state) state.textContent = "Saving…";
       newsletterSaveTimer = window.setTimeout(() => {
         localStorage.setItem(newsletterStorageKey, JSON.stringify(newsletterDraft));
         if (state) state.textContent = "Draft saved";
       }, 220);
+    };
+    const restoreNewsletterHistory = (direction) => {
+      const source = direction === "undo" ? newsletterUndoStack : newsletterRedoStack;
+      const destination = direction === "undo" ? newsletterRedoStack : newsletterUndoStack;
+      const snapshot = source.pop();
+      if (!snapshot) return;
+      destination.push(newsletterHistoryCurrent);
+      newsletterHistorySuspended = true;
+      newsletterDraft = JSON.parse(snapshot);
+      newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
+      newsletterHistoryCurrent = snapshot;
+      localStorage.setItem(newsletterStorageKey, snapshot);
+      renderNewsletterStudio();
+      newsletterHistorySuspended = false;
+      newsletterLastHistoryAt = 0;
+      updateNewsletterHistoryButtons();
+      showToast(direction === "undo" ? "Last change undone." : "Change restored.");
     };
 
     const newsletterEmailHtml = (context = newsletterSampleContext(), draft = newsletterDraft) => {
@@ -26374,6 +26417,7 @@
       preview.style.setProperty("--newsletter-body-weight", newsletterFontWeight());
       preview.style.setProperty("--newsletter-body-size", newsletterFontSize());
       preview.innerHTML = `<header class="newsletter-preview-header"><div class="newsletter-logo-editor ${newsletterLogoSelected ? "is-selected" : ""}" role="button" tabindex="0" data-newsletter-logo-editor aria-label="Select newsletter logo" style="width:${Math.max(60, Math.min(280, Number(newsletterDraft.logoWidth) || 150))}px;--newsletter-logo-color:${newsletterColors[newsletterDraft.logoColor] || newsletterColors.black};"><span class="newsletter-logo-mark" aria-hidden="true"></span><button class="newsletter-logo-resize-handle" type="button" data-newsletter-logo-resize-handle aria-label="Resize newsletter logo" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button></div><h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>${floatingGraphicsMarkup}`;
+      updateNewsletterHistoryButtons();
     };
 
     const newsletterLowercaseText = (value = "") => {
@@ -27711,6 +27755,8 @@
       renderNewsletterStudio();
       saveNewsletterDraft();
     }));
+    document.getElementById("newsletter-undo")?.addEventListener("click", () => restoreNewsletterHistory("undo"));
+    document.getElementById("newsletter-redo")?.addEventListener("click", () => restoreNewsletterHistory("redo"));
     document.getElementById("newsletter-video-clear")?.addEventListener("click", () => {
       newsletterDraft.videoUrl = "";
       renderNewsletterStudio();
