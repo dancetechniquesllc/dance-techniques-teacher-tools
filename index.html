@@ -16071,6 +16071,7 @@
         profileTeacher.loginEmail = profile.email;
       }
       document.body.dataset.currentTeacherId = profileTeacher.id;
+      const assignmentCountBeforeMerge = schoolLibraryAssignmentCount();
       if (schools.length) {
         const mergedSchools = schools.map((school, index) => {
           const resolvedSchoolId = String(school.id || "");
@@ -16086,6 +16087,10 @@
           };
         });
         replaceCollection(schoolLibrary, mergedSchools);
+        if (!assignmentCountBeforeMerge && !schoolLibraryAssignmentCount(schoolLibrary) && restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true })) {
+          showToast("School assignments were restored from your last local backup.");
+          scheduleAppDataSave();
+        }
       } else if (schoolLibrary.length) {
         console.error("The shared partner-school table is empty; the preserved directory remains visible and will not be overwritten.");
       }
@@ -18762,6 +18767,36 @@
       const schoolEvents = Array.isArray(payload.isdCalendars) ? payload.isdCalendars.length : 0;
       return (rosterCount + teacherCount + schoolCount + schoolEvents) > 0;
     };
+    const schoolLibraryAssignmentCount = (schools = []) => {
+      if (!Array.isArray(schools)) return 0;
+      return schools.filter((school) => Boolean(school?.assignedTeacherId)).length;
+    };
+    const restoreSchoolAssignmentsFromHistory = ({ onlyUnassigned = true } = {}) => {
+      const history = loadPersistedAppDataHistory();
+      const sourceSnapshot = history.find((entry) => {
+        if (!entry || typeof entry !== "object") return false;
+        const payload = entry.payload;
+        return payload && Array.isArray(payload.schoolLibrary);
+      });
+      if (!sourceSnapshot?.payload) return false;
+      const sourceById = new Map();
+      (sourceSnapshot.payload.schoolLibrary || []).forEach((school) => {
+        if (school?.id) sourceById.set(String(school.id), school.assignedTeacherId || "");
+      });
+      if (!sourceById.size) return false;
+      let didRestore = false;
+      schoolLibrary.forEach((school) => {
+        const restoreId = sourceById.get(String(school.id || ""));
+        if (!restoreId) return;
+        if (!onlyUnassigned || !school.assignedTeacherId) {
+          if (school.assignedTeacherId !== restoreId) {
+            school.assignedTeacherId = restoreId;
+            didRestore = true;
+          }
+        }
+      });
+      return didRestore;
+    };
     const loadPersistedAppDataHistory = () => {
       try {
         const raw = window.localStorage?.getItem(persistentStorageBackupKey);
@@ -19065,6 +19100,9 @@
           school.assignedTeacherId = persistedTeacherIdMap.get(school.assignedTeacherId);
         }
       });
+      if (!schoolLibraryAssignmentCount() && restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true })) {
+        scheduleAppDataSave();
+      }
       const hasPersistedRosterClasses = Array.isArray(persisted.rosterClasses);
       if (hasPersistedRosterClasses && persisted.rosterClasses.length > 0) {
         replaceCollection(rosterClasses, persisted.rosterClasses);
