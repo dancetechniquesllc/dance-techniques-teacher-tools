@@ -18653,6 +18653,7 @@
     document.getElementById("admin-tempo-tag-filter")?.addEventListener("change", renderTempoLibraryAdmin);
 
     let profileTeacher = teachers[0];
+    let localPersistedAppDataAt = "";
     const dayOptions = [
       { value: 1, label: "Mon" },
       { value: 2, label: "Tue" },
@@ -18981,6 +18982,7 @@
       try {
         const serializedPayload = JSON.stringify(payload);
         window.localStorage?.setItem(persistentStorageKey, serializedPayload);
+        localPersistedAppDataAt = payload.savedAt || "";
         savePersistedAppDataHistory(payload);
         window.name = JSON.stringify({ key: persistentStorageKey, data: payload });
         window.dtPrototypeStorageStatus = { ok: true, savedAt, method: "localStorage" };
@@ -19008,8 +19010,18 @@
       persistenceSaveTimer = window.setTimeout(saveAppData, 180);
     };
 
+    const cloudPayloadShouldApply = (cloudPayload) => {
+      if (!cloudPayload || typeof cloudPayload !== "object") return true;
+      if (!cloudPayload.savedAt || !localPersistedAppDataAt) return true;
+      const cloudTime = Date.parse(cloudPayload.savedAt);
+      const localTime = Date.parse(localPersistedAppDataAt);
+      if (!Number.isFinite(cloudTime) || !Number.isFinite(localTime)) return true;
+      return cloudTime >= localTime;
+    };
+
     const applyPersistedAppData = (persisted, { mergeTeachers = false } = {}) => {
       if (!persisted) return;
+      if (persisted.savedAt) localPersistedAppDataAt = persisted.savedAt;
       const currentTeacherId = persisted.currentTeacherId || profileTeacher?.id || "lexi";
       const persistedTeacherIdMap = new Map();
       if (Array.isArray(persisted.teachers)) {
@@ -30495,7 +30507,10 @@
         return;
       }
       if (data?.payload) {
-        if (isLeader) applyPersistedAppData(data.payload, { mergeTeachers: true });
+        if (isLeader && cloudPayloadShouldApply(data.payload)) applyPersistedAppData(data.payload, { mergeTeachers: true });
+        else if (isLeader && data?.payload && !cloudPayloadShouldApply(data.payload)) {
+          console.info("Skipping older cloud payload in favor of local DD snapshot.");
+        }
         else applyTeacherCloudData(data.payload, profile.id);
       }
       if (isLeader) {
