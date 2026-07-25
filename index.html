@@ -19460,6 +19460,23 @@
           return false;
         }
         if (data?.id) school.assignmentId = data.id;
+        const verificationQuery = client
+          .from("teacher_school_assignments")
+          .select("id, teacher_id, partner_school_id, active, updated_at")
+          .eq("partner_school_id", school.id)
+          .eq("active", true)
+          .order("updated_at", { ascending: false })
+          .limit(1);
+        const { data: verifiedRows, error: verificationError } = await verificationQuery;
+        const verifiedAssignment = verifiedRows?.[0] || null;
+        const assignmentMatches = targetTeacherId
+          ? verifiedAssignment?.teacher_id === targetTeacherId
+          : !verifiedAssignment;
+        if (verificationError || !assignmentMatches) {
+          console.error(`The assignment for ${school.name || school.id} was not confirmed after saving.`, verificationError || verifiedAssignment);
+          return false;
+        }
+        if (verifiedAssignment?.id) school.assignmentId = verifiedAssignment.id;
       }
       document.documentElement.dataset.assignmentsVerifiedAt = new Date().toISOString();
       return true;
@@ -21765,7 +21782,8 @@
       const teacher = teachers.find((item) => item.id === teacherId);
       if (!teacher) return "";
       const color = teacherProfileColor(teacher);
-      return `style="--teacher-assigned-color:${escapeText(color)};--teacher-assigned-text:${escapeText(coordinatedInitialColor(color))}"`;
+      const textColor = coordinatedInitialColor(color);
+      return `style="--teacher-assigned-color:${escapeText(color)};--teacher-assigned-text:${escapeText(textColor)};background-color:${escapeText(color)};color:${escapeText(textColor)};border-color:${escapeText(color)}"`;
     };
 
     const schoolDaySortValue = (school) => {
@@ -21974,21 +21992,28 @@
       if (!card || !school) return;
       const assignment = teacherAssignmentLabel(school.assignedTeacherId);
       const assignmentClass = school.assignedTeacherId ? teacherAssignmentColorClass(school.assignedTeacherId) : "unassigned";
-      const teacherBubble = card.querySelector(".school-library-assignment");
+      const teacherBubbles = card.querySelectorAll(".school-library-assignment");
       const isdBubble = card.querySelector(".school-library-isd-bubble");
-      if (teacherBubble) {
+      teacherBubbles.forEach((teacherBubble) => {
         teacherBubble.textContent = assignment;
         teacherBubble.className = `status school-library-assignment ${assignmentClass}`;
         const teacher = teachers.find((item) => item.id === school.assignedTeacherId);
         if (teacher) {
           const color = teacherProfileColor(teacher);
+          const textColor = coordinatedInitialColor(color);
           teacherBubble.style.setProperty("--teacher-assigned-color", color);
-          teacherBubble.style.setProperty("--teacher-assigned-text", coordinatedInitialColor(color));
+          teacherBubble.style.setProperty("--teacher-assigned-text", textColor);
+          teacherBubble.style.backgroundColor = color;
+          teacherBubble.style.color = textColor;
+          teacherBubble.style.borderColor = color;
         } else {
           teacherBubble.style.removeProperty("--teacher-assigned-color");
           teacherBubble.style.removeProperty("--teacher-assigned-text");
+          teacherBubble.style.removeProperty("background-color");
+          teacherBubble.style.removeProperty("color");
+          teacherBubble.style.removeProperty("border-color");
         }
-      }
+      });
       if (isdBubble) isdBubble.textContent = school.isd || "No ISD";
     };
 
