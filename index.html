@@ -18984,7 +18984,12 @@
           school.assignedTeacherId = persistedTeacherIdMap.get(school.assignedTeacherId);
         }
       });
-      replaceCollection(rosterClasses, persisted.rosterClasses);
+      const hasPersistedRosterClasses = Array.isArray(persisted.rosterClasses);
+      if (hasPersistedRosterClasses && persisted.rosterClasses.length > 0) {
+        replaceCollection(rosterClasses, persisted.rosterClasses);
+      } else if (hasPersistedRosterClasses && !rosterClasses.length && persisted.rosterClasses.length === 0) {
+        replaceCollection(rosterClasses, []);
+      }
       replaceCollection(messageThreads, persisted.messageThreads);
       replaceCollection(isdCalendars, persisted.isdCalendars);
       replaceCollection(tempoEncouragementLibrary, persisted.tempoEncouragementLibrary);
