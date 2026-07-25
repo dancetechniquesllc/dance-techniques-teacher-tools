@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v184-teacher-color-fallback";
+const CACHE_NAME = "my-dance-techniques-v185-class-teacher-bubbles";
 const CORE_ASSETS = [
   "./",
   "./index.html",
