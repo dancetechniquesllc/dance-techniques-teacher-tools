@@ -27478,13 +27478,20 @@
       selection.addRange(newsletterSavedSelection);
       return true;
     };
+    const captureNewsletterSelection = () => {
+      const selection = window.getSelection();
+      const preview = document.getElementById("newsletter-preview-document");
+      if (!selection?.rangeCount || selection.isCollapsed || !preview?.contains(selection.getRangeAt(0).commonAncestorContainer)) return false;
+      newsletterSavedSelection = selection.getRangeAt(0).cloneRange();
+      return true;
+    };
     const applyNewsletterSelectionStyle = (styles) => {
       if (!restoreNewsletterSelection()) return false;
       const selection = window.getSelection();
       if (!selection?.rangeCount || selection.isCollapsed) return false;
       const range = selection.getRangeAt(0);
       const span = document.createElement("span");
-      Object.assign(span.style, styles);
+      Object.entries(styles).forEach(([property, value]) => span.style.setProperty(property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`), value, "important"));
       span.appendChild(range.extractContents());
       range.insertNode(span);
       selection.removeAllRanges();
@@ -27495,6 +27502,9 @@
       newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
       return true;
     };
+    ["newsletter-font", "newsletter-text-size", "newsletter-inline-toolbar", "newsletter-color-swatches"].forEach((id) => {
+      document.getElementById(id)?.addEventListener("pointerdown", captureNewsletterSelection, true);
+    });
     document.getElementById("newsletter-inline-toolbar")?.addEventListener("click", (event) => {
       const command = event.target.closest("[data-newsletter-command]")?.dataset.newsletterCommand;
       if (command) {
@@ -27922,8 +27932,7 @@
         return;
       }
       if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
-        document.execCommand("foreColor", false, newsletterColors[button.dataset.newsletterColor] || newsletterColors.berry);
-        newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
+        applyNewsletterSelectionStyle({ color: newsletterColors[button.dataset.newsletterColor] || newsletterColors.berry });
         return;
       }
       newsletterDraft.color = button.dataset.newsletterColor || "berry";
