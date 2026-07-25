@@ -16285,15 +16285,18 @@
         const mergedSchools = schools.map((school, index) => {
           const resolvedSchoolId = String(school.id || "");
           const localAssignedTeacherId = localSchoolAssignmentsById.get(resolvedSchoolId);
-          const databaseAssignedTeacherId = activeAssignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id
-            || (recoverInactiveAssignments ? assignments.find((assignment) => assignment.partner_school_id === school.id)?.teacher_id : "")
-            || "";
+          const activeAssignment = activeAssignments.find((assignment) => assignment.partner_school_id === school.id);
+          const recoveredInactiveAssignment = !activeAssignment && recoverInactiveAssignments
+            ? assignments.find((assignment) => assignment.partner_school_id === school.id)
+            : null;
+          const databaseAssignedTeacherId = activeAssignment?.teacher_id || recoveredInactiveAssignment?.teacher_id || "";
           return {
           id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
           initials: school.initials || "",
           isd: school.district || "", directorName: school.director_name || "", phone: school.director_phone || "", email: school.director_email || "",
           dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", seasonStartDate: school.season_start_date || "",
           assignedTeacherId: databaseAssignedTeacherId || localAssignedTeacherId || "",
+          recoveredFromInactiveAssignment: Boolean(recoveredInactiveAssignment?.teacher_id),
           classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "",
           importantNotes: school.important_notes || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
           };
@@ -18988,7 +18991,7 @@
     ];
     const persistentStorageKey = "dt-teacher-tools-prototype-v1";
     const persistentStorageBackupKey = `${persistentStorageKey}:history`;
-    const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725-v2`;
+    const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725-v3`;
     const schoolScheduleRecoveryCompletedKey = `${persistentStorageKey}:school-schedule-recovery-20260725-v1`;
     const missingSchoolDataRecoveryCompletedKey = `${persistentStorageKey}:missing-school-data-recovery-20260725-v1`;
     const cloudStateRecordId = "director-dashboard";
@@ -19396,12 +19399,12 @@
       const desiredAssignments = schoolLibrary
         .filter((school) => isUuid(school.id) && isUuid(school.assignedTeacherId))
         .map((school) => ({ teacher_id: school.assignedTeacherId, partner_school_id: school.id, active: true }));
-      const managedSchoolIds = [...new Set(schoolLibrary.filter((school) => isUuid(school.id)).map((school) => school.id))];
-      if (!managedSchoolIds.length) return true;
+      const desiredSchoolIds = [...new Set(desiredAssignments.map((assignment) => assignment.partner_school_id))];
+      if (!desiredSchoolIds.length) return true;
       const { error: deactivateError } = await client
         .from("teacher_school_assignments")
         .update({ active: false })
-        .in("partner_school_id", managedSchoolIds);
+        .in("partner_school_id", desiredSchoolIds);
       if (deactivateError) {
         console.error("Previous Partner School assignments could not be retired", deactivateError);
         return false;
@@ -19415,17 +19418,14 @@
       const { data: verifiedAssignments, error: verificationError } = await client
         .from("teacher_school_assignments")
         .select("teacher_id,partner_school_id,active")
-        .in("partner_school_id", managedSchoolIds)
+        .in("partner_school_id", desiredSchoolIds)
         .eq("active", true);
       if (verificationError) {
         console.error("Partner School assignments could not be verified", verificationError);
         return false;
       }
       const verifiedBySchool = new Map((verifiedAssignments || []).map((assignment) => [assignment.partner_school_id, assignment.teacher_id]));
-      const assignmentsMatch = desiredAssignments.every((assignment) => verifiedBySchool.get(assignment.partner_school_id) === assignment.teacher_id)
-        && (verifiedAssignments || []).every((assignment) => desiredAssignments.some((desired) => (
-          desired.partner_school_id === assignment.partner_school_id && desired.teacher_id === assignment.teacher_id
-        )));
+      const assignmentsMatch = desiredAssignments.every((assignment) => verifiedBySchool.get(assignment.partner_school_id) === assignment.teacher_id);
       if (!assignmentsMatch) {
         console.error("Partner School assignment verification did not match the Director Dashboard.");
         return false;
@@ -31857,7 +31857,11 @@
             if (recoveredMissingSchoolData.length) showToast(`${recoveredMissingSchoolData.length} Partner School record${recoveredMissingSchoolData.length === 1 ? "" : "s"} recovered.`);
           }
         }
-        const assignmentsSynced = await syncSchoolAssignmentsToDatabase();
+        const recoveredInactiveSchools = schoolLibrary.filter((school) => school.recoveredFromInactiveAssignment);
+        const assignmentsSynced = recoveredInactiveSchools.length
+          ? await syncSchoolAssignmentsToDatabase()
+          : true;
+        if (assignmentsSynced) recoveredInactiveSchools.forEach((school) => { delete school.recoveredFromInactiveAssignment; });
         if (!assignmentsSynced) showToast("Some teacher school assignments still need attention.");
         else if (recoveredTeachers.length || recoveredAssignments) {
           showToast(`${recoveredTeachers.length ? `${recoveredTeachers.length} teacher profile${recoveredTeachers.length === 1 ? "" : "s"} and ` : ""}${recoveredAssignments ? "school assignments" : "saved records"} restored from autosave.`);
