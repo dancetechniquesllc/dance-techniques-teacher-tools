@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v186-prefill-class-school";
+const CACHE_NAME = "my-dance-techniques-v187-class-level-bubble";
 const CORE_ASSETS = [
   "./",
   "./index.html",

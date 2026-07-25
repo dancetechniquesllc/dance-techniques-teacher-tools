@@ -5803,6 +5803,7 @@
     .roster-class-badge img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
     .roster-class-day-bubble { position: absolute; top: 10px; right: 10px; min-width: 28px; height: 28px; display: grid; place-items: center; padding: 0 7px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; font-weight: 850; }
     .roster-class-time-bubble { position: absolute; top: 12px; left: 12px; display: inline-flex; min-height: 30px; align-items: center; padding: 5px 10px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; font-weight: 850; }
+    .roster-class-level-bubble { position: absolute; top: 12px; left: 50%; min-height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 5px 11px; transform: translateX(-50%); border: 1px solid #c5c5c5; border-radius: 999px; background: #e2e2e2; color: #4f4f4f; font-size: 10px; font-weight: 850; white-space: nowrap; }
     .roster-class-card > .roster-enrollment-bubble { position: absolute; top: 12px; right: 12px; left: auto; min-height: 30px; align-items: center; padding: 5px 10px; transform: none; margin: 0 !important; white-space: nowrap; }
     .roster-class-age-range { margin-bottom: 5px; }
     .roster-class-students { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px 6px; margin-top: 8px; }
@@ -26903,6 +26904,7 @@
         }, new Map());
         return `<button class="roster-class-card ${item.id === selectedRosterClassId && rosterClassProfileOpen ? "is-selected" : ""}" type="button" data-roster-class="${rosterSafe(item.id)}">
           <span class="roster-class-time-bubble">${rosterSafe(item.time || "Time not set")}</span>
+          <span class="roster-class-level-bubble">Level ${rosterSafe(item.level || "—")}</span>
           <small class="roster-enrollment-bubble ${enrolled >= item.capacity ? "full" : (enrolled >= 7 ? "ready" : "low")}">${enrolled}/${item.capacity} Enrolled${enrolled >= item.capacity ? " · Full" : ""}</small>
           <span class="roster-class-teacher-bubble teacher-identity-bubble ${teacherProfileColorClass(assignedTeacher || item.teacherId)}" title="${rosterSafe(assignedTeacher ? rosterTeacherName(item.teacherId) : "Teacher unassigned")}" aria-label="${rosterSafe(assignedTeacher ? `Assigned to ${rosterTeacherName(item.teacherId)}` : "Teacher unassigned")}">${assignedTeacher?.photo ? `<img src="${rosterSafe(assignedTeacher.photo)}" alt="">` : rosterSafe(assignedTeacher ? initialsFor(assignedTeacher) : "—")}</span>
           <strong>${rosterSafe(item.name)}</strong>
