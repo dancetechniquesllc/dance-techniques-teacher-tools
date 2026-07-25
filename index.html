@@ -9353,6 +9353,19 @@
       cursor: default;
       opacity: 1;
     }
+    #profile-create-live-record.needs-live-profile {
+      background: var(--berry);
+      border-color: var(--berry);
+      color: #fffaf6;
+      animation: live-profile-reminder 2s ease-in-out infinite;
+    }
+    @keyframes live-profile-reminder {
+      0%, 100% { box-shadow: 0 0 0 0 rgb(101 16 63 / 0); transform: scale(1); }
+      50% { box-shadow: 0 0 0 7px rgb(101 16 63 / .18); transform: scale(1.025); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #profile-create-live-record.needs-live-profile { animation: none; }
+    }
     .teacher-live-profile-alert {
       width: fit-content;
       margin-top: 8px;
@@ -13568,6 +13581,7 @@
           <div class="admin-page-actions">
             <button class="secondary" type="button" id="restore-previous-autosave">Restore previous autosave</button>
             <button class="secondary" type="button" id="restore-assignments">Restore assignments</button>
+            <button class="profile-login-top-button" type="button" id="profile-create-live-record">Make Profile Live</button>
             <button class="profile-login-top-button" type="button" id="open-profile-login-setup">Login Setup</button>
             <button class="danger-btn" type="button" id="deactivate-profile">Deactivate</button>
             <button class="primary" type="button" data-save-profile>Save changes</button>
@@ -14080,7 +14094,6 @@
         <label>Invite sent date<input id="profile-invite-date" data-profile-field="inviteDate" type="date"></label>
         <div class="login-invite-actions full-field">
           <div class="login-invite-button-row">
-            <button class="secondary" type="button" id="profile-create-live-record">Create Live Profile</button>
             <button class="primary" type="button" id="profile-send-email-invite">Send Invite Now</button>
             <a class="secondary profile-invite-button" id="profile-invite-text-button" href="sms:?&body=">Text Invite</a>
           </div>
@@ -21538,7 +21551,8 @@
         createLiveRecordButton.hidden = false;
         createLiveRecordButton.disabled = hasLiveProfile;
         createLiveRecordButton.classList.toggle("live-profile-active", hasLiveProfile);
-        createLiveRecordButton.textContent = hasLiveProfile ? "Live Profile Active" : "Create Live Profile";
+        createLiveRecordButton.classList.toggle("needs-live-profile", !hasLiveProfile);
+        createLiveRecordButton.textContent = hasLiveProfile ? "✓ Profile Live" : "Make Profile Live";
       }
       const liveStatusAlert = document.getElementById("profile-live-status-alert");
       if (liveStatusAlert) liveStatusAlert.hidden = hasLiveProfile;
@@ -21562,6 +21576,7 @@
       const email = String(document.getElementById("profile-login-email")?.value || profileTeacher.loginEmail || "").trim().toLowerCase();
       const client = window.dtSupabase;
       if (!email || !email.includes("@")) {
+        setProfileLoginSetupOpen(true);
         message.className = "login-invite-message error";
         message.textContent = "Add a valid login email first.";
         document.getElementById("profile-login-email")?.focus();
@@ -21619,7 +21634,8 @@
       saveAppData();
       button.disabled = true;
       button.classList.add("live-profile-active");
-      button.textContent = "Live Profile Active";
+      button.classList.remove("needs-live-profile");
+      button.textContent = "✓ Profile Live";
       const liveStatusAlert = document.getElementById("profile-live-status-alert");
       if (liveStatusAlert) liveStatusAlert.hidden = true;
       message.className = "login-invite-message success";
