@@ -16245,7 +16245,7 @@
             dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", isd: school.district || "", seasonStartDate: school.season_start_date || "",
             address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "), directorName: school.director_name || "",
             phone: school.director_phone || "", email: school.director_email || "", importantNotes: school.important_notes || "",
-            partnershipBenefit: school.partnership_benefit || "", color: item.color || ""
+            partnershipBenefit: school.partnership_benefit || "", updatedAt: school.updated_at || "", color: item.color || ""
           };
         });
         return teacher;
@@ -16298,7 +16298,7 @@
           assignedTeacherId: databaseAssignedTeacherId || localAssignedTeacherId || "",
           recoveredFromInactiveAssignment: Boolean(recoveredInactiveAssignment?.teacher_id),
           classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "",
-          importantNotes: school.important_notes || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
+          importantNotes: school.important_notes || "", updatedAt: school.updated_at || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
           };
         });
         replaceCollection(schoolLibrary, mergedSchools);
@@ -16317,6 +16317,7 @@
           id: item.id, assignmentId: item.teacher_school_assignment_id, name: item.name, ageGroup: item.age_group, level: String(item.level),
           time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", schoolName: school.name || "Partner School",
           day: weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
+          updatedAt: item.updated_at || "",
           helperHistory: Array.isArray(item.helper_history) ? item.helper_history : [],
           students: enrollments.filter((enrollment) => enrollment.dance_class_id === item.id).map((enrollment) => {
             const student = enrollment.students || {};
@@ -16405,16 +16406,26 @@
           return false;
         }
         const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active", helper_history: rosterClass.helperHistory || [] };
-        const query = oldId?.startsWith("roster-") ? window.dtSupabase.from("dance_classes").insert(payload) : window.dtSupabase.from("dance_classes").update(payload).eq("id", oldId);
-        const { data, error } = await query.select("id").single();
+        let query = oldId?.startsWith("roster-")
+          ? window.dtSupabase.from("dance_classes").insert(payload)
+          : window.dtSupabase.from("dance_classes").update(payload).eq("id", oldId);
+        if (!oldId?.startsWith("roster-") && rosterClass.updatedAt) query = query.eq("updated_at", rosterClass.updatedAt);
+        const { data, error } = await query.select("id, updated_at").maybeSingle();
         if (error) {
           rosterClass.sharedSaveError = true;
           sharedRosterError("The class could not sync, but it has been kept in Classes & Rosters.", error, { reload: false });
           scheduleAppDataSave();
           return false;
         }
+        if (!data?.id) {
+          rosterClass.sharedSaveError = true;
+          showToast("This class changed in another session. Your edit was kept here; refresh before saving it again.");
+          scheduleAppDataSave();
+          return false;
+        }
         delete rosterClass.sharedSaveError;
         rosterClass.id = data.id;
+        rosterClass.updatedAt = data.updated_at || rosterClass.updatedAt || "";
         if (selectedRosterClassId === oldId) selectedRosterClassId = data.id;
         scheduleAppDataSave();
         return true;
@@ -19392,43 +19403,25 @@
 
     const isUuid = (value) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
 
-    const syncSchoolAssignmentsToDatabase = async () => {
+    const syncSchoolAssignmentsToDatabase = async (schoolsToSync = schoolLibrary.filter((school) => isUuid(school.id) && isUuid(school.assignedTeacherId))) => {
       const client = window.dtSupabase;
       const profile = window.dtCurrentProfile;
       if (!client || !profile || !["admin", "director"].includes(profile.role) || document.body.dataset.tourMode === "true") return true;
-      const desiredAssignments = schoolLibrary
-        .filter((school) => isUuid(school.id) && isUuid(school.assignedTeacherId))
-        .map((school) => ({ teacher_id: school.assignedTeacherId, partner_school_id: school.id, active: true }));
-      const desiredSchoolIds = [...new Set(desiredAssignments.map((assignment) => assignment.partner_school_id))];
-      if (!desiredSchoolIds.length) return true;
-      const { error: deactivateError } = await client
-        .from("teacher_school_assignments")
-        .update({ active: false })
-        .in("partner_school_id", desiredSchoolIds);
-      if (deactivateError) {
-        console.error("Previous Partner School assignments could not be retired", deactivateError);
-        return false;
-      }
-      if (!desiredAssignments.length) return true;
-      const { error } = await client.from("teacher_school_assignments").upsert(desiredAssignments, { onConflict: "teacher_id,partner_school_id" });
-      if (error) {
-        console.error("Partner School assignments could not be synchronized", error);
-        return false;
-      }
-      const { data: verifiedAssignments, error: verificationError } = await client
-        .from("teacher_school_assignments")
-        .select("teacher_id,partner_school_id,active")
-        .in("partner_school_id", desiredSchoolIds)
-        .eq("active", true);
-      if (verificationError) {
-        console.error("Partner School assignments could not be verified", verificationError);
-        return false;
-      }
-      const verifiedBySchool = new Map((verifiedAssignments || []).map((assignment) => [assignment.partner_school_id, assignment.teacher_id]));
-      const assignmentsMatch = desiredAssignments.every((assignment) => verifiedBySchool.get(assignment.partner_school_id) === assignment.teacher_id);
-      if (!assignmentsMatch) {
-        console.error("Partner School assignment verification did not match the Director Dashboard.");
-        return false;
+      const targets = [...new Map((schoolsToSync || [])
+        .filter((school) => isUuid(school?.id))
+        .map((school) => [school.id, school])).values()];
+      if (!targets.length) return true;
+      for (const school of targets) {
+        const targetTeacherId = isUuid(school.assignedTeacherId) ? school.assignedTeacherId : null;
+        const { data, error } = await client.rpc("set_school_teacher_assignment", {
+          target_school_id: school.id,
+          target_teacher_id: targetTeacherId
+        });
+        if (error) {
+          console.error(`The assignment for ${school.name || school.id} could not be synchronized.`, error);
+          return false;
+        }
+        if (data?.id) school.assignmentId = data.id;
       }
       document.documentElement.dataset.assignmentsVerifiedAt = new Date().toISOString();
       return true;
@@ -22925,7 +22918,7 @@
       addAssignedSchoolCurriculum(school);
       setTeacherSchoolNewOpen(false);
       refreshTeacherSchoolAssignmentViews();
-      syncSchoolAssignmentsToDatabase();
+      syncPartnerSchoolToDatabase(school).then((saved) => saved && syncSchoolAssignmentsToDatabase([school]));
       showToast(`Created ${school.name} and assigned to ${teacherNickname(profileTeacher)}.`);
     };
 
@@ -23120,15 +23113,21 @@
         important_notes: school.importantNotes || null,
         classroom_options: school.classroomOptions || []
       };
-      const query = isUuid(school.id)
+      let query = isUuid(school.id)
         ? window.dtSupabase.from("partner_schools").update(payload).eq("id", school.id)
         : window.dtSupabase.from("partner_schools").insert({ ...payload, active: true });
-      const { data, error } = await query.select("id").single();
+      if (isUuid(school.id) && school.updatedAt) query = query.eq("updated_at", school.updatedAt);
+      const { data, error } = await query.select("id, updated_at").maybeSingle();
       if (error) {
         console.error("Partner School profile could not be synchronized", error);
         return false;
       }
+      if (!data?.id) {
+        showToast("This school changed in another session. Refresh before saving so no newer information is overwritten.");
+        return false;
+      }
       if (!isUuid(school.id) && data?.id) school.id = data.id;
+      school.updatedAt = data.updated_at || school.updatedAt || "";
       return true;
     };
 
@@ -23588,7 +23587,7 @@
       syncTeachingTeamSchools();
       saveAppData();
       const [assignmentsSaved, cloudSaved] = await Promise.all([
-        schoolSaved === false ? Promise.resolve(false) : syncSchoolAssignmentsToDatabase(),
+        schoolSaved === false ? Promise.resolve(false) : syncSchoolAssignmentsToDatabase([school]),
         saveCloudAppData()
       ]);
       const saveFailed = schoolSaved === false || assignmentsSaved === false || cloudSaved === false;
@@ -23652,7 +23651,7 @@
         renderTeacherProfileList();
         markAdminDashboardReview("schoolLibrary");
         saveAppData();
-        syncSchoolAssignmentsToDatabase().then((synced) => {
+        syncSchoolAssignmentsToDatabase([school]).then((synced) => {
           if (!synced) showToast("The school assignment is saved here, but teacher access still needs attention.");
         });
       }
@@ -23681,8 +23680,9 @@
       if (!button) return;
       const index = Number(button.dataset.deleteSchool);
       const [removed] = profileTeacher.schools.splice(index, 1);
+      let sourceSchool = null;
       if (removed) {
-        const sourceSchool = schoolLibrary.find((school) => (
+        sourceSchool = schoolLibrary.find((school) => (
           (removed.id && school.id === removed.id)
           || school.name === removed.name
         ));
@@ -23690,7 +23690,7 @@
         profileTeacher.curriculum = profileTeacher.curriculum.filter((item) => item.schoolName !== removed.name);
       }
       refreshTeacherSchoolAssignmentViews();
-      syncSchoolAssignmentsToDatabase();
+      if (removed) syncSchoolAssignmentsToDatabase([sourceSchool || removed]);
       showToast("School assignment removed");
     });
 
@@ -23760,7 +23760,7 @@
       addAssignedSchoolCurriculum(school);
       setTeacherSchoolAssignmentOpen(false);
       refreshTeacherSchoolAssignmentViews();
-      syncSchoolAssignmentsToDatabase();
+      syncSchoolAssignmentsToDatabase([school]);
       showToast(`${school.nickname || school.name} assigned to ${teacherNickname(profileTeacher)}`);
     });
     document.getElementById("teacher-school-new-close")?.addEventListener("click", () => setTeacherSchoolNewOpen(false));
@@ -23790,7 +23790,7 @@
         return;
       }
       refreshTeacherSchoolAssignmentViews();
-      syncSchoolAssignmentsToDatabase();
+      syncSchoolAssignmentsToDatabase(schoolLibrary.filter((school) => isUuid(school.id) && isUuid(school.assignedTeacherId)));
       openTeacherProfile(profileTeacher?.id);
       showToast("School assignments restored.");
     });
@@ -25085,11 +25085,16 @@
       const rosterClass = teacherRosterClasses().find((item) => item.id === editingTeacherProspectClassId);
       const student = rosterClass?.students.find((item) => item.id === editingTeacherProspectStudentId);
       if (!rosterClass || !student) return;
-      if (!window.confirm(`Are you sure you want to delete ${rosterStudentFullName(student)}? This permanently removes the dancer and cannot be undone.`)) return;
+      if (!window.confirm(`Archive ${rosterStudentFullName(student)}? The dancer will leave the active roster, but their record can be recovered.`)) return;
       if (student.enrollmentId && window.dtSupabase && document.body.dataset.tourMode !== "true") {
-        const result = await window.dtSupabase.from("students").delete().eq("id", student.id);
-        if (result.error) return sharedRosterError("The future dancer could not be deleted.", result.error, { reload: false });
-        if (student.photoPath) await window.dtSupabase.storage.from("student-photos").remove([student.photoPath]);
+        const archivedAt = new Date().toISOString().slice(0, 10);
+        const [enrollmentResult, studentResult] = await Promise.all([
+          window.dtSupabase.from("class_enrollments").update({ status: "withdrawn", ended_date: archivedAt }).eq("id", student.enrollmentId),
+          window.dtSupabase.from("students").update({ status: "inactive" }).eq("id", student.id)
+        ]);
+        if (enrollmentResult.error || studentResult.error) {
+          return sharedRosterError("The future dancer could not be archived.", enrollmentResult.error || studentResult.error, { reload: false });
+        }
       }
       rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
       setTeacherRosterOverlay("teacher-roster-future-overlay", false);
@@ -25100,7 +25105,7 @@
       renderTeacherRosters();
       renderClassesAndRosters();
       renderEnrollmentStudentsView();
-      showToast(`${rosterStudentFullName(student)} was deleted`);
+      showToast(`${rosterStudentFullName(student)} was archived`);
     };
 
     const openTeacherStudentProfile = (rosterClass, student) => {
@@ -25996,19 +26001,23 @@
     const deleteEditingRosterStudent = async () => {
       const { rosterClass, student } = currentEditingRosterStudent();
       if (!rosterClass || !student) return;
-      const confirmation = window.prompt(`Permanently deleting ${rosterStudentFullName(student)} removes their roster history and notes. Type DELETE to continue.`);
-      if (confirmation !== "DELETE") return;
+      if (!window.confirm(`Archive ${rosterStudentFullName(student)}? Their roster history and notes will remain recoverable.`)) return;
       if (student.enrollmentId && window.dtSupabase && document.body.dataset.tourMode !== "true") {
-        const result = await window.dtSupabase.from("students").delete().eq("id", student.id);
-        if (result.error) return sharedRosterError("The student could not be deleted.", result.error, { reload: false });
-        if (student.photoPath) await window.dtSupabase.storage.from("student-photos").remove([student.photoPath]);
+        const archivedAt = new Date().toISOString().slice(0, 10);
+        const [enrollmentResult, studentResult] = await Promise.all([
+          window.dtSupabase.from("class_enrollments").update({ status: "withdrawn", ended_date: archivedAt }).eq("id", student.enrollmentId),
+          window.dtSupabase.from("students").update({ status: "inactive" }).eq("id", student.id)
+        ]);
+        if (enrollmentResult.error || studentResult.error) {
+          return sharedRosterError("The student could not be archived.", enrollmentResult.error || studentResult.error, { reload: false });
+        }
       }
       rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
       closeRosterStudentEditor();
       renderClassesAndRosters();
       renderStudentLibrary();
       scheduleAppDataSave();
-      showToast(`${rosterStudentFullName(student)} was permanently deleted`);
+      showToast(`${rosterStudentFullName(student)} was archived`);
     };
 
     const rosterProfileRelatedNames = () => String(document.getElementById("roster-edit-related-dancer")?.value || "").split(" • ").map((name) => name.trim()).filter(Boolean);
@@ -31859,7 +31868,7 @@
         }
         const recoveredInactiveSchools = schoolLibrary.filter((school) => school.recoveredFromInactiveAssignment);
         const assignmentsSynced = recoveredInactiveSchools.length
-          ? await syncSchoolAssignmentsToDatabase()
+          ? await syncSchoolAssignmentsToDatabase(recoveredInactiveSchools)
           : true;
         if (assignmentsSynced) recoveredInactiveSchools.forEach((school) => { delete school.recoveredFromInactiveAssignment; });
         if (!assignmentsSynced) showToast("Some teacher school assignments still need attention.");
