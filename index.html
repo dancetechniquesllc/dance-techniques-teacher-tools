@@ -7268,10 +7268,60 @@
       gap: 12px;
     }
 
-    .class-calendar-open-actions {
+    .class-calendar-open-actions,
+    .partner-school-actions {
       display: flex;
-      justify-content: flex-end;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 12px;
+    }
+
+    .school-calendar-open-button {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0;
+      background: var(--blush);
+      color: var(--berry);
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .teacher-tools-schedule-content {
+      max-height: min(64vh, 480px);
+      overflow: auto;
+      display: grid;
+      gap: 12px;
+    }
+
+    .teacher-tools-schedule-day {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      background: color-mix(in oklch, var(--surface) 88%, white);
+    }
+
+    .teacher-tools-schedule-day h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      letter-spacing: 0.03em;
+    }
+
+    .teacher-tools-schedule-event {
+      display: grid;
+      gap: 4px;
+      margin-bottom: 10px;
+    }
+
+    .teacher-tools-schedule-event:last-child { margin-bottom: 0; }
+
+    .teacher-tools-schedule-event .mini-label {
+      margin-bottom: 0;
+      color: var(--berry);
     }
 
     .profile-login-setup-dialog { width: min(760px, calc(100vw - 28px)); }
@@ -13446,6 +13496,8 @@
             </div>
           </div>
           <div class="admin-page-actions">
+            <button class="secondary" type="button" id="restore-previous-autosave">Restore previous autosave</button>
+            <button class="secondary" type="button" id="restore-assignments">Restore assignments</button>
             <button class="profile-login-top-button" type="button" id="open-profile-login-setup">Login Setup</button>
             <button class="danger-btn" type="button" id="deactivate-profile">Deactivate</button>
             <button class="primary" type="button" data-save-profile>Save changes</button>
@@ -13569,7 +13621,12 @@
                 <h3>Partner Schools</h3>
               </div>
             </div>
-            <div class="class-calendar-open-actions"><button class="primary" type="button" id="add-school-row">Add School</button></div>
+            <div class="partner-school-actions">
+              <button class="school-calendar-open-button" type="button" id="open-partner-school-calendar" title="Open this teacher’s schedule">
+                <span aria-hidden="true">🗓</span>
+              </button>
+              <button class="primary" type="button" id="add-school-row">Add School</button>
+            </div>
             <div class="admin-table">
               <div class="admin-table" id="school-calendar-rows"></div>
             </div>
@@ -13860,18 +13917,70 @@
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="confirm-overlay" id="teacher-tools-schedule-overlay" aria-hidden="true">
+    <div class="confirm-dialog teacher-tools-schedule-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-tools-schedule-title">
+      <div class="profile-login-setup-header">
+        <div>
+          <h3 id="teacher-tools-schedule-title">Teacher Schedule</h3>
+          <p class="subtle" id="teacher-tools-schedule-copy">Teacher tools schedule for this teacher.</p>
+        </div>
+        <button class="profile-login-close" type="button" id="teacher-tools-schedule-close" aria-label="Close Teacher Schedule">&times;</button>
+      </div>
+      <div class="teacher-tools-schedule-content" id="teacher-tools-schedule-content"></div>
+      <div class="confirm-actions">
+        <button class="secondary" type="button" id="teacher-tools-schedule-close-secondary">Close</button>
+      </div>
+    </div>
+  </div>
   <div class="confirm-overlay" id="teacher-school-assignment-overlay" aria-hidden="true">
     <div class="confirm-dialog teacher-school-assignment-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-school-assignment-title">
       <div class="profile-login-setup-header">
         <div><h3 id="teacher-school-assignment-title">Add School</h3><p class="subtle" id="teacher-school-assignment-copy">Assign an available Partner School to this teacher.</p></div>
         <button class="profile-login-close" type="button" id="teacher-school-assignment-close" aria-label="Close Add School">&times;</button>
       </div>
+      <label>Search partner schools
+        <input type="search" id="teacher-school-assignment-search" placeholder="Search existing schools" />
+      </label>
       <label>Partner School
         <select id="teacher-school-assignment-select"></select>
       </label>
       <div class="confirm-actions">
         <button class="secondary" type="button" id="teacher-school-assignment-cancel">Cancel</button>
         <button class="primary" type="button" id="teacher-school-assignment-confirm">Continue</button>
+      </div>
+    </div>
+  </div>
+  <div class="confirm-overlay" id="teacher-school-new-overlay" aria-hidden="true">
+    <div class="confirm-dialog teacher-school-new-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-school-new-title">
+      <div class="profile-login-setup-header">
+        <div>
+          <h3 id="teacher-school-new-title">Create Partner School</h3>
+          <p class="subtle">Add a new school and assign it to this teacher.</p>
+        </div>
+        <button class="profile-login-close" type="button" id="teacher-school-new-close" aria-label="Close Create Partner School">&times;</button>
+      </div>
+      <label>School Name
+        <input id="teacher-school-new-name" placeholder="e.g., Primrose North" required />
+      </label>
+      <label>Day
+        <select id="teacher-school-new-day">
+          <option value="" selected>Day</option>
+          <option value="1">Monday</option>
+          <option value="2">Tuesday</option>
+          <option value="3">Wednesday</option>
+          <option value="4">Thursday</option>
+          <option value="5">Friday</option>
+        </select>
+      </label>
+      <label>AM / PM
+        <select id="teacher-school-new-time">
+          <option value="AM" selected>AM</option>
+          <option value="PM">PM</option>
+        </select>
+      </label>
+      <div class="confirm-actions">
+        <button class="secondary" type="button" id="teacher-school-new-cancel">Cancel</button>
+        <button class="primary" type="button" id="teacher-school-new-save">Create & Assign</button>
       </div>
     </div>
   </div>
@@ -18797,6 +18906,18 @@
       });
       return didRestore;
     };
+    const latestPersistedHistorySnapshot = () => {
+      const history = loadPersistedAppDataHistory();
+      return history.length ? clonePayload(history[0].payload) : null;
+    };
+    const restoreTeacherAutosaveSnapshot = () => {
+      const snapshot = latestPersistedHistorySnapshot();
+      if (!snapshot) return false;
+      applyPersistedAppData(snapshot, { mergeTeachers: true });
+      return true;
+    };
+
+    const restoreSchoolAssignmentsSnapshot = () => restoreSchoolAssignmentsFromHistory({ onlyUnassigned: false });
     const loadPersistedAppDataHistory = () => {
       try {
         const raw = window.localStorage?.getItem(persistentStorageBackupKey);
@@ -18837,6 +18958,7 @@
         schoolLibrary,
         ...(includeRosters ? { rosterClasses } : {}),
         messageThreads,
+        isdOptions,
         isdCalendars,
         tempoEncouragementLibrary,
         payrollState,
@@ -19111,6 +19233,17 @@
       }
       safeReplaceCollection(messageThreads, persisted.messageThreads || []);
       safeReplaceCollection(isdCalendars, persisted.isdCalendars || []);
+      const recoveredIsdNames = [
+        ...(Array.isArray(persisted.isdOptions) ? persisted.isdOptions : []),
+        ...isdCalendars.map((calendar) => calendar?.isd),
+        ...schoolLibrary.map((school) => school?.isd),
+        ...teachers.flatMap((teacher) => (teacher.schools || []).map((school) => school?.isd))
+      ]
+        .map((name) => String(name || "").trim())
+        .filter(Boolean);
+      recoveredIsdNames.forEach((name) => {
+        if (!isdOptions.some((existing) => isdNameMatches(existing, name))) isdOptions.push(name);
+      });
       safeReplaceCollection(tempoEncouragementLibrary, persisted.tempoEncouragementLibrary || []);
       if (persisted.payrollState && typeof persisted.payrollState === "object") {
         payrollState = { ...payrollState, ...JSON.parse(JSON.stringify(persisted.payrollState)) };
@@ -19395,6 +19528,7 @@
       refreshIsdSelectOptions(field, cleanName);
       field.value = cleanName;
       field.dispatchEvent(new Event("change", { bubbles: true }));
+      scheduleAppDataSave();
       showToast(`${cleanName} added`);
     };
 
@@ -20983,6 +21117,11 @@
       if (deactivate) deactivate.textContent = profileTeacher.status === "active" ? "Deactivate" : "Reactivate";
       const isOwnAccount = document.body.dataset.tourMode === "true"
         || Boolean(window.dtCurrentProfile?.id && window.dtCurrentProfile.id === profileTeacher.id);
+      const isCompanyProfile = isCompanyTeacherProfile(profileTeacher);
+      ["restore-previous-autosave", "restore-assignments"].forEach((id) => {
+        const restoreButton = document.getElementById(id);
+        if (restoreButton) restoreButton.style.display = isCompanyProfile ? "" : "none";
+      });
       document.querySelectorAll("[data-account-security]").forEach((section) => {
         section.hidden = !isOwnAccount;
         const card = section.closest(".panel, .admin-profile-card");
@@ -22306,22 +22445,153 @@
     const setTeacherSchoolAssignmentOpen = (open) => {
       const overlay = document.getElementById("teacher-school-assignment-overlay");
       const select = document.getElementById("teacher-school-assignment-select");
+      const search = document.getElementById("teacher-school-assignment-search");
       if (!overlay || !select) return;
-      if (open) {
-        const unassignedSchools = schoolLibrary
-          .map((school, index) => ({ school, index }))
-          .filter(({ school }) => !school.assignedTeacherId && String(school.name || "").trim().toLowerCase() !== "dance techniques")
-          .sort((a, b) => (a.school.nickname || a.school.name || "").localeCompare(b.school.nickname || b.school.name || ""));
-        select.innerHTML = `
-          <option value="">Choose an unassigned school…</option>
-          ${unassignedSchools.map(({ school, index }) => `<option value="${index}">${escapeText(school.nickname || school.name)}</option>`).join("")}
-          <option value="__new__">+ Add a completely new school</option>
-        `;
-        setText("teacher-school-assignment-copy", `Assign an available Partner School to ${teacherNickname(profileTeacher)}.`);
+      if (!open) {
+        overlay.classList.remove("active");
+        overlay.setAttribute("aria-hidden", "true");
+        return;
       }
+      const query = (search?.value || "").trim().toLowerCase();
+      const unassignedSchools = schoolLibrary
+        .map((school, index) => ({ school, index }))
+        .filter(({ school }) => !school.assignedTeacherId && String(school.name || "").trim().toLowerCase() !== "dance techniques")
+        .sort((a, b) => (a.school.nickname || a.school.name || "").localeCompare(b.school.nickname || b.school.name || ""));
+      const options = query
+        ? unassignedSchools.filter(({ school }) => `${school.nickname || school.name || ""}`.toLowerCase().includes(query))
+        : unassignedSchools;
+      select.innerHTML = `
+        <option value="">Choose an unassigned school…</option>
+        ${options.length ? options.map(({ school, index }) => `<option value="${index}">${escapeText(school.nickname || school.name)}</option>`).join("") : "<option value=\"\" disabled>No matching school found</option>"}
+      `;
+      setText("teacher-school-assignment-copy", `Assign an available Partner School to ${teacherNickname(profileTeacher)}.`);
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+      window.setTimeout(() => select.focus(), 60);
+    };
+
+    const refreshTeacherSchoolAssignmentOptions = () => {
+      const overlay = document.getElementById("teacher-school-assignment-overlay");
+      if (!overlay?.classList.contains("active")) return;
+      setTeacherSchoolAssignmentOpen(true);
+    };
+
+    const setTeacherSchoolNewOpen = (open) => {
+      const overlay = document.getElementById("teacher-school-new-overlay");
+      if (!overlay) return;
       overlay.classList.toggle("active", open);
       overlay.setAttribute("aria-hidden", String(!open));
-      if (open) window.setTimeout(() => select.focus(), 60);
+      if (open) {
+        const dayInput = document.getElementById("teacher-school-new-day");
+        const timeInput = document.getElementById("teacher-school-new-time");
+        setText("teacher-school-new-name", "");
+        if (dayInput) dayInput.value = "";
+        if (timeInput) timeInput.value = "AM";
+        window.setTimeout(() => document.getElementById("teacher-school-new-name")?.focus(), 60);
+      }
+    };
+
+    const createAndAssignPartnerSchool = () => {
+      const nameInput = document.getElementById("teacher-school-new-name");
+      const dayInput = document.getElementById("teacher-school-new-day");
+      const timeInput = document.getElementById("teacher-school-new-time");
+      const name = String(nameInput?.value || "").trim();
+      if (!name) {
+        showToast("Enter a school name first.");
+        nameInput?.focus();
+        return;
+      }
+      if (!dayInput?.value) {
+        showToast("Choose a dance day.");
+        dayInput?.focus();
+        return;
+      }
+      const dayOfWeek = Number(dayInput.value);
+      if (!Number.isFinite(dayOfWeek) || dayOfWeek < 1 || dayOfWeek > 7) {
+        showToast("Choose a valid dance day.");
+        dayInput?.focus();
+        return;
+      }
+      const timeBlock = String(timeInput?.value || "AM").trim() || "AM";
+      if (schoolLibrary.some((school) => String(school.name || "").trim().toLowerCase() === name.toLowerCase())) {
+        showToast("That school already exists in the directory.");
+        return;
+      }
+      const school = {
+        id: `local-school-${Date.now()}`,
+        name,
+        nickname: "",
+        initials: "",
+        classCount: "",
+        dayOfWeek,
+        timeBlock,
+        isd: "",
+        seasonStartDate: "2026-08-31",
+        address: "",
+        directorName: "",
+        phone: "",
+        email: "",
+        importantNotes: "",
+        partnershipBenefit: "",
+        assignedTeacherId: profileTeacher.id,
+        classCurriculum: [],
+        color: schoolColors[schoolLibrary.length % schoolColors.length]
+      };
+      schoolLibrary.push(school);
+      addAssignedSchoolCurriculum(school);
+      setTeacherSchoolNewOpen(false);
+      refreshTeacherSchoolAssignmentViews();
+      syncSchoolAssignmentsToDatabase();
+      showToast(`Created ${school.name} and assigned to ${teacherNickname(profileTeacher)}.`);
+    };
+
+    const setTeacherToolsScheduleOpen = (open) => {
+      const overlay = document.getElementById("teacher-tools-schedule-overlay");
+      const content = document.getElementById("teacher-tools-schedule-content");
+      if (!overlay || !content) return;
+      if (!open) {
+        overlay.classList.remove("active");
+        overlay.setAttribute("aria-hidden", "true");
+        return;
+      }
+      const allEvents = flattenLexiSchedule().slice().sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return timeBlockRank(a.timeBlock) - timeBlockRank(b.timeBlock);
+      });
+      if (!allEvents.length) {
+        setText("teacher-tools-schedule-copy", `No Teacher Tools events yet for ${teacherNickname(profileTeacher)}.`);
+        content.innerHTML = "<p class=\"teacher-roster-empty\">Add schools to begin building this teacher’s schedule.</p>";
+      } else {
+        const grouped = {};
+        allEvents.forEach((event) => {
+          (grouped[event.date] ||= []).push(event);
+        });
+        const sortedDates = Object.keys(grouped).sort();
+        setText("teacher-tools-schedule-copy", `Teacher Tools schedule for ${teacherNickname(profileTeacher)}.`);
+        content.innerHTML = sortedDates.map((dateKey) => {
+          const dayEvents = grouped[dateKey];
+          const dateLabel = new Date(`${dateKey}T12:00:00`).toLocaleDateString("en-US", {
+            weekday: "long",
+            month: "short",
+            day: "numeric"
+          });
+          return `
+            <section class="teacher-tools-schedule-day">
+              <h4>${escapeText(dateLabel)}</h4>
+              ${dayEvents.map((event) => `
+                <div class="teacher-tools-schedule-event">
+                  <span class="mini-label">${escapeText(timeBlockLabel(event.timeBlock) || "Schedule")}${event.isRescheduled ? " • Rescheduled" : ""}</span>
+                  <button class="my-day-school-name" type="button" data-directions-url="${escapeText(directionsUrlForEvent(event))}" aria-label="Get directions to ${escapeText(myDaySchoolTitle(event))}">${escapeText(myDaySchoolTitle(event))}</button>
+                  <span class="widget-curriculum-note">${escapeText(event.isCustomEvent ? (event.eventTitle || "School event") : `${curriculumWeekDisplay(event.week)} ${event.curriculum}: ${event.curriculumTitle || "School visit"}`)}</span>
+                  <small class="subtle">${escapeText(`${(event.classCount || 0)} class${(event.classCount || 0) === 1 ? "" : "es"} · ${event.day || "Scheduled"} · ${event.isd || ""}`)}</small>
+                </div>
+              `).join("")}
+            </section>
+          `;
+        }).join("");
+      }
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
     };
 
     const addAssignedSchoolCurriculum = (school) => {
@@ -23071,9 +23341,11 @@
     document.getElementById("stub-month")?.addEventListener("change", renderPayDateOptions);
     document.getElementById("stub-year")?.addEventListener("change", renderPayDateOptions);
     document.getElementById("save-stub")?.addEventListener("click", saveStubToArchive);
+    document.getElementById("open-partner-school-calendar")?.addEventListener("click", () => setTeacherToolsScheduleOpen(true));
     document.getElementById("add-school-row")?.addEventListener("click", () => setTeacherSchoolAssignmentOpen(true));
     document.getElementById("teacher-school-assignment-close")?.addEventListener("click", () => setTeacherSchoolAssignmentOpen(false));
     document.getElementById("teacher-school-assignment-cancel")?.addEventListener("click", () => setTeacherSchoolAssignmentOpen(false));
+    document.getElementById("teacher-school-assignment-search")?.addEventListener("input", () => refreshTeacherSchoolAssignmentOptions());
     document.getElementById("teacher-school-assignment-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "teacher-school-assignment-overlay") setTeacherSchoolAssignmentOpen(false);
     });
@@ -23081,23 +23353,8 @@
       const select = document.getElementById("teacher-school-assignment-select");
       const selected = select?.value || "";
       if (!selected) {
-        showToast("Choose a school or add a new one");
+        showToast("Choose a school to assign");
         select?.focus();
-        return;
-      }
-      if (selected === "__new__") {
-        addLibrarySchool();
-        const school = schoolLibrary.at(-1);
-        school.assignedTeacherId = profileTeacher.id;
-        addAssignedSchoolCurriculum(school);
-        setTeacherSchoolAssignmentOpen(false);
-        refreshTeacherSchoolAssignmentViews();
-        openAdminSection("school-library");
-        window.setTimeout(() => {
-          const card = document.querySelector(`.school-library-card[data-library-school-index="${schoolLibrary.length - 1}"]`);
-          if (card) card.open = true;
-        }, 80);
-        showToast("New Partner School ready to complete");
         return;
       }
       const school = schoolLibrary[Number(selected)];
@@ -23112,6 +23369,37 @@
       refreshTeacherSchoolAssignmentViews();
       syncSchoolAssignmentsToDatabase();
       showToast(`${school.nickname || school.name} assigned to ${teacherNickname(profileTeacher)}`);
+    });
+    document.getElementById("teacher-school-new-close")?.addEventListener("click", () => setTeacherSchoolNewOpen(false));
+    document.getElementById("teacher-school-new-cancel")?.addEventListener("click", () => setTeacherSchoolNewOpen(false));
+    document.getElementById("teacher-school-new-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "teacher-school-new-overlay") setTeacherSchoolNewOpen(false);
+    });
+    document.getElementById("teacher-school-new-save")?.addEventListener("click", () => createAndAssignPartnerSchool());
+    document.getElementById("teacher-tools-schedule-close")?.addEventListener("click", () => setTeacherToolsScheduleOpen(false));
+    document.getElementById("teacher-tools-schedule-close-secondary")?.addEventListener("click", () => setTeacherToolsScheduleOpen(false));
+    document.getElementById("teacher-tools-schedule-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "teacher-tools-schedule-overlay") setTeacherToolsScheduleOpen(false);
+    });
+    document.getElementById("restore-previous-autosave")?.addEventListener("click", () => {
+      const restored = restoreTeacherAutosaveSnapshot();
+      if (!restored) {
+        showToast("No autosave snapshot was found to restore.");
+        return;
+      }
+      openTeacherProfile(profileTeacher?.id);
+      showToast("Autosave snapshot restored.");
+    });
+    document.getElementById("restore-assignments")?.addEventListener("click", () => {
+      const restored = restoreSchoolAssignmentsSnapshot();
+      if (!restored) {
+        showToast("No assignment history was found to restore.");
+        return;
+      }
+      refreshTeacherSchoolAssignmentViews();
+      syncSchoolAssignmentsToDatabase();
+      openTeacherProfile(profileTeacher?.id);
+      showToast("School assignments restored.");
     });
     document.getElementById("save-isd-calendar")?.addEventListener("click", saveIsdCalendar);
     document.getElementById("isd-calendar-list")?.addEventListener("click", (event) => {
