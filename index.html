@@ -21509,6 +21509,13 @@
       profileTeacher.loginEmail = email;
       profileTeacher.inviteStatus = "Invite sent";
       profileTeacher.inviteDate = isoDate(new Date());
+      const invitedTeacherName = fullName(profileTeacher).trim().toLowerCase();
+      await loadSharedClassesAndRosters(window.dtCurrentProfile);
+      const syncedInvitedTeacher = teachers.find((teacher) => (
+        isUuid(teacher.id)
+        && fullName(teacher).trim().toLowerCase() === invitedTeacherName
+      ));
+      if (syncedInvitedTeacher) profileTeacher = syncedInvitedTeacher;
       syncPersonalForm();
       renderProfileHero();
       renderTeacherProfileList();
@@ -30672,8 +30679,13 @@
     };
 
     const openRosterClassCreator = () => {
-      const activeTeachers = classesAndRostersTeacherDirectory().filter((teacher) => teacher.status !== "inactive");
-      if (!activeTeachers.length) return showToast("Add an active teacher before creating a class");
+      const teacherDirectory = classesAndRostersTeacherDirectory().filter((teacher) => teacher.status !== "inactive");
+      const activeTeachers = teacherDirectory.filter((teacher) => isUuid(teacher.id));
+      if (!activeTeachers.length) {
+        return showToast(teacherDirectory.length
+          ? "Send the teacher’s login invitation before creating shared classes."
+          : "Add an active teacher before creating a class");
+      }
       const teacherSelect = document.getElementById("roster-class-create-teacher");
       teacherSelect.innerHTML = `<option value="">Select a teacher…</option>${activeTeachers.map((teacher) => `<option value="${rosterSafe(teacher.id)}">${rosterSafe(fullName(teacher))}</option>`).join("")}`;
       document.getElementById("roster-class-create-age").innerHTML = optionMarkup(classAgeOptions, "Tots");
