@@ -27485,6 +27485,38 @@
       newsletterSavedSelection = selection.getRangeAt(0).cloneRange();
       return true;
     };
+    const normalizeNewsletterRichTextElement = (editable) => {
+      if (!editable) return false;
+      let changed = false;
+      let merged = true;
+      while (merged) {
+        merged = false;
+        [...editable.querySelectorAll("span")].forEach((parent) => {
+          const child = parent.childNodes.length === 1 && parent.firstElementChild?.tagName === "SPAN"
+            ? parent.firstElementChild
+            : null;
+          const hasUnsupportedAttributes = [...parent.attributes].some((attribute) => attribute.name !== "style");
+          if (!child || hasUnsupportedAttributes) return;
+          const parentStyles = [...parent.style].map((property) => [
+            property,
+            parent.style.getPropertyValue(property),
+            parent.style.getPropertyPriority(property)
+          ]);
+          parentStyles.forEach(([property, value, priority]) => {
+            if (!child.style.getPropertyValue(property)) child.style.setProperty(property, value, priority);
+          });
+          parent.replaceWith(child);
+          changed = true;
+          merged = true;
+        });
+      }
+      [...editable.querySelectorAll("span")].reverse().forEach((span) => {
+        if (span.attributes.length || !span.parentNode) return;
+        span.replaceWith(...span.childNodes);
+        changed = true;
+      });
+      return changed;
+    };
     const applyNewsletterSelectionStyle = (styles) => {
       if (!restoreNewsletterSelection()) return false;
       const selection = window.getSelection();
@@ -27505,6 +27537,7 @@
       });
       span.appendChild(contents);
       range.insertNode(span);
+      normalizeNewsletterRichTextElement(newsletterActivePreviewTarget);
       selection.removeAllRanges();
       const styledRange = document.createRange();
       styledRange.selectNodeContents(span);
@@ -27521,6 +27554,7 @@
       if (command) {
         restoreNewsletterSelection();
         document.execCommand(command, false);
+        normalizeNewsletterRichTextElement(newsletterActivePreviewTarget);
         newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
       }
     });
@@ -27557,6 +27591,9 @@
       newsletterSelectedGraphicIndex = -1;
       document.querySelector("[data-newsletter-logo-editor]")?.classList.remove("is-selected");
       newsletterActivePreviewTarget = editable;
+      if (normalizeNewsletterRichTextElement(editable)) {
+        editable.dispatchEvent(new Event("input", { bubbles: true }));
+      }
       newsletterActiveField = editable.dataset.newsletterPreviewField || editable.dataset.newsletterPreviewSectionField || (editable.dataset.newsletterPreviewTextbox !== undefined ? "text" : "message");
       const context = newsletterActiveFormatContext();
       const font = (context?.directFormat ? context.owner.font : context?.owner?.[`${context.key}Font`]) || newsletterDraft.font;
