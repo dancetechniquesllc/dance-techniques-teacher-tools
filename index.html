@@ -5521,13 +5521,20 @@
     .enrollment-queue-item .enrollment-card-age { color: color-mix(in oklch, var(--muted) 72%, white); font-size: 10px; font-weight: 400 !important; }
     .enrollment-queue-item .enrollment-priority-bubble,
     .enrollment-queue-item .enrollment-stage-bubble { position: absolute; top: 10px; right: 10px; max-width: calc(100% - 20px); margin: 0; font-size: 9px; }
+    .enrollment-card-billing-bubbles { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; margin-top: 2px; }
+    .enrollment-card-billing-bubble { display: inline-grid; gap: 1px; max-width: 100%; padding: 6px 10px; border-radius: 999px; background: var(--ivory); color: var(--fg); font-size: 9px; line-height: 1.15; text-align: center; }
+    .enrollment-card-billing-bubble.discount { background: color-mix(in srgb, var(--sage) 23%, white); }
+    .enrollment-card-billing-bubble.tuition { background: color-mix(in srgb, var(--blush) 48%, white); }
+    .enrollment-card-billing-bubble > span { color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+    .enrollment-card-billing-bubble > b { overflow: hidden; font-size: 10px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
     .enrollment-future-match-heart { position: absolute; top: 36px; right: 13px; width: 22px; height: 20px; display: grid; place-items: center; background: var(--blush); color: var(--berry); font-size: 11px; line-height: 1; clip-path: path("M11 19C9 16 1 12 1 6 1 2 4 0 7 0c2 0 3 1 4 3 1-2 2-3 4-3 3 0 6 2 6 6 0 6-8 10-10 13Z"); filter: drop-shadow(0 1px 1px rgb(91 45 55 / .16)); }
     .enrollment-priority-bubble { display: inline-flex; width: fit-content; align-items: center; margin-top: 3px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1; }
     .enrollment-priority-bubble.today { background: oklch(91% 0.09 25); color: oklch(43% 0.16 25); }
     .enrollment-priority-bubble.tomorrow { background: oklch(93% 0.11 92); color: oklch(43% 0.1 72); }
     .enrollment-priority-bubble.later { background: oklch(91% 0.08 145); color: oklch(39% 0.11 145); }
     .enrollment-stage-bubble { display: inline-flex; width: fit-content; align-items: center; margin-top: 3px; padding: 4px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 800; line-height: 1; }
-    .enrollment-history-bubble { display: inline-flex; width: fit-content; align-items: center; padding: 6px 11px; border-radius: 999px; font-size: 11px; font-weight: 850; letter-spacing: 0.04em; line-height: 1; }
+    .enrollment-history-bubble { display: inline-flex; width: fit-content; min-height: 26px; box-sizing: border-box; align-items: center; justify-content: center; padding: 6px 12px; border: 0; border-radius: 999px; overflow: visible; font-size: 11px; font-weight: 850; letter-spacing: 0.04em; line-height: 1; white-space: nowrap; }
+    .enrollment-editor-meta .enrollment-history-bubble { flex: 0 0 auto; padding: 6px 12px; border: 0; }
     .enrollment-history-bubble.new { background: oklch(92% 0.07 8); color: var(--berry); }
     .enrollment-history-bubble.returning { background: oklch(90% 0.09 145); color: oklch(38% 0.11 145); }
     .enrollment-history-bubble.sibling { background: oklch(93% 0.11 92); color: oklch(43% 0.1 72); }
@@ -13165,7 +13172,7 @@
                   <select id="enrollment-checklist-filter">
                     <option value="new">New Enrollments (no checklist items complete)</option>
                     <option value="assign-class">Assign to Class</option>
-                    <option value="assign-brightwheel">Assign to Brightwheel</option>
+                    <option value="assign-brightwheel">Brightwheel Assignment</option>
                     <option value="record-fee">Record Enrollment Fee</option>
                     <option value="bill-recital">Bill The Recital Experience</option>
                     <option value="implement-billing">Implement Billing Plan</option>
@@ -16086,11 +16093,17 @@
       const percentage = Math.min(1, classCount / 4);
       return { classCount, amount: Number((monthlyTuition * percentage).toFixed(2)), monthlyTuition, discounted, nextMonth: classCount === 0 };
     };
+    const enrollmentSuggestedTuitionLabel = (tuition) => {
+      if (!tuition || !Number.isFinite(tuition.amount) || !Number.isFinite(tuition.monthlyTuition)) return "";
+      if (tuition.beforeSeason) return `$${tuition.amount.toFixed(2)} · Full Tuition`;
+      if (tuition.nextMonth) return `$${tuition.monthlyTuition.toFixed(2)} Next Month`;
+      return `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`;
+    };
 
     const enrollmentChecklistSteps = [
-      ["brightwheel_profile_created_at", "Brighthweel Setup Complete"],
+      ["brightwheel_profile_created_at", "Brightwheel Assignment"],
       ["invoice_sent_at", "The Recital Experience Added"],
-      ["enrollment_active_at", "Billing Plan Active"],
+      ["enrollment_active_at", "Billing Plan"],
       ["parent_invited_at", "Welcome Email"]
     ];
     const enrollmentWelcomeSending = new Set();
@@ -16108,7 +16121,7 @@
       return !status || status === "unknown" ? "not-recorded" : status;
     };
     const enrollmentBatchStepConfig = {
-      "assign-brightwheel": { field: "brightwheel_profile_created_at", label: "Brightwheel setup" },
+      "assign-brightwheel": { field: "brightwheel_profile_created_at", label: "Brightwheel Assignment" },
       "record-fee": { field: "payment_status", label: "Enrollment fee record", value: "unpaid", note: "Records the fee status as Unpaid. It does not process or claim a payment." },
       "bill-recital": { field: "invoice_sent_at", label: "The Recital Experience" },
       "implement-billing": { field: "enrollment_active_at", label: "Billing plan" }
@@ -16118,7 +16131,7 @@
       || ["admin", "director"].includes(window.dtCurrentProfile?.role || profile?.role);
     const enrollmentTuitionDiscountLabel = (item) => {
       const discount = String(item?.tuition_discount || "").trim().toLowerCase();
-      if (!discount || discount === "none") return "No Discount";
+      if (!discount || discount === "none") return "";
       return discount.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
     };
     const enrollmentNextChecklistStep = (item) => {
@@ -16238,11 +16251,12 @@
       if (checklistSelect) checklistSelect.value = enrollmentChecklistFilter;
       if (typeSelect) typeSelect.value = enrollmentTypeFilter;
       if (feeSelect) {
-        const values = [...new Set(enrollmentIntakeQueue.map(enrollmentFeeStatusKey))].sort();
+        const values = [...new Set(["unpaid", ...enrollmentIntakeQueue.map(enrollmentFeeStatusKey)])].sort();
         if (enrollmentFeeStatusFilter !== "all" && !values.includes(enrollmentFeeStatusFilter)) enrollmentFeeStatusFilter = "all";
         feeSelect.innerHTML = `<option value="all">All</option>${values.map((value) => {
           const example = enrollmentIntakeQueue.find((item) => enrollmentFeeStatusKey(item) === value);
-          return `<option value="${escapeText(value)}">${escapeText(enrollmentFeeStatusLabel(example))}</option>`;
+          const label = value === "unpaid" ? "Unpaid" : enrollmentFeeStatusLabel(example);
+          return `<option value="${escapeText(value)}">${escapeText(label)}</option>`;
         }).join("")}`;
         feeSelect.value = enrollmentFeeStatusFilter;
       }
@@ -16439,6 +16453,10 @@
         const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase() || "DT";
         const futureDancerMatch = futureDancerMatchForEnrollment(item);
         const assignedTeacherId = enrollmentMatchedTeacherId(item);
+        const billingDiscount = enrollmentChecklistFilter === "implement-billing" ? enrollmentTuitionDiscountLabel(item) : "";
+        const billingTuition = enrollmentChecklistFilter === "implement-billing"
+          ? enrollmentSuggestedTuitionLabel(suggestedEnrollmentTuition(item, suggestEnrollmentClass(item)))
+          : "";
         return `
         <div class="enrollment-queue-item ${batchConfig ? "is-batchable" : ""} ${item.id === selectedEnrollmentIntakeId && enrollmentReviewOpen ? "is-selected" : ""}">
           ${batchConfig ? `<input class="enrollment-queue-select" type="checkbox" data-enrollment-batch-select="${escapeText(item.id)}" aria-label="Select ${escapeText([firstName, lastName].filter(Boolean).join(" ") || "enrollment")} for batch completion" ${enrollmentBatchSelected.has(item.id) ? "checked" : ""}>` : ""}
@@ -16447,6 +16465,10 @@
           <strong>${escapeText([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "Unnamed dancer")}</strong>
           <small>${escapeText(enrollmentDisplaySchoolName(item))}</small>
           <small class="enrollment-card-age">${escapeText(item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided")}</small>
+          ${enrollmentChecklistFilter === "implement-billing" ? `<span class="enrollment-card-billing-bubbles">
+            ${billingDiscount ? `<span class="enrollment-card-billing-bubble discount" aria-label="Tuition Discount: ${escapeText(billingDiscount)}"><span>Tuition Discount</span><b>${escapeText(billingDiscount)}</b></span>` : ""}
+            ${billingTuition ? `<span class="enrollment-card-billing-bubble tuition" aria-label="Suggested Tuition: ${escapeText(billingTuition)}"><span>Suggested Tuition</span><b>${escapeText(billingTuition)}</b></span>` : `<span class="enrollment-card-billing-bubble tuition" aria-label="Suggested Tuition unavailable"><span>Suggested Tuition</span><b>Unavailable</b></span>`}
+          </span>` : ""}
           ${placed ? `<span class="enrollment-stage-bubble">${escapeText(enrollmentWorkflowLabel(item))}</span>` : `<span class="enrollment-priority-bubble ${priorityStyle}">${escapeText(priority.label)}</span>`}
           ${futureDancerMatch ? `<span class="enrollment-future-match-heart" aria-label="Matches Future Dancer" title="Matches Future Dancer">♥</span>` : ""}
           </button>
@@ -16615,12 +16637,12 @@
           </div>
           ${placed ? `
           <div class="enrollment-checklist">
-            <button class="primary" type="button" disabled>✓ Placed in a Class</button>
-            <button class="${item.brightwheel_profile_created_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="brightwheel_profile_created_at">${item.brightwheel_profile_created_at ? "✓ " : "○ "}Brighthweel Setup Complete</button>
-            <button class="${enrollmentFeeRecorded(item) ? "primary" : "secondary"}" type="button" disabled>${enrollmentFeeRecorded(item) ? "✓ " : "○ "}Enrollment Fee Recorded: ${escapeText(enrollmentFeeStatusLabel(item))}</button>
+            <button class="primary" type="button" disabled>✓ Placed in Class</button>
+            <button class="${item.brightwheel_profile_created_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="brightwheel_profile_created_at">${item.brightwheel_profile_created_at ? "✓ " : "○ "}Brightwheel Assignment</button>
+            <button class="${enrollmentFeeRecorded(item) ? "primary" : "secondary"}" type="button" disabled>${enrollmentFeeRecorded(item) ? "✓ " : "○ "}Enrollment Fee Recorded</button>
             <button class="${item.invoice_sent_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="invoice_sent_at">${item.invoice_sent_at ? "✓ " : "○ "}The Recital Experience Added</button>
-            <button class="${item.enrollment_active_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="enrollment_active_at">${item.enrollment_active_at ? "✓ " : "○ "}Billing Plan Active: ${escapeText(enrollmentTuitionDiscountLabel(item))}</button>
-            <button class="${item.parent_invited_at ? "primary" : "secondary"}" type="button" data-enrollment-welcome-email ${item.parent_invited_at || enrollmentWelcomeSending.has(item.id) ? "disabled" : ""}>${enrollmentWelcomeSending.has(item.id) ? "Sending… " : item.parent_invited_at ? "✓ " : "○ "}Welcome Email (clicking this step will send the welcome email)</button>
+            <button class="${item.enrollment_active_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="enrollment_active_at">${item.enrollment_active_at ? "✓ " : "○ "}Billing Plan${enrollmentTuitionDiscountLabel(item) ? `: ${escapeText(enrollmentTuitionDiscountLabel(item))}` : ""}</button>
+            <button class="${item.parent_invited_at ? "primary" : "secondary"}" type="button" data-enrollment-welcome-email ${item.parent_invited_at || enrollmentWelcomeSending.has(item.id) ? "disabled" : ""}>${enrollmentWelcomeSending.has(item.id) ? "Sending… " : item.parent_invited_at ? "✓ " : "○ "}Welcome Email</button>
           </div>` : `
           <section class="enrollment-placement-class-section">
             <div class="enrollment-placement-class-grid">
