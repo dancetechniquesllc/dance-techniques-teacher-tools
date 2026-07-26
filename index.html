@@ -6294,6 +6294,15 @@
     .newsletter-change-template[open] summary::after { transform: rotate(180deg); }
     .newsletter-change-template .newsletter-template-grid { padding: 0 11px 11px; }
     .newsletter-editor-panel, .newsletter-preview-panel { display: grid; gap: 13px; }
+    .newsletter-editor-panel {
+      position: sticky;
+      top: 12px;
+      max-height: calc(100vh - 24px);
+      align-content: start;
+      overflow: auto;
+      overscroll-behavior: auto;
+      scrollbar-gutter: stable;
+    }
     .newsletter-studio-toolbar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
     .newsletter-studio-toolbar label, .newsletter-editor-panel label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 800; }
     .newsletter-template-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
@@ -6335,6 +6344,11 @@
     .newsletter-graphic-library-card small { color: var(--muted); font-size: 10px; line-height: 1.35; }
     .newsletter-graphic-type-icon { position: relative; width: 84px; height: 64px; margin: 8px 0 10px; border-radius: 9px; background: var(--blush); }
     .newsletter-graphic-type-icon::before { content: ""; position: absolute; top: -10px; left: 8px; width: 36px; height: 18px; border-radius: 8px 8px 0 0; background: var(--blush); }
+    .newsletter-graphic-library-card.is-bopper-folder { border-color: #aeb9a6; background: #e7ece3; }
+    .newsletter-graphic-library-card.is-bopper-folder:hover { border-color: var(--sage); box-shadow: 0 8px 20px rgb(82 97 73 / .14); }
+    .newsletter-graphic-library-card.is-bopper-folder .newsletter-graphic-type-icon,
+    .newsletter-graphic-library-card.is-bopper-folder .newsletter-graphic-type-icon::before { background: var(--sage); }
+    .newsletter-graphic-library-card.is-bopper-folder strong { color: #526149; }
     .newsletter-graphic-library-back { min-height: 31px; padding: 5px 11px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
     @media (max-width: 640px) { .newsletter-graphic-library-grid { grid-template-columns: 1fr 1fr; } }
     .newsletter-section-list { display: grid; gap: 8px; }
@@ -6345,6 +6359,12 @@
     .newsletter-section-editor-head button { min-height: 28px; padding: 4px 8px; border-radius: 999px; background: #fff0ef; color: #a1343e; font-size: 10px; }
     .newsletter-section-editor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .newsletter-section-editor-grid .full { grid-column: 1 / -1; }
+    .newsletter-photo-upload-control { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; padding: 10px; border: 1px dashed var(--border); border-radius: 11px; background: var(--surface-soft); }
+    .newsletter-photo-upload-control input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+    .newsletter-photo-upload-control label { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 7px 13px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 800; cursor: pointer; }
+    .newsletter-photo-upload-status { display: flex; align-items: center; gap: 8px; min-width: 0; color: var(--muted); font-size: 10px; }
+    .newsletter-photo-upload-status img { width: 46px; height: 38px; flex: 0 0 auto; border-radius: 7px; object-fit: cover; }
+    .newsletter-photo-upload-status span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .newsletter-content-section { margin: 20px 0; }
     .newsletter-content-section h2 { margin: 0 0 7px; font-family: var(--newsletter-title-font, inherit); font-size: 1.35em; }
     .newsletter-content-section p { margin: 0; }
@@ -6354,7 +6374,21 @@
     .newsletter-content-section.is-reminder { padding: 18px; border: 2px solid var(--newsletter-accent); border-radius: 12px; }
     .newsletter-content-section.is-character { text-align: center; }
     .newsletter-character-graphic { display: inline-grid; place-items: center; width: 82px; height: 82px; border-radius: 999px; background: #f8e1dc; font-size: 42px; }
-    .newsletter-block-image { width: 100%; max-height: 340px; object-fit: cover; border-radius: 12px; }
+    .newsletter-social-links { display: flex; align-items: center; justify-content: center; gap: clamp(18px, 5vw, 42px); width: 100%; margin: 12px auto; padding: 4px 0; background: transparent !important; }
+    .newsletter-social-link { position: relative; z-index: 2; display: inline-flex; align-items: center; justify-content: center; width: clamp(76px, 15vw, 112px); aspect-ratio: 1.13 / 1; background: transparent; cursor: pointer; }
+    .newsletter-social-link:focus-visible { outline: 3px solid #69745f; outline-offset: 4px; border-radius: 50%; }
+    .newsletter-social-link img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .newsletter-preview-section-editor.is-boy-social-links .newsletter-social-link { aspect-ratio: 1; }
+    .newsletter-preview-section-editor.is-social-links { background: transparent; }
+    .newsletter-social-links-note { margin: 8px 0 0; color: #7a6965; font-size: 12px; text-align: center; }
+    @media (max-width: 520px) {
+      .newsletter-social-links { gap: 20px; }
+      .newsletter-social-link { width: 78px; }
+    }
+    .newsletter-preview-document.is-mobile .newsletter-social-links { gap: 20px; }
+    .newsletter-preview-document.is-mobile .newsletter-social-link { width: 78px; }
+    .newsletter-block-image { display: block; width: 100%; height: auto; max-height: none; object-fit: contain; border-radius: 12px; }
+    .newsletter-block-image.is-cropped { height: 340px; max-height: 340px; object-fit: cover; }
     .newsletter-dt-touch { min-height: 36px; padding: 7px 13px; border-radius: 999px; background: linear-gradient(135deg, var(--berry), #9b4669); color: white; font-size: 11px; box-shadow: 0 7px 18px rgb(101 16 63 / .18); }
     .newsletter-dt-dialog { width: min(980px, 100%); }
     .newsletter-dt-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
@@ -6383,9 +6417,23 @@
     .newsletter-gender-version.is-selected[data-newsletter-gender-version="female"] { border-color: #dba9a1; background: #dba9a1; color: #160f0d; }
     .newsletter-gender-version.is-selected[data-newsletter-gender-version="male"] { border-color: #68775f; background: #68775f; color: #fffaf6; }
     .newsletter-version-note { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 10px; font-weight: 500; text-align: center; }
-    .newsletter-preview-panel { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: hidden; }
-    .newsletter-preview-stage { display: grid; place-items: start center; min-height: 0; max-height: calc(100vh - 285px); padding: 20px; border-radius: 14px; background: #e9e3df; overflow: auto; }
-    .newsletter-preview-document { position: relative; width: min(100%, 680px); min-height: 600px; border-radius: 14px; overflow: hidden; background: #fffaf6; box-shadow: 0 12px 34px rgb(58 29 22 / .14); transition: width .18s ease; }
+    .newsletter-preview-panel { position: relative; min-width: 0; max-height: none; align-content: start; overflow: visible; }
+    .newsletter-preview-controls { position: sticky; top: 12px; z-index: 20; padding: 10px 12px; border: 1px solid var(--border); border-radius: 12px; background: rgb(255 250 246 / .96); box-shadow: 0 7px 20px rgb(58 29 22 / .08); backdrop-filter: blur(10px); }
+    .newsletter-preview-stage {
+      width: 100%;
+      min-width: 0;
+      height: clamp(440px, calc(100vh - 180px), 820px);
+      display: grid;
+      place-items: start center;
+      padding: 20px 20px 64px;
+      border-radius: 14px;
+      background: #e9e3df;
+      overflow: auto;
+      overscroll-behavior: auto;
+      scrollbar-gutter: stable;
+      contain: inline-size;
+    }
+    .newsletter-preview-document { position: relative; width: 680px; min-width: 680px; max-width: none; min-height: 600px; border-radius: 14px; overflow: hidden; background: #fffaf6; box-shadow: 0 12px 34px rgb(58 29 22 / .14); zoom: var(--newsletter-desktop-scale, 1); }
     .newsletter-preview-document > :is(header, main, footer) { position: relative; z-index: 2; }
     .newsletter-background-box { position: absolute; z-index: 1; min-width: 80px; min-height: 60px; border-radius: 18px; pointer-events: none; transform: translate(-50%, -50%); }
     .newsletter-background-box.is-outline { border: 3px solid var(--newsletter-box-border); background: var(--newsletter-box-color); }
@@ -6400,6 +6448,8 @@
     .newsletter-background-box-controls { position: absolute; z-index: 10; top: -16px; right: -12px; display: flex; gap: 4px; opacity: .72; pointer-events: auto; transition: opacity .15s ease; }
     .newsletter-background-box-editor:hover .newsletter-background-box-controls, .newsletter-background-box-editor:focus-within .newsletter-background-box-controls, .newsletter-background-box-editor.is-selected .newsletter-background-box-controls { opacity: 1; }
     .newsletter-background-box-controls button { min-height: 28px; padding: 4px 8px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 9px; }
+    .newsletter-background-box-controls [data-newsletter-background-box-drag-handle] { cursor: grab; touch-action: none; user-select: none; }
+    .newsletter-background-box-controls [data-newsletter-background-box-drag-handle]:active { cursor: grabbing; }
     .newsletter-background-box-controls .newsletter-box-icon-button { width: 28px; padding: 0; }
     .newsletter-background-box-popover { position: absolute; z-index: 12; top: 20px; right: -4px; width: 230px; display: grid; gap: 9px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: white; box-shadow: var(--shadow); color: var(--fg); pointer-events: auto; }
     .newsletter-background-box-popover strong { font-size: 11px; }
@@ -6438,9 +6488,18 @@
     .newsletter-text-resize-handle svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; pointer-events: none; }
     .newsletter-resizable-field { position: relative; min-width: 120px; max-width: 100%; }
     .newsletter-resizable-field > .newsletter-preview-editable { width: 100%; min-width: 0; max-width: 100%; overflow: auto; }
+    .newsletter-text-full-width { position: absolute; top: -13px; left: 50%; z-index: 5; min-height: 27px; padding: 4px 10px; border: 1px solid var(--newsletter-accent); border-radius: 999px; background: #fffaf6; color: var(--berry); font-size: 9px; font-weight: 850; white-space: nowrap; cursor: pointer; opacity: 0; pointer-events: none; transform: translateX(-50%); transition: opacity .15s ease; }
+    .newsletter-resizable-field:hover > .newsletter-text-full-width,
+    .newsletter-resizable-field:focus-within > .newsletter-text-full-width { opacity: 1; pointer-events: auto; }
     .newsletter-preview-editable[data-newsletter-preview-section-field]:focus,
     .newsletter-preview-editable[data-newsletter-preview-field="message"]:focus { outline: 1px dashed var(--newsletter-accent); outline-offset: 4px; }
-    .newsletter-preview-editable { border-radius: 7px; outline: 1px dashed transparent; white-space: pre-wrap; transition: outline-color .15s ease, background .15s ease; }
+    .newsletter-preview-editable { border-radius: 7px; outline: 1px dashed transparent; line-height: 1.35; white-space: pre-wrap; transition: outline-color .15s ease, background .15s ease; }
+    .newsletter-preview-document .newsletter-rich-text,
+    .newsletter-preview-document .newsletter-preview-editable :is(div, p, li) { line-height: 1.35; }
+    #newsletter-preview-document .newsletter-preview-editable [style*="background-color: rgba(255, 255, 255"],
+    #newsletter-preview-document .newsletter-preview-editable [style*="background-color: rgb(255 255 255 /"] { background-color: transparent !important; }
+    #newsletter-preview-document .newsletter-preview-editable::selection,
+    #newsletter-preview-document .newsletter-preview-editable *::selection { background: color-mix(in srgb, var(--newsletter-accent) 38%, transparent); }
     .newsletter-preview-editable:hover { outline-color: color-mix(in srgb, var(--newsletter-accent) 52%, transparent); }
     .newsletter-preview-editable:focus { outline: 2px solid var(--newsletter-accent); background: transparent; }
     .newsletter-preview-section-editor { position: relative; margin: 16px 0; padding: 14px; border: 1px dashed color-mix(in srgb, var(--newsletter-accent) 42%, transparent); border-radius: 11px; background: rgb(255 255 255 / .35); }
@@ -6449,20 +6508,72 @@
     .newsletter-preview-section-editor:hover .newsletter-preview-section-actions,
     .newsletter-preview-section-editor:focus-within .newsletter-preview-section-actions { opacity: 1; }
     .newsletter-preview-section-actions button { width: 25px; min-height: 25px; padding: 0; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 15px; }
+    .newsletter-preview-section-actions > span { display: flex; gap: 4px; }
+    .newsletter-section-background-trigger { border: 1px solid rgb(22 15 13 / .18); box-shadow: inset 0 0 0 2px white; }
+    .newsletter-section-background-popover { position: absolute; z-index: 12; top: 38px; right: 6px; width: 238px; display: grid; gap: 9px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: white; box-shadow: var(--shadow); color: var(--fg); }
+    .newsletter-section-background-popover strong { font-size: 11px; }
+    .newsletter-section-background-swatches { display: flex; flex-wrap: wrap; gap: 7px; }
+    .newsletter-section-background-swatches button { width: 29px; min-height: 29px; border: 2px solid white; box-shadow: 0 0 0 1px var(--border); }
+    .newsletter-section-background-swatches button.is-selected { box-shadow: 0 0 0 2px var(--fg); }
+    .newsletter-section-background-clear { width: auto !important; padding: 4px 9px !important; font-size: 9px !important; }
+    .newsletter-section-custom-color { display: grid; grid-template-columns: 1fr 36px; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
+    .newsletter-section-custom-color input { width: 36px; height: 30px; min-height: 30px; padding: 2px; border-radius: 8px; }
+    .newsletter-section-background-image { display: grid; gap: 7px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .newsletter-section-background-image > span { color: var(--muted); font-size: 10px; font-weight: 800; }
+    .newsletter-section-background-image input[type="file"] { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
+    .newsletter-section-background-image-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+    .newsletter-section-background-image-actions label,
+    .newsletter-section-background-image-actions button { width: auto; min-height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 5px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 9px; font-weight: 850; cursor: pointer; }
+    .newsletter-section-background-image-preview { width: 100%; height: 84px; display: block; border: 1px solid var(--border); border-radius: 9px; object-fit: cover; }
+    .newsletter-section-background-fit { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .newsletter-section-background-fit button { width: auto; min-height: 29px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-soft); color: var(--fg); font-size: 9px; }
+    .newsletter-section-background-fit button.is-selected { border-color: var(--berry); background: var(--blush); color: var(--berry); }
     .newsletter-preview-drag-handle { cursor: grab; }
     .newsletter-inline-toolbar { position: relative; display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); }
     .newsletter-inline-toolbar > button { min-height: 30px; padding: 5px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
     .newsletter-inline-toolbar .newsletter-toolbar-row-break { flex-basis: 100%; height: 0; }
     .newsletter-alignment-icon { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 2; vertical-align: -3px; }
+    .newsletter-list-control { position: relative; }
+    .newsletter-list-trigger { min-height: 30px; padding: 5px 10px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
+    .newsletter-list-trigger.is-active { box-shadow: inset 0 0 0 2px var(--berry); }
+    .newsletter-list-popover { position: absolute; top: calc(100% + 6px); left: 0; z-index: 21; width: 205px; display: grid; gap: 6px; padding: 9px; border: 1px solid var(--border); border-radius: 10px; background: white; box-shadow: var(--shadow); }
+    .newsletter-list-popover[hidden] { display: none; }
+    .newsletter-list-popover button { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 6px 9px; border-radius: 8px; background: var(--surface-soft); color: var(--fg); font-size: 10px; text-align: left; }
+    .newsletter-list-popover button.is-active { background: var(--blush); color: var(--berry); box-shadow: inset 0 0 0 1px var(--berry); }
+    .newsletter-list-sample { width: 22px; flex: 0 0 auto; color: var(--berry); font-weight: 900; text-align: center; }
+    .newsletter-condition-control { position: relative; }
+    .newsletter-condition-trigger { min-height: 30px; padding: 5px 10px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
+    .newsletter-condition-trigger.is-active { box-shadow: inset 0 0 0 2px var(--berry); }
+    .newsletter-condition-popover { position: absolute; top: calc(100% + 6px); left: 0; z-index: 22; width: min(330px, 88vw); display: grid; gap: 9px; padding: 11px; border: 1px solid var(--border); border-radius: 11px; background: white; box-shadow: var(--shadow); }
+    .newsletter-condition-popover[hidden] { display: none; }
+    .newsletter-condition-popover > strong { color: var(--berry); font-size: 12px; }
+    .newsletter-condition-popover > small { color: var(--muted); font-size: 10px; line-height: 1.4; }
+    .newsletter-condition-schools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-height: 220px; overflow: auto; }
+    .newsletter-condition-schools label { display: flex; align-items: center; gap: 7px; padding: 7px; border: 1px solid var(--border); border-radius: 8px; color: var(--fg); font-size: 10px; font-weight: 700; }
+    .newsletter-condition-schools input { accent-color: var(--berry); }
+    .newsletter-condition-actions { display: flex; justify-content: flex-end; gap: 6px; }
+    .newsletter-condition-actions button { min-height: 30px; padding: 5px 10px; border-radius: 999px; font-size: 10px; }
+    .newsletter-condition-actions [data-newsletter-remove-condition] { margin-right: auto; background: #fff0ef; color: #a1343e; }
     .newsletter-field-popover { position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; width: min(420px, 90vw); display: grid; gap: 8px; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: white; box-shadow: var(--shadow); }
     .newsletter-field-popover[hidden] { display: none; }
     .newsletter-preview-inline-input { width: 100%; margin-top: 7px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 7px; background: white; font: inherit; }
-    .newsletter-preview-document.is-mobile { width: min(100%, 360px); }
+    .newsletter-preview-document.is-mobile { width: min(100%, 360px); min-width: 0; max-width: 360px; zoom: 1; }
     .newsletter-preview-document.template-birthday .newsletter-preview-header,
     .newsletter-preview-document.template-recital .newsletter-preview-header { background: linear-gradient(135deg, #f2c1bc, #f9e4b7); }
     .newsletter-preview-document.template-summer .newsletter-preview-header,
     .newsletter-preview-document.template-partnership .newsletter-preview-header { background: linear-gradient(135deg, #dcead9, #f6e9df); }
     .newsletter-preview-document.template-costume .newsletter-preview-header { background: linear-gradient(135deg, #f8d9dd, #fff3ed); }
+    .newsletter-preview-document .newsletter-preview-editable ul,
+    .newsletter-preview-document .newsletter-preview-editable ol,
+    .newsletter-preview-document .newsletter-rich-text ul,
+    .newsletter-preview-document .newsletter-rich-text ol { margin: 8px 0; padding-left: 1.45em; white-space: normal; }
+    .newsletter-preview-document :is(.newsletter-preview-editable, .newsletter-rich-text) li::marker { color: currentColor; }
+    .newsletter-preview-document .newsletter-heart-list { list-style: none; padding-left: 1.55em !important; }
+    .newsletter-preview-document .newsletter-heart-list > li { position: relative; }
+    .newsletter-preview-document .newsletter-heart-list > li::before { content: "♥"; position: absolute; left: -1.35em; color: currentColor; font-size: .82em; line-height: 1.75; }
+    .newsletter-preview-document .newsletter-school-condition { border-radius: 4px; background: color-mix(in srgb, var(--newsletter-accent, #65103f) 12%, transparent); box-shadow: inset 0 -1px 0 var(--newsletter-accent, #65103f); }
+    .newsletter-preview-document .newsletter-school-condition::after { content: "school only"; margin-left: 4px; padding: 1px 4px; border-radius: 999px; background: var(--newsletter-accent, #65103f); color: white; font-size: 8px; font-weight: 800; letter-spacing: .02em; vertical-align: 2px; }
+    .newsletter-preview-document .newsletter-school-condition.is-condition-not-sample { opacity: .62; box-shadow: inset 0 -1px 0 #8f8985; }
     .newsletter-preview-document.template-welcome { background: #fffaf4; }
     .newsletter-preview-document.template-welcome .newsletter-preview-header { padding: 34px 34px 28px; border-bottom: 1px solid #dfb9b2; background: linear-gradient(180deg, #f8e4df 0%, #fffaf4 100%); }
     .newsletter-preview-document.template-welcome .newsletter-preview-header img { width: 132px; }
@@ -6503,6 +6614,10 @@
     .newsletter-logo-editor.badge-solid-heart .newsletter-logo-badge-surface { background: var(--newsletter-logo-badge-color); -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 58'%3E%3Cpath fill='black' d='M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 58'%3E%3Cpath fill='black' d='M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z'/%3E%3C/svg%3E") center / contain no-repeat; }
     .newsletter-logo-mark { display: block; width: 100%; aspect-ratio: 2.15 / 1; background: var(--newsletter-logo-color, #160f0d); -webkit-mask: url("assets/dance-techniques-logo-only.png") center / contain no-repeat; mask: url("assets/dance-techniques-logo-only.png") center / contain no-repeat; }
     .newsletter-logo-editor.has-badge .newsletter-logo-mark { width: 150%; max-width: none; }
+    .newsletter-boy-logo-mark { display: block; width: 100%; aspect-ratio: 1; background: var(--newsletter-logo-color, #160f0d); -webkit-mask: url("assets/boy-d-logo.png") center / contain no-repeat; mask: url("assets/boy-d-logo.png") center / contain no-repeat; }
+    .newsletter-preview-document .newsletter-preview-header .newsletter-boy-logo-mark { width: 100%; max-height: none; aspect-ratio: 1; }
+    .newsletter-logo-editor.has-badge .newsletter-boy-logo-mark { width: 47.6%; height: 47.6%; }
+    .newsletter-preview-document .newsletter-preview-header .newsletter-logo-editor.has-badge .newsletter-boy-logo-mark { width: 47.6%; height: 47.6%; }
     .newsletter-logo-badge-controls { position: absolute; top: 12px; right: 12px; z-index: 8; display: grid; justify-items: end; gap: 7px; text-align: left; }
     .newsletter-logo-badge-trigger { min-height: 32px; padding: 6px 11px; border: 1px solid var(--berry); border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; font-weight: 850; }
     .newsletter-logo-badge-popover { width: min(250px, calc(100vw - 64px)); padding: 11px; border: 1px solid var(--border); border-radius: 12px; background: #fffaf6; box-shadow: 0 12px 30px rgb(66 35 40 / .18); }
@@ -6540,6 +6655,11 @@
     .newsletter-preview-document a { text-decoration: none !important; }
     .newsletter-save-state { display: inline-flex; align-items: center; gap: 6px; min-height: 30px; padding: 5px 11px; border-radius: 999px; background: var(--berry); color: white; font-size: 10px; font-weight: 850; white-space: nowrap; }
     .newsletter-save-state::before { content: "✓"; font-size: 12px; }
+    .newsletter-save-state.is-saving::before { content: "…"; }
+    .newsletter-save-state.is-error { background: #a33f50; }
+    .newsletter-save-state.is-error::before { content: "!"; }
+    .newsletter-save-controls { display: flex; align-items: center; justify-content: flex-end; gap: 7px; }
+    .newsletter-save-now { min-height: 30px; padding: 5px 10px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; white-space: nowrap; }
     @media (max-width: 850px) {
       .boutique-kit-toolbar { grid-template-columns: 1fr 1fr; }
       .boutique-kit-heading { display: flex; align-items: flex-start; }
@@ -6553,6 +6673,9 @@
       .boutique-order-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .boutique-assignment-suggestions { grid-template-columns: 1fr; }
       .newsletter-studio-shell { grid-template-columns: 1fr; }
+      .newsletter-editor-panel { position: relative; top: auto; max-height: none; overflow: visible; }
+      .newsletter-preview-controls { top: 8px; }
+      .newsletter-preview-stage { height: min(76vh, 760px); min-height: 440px; }
       .newsletter-studio-toolbar { grid-template-columns: 1fr; }
       .newsletter-brand-controls, .newsletter-section-editor-grid { grid-template-columns: 1fr; }
       .newsletter-template-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -11524,6 +11647,7 @@
       body[data-mode="teacher"] .admin-shell .admin-grid { display: none; }
     }
   </style>
+  <link rel="stylesheet" href="tulle.css?v=20260726-phase1">
 </head>
 <body class="auth-checking" data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="today">
   <section class="auth-gate" id="auth-gate" data-state="checking" aria-live="polite">
@@ -12621,7 +12745,7 @@
             </div>
             <div class="newsletter-studio-shell" id="newsletter-studio-shell" hidden>
               <article class="admin-card newsletter-editor-panel">
-                <div class="section-title"><div><h3>Design Studio</h3><p class="subtle">Sections appear in Live Preview. Edit, drag to arrange, and remove them there.</p></div><span class="newsletter-save-state" id="newsletter-save-state">Draft saved</span></div>
+                <div class="section-title"><div><h3>Design Studio</h3><p class="subtle">Sections appear in Live Preview. Edit, drag to arrange, and remove them there.</p></div><div class="newsletter-save-controls"><button class="newsletter-save-now" id="newsletter-save-now" type="button">Save now</button><span class="newsletter-save-state" id="newsletter-save-state" role="status" aria-live="polite">Draft saved</span></div></div>
                 <details class="newsletter-change-template" id="newsletter-change-template">
                   <summary><span>Change Template</span><small id="newsletter-selected-template">Monthly Newsletter</small></summary>
                   <div class="newsletter-template-grid" aria-label="Newsletter templates">
@@ -12676,6 +12800,23 @@
                     <strong>Insert Personalized Field</strong>
                     <div class="newsletter-field-buttons" id="newsletter-field-buttons">
                       <button type="button" data-newsletter-field="[Parent First Name]">Parent First Name</button><button type="button" data-newsletter-field="[Dancer Name]">Dancer Name</button><button type="button" data-newsletter-field="[School Nickname]">School Nickname</button><button type="button" data-newsletter-field="[Teacher Name]">Teacher Name</button><button type="button" data-newsletter-field="[Dance Day]">Dance Day</button><button type="button" data-newsletter-field="[Dance Time]">Dance Time</button><button type="button" data-newsletter-field="[AM or PM]">AM or PM</button><button type="button" data-newsletter-field="[Director First Name]">Director First Name</button>
+                    </div>
+                  </div>
+                  <div class="newsletter-list-control">
+                    <button class="newsletter-list-trigger" type="button" id="newsletter-open-lists" aria-expanded="false">＋ Add bullets or numbers</button>
+                    <div class="newsletter-list-popover" id="newsletter-list-popover" hidden>
+                      <button type="button" data-newsletter-list-type="bullets"><span class="newsletter-list-sample">•</span>Bulleted list</button>
+                      <button type="button" data-newsletter-list-type="numbers"><span class="newsletter-list-sample">1.</span>Numbered list</button>
+                      <button type="button" data-newsletter-list-type="heart"><span class="newsletter-list-sample">♥</span>Signature-heart list</button>
+                    </div>
+                  </div>
+                  <div class="newsletter-condition-control">
+                    <button class="newsletter-condition-trigger" type="button" id="newsletter-open-condition" aria-expanded="false">Show only when…</button>
+                    <div class="newsletter-condition-popover" id="newsletter-condition-popover" hidden>
+                      <strong>Show this text only for selected schools</strong>
+                      <small>Families at all other schools will not see this highlighted phrase.</small>
+                      <div class="newsletter-condition-schools" id="newsletter-condition-schools"></div>
+                      <div class="newsletter-condition-actions"><button type="button" data-newsletter-remove-condition hidden>Remove condition</button><button type="button" data-newsletter-close-condition>Cancel</button><button class="primary" type="button" data-newsletter-apply-condition>Apply</button></div>
                     </div>
                   </div>
                 </div>
@@ -14514,15 +14655,25 @@
             <strong>Twirla</strong>
             <small>Saved Twirla character graphics</small>
           </button>
+          <button class="newsletter-graphic-library-card is-bopper-folder" type="button" data-newsletter-graphic-type="bopper">
+            <span class="newsletter-graphic-type-icon" aria-hidden="true"></span>
+            <strong>Bopper</strong>
+            <small>Saved Bopper character graphics</small>
+          </button>
         </div>
       </section>
       <section id="newsletter-graphic-card-view" hidden>
         <button class="newsletter-graphic-library-back" type="button" data-newsletter-graphic-library-back>← Graphic Types</button>
         <div class="newsletter-graphic-library-grid">
-          <button class="newsletter-graphic-library-card" type="button" data-newsletter-library-graphic="twirla-peeking">
+          <button class="newsletter-graphic-library-card" type="button" data-newsletter-library-folder="twirla" data-newsletter-library-graphic="twirla-peeking">
             <img src="assets/twirla-peeking.png" alt="Twirla Peeking">
             <strong>Twirla Peeking</strong>
             <small>Click to add her to the newsletter</small>
+          </button>
+          <button class="newsletter-graphic-library-card" type="button" data-newsletter-library-folder="bopper" data-newsletter-library-graphic="bopper-peeking" hidden>
+            <img src="assets/bopper-peeking.png" alt="Bopper Peeking">
+            <strong>Bopper Peeking</strong>
+            <small>Click to add him to the newsletter</small>
           </button>
         </div>
       </section>
@@ -27199,20 +27350,59 @@
     };
 
     const newsletterStorageKey = "dt-newsletter-studio-draft-v1";
+    const newsletterDraftDbName = "dt-newsletter-studio";
+    const newsletterDraftDbStore = "drafts";
+    const newsletterDraftDbKey = "current";
+    const openNewsletterDraftDatabase = () => new Promise((resolve, reject) => {
+      if (!window.indexedDB) return reject(new Error("Large-draft storage is unavailable in this browser."));
+      const request = indexedDB.open(newsletterDraftDbName, 1);
+      request.addEventListener("upgradeneeded", () => {
+        const database = request.result;
+        if (!database.objectStoreNames.contains(newsletterDraftDbStore)) database.createObjectStore(newsletterDraftDbStore, { keyPath: "id" });
+      });
+      request.addEventListener("success", () => resolve(request.result));
+      request.addEventListener("error", () => reject(request.error || new Error("Newsletter storage could not be opened.")));
+    });
+    const writeNewsletterDraftDatabase = async (snapshot) => {
+      const database = await openNewsletterDraftDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = database.transaction(newsletterDraftDbStore, "readwrite");
+        transaction.objectStore(newsletterDraftDbStore).put({ id: newsletterDraftDbKey, snapshot, savedAt: Date.now() });
+        transaction.addEventListener("complete", resolve);
+        transaction.addEventListener("abort", () => reject(transaction.error || new Error("Newsletter storage was interrupted.")));
+        transaction.addEventListener("error", () => reject(transaction.error || new Error("Newsletter draft could not be stored.")));
+      });
+      database.close();
+    };
+    const readNewsletterDraftDatabase = async () => {
+      const database = await openNewsletterDraftDatabase();
+      const record = await new Promise((resolve, reject) => {
+        const transaction = database.transaction(newsletterDraftDbStore, "readonly");
+        const request = transaction.objectStore(newsletterDraftDbStore).get(newsletterDraftDbKey);
+        request.addEventListener("success", () => resolve(request.result || null));
+        request.addEventListener("error", () => reject(request.error || new Error("Newsletter draft could not be read.")));
+      });
+      database.close();
+      return record;
+    };
     const newsletterDefaultDraft = { template: "monthly", audience: "parents", school: "all", teacher: "all", subject: "", headline: "What’s Happening at Dance Techniques", message: "Hi [Parent First Name],\n\nWe loved dancing with [Dancer Name] this week!", font: "avenir-light", textSize: "12", color: "berry", sections: [], graphics: [], backgroundBoxes: [], videoUrl: "", ctaLabel: "", ctaUrl: "", device: "desktop" };
     let newsletterDraft = { ...newsletterDefaultDraft };
     let newsletterSaveTimer = 0;
+    let newsletterSaveRevision = 0;
+    let newsletterDurableHydrationComplete = false;
     let newsletterActiveField = "message";
     let newsletterActivePreviewTarget = null;
     let newsletterSavedSelection = null;
     let newsletterSavedSelectionTarget = null;
     let newsletterApplyingSelectionFormat = false;
     let newsletterIgnoreCollapsedSelectionOnce = false;
+    let newsletterConditionEditingSpan = null;
     let newsletterLogoSelected = false;
     let newsletterLogoBadgePopoverOpen = false;
     let newsletterSelectedGraphicIndex = -1;
     let newsletterSelectedButtonIndex = -1;
     let newsletterSelectedBackgroundBoxIndex = -1;
+    let newsletterSelectedSectionBackgroundIndex = -1;
     let newsletterBackgroundBoxDragIndex = -1;
     try { newsletterDraft = { ...newsletterDefaultDraft, ...(JSON.parse(localStorage.getItem(newsletterStorageKey) || "null") || {}) }; } catch (_) { /* Start with a clean draft. */ }
     if (newsletterDraft.audience === "both") newsletterDraft.audience = "parents";
@@ -27277,8 +27467,8 @@
     };
     if (!newsletterTemplates[newsletterDraft.template]) newsletterDraft.template = "monthly";
 
-    const newsletterVariantFields = ["template", "subject", "subjectHtml", "subjectFont", "subjectTextSize", "headline", "headlineHtml", "headlineFont", "headlineTextSize", "message", "messageHtml", "messageFont", "messageTextSize", "messageWidth", "messageLeft", "logoWidth", "logoColor", "logoBadgeShape", "logoBadgeColor", "font", "textSize", "color", "sections", "graphics", "backgroundBoxes", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl"];
-    const newsletterVariantSnapshot = (source = newsletterDraft, colorOverride = "") => Object.fromEntries(newsletterVariantFields.map((key) => [key, ["sections", "graphics", "backgroundBoxes"].includes(key) ? structuredClone(source[key] || []) : source[key]]).filter(([, value]) => value !== undefined).map(([key, value]) => [key, key === "color" && colorOverride ? colorOverride : value]));
+    const newsletterVariantFields = ["template", "subject", "subjectHtml", "subjectFont", "subjectTextSize", "headline", "headlineHtml", "headlineFont", "headlineTextSize", "message", "messageHtml", "messageFont", "messageTextSize", "messageWidth", "messageLeft", "logoWidth", "logoColor", "logoBadgeShape", "logoBadgeColor", "font", "textSize", "color", "sections", "graphics", "backgroundBoxes", "messagePosition", "videoUrl", "ctaLabel", "ctaUrl", "girlLayoutSyncVersion", "breakpointVersions"];
+    const newsletterVariantSnapshot = (source = newsletterDraft, colorOverride = "") => Object.fromEntries(newsletterVariantFields.map((key) => [key, source[key] && typeof source[key] === "object" ? structuredClone(source[key]) : source[key]]).filter(([, value]) => value !== undefined).map(([key, value]) => [key, key === "color" && colorOverride ? colorOverride : value]));
     let newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
     if (!newsletterDraft.genderVersions?.female || !newsletterDraft.genderVersions?.male) {
       const initialFemale = newsletterVariantSnapshot(newsletterDraft);
@@ -27287,17 +27477,137 @@
         male: newsletterVariantSnapshot(newsletterDraft, "sage")
       };
     }
+    const newsletterBoySageValue = (value) => {
+      if (Array.isArray(value)) return value.map(newsletterBoySageValue);
+      if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, newsletterBoySageValue(item)]));
+      if (typeof value !== "string") return value;
+      if (value === "blush") return "soft-sage";
+      if (value === "berry" || value === "dusty-mauve") return "sage";
+      return value
+        .replaceAll("#dba9a1", "#c6d3b5")
+        .replaceAll("#65103f", "#526149")
+        .replaceAll("#9b687a", "#68775f")
+        .replaceAll("#f8e4df", "#e7ece3")
+        .replaceAll("#f8e6e1", "#e7ece3")
+        .replaceAll("#f7e4df", "#e7ece3")
+        .replaceAll("#f8dfdc", "#e7ece3")
+        .replaceAll("#f8e5e5", "#e7ece3")
+        .replaceAll("#dfb9b2", "#b9c3b2")
+        .replaceAll("#e4c2bb", "#b9c3b2");
+    };
+    const newsletterSyncWelcomeBoyLayout = () => {
+      const female = newsletterDraft.genderVersions?.female;
+      const currentMale = newsletterDraft.genderVersions?.male;
+      if (!female || !currentMale || female.template !== "welcome" || currentMale.girlLayoutSyncVersion === 1) return;
+      const male = newsletterBoySageValue(structuredClone(female));
+      const hasBoySpecificCopy = (value) => /\b(boy|boys|he|him|his|gentleman)\b/i.test(String(value || ""));
+      ["subject", "subjectHtml", "headline", "headlineHtml", "message", "messageHtml"].forEach((key) => {
+        if (hasBoySpecificCopy(currentMale[key])) male[key] = currentMale[key];
+      });
+      male.template = female.template;
+      male.color = "sage";
+      male.girlLayoutSyncVersion = 1;
+      newsletterDraft.genderVersions.male = male;
+      if (newsletterGenderView === "male") newsletterDraft = { ...newsletterDraft, ...structuredClone(male), genderView: "male" };
+    };
+    newsletterSyncWelcomeBoyLayout();
+    const newsletterBreakpointFields = newsletterVariantFields.filter((key) => !["breakpointVersions", "girlLayoutSyncVersion"].includes(key));
+    const newsletterBreakpointSnapshot = (source = newsletterDraft) => Object.fromEntries(newsletterBreakpointFields
+      .map((key) => [key, source[key] && typeof source[key] === "object" ? structuredClone(source[key]) : source[key]])
+      .filter(([, value]) => value !== undefined));
+    const newsletterSyncSharedBreakpointContent = (target, source = newsletterDraft) => {
+      if (!target) return;
+      ["template", "subject", "headline", "message", "videoUrl", "ctaLabel", "ctaUrl"].forEach((key) => {
+        const contentChanged = target[key] !== source[key];
+        target[key] = source[key];
+        // Rich-text HTML is presentation state. Never copy it from the active
+        // breakpoint into the other breakpoint while synchronizing shared copy.
+        // Existing drafts without an HTML value still receive a safe initial value.
+        if (contentChanged && ["subject", "headline", "message"].includes(key) && !target[`${key}Html`]) {
+          target[`${key}Html`] = rosterSafe(source[key] || "").replaceAll("\n", "<br>");
+        }
+      });
+      if (!Array.isArray(target.sections) || target.sections.length !== source.sections.length
+        || target.sections.some((section, index) => section.type !== source.sections[index]?.type)) {
+        const targetPresentation = Array.isArray(target.sections) ? target.sections : [];
+        target.sections = source.sections.map((section, index) => {
+          const preserved = targetPresentation[index] || {};
+          return {
+            ...structuredClone(section),
+            ...Object.fromEntries(Object.entries(preserved).filter(([key]) => /(?:Font|TextSize|Width|Left|Align|Color|Image|ImageName|Fit|Position|Spacing|Padding|Margin)$/i.test(key)))
+          };
+        });
+      } else {
+        source.sections.forEach((section, index) => {
+          ["type", "title", "text", "linkText", "url", "imageName"].forEach((key) => {
+            const contentChanged = target.sections[index][key] !== section[key];
+            target.sections[index][key] = section[key];
+            if (contentChanged && ["title", "text", "linkText"].includes(key) && !target.sections[index][`${key}Html`]) {
+              target.sections[index][`${key}Html`] = rosterSafe(section[key] || "").replaceAll("\n", "<br>");
+            }
+          });
+        });
+      }
+      if (!Array.isArray(target.graphics) || target.graphics.length !== source.graphics.length) {
+        target.graphics = structuredClone(source.graphics);
+      } else {
+        source.graphics.forEach((graphic, index) => {
+          target.graphics[index].url = graphic.url;
+          target.graphics[index].alt = graphic.alt;
+          // Position, size, transforms, and locks are breakpoint presentation
+          // state. Preserve the target snapshot instead of copying the active
+          // view's responsive maps across both previews.
+        });
+      }
+      if (!Array.isArray(target.backgroundBoxes) || target.backgroundBoxes.length !== source.backgroundBoxes.length) {
+        target.backgroundBoxes = structuredClone(source.backgroundBoxes);
+      }
+    };
+    const ensureNewsletterBreakpointVersions = () => {
+      newsletterDraft.breakpointVersionsByGender ||= {};
+      newsletterDraft.breakpointVersions = newsletterDraft.breakpointVersionsByGender[newsletterGenderView]
+        || newsletterDraft.breakpointVersions
+        || {};
+      newsletterDraft.breakpointVersions ||= {};
+      const initial = newsletterBreakpointSnapshot(newsletterDraft);
+      newsletterDraft.breakpointVersions.desktop ||= structuredClone(initial);
+      newsletterDraft.breakpointVersions.mobile ||= structuredClone(initial);
+      newsletterDraft.breakpointVersionsByGender[newsletterGenderView] = newsletterDraft.breakpointVersions;
+    };
+    const persistNewsletterActiveBreakpoint = () => {
+      ensureNewsletterBreakpointVersions();
+      const active = newsletterDraft.device === "mobile" ? "mobile" : "desktop";
+      newsletterDraft.breakpointVersions[active] = newsletterBreakpointSnapshot(newsletterDraft);
+      const other = active === "mobile" ? "desktop" : "mobile";
+      newsletterSyncSharedBreakpointContent(newsletterDraft.breakpointVersions[other]);
+      newsletterDraft.breakpointVersionsByGender[newsletterGenderView] = newsletterDraft.breakpointVersions;
+    };
+    const loadNewsletterBreakpoint = (device) => {
+      persistNewsletterActiveBreakpoint();
+      const view = device === "mobile" ? "mobile" : "desktop";
+      const versions = newsletterDraft.breakpointVersions;
+      const target = structuredClone(versions[view] || newsletterBreakpointSnapshot(newsletterDraft));
+      newsletterSyncSharedBreakpointContent(target);
+      newsletterDraft = { ...newsletterDraft, ...target, breakpointVersions: versions, device: view };
+    };
+    ensureNewsletterBreakpointVersions();
     const persistNewsletterActiveVersion = () => {
+      persistNewsletterActiveBreakpoint();
       newsletterDraft.genderVersions ||= {};
       newsletterDraft.genderVersions[newsletterGenderView] = newsletterVariantSnapshot(newsletterDraft, newsletterGenderView === "male" ? (newsletterDraft.color || "sage") : "");
       newsletterDraft.genderView = newsletterGenderView;
     };
     const loadNewsletterGenderVersion = (gender) => {
       persistNewsletterActiveVersion();
+      const breakpointVersionsByGender = newsletterDraft.breakpointVersionsByGender || {};
       newsletterGenderView = gender === "male" ? "male" : "female";
       const version = newsletterDraft.genderVersions?.[newsletterGenderView] || newsletterVariantSnapshot(newsletterDraft, newsletterGenderView === "male" ? "sage" : "");
-      newsletterDraft = { ...newsletterDraft, ...structuredClone(version), genderView: newsletterGenderView };
+      newsletterDraft = { ...newsletterDraft, ...structuredClone(version), breakpointVersionsByGender, breakpointVersions: breakpointVersionsByGender[newsletterGenderView] || version.breakpointVersions, genderView: newsletterGenderView };
       if (newsletterGenderView === "male" && !newsletterDraft.color) newsletterDraft.color = "sage";
+      ensureNewsletterBreakpointVersions();
+      const breakpointVersions = newsletterDraft.breakpointVersions;
+      const activeBreakpoint = newsletterDraft.device === "mobile" ? "mobile" : "desktop";
+      newsletterDraft = { ...newsletterDraft, ...structuredClone(breakpointVersions[activeBreakpoint] || {}), breakpointVersions, device: activeBreakpoint };
     };
     const resetNewsletterGenderVersions = (source) => {
       const female = newsletterVariantSnapshot(source);
@@ -27321,6 +27631,30 @@
     };
 
     const newsletterColors = { black: "#160f0d", "soft-grey": "#5e5e5e", berry: "#65103f", "dusty-mauve": "#9b687a", blush: "#dba9a1", sage: "#68775f", "soft-sage": "#c6d3b5", ivory: "#fffaf6", gold: "#d58c24" };
+    const newsletterSectionBackgroundValue = (section = {}) => {
+      const value = String(section.backgroundColor || "").trim();
+      if (!value) return "";
+      return newsletterColors[value] || (/^#[0-9a-f]{6}$/i.test(value) ? value : "");
+    };
+    const newsletterSectionBackgroundImageStyle = (section = {}) => {
+      const image = String(section.backgroundImage || "").trim();
+      if (!image) return "";
+      const safeImage = image.replaceAll("'", "%27").replaceAll('"', "%22");
+      const fit = section.backgroundImageFit === "contain" ? "contain" : "cover";
+      return `background-image:url('${safeImage}');background-size:${fit};background-position:center;background-repeat:no-repeat;`;
+    };
+    const newsletterSectionBackgroundControls = (section, index) => {
+      if (["social", "divider"].includes(section.type)) return "";
+      const value = newsletterSectionBackgroundValue(section);
+      const selected = newsletterSelectedSectionBackgroundIndex === index;
+      const palette = Object.entries(newsletterColors).map(([key, color]) => `<button type="button" data-newsletter-section-background="${key}" class="${section.backgroundColor === key || value.toLowerCase() === color.toLowerCase() ? "is-selected" : ""}" style="background:${color}" aria-label="${key.replaceAll("-", " ")} section background"></button>`).join("");
+      const image = String(section.backgroundImage || "");
+      const fit = section.backgroundImageFit === "contain" ? "contain" : "cover";
+      const imageId = `newsletter-section-background-image-${newsletterDraft.device}-${index}`;
+      const imageControls = `<div class="newsletter-section-background-image"><span>Background Image</span>${image ? `<img class="newsletter-section-background-image-preview" src="${rosterSafe(image)}" alt="Section background preview">` : ""}<span class="newsletter-section-background-image-actions"><input id="${imageId}" type="file" accept="image/*" data-newsletter-section-background-upload="${index}"><label for="${imageId}">${image ? "Replace Background Image" : "Choose Background Image"}</label>${image ? `<button type="button" data-newsletter-remove-section-background-image>Remove Image</button>` : ""}</span>${image ? `<span class="newsletter-section-background-fit"><button type="button" data-newsletter-section-background-fit="cover" class="${fit === "cover" ? "is-selected" : ""}">Cover</button><button type="button" data-newsletter-section-background-fit="contain" class="${fit === "contain" ? "is-selected" : ""}">Contain</button></span>` : ""}</div>`;
+      const popover = selected ? `<div class="newsletter-section-background-popover" data-newsletter-section-background-popover><strong>Section Background</strong><span class="newsletter-section-background-swatches"><button class="newsletter-section-background-clear ${!value ? "is-selected" : ""}" type="button" data-newsletter-section-background="">No fill</button>${palette}</span><label class="newsletter-section-custom-color">Custom color<input type="color" data-newsletter-section-custom-background value="${value || "#fffaf6"}"></label>${imageControls}</div>` : "";
+      return `<button class="newsletter-section-background-trigger" type="button" data-newsletter-edit-section-background="${index}" aria-label="Edit Section Background" title="Section Background: color or image" style="background:${value || "linear-gradient(135deg,#fff 48%,#dba9a1 49%,#dba9a1 54%,#fff 55%)"}"></button>${popover}`;
+    };
     const newsletterFontStyle = (draft = newsletterDraft) => draft.font === "parisienne" ? '"Parisienne", cursive' : draft.font === "bodoni-smallcaps" ? '"Bodoni 72 Smallcaps", "Bodoni 72", Didot, serif' : draft.font === "avenir-ultra-light" ? '"Avenir Next Ultra Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : draft.font === "avenir-light" ? '"Avenir Next Light", "Avenir Next", "Helvetica Neue", Arial, sans-serif' : '"Avenir Next", "Helvetica Neue", Arial, sans-serif';
     const newsletterInlineFontStyle = (draft = newsletterDraft) => newsletterFontStyle(draft).replaceAll('"', "'");
     const newsletterLogoBadgeClass = (draft = newsletterDraft) => ["circle-outline", "solid-circle", "solid-heart"].includes(draft.logoBadgeShape) ? `has-badge badge-${draft.logoBadgeShape}` : "";
@@ -27335,28 +27669,147 @@
     const newsletterFontWeight = (draft = newsletterDraft) => draft.font === "avenir-bold" ? "800" : draft.font === "avenir-ultra-light" ? "200" : "400";
     const newsletterFontSize = (draft = newsletterDraft) => `${Number(draft.textSize) || 12}pt`;
     const newsletterButtonTextColor = (colorKey = "berry") => ["blush", "soft-sage", "ivory", "gold"].includes(colorKey) ? newsletterColors.black : "#ffffff";
-    const newsletterSectionMarkup = (section, context = newsletterSampleContext(), draft = newsletterDraft) => {
+    const newsletterListItemIsEmpty = (item) => {
+      if (!item?.matches?.("li")) return false;
+      const readableText = String(item.textContent || "").replace(/[\u200B-\u200D\u2060\uFEFF\u00A0]/g, "").trim();
+      return !readableText && !item.querySelector("img, picture, svg, video, audio, a[href], button, input, .newsletter-school-condition[data-newsletter-schools]");
+    };
+    const cleanupNewsletterEmptyListItems = (root, { preserveCaret = true } = {}) => {
+      if (!root?.querySelectorAll) return false;
+      const selection = preserveCaret ? window.getSelection() : null;
+      const activeRange = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      let changed = false;
+      root.querySelectorAll("ul, ol").forEach((list) => {
+        const items = [...list.children].filter((child) => child.matches("li"));
+        items.forEach((item) => {
+          if (!newsletterListItemIsEmpty(item)) return;
+          if (activeRange && item.contains(activeRange.commonAncestorContainer)) return;
+          item.remove();
+          changed = true;
+        });
+        if (!list.querySelector(":scope > li")) {
+          list.remove();
+          changed = true;
+        }
+      });
+      return changed;
+    };
+    const newsletterBlockEditableHtml = (html = "", fallback = "") => {
+      const source = html || rosterSafe(fallback);
+      if (!source.includes("\n") && !/<br\s*\/?>/i.test(source) && !/<(?:ul|ol)\b/i.test(source) && !/(?:^|>)[^<\s][^<]*<(?:div|p|ul|ol|blockquote)\b/i.test(source)) return source;
+      if (!/<(?:div|p|ul|ol|li|blockquote)\b/i.test(source)) {
+        return source.split(/(?:\r?\n|<br\s*\/?>)/i).map((line) => `<div>${line || "<br>"}</div>`).join("");
+      }
+      const template = document.createElement("template");
+      template.innerHTML = source;
+      [...template.content.childNodes].forEach((node) => {
+        if (node.nodeType !== Node.TEXT_NODE || !node.nodeValue?.trim()) return;
+        const paragraph = document.createElement("div");
+        paragraph.textContent = node.nodeValue;
+        node.replaceWith(paragraph);
+      });
+      cleanupNewsletterEmptyListItems(template.content, { preserveCaret: false });
+      return template.innerHTML;
+    };
+    const newsletterPhotoUploadMarkup = (section, index, scope = "preview") => {
+      const hasImage = Boolean(section?.url);
+      return `<div class="newsletter-photo-upload-control">
+        <input id="newsletter-photo-upload-${scope}-${index}" data-newsletter-photo-upload="${index}" type="file" accept="image/*">
+        <label for="newsletter-photo-upload-${scope}-${index}">${hasImage ? "Replace Picture" : "Choose Picture"}</label>
+        <span class="newsletter-photo-upload-status">${hasImage ? `<img src="${rosterSafe(section.url)}" alt=""><span>${rosterSafe(section.imageName || "Picture selected")}</span>` : `<span>No picture selected yet</span>`}</span>
+      </div>`;
+    };
+    const newsletterPhotoDataUrl = (file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener("error", () => reject(new Error("The picture could not be read.")));
+      reader.addEventListener("load", () => {
+        const image = new Image();
+        image.addEventListener("error", () => reject(new Error("The picture could not be opened.")));
+        image.addEventListener("load", () => {
+          const maxSide = 1400;
+          const scale = Math.min(1, maxSide / Math.max(image.naturalWidth, image.naturalHeight));
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+          const context = canvas.getContext("2d");
+          if (!context) return reject(new Error("The picture could not be prepared."));
+          context.drawImage(image, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL("image/jpeg", .84));
+        });
+        image.src = String(reader.result || "");
+      });
+      reader.readAsDataURL(file);
+    });
+    const newsletterSocialLinksForGender = (section, gender = newsletterGenderView) => {
+      const links = Array.isArray(section?.socialLinks) && section.socialLinks.length ? section.socialLinks : [
+        { label: "Instagram", url: "https://www.instagram.com/dancetechniquesllc/" },
+        { label: "Facebook", url: "https://www.facebook.com/dancetechniquesllc" }
+      ];
+      const isBoy = gender === "male";
+      return links.map((item, index) => {
+        const isFacebook = String(item.label || "").toLowerCase().includes("facebook") || index === 1;
+        return {
+          ...item,
+          url: isFacebook
+            ? "https://www.facebook.com/dancetechniquesllc"
+            : "https://www.instagram.com/dancetechniquesllc/",
+          image: isBoy
+            ? (isFacebook ? "assets/social-facebook-sage-circle.svg" : "assets/social-instagram-sage-circle.svg")
+            : (isFacebook ? "assets/social-facebook-heart.png" : "assets/social-instagram-heart.png")
+        };
+      });
+    };
+    const newsletterSectionMarkup = (section, context = newsletterSampleContext(), draft = newsletterDraft, sectionIndex = -1) => {
+      const desktopSection = draft.breakpointVersions?.desktop?.sections?.[sectionIndex] || section;
+      const mobileSection = draft.breakpointVersions?.mobile?.sections?.[sectionIndex] || section;
+      const desktopBackground = newsletterSectionBackgroundValue(desktopSection) || "transparent";
+      const mobileBackground = newsletterSectionBackgroundValue(mobileSection) || "transparent";
+      const emailBackgroundImage = (value) => {
+        const image = String(value || "").trim();
+        return image ? `url('${image.replaceAll("'", "%27").replaceAll('"', "%22")}')` : "none";
+      };
+      const desktopImage = emailBackgroundImage(desktopSection.backgroundImage);
+      const mobileImage = emailBackgroundImage(mobileSection.backgroundImage);
+      const desktopFit = desktopSection.backgroundImageFit === "contain" ? "contain" : "cover";
+      const mobileFit = mobileSection.backgroundImageFit === "contain" ? "contain" : "cover";
+      const desktopHasBackground = desktopBackground !== "transparent" || desktopImage !== "none";
+      const mobileHasBackground = mobileBackground !== "transparent" || mobileImage !== "none";
+      const sectionBackgroundStyle = `--section-bg-desktop:${desktopBackground};--section-bg-mobile:${mobileBackground};--section-image-desktop:${desktopImage};--section-image-mobile:${mobileImage};--section-fit-desktop:${desktopFit};--section-fit-mobile:${mobileFit};--section-pad-desktop:${desktopHasBackground ? "18px" : "0px"};--section-pad-mobile:${mobileHasBackground ? "18px" : "0px"};background-color:var(--section-bg-desktop);background-image:var(--section-image-desktop);background-size:var(--section-fit-desktop);background-position:center;background-repeat:no-repeat;padding:var(--section-pad-desktop);border-radius:${desktopHasBackground ? "12px" : "0"};`;
       if (section.type === "divider") return `<div class="newsletter-content-section is-divider" aria-hidden="true"></div>`;
-      if (section.type === "photo") return section.url ? `<section class="newsletter-content-section"><img class="newsletter-block-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">${section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text))}</p>` : ""}</section>` : `<section class="newsletter-content-section is-highlight"><p>Photo or Resource Library image</p></section>`;
-      if (section.type === "youtube") { const id = newsletterYouTubeId(section.url); return section.url ? `<a class="newsletter-video-card" href="${rosterSafe(section.url)}" target="_blank" rel="noopener">${id ? `<img src="https://i.ytimg.com/vi/${rosterSafe(id)}/hqdefault.jpg" alt="YouTube video preview">` : ""}<span class="newsletter-video-play">▶</span></a>` : ""; }
+      if (section.type === "photo") return section.url ? `<section class="newsletter-content-section newsletter-responsive-section" style="${sectionBackgroundStyle}"><img class="newsletter-block-image${section.imageFit === "cover" ? " is-cropped" : ""}" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">${section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text))}</p>` : ""}</section>` : `<section class="newsletter-content-section is-highlight newsletter-responsive-section" style="${sectionBackgroundStyle}"><p>Photo or Resource Library image</p></section>`;
+      if (section.type === "youtube") { const id = newsletterYouTubeId(section.url); return section.url ? `<section class="newsletter-content-section newsletter-responsive-section" style="${sectionBackgroundStyle}"><a class="newsletter-video-card" href="${rosterSafe(section.url)}" target="_blank" rel="noopener">${id ? `<img src="https://i.ytimg.com/vi/${rosterSafe(id)}/hqdefault.jpg" alt="YouTube video preview">` : ""}<span class="newsletter-video-play">▶</span></a></section>` : ""; }
       if (section.type === "button") {
         const colorKey = section.buttonColor || (draft.genderView === "male" ? "sage" : "berry");
         const background = newsletterColors[colorKey] || newsletterColors.berry;
         const textColor = newsletterColors[section.buttonTextColor] || newsletterButtonTextColor(colorKey);
         const buttonFont = section.buttonFont || "avenir-bold";
-        return section.linkText && section.url ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 22px;border-radius:999px;background:${background};color:${textColor};font-family:${newsletterInlineFontStyle({ font: buttonFont })};font-weight:${newsletterFontWeight({ font: buttonFont })};text-decoration:none!important;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
+        return section.linkText && section.url ? `<section class="newsletter-content-section newsletter-responsive-section" style="${sectionBackgroundStyle}"><p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(section.url)}" style="display:inline-block;padding:11px 22px;border-radius:999px;background:${background};color:${textColor};font-family:${newsletterInlineFontStyle({ font: buttonFont })};font-weight:${newsletterFontWeight({ font: buttonFont })};text-decoration:none!important;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p></section>` : "";
       }
-      if (section.type === "character") return `<section class="newsletter-content-section is-character"><span class="newsletter-character-graphic">${rosterSafe(section.text || "🩰")}</span>${section.title ? `<h2>${rosterSafe(section.title)}</h2>` : ""}</section>`;
+      if (section.type === "social") {
+        const socialLinks = newsletterSocialLinksForGender(section, draft.genderView);
+        const hearts = socialLinks.map((item) => {
+          const image = String(item.image || "").startsWith("assets/") ? `https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/${item.image}` : item.image;
+          return `<a href="${rosterSafe(item.url || "")}" aria-label="${rosterSafe(item.label || "Dance Techniques social page")}" style="display:inline-block;width:104px;max-width:34%;margin:0 12px;text-decoration:none!important;background:transparent;"><img src="${rosterSafe(image || "")}" alt="${rosterSafe(item.label || "Social link")}" width="104" style="display:block;width:100%;height:auto;object-fit:contain;border:0;"></a>`;
+        }).join("");
+        return `<section class="newsletter-content-section newsletter-social-links" style="display:flex;align-items:center;justify-content:center;gap:20px;margin:18px 0;padding:4px 0;background:transparent!important;text-align:center;">${hearts}</section>`;
+      }
+      if (section.type === "character") return `<section class="newsletter-content-section is-character newsletter-responsive-section" style="${sectionBackgroundStyle}"><span class="newsletter-character-graphic">${rosterSafe(section.text || "🩰")}</span>${section.title ? `<h2>${rosterSafe(section.title)}</h2>` : ""}</section>`;
       const titleWidth = Math.max(20, Math.min(100, Number(section.titleWidth) || 100));
       const textWidth = Math.max(20, Math.min(100, Number(section.textWidth) || 100));
       const titleLeft = Math.max(0, Math.min(100 - titleWidth, Number(section.titleLeft) || 0));
+      const titleAlignment = section.titleAlign || "left";
+      const titleMargins = titleAlignment === "center"
+        ? "margin-left:auto;margin-right:auto;"
+        : titleAlignment === "right"
+          ? "margin-left:auto;margin-right:0;"
+          : "margin-left:0;margin-right:auto;";
       const textLeft = Math.max(0, Math.min(100 - textWidth, Number(section.textLeft) || 0));
-      const title = section.title ? `<h2 style="width:${titleWidth}%;max-width:100%;margin-left:${titleLeft}%;${section.titleFont ? `font-family:${newsletterInlineFontStyle({ font: section.titleFont })}!important;` : ""}${section.titleTextSize ? `font-size:${Number(section.titleTextSize)}pt!important;` : ""}">${newsletterPersonalize(section.titleHtml || rosterSafe(section.title), context)}</h2>` : "";
-      const body = section.text ? `<p style="width:${textWidth}%;max-width:100%;margin-left:${textLeft}%;${section.textFont ? `font-family:${newsletterInlineFontStyle({ font: section.textFont })}!important;` : ""}${section.textTextSize ? `font-size:${Number(section.textTextSize)}pt!important;` : ""}">${newsletterPersonalize(section.textHtml || rosterSafe(section.text), context)}</p>` : "";
+      const title = section.title ? `<h2 style="width:${titleWidth}%;max-width:100%;${titleMargins}text-align:${titleAlignment};${section.titleFont ? `font-family:${newsletterInlineFontStyle({ font: section.titleFont })}!important;` : ""}${section.titleTextSize ? `font-size:${Number(section.titleTextSize)}pt!important;` : ""}">${newsletterPersonalize(section.titleHtml || rosterSafe(section.title), context)}</h2>` : "";
+      const body = section.text ? `<div class="newsletter-rich-text" style="width:${textWidth}%;max-width:100%;margin-left:${textLeft}%;line-height:1.35;${section.textFont ? `font-family:${newsletterInlineFontStyle({ font: section.textFont })}!important;` : ""}${section.textTextSize ? `font-size:${Number(section.textTextSize)}pt!important;` : ""}">${newsletterPersonalize(section.textHtml || rosterSafe(section.text), context)}</div>` : "";
       const textBoxes = (section.textBoxes || []).map((box) => {
         const width = Math.max(20, Math.min(100, Number(box.width) || 100));
         const left = Math.max(0, Math.min(100 - width, Number(box.left) || 0));
-        return `<div style="width:${width}%;max-width:100%;margin:10px 0 0 ${left}%;${box.font ? `font-family:${newsletterInlineFontStyle({ font: box.font })}!important;` : ""}${box.textSize ? `font-size:${Number(box.textSize)}pt!important;` : ""}">${newsletterPersonalize(box.html || rosterSafe(box.text || ""), context)}</div>`;
+        return `<div style="width:${width}%;max-width:100%;margin:10px 0 0 ${left}%;line-height:1.35;${box.font ? `font-family:${newsletterInlineFontStyle({ font: box.font })}!important;` : ""}${box.textSize ? `font-size:${Number(box.textSize)}pt!important;` : ""}">${newsletterPersonalize(box.html || rosterSafe(box.text || ""), context)}</div>`;
       }).join("");
       const nestedButtons = (section.buttons || []).map((button) => {
         if (!button.linkText || !button.url) return "";
@@ -27365,12 +27818,19 @@
         const buttonFont = button.buttonFont || "avenir-bold";
         return `<p style="text-align:center;margin:18px 0;"><a href="${rosterSafe(button.url)}" style="display:inline-block;padding:11px 22px;border-radius:999px;background:${newsletterColors[colorKey] || newsletterColors.berry};color:${textColor};font-family:${newsletterInlineFontStyle({ font: buttonFont })};font-weight:${newsletterFontWeight({ font: buttonFont })};text-decoration:none!important;">${rosterSafe(newsletterPersonalize(button.linkText, context))}</a></p>`;
       }).join("");
-      const link = section.type === "social" && section.linkText && section.url ? `<p><a href="${rosterSafe(section.url)}" style="color:var(--newsletter-accent);font-weight:800;">${rosterSafe(newsletterPersonalize(section.linkText, context))}</a></p>` : "";
+      const link = "";
       const extraClass = section.type === "quote" ? " is-quote" : section.type === "reminder" || section.type === "calendar" ? " is-reminder" : section.type === "personalized" ? " is-highlight" : "";
-      return `<section class="newsletter-content-section${extraClass}">${title}${body}${textBoxes}${nestedButtons}${link}</section>`;
+      return `<section class="newsletter-content-section newsletter-responsive-section${extraClass}" style="${sectionBackgroundStyle}">${title}${body}${textBoxes}${nestedButtons}${link}</section>`;
     };
     const newsletterEditableSectionMarkup = (section, index) => {
       const type = section.type || "text";
+      if (type === "social") {
+        const socialLinks = newsletterSocialLinksForGender(section, newsletterGenderView);
+        return `<section class="newsletter-preview-section-editor newsletter-content-section is-social-links ${newsletterGenderView === "male" ? "is-boy-social-links" : "is-girl-social-links"}" draggable="true" data-newsletter-preview-section="${index}">
+          <span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
+          <div class="newsletter-social-links">${socialLinks.map((item) => `<a class="newsletter-social-link" href="${rosterSafe(item.url || "")}" target="_blank" rel="noopener noreferrer" draggable="false" aria-label="Open Dance Techniques on ${rosterSafe(item.label || "social media")}"><img src="${rosterSafe(item.image || "")}" draggable="false" alt="${rosterSafe(item.label || "Social link")}"></a>`).join("")}</div>
+        </section>`;
+      }
       if (type === "button") {
         const colorKey = section.buttonColor || (newsletterGenderView === "male" ? "sage" : "berry");
         const background = newsletterColors[colorKey] || newsletterColors.berry;
@@ -27381,8 +27841,10 @@
         const textColorButtons = Object.entries(newsletterColors).map(([key, value]) => `<button type="button" data-newsletter-button-text-color="${key}" class="${key === textColorKey ? "is-selected" : ""}" style="background:${value}" aria-label="${key.replaceAll("-", " ")} button text"></button>`).join("");
         const fontOptions = [["parisienne", "Parisienne"], ["bodoni-smallcaps", "Bodoni 72 Smallcaps"], ["avenir-bold", "Avenir Bold"], ["avenir-light", "Avenir Light"], ["avenir-ultra-light", "Avenir Ultra Light"]].map(([value, label]) => `<option value="${value}" ${value === buttonFont ? "selected" : ""}>${label}</option>`).join("");
         const popover = newsletterSelectedButtonIndex === index ? `<div class="newsletter-button-edit-popover" data-newsletter-button-popover><button class="newsletter-button-editor-done" type="button" data-newsletter-close-button-editor="${index}" aria-label="Save and close button editor" title="Save and close"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="m4 9 3.2 3.2L14 5.5"></path></svg></button><strong>Edit Bubble Button</strong><label>Display Text<input data-newsletter-button-field="linkText" value="${rosterSafe(section.linkText || "")}" placeholder="Open Link"></label><label>Display Font<select data-newsletter-button-field="buttonFont">${fontOptions}</select></label><label>Text Color<span class="newsletter-button-color-options">${textColorButtons}</span></label><label>Hyperlink<input data-newsletter-button-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="https://..."></label><label>Button Color<span class="newsletter-button-color-options">${colorButtons}</span></label></div>` : "";
-        return `<section class="newsletter-preview-section-editor newsletter-content-section" draggable="true" data-newsletter-preview-section="${index}">
-          <span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
+        const sectionBackground = newsletterSectionBackgroundValue(section);
+        const sectionBackgroundImage = newsletterSectionBackgroundImageStyle(section);
+        return `<section class="newsletter-preview-section-editor newsletter-content-section${sectionBackground || sectionBackgroundImage ? " has-section-background" : ""}" draggable="true" data-newsletter-preview-section="${index}" style="${sectionBackground ? `background-color:${sectionBackground};` : ""}${sectionBackgroundImage}">
+          <span class="newsletter-preview-section-actions"><span>${newsletterSectionBackgroundControls(section, index)}<button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button></span><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
           <div class="newsletter-bubble-button-wrap">${popover}<button class="newsletter-bubble-button" type="button" data-newsletter-edit-bubble-button="${index}" style="background:${background};color:${textColor};font-family:${newsletterInlineFontStyle({ font: buttonFont })};font-weight:${newsletterFontWeight({ font: buttonFont })};">${rosterSafe(section.linkText || "Open Link")}</button></div>
         </section>`;
       }
@@ -27394,12 +27856,20 @@
       const image = type === "photo" && section.url ? `<img class="newsletter-block-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">` : "";
       const divider = type === "divider" ? `<div class="newsletter-content-section is-divider" aria-label="Divider"></div>` : "";
       const resizeHandle = (field, side) => `<button class="newsletter-text-resize-handle ${side === "left" ? "is-left" : ""}" type="button" data-newsletter-text-resize-handle="${field}" data-newsletter-resize-side="${side}" aria-label="Resize ${field === "linkText" ? "link text" : field} box from ${side}" title="Drag ${side} edge to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button>`;
+      const fullWidthControl = (field) => `<button class="newsletter-text-full-width" type="button" data-newsletter-text-full-width="${field}" aria-label="Make ${field === "linkText" ? "link text" : field} box full width">Full width</button>`;
       const resizableField = (field, tag, placeholder, value) => {
         const width = Math.max(20, Math.min(100, Number(section[`${field}Width`]) || 100));
         const left = Math.max(0, Math.min(100 - width, Number(section[`${field}Left`]) || 0));
         const fieldFont = section[`${field}Font`] ? `font-family:${newsletterInlineFontStyle({ font: section[`${field}Font`] })}!important;` : "";
         const fieldSize = section[`${field}TextSize`] ? `font-size:${Number(section[`${field}TextSize`])}pt!important;` : "";
-        return `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${field}" style="width:${width}%;margin-left:${left}%"><${tag} class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="${field}" data-placeholder="${placeholder}" style="${fieldFont}${fieldSize}">${value}</${tag}>${resizeHandle(field, "left")}${resizeHandle(field, "right")}</div>`;
+        const fieldAlign = section[`${field}Align`] ? `text-align:${section[`${field}Align`]};` : "";
+        const editableValue = field === "text" ? newsletterBlockEditableHtml(value) : value;
+        const fieldMargins = field === "title" && section.titleAlign === "center"
+          ? "margin-left:auto;margin-right:auto"
+          : field === "title" && section.titleAlign === "right"
+            ? "margin-left:auto;margin-right:0"
+            : `margin-left:${left}%;margin-right:0`;
+        return `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${field}" style="width:${width}%;${fieldMargins}">${fullWidthControl(field)}<${tag} class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-section-field="${field}" data-placeholder="${placeholder}" style="${fieldFont}${fieldSize}${fieldAlign}">${editableValue}</${tag}>${resizeHandle(field, "left")}${resizeHandle(field, "right")}</div>`;
       };
       const extraTextBoxes = (section.textBoxes || []).map((box, boxIndex) => {
         const width = Math.max(20, Math.min(100, Number(box.width) || 100));
@@ -27407,7 +27877,7 @@
         const fieldFont = box.font ? `font-family:${newsletterInlineFontStyle({ font: box.font })}!important;` : "";
         const fieldSize = box.textSize ? `font-size:${Number(box.textSize)}pt!important;` : "";
         const key = `textBox:${boxIndex}`;
-        return `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${key}" style="width:${width}%;margin:10px 0 0 ${left}%"><button type="button" data-newsletter-remove-textbox="${boxIndex}" aria-label="Remove text box" title="Remove text box" style="position:absolute;right:3px;top:3px;z-index:3;width:22px;min-height:22px;padding:0;border-radius:50%;background:var(--blush);color:var(--berry)">×</button><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-textbox="${boxIndex}" data-placeholder="Write in this text box…" style="${fieldFont}${fieldSize}">${box.html || rosterSafe(box.text || "New text box")}</div>${resizeHandle(key, "left")}${resizeHandle(key, "right")}</div>`;
+        return `<div class="newsletter-resizable-field" data-newsletter-resizable-field="${key}" style="width:${width}%;margin:10px 0 0 ${left}%">${fullWidthControl(key)}<button type="button" data-newsletter-remove-textbox="${boxIndex}" aria-label="Remove text box" title="Remove text box" style="position:absolute;right:3px;top:3px;z-index:3;width:22px;min-height:22px;padding:0;border-radius:50%;background:var(--blush);color:var(--berry)">×</button><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-textbox="${boxIndex}" data-placeholder="Write in this text box…" style="${fieldFont}${fieldSize}">${newsletterBlockEditableHtml(box.html, box.text || "New text box")}</div>${resizeHandle(key, "left")}${resizeHandle(key, "right")}</div>`;
       }).join("");
       const nestedButtons = (section.buttons || []).map((button, buttonIndex) => {
         const selectionKey = `nested:${index}:${buttonIndex}`;
@@ -27421,15 +27891,17 @@
         const popover = newsletterSelectedButtonIndex === selectionKey ? `<div class="newsletter-button-edit-popover" data-newsletter-button-popover><button class="newsletter-button-editor-done" type="button" data-newsletter-close-nested-button-editor="${selectionKey}" aria-label="Save and close button editor" title="Save and close"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="m4 9 3.2 3.2L14 5.5"></path></svg></button><strong>Edit Bubble Button</strong><label>Display Text<input data-newsletter-button-field="linkText" value="${rosterSafe(button.linkText || "")}" placeholder="Open Link"></label><label>Display Font<select data-newsletter-button-field="buttonFont">${fontOptions}</select></label><label>Text Color<span class="newsletter-button-color-options">${textColorButtons}</span></label><label>Hyperlink<input data-newsletter-button-field="url" type="url" value="${rosterSafe(button.url || "")}" placeholder="https://..."></label><label>Button Color<span class="newsletter-button-color-options">${colorButtons}</span></label></div>` : "";
         return `<div class="newsletter-bubble-button-wrap" data-newsletter-nested-button="${buttonIndex}">${popover}<button class="newsletter-bubble-button" type="button" data-newsletter-edit-nested-button="${selectionKey}" style="background:${newsletterColors[colorKey] || newsletterColors.berry};color:${textColor};font-family:${newsletterInlineFontStyle({ font: buttonFont })};font-weight:${newsletterFontWeight({ font: buttonFont })};">${rosterSafe(button.linkText || "Open Link")}</button><button type="button" data-newsletter-remove-nested-button="${buttonIndex}" aria-label="Remove button" title="Remove button" style="position:absolute;right:3px;top:3px;z-index:3;width:22px;min-height:22px;padding:0;border-radius:50%;background:var(--blush);color:var(--berry)">×</button></div>`;
       }).join("");
-      return `<section class="newsletter-preview-section-editor newsletter-content-section${extraClass}" draggable="true" data-newsletter-preview-section="${index}">
-        <span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
+      const sectionBackground = newsletterSectionBackgroundValue(section);
+      const sectionBackgroundImage = newsletterSectionBackgroundImageStyle(section);
+      return `<section class="newsletter-preview-section-editor newsletter-content-section${extraClass}${sectionBackground || sectionBackgroundImage ? " has-section-background" : ""}" draggable="true" data-newsletter-preview-section="${index}" style="${sectionBackground ? `background-color:${sectionBackground};` : ""}${sectionBackgroundImage}">
+        <span class="newsletter-preview-section-actions"><span>${newsletterSectionBackgroundControls(section, index)}<button type="button" data-newsletter-preview-remove="${index}" title="Remove section" aria-label="Remove section">×</button></span><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span>
         ${divider}${image}
         ${titleAllowed ? resizableField("title", "h2", "Section title", section.titleHtml || rosterSafe(section.title || "")) : ""}
         ${textAllowed ? resizableField("text", "div", "Write this section…", section.textHtml || rosterSafe(section.text || "")) : ""}
         ${extraTextBoxes}
         ${nestedButtons}
         ${linkTextAllowed ? resizableField("linkText", "div", "Button or link text", section.linkTextHtml || rosterSafe(section.linkText || "")) : ""}
-        ${urlAllowed ? `<input class="newsletter-preview-inline-input" data-newsletter-preview-section-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="${type === "photo" ? "Image URL" : type === "youtube" ? "YouTube URL" : "Link URL"}">` : ""}
+        ${type === "photo" ? newsletterPhotoUploadMarkup(section, index, "preview") : urlAllowed ? `<input class="newsletter-preview-inline-input" data-newsletter-preview-section-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="${type === "youtube" ? "YouTube URL" : "Link URL"}">` : ""}
       </section>`;
     };
     const newsletterGraphicPosition = (graphic, device = newsletterDraft.device) => {
@@ -27449,11 +27921,50 @@
       };
       return graphic.positions[view];
     };
+    const newsletterGraphicLocked = (graphic, device = newsletterDraft.device) => {
+      const view = device === "mobile" ? "mobile" : "desktop";
+      return graphic?.locks?.[view] ?? Boolean(graphic?.locked);
+    };
+    const setNewsletterGraphicLocked = (graphic, locked, device = newsletterDraft.device) => {
+      const view = device === "mobile" ? "mobile" : "desktop";
+      graphic.locks ||= {
+        desktop: Boolean(graphic.locked),
+        mobile: Boolean(graphic.locked)
+      };
+      graphic.locks[view] = Boolean(locked);
+      return graphic.locks[view];
+    };
+    const newsletterGraphicDimensions = (graphic, device = newsletterDraft.device) => {
+      const view = device === "mobile" ? "mobile" : "desktop";
+      const saved = graphic?.sizes?.[view] || {};
+      return {
+        width: Math.max(60, Math.min(500, Number(saved.width ?? graphic?.width) || 120)),
+        height: Number(saved.height ?? graphic?.height) > 0 ? Math.max(40, Math.min(700, Number(saved.height ?? graphic?.height))) : null,
+        scale: Math.max(.2, Math.min(4, Number(saved.scale ?? graphic?.scale) || 1)),
+        transform: String(saved.transform ?? graphic?.transform ?? "")
+      };
+    };
+    const setNewsletterGraphicDimensions = (graphic, dimensions = {}, device = newsletterDraft.device) => {
+      const view = device === "mobile" ? "mobile" : "desktop";
+      const legacy = {
+        width: Math.max(60, Math.min(500, Number(graphic.width) || 120)),
+        height: Number(graphic.height) > 0 ? Math.max(40, Math.min(700, Number(graphic.height))) : null,
+        scale: Math.max(.2, Math.min(4, Number(graphic.scale) || 1)),
+        transform: String(graphic.transform || "")
+      };
+      graphic.sizes ||= {
+        desktop: { ...legacy },
+        mobile: { ...legacy }
+      };
+      graphic.sizes[view] = { ...graphic.sizes[view], ...dimensions };
+      return newsletterGraphicDimensions(graphic, view);
+    };
     const newsletterFloatingGraphicMarkup = (graphic, index) => {
       const { x, y } = newsletterGraphicPosition(graphic);
-      const width = Math.max(60, Math.min(500, Number(graphic.width) || 120));
-      const locked = Boolean(graphic.locked);
-      return `<div class="newsletter-floating-graphic ${locked ? "is-locked" : ""} ${newsletterSelectedGraphicIndex === index ? "is-selected" : ""}" tabindex="0" role="button" aria-label="Select ${rosterSafe(graphic.alt || "newsletter graphic")} for positioning" draggable="${locked ? "false" : "true"}" data-newsletter-floating-graphic="${index}" style="left:${x}%;top:${y}%;width:${width}px;">
+      const { width, height, scale, transform } = newsletterGraphicDimensions(graphic);
+      const locked = newsletterGraphicLocked(graphic);
+      const extraTransform = transform ? ` ${transform}` : "";
+      return `<div class="newsletter-floating-graphic ${locked ? "is-locked" : ""} ${newsletterSelectedGraphicIndex === index ? "is-selected" : ""}" tabindex="0" role="button" aria-label="Select ${rosterSafe(graphic.alt || "newsletter graphic")} for positioning" draggable="${locked ? "false" : "true"}" data-newsletter-floating-graphic="${index}" style="left:${x}%;top:${y}%;width:${width}px;${height ? `height:${height}px;` : ""}transform:translate(-50%,-50%) scale(${scale})${extraTransform};">
         ${graphic.url ? `<img src="${rosterSafe(graphic.url)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}">` : `<span class="newsletter-floating-graphic-placeholder">Paste a graphic URL below, then drag this anywhere.</span>`}
         <span class="newsletter-floating-graphic-controls"><input type="url" data-newsletter-graphic-url="${index}" value="${rosterSafe(graphic.url || "")}" placeholder="Graphic URL"><button class="newsletter-graphic-anchor ${locked ? "is-locked" : ""}" type="button" data-newsletter-toggle-graphic-lock="${index}" aria-label="${locked ? "Unfreeze graphic position" : "Freeze graphic position"}" title="${locked ? "Unfreeze position" : "Freeze position"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2h2v4.08a4 4 0 0 1 2.92 2.92H20v2h-4.08A4 4 0 0 1 13 13.92V20a7 7 0 0 0 5.83-3.13l-2.12-2.12 1.41-1.41L22 17.22A9 9 0 0 1 12 23a9 9 0 0 1-10-5.78l3.88-3.88 1.41 1.41-2.12 2.12A7 7 0 0 0 11 20v-6.08A4 4 0 0 1 8.08 11H4V9h4.08A4 4 0 0 1 11 6.08V2Zm1 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path></svg></button><button type="button" data-newsletter-remove-graphic="${index}" aria-label="Remove graphic">×</button></span>
         ${locked ? "" : `<button class="newsletter-graphic-resize-handle" type="button" data-newsletter-graphic-resize-handle="${index}" aria-label="Resize graphic" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button>`}
@@ -27476,7 +27987,7 @@
       const geometry = `left:${x}%;top:${y}%;width:${width}px;height:${height}px;`;
       return `<div class="newsletter-background-box ${style === "outline-rounded" ? "is-outline" : ""} ${style === "solid-scalloped" ? "is-scalloped" : ""}" aria-hidden="true" data-newsletter-background-box-surface="${index}" style="${geometry}--newsletter-box-color:${newsletterColors[colorKey] || newsletterColors.blush};--newsletter-box-border:${newsletterColors[borderKey] || newsletterColors.berry};"></div>
       <div class="newsletter-background-box-editor ${selected ? "is-selected" : ""} ${locked ? "is-locked" : ""}" tabindex="0" role="group" data-newsletter-background-box="${index}" style="${geometry}">
-        <span class="newsletter-background-box-controls"><button type="button" draggable="${locked ? "false" : "true"}" data-newsletter-background-box-drag-handle data-newsletter-edit-background-box="${index}" title="${locked ? "Edit background box" : "Drag to move or click to edit"}">Edit Box</button><button class="newsletter-box-icon-button" type="button" data-newsletter-toggle-background-box-lock="${index}" aria-label="${locked ? "Unfreeze background box" : "Freeze background box"}">${locked ? "●" : "○"}</button><button class="newsletter-box-icon-button" type="button" data-newsletter-remove-background-box="${index}" aria-label="Remove background box">×</button></span>
+        <span class="newsletter-background-box-controls">${locked ? "" : `<button type="button" draggable="false" data-newsletter-background-box-drag-handle="${index}" aria-label="Move background box" title="Drag to move background box">Move</button>`}<button type="button" data-newsletter-edit-background-box="${index}" aria-label="Edit background box style">Edit</button><button class="newsletter-box-icon-button" type="button" data-newsletter-toggle-background-box-lock="${index}" aria-label="${locked ? "Unfreeze background box" : "Freeze background box"}">${locked ? "●" : "○"}</button><button class="newsletter-box-icon-button" type="button" data-newsletter-remove-background-box="${index}" aria-label="Remove background box">×</button></span>
         ${popover}
         ${locked ? "" : `<button class="newsletter-background-box-resize" type="button" data-newsletter-background-box-resize="${index}" aria-label="Resize background box">↘</button>`}
       </div>`;
@@ -27486,10 +27997,13 @@
       if (!list) return;
       const labels = { title: "Title", text: "Text", photo: "Photo", personalized: "Personalized Fields", youtube: "YouTube Video", button: "Button", divider: "Divider", character: "Character Graphic", quote: "Quote Box", reminder: "Important Reminder", calendar: "Calendar", social: "Social Links" };
       list.innerHTML = newsletterDraft.sections.length ? newsletterDraft.sections.map((section, index) => {
+        if (section.type === "social") {
+          return `<div class="newsletter-section-editor" draggable="true" data-newsletter-section-index="${index}"><div class="newsletter-section-editor-head"><span><span class="newsletter-section-drag">⋮⋮ Drag</span> <strong>Social Links</strong></span><span><button type="button" data-newsletter-move-section="up" aria-label="Move section up">↑</button> <button type="button" data-newsletter-move-section="down" aria-label="Move section down">↓</button> <button type="button" data-newsletter-remove-section="${index}">Remove</button></span></div><p class="newsletter-social-links-note">Instagram and Facebook ${newsletterGenderView === "male" ? "sage circle" : "blush heart"} links · transparent background</p></div>`;
+        }
         const needsText = !["divider", "photo", "youtube", "button"].includes(section.type);
         const needsUrl = ["photo", "youtube", "button", "social"].includes(section.type);
         const needsLinkText = ["button", "social"].includes(section.type);
-        return `<div class="newsletter-section-editor" draggable="true" data-newsletter-section-index="${index}"><div class="newsletter-section-editor-head"><span><span class="newsletter-section-drag">⋮⋮ Drag</span> <strong>${labels[section.type] || "Newsletter Block"}</strong></span><span><button type="button" data-newsletter-move-section="up" aria-label="Move section up">↑</button> <button type="button" data-newsletter-move-section="down" aria-label="Move section down">↓</button> <button type="button" data-newsletter-remove-section="${index}">Remove</button></span></div>${section.type === "divider" ? "" : `<div class="newsletter-section-editor-grid"><label>${section.type === "character" ? "Character title" : "Section title"}<input data-newsletter-section-field="title" value="${rosterSafe(section.title || "")}" placeholder="Section title"></label>${needsText ? `<label class="full">${section.type === "character" ? "Character or emoji" : section.type === "calendar" ? "Dates and details" : "Text"}<textarea data-newsletter-section-field="text" placeholder="Write this section…">${rosterSafe(section.text || "")}</textarea></label>` : ""}${needsLinkText ? `<label>Link text<input data-newsletter-section-field="linkText" value="${rosterSafe(section.linkText || "")}" placeholder="Open link"></label>` : ""}${needsUrl ? `<label>${section.type === "photo" ? "Image URL" : section.type === "youtube" ? "YouTube URL" : "Link URL"}<input data-newsletter-section-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="https://..."></label>` : ""}</div>`}</div>`;
+        return `<div class="newsletter-section-editor" draggable="true" data-newsletter-section-index="${index}"><div class="newsletter-section-editor-head"><span><span class="newsletter-section-drag">⋮⋮ Drag</span> <strong>${labels[section.type] || "Newsletter Block"}</strong></span><span><button type="button" data-newsletter-move-section="up" aria-label="Move section up">↑</button> <button type="button" data-newsletter-move-section="down" aria-label="Move section down">↓</button> <button type="button" data-newsletter-remove-section="${index}">Remove</button></span></div>${section.type === "divider" ? "" : `<div class="newsletter-section-editor-grid"><label>${section.type === "character" ? "Character title" : "Section title"}<input data-newsletter-section-field="title" value="${rosterSafe(section.title || "")}" placeholder="Section title"></label>${needsText ? `<label class="full">${section.type === "character" ? "Character or emoji" : section.type === "calendar" ? "Dates and details" : "Text"}<textarea data-newsletter-section-field="text" placeholder="Write this section…">${rosterSafe(section.text || "")}</textarea></label>` : ""}${needsLinkText ? `<label>Link text<input data-newsletter-section-field="linkText" value="${rosterSafe(section.linkText || "")}" placeholder="Open link"></label>` : ""}${section.type === "photo" ? newsletterPhotoUploadMarkup(section, index, "panel") : needsUrl ? `<label>${section.type === "youtube" ? "YouTube URL" : "Link URL"}<input data-newsletter-section-field="url" type="url" value="${rosterSafe(section.url || "")}" placeholder="https://..."></label>` : ""}</div>`}</div>`;
       }).join("") : `<p class="subtle">Choose a block above to begin building your newsletter.</p>`;
     };
 
@@ -27515,6 +28029,24 @@
         return true;
       });
     };
+    const newsletterTeacherName = (teacherId) => {
+      const teacher = teachers.find((item) => item.id === teacherId);
+      if (!teacher) return "your Dance Techniques teacher";
+      const preferredName = String(teacher.nickname || teacher.preferredName || "").trim();
+      if (preferredName) return preferredName;
+      const displayName = String(teacher.displayName || "").trim();
+      const legalName = fullName(teacher).trim();
+      if (displayName && displayName.toLocaleLowerCase() !== legalName.toLocaleLowerCase()) return displayName;
+      const firstName = String(teacher.firstName || "").trim();
+      return firstName ? personDisplayName(firstName) : "your Dance Techniques teacher";
+    };
+    const newsletterSchoolConditionKey = (school = {}) => String(school.id || school.name || school.nickname || "").trim();
+    const newsletterConditionSchoolKeys = (school = {}, rosterClass = {}) => [...new Set([
+      newsletterSchoolConditionKey(school),
+      school.name,
+      school.nickname,
+      rosterClass.schoolName
+    ].map((value) => String(value || "").trim().toLocaleLowerCase()).filter(Boolean))];
     const newsletterContextForRecord = (record) => {
       const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, record?.rosterClass.schoolName)) || {};
       const student = record?.student || {};
@@ -27525,16 +28057,59 @@
         "[Dancer First Name]": student.firstName || student.first_name || rosterStudentFirstName(student) || "your dancer",
         "[Dancer Preferred Name]": rosterStudentFirstName(student) || "your dancer",
         "[School Nickname]": school.nickname || rosterSchoolNickname(record?.rosterClass.schoolName || "your school"),
-        "[Teacher Name]": record ? rosterTeacherName(record.rosterClass.teacherId) : "your Dance Techniques teacher",
+        "[Teacher Name]": record ? newsletterTeacherName(record.rosterClass.teacherId) : "your Dance Techniques teacher",
         "[Dance Day]": record?.rosterClass.day || "dance day",
         "[Dance Time]": record?.rosterClass.time || "class time",
         "[AM or PM]": timeOfDay === "AM" ? "Mornings" : timeOfDay === "PM" ? "Afternoons" : "Mornings or Afternoons",
-        "[Director First Name]": String(school.directorName || "School Director").split(" ")[0]
+        "[Director First Name]": String(school.directorName || "School Director").split(" ")[0],
+        __schoolConditionKeys: newsletterConditionSchoolKeys(school, record?.rosterClass || {})
       };
     };
     const newsletterSampleContext = () => newsletterContextForRecord(newsletterFilteredRecords()[0] || newsletterAudienceRecords()[0] || boutiqueKitRecords()[0]);
+    const newsletterConditionalHtml = (value = "", context = newsletterSampleContext()) => {
+      const html = String(value || "");
+      if (!html.includes("newsletter-school-condition")) return html;
+      const template = document.createElement("template");
+      template.innerHTML = html;
+      const recipientKeys = new Set((context?.__schoolConditionKeys || []).map((value) => String(value).toLocaleLowerCase()));
+      template.content.querySelectorAll(".newsletter-school-condition[data-newsletter-schools]").forEach((span) => {
+        const schoolKeys = String(span.dataset.newsletterSchools || "").split("|").map((value) => value.trim().toLocaleLowerCase()).filter(Boolean);
+        const matches = schoolKeys.some((key) => recipientKeys.has(key));
+        if (matches) {
+          span.removeAttribute("class");
+          span.removeAttribute("data-newsletter-schools");
+          span.removeAttribute("data-newsletter-condition-label");
+          span.removeAttribute("title");
+          span.replaceWith(...span.childNodes);
+          return;
+        }
+        const parent = span.parentElement;
+          const previous = span.previousSibling;
+          const next = span.nextSibling;
+          span.remove();
+          if (previous?.nodeType === Node.TEXT_NODE && next?.nodeType === Node.TEXT_NODE) {
+            const keepBoundarySpace = /\s$/.test(previous.nodeValue || "") || /^\s/.test(next.nodeValue || "");
+            previous.nodeValue = `${(previous.nodeValue || "").replace(/\s+$/, "")}${keepBoundarySpace ? " " : ""}${(next.nodeValue || "").replace(/^\s+/, "")}`;
+            next.remove();
+          }
+          if (parent?.matches("li, p, div") && !parent.textContent.trim() && !parent.querySelector("img, a, button")) parent.remove();
+      });
+      return template.innerHTML;
+    };
+    const decorateNewsletterConditionalText = (container, context = newsletterSampleContext()) => {
+      const sampleKeys = new Set((context?.__schoolConditionKeys || []).map((value) => String(value).toLocaleLowerCase()));
+      container?.querySelectorAll(".newsletter-school-condition[data-newsletter-schools]").forEach((span) => {
+        const keys = String(span.dataset.newsletterSchools || "").split("|").map((value) => value.trim().toLocaleLowerCase()).filter(Boolean);
+        const labels = String(span.dataset.newsletterConditionLabel || "").split("|").filter(Boolean);
+        const matches = keys.some((key) => sampleKeys.has(key));
+        span.classList.toggle("is-condition-not-sample", !matches);
+        span.title = `${matches ? "Shown" : "Hidden"} for this preview · ${labels.join(", ") || "Selected schools"}`;
+      });
+    };
     const newsletterPersonalize = (value = "", context = newsletterSampleContext()) => {
-      return Object.entries(context).reduce((text, [token, replacement]) => text.replaceAll(token, replacement), String(value || ""));
+      return Object.entries(context)
+        .filter(([token]) => token.startsWith("["))
+        .reduce((text, [token, replacement]) => text.replaceAll(token, replacement), newsletterConditionalHtml(value, context));
     };
 
     let newsletterSetupStep = 1;
@@ -27636,10 +28211,19 @@
       setText("newsletter-current-audience", newsletterAudienceLabel(newsletterDraft.audience));
     };
 
+    const setNewsletterSaveState = (status, message) => {
+      const state = document.getElementById("newsletter-save-state");
+      if (!state) return;
+      state.classList.toggle("is-saving", status === "saving");
+      state.classList.toggle("is-error", status === "error");
+      state.textContent = message;
+      state.title = status === "error" ? message : "";
+    };
     const saveNewsletterDraft = () => {
       clearTimeout(newsletterSaveTimer);
       persistNewsletterActiveVersion();
       const snapshot = JSON.stringify(newsletterDraft);
+      const revision = ++newsletterSaveRevision;
       if (!newsletterHistorySuspended && snapshot !== newsletterHistoryCurrent) {
         const now = Date.now();
         if (!newsletterUndoStack.length || now - newsletterLastHistoryAt > 550) newsletterUndoStack.push(newsletterHistoryCurrent);
@@ -27649,12 +28233,27 @@
         newsletterLastHistoryAt = now;
         updateNewsletterHistoryButtons();
       }
-      const state = document.getElementById("newsletter-save-state");
-      if (state) state.textContent = "Saving…";
-      newsletterSaveTimer = window.setTimeout(() => {
-        localStorage.setItem(newsletterStorageKey, JSON.stringify(newsletterDraft));
-        if (state) state.textContent = "Draft saved";
-      }, 220);
+      setNewsletterSaveState("saving", "Saving…");
+      // IndexedDB is the primary store because uploaded photos can make a fully
+      // responsive draft much larger than localStorage's small quota.
+      return writeNewsletterDraftDatabase(snapshot).then(() => {
+        if (revision !== newsletterSaveRevision) return false;
+        // Keep a small backward-compatible mirror when it fits. Large drafts
+        // intentionally stay in IndexedDB instead of surfacing a false error.
+        if (snapshot.length < 2_000_000) {
+          try { localStorage.setItem(newsletterStorageKey, snapshot); } catch (_) { /* IndexedDB already saved it. */ }
+        }
+        newsletterSaveTimer = window.setTimeout(() => {
+          if (revision === newsletterSaveRevision) setNewsletterSaveState("saved", "Draft saved");
+        }, 120);
+        return true;
+      }).catch((error) => {
+        if (revision !== newsletterSaveRevision) return false;
+        console.error("Newsletter draft could not be saved", error);
+        setNewsletterSaveState("error", "Draft not saved");
+        showToast("This newsletter draft could not be saved. Keep this tab open and try again.");
+        return false;
+      });
     };
     const restoreNewsletterHistory = (direction) => {
       const source = direction === "undo" ? newsletterUndoStack : newsletterRedoStack;
@@ -27666,23 +28265,72 @@
       newsletterDraft = JSON.parse(snapshot);
       newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
       newsletterHistoryCurrent = snapshot;
-      localStorage.setItem(newsletterStorageKey, snapshot);
       renderNewsletterStudio();
+      saveNewsletterDraft();
       newsletterHistorySuspended = false;
       newsletterLastHistoryAt = 0;
       updateNewsletterHistoryButtons();
       showToast(direction === "undo" ? "Last change undone." : "Change restored.");
     };
+    const hydrateNewsletterDraftFromDurableStorage = async () => {
+      try {
+        const record = await readNewsletterDraftDatabase();
+        if (!record?.snapshot) {
+          // One-time migration for existing localStorage-only drafts.
+          await writeNewsletterDraftDatabase(JSON.stringify(newsletterDraft));
+          newsletterDurableHydrationComplete = true;
+          return;
+        }
+        // Never replace edits made while hydration was opening.
+        if (newsletterSaveRevision) {
+          newsletterDurableHydrationComplete = true;
+          return;
+        }
+        const stored = JSON.parse(record.snapshot);
+        newsletterDraft = { ...newsletterDefaultDraft, ...stored };
+        newsletterSetupComplete = true;
+        if (!Array.isArray(newsletterDraft.sections)) newsletterDraft.sections = [];
+        if (!Array.isArray(newsletterDraft.graphics)) newsletterDraft.graphics = [];
+        if (!Array.isArray(newsletterDraft.backgroundBoxes)) newsletterDraft.backgroundBoxes = [];
+        newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
+        ensureNewsletterBreakpointVersions();
+        newsletterHistoryCurrent = JSON.stringify(newsletterDraft);
+        newsletterSetupSelection = {
+          mode: newsletterDraft.template ? "template" : "blank",
+          category: newsletterCategoryForTemplate(newsletterDraft.template),
+          template: newsletterDraft.template || "monthly",
+          audience: newsletterDraft.audience,
+          targetMode: newsletterDraft.targeting?.mode || "all",
+          day: newsletterDraft.targeting?.day || "all",
+          schools: newsletterDraft.targeting?.schools || [],
+          teachers: newsletterDraft.targeting?.teachers || [],
+          classes: newsletterDraft.targeting?.classes || [],
+          students: newsletterDraft.targeting?.students || [],
+          school: newsletterDraft.school,
+          teacher: newsletterDraft.teacher
+        };
+        renderNewsletterSetup();
+        renderNewsletterStudio();
+        setNewsletterSaveState("saved", "Draft saved");
+        newsletterDurableHydrationComplete = true;
+      } catch (error) {
+        newsletterDurableHydrationComplete = true;
+        console.error("Newsletter durable draft could not be opened", error);
+        setNewsletterSaveState("error", "Draft storage unavailable");
+      }
+    };
 
     const newsletterEmailHtml = (context = newsletterSampleContext(), draft = newsletterDraft) => {
       const accent = newsletterColors[draft.color] || newsletterColors.berry;
       const personalizeHtml = (html, fallback = "") => newsletterPersonalize(html || rosterSafe(fallback), context);
-      const sections = draft.sections.map((section) => newsletterSectionMarkup(section, context, draft)).join("");
+      const sections = draft.sections.map((section, index) => newsletterSectionMarkup(section, context, draft, index)).join("");
       const graphics = (draft.graphics || []).filter((graphic) => graphic.url).map((graphic) => {
         const source = String(graphic.url).startsWith("assets/") ? `https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/${graphic.url}` : graphic.url;
         const desktop = newsletterGraphicPosition(graphic, "desktop");
         const mobile = newsletterGraphicPosition(graphic, "mobile");
-        return `<img class="newsletter-email-floating-graphic" src="${rosterSafe(source)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:var(--desktop-x);top:var(--desktop-y);--desktop-x:${desktop.x}%;--desktop-y:${desktop.y}%;--mobile-x:${mobile.x}%;--mobile-y:${mobile.y}%;width:${Math.max(60, Math.min(500, Number(graphic.width) || 120))}px;height:auto;transform:translate(-50%,-50%);">`;
+        const desktopSize = newsletterGraphicDimensions(graphic, "desktop");
+        const mobileSize = newsletterGraphicDimensions(graphic, "mobile");
+        return `<img class="newsletter-email-floating-graphic" src="${rosterSafe(source)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:var(--desktop-x);top:var(--desktop-y);--desktop-x:${desktop.x}%;--desktop-y:${desktop.y}%;--mobile-x:${mobile.x}%;--mobile-y:${mobile.y}%;--desktop-width:${desktopSize.width}px;--mobile-width:${mobileSize.width}px;--desktop-scale:${desktopSize.scale};--mobile-scale:${mobileSize.scale};width:var(--desktop-width);height:auto;transform:translate(-50%,-50%) scale(var(--desktop-scale));">`;
       }).join("");
       const backgroundBoxes = (draft.backgroundBoxes || []).map((box) => {
         const color = newsletterColors[box.color] || newsletterColors.blush;
@@ -27700,15 +28348,21 @@
       const logoColor = newsletterColors[draft.logoColor] || newsletterColors.black;
       const badgeColor = newsletterColors[draft.logoBadgeColor] || newsletterColors.blush;
       const logoMask = `url('https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/dance-techniques-logo-only.png') center/contain no-repeat`;
+      const boyLogoUrl = "https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/boy-d-logo.png";
       const heartMask = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 58'%3E%3Cpath fill='black' d='M32 56C27 50 3 37 3 19 3 8 11 2 20 2c6 0 10 3 12 8 2-5 6-8 12-8 9 0 17 6 17 17 0 18-24 31-29 37Z'/%3E%3C/svg%3E") center/contain no-repeat`;
-      const logoOnly = `<div role="img" aria-label="Dance Techniques" style="width:${logoWidth}px;max-width:80%;aspect-ratio:2.15/1;margin:0 auto;background:${logoColor};-webkit-mask:${logoMask};mask:${logoMask};"></div>`;
+      const boyLogoMask = `url('${boyLogoUrl}') center/contain no-repeat`;
+      const logoOnly = draft.genderView === "male"
+        ? `<div role="img" aria-label="Dance Techniques" style="display:block;width:${logoWidth}px;max-width:80%;aspect-ratio:1;margin:0 auto;background:${logoColor};-webkit-mask:${boyLogoMask};mask:${boyLogoMask};"></div>`
+        : `<div role="img" aria-label="Dance Techniques" style="width:${logoWidth}px;max-width:80%;aspect-ratio:2.15/1;margin:0 auto;background:${logoColor};-webkit-mask:${logoMask};mask:${logoMask};"></div>`;
       const badgeStyle = draft.logoBadgeShape === "circle-outline" ? `border:4px solid ${badgeColor};border-radius:50%;background:transparent;` : draft.logoBadgeShape === "solid-circle" ? `border-radius:50%;background:${badgeColor};` : draft.logoBadgeShape === "solid-heart" ? `background:${badgeColor};-webkit-mask:${heartMask};mask:${heartMask};` : "";
-      const deliveredLogo = draft.logoBadgeShape ? `<div role="img" aria-label="Dance Techniques" style="box-sizing:border-box;display:grid;place-items:center;width:${logoWidth}px;max-width:80%;aspect-ratio:1;margin:0 auto;padding:6%;overflow:hidden;${badgeStyle}"><span style="display:block;width:150%;max-width:none;aspect-ratio:2.15/1;background:${logoColor};-webkit-mask:${logoMask};mask:${logoMask};"></span></div>` : logoOnly;
+      const deliveredLogo = draft.logoBadgeShape
+        ? `<div role="img" aria-label="Dance Techniques" style="box-sizing:border-box;display:grid;place-items:center;width:${logoWidth}px;max-width:80%;aspect-ratio:1;margin:0 auto;padding:6%;overflow:hidden;${badgeStyle}">${draft.genderView === "male" ? `<span style="display:block;width:47.6%;height:47.6%;background:${logoColor};-webkit-mask:${boyLogoMask};mask:${boyLogoMask};"></span>` : `<span style="display:block;width:150%;max-width:none;aspect-ratio:2.15/1;background:${logoColor};-webkit-mask:${logoMask};mask:${logoMask};"></span>`}</div>`
+        : logoOnly;
       return `<!doctype html><html><head><style>
-        a{text-decoration:none!important}.newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p{margin:0;white-space:pre-wrap}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}@media(max-width:480px){.newsletter-email-floating-graphic{left:var(--mobile-x)!important;top:var(--mobile-y)!important}}
+        a{text-decoration:none!important}.newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p,.newsletter-rich-text{margin:0;line-height:1.35;white-space:pre-wrap}.newsletter-main>div{line-height:1.35}.newsletter-content-section li,.newsletter-main>div li{line-height:1.35}.newsletter-content-section li::marker,.newsletter-main>div li::marker{color:currentColor}.newsletter-content-section ul,.newsletter-content-section ol,.newsletter-main>div ul,.newsletter-main>div ol{margin:8px 0;padding-left:1.45em;white-space:normal}.newsletter-heart-list{list-style:none!important;padding-left:1.55em!important}.newsletter-heart-list>li{position:relative}.newsletter-heart-list>li:before{content:'♥';position:absolute;left:-1.35em;color:currentColor;font-size:.82em;line-height:1.75}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}@media(max-width:480px){.newsletter-email-floating-graphic{left:var(--mobile-x)!important;top:var(--mobile-y)!important;width:var(--mobile-width)!important;transform:translate(-50%,-50%) scale(var(--mobile-scale))!important}.newsletter-responsive-section{background-color:var(--section-bg-mobile)!important;background-image:var(--section-image-mobile)!important;background-size:var(--section-fit-mobile)!important;padding:var(--section-pad-mobile)!important;border-radius:var(--section-pad-mobile)!important}}
         .template-welcome .newsletter-header{padding:38px 32px 30px!important;border-bottom:1px solid #dfb9b2;background:#f8e4df!important}.template-welcome .newsletter-header h1{max-width:520px;margin:0 auto 8px!important;color:#211817!important;font-family:Didot,Georgia,serif!important;font-size:32px;font-weight:500;line-height:1.08}.template-welcome .newsletter-header p{color:#8b4e61!important;font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.template-welcome .newsletter-main{padding:32px 38px 38px!important}.template-welcome .newsletter-content-section h2{color:#65103f;font-family:Didot,Georgia,serif;font-size:22px;font-weight:500}.template-welcome .newsletter-content-section.is-highlight{border:1px solid #e4c2bb;background:#f8e6e1}.template-welcome .newsletter-content-section.is-reminder{border:1px solid #dba9a1;border-radius:4px;background:#fffdf9}.template-welcome .newsletter-content-section.is-divider{background:#dba9a1}.template-welcome .newsletter-footer{border-top:1px solid #dfb9b2;background:#f8e4df!important}
         ${versionStyles}
-      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterInlineFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.65;">${backgroundBoxes}${graphics}<header class="newsletter-header" style="position:relative;z-index:2;padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);">${deliveredLogo}<h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterInlineFontStyle({ font: draft.headlineFont || draft.font })};font-size:${draft.headlineTextSize ? `${Number(draft.headlineTextSize)}pt` : "29px"};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};font-family:${newsletterInlineFontStyle({ font: draft.subjectFont || draft.font })};font-size:${Number(draft.subjectTextSize) || Number(draft.textSize) || 12}pt;">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="position:relative;z-index:2;padding:30px;"><div style="width:${Math.max(20, Math.min(100, Number(draft.messageWidth) || 100))}%;max-width:100%;margin-left:${Math.max(0, Math.min(100 - Math.max(20, Math.min(100, Number(draft.messageWidth) || 100)), Number(draft.messageLeft) || 0))}%;font-family:${newsletterInlineFontStyle({ font: draft.messageFont || draft.font })};font-size:${Number(draft.messageTextSize) || Number(draft.textSize) || 12}pt;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="position:relative;z-index:2;padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterInlineFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.35;">${backgroundBoxes}${graphics}<header class="newsletter-header" style="position:relative;z-index:2;padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);">${deliveredLogo}<h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterInlineFontStyle({ font: draft.headlineFont || draft.font })};font-size:${draft.headlineTextSize ? `${Number(draft.headlineTextSize)}pt` : "29px"};text-align:${draft.headlineAlign || "center"};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};font-family:${newsletterInlineFontStyle({ font: draft.subjectFont || draft.font })};font-size:${Number(draft.subjectTextSize) || Number(draft.textSize) || 12}pt;">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="position:relative;z-index:2;padding:30px;"><div style="width:${Math.max(20, Math.min(100, Number(draft.messageWidth) || 100))}%;max-width:100%;margin-left:${Math.max(0, Math.min(100 - Math.max(20, Math.min(100, Number(draft.messageWidth) || 100)), Number(draft.messageLeft) || 0))}%;font-family:${newsletterInlineFontStyle({ font: draft.messageFont || draft.font })};font-size:${Number(draft.messageTextSize) || Number(draft.textSize) || 12}pt;line-height:1.35;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="position:relative;z-index:2;padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
     };
     const newsletterRecipientMessages = () => {
       const records = newsletterFilteredRecords();
@@ -27747,6 +28401,27 @@
       return data;
     };
 
+    const newsletterDesktopCanvasWidth = 680;
+    const updateNewsletterDesktopCanvasScale = () => {
+      const stage = document.querySelector(".newsletter-preview-stage");
+      const preview = document.getElementById("newsletter-preview-document");
+      if (!stage || !preview) return;
+      if (preview.classList.contains("is-mobile")) {
+        preview.style.removeProperty("--newsletter-desktop-scale");
+        return;
+      }
+      const stageStyle = getComputedStyle(stage);
+      const horizontalPadding = (parseFloat(stageStyle.paddingLeft) || 0) + (parseFloat(stageStyle.paddingRight) || 0);
+      const availableWidth = Math.max(240, stage.clientWidth - horizontalPadding);
+      const scale = Math.min(1, availableWidth / newsletterDesktopCanvasWidth);
+      preview.style.setProperty("--newsletter-desktop-scale", String(Math.max(.35, scale)));
+    };
+    const newsletterCanvasPointerScale = () => {
+      const preview = document.getElementById("newsletter-preview-document");
+      if (!preview || preview.classList.contains("is-mobile")) return 1;
+      const rectWidth = preview.getBoundingClientRect().width;
+      return rectWidth > 0 ? rectWidth / newsletterDesktopCanvasWidth : 1;
+    };
     const renderNewsletterStudio = () => {
       updateNewsletterCurrentSetup();
       document.getElementById("newsletter-font").value = newsletterDraft.font;
@@ -27781,7 +28456,7 @@
       const messageWidth = Math.max(20, Math.min(100, Number(newsletterDraft.messageWidth) || 100));
       const messageLeft = Math.max(0, Math.min(100 - messageWidth, Number(newsletterDraft.messageLeft) || 0));
       const messageResizeHandle = (side) => `<button class="newsletter-text-resize-handle ${side === "left" ? "is-left" : ""}" type="button" data-newsletter-text-resize-handle="message" data-newsletter-resize-side="${side}" aria-label="Resize message box from ${side}" title="Drag ${side} edge to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button>`;
-      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-resizable-field" data-newsletter-resizable-field="message" style="width:${messageWidth}%;margin-left:${messageLeft}%"><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message" style="${newsletterDraft.messageFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.messageFont })}!important;` : ""}${newsletterDraft.messageTextSize ? `font-size:${Number(newsletterDraft.messageTextSize)}pt!important;` : ""}">${newsletterDraft.messageHtml || rosterSafe(newsletterDraft.message || "")}</div>${messageResizeHandle("left")}${messageResizeHandle("right")}</div></section>`;
+      const messageMarkup = `<section class="newsletter-preview-section-editor" draggable="true" data-newsletter-preview-message><span class="newsletter-preview-section-actions"><button type="button" data-newsletter-preview-remove-message title="Remove message" aria-label="Remove message">×</button><button class="newsletter-preview-drag-handle" type="button" title="Drag to reorder" aria-label="Drag to reorder">✥</button></span><div class="newsletter-resizable-field" data-newsletter-resizable-field="message" style="width:${messageWidth}%;margin-left:${messageLeft}%"><button class="newsletter-text-full-width" type="button" data-newsletter-text-full-width="message" aria-label="Make message box full width">Full width</button><div class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="message" style="${newsletterDraft.messageFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.messageFont })}!important;` : ""}${newsletterDraft.messageTextSize ? `font-size:${Number(newsletterDraft.messageTextSize)}pt!important;` : ""}">${newsletterBlockEditableHtml(newsletterDraft.messageHtml, newsletterDraft.message || "")}</div>${messageResizeHandle("left")}${messageResizeHandle("right")}</div></section>`;
       editableSections.splice(messagePosition, 0, messageMarkup);
       const sectionsMarkup = editableSections.join("");
       const preview = document.getElementById("newsletter-preview-document");
@@ -27792,8 +28467,10 @@
       preview.style.setProperty("--newsletter-body-weight", newsletterFontWeight());
       preview.style.setProperty("--newsletter-body-size", newsletterFontSize());
       const logoBadgeClass = newsletterLogoBadgeClass();
-      const logoMarkup = `<div class="newsletter-logo-editor ${logoBadgeClass} ${newsletterLogoSelected ? "is-selected" : ""}" role="button" tabindex="0" data-newsletter-logo-editor aria-label="Select newsletter logo" style="width:${Math.max(60, Math.min(280, Number(newsletterDraft.logoWidth) || 150))}px;--newsletter-logo-color:${newsletterColors[newsletterDraft.logoColor] || newsletterColors.black};--newsletter-logo-badge-color:${newsletterColors[newsletterDraft.logoBadgeColor] || newsletterColors.blush};"><span class="newsletter-logo-badge-surface"><span class="newsletter-logo-mark" aria-hidden="true"></span></span><button class="newsletter-logo-resize-handle" type="button" data-newsletter-logo-resize-handle aria-label="Resize newsletter logo" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button></div>`;
-      preview.innerHTML = `${backgroundBoxesMarkup}<header class="newsletter-preview-header">${newsletterLogoBadgeControlsMarkup()}${logoMarkup}<h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline" style="${newsletterDraft.headlineFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.headlineFont })}!important;` : ""}${newsletterDraft.headlineTextSize ? `font-size:${Number(newsletterDraft.headlineTextSize)}pt!important;` : ""}">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject" style="${newsletterDraft.subjectFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.subjectFont })}!important;` : ""}${newsletterDraft.subjectTextSize ? `font-size:${Number(newsletterDraft.subjectTextSize)}pt!important;` : ""}">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>${floatingGraphicsMarkup}`;
+      const logoMarkup = `<div class="newsletter-logo-editor ${logoBadgeClass} ${newsletterLogoSelected ? "is-selected" : ""}" role="button" tabindex="0" data-newsletter-logo-editor aria-label="Select newsletter logo" style="width:${Math.max(60, Math.min(280, Number(newsletterDraft.logoWidth) || 150))}px;--newsletter-logo-color:${newsletterColors[newsletterDraft.logoColor] || newsletterColors.black};--newsletter-logo-badge-color:${newsletterColors[newsletterDraft.logoBadgeColor] || newsletterColors.blush};"><span class="newsletter-logo-badge-surface">${newsletterGenderView === "male" ? `<span class="newsletter-boy-logo-mark" aria-hidden="true"></span>` : `<span class="newsletter-logo-mark" aria-hidden="true"></span>`}</span><button class="newsletter-logo-resize-handle" type="button" data-newsletter-logo-resize-handle aria-label="Resize newsletter logo" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button></div>`;
+      preview.innerHTML = `${backgroundBoxesMarkup}<header class="newsletter-preview-header">${newsletterLogoBadgeControlsMarkup()}${logoMarkup}<h1 class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="headline" style="${newsletterDraft.headlineFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.headlineFont })}!important;` : ""}${newsletterDraft.headlineTextSize ? `font-size:${Number(newsletterDraft.headlineTextSize)}pt!important;` : ""}${newsletterDraft.headlineAlign ? `text-align:${newsletterDraft.headlineAlign};` : ""}">${newsletterDraft.headlineHtml || rosterSafe(newsletterDraft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-preview-editable" contenteditable="true" spellcheck="true" data-newsletter-preview-field="subject" style="${newsletterDraft.subjectFont ? `font-family:${newsletterInlineFontStyle({ font: newsletterDraft.subjectFont })}!important;` : ""}${newsletterDraft.subjectTextSize ? `font-size:${Number(newsletterDraft.subjectTextSize)}pt!important;` : ""}">${newsletterDraft.subjectHtml || rosterSafe(newsletterDraft.subject || "A special update for our dance family")}</p></header><main class="newsletter-preview-content">${sectionsMarkup}${videoMarkup}${ctaMarkup}</main><footer class="newsletter-preview-footer">Dance Techniques · Beautiful movement, joyful confidence.<br>Recipient preferences and unsubscribe information will appear here.</footer>${floatingGraphicsMarkup}`;
+      decorateNewsletterConditionalText(preview);
+      window.requestAnimationFrame(updateNewsletterDesktopCanvasScale);
       updateNewsletterHistoryButtons();
     };
 
@@ -27858,12 +28535,10 @@
       const font = document.getElementById("newsletter-font")?.value || "avenir-light";
       newsletterDraft = { ...newsletterDraft, font, textSize: document.getElementById("newsletter-text-size")?.value || "12" };
       if (font === "bodoni-smallcaps") lowercaseNewsletterDraftCopy();
-      else clearNewsletterInlineFonts();
       renderNewsletterStudio();
       saveNewsletterDraft();
     };
-    const newsletterActiveFormatContext = () => {
-      const target = newsletterActivePreviewTarget;
+    const newsletterFormatContextForTarget = (target) => {
       if (!target || !document.contains(target)) return null;
       const draftKey = target.dataset.newsletterPreviewField;
       if (draftKey) return { owner: newsletterDraft, key: draftKey };
@@ -27876,6 +28551,7 @@
       const owner = sectionEditor ? newsletterDraft.sections[Number(sectionEditor.dataset.newsletterPreviewSection)] : null;
       return owner && sectionKey ? { owner, key: sectionKey } : null;
     };
+    const newsletterActiveFormatContext = () => newsletterFormatContextForTarget(newsletterActivePreviewTarget);
     const updateNewsletterActiveFieldFormat = (property, value) => {
       const context = newsletterActiveFormatContext();
       if (!context) return false;
@@ -27885,8 +28561,6 @@
         if (value === "bodoni-smallcaps") {
           context.owner[context.key] = newsletterLowercaseText(context.owner[context.key] || "");
           if (context.owner[`${context.key}Html`]) context.owner[`${context.key}Html`] = newsletterLowercaseHtml(context.owner[`${context.key}Html`]);
-        } else if (context.owner[`${context.key}Html`]) {
-          context.owner[`${context.key}Html`] = newsletterClearInlineFontHtml(context.owner[`${context.key}Html`]);
         }
       }
       newsletterActivePreviewTarget = null;
@@ -28696,6 +29370,12 @@
       renderNewsletterSetup();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
+    document.getElementById("newsletter-save-now")?.addEventListener("click", async () => {
+      const saved = await saveNewsletterDraft();
+      if (!saved) return;
+      setNewsletterSaveState("saved", "Draft saved");
+      showToast("Your current newsletter formatting is safely saved.");
+    });
 
     ["newsletter-font", "newsletter-text-size"].forEach((id) => {
       document.getElementById(id)?.addEventListener("change", (event) => {
@@ -28713,7 +29393,15 @@
             });
           } else {
             const pointSize = Number(selectedValue) || 12;
-            appliedToHighlight = applyNewsletterSelectionStyle({ fontSize: `${pointSize}pt` });
+            const selection = window.getSelection();
+            const target = newsletterEditableForRange(selection?.rangeCount ? selection.getRangeAt(0) : null);
+            if (newsletterSelectionCoversEditable(selection, target)) {
+              newsletterActivePreviewTarget = target;
+              newsletterApplyingSelectionFormat = false;
+              if (updateNewsletterActiveFieldFormat("TextSize", selectedValue)) return;
+              newsletterApplyingSelectionFormat = true;
+            }
+            appliedToHighlight = applyNewsletterSelectionStyle({ fontSize: `${pointSize}pt`, lineHeight: "1.35" });
           }
         }
         newsletterApplyingSelectionFormat = false;
@@ -28807,6 +29495,8 @@
           }
         }
       }
+      updateNewsletterListControls();
+      updateNewsletterConditionControl();
     });
     const newsletterEditableSelector = "[data-newsletter-preview-field], [data-newsletter-preview-section-field], [data-newsletter-preview-textbox]";
     function newsletterEditableForNode(node) {
@@ -28862,7 +29552,7 @@
     };
     const normalizeNewsletterRichTextElement = (editable) => {
       if (!editable) return false;
-      let changed = false;
+      let changed = cleanupNewsletterEmptyListItems(editable);
       let merged = true;
       while (merged) {
         merged = false;
@@ -28899,6 +29589,34 @@
       const range = selection.getRangeAt(0);
       const target = newsletterEditableForRange(range);
       if (!target) return false;
+      const selectedListItems = [...target.querySelectorAll("li")].filter((item) => {
+        try { return range.intersectsNode(item); } catch (_) { return false; }
+      });
+      if (selectedListItems.length) {
+        const cssProperties = Object.entries(styles).map(([property, value]) => [property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`), value]);
+        selectedListItems.forEach((item) => {
+          item.querySelectorAll("font").forEach((font) => {
+            if (styles.fontFamily) font.removeAttribute("face");
+            if (styles.fontSize) font.removeAttribute("size");
+            if (styles.color) font.removeAttribute("color");
+            if (!font.attributes.length) font.replaceWith(...font.childNodes);
+          });
+          item.querySelectorAll("[style]").forEach((element) => {
+            cssProperties.forEach(([property]) => element.style.removeProperty(property));
+            if (!element.getAttribute("style")?.trim()) element.removeAttribute("style");
+          });
+          cssProperties.forEach(([property, value]) => item.style.setProperty(property, value, "important"));
+        });
+        const preservedRange = document.createRange();
+        preservedRange.setStartBefore(selectedListItems[0]);
+        preservedRange.setEndAfter(selectedListItems[selectedListItems.length - 1]);
+        newsletterSavedSelection = preservedRange.cloneRange();
+        newsletterSavedSelectionTarget = target;
+        newsletterActivePreviewTarget = target;
+        target.dispatchEvent(new Event("input", { bubbles: true }));
+        updateNewsletterListControls();
+        return true;
+      }
       const span = document.createElement("span");
       const cssProperties = Object.entries(styles).map(([property, value]) => [property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`), value]);
       cssProperties.forEach(([property, value]) => span.style.setProperty(property, value, "important"));
@@ -28929,21 +29647,305 @@
       target.dispatchEvent(new Event("input", { bubbles: true }));
       return true;
     };
+    const applyNewsletterSelectionColor = (color) => {
+      if (!restoreNewsletterSelection()) return false;
+      const selection = window.getSelection();
+      if (!selection?.rangeCount || selection.isCollapsed) return false;
+      const range = selection.getRangeAt(0);
+      const target = newsletterEditableForRange(range);
+      if (!target) return false;
+      const selectedItems = [...target.querySelectorAll("li")].filter((item) => {
+        try { return range.intersectsNode(item); } catch (_) { return false; }
+      });
+      if (selectedItems.length) {
+        selectedItems.forEach((item) => {
+          item.querySelectorAll("font[color]").forEach((font) => {
+            font.removeAttribute("color");
+            if (!font.attributes.length) font.replaceWith(...font.childNodes);
+          });
+          item.querySelectorAll("[style]").forEach((element) => {
+            element.style.removeProperty("color");
+            if (!element.getAttribute("style")?.trim()) element.removeAttribute("style");
+          });
+          item.style.setProperty("color", color, "important");
+        });
+        newsletterSavedSelection = range.cloneRange();
+        newsletterSavedSelectionTarget = target;
+        newsletterActivePreviewTarget = target;
+        target.dispatchEvent(new Event("input", { bubbles: true }));
+        return true;
+      }
+      return applyNewsletterSelectionStyle({ color });
+    };
+    const newsletterSelectionCoversEditable = (selection, target) => {
+      if (!selection?.rangeCount || !target) return false;
+      const clean = (value) => String(value || "").replace(/[\u200B-\u200D\u2060\uFEFF\u00A0]/g, " ").replace(/\s+/g, " ").trim();
+      const selectedText = clean(selection.getRangeAt(0).toString());
+      return Boolean(selectedText) && selectedText === clean(target.textContent);
+    };
+    const newsletterClearInlineAlignmentHtml = (html) => {
+      const template = document.createElement("template");
+      template.innerHTML = String(html || "");
+      template.content.querySelectorAll("[align]").forEach((element) => element.removeAttribute("align"));
+      template.content.querySelectorAll("[style]").forEach((element) => {
+        element.style.removeProperty("text-align");
+        if (!element.getAttribute("style")?.trim()) element.removeAttribute("style");
+      });
+      return template.innerHTML;
+    };
+    const applyNewsletterTitleAlignment = (target, command) => {
+      const alignment = { justifyLeft: "left", justifyCenter: "center", justifyRight: "right" }[command];
+      if (!alignment || !target) return false;
+      const context = newsletterFormatContextForTarget(target);
+      if (!context || !["headline", "title"].includes(context.key)) return false;
+      const htmlKey = `${context.key}Html`;
+      if (context.owner[htmlKey]) context.owner[htmlKey] = newsletterClearInlineAlignmentHtml(context.owner[htmlKey]);
+      context.owner[`${context.key}Align`] = alignment;
+      if (context.key === "title") {
+        const width = Math.max(20, Math.min(100, Number(context.owner.titleWidth) || 100));
+        context.owner.titleLeft = alignment === "center" ? (100 - width) / 2 : alignment === "right" ? 100 - width : 0;
+      }
+      return true;
+    };
+    const newsletterCurrentOrSavedRange = () => {
+      const selection = window.getSelection();
+      const liveRange = selection?.rangeCount ? selection.getRangeAt(0) : null;
+      const preview = document.getElementById("newsletter-preview-document");
+      return liveRange && preview?.contains(liveRange.commonAncestorContainer) ? liveRange : newsletterSavedSelection;
+    };
+    const newsletterListForSelection = () => {
+      const range = newsletterCurrentOrSavedRange();
+      if (!range) return null;
+      const node = range.startContainer?.nodeType === Node.ELEMENT_NODE ? range.startContainer : range.startContainer?.parentElement;
+      const list = node?.closest?.("ul, ol");
+      const editable = newsletterEditableForRange(range);
+      return list && editable?.contains(list) ? list : null;
+    };
+    const normalizeNewsletterPlainTextParagraphs = (target) => {
+      const selection = window.getSelection();
+      if (!target || target.children.length || !target.textContent.includes("\n") || !selection?.rangeCount) return false;
+      const range = selection.getRangeAt(0);
+      if (!target.contains(range.startContainer) || !target.contains(range.endContainer)) return false;
+      const offsetWithinTarget = (node, offset) => {
+        const probe = document.createRange();
+        probe.selectNodeContents(target);
+        probe.setEnd(node, offset);
+        return probe.toString().replace(/\r/g, "").length;
+      };
+      const startOffset = offsetWithinTarget(range.startContainer, range.startOffset);
+      const endOffset = offsetWithinTarget(range.endContainer, range.endOffset);
+      const lines = target.textContent.replace(/\r/g, "").split("\n");
+      target.replaceChildren(...lines.map((line) => {
+        const paragraph = document.createElement("div");
+        if (line) paragraph.textContent = line;
+        else paragraph.appendChild(document.createElement("br"));
+        return paragraph;
+      }));
+      const pointForOffset = (requestedOffset) => {
+        let remaining = Math.max(0, requestedOffset);
+        const paragraphs = [...target.children];
+        for (let index = 0; index < paragraphs.length; index += 1) {
+          const paragraph = paragraphs[index];
+          const textNode = paragraph.firstChild?.nodeType === Node.TEXT_NODE ? paragraph.firstChild : null;
+          const length = textNode?.nodeValue?.length || 0;
+          if (remaining <= length || index === paragraphs.length - 1) {
+            return textNode
+              ? { node: textNode, offset: Math.min(remaining, length) }
+              : { node: paragraph, offset: 0 };
+          }
+          remaining -= length + 1;
+        }
+        return { node: target, offset: target.childNodes.length };
+      };
+      const start = pointForOffset(startOffset);
+      const end = pointForOffset(endOffset);
+      const restored = document.createRange();
+      restored.setStart(start.node, start.offset);
+      restored.setEnd(end.node, end.offset);
+      selection.removeAllRanges();
+      selection.addRange(restored);
+      newsletterSavedSelection = restored.cloneRange();
+      newsletterSavedSelectionTarget = target;
+      return true;
+    };
+    const newsletterActiveListType = () => {
+      const list = newsletterListForSelection();
+      if (list?.tagName === "OL") return "numbers";
+      if (list?.tagName === "UL") return list.classList.contains("newsletter-heart-list") ? "heart" : "bullets";
+      return "";
+    };
+    const updateNewsletterListControls = () => {
+      const activeType = newsletterActiveListType();
+      document.querySelectorAll("[data-newsletter-list-type]").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.newsletterListType === activeType);
+        button.setAttribute("aria-pressed", String(button.dataset.newsletterListType === activeType));
+      });
+      document.getElementById("newsletter-open-lists")?.classList.toggle("is-active", Boolean(activeType));
+    };
+    const applyNewsletterList = (type) => {
+      if (!restoreNewsletterSelection()) {
+        showToast("Highlight text in the Live Preview first.");
+        return false;
+      }
+      const target = newsletterActivePreviewTarget;
+      const supportsLists = target?.dataset.newsletterPreviewField === "message"
+        || target?.dataset.newsletterPreviewSectionField === "text"
+        || target?.dataset.newsletterPreviewTextbox !== undefined;
+      if (!supportsLists) {
+        showToast("Use bullets or numbers in a message or text box.");
+        return false;
+      }
+      normalizeNewsletterPlainTextParagraphs(target);
+      const currentList = newsletterListForSelection();
+      const currentType = newsletterActiveListType();
+      if (type === "bullets" && currentList?.tagName === "UL" && currentType === "heart") {
+        currentList.classList.remove("newsletter-heart-list");
+      } else if (type === "heart" && currentList?.tagName === "UL" && currentType === "bullets") {
+        currentList.classList.add("newsletter-heart-list");
+      } else {
+        document.execCommand(type === "numbers" ? "insertOrderedList" : "insertUnorderedList", false);
+        const updatedList = newsletterListForSelection();
+        if (updatedList?.tagName === "UL") updatedList.classList.toggle("newsletter-heart-list", type === "heart");
+      }
+      captureNewsletterSelection();
+      target?.dispatchEvent(new Event("input", { bubbles: true }));
+      updateNewsletterListControls();
+      return true;
+    };
+    const newsletterConditionForSelection = () => {
+      const range = newsletterCurrentOrSavedRange();
+      if (!range) return null;
+      const node = range.startContainer?.nodeType === Node.ELEMENT_NODE ? range.startContainer : range.startContainer?.parentElement;
+      const span = node?.closest?.(".newsletter-school-condition[data-newsletter-schools]");
+      const editable = newsletterEditableForRange(range);
+      return span && editable?.contains(span) ? span : null;
+    };
+    const updateNewsletterConditionControl = () => {
+      document.getElementById("newsletter-open-condition")?.classList.toggle("is-active", Boolean(newsletterConditionForSelection()));
+    };
+    const closeNewsletterConditionPopover = () => {
+      const popover = document.getElementById("newsletter-condition-popover");
+      const trigger = document.getElementById("newsletter-open-condition");
+      if (popover) popover.hidden = true;
+      trigger?.setAttribute("aria-expanded", "false");
+      newsletterConditionEditingSpan = null;
+    };
+    const openNewsletterConditionPopover = () => {
+      const range = newsletterSavedSelection;
+      const existing = newsletterConditionEditingSpan?.isConnected ? newsletterConditionEditingSpan : newsletterConditionForSelection();
+      if (!existing && (!range || range.collapsed)) {
+        showToast("Highlight the phrase you want to show only for certain schools.");
+        return;
+      }
+      newsletterConditionEditingSpan = existing;
+      const selectedKeys = new Set(String(existing?.dataset.newsletterSchools || "").split("|").filter(Boolean));
+      const schools = [...new Map(schoolLibrary.map((school) => [newsletterSchoolConditionKey(school), school])).values()]
+        .filter((school) => newsletterSchoolConditionKey(school))
+        .sort((left, right) => String(left.nickname || left.name).localeCompare(String(right.nickname || right.name)));
+      const options = document.getElementById("newsletter-condition-schools");
+      if (options) options.innerHTML = schools.map((school) => {
+        const key = newsletterSchoolConditionKey(school);
+        return `<label><input type="checkbox" data-newsletter-condition-school="${rosterSafe(key)}" data-newsletter-condition-label="${rosterSafe(school.nickname || school.name)}" ${selectedKeys.has(key) ? "checked" : ""}>${rosterSafe(school.nickname || school.name)}</label>`;
+      }).join("") || `<small>Add Partner Schools before creating a school condition.</small>`;
+      document.querySelector("[data-newsletter-remove-condition]")?.toggleAttribute("hidden", !existing);
+      const popover = document.getElementById("newsletter-condition-popover");
+      if (popover) popover.hidden = false;
+      document.getElementById("newsletter-open-condition")?.setAttribute("aria-expanded", "true");
+    };
+    const applyNewsletterSchoolCondition = () => {
+      const checked = [...document.querySelectorAll("[data-newsletter-condition-school]:checked")];
+      if (!checked.length) {
+        showToast("Choose at least one school.");
+        return;
+      }
+      const keys = checked.map((input) => input.dataset.newsletterConditionSchool);
+      const labels = checked.map((input) => input.dataset.newsletterConditionLabel);
+      let span = newsletterConditionEditingSpan;
+      if (!span) {
+        if (!restoreNewsletterSelection()) return showToast("Highlight the phrase again, then choose its schools.");
+        const selection = window.getSelection();
+        const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+        const startBlock = newsletterEditableForNode(range?.startContainer)?.contains(range?.startContainer)
+          ? (range.startContainer.nodeType === Node.ELEMENT_NODE ? range.startContainer : range.startContainer.parentElement)?.closest("li, p, div")
+          : null;
+        const endBlock = (range?.endContainer?.nodeType === Node.ELEMENT_NODE ? range.endContainer : range?.endContainer?.parentElement)?.closest?.("li, p, div");
+        if (!range || range.collapsed || (startBlock && endBlock && startBlock !== endBlock)) {
+          showToast("Keep the highlighted phrase within one paragraph or list item.");
+          return;
+        }
+        span = document.createElement("span");
+        span.className = "newsletter-school-condition";
+        span.appendChild(range.extractContents());
+        range.insertNode(span);
+      }
+      span.classList.add("newsletter-school-condition");
+      span.dataset.newsletterSchools = keys.join("|");
+      span.dataset.newsletterConditionLabel = labels.join("|");
+      span.title = `Shown only for ${labels.join(", ")}`;
+      const target = span.closest(newsletterEditableSelector);
+      target?.dispatchEvent(new Event("input", { bubbles: true }));
+      closeNewsletterConditionPopover();
+      updateNewsletterConditionControl();
+      showToast(`Conditional text saved for ${labels.length} school${labels.length === 1 ? "" : "s"}.`);
+    };
+    const removeNewsletterSchoolCondition = () => {
+      const span = newsletterConditionEditingSpan || newsletterConditionForSelection();
+      if (!span) return;
+      const target = span.closest(newsletterEditableSelector);
+      span.replaceWith(...span.childNodes);
+      target?.dispatchEvent(new Event("input", { bubbles: true }));
+      closeNewsletterConditionPopover();
+      updateNewsletterConditionControl();
+      showToast("School condition removed.");
+    };
     ["newsletter-font", "newsletter-text-size", "newsletter-inline-toolbar", "newsletter-color-swatches"].forEach((id) => {
       document.getElementById(id)?.addEventListener("pointerdown", captureNewsletterSelection, true);
     });
     document.getElementById("newsletter-inline-toolbar")?.addEventListener("click", (event) => {
+      const listButton = event.target.closest("[data-newsletter-list-type]");
+      if (listButton) {
+        event.preventDefault();
+        applyNewsletterList(listButton.dataset.newsletterListType);
+        return;
+      }
       const command = event.target.closest("[data-newsletter-command]")?.dataset.newsletterCommand;
       if (command) {
         restoreNewsletterSelection();
+        const alignmentTarget = newsletterActivePreviewTarget;
+        if (applyNewsletterTitleAlignment(alignmentTarget, command)) {
+          renderNewsletterStudio();
+          saveNewsletterDraft();
+          updateNewsletterListControls();
+          return;
+        }
         document.execCommand(command, false);
         normalizeNewsletterRichTextElement(newsletterActivePreviewTarget);
         newsletterActivePreviewTarget?.dispatchEvent(new Event("input", { bubbles: true }));
+        updateNewsletterListControls();
       }
     });
     document.getElementById("newsletter-open-fields")?.addEventListener("click", () => {
       const popover = document.getElementById("newsletter-field-popover");
       popover.hidden = !popover.hidden;
+    });
+    document.getElementById("newsletter-open-lists")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const popover = document.getElementById("newsletter-list-popover");
+      popover.hidden = !popover.hidden;
+      event.currentTarget.setAttribute("aria-expanded", String(!popover.hidden));
+      updateNewsletterListControls();
+    });
+    document.getElementById("newsletter-open-condition")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const popover = document.getElementById("newsletter-condition-popover");
+      if (!popover?.hidden) closeNewsletterConditionPopover();
+      else openNewsletterConditionPopover();
+    });
+    document.getElementById("newsletter-condition-popover")?.addEventListener("click", (event) => {
+      event.stopPropagation();
+      if (event.target.closest("[data-newsletter-apply-condition]")) applyNewsletterSchoolCondition();
+      if (event.target.closest("[data-newsletter-remove-condition]")) removeNewsletterSchoolCondition();
+      if (event.target.closest("[data-newsletter-close-condition]")) closeNewsletterConditionPopover();
     });
     document.getElementById("newsletter-add-link")?.addEventListener("click", () => {
       if (!restoreNewsletterSelection()) return showToast("Highlight text in the Live Preview first.");
@@ -28990,6 +29992,16 @@
         fontSelect.style.fontWeight = newsletterFontWeight({ font });
       }
       if (sizeSelect) sizeSelect.value = textSize;
+    });
+    document.getElementById("newsletter-preview-document")?.addEventListener("focusout", (event) => {
+      const editable = event.target.closest(newsletterEditableSelector);
+      if (!editable) return;
+      window.requestAnimationFrame(() => {
+        if (!document.contains(editable) || editable.contains(document.activeElement)) return;
+        if (cleanupNewsletterEmptyListItems(editable, { preserveCaret: false })) {
+          editable.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+      });
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("input", (event) => {
       const buttonField = event.target.closest("[data-newsletter-button-field]");
@@ -29042,7 +30054,39 @@
       if (!(sectionField instanceof HTMLInputElement)) section[`${key}Html`] = sectionField.innerHTML;
       saveNewsletterDraft();
     });
-    document.getElementById("newsletter-preview-document")?.addEventListener("change", (event) => {
+    document.getElementById("newsletter-preview-document")?.addEventListener("change", async (event) => {
+      const sectionBackgroundUpload = event.target.closest("[data-newsletter-section-background-upload]");
+      if (sectionBackgroundUpload) {
+        const editor = sectionBackgroundUpload.closest("[data-newsletter-preview-section]");
+        const index = Number(editor?.dataset.newsletterPreviewSection);
+        const section = newsletterDraft.sections[index];
+        const file = sectionBackgroundUpload.files?.[0];
+        if (!section || !file || ["social", "divider"].includes(section.type)) return;
+        try {
+          section.backgroundImage = await newsletterPhotoDataUrl(file);
+          section.backgroundImageName = file.name;
+          section.backgroundImageFit ||= "cover";
+          newsletterSelectedSectionBackgroundIndex = index;
+          renderNewsletterStudio();
+          saveNewsletterDraft();
+          showToast("Section background image added.");
+        } catch (error) {
+          showToast(error.message || "The background image could not be added.");
+        }
+        return;
+      }
+      const sectionCustomBackground = event.target.closest("[data-newsletter-section-custom-background]");
+      if (sectionCustomBackground) {
+        const editor = sectionCustomBackground.closest("[data-newsletter-preview-section]");
+        const index = Number(editor?.dataset.newsletterPreviewSection);
+        const section = newsletterDraft.sections[index];
+        if (!section || ["social", "divider"].includes(section.type)) return;
+        section.backgroundColor = sectionCustomBackground.value;
+        newsletterSelectedSectionBackgroundIndex = index;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        return;
+      }
       if (event.target.matches("[data-newsletter-button-field]")) {
         event.target.dispatchEvent(new Event("input", { bubbles: true }));
         return;
@@ -29060,6 +30104,69 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("click", (event) => {
+      if (event.target.closest(".newsletter-social-link")) {
+        event.stopPropagation();
+        return;
+      }
+      const conditionalText = event.target.closest(".newsletter-school-condition[data-newsletter-schools]");
+      if (conditionalText) {
+        newsletterConditionEditingSpan = conditionalText;
+        document.getElementById("newsletter-open-condition")?.classList.add("is-active");
+        openNewsletterConditionPopover();
+        return;
+      } else if (!event.target.closest("[data-newsletter-open-condition]")) {
+        newsletterConditionEditingSpan = null;
+      }
+      const editSectionBackground = event.target.closest("[data-newsletter-edit-section-background]");
+      if (editSectionBackground) {
+        event.preventDefault();
+        const index = Number(editSectionBackground.dataset.newsletterEditSectionBackground);
+        newsletterSelectedSectionBackgroundIndex = newsletterSelectedSectionBackgroundIndex === index ? -1 : index;
+        renderNewsletterStudio();
+        return;
+      }
+      const sectionBackground = event.target.closest("[data-newsletter-section-background]");
+      if (sectionBackground) {
+        event.preventDefault();
+        const editor = sectionBackground.closest("[data-newsletter-preview-section]");
+        const index = Number(editor?.dataset.newsletterPreviewSection);
+        const section = newsletterDraft.sections[index];
+        if (!section || ["social", "divider"].includes(section.type)) return;
+        section.backgroundColor = sectionBackground.dataset.newsletterSectionBackground || "";
+        newsletterSelectedSectionBackgroundIndex = index;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        return;
+      }
+      const removeSectionBackgroundImage = event.target.closest("[data-newsletter-remove-section-background-image]");
+      if (removeSectionBackgroundImage) {
+        event.preventDefault();
+        const editor = removeSectionBackgroundImage.closest("[data-newsletter-preview-section]");
+        const index = Number(editor?.dataset.newsletterPreviewSection);
+        const section = newsletterDraft.sections[index];
+        if (!section || ["social", "divider"].includes(section.type)) return;
+        delete section.backgroundImage;
+        delete section.backgroundImageName;
+        delete section.backgroundImageFit;
+        newsletterSelectedSectionBackgroundIndex = index;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        showToast("Section background image removed.");
+        return;
+      }
+      const sectionBackgroundFit = event.target.closest("[data-newsletter-section-background-fit]");
+      if (sectionBackgroundFit) {
+        event.preventDefault();
+        const editor = sectionBackgroundFit.closest("[data-newsletter-preview-section]");
+        const index = Number(editor?.dataset.newsletterPreviewSection);
+        const section = newsletterDraft.sections[index];
+        if (!section || !section.backgroundImage || ["social", "divider"].includes(section.type)) return;
+        section.backgroundImageFit = sectionBackgroundFit.dataset.newsletterSectionBackgroundFit === "contain" ? "contain" : "cover";
+        newsletterSelectedSectionBackgroundIndex = index;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        return;
+      }
       const editBackgroundBox = event.target.closest("[data-newsletter-edit-background-box]");
       if (editBackgroundBox) {
         const index = Number(editBackgroundBox.dataset.newsletterEditBackgroundBox);
@@ -29241,10 +30348,10 @@
       if (toggleGraphicLock) {
         const graphic = newsletterDraft.graphics?.[Number(toggleGraphicLock.dataset.newsletterToggleGraphicLock)];
         if (!graphic) return;
-        graphic.locked = !graphic.locked;
+        const locked = setNewsletterGraphicLocked(graphic, !newsletterGraphicLocked(graphic));
         renderNewsletterStudio();
         saveNewsletterDraft();
-        showToast(graphic.locked ? "Graphic position frozen." : "Graphic position unlocked.");
+        showToast(`${newsletterDraft.device === "mobile" ? "Phone" : "Desktop"} graphic position ${locked ? "frozen" : "unlocked"}.`);
         return;
       }
       const removeGraphic = event.target.closest("[data-newsletter-remove-graphic]");
@@ -29288,6 +30395,12 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("keydown", (event) => {
+      const editable = event.target.closest("[contenteditable='true']");
+      if (editable && ["Backspace", "Delete"].includes(event.key)) {
+        captureNewsletterSelection();
+        window.requestAnimationFrame(updateNewsletterListControls);
+        return;
+      }
       if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key) || event.target.closest("input, textarea, [contenteditable='true']")) return;
       const boxElement = event.target.closest("[data-newsletter-background-box]") || document.querySelector(".newsletter-background-box.is-selected");
       const boxIndex = boxElement ? Number(boxElement.dataset.newsletterBackgroundBox) : newsletterSelectedBackgroundBoxIndex;
@@ -29316,7 +30429,7 @@
       const graphic = newsletterDraft.graphics?.[index];
       if (!graphic || index !== newsletterSelectedGraphicIndex) return;
       event.preventDefault();
-      if (graphic.locked) {
+      if (newsletterGraphicLocked(graphic)) {
         showToast("Unfreeze the graphic before nudging it.");
         return;
       }
@@ -29333,6 +30446,10 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("dragstart", (event) => {
+      if (event.target.closest(".newsletter-social-link")) {
+        event.preventDefault();
+        return;
+      }
       if (event.target.closest("[data-newsletter-logo-resize-handle], [data-newsletter-graphic-resize-handle], [data-newsletter-background-box-resize], [data-newsletter-text-resize-handle]")) {
         event.preventDefault();
         return;
@@ -29351,7 +30468,7 @@
       const graphic = event.target.closest("[data-newsletter-floating-graphic]");
       if (graphic) {
         newsletterGraphicDragIndex = Number(graphic.dataset.newsletterFloatingGraphic);
-        if (newsletterDraft.graphics?.[newsletterGraphicDragIndex]?.locked) {
+        if (newsletterGraphicLocked(newsletterDraft.graphics?.[newsletterGraphicDragIndex])) {
           newsletterGraphicDragIndex = -1;
           event.preventDefault();
           return;
@@ -29473,6 +30590,51 @@
       saveNewsletterDraft();
     });
     document.getElementById("newsletter-preview-document")?.addEventListener("pointerdown", (event) => {
+      if (event.target.closest(".newsletter-social-link")) return;
+      const backgroundBoxMoveHandle = event.target.closest("[data-newsletter-background-box-drag-handle]");
+      if (backgroundBoxMoveHandle) {
+        event.preventDefault();
+        event.stopPropagation();
+        const index = Number(backgroundBoxMoveHandle.dataset.newsletterBackgroundBoxDragHandle);
+        const box = newsletterDraft.backgroundBoxes?.[index];
+        const element = backgroundBoxMoveHandle.closest("[data-newsletter-background-box]");
+        const surface = document.querySelector(`[data-newsletter-background-box-surface="${index}"]`);
+        const preview = document.getElementById("newsletter-preview-document");
+        if (!box || box.locked || !element || !preview) return;
+        newsletterSelectedBackgroundBoxIndex = index;
+        newsletterSelectedGraphicIndex = -1;
+        newsletterSelectedButtonIndex = -1;
+        element.classList.add("is-selected");
+        element.focus({ preventScroll: true });
+        const startX = event.clientX;
+        const startY = event.clientY;
+        const startBoxX = Number(box.x) || 50;
+        const startBoxY = Number(box.y) || 35;
+        const previewRect = preview.getBoundingClientRect();
+        backgroundBoxMoveHandle.setPointerCapture?.(event.pointerId);
+        const move = (moveEvent) => {
+          const xChange = ((moveEvent.clientX - startX) / Math.max(1, previewRect.width)) * 100;
+          const yChange = ((moveEvent.clientY - startY) / Math.max(1, previewRect.height)) * 100;
+          box.x = Math.max(5, Math.min(95, startBoxX + xChange));
+          box.y = Math.max(3, Math.min(97, startBoxY + yChange));
+          element.style.left = `${box.x}%`;
+          element.style.top = `${box.y}%`;
+          if (surface) {
+            surface.style.left = `${box.x}%`;
+            surface.style.top = `${box.y}%`;
+          }
+        };
+        const finish = () => {
+          backgroundBoxMoveHandle.removeEventListener("pointermove", move);
+          backgroundBoxMoveHandle.removeEventListener("pointerup", finish);
+          backgroundBoxMoveHandle.removeEventListener("pointercancel", finish);
+          saveNewsletterDraft();
+        };
+        backgroundBoxMoveHandle.addEventListener("pointermove", move);
+        backgroundBoxMoveHandle.addEventListener("pointerup", finish);
+        backgroundBoxMoveHandle.addEventListener("pointercancel", finish);
+        return;
+      }
       const logoHandle = event.target.closest("[data-newsletter-logo-resize-handle]");
       if (logoHandle) {
         event.preventDefault();
@@ -29482,10 +30644,11 @@
         newsletterLogoSelected = true;
         logo.classList.add("is-selected");
         const startX = event.clientX;
-        const startWidth = logo.getBoundingClientRect().width;
+        const pointerScale = newsletterCanvasPointerScale();
+        const startWidth = logo.getBoundingClientRect().width / pointerScale;
         logoHandle.setPointerCapture?.(event.pointerId);
         const move = (moveEvent) => {
-          const width = Math.max(60, Math.min(280, startWidth + (moveEvent.clientX - startX)));
+          const width = Math.max(60, Math.min(280, startWidth + ((moveEvent.clientX - startX) / pointerScale)));
           newsletterDraft.logoWidth = width;
           logo.style.width = `${width}px`;
         };
@@ -29512,12 +30675,13 @@
         newsletterSelectedBackgroundBoxIndex = index;
         const startX = event.clientX;
         const startY = event.clientY;
-        const startWidth = element.getBoundingClientRect().width;
-        const startHeight = element.getBoundingClientRect().height;
+        const pointerScale = newsletterCanvasPointerScale();
+        const startWidth = element.getBoundingClientRect().width / pointerScale;
+        const startHeight = element.getBoundingClientRect().height / pointerScale;
         backgroundBoxHandle.setPointerCapture?.(event.pointerId);
         const move = (moveEvent) => {
-          box.width = Math.max(80, Math.min(620, startWidth + (moveEvent.clientX - startX)));
-          box.height = Math.max(60, Math.min(700, startHeight + (moveEvent.clientY - startY)));
+          box.width = Math.max(80, Math.min(620, startWidth + ((moveEvent.clientX - startX) / pointerScale)));
+          box.height = Math.max(60, Math.min(700, startHeight + ((moveEvent.clientY - startY) / pointerScale)));
           element.style.width = `${box.width}px`;
           element.style.height = `${box.height}px`;
           if (surface) {
@@ -29543,13 +30707,14 @@
         const index = Number(graphicHandle.dataset.newsletterGraphicResizeHandle);
         const graphic = newsletterDraft.graphics?.[index];
         const element = graphicHandle.closest("[data-newsletter-floating-graphic]");
-        if (!graphic || graphic.locked || !element) return;
+        if (!graphic || newsletterGraphicLocked(graphic) || !element) return;
         const startX = event.clientX;
-        const startWidth = element.getBoundingClientRect().width;
+        const pointerScale = newsletterCanvasPointerScale();
+        const startWidth = element.getBoundingClientRect().width / pointerScale;
         graphicHandle.setPointerCapture?.(event.pointerId);
         const move = (moveEvent) => {
-          const width = Math.max(60, Math.min(500, startWidth + (moveEvent.clientX - startX)));
-          graphic.width = width;
+          const width = Math.max(60, Math.min(500, startWidth + ((moveEvent.clientX - startX) / pointerScale)));
+          setNewsletterGraphicDimensions(graphic, { width });
           element.style.width = `${width}px`;
         };
         const finish = () => {
@@ -29619,6 +30784,36 @@
       textHandle.addEventListener("pointerup", finish);
       textHandle.addEventListener("pointercancel", finish);
     });
+    document.getElementById("newsletter-preview-document")?.addEventListener("click", (event) => {
+      const fullWidthButton = event.target.closest("[data-newsletter-text-full-width]");
+      if (!fullWidthButton) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const wrapper = fullWidthButton.closest("[data-newsletter-resizable-field]");
+      const container = fullWidthButton.closest("[data-newsletter-preview-section], [data-newsletter-preview-message]");
+      const key = fullWidthButton.dataset.newsletterTextFullWidth;
+      if (!wrapper || !container || !key) return;
+      wrapper.style.width = "100%";
+      wrapper.style.marginLeft = "0%";
+      if (key === "message") {
+        newsletterDraft.messageWidth = 100;
+        newsletterDraft.messageLeft = 0;
+      } else {
+        const section = newsletterDraft.sections[Number(container.dataset.newsletterPreviewSection)];
+        if (!section) return;
+        if (key.startsWith("textBox:")) {
+          const textBox = section.textBoxes?.[Number(key.split(":")[1])];
+          if (!textBox) return;
+          textBox.width = 100;
+          textBox.left = 0;
+        } else {
+          section[`${key}Width`] = 100;
+          section[`${key}Left`] = 0;
+        }
+      }
+      saveNewsletterDraft();
+      showToast("Text box set to full width.");
+    });
     document.getElementById("newsletter-color-swatches")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-newsletter-color]");
       if (!button) return;
@@ -29629,7 +30824,7 @@
         return;
       }
       if (restoreNewsletterSelection() && !window.getSelection()?.isCollapsed) {
-        applyNewsletterSelectionStyle({ color: newsletterColors[button.dataset.newsletterColor] || newsletterColors.berry });
+        applyNewsletterSelectionColor(newsletterColors[button.dataset.newsletterColor] || newsletterColors.berry);
         return;
       }
       newsletterDraft.color = button.dataset.newsletterColor || "berry";
@@ -29689,7 +30884,10 @@
       if (!button) return;
       const type = button.dataset.newsletterAddSection || "text";
       const defaults = {
-        title: { title: "New Section" }, section: { title: "New Section", text: "Add your section details here." }, button: { linkText: "Open Link", buttonColor: newsletterGenderView === "male" ? "sage" : "berry", buttonFont: "avenir-bold" }, character: { title: "A Little DT Magic", text: "🩰" }, quote: { text: "Movement is the language of joy." }, reminder: { title: "Important Reminder" }, calendar: { title: "Save the Date" }, social: { title: "Follow Along", linkText: "Follow Dance Techniques" }
+        title: { title: "New Section" }, section: { title: "New Section", text: "Add your section details here." }, button: { linkText: "Open Link", buttonColor: newsletterGenderView === "male" ? "sage" : "berry", buttonFont: "avenir-bold" }, character: { title: "A Little DT Magic", text: "🩰" }, quote: { text: "Movement is the language of joy." }, reminder: { title: "Important Reminder" }, calendar: { title: "Save the Date" }, social: { socialLinks: [
+          { label: "Instagram", url: "https://www.instagram.com/dancetechniquesllc/", image: newsletterGenderView === "male" ? "assets/social-instagram-sage-circle.svg" : "assets/social-instagram-heart.png" },
+          { label: "Facebook", url: "https://www.facebook.com/dancetechniquesllc", image: newsletterGenderView === "male" ? "assets/social-facebook-sage-circle.svg" : "assets/social-facebook-heart.png" }
+        ] }
       };
       newsletterDraft.sections.push({ type, title: "", text: "", linkText: "", url: "", titleWidth: 100, titleLeft: 0, textWidth: 100, textLeft: 0, linkTextWidth: 100, linkTextLeft: 0, ...(defaults[type] || {}) });
       if (type === "button") newsletterSelectedButtonIndex = newsletterDraft.sections.length - 1;
@@ -29728,6 +30926,28 @@
       renderNewsletterStudio();
       saveNewsletterDraft();
     });
+    document.addEventListener("change", async (event) => {
+      const input = event.target.closest("[data-newsletter-photo-upload]");
+      if (!input) return;
+      const file = input.files?.[0];
+      const section = newsletterDraft.sections[Number(input.dataset.newsletterPhotoUpload)];
+      if (!file || section?.type !== "photo") return;
+      if (!file.type.startsWith("image/")) {
+        showToast("Choose an image or photo file.");
+        input.value = "";
+        return;
+      }
+      try {
+        section.url = await newsletterPhotoDataUrl(file);
+        section.imageName = file.name;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        showToast("Picture added to the newsletter.");
+      } catch (error) {
+        console.error("Newsletter picture could not be prepared", error);
+        showToast(error.message || "The picture could not be added.");
+      }
+    });
     document.getElementById("newsletter-section-list")?.addEventListener("input", (event) => {
       const field = event.target.closest("[data-newsletter-section-field]");
       const editor = event.target.closest("[data-newsletter-section-index]");
@@ -29752,7 +30972,7 @@
       document.getElementById("newsletter-change-template")?.removeAttribute("open");
     }));
     document.querySelectorAll("[data-newsletter-device]").forEach((button) => button.addEventListener("click", () => {
-      newsletterDraft.device = button.dataset.newsletterDevice || "desktop";
+      loadNewsletterBreakpoint(button.dataset.newsletterDevice || "desktop");
       renderNewsletterStudio();
       saveNewsletterDraft();
     }));
@@ -30227,11 +31447,16 @@
         closeLibrary();
         return;
       }
-      if (event.target.closest("[data-newsletter-graphic-type='twirla']")) {
+      const graphicType = event.target.closest("[data-newsletter-graphic-type]")?.dataset.newsletterGraphicType;
+      if (["twirla", "bopper"].includes(graphicType)) {
         if (typeView) typeView.hidden = true;
         if (cardView) cardView.hidden = false;
-        setText("newsletter-graphic-library-title", "Twirla");
-        setText("newsletter-graphic-library-subtitle", "Choose a saved Twirla graphic.");
+        cardView?.querySelectorAll("[data-newsletter-library-folder]").forEach((card) => {
+          card.hidden = card.dataset.newsletterLibraryFolder !== graphicType;
+        });
+        const folderTitle = graphicType === "bopper" ? "Bopper" : "Twirla";
+        setText("newsletter-graphic-library-title", folderTitle);
+        setText("newsletter-graphic-library-subtitle", `Choose a saved ${folderTitle} graphic.`);
         return;
       }
       if (event.target.closest("[data-newsletter-graphic-library-back]")) {
@@ -30249,8 +31474,25 @@
         saveNewsletterDraft();
         closeLibrary();
         showToast("Twirla Peeking is ready to move. Use the anchor to freeze her position.");
+        return;
+      }
+      if (event.target.closest("[data-newsletter-library-graphic='bopper-peeking']")) {
+        newsletterDraft.graphics ||= [];
+        newsletterDraft.graphics.push({ url: "assets/bopper-peeking.png", alt: "Bopper Peeking", x: 18, y: 18, width: 190, locked: false });
+        newsletterSelectedGraphicIndex = newsletterDraft.graphics.length - 1;
+        renderNewsletterStudio();
+        saveNewsletterDraft();
+        closeLibrary();
+        showToast("Bopper Peeking is ready to move. Use the anchor to freeze his position.");
       }
     });
+    const newsletterPreviewStage = document.querySelector(".newsletter-preview-stage");
+    if (newsletterPreviewStage && window.ResizeObserver) {
+      new ResizeObserver(() => window.requestAnimationFrame(updateNewsletterDesktopCanvasScale)).observe(newsletterPreviewStage);
+    } else {
+      window.addEventListener("resize", updateNewsletterDesktopCanvasScale);
+    }
+    hydrateNewsletterDraftFromDurableStorage();
 
     document.querySelector("[data-open-director-profile]")?.addEventListener("click", () => {
       const signedInProfile = teachers.find((teacher) => isCompanyTeacherProfile(teacher))
@@ -32369,5 +33611,6 @@
         });
     }
   </script>
+  <script src="tulle.js?v=20260726-phase1"></script>
 </body>
 </html>
