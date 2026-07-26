@@ -2334,12 +2334,19 @@
     .student-library-card .student-library-age { color: color-mix(in oklch, var(--muted) 72%, white); font-size: 10px; font-weight: 450; }
     .student-library-day-bubble { position: absolute; top: 10px; right: 10px; min-width: 29px; height: 29px; display: grid; place-items: center; padding: 0 7px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 950; }
     .enrollment-summary-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 4px 0 16px; }
-    .enrollment-summary-card { min-height: 86px; display: grid; place-content: center; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); text-align: center; }
+    .enrollment-summary-card { min-height: 86px; display: grid; place-content: center; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); color: inherit; font: inherit; text-align: center; cursor: pointer; }
+    .enrollment-summary-card[aria-pressed="true"] { border-color: var(--berry); box-shadow: inset 0 0 0 1px var(--berry); }
     .enrollment-summary-card strong { color: var(--berry); font-size: 25px; line-height: 1; }
     .enrollment-summary-card small { color: var(--muted); font-size: 11px; font-weight: 700; }
-    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .enrollment-student-view-toggle button { min-height: 48px; padding: 9px 14px; border-radius: 12px; background: transparent; color: var(--fg); font-family: var(--font-body); font-size: 16px; font-weight: 800; }
     .enrollment-student-view-toggle button.is-selected { background: var(--blush); color: var(--berry); box-shadow: 0 1px 3px oklch(35% 0.04 25 / .08); }
+    .enrollment-checklist-summary { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; margin: 0 0 14px; }
+    .enrollment-checklist-summary[hidden] { display: none; }
+    .enrollment-checklist-summary button { min-height: 76px; display: grid; place-content: center; gap: 4px; padding: 8px 6px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); color: var(--fg); font: inherit; text-align: center; }
+    .enrollment-checklist-summary button strong { color: var(--berry); font-size: 20px; line-height: 1; }
+    .enrollment-checklist-summary button small { color: var(--muted); font-size: 9px; font-weight: 750; line-height: 1.15; }
+    .enrollment-checklist-summary button[aria-pressed="true"] { border-color: var(--berry); background: var(--blush); box-shadow: inset 0 0 0 1px var(--berry); }
     .enrollment-student-view-panel[hidden] { display: none !important; }
     .student-library-grid.is-grouped { display: block; }
     .student-library-school-section + .student-library-school-section { margin-top: 30px; }
@@ -2355,6 +2362,8 @@
       .enrollment-summary-card strong { font-size: 21px; }
       .enrollment-summary-card small { font-size: 9px; }
       .enrollment-student-view-toggle button { padding-inline: 5px; font-size: 12px; }
+      .enrollment-student-view-toggle { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .enrollment-checklist-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     .teacher-attendance-review-list { display: grid; gap: 8px; margin-top: 14px; }
     .teacher-attendance-review-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-soft); }
@@ -13170,12 +13179,14 @@
               <div class="enrollment-queue-filters">
                 <label>Checklist Next Step
                   <select id="enrollment-checklist-filter">
+                    <option value="all">All Incomplete Enrollments</option>
                     <option value="new">New Enrollments (no checklist items complete)</option>
                     <option value="assign-class">Assign to Class</option>
                     <option value="assign-brightwheel">Brightwheel Assignment</option>
                     <option value="record-fee">Record Enrollment Fee</option>
                     <option value="bill-recital">Bill The Recital Experience</option>
                     <option value="implement-billing">Implement Billing Plan</option>
+                    <option value="welcome-email">Welcome Email</option>
                   </select>
                 </label>
                 <label>Enrollment Type
@@ -13289,10 +13300,16 @@
             <div class="enrollment-summary-row" id="enrollment-student-summary" aria-label="Enrollment and student summary"></div>
             <div class="enrollment-student-view-toggle" role="tablist" aria-label="Enrollment and student view">
               <button class="is-selected" type="button" role="tab" aria-selected="true" data-enrollment-student-view="enrollments">New Enrollments</button>
+              <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="active-enrollments">Active Enrollments</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="directory">Dancer Directory</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="future-dancers">Future Dancers</button>
             </div>
+            <div class="enrollment-checklist-summary" id="enrollment-checklist-summary" aria-label="New Enrollment next-step summary"></div>
             <div class="enrollment-student-view-panel" id="enrollment-student-intake-slot" data-enrollment-student-panel="enrollments"></div>
+            <div class="enrollment-student-view-panel" id="active-enrollment-panel" data-enrollment-student-panel="active-enrollments" hidden>
+              <div class="section-title" style="margin-top:8px"><div><h3>Active Enrollments</h3><p>Every required enrollment step is complete.</p></div></div>
+              <div class="student-library-grid" id="active-enrollment-list"></div>
+            </div>
             <div class="enrollment-student-view-panel" id="dancer-directory-panel" data-enrollment-student-panel="directory" hidden>
               <div class="section-title" style="margin-top:8px">
                 <div><h3>Dancer Directory</h3></div>
@@ -15347,7 +15364,7 @@
     let directorFutureDancerSearch = "";
     let directorFutureDancerSchool = "all";
     let directorFutureDancerDay = "all";
-    let enrollmentChecklistFilter = "new";
+    let enrollmentChecklistFilter = "all";
     let enrollmentTypeFilter = "all";
     let enrollmentFeeStatusFilter = "all";
     let enrollmentSchoolFilter = "all";
@@ -16100,17 +16117,11 @@
       return `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`;
     };
 
-    const enrollmentChecklistSteps = [
-      ["brightwheel_profile_created_at", "Brightwheel Assignment"],
-      ["invoice_sent_at", "The Recital Experience Added"],
-      ["enrollment_active_at", "Billing Plan"],
-      ["parent_invited_at", "Welcome Email"]
-    ];
     const enrollmentWelcomeSending = new Set();
-    const enrollmentFeeRecorded = (item) => {
-      const status = String(item?.payment_status || "").trim().toLowerCase();
-      return Boolean(status) && status !== "unknown";
-    };
+    const enrollmentFeeRecorded = (item) => Boolean(
+      item?.enrollment_fee_recorded_at
+      || item?.additional_information?.enrollment_fee_recorded_at
+    );
     const enrollmentFeeStatusLabel = (item) => {
       const status = String(item?.payment_status || "").trim().toLowerCase();
       if (!status || status === "unknown") return "Status Not Recorded";
@@ -16122,7 +16133,7 @@
     };
     const enrollmentBatchStepConfig = {
       "assign-brightwheel": { field: "brightwheel_profile_created_at", label: "Brightwheel Assignment" },
-      "record-fee": { field: "payment_status", label: "Enrollment fee record", value: "unpaid", note: "Records the fee status as Unpaid. It does not process or claim a payment." },
+      "record-fee": { field: "additional_information", nestedField: "enrollment_fee_recorded_at", label: "Enrollment fee record", note: "Records that the existing enrollment-fee status was reviewed. It does not process or change a payment." },
       "bill-recital": { field: "invoice_sent_at", label: "The Recital Experience" },
       "implement-billing": { field: "enrollment_active_at", label: "Billing plan" }
     };
@@ -16149,17 +16160,38 @@
       if (!feeRecorded) return "record-fee";
       if (!item.invoice_sent_at) return "bill-recital";
       if (!item.enrollment_active_at) return "implement-billing";
+      if (!item.parent_invited_at) return "welcome-email";
       return "complete";
     };
-    const enrollmentWorkflowStage = (item) => {
-      if (item.status !== "placed") return "unplaced";
-      return enrollmentChecklistSteps.find(([field]) => !item[field])?.[0] || "complete";
+    const enrollmentActiveDancerRecord = (item) => rosterClasses
+      .filter((rosterClass) => rosterClass.sourceActive !== false)
+      .flatMap((rosterClass) => rosterClass.students)
+      .some((student) => student.status === "enrolled" && student.id === item?.placed_student_id);
+    const enrollmentCurrentActiveDancerRecord = (item) => {
+      if (!enrollmentActiveDancerRecord(item) || !item?.placed_student_id) return false;
+      const matching = enrollmentIntakeQueue.filter((candidate) => candidate.placed_student_id === item.placed_student_id && !enrollmentIsArchived(candidate));
+      matching.sort((left, right) => new Date(right.updated_at || right.submitted_at || right.created_at || 0) - new Date(left.updated_at || left.submitted_at || left.created_at || 0));
+      return matching[0]?.id === item.id;
     };
+    const enrollmentIsArchived = (item) => ["archived", "inactive", "dropped", "withdrawn", "cancelled"].includes(String(item?.status || "").trim().toLowerCase());
+    const enrollmentBelongsInWorkflow = (item) => !enrollmentIsArchived(item) && (
+      enrollmentCurrentActiveDancerRecord(item)
+      || !["placed", "complete"].includes(String(item?.status || "").trim().toLowerCase())
+    );
+    const enrollmentWorkflowStage = (item) => enrollmentNextChecklistStep(item);
     const enrollmentWorkflowLabel = (item) => {
       const stage = enrollmentWorkflowStage(item);
-      if (stage === "unplaced") return "Not Placed";
+      if (stage === "new") return "New Enrollment";
+      if (stage === "assign-class") return "Not Placed";
       if (stage === "complete") return "Checklist Complete";
-      return `Next: ${enrollmentChecklistSteps.find(([field]) => field === stage)?.[1] || "Checklist"}`;
+      const labels = {
+        "assign-brightwheel": "Brightwheel Assignment",
+        "record-fee": "Enrollment Fee Recorded",
+        "bill-recital": "The Recital Experience Added",
+        "implement-billing": "Billing Plan",
+        "welcome-email": "Welcome Email"
+      };
+      return `Next: ${labels[stage] || "Checklist"}`;
     };
     const enrollmentMatchedSchool = (item) => schoolLibrary.find((school) => (
       (item.matched_partner_school_id && (school.id || school.name) === item.matched_partner_school_id)
@@ -16219,7 +16251,8 @@
     };
     const filteredEnrollmentQueue = () => enrollmentIntakeQueue.filter((item) => {
       const nextStep = enrollmentNextChecklistStep(item);
-      if (nextStep === "complete" || nextStep !== enrollmentChecklistFilter) return false;
+      if (!enrollmentBelongsInWorkflow(item) || nextStep === "complete") return false;
+      if (enrollmentChecklistFilter !== "all" && nextStep !== enrollmentChecklistFilter) return false;
       if (enrollmentTypeFilter !== "all" && enrollmentHistoryBadge(item.enrollment_history).style !== enrollmentTypeFilter) return false;
       if (enrollmentFeeStatusFilter !== "all" && enrollmentFeeStatusKey(item) !== enrollmentFeeStatusFilter) return false;
       const school = enrollmentMatchedSchool(item);
@@ -16408,7 +16441,7 @@
 
     const renderEnrollmentQueue = () => {
       syncTeacherProfileColorRules();
-      const newCount = enrollmentIntakeQueue.filter((item) => enrollmentWorkflowStage(item) !== "complete").length;
+      const newCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentWorkflowStage(item) !== "complete").length;
       setText("roster-enrollments-waiting-count", String(newCount));
       renderEnrollmentQueueFilters();
       const list = document.getElementById("enrollment-queue-list");
@@ -16427,7 +16460,7 @@
         ? (batchConfig.note || `Marks only ${batchConfig.label} complete for the selected enrollments.`)
         : enrollmentChecklistFilter === "assign-class"
           ? "Class placement must be reviewed individually so the correct class and teacher are selected."
-          : "New Enrollments have no single checklist step to complete in a batch. Choose a specific next-step filter first.";
+          : "Choose a specific next-step filter to use Batch complete.";
       batchToolbar?.querySelectorAll("[data-enrollment-batch-select-all], [data-enrollment-batch-clear], [data-enrollment-batch-complete]").forEach((control) => { control.hidden = !batchConfig; });
       const batchButton = batchToolbar?.querySelector("[data-enrollment-batch-complete]");
       if (batchButton) {
@@ -26775,7 +26808,7 @@
         const haystack = `${student.firstName} ${student.preferredName || ""} ${student.lastName} ${student.parentFirstName || ""} ${student.parentLastName || ""} ${student.parentEmail || ""} ${rosterClass.schoolName} ${rosterClass.name}`.toLowerCase();
         return !term || haystack.includes(term);
       }).sort((left, right) => `${left.student.lastName} ${rosterStudentFirstName(left.student)}`.localeCompare(`${right.student.lastName} ${rosterStudentFirstName(right.student)}`));
-      const newEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentWorkflowStage(item) !== "complete").length;
+      const newEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentWorkflowStage(item) !== "complete").length;
       document.getElementById("admin-student-library-count").textContent = `${newEnrollmentCount} New · ${records.length} Student${records.length === 1 ? "" : "s"}`;
       const cardMarkup = ({ rosterClass, student }, { includeTeacher = true, includeSchoolClass = true } = {}) => {
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
@@ -26835,18 +26868,55 @@
       const summary = document.getElementById("enrollment-student-summary");
       if (!summary) return;
       const activeClasses = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false);
-      const activeDancers = activeClasses.reduce((count, rosterClass) => count + rosterClass.students.filter((student) => student.status === "enrolled").length, 0);
       const futureDancers = activeClasses.reduce((count, rosterClass) => count + rosterClass.students.filter((student) => student.status !== "enrolled" && student.additionalInformation?.trial_completed && !student.additionalInformation?.future_dancer_archived).length, 0);
+      const incompleteEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) !== "complete").length;
+      const activeEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentCurrentActiveDancerRecord(item) && enrollmentNextChecklistStep(item) === "complete").length;
       const metrics = [
-        [enrollmentIntakeQueue.length, "New Enrollments"],
-        [activeDancers, "Active Dancers"],
-        [futureDancers, "Future Dancers"]
+        [incompleteEnrollmentCount, "New Enrollments", "enrollments"],
+        [activeEnrollmentCount, "Active Enrollments", "active-enrollments"],
+        [futureDancers, "Future Dancers", "future-dancers"]
       ];
-      summary.innerHTML = metrics.map(([value, label]) => `<article class="enrollment-summary-card"><strong>${rosterSafe(value)}</strong><small>${rosterSafe(label)}</small></article>`).join("");
+      summary.innerHTML = metrics.map(([value, label, view]) => `<button class="enrollment-summary-card" type="button" data-enrollment-summary-view="${rosterSafe(view)}" aria-pressed="${enrollmentStudentsView === view ? "true" : "false"}"><strong>${rosterSafe(value)}</strong><small>${rosterSafe(label)}</small></button>`).join("");
+    };
+
+    const renderEnrollmentChecklistSummary = () => {
+      const summary = document.getElementById("enrollment-checklist-summary");
+      if (!summary) return;
+      summary.hidden = enrollmentStudentsView !== "enrollments";
+      if (summary.hidden) return;
+      const steps = [
+        ["new", "Brand New"],
+        ["assign-class", "Assign to Class"],
+        ["assign-brightwheel", "Brightwheel Assignment"],
+        ["record-fee", "Enrollment Fee Recorded"],
+        ["bill-recital", "The Recital Experience Added"],
+        ["implement-billing", "Implement Billing Plan"],
+        ["welcome-email", "Welcome Email"]
+      ];
+      const eligible = enrollmentIntakeQueue.filter(enrollmentBelongsInWorkflow);
+      summary.innerHTML = steps.map(([step, label]) => {
+        const count = eligible.filter((item) => enrollmentNextChecklistStep(item) === step).length;
+        return `<button type="button" data-enrollment-summary-step="${step}" aria-pressed="${enrollmentChecklistFilter === step ? "true" : "false"}"><strong>${count}</strong><small>${rosterSafe(label)}${step === "new" ? " (New Enrollments)" : ""}</small></button>`;
+      }).join("");
+    };
+
+    const renderActiveEnrollments = () => {
+      const list = document.getElementById("active-enrollment-list");
+      if (!list) return;
+      const records = enrollmentIntakeQueue.filter((item) => enrollmentCurrentActiveDancerRecord(item) && enrollmentNextChecklistStep(item) === "complete").map((item) => {
+        const rosterClass = rosterClasses.find((candidate) => candidate.sourceActive !== false && candidate.students.some((student) => student.id === item.placed_student_id));
+        const student = rosterClass?.students.find((candidate) => candidate.id === item.placed_student_id);
+        return { item, rosterClass, student };
+      }).filter(({ rosterClass, student }) => rosterClass && student);
+      list.innerHTML = records.length ? records.map(({ rosterClass, student }) => {
+        const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
+        return `<button class="student-library-card" type="button" data-active-enrollment-open="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>Checklist Complete</small></button>`;
+      }).join("") : `<div class="roster-empty" style="grid-column:1/-1">No enrollments have completed every checklist step yet.</div>`;
     };
 
     const renderEnrollmentStudentsView = () => {
       renderEnrollmentStudentSummary();
+      renderEnrollmentChecklistSummary();
       document.querySelectorAll("[data-enrollment-student-view]").forEach((button) => {
         const selected = button.dataset.enrollmentStudentView === enrollmentStudentsView;
         button.classList.toggle("is-selected", selected);
@@ -26856,6 +26926,7 @@
         panel.hidden = panel.dataset.enrollmentStudentPanel !== enrollmentStudentsView;
       });
       if (enrollmentStudentsView === "enrollments") renderEnrollmentQueue();
+      else if (enrollmentStudentsView === "active-enrollments") renderActiveEnrollments();
       else if (enrollmentStudentsView === "future-dancers") renderDirectorFutureDancers();
       else renderStudentLibrary();
     };
@@ -31673,11 +31744,37 @@
       openTeacherFutureDancerCreator("", null, { directorMode: true });
     });
     document.getElementById("admin-home-student-library")?.addEventListener("click", (event) => {
+      const summaryView = event.target.closest("[data-enrollment-summary-view]");
+      if (summaryView) {
+        enrollmentStudentsView = summaryView.dataset.enrollmentSummaryView;
+        enrollmentReviewOpen = false;
+        enrollmentChecklistFilter = "all";
+        renderEnrollmentStudentsView();
+        return;
+      }
+      const summaryStep = event.target.closest("[data-enrollment-summary-step]");
+      if (summaryStep) {
+        enrollmentStudentsView = "enrollments";
+        enrollmentChecklistFilter = summaryStep.dataset.enrollmentSummaryStep;
+        enrollmentBatchSelected.clear();
+        enrollmentReviewOpen = false;
+        renderEnrollmentStudentsView();
+        return;
+      }
       const button = event.target.closest("[data-enrollment-student-view]");
       if (!button) return;
       enrollmentStudentsView = button.dataset.enrollmentStudentView;
       enrollmentReviewOpen = false;
+      if (enrollmentStudentsView !== "enrollments") enrollmentChecklistFilter = "all";
       renderEnrollmentStudentsView();
+    });
+    document.getElementById("active-enrollment-list")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-active-enrollment-open]");
+      if (!button) return;
+      const [classId, studentId] = button.dataset.activeEnrollmentOpen.split("::");
+      const rosterClass = rosterClasses.find((item) => item.id === classId);
+      const student = rosterClass?.students.find((item) => item.id === studentId);
+      if (rosterClass && student) openRosterStudentEditor(rosterClass, student);
     });
     document.getElementById("director-future-dancer-search")?.addEventListener("input", (event) => {
       directorFutureDancerSearch = event.target.value;
@@ -31804,12 +31901,15 @@
         if (!item || enrollmentNextChecklistStep(item) !== enrollmentChecklistFilter) { failed.push(id); continue; }
         const value = Object.hasOwn(config, "value") ? config.value : new Date().toISOString();
         try {
+          const update = config.nestedField
+            ? { [config.field]: { ...(item[config.field] || {}), [config.nestedField]: value } }
+            : { [config.field]: value };
           if (document.body.dataset.tourMode !== "true") {
             if (!window.dtSupabase) throw new Error("Enrollment service unavailable");
-            const { error } = await window.dtSupabase.from("enrollments").update({ [config.field]: value }).eq("id", id);
+            const { error } = await window.dtSupabase.from("enrollments").update(update).eq("id", id);
             if (error) throw error;
           }
-          item[config.field] = value;
+          Object.assign(item, update);
           succeeded.push(id);
         } catch (error) {
           console.error("Enrollment batch completion failed", id, error);
