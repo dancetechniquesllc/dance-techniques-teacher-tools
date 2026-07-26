@@ -13213,8 +13213,16 @@
                 <label>Find a Student or Parent
                   <input id="enrollment-name-search" type="search" placeholder="Search student or parent name" autocomplete="off">
                 </label>
+                <label>Sort by
+                  <select id="enrollment-sort">
+                    <option value="default">Current workflow order</option>
+                    <option value="first-name">Alphabetical First Name</option>
+                    <option value="last-name">Alphabetical Last Name</option>
+                    <option value="school">Alphabetical by School</option>
+                  </select>
+                </label>
               </div>
-              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="enrollment-checklist-filter,enrollment-type-filter,enrollment-fee-status-filter,enrollment-school-filter,enrollment-teacher-filter,enrollment-day-filter,enrollment-name-search">Reset Filter</button></div>
+              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="enrollment-checklist-filter,enrollment-type-filter,enrollment-fee-status-filter,enrollment-school-filter,enrollment-teacher-filter,enrollment-day-filter,enrollment-name-search,enrollment-sort">Reset Filter</button></div>
               <div class="enrollment-batch-toolbar" id="enrollment-batch-toolbar" hidden aria-live="polite">
                 <strong id="enrollment-batch-count">0 selected</strong>
                 <button class="secondary" type="button" data-enrollment-batch-select-all>Select all filtered</button>
@@ -15371,6 +15379,7 @@
     let enrollmentTeacherFilter = "all";
     let enrollmentDayFilter = "all";
     let enrollmentNameSearch = "";
+    let enrollmentSort = "default";
     const enrollmentBatchSelected = new Set();
     let enrollmentBatchCompleting = false;
     let enrollmentClassroomManagerOpen = false;
@@ -16270,6 +16279,30 @@
       }
       return true;
     });
+    const compareEnrollmentText = (left, right) => String(left || "").localeCompare(String(right || ""), undefined, { sensitivity: "base", numeric: true });
+    const enrollmentSortTieBreaker = (left, right) => (
+      compareEnrollmentText(left.student_last_name, right.student_last_name)
+      || compareEnrollmentText(left.student_preferred_name || left.student_first_name, right.student_preferred_name || right.student_first_name)
+      || compareEnrollmentText(left.id, right.id)
+    );
+    const sortEnrollmentQueue = (items) => [...items].sort((left, right) => {
+      if (enrollmentSort === "first-name") {
+        return compareEnrollmentText(left.student_preferred_name || left.student_first_name, right.student_preferred_name || right.student_first_name)
+          || compareEnrollmentText(left.student_last_name, right.student_last_name)
+          || compareEnrollmentText(enrollmentDisplaySchoolName(left), enrollmentDisplaySchoolName(right))
+          || compareEnrollmentText(left.id, right.id);
+      }
+      if (enrollmentSort === "last-name") return enrollmentSortTieBreaker(left, right);
+      if (enrollmentSort === "school") {
+        return compareEnrollmentText(enrollmentDisplaySchoolName(left), enrollmentDisplaySchoolName(right))
+          || enrollmentSortTieBreaker(left, right);
+      }
+      const leftPriority = enrollmentPriority(left);
+      const rightPriority = enrollmentPriority(right);
+      return leftPriority.rank - rightPriority.rank
+        || new Date(left.submitted_at || left.created_at || 0) - new Date(right.submitted_at || right.created_at || 0)
+        || enrollmentSortTieBreaker(left, right);
+    });
 
     const renderEnrollmentQueueFilters = () => {
       const checklistSelect = document.getElementById("enrollment-checklist-filter");
@@ -16279,6 +16312,7 @@
       const teacherSelect = document.getElementById("enrollment-teacher-filter");
       const daySelect = document.getElementById("enrollment-day-filter");
       const searchInput = document.getElementById("enrollment-name-search");
+      const sortSelect = document.getElementById("enrollment-sort");
       const enrollmentTeachers = teacherFilterProfiles().sort((left, right) => teacherNickname(left).localeCompare(teacherNickname(right), undefined, { sensitivity: "base" }));
       if (enrollmentTeacherFilter !== "all" && !enrollmentTeachers.some((teacher) => teacher.id === enrollmentTeacherFilter)) enrollmentTeacherFilter = "all";
       if (checklistSelect) checklistSelect.value = enrollmentChecklistFilter;
@@ -16295,6 +16329,7 @@
       }
       if (searchInput && searchInput.value !== enrollmentNameSearch) searchInput.value = enrollmentNameSearch;
       if (daySelect) daySelect.value = enrollmentDayFilter;
+      if (sortSelect) sortSelect.value = enrollmentSort;
       if (schoolSelect) {
         const selectedTeacher = teachers.find((teacher) => teacher.id === enrollmentTeacherFilter);
         const selectedTeacherSchoolIds = new Set((selectedTeacher?.schools || []).map((school) => String(school.id || "")).filter(Boolean));
@@ -16471,12 +16506,7 @@
         selectedEnrollmentIntakeId = visibleEnrollments[0]?.id || "";
         enrollmentReviewOpen = false;
       }
-      const orderedEnrollments = [...visibleEnrollments].sort((left, right) => {
-        const leftPriority = enrollmentPriority(left);
-        const rightPriority = enrollmentPriority(right);
-        return leftPriority.rank - rightPriority.rank
-          || new Date(left.submitted_at || left.created_at || 0) - new Date(right.submitted_at || right.created_at || 0);
-      });
+      const orderedEnrollments = sortEnrollmentQueue(visibleEnrollments);
       list.innerHTML = orderedEnrollments.length ? orderedEnrollments.map((item) => {
         const priority = enrollmentPriority(item);
         const priorityStyle = priority.rank === 1 ? "today" : priority.rank === 2 ? "tomorrow" : "later";
@@ -32200,6 +32230,11 @@
       }
       if (event.target.id === "enrollment-day-filter") {
         enrollmentDayFilter = event.target.value;
+        renderEnrollmentQueue();
+        return;
+      }
+      if (event.target.id === "enrollment-sort") {
+        enrollmentSort = event.target.value;
         renderEnrollmentQueue();
         return;
       }
