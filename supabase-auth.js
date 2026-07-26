@@ -22,6 +22,7 @@
     || authQuery.has("code")
     || ["invite", "recovery"].includes(authQuery.get("type"))
     || ["invite", "recovery"].includes(authHash.get("type"));
+  let authCallbackInitializing = passwordRecoveryMode;
   const isLocalTour = ["127.0.0.1", "localhost"].includes(window.location.hostname)
     && new URLSearchParams(window.location.search).get("tour") === "1";
 
@@ -38,6 +39,8 @@
     if (copy.includes("invalid login credentials")) return "That email or password doesn’t match. Please try again.";
     if (copy.includes("email not confirmed")) return "Please confirm your email before signing in.";
     if (copy.includes("failed to fetch")) return "We couldn’t reach the portal. Check your connection and try again.";
+    if (copy.includes("auth session missing") || copy.includes("session not found")) return "This secure password link is no longer active. Please request a new invitation or password link.";
+    if (copy.includes("otp") || copy.includes("expired") || copy.includes("code verifier") || copy.includes("invalid request")) return "This secure password link has expired or was already used. Please request a new one.";
     return error?.message || "Sign-in didn’t finish. Please try again.";
   };
 
@@ -61,8 +64,14 @@
   window.dtSupabase = client;
 
   const showSession = async (session) => {
-    if (passwordRecoveryMode) {
+    if (passwordRecoveryMode && session?.user) {
       setGateState("setup");
+      return;
+    }
+    if (passwordRecoveryMode && !session?.user) {
+      passwordRecoveryMode = false;
+      message.textContent = "This secure invitation or password link has expired, was already used, or did not finish opening. Please request a new link.";
+      setGateState("login");
       return;
     }
     if (!session?.user) {
@@ -182,6 +191,11 @@
       passwordMessage.textContent = "Those passwords don’t match yet.";
       return;
     }
+    const { data: sessionData, error: sessionError } = await client.auth.getSession();
+    if (sessionError || !sessionData.session?.user) {
+      passwordMessage.textContent = friendlyAuthError(sessionError || new Error("Auth session missing"));
+      return;
+    }
     const passwordSubmit = document.getElementById("auth-password-submit");
     passwordSubmit.disabled = true;
     passwordSubmit.textContent = "Saving…";
@@ -228,6 +242,7 @@
   });
 
   client.auth.onAuthStateChange((event, session) => {
+    if (authCallbackInitializing) return;
     if (event === "PASSWORD_RECOVERY") {
       passwordRecoveryMode = true;
       setGateState("setup");
@@ -236,7 +251,48 @@
     window.setTimeout(() => showSession(session), 0);
   });
 
-  client.auth.getSession().then(({ data }) => showSession(data.session));
+  const establishCallbackSession = async () => {
+    let { data: current, error: currentError } = await client.auth.getSession();
+    if (currentError) throw currentError;
+    if (current.session?.user) return current.session;
+
+    const code = authQuery.get("code");
+    if (code) {
+      const { data, error } = await client.auth.exchangeCodeForSession(code);
+      if (error) throw error;
+      return data.session;
+    }
+
+    const tokenHash = authQuery.get("token_hash");
+    const callbackType = authQuery.get("type");
+    if (tokenHash && ["invite", "recovery"].includes(callbackType)) {
+      const { data, error } = await client.auth.verifyOtp({ token_hash: tokenHash, type: callbackType });
+      if (error) throw error;
+      return data.session;
+    }
+
+    const accessToken = authHash.get("access_token");
+    const refreshToken = authHash.get("refresh_token");
+    if (accessToken && refreshToken && ["invite", "recovery"].includes(authHash.get("type"))) {
+      const { data, error } = await client.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+      if (error) throw error;
+      return data.session;
+    }
+    return null;
+  };
+
+  establishCallbackSession()
+    .then((session) => {
+      authCallbackInitializing = false;
+      return showSession(session);
+    })
+    .catch((error) => {
+      console.warn("Secure auth callback did not finish", error);
+      authCallbackInitializing = false;
+      passwordRecoveryMode = false;
+      message.textContent = friendlyAuthError(error);
+      setGateState("login");
+    });
 
   if ("serviceWorker" in navigator) {
     let refreshingForAppUpdate = false;

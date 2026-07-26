@@ -5805,17 +5805,20 @@
     .roster-multi-class-filters label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; }
     .roster-multi-class-filters select { min-height: 42px; }
     .roster-multi-class-grid { display: grid; gap: 24px; margin-top: 8px; }
-    .roster-multi-class-section { min-height: 180px; padding: 4px 2px 18px; border-radius: 14px; transition: background .16s ease, box-shadow .16s ease; }
+    .roster-multi-class-section { min-height: 180px; padding: 4px 2px 18px; border-radius: 14px; outline: none; transition: background .16s ease, box-shadow .16s ease; }
     .roster-multi-class-section.is-drop-target { background: color-mix(in srgb, var(--blush) 45%, transparent); box-shadow: inset 0 0 0 2px var(--accent-strong); }
+    .roster-multi-class-section:focus-visible { box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--accent-strong) 72%, transparent); }
     .roster-multi-class-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
     .roster-multi-class-title-row h4 { margin: 0; font-size: 22px; }
     .roster-multi-class-title-row small { color: var(--muted); }
     .roster-multi-class-divider { height: 2px; margin: 9px 0 16px; border-radius: 999px; background: var(--blush); }
     .roster-multi-student-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
-    .roster-multi-student { display: grid; justify-items: center; align-content: start; gap: 6px; min-width: 0; padding: 12px 8px; border: 1px solid transparent; border-radius: 14px; background: transparent; text-align: center; cursor: grab; }
+    .roster-multi-student { display: grid; justify-items: center; align-content: start; gap: 6px; min-width: 0; padding: 12px 8px; border: 1px solid transparent; border-radius: 14px; outline: none; background: transparent; text-align: center; cursor: grab; touch-action: none; }
     .roster-multi-student:hover { border-color: var(--border); background: var(--surface-soft); }
+    .roster-multi-student:focus-visible { border-color: var(--accent-strong); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blush) 60%, transparent); }
     .roster-multi-student:active { cursor: grabbing; }
     .roster-multi-student.is-dragging { opacity: .42; }
+    .roster-multi-student.is-keyboard-selected { border-color: var(--accent-strong); background: color-mix(in srgb, var(--blush) 30%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blush) 50%, transparent); }
     .roster-multi-student .roster-student-photo { width: 76px; height: 76px; }
     .roster-multi-student strong { max-width: 100%; font-size: 15px; line-height: 1.15; }
     .roster-multi-student small { max-width: 100%; color: var(--muted); font-size: 11px; line-height: 1.25; }
@@ -13045,15 +13048,23 @@
               </div>
               <div class="enrollment-queue-state" id="enrollment-queue-state" role="status" aria-live="polite"></div>
               <div class="enrollment-queue-filters">
-                <label>Checklist Status
+                <label>Checklist Next Step
                   <select id="enrollment-checklist-filter">
-                    <option value="incomplete">Enrollment In Progress</option>
-                    <option value="unplaced">Not Placed in a Class</option>
-                    <option value="brightwheel_profile_created_at">Needs Brightwheel Profile</option>
-                    <option value="parent_invited_at">Needs Parent Invitation</option>
-                    <option value="invoice_sent_at">Needs Invoice Sent</option>
-                    <option value="enrollment_active_at">Needs Enrollment Activated</option>
-                    <option value="all">All Enrollments</option>
+                    <option value="new">New Enrollments (no checklist items complete)</option>
+                    <option value="assign-class">Assign to Class</option>
+                    <option value="assign-brightwheel">Assign to Brightwheel</option>
+                    <option value="record-fee">Record Enrollment Fee</option>
+                    <option value="bill-recital">Bill The Recital Experience</option>
+                    <option value="implement-billing">Implement Billing Plan</option>
+                  </select>
+                </label>
+                <label>Enrollment Type
+                  <select id="enrollment-type-filter">
+                    <option value="all">All</option>
+                    <option value="new">New</option>
+                    <option value="returning">Returning</option>
+                    <option value="school-change">School Change</option>
+                    <option value="sibling">New Sibling</option>
                   </select>
                 </label>
                 <label>Partner School
@@ -13069,7 +13080,7 @@
                   <input id="enrollment-name-search" type="search" placeholder="Search student or parent name" autocomplete="off">
                 </label>
               </div>
-              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="enrollment-checklist-filter,enrollment-school-filter,enrollment-teacher-filter,enrollment-day-filter,enrollment-name-search">Reset Filter</button></div>
+              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="enrollment-checklist-filter,enrollment-type-filter,enrollment-school-filter,enrollment-teacher-filter,enrollment-day-filter,enrollment-name-search">Reset Filter</button></div>
               <div class="enrollment-queue-workspace">
                 <div class="enrollment-queue-list" id="enrollment-queue-list"></div>
                 <div class="confirm-overlay" id="enrollment-review-overlay" aria-hidden="true">
@@ -14883,7 +14894,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20260723-auto-update"></script>
+  <script src="supabase-auth.js?v=20260726-invite-session-fix-2"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <script>
     const teachers = [
@@ -15200,7 +15211,8 @@
     let directorFutureDancerSearch = "";
     let directorFutureDancerSchool = "all";
     let directorFutureDancerDay = "all";
-    let enrollmentChecklistFilter = "incomplete";
+    let enrollmentChecklistFilter = "new";
+    let enrollmentTypeFilter = "all";
     let enrollmentSchoolFilter = "all";
     let enrollmentTeacherFilter = "all";
     let enrollmentDayFilter = "all";
@@ -15942,11 +15954,43 @@
     };
 
     const enrollmentChecklistSteps = [
-      ["brightwheel_profile_created_at", "Brightwheel Profile"],
-      ["parent_invited_at", "Parent Invitation"],
-      ["invoice_sent_at", "Invoice Sent"],
-      ["enrollment_active_at", "Enrollment Activated"]
+      ["brightwheel_profile_created_at", "Brighthweel Setup Complete"],
+      ["invoice_sent_at", "The Recital Experience Added"],
+      ["enrollment_active_at", "Billing Plan Active"],
+      ["parent_invited_at", "Welcome Email"]
     ];
+    const enrollmentWelcomeSending = new Set();
+    const enrollmentFeeRecorded = (item) => {
+      const status = String(item?.payment_status || "").trim().toLowerCase();
+      return Boolean(status) && status !== "unknown";
+    };
+    const enrollmentFeeStatusLabel = (item) => {
+      const status = String(item?.payment_status || "").trim().toLowerCase();
+      if (!status || status === "unknown") return "Status Not Recorded";
+      return status === "paid" ? "Paid" : status === "unpaid" ? "Unpaid" : status.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+    };
+    const enrollmentTuitionDiscountLabel = (item) => {
+      const discount = String(item?.tuition_discount || "").trim().toLowerCase();
+      if (!discount || discount === "none") return "No Discount";
+      return discount.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+    };
+    const enrollmentNextChecklistStep = (item) => {
+      const placed = item?.status === "placed" || Boolean(item?.placed_student_id);
+      const feeRecorded = enrollmentFeeRecorded(item);
+      const anyComplete = placed
+        || Boolean(item?.brightwheel_profile_created_at)
+        || feeRecorded
+        || Boolean(item?.invoice_sent_at)
+        || Boolean(item?.enrollment_active_at)
+        || Boolean(item?.parent_invited_at);
+      if (!anyComplete) return "new";
+      if (!placed) return "assign-class";
+      if (!item.brightwheel_profile_created_at) return "assign-brightwheel";
+      if (!feeRecorded) return "record-fee";
+      if (!item.invoice_sent_at) return "bill-recital";
+      if (!item.enrollment_active_at) return "implement-billing";
+      return "complete";
+    };
     const enrollmentWorkflowStage = (item) => {
       if (item.status !== "placed") return "unplaced";
       return enrollmentChecklistSteps.find(([field]) => !item[field])?.[0] || "complete";
@@ -15972,9 +16016,9 @@
       return rosterClasses.find((rosterClass) => rosterClass.id === classId)?.day || "";
     };
     const filteredEnrollmentQueue = () => enrollmentIntakeQueue.filter((item) => {
-      const workflowStage = enrollmentWorkflowStage(item);
-      if (workflowStage === "complete") return false;
-      if (!["all", "incomplete"].includes(enrollmentChecklistFilter) && workflowStage !== enrollmentChecklistFilter) return false;
+      const nextStep = enrollmentNextChecklistStep(item);
+      if (nextStep === "complete" || nextStep !== enrollmentChecklistFilter) return false;
+      if (enrollmentTypeFilter !== "all" && enrollmentHistoryBadge(item.enrollment_history).style !== enrollmentTypeFilter) return false;
       const school = enrollmentMatchedSchool(item);
       if (enrollmentSchoolFilter !== "all" && (school?.id || school?.name) !== enrollmentSchoolFilter) return false;
       if (enrollmentTeacherFilter !== "all" && enrollmentMatchedTeacherId(item) !== enrollmentTeacherFilter) return false;
@@ -15993,6 +16037,7 @@
 
     const renderEnrollmentQueueFilters = () => {
       const checklistSelect = document.getElementById("enrollment-checklist-filter");
+      const typeSelect = document.getElementById("enrollment-type-filter");
       const schoolSelect = document.getElementById("enrollment-school-filter");
       const teacherSelect = document.getElementById("enrollment-teacher-filter");
       const daySelect = document.getElementById("enrollment-day-filter");
@@ -16000,6 +16045,7 @@
       const enrollmentTeachers = teacherFilterProfiles().sort((left, right) => teacherNickname(left).localeCompare(teacherNickname(right), undefined, { sensitivity: "base" }));
       if (enrollmentTeacherFilter !== "all" && !enrollmentTeachers.some((teacher) => teacher.id === enrollmentTeacherFilter)) enrollmentTeacherFilter = "all";
       if (checklistSelect) checklistSelect.value = enrollmentChecklistFilter;
+      if (typeSelect) typeSelect.value = enrollmentTypeFilter;
       if (searchInput && searchInput.value !== enrollmentNameSearch) searchInput.value = enrollmentNameSearch;
       if (daySelect) daySelect.value = enrollmentDayFilter;
       if (schoolSelect) {
@@ -16328,7 +16374,12 @@
           </div>
           ${placed ? `
           <div class="enrollment-checklist">
-            ${[["brightwheel_profile_created_at", "Brightwheel Profile Created"], ["parent_invited_at", "Parent Invited"], ["invoice_sent_at", "Invoice Sent"], ["enrollment_active_at", "Enrollment Active"]].map(([field, label]) => `<button class="${item[field] ? "primary" : "secondary"}" type="button" data-enrollment-checklist="${field}">${item[field] ? "✓ " : "○ "}${label}</button>`).join("")}
+            <button class="primary" type="button" disabled>✓ Placed in a Class</button>
+            <button class="${item.brightwheel_profile_created_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="brightwheel_profile_created_at">${item.brightwheel_profile_created_at ? "✓ " : "○ "}Brighthweel Setup Complete</button>
+            <button class="${enrollmentFeeRecorded(item) ? "primary" : "secondary"}" type="button" disabled>${enrollmentFeeRecorded(item) ? "✓ " : "○ "}Enrollment Fee Recorded: ${escapeText(enrollmentFeeStatusLabel(item))}</button>
+            <button class="${item.invoice_sent_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="invoice_sent_at">${item.invoice_sent_at ? "✓ " : "○ "}The Recital Experience Added</button>
+            <button class="${item.enrollment_active_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="enrollment_active_at">${item.enrollment_active_at ? "✓ " : "○ "}Billing Plan Active: ${escapeText(enrollmentTuitionDiscountLabel(item))}</button>
+            <button class="${item.parent_invited_at ? "primary" : "secondary"}" type="button" data-enrollment-welcome-email ${item.parent_invited_at || enrollmentWelcomeSending.has(item.id) ? "disabled" : ""}>${enrollmentWelcomeSending.has(item.id) ? "Sending… " : item.parent_invited_at ? "✓ " : "○ "}Welcome Email (clicking this step will send the welcome email)</button>
           </div>` : `
           <section class="enrollment-placement-class-section">
             <div class="enrollment-placement-class-grid">
@@ -27075,6 +27126,7 @@
     let rosterMultiClassClassroomFilter = "all";
     let rosterMultiClassAgeFilter = "all";
     let rosterMultiClassDragStudent = null;
+    let rosterMultiClassPointerDrag = null;
     let rosterMultiClassOpenedFromTeacherTools = false;
     let rosterMultiClassOverlayHome = null;
     let rosterMultiClassOverlayNextSibling = null;
@@ -27095,6 +27147,7 @@
     const closeRosterMultiClassEdit = () => {
       rosterMultiClassSchoolName = "";
       rosterMultiClassDragStudent = null;
+      rosterMultiClassPointerDrag = null;
       const overlay = document.getElementById("roster-multi-class-overlay");
       overlay?.classList.remove("active");
       overlay?.setAttribute("aria-hidden", "true");
@@ -27144,10 +27197,10 @@
           if (rosterMultiClassSort === "age") return rosterMultiAgeValue(right) - rosterMultiAgeValue(left) || rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right));
           return rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right)) || (left.lastName || "").localeCompare(right.lastName || "");
         });
-        return `<section class="roster-multi-class-section" data-roster-multi-drop-class="${rosterSafe(rosterClass.id)}">
+        return `<section class="roster-multi-class-section" tabindex="0" role="button" aria-label="Move selected dancer to ${rosterSafe(rosterClass.name)}" data-roster-multi-drop-class="${rosterSafe(rosterClass.id)}">
           <div class="roster-multi-class-title-row"><h4>${rosterSafe(rosterClass.name)}</h4><small>${enrolled.length}/${rosterClass.capacity || 12} students · ${rosterSafe(rosterClass.day || "Day not set")} ${rosterSafe(rosterClass.time || "")}</small></div>
           <div class="roster-multi-class-divider"></div>
-          <div class="roster-multi-student-grid">${students.length ? students.map((student) => `<article class="roster-multi-student" draggable="true" data-roster-multi-student="${rosterSafe(student.id)}" data-roster-multi-source-class="${rosterSafe(rosterClass.id)}" title="Drag to move ${rosterSafe(rosterStudentFullName(student))} to another class">
+          <div class="roster-multi-student-grid">${students.length ? students.map((student) => `<article class="roster-multi-student" draggable="true" tabindex="0" role="button" aria-grabbed="false" aria-label="Move ${rosterSafe(rosterStudentFullName(student))} to another class" data-roster-multi-student="${rosterSafe(student.id)}" data-roster-multi-source-class="${rosterSafe(rosterClass.id)}" title="Drag to move ${rosterSafe(rosterStudentFullName(student))} to another class">
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
             <strong>${rosterSafe(rosterStudentFullName(student))}</strong>
             <small>${rosterSafe(student.classroom || "Official classroom not entered")}</small>
@@ -28393,9 +28446,9 @@
       }
       return messages;
     };
-    const sendNewsletterMessages = async ({ messages, mode, confirmed = false }) => {
+    const sendNewsletterMessages = async ({ messages, mode, confirmed = false, sendId = crypto.randomUUID() }) => {
       if (!window.dtSupabase) throw new Error("Sign in to the live Director Dashboard before sending.");
-      const { data, error } = await window.dtSupabase.functions.invoke("send-newsletter", { body: { messages, mode, confirmed, sendId: crypto.randomUUID() } });
+      const { data, error } = await window.dtSupabase.functions.invoke("send-newsletter", { body: { messages, mode, confirmed, sendId } });
       if (error) throw new Error(data?.message || error.message || "The newsletter service could not be reached.");
       if (!data?.ok) throw new Error(data?.message || "The newsletter could not be sent.");
       return data;
@@ -31189,6 +31242,80 @@
     document.getElementById("enrollment-student-intake-slot")?.appendChild(enrollmentQueuePanel);
     enrollmentQueuePanel?.removeAttribute("hidden");
 
+    const sendEnrollmentWelcomeEmail = async (item) => {
+      if (!item || enrollmentWelcomeSending.has(item.id) || item.parent_invited_at) return;
+      const role = document.body.dataset.userRole || "";
+      if (!["admin", "director"].includes(role)) {
+        showToast("Only an administrator or director can send a welcome email.");
+        return;
+      }
+      const gender = String(item.student_gender || "").trim().toLowerCase();
+      if (!["female", "male"].includes(gender)) {
+        showToast("Choose Female or Male in the dancer’s profile before selecting a welcome template.");
+        return;
+      }
+      const recipient = String(item.parent_email || "").trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) {
+        showToast("Add a valid parent email before sending the welcome email.");
+        return;
+      }
+      persistNewsletterActiveVersion();
+      const girlTemplate = newsletterDraft.genderVersions?.female;
+      const boyTemplate = newsletterDraft.genderVersions?.male;
+      if (newsletterDraft.template !== "welcome" || girlTemplate?.template !== "welcome" || boyTemplate?.template !== "welcome") {
+        showToast("Open and save both Girl and Boy versions of the Welcome to Dance Techniques template before sending.");
+        return;
+      }
+      const placedClass = rosterClasses.find((rosterClass) => rosterClass.students.some((student) => student.id === item.placed_student_id));
+      const placedStudent = placedClass?.students.find((student) => student.id === item.placed_student_id);
+      const record = boutiqueKitRecords().find(({ student }) => (
+        student.id === item.placed_student_id
+        || (item.placed_class_enrollment_id && student.enrollmentId === item.placed_class_enrollment_id)
+      )) || (placedClass && placedStudent ? { rosterClass: placedClass, student: placedStudent } : null);
+      if (!record) {
+        showToast("This dancer’s class record is not available yet. Review the class placement before sending.");
+        return;
+      }
+      if (document.body.dataset.tourMode === "true") {
+        showToast(`${gender === "male" ? "Boy" : "Girl"} welcome email ready. Demo mode did not send it.`);
+        return;
+      }
+      enrollmentWelcomeSending.add(item.id);
+      renderEnrollmentQueue();
+      try {
+        const version = structuredClone(gender === "male" ? boyTemplate : girlTemplate);
+        const context = newsletterContextForRecord(record);
+        const subject = newsletterPersonalize(version.subject || version.headline || "Welcome to Dance Techniques", context);
+        const html = newsletterEmailHtml(context, { ...version, genderView: gender });
+        await sendNewsletterMessages({
+          mode: "send",
+          confirmed: true,
+          sendId: `welcome-${item.id}-${gender}`,
+          messages: [{
+            to: recipient,
+            name: [item.parent_first_name, item.parent_last_name].filter(Boolean).join(" ") || item.parent_name || "",
+            subject,
+            html
+          }]
+        });
+        const sentAt = new Date().toISOString();
+        const { error } = await window.dtSupabase.from("enrollments").update({ parent_invited_at: sentAt }).eq("id", item.id);
+        item.parent_invited_at = sentAt;
+        if (error) {
+          console.error("Welcome email status update failed", error);
+          showToast("Welcome email sent, but its checklist status could not be saved. Please contact support before retrying.");
+        } else {
+          showToast(`${gender === "male" ? "Boy" : "Girl"} welcome email sent.`);
+        }
+      } catch (error) {
+        console.error("Welcome email send failed", error);
+        showToast(error.message || "The welcome email could not be sent.");
+      } finally {
+        enrollmentWelcomeSending.delete(item.id);
+        renderEnrollmentQueue();
+      }
+    };
+
     enrollmentQueuePanel?.addEventListener("click", async (event) => {
       const relatedResult = event.target.closest("[data-enrollment-related-select]");
       if (relatedResult) {
@@ -31271,6 +31398,11 @@
         renderEnrollmentQueue();
         return;
       }
+      if (event.target.closest("[data-enrollment-welcome-email]")) {
+        const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
+        await sendEnrollmentWelcomeEmail(item);
+        return;
+      }
       const checklistButton = event.target.closest("[data-enrollment-checklist]");
       if (!checklistButton) return;
       const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
@@ -31315,6 +31447,11 @@
     enrollmentQueuePanel?.addEventListener("change", async (event) => {
       if (event.target.id === "enrollment-checklist-filter") {
         enrollmentChecklistFilter = event.target.value;
+        renderEnrollmentQueue();
+        return;
+      }
+      if (event.target.id === "enrollment-type-filter") {
+        enrollmentTypeFilter = event.target.value;
         renderEnrollmentQueue();
         return;
       }
@@ -32601,6 +32738,37 @@
       rosterMultiClassAgeFilter = event.target.value;
       renderRosterMultiClassEdit();
     });
+    const clearRosterMultiClassDragVisuals = () => {
+      document.querySelectorAll(".roster-multi-student.is-dragging, .roster-multi-student.is-keyboard-selected, .roster-multi-class-section.is-drop-target").forEach((element) => {
+        element.classList.remove("is-dragging", "is-keyboard-selected", "is-drop-target");
+        if (element.matches("[data-roster-multi-student]")) element.setAttribute("aria-grabbed", "false");
+      });
+    };
+    const moveRosterMultiClassStudent = async (dragged, targetClassId) => {
+      if (!dragged || !targetClassId) return false;
+      const sourceClass = rosterClasses.find((item) => item.id === dragged.sourceClassId);
+      const targetClass = rosterClasses.find((item) => item.id === targetClassId);
+      const student = sourceClass?.students.find((item) => item.id === dragged.studentId);
+      if (!sourceClass || !targetClass || !student || sourceClass.id === targetClass.id) return false;
+      if (rosterEnrolled(targetClass).length >= Number(targetClass.capacity || 12)) {
+        window.alert(`${targetClass.name} is full. Increase its capacity or choose another class before moving ${rosterStudentFirstName(student)}.`);
+        return false;
+      }
+      const sourceCount = rosterEnrolled(sourceClass).length;
+      const targetCount = rosterEnrolled(targetClass).length;
+      sourceClass.students.splice(sourceClass.students.indexOf(student), 1);
+      targetClass.students.push(student);
+      syncRosterCountToSource(sourceClass, { previousCount: sourceCount });
+      syncRosterCountToSource(targetClass, { previousCount: targetCount });
+      renderRosterMultiClassEdit();
+      renderClassesAndRosters();
+      if (rosterMultiClassOpenedFromTeacherTools) renderTeacherRosters();
+      scheduleAppDataSave();
+      await saveSharedStudent(student, targetClass);
+      await queueRosterChangeNotifications(student, sourceClass, targetClass, rosterMultiClassOpenedFromTeacherTools);
+      showToast(`${rosterStudentFirstName(student)} moved to ${targetClass.name}`);
+      return true;
+    };
     document.getElementById("roster-multi-class-grid")?.addEventListener("dragstart", (event) => {
       const studentCard = event.target.closest("[data-roster-multi-student]");
       if (!studentCard) return;
@@ -32626,40 +32794,88 @@
     });
     document.getElementById("roster-multi-class-grid")?.addEventListener("dragend", () => {
       rosterMultiClassDragStudent = null;
-      document.querySelectorAll(".roster-multi-student.is-dragging, .roster-multi-class-section.is-drop-target").forEach((element) => element.classList.remove("is-dragging", "is-drop-target"));
+      clearRosterMultiClassDragVisuals();
     });
     document.getElementById("roster-multi-class-grid")?.addEventListener("drop", async (event) => {
       const targetSection = event.target.closest("[data-roster-multi-drop-class]");
       const dragged = rosterMultiClassDragStudent;
       if (!targetSection || !dragged) return;
       event.preventDefault();
-      const sourceClass = rosterClasses.find((item) => item.id === dragged.sourceClassId);
-      const targetClass = rosterClasses.find((item) => item.id === targetSection.dataset.rosterMultiDropClass);
-      const student = sourceClass?.students.find((item) => item.id === dragged.studentId);
-      if (!sourceClass || !targetClass || !student || sourceClass.id === targetClass.id) {
+      rosterMultiClassDragStudent = null;
+      clearRosterMultiClassDragVisuals();
+      await moveRosterMultiClassStudent(dragged, targetSection.dataset.rosterMultiDropClass);
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("pointerdown", (event) => {
+      if (event.pointerType === "mouse") return;
+      const studentCard = event.target.closest("[data-roster-multi-student]");
+      if (!studentCard) return;
+      rosterMultiClassPointerDrag = {
+        pointerId: event.pointerId,
+        studentId: studentCard.dataset.rosterMultiStudent,
+        sourceClassId: studentCard.dataset.rosterMultiSourceClass,
+        startX: event.clientX,
+        startY: event.clientY,
+        active: false,
+        card: studentCard
+      };
+      studentCard.setPointerCapture?.(event.pointerId);
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("pointermove", (event) => {
+      const dragged = rosterMultiClassPointerDrag;
+      if (!dragged || dragged.pointerId !== event.pointerId) return;
+      if (!dragged.active && Math.hypot(event.clientX - dragged.startX, event.clientY - dragged.startY) < 10) return;
+      dragged.active = true;
+      event.preventDefault();
+      dragged.card.classList.add("is-dragging");
+      const targetSection = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-roster-multi-drop-class]");
+      document.querySelectorAll(".roster-multi-class-section.is-drop-target").forEach((section) => section.classList.toggle("is-drop-target", section === targetSection));
+    });
+    const finishRosterMultiClassPointerDrag = async (event) => {
+      const dragged = rosterMultiClassPointerDrag;
+      if (!dragged || dragged.pointerId !== event.pointerId) return;
+      const targetSection = dragged.active
+        ? document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-roster-multi-drop-class]")
+        : null;
+      rosterMultiClassPointerDrag = null;
+      clearRosterMultiClassDragVisuals();
+      if (targetSection) await moveRosterMultiClassStudent(dragged, targetSection.dataset.rosterMultiDropClass);
+    };
+    document.getElementById("roster-multi-class-grid")?.addEventListener("pointerup", finishRosterMultiClassPointerDrag);
+    document.getElementById("roster-multi-class-grid")?.addEventListener("pointercancel", (event) => {
+      if (!rosterMultiClassPointerDrag || rosterMultiClassPointerDrag.pointerId !== event.pointerId) return;
+      rosterMultiClassPointerDrag = null;
+      clearRosterMultiClassDragVisuals();
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("keydown", async (event) => {
+      if (event.key === "Escape" && rosterMultiClassDragStudent) {
+        event.preventDefault();
         rosterMultiClassDragStudent = null;
-        return renderRosterMultiClassEdit();
-      }
-      if (rosterEnrolled(targetClass).length >= Number(targetClass.capacity || 12)) {
-        rosterMultiClassDragStudent = null;
-        renderRosterMultiClassEdit();
-        window.alert(`${targetClass.name} is full. Increase its capacity or choose another class before moving ${rosterStudentFirstName(student)}.`);
+        clearRosterMultiClassDragVisuals();
+        showToast("Move canceled");
         return;
       }
-      const sourceCount = rosterEnrolled(sourceClass).length;
-      const targetCount = rosterEnrolled(targetClass).length;
-      sourceClass.students.splice(sourceClass.students.indexOf(student), 1);
-      targetClass.students.push(student);
-      syncRosterCountToSource(sourceClass, { previousCount: sourceCount });
-      syncRosterCountToSource(targetClass, { previousCount: targetCount });
+      if (!["Enter", " "].includes(event.key)) return;
+      const studentCard = event.target.closest("[data-roster-multi-student]");
+      if (studentCard) {
+        event.preventDefault();
+        rosterMultiClassDragStudent = {
+          studentId: studentCard.dataset.rosterMultiStudent,
+          sourceClassId: studentCard.dataset.rosterMultiSourceClass
+        };
+        clearRosterMultiClassDragVisuals();
+        studentCard.classList.add("is-keyboard-selected");
+        studentCard.setAttribute("aria-grabbed", "true");
+        const studentName = studentCard.querySelector("strong")?.textContent || "Dancer";
+        showToast(`${studentName} selected. Focus a class and press Enter to move.`);
+        return;
+      }
+      const targetSection = event.target.closest("[data-roster-multi-drop-class]");
+      if (!targetSection || !rosterMultiClassDragStudent) return;
+      event.preventDefault();
+      const dragged = rosterMultiClassDragStudent;
       rosterMultiClassDragStudent = null;
-      renderRosterMultiClassEdit();
-      renderClassesAndRosters();
-      if (rosterMultiClassOpenedFromTeacherTools) renderTeacherRosters();
-      scheduleAppDataSave();
-      await saveSharedStudent(student, targetClass);
-      await queueRosterChangeNotifications(student, sourceClass, targetClass, rosterMultiClassOpenedFromTeacherTools);
-      showToast(`${rosterStudentFirstName(student)} moved to ${targetClass.name}`);
+      clearRosterMultiClassDragVisuals();
+      await moveRosterMultiClassStudent(dragged, targetSection.dataset.rosterMultiDropClass);
     });
     document.getElementById("roster-class-profile-overlay")?.addEventListener("click", (event) => {
       if (event.target.id !== "roster-class-profile-overlay") return;
