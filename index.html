@@ -2754,7 +2754,9 @@
     .teacher-roster-tile-actions button { min-height: 28px; padding: 0 6px; border-radius: 999px; font-size: 9px; font-weight: 700; }
     #teacher-student-profile-overlay { overflow-x: hidden; }
     #teacher-student-profile-overlay .confirm-dialog { width: min(420px, 100%); max-width: 100%; max-height: calc(100dvh - 36px); overflow-x: hidden; overflow-y: auto; box-sizing: border-box; }
-    .teacher-student-profile { width: 100%; min-width: 0; display: grid; justify-items: center; gap: 12px; overflow-x: hidden; text-align: center; }
+    .teacher-student-profile { position: relative; width: 100%; min-width: 0; display: grid; justify-items: center; gap: 12px; overflow-x: hidden; text-align: center; }
+    .teacher-student-profile-edit-trigger { position: absolute; top: 0; right: 0; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--berry); font-size: 18px; line-height: 1; box-shadow: 0 4px 12px oklch(30% 0.03 20 / .08); }
+    .teacher-student-profile-edit-trigger:hover, .teacher-student-profile-edit-trigger:focus-visible { border-color: var(--berry); background: var(--surface-soft); outline: none; }
     .teacher-student-profile .roster-student-photo { width: 86px; height: 86px; font-size: 24px; }
     .teacher-student-profile-photo-editor { position: relative; display: grid; justify-items: center; gap: 5px; cursor: pointer; }
     .teacher-student-profile-photo-editor .roster-student-photo { border: 0; }
@@ -2766,6 +2768,7 @@
     .teacher-student-profile-details small { margin-bottom: 3px; color: var(--muted); font-size: 10px; }
     .teacher-student-profile-details strong { font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
     .teacher-student-profile-edit-form { width: 100%; min-width: 0; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 9px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); overflow: hidden; text-align: left; }
+    .teacher-student-profile-edit-form[hidden], .teacher-student-profile [data-teacher-student-edit-related][hidden], .teacher-student-profile-edit-trigger[hidden] { display: none !important; }
     .teacher-student-profile-edit-form label { min-width: 0; max-width: 100%; display: grid; gap: 4px; overflow: hidden; color: var(--muted); font-size: 10px; font-weight: 800; }
     .teacher-student-profile-edit-form input, .teacher-student-profile-edit-form select, .teacher-student-profile-edit-form textarea { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
     .teacher-student-profile-edit-form input[type="date"] { display: block; inline-size: 100%; min-inline-size: 0; }
@@ -31434,13 +31437,13 @@
       const tardyCount = attendanceHistory.filter((entry) => entry.status === "tardy").length;
       const absentCount = attendanceHistory.filter((entry) => entry.status === "absent").length;
       content.innerHTML = `
+        <button class="teacher-student-profile-edit-trigger" type="button" data-teacher-edit-student="${rosterSafe(student.id)}" data-teacher-edit-student-class="${rosterSafe(rosterClass.id)}" aria-label="Edit ${rosterSafe(rosterStudentFullName(student))}'s information" title="Edit information">✎</button>
         <label class="teacher-student-profile-photo-editor" aria-label="Add or change photo for ${rosterSafe(rosterStudentFullName(student))}">
           <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
           <small>Take or choose photo</small>
-          <input type="file" accept="image/*" capture="environment" hidden data-teacher-student-photo="${rosterSafe(student.id)}" data-teacher-student-photo-class="${rosterSafe(rosterClass.id)}">
+          <input type="file" accept="image/*" hidden data-teacher-student-photo="${rosterSafe(student.id)}" data-teacher-student-photo-class="${rosterSafe(rosterClass.id)}">
         </label>
         <h3 id="teacher-student-profile-title">${rosterSafe(rosterStudentFullName(student))}</h3>
-        <button class="secondary" type="button" data-teacher-edit-student="${rosterSafe(student.id)}" data-teacher-edit-student-class="${rosterSafe(rosterClass.id)}">Edit Information</button>
         <div class="teacher-student-profile-details">
           <span><small>Official Classroom</small><strong>${rosterSafe(student.officialClassroom || student.classroom || "Not entered")}</strong></span>
           <span><small>Age</small><strong>${rosterSafe(rosterAge(student.birthdate))}</strong></span>
@@ -31461,7 +31464,7 @@
           <label class="is-wide">Notes<textarea name="notes">${rosterSafe(student.notes || "")}</textarea></label>
           <div class="teacher-student-profile-edit-actions"><button class="secondary" type="button" data-teacher-cancel-student-edit>Cancel</button><button class="primary" type="submit">Save Changes</button></div>
         </form>
-        <div class="teacher-student-classroom-editor" role="group" aria-label="Change Official Classroom for ${rosterSafe(rosterStudentFullName(student))}">
+        <div class="teacher-student-classroom-editor" role="group" aria-label="Change Official Classroom for ${rosterSafe(rosterStudentFullName(student))}" data-teacher-student-edit-related hidden>
           <span>Change Official Classroom</span>
           <span class="teacher-student-classroom-editor-row">
             <select data-teacher-student-classroom="${rosterSafe(student.id)}" data-teacher-student-classroom-class="${rosterSafe(rosterClass.id)}" aria-label="Official Classroom for ${rosterSafe(rosterStudentFullName(student))}" ${classroomOptions.length ? "" : "disabled"}>
@@ -31473,7 +31476,7 @@
           <small>${classroomOptions.length ? `Only Official Classrooms for ${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} are available.` : "No Official Classrooms are available for this school. Ask a Director to add one in Partner Schools."}</small>
         </div>
         <label class="roster-profile-kit-check"><input type="checkbox" ${student.kitReady ? "checked" : ""} disabled> T-Shirt &amp; Bag Ready</label>
-        <label class="roster-profile-kit-check"><input type="checkbox" data-teacher-kit-received="${rosterSafe(student.id)}" data-teacher-kit-class="${rosterSafe(rosterClass.id)}" ${student.kitReceived ? "checked" : ""}> Received T-Shirt &amp; Bag</label>
+        <label class="roster-profile-kit-check" data-teacher-student-edit-related hidden><input type="checkbox" data-teacher-kit-received="${rosterSafe(student.id)}" data-teacher-kit-class="${rosterSafe(rosterClass.id)}" ${student.kitReceived ? "checked" : ""}> Received T-Shirt &amp; Bag</label>
         <div class="teacher-student-attendance-history">
           <h4>Attendance History · ${tardyCount} Tardy · ${absentCount} Absent</h4>
           ${attendanceHistory.length ? attendanceHistory.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(new Date(`${entry.date}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))} · ${rosterSafe(entry.status[0].toUpperCase() + entry.status.slice(1))}</strong><strong>${rosterSafe(rosterClass.name)}</strong><small>In ${rosterSafe(teacherAttendanceTimeLabel(entry.checkInAt))}</small><small>Out ${rosterSafe(teacherAttendanceTimeLabel(entry.checkOutAt))}</small></div>`).join("") : `<div class="teacher-roster-empty">No attendance recorded yet.</div>`}
@@ -31955,6 +31958,7 @@
         const form = document.querySelector(`[data-teacher-student-edit-form="${CSS.escape(editButton.dataset.teacherEditStudent || "")}"][data-teacher-student-edit-class="${CSS.escape(editButton.dataset.teacherEditStudentClass || "")}"]`);
         if (!form) return;
         form.hidden = false;
+        document.querySelectorAll("#teacher-student-profile-content [data-teacher-student-edit-related]").forEach((element) => { element.hidden = false; });
         editButton.hidden = true;
         form.querySelector("input")?.focus();
         return;
@@ -31964,6 +31968,7 @@
         const form = cancelButton.closest("[data-teacher-student-edit-form]");
         if (!form) return;
         form.hidden = true;
+        document.querySelectorAll("#teacher-student-profile-content [data-teacher-student-edit-related]").forEach((element) => { element.hidden = true; });
         const editTrigger = document.querySelector(`[data-teacher-edit-student="${CSS.escape(form.dataset.teacherStudentEditForm || "")}"][data-teacher-edit-student-class="${CSS.escape(form.dataset.teacherStudentEditClass || "")}"]`);
         if (editTrigger) editTrigger.hidden = false;
         editTrigger?.focus();
