@@ -31232,7 +31232,18 @@
       status.textContent = "Securely publishing this class post…";
       try {
         const { data, error } = await window.dtSupabase.functions.invoke("publish-parent-portal-class-post", { body: form });
-        if (error || !data?.ok) throw error || new Error(data?.message || "Class post delivery failed");
+        if (error) {
+          let serverMessage = "";
+          try {
+            const response = error.context;
+            if (response && typeof response.clone === "function") {
+              const payload = await response.clone().json();
+              serverMessage = String(payload?.message || "");
+            }
+          } catch (_) {}
+          throw new Error(serverMessage || error.message || "Class post delivery failed");
+        }
+        if (!data?.ok) throw new Error(data?.message || "Class post delivery failed");
         status.textContent = data.duplicate
           ? "This post was already published once. No duplicate was created."
           : teacherClassPostAudienceMode === "private"
