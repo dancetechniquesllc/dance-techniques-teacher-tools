@@ -32858,16 +32858,40 @@
         panel.hidden = panel.dataset.rosterProfilePanel !== activeTab;
       });
     };
-    const renderRosterProfilePrivateFeed = (student) => {
+    const rosterProfilePrivateFeedMarkup = (student, posts) => {
       const container = document.getElementById("roster-profile-private-feed");
-      if (!container) return;
-      const posts = [student?.privateFeed, student?.privateFeedPosts, student?.parentPortalPosts, student?.posts]
-        .find((value) => Array.isArray(value)) || [];
+      if (!container) return "";
       container.innerHTML = posts.length ? [...posts].sort((left, right) => String(right.publishedAt || right.published_at || right.createdAt || right.created_at || "").localeCompare(String(left.publishedAt || left.published_at || left.createdAt || left.created_at || ""))).map((post) => {
         const publishedAt = post.publishedAt || post.published_at || post.createdAt || post.created_at;
         const mediaUrl = post.mediaUrl || post.media_url || post.photoUrl || post.photo_url || "";
         return `<article class="roster-private-feed-card">${mediaUrl ? `<img src="${rosterSafe(mediaUrl)}" alt="Private-feed post for ${rosterSafe(rosterStudentFullName(student))}">` : ""}<strong>${rosterSafe(post.title || "Private Feed Post")}</strong>${post.caption || post.message ? `<p>${rosterSafe(post.caption || post.message)}</p>` : ""}<small>${publishedAt ? rosterSafe(new Date(publishedAt).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })) : "Shared with this dancer’s family"}</small></article>`;
       }).join("") : `<div class="teacher-roster-empty">No private-feed posts have been shared with ${rosterSafe(rosterStudentFirstName(student) || "this dancer")} yet.</div>`;
+    };
+    const renderRosterProfilePrivateFeed = async (rosterClass, student) => {
+      const container = document.getElementById("roster-profile-private-feed");
+      if (!container) return;
+      const localPosts = [student?.privateFeed, student?.privateFeedPosts, student?.parentPortalPosts, student?.posts]
+        .find((value) => Array.isArray(value)) || [];
+      rosterProfilePrivateFeedMarkup(student, localPosts);
+      if (!window.dtSupabase || !isUuid(rosterClass?.id) || !isUuid(student?.id)) return;
+      container.innerHTML = `<div class="teacher-roster-empty">Loading ${rosterSafe(rosterStudentFirstName(student) || "this dancer")}’s live Parent Portal posts…</div>`;
+      try {
+        const { data, error } = await window.dtSupabase.functions.invoke("director-parent-portal-student-feed", { body: { studentId: student.id } });
+        if (error) throw error;
+        if (!data?.ok) throw new Error(data?.message || "The live Parent Portal history could not be loaded.");
+        if (String(editingRosterClassId) !== String(rosterClass.id) || String(editingRosterStudentId) !== String(student.id)) return;
+        const livePosts = (data.posts || []).map((post) => ({
+          ...post,
+          title: post.audienceMode === "private" ? "Private Feed Post" : "Class Feed Post"
+        }));
+        if (String(editingRosterClassId) !== String(rosterClass.id) || String(editingRosterStudentId) !== String(student.id)) return;
+        rosterProfilePrivateFeedMarkup(student, livePosts);
+      } catch (error) {
+        console.error("Parent Portal private feed could not be loaded", error);
+        if (String(editingRosterStudentId) === String(student.id)) {
+          container.innerHTML = `<div class="teacher-roster-empty">This live Parent Portal feed could not be loaded. Please refresh and try again.</div>`;
+        }
+      }
     };
     const openRosterStudentEditor = (rosterClass, student) => {
       editingRosterClassId = rosterClass.id;
@@ -32877,7 +32901,7 @@
       document.getElementById("roster-student-edit-overlay")?.classList.toggle("is-future-dancer", isFutureDancer);
       document.getElementById("roster-student-edit-title").textContent = rosterStudentFullName(student) || (isFutureDancer ? "Future Dancer" : "Dancer Profile");
       setRosterProfileTab("profile");
-      renderRosterProfilePrivateFeed(student);
+      void renderRosterProfilePrivateFeed(rosterClass, student);
       document.getElementById("roster-contact-future-parent").hidden = !isFutureDancer;
       document.getElementById("roster-delete-student").textContent = "Delete Dancer";
       const intakeRecord = isFutureDancer ? null : enrollmentIntakeQueue.find((item) => item.placed_student_id === student.id || item.placed_class_enrollment_id === student.enrollmentId);
