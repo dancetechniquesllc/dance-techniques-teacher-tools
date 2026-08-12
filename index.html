@@ -32042,16 +32042,14 @@
         const rosterClass = teacherRosterClasses().find((item) => item.id === photoInput.dataset.teacherStudentPhotoClass);
         const student = rosterClass?.students.find((item) => item.id === photoInput.dataset.teacherStudentPhoto);
         const file = photoInput.files?.[0];
+        photoInput.value = "";
         if (!rosterClass || !student || !file) return;
         if (!file.type.startsWith("image/")) {
           showToast("Choose a photo file");
-          photoInput.value = "";
           return;
         }
-        const reader = new FileReader();
-        reader.addEventListener("load", async () => {
-          if (typeof reader.result !== "string") return;
-          student.photo = reader.result;
+        try {
+          student.photo = await openProfilePhotoCropper(file);
           scheduleAppDataSave();
           await saveSharedStudent(student, rosterClass);
           renderTeacherRosters();
@@ -32059,8 +32057,12 @@
           renderClassesAndRosters();
           openTeacherStudentProfile(rosterClass, student);
           showToast(`${rosterStudentFirstName(student)}’s photo was saved`);
-        }, { once: true });
-        reader.readAsDataURL(file);
+        } catch (error) {
+          if (error?.message !== "Profile photo crop cancelled") {
+            console.error("Dancer photo upload did not finish", error);
+            showToast(error.message || "Photo upload did not finish");
+          }
+        }
         return;
       }
       const checkbox = event.target.closest("[data-teacher-kit-received]");
