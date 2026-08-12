@@ -2752,7 +2752,9 @@
     .teacher-roster-student-tile.is-tardy .teacher-roster-profile-button { border-color: oklch(72% 0.12 80); }
     .teacher-roster-tile-actions { display: flex; gap: 3px; }
     .teacher-roster-tile-actions button { min-height: 28px; padding: 0 6px; border-radius: 999px; font-size: 9px; font-weight: 700; }
-    .teacher-student-profile { display: grid; justify-items: center; gap: 12px; text-align: center; }
+    #teacher-student-profile-overlay { overflow-x: hidden; }
+    #teacher-student-profile-overlay .confirm-dialog { width: min(420px, 100%); max-width: 100%; max-height: calc(100dvh - 36px); overflow-x: hidden; overflow-y: auto; box-sizing: border-box; }
+    .teacher-student-profile { width: 100%; min-width: 0; display: grid; justify-items: center; gap: 12px; overflow-x: hidden; text-align: center; }
     .teacher-student-profile .roster-student-photo { width: 86px; height: 86px; font-size: 24px; }
     .teacher-student-profile-photo-editor { position: relative; display: grid; justify-items: center; gap: 5px; cursor: pointer; }
     .teacher-student-profile-photo-editor .roster-student-photo { border: 0; }
@@ -2763,9 +2765,10 @@
     .teacher-student-profile-details small, .teacher-student-profile-details strong { display: block; }
     .teacher-student-profile-details small { margin-bottom: 3px; color: var(--muted); font-size: 10px; }
     .teacher-student-profile-details strong { font-size: 12px; font-weight: 600; overflow-wrap: anywhere; }
-    .teacher-student-profile-edit-form { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 9px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); text-align: left; }
-    .teacher-student-profile-edit-form label { min-width: 0; display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; }
-    .teacher-student-profile-edit-form input, .teacher-student-profile-edit-form select, .teacher-student-profile-edit-form textarea { width: 100%; min-width: 0; }
+    .teacher-student-profile-edit-form { width: 100%; min-width: 0; box-sizing: border-box; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 9px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); overflow: hidden; text-align: left; }
+    .teacher-student-profile-edit-form label { min-width: 0; max-width: 100%; display: grid; gap: 4px; overflow: hidden; color: var(--muted); font-size: 10px; font-weight: 800; }
+    .teacher-student-profile-edit-form input, .teacher-student-profile-edit-form select, .teacher-student-profile-edit-form textarea { width: 100%; min-width: 0; max-width: 100%; box-sizing: border-box; }
+    .teacher-student-profile-edit-form input[type="date"] { display: block; inline-size: 100%; min-inline-size: 0; }
     .teacher-student-profile-edit-form textarea { min-height: 72px; resize: vertical; }
     .teacher-student-profile-edit-form .is-wide { grid-column: 1 / -1; }
     .teacher-student-profile-edit-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
@@ -2782,6 +2785,8 @@
     @media (max-width: 520px) {
       .teacher-student-profile-edit-form { grid-template-columns: 1fr; }
       .teacher-student-profile-edit-form .is-wide, .teacher-student-profile-edit-actions { grid-column: 1; }
+      .teacher-student-profile-edit-actions { width: 100%; }
+      .teacher-student-profile-edit-actions button { min-width: 0; flex: 1 1 0; padding-inline: 10px; }
     }
     .student-library-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 14px; }
     .student-library-card { position: relative; min-width: 0; min-height: 205px; display: grid; justify-items: center; align-content: center; gap: 8px; padding: 18px 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--fg); text-align: center; box-shadow: 0 8px 20px oklch(22% 0.03 245 / .045); }
