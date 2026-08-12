@@ -217,6 +217,7 @@
 .tulle-response[hidden] { display: none; }
 .tulle-choice-list { display: grid; gap: 8px; margin: -3px 0 14px; }
 .tulle-choice-list[hidden] { display: none; }
+.tulle-choice-list.is-birthday-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .tulle-choice-card {
   width: 100%;
   padding: 11px 13px;
@@ -230,6 +231,13 @@
 .tulle-choice-card strong, .tulle-choice-card small { display: block; }
 .tulle-choice-card small { margin-top: 3px; color: #73645f; line-height: 1.35; }
 .tulle-choice-card:hover { border-color: var(--tulle-berry); background: #fff; }
+.tulle-birthday-card { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 9px; align-items: center; width: 100%; min-width: 0; padding: 9px; border: 1px solid rgba(219, 169, 161, .74); border-radius: 14px; background: #fffdfa; color: var(--tulle-ink); text-align: left; cursor: pointer; }
+.tulle-birthday-card:hover { border-color: var(--tulle-berry); background: var(--tulle-soft-blush); }
+.tulle-birthday-photo { display: grid; place-items: center; width: 48px; height: 48px; overflow: hidden; border: 2px solid var(--tulle-blush); border-radius: 50%; background: #acdabc; color: #4f6252; font: 800 15px/1 "Avenir Next Demi Bold", "Avenir Next", Avenir, sans-serif; }
+.tulle-birthday-photo img { width: 100%; height: 100%; object-fit: cover; }
+.tulle-birthday-card strong, .tulle-birthday-card small { display: block; min-width: 0; }
+.tulle-birthday-card strong { font-size: 12px; line-height: 1.2; }
+.tulle-birthday-card small { margin-top: 3px; color: #73645f; font-size: 10px; line-height: 1.25; }
 
 .tulle-quick-actions {
   display: grid;
@@ -411,6 +419,7 @@
   .tulle-panel-title span { display: none; }
   .tulle-quick-actions { grid-template-columns: 1fr; }
   .tulle-quick-action:nth-child(n+5) { grid-column: auto; }
+  .tulle-choice-list.is-birthday-cards { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

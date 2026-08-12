@@ -44,6 +44,28 @@
     return error?.message || "Sign-in didn’t finish. Please try again.";
   };
 
+  // Keep the teaching screen awake while Teacher Tools / Director Dashboard
+  // remains visible. Browsers automatically release this when the phone locks
+  // or the user navigates away; request it again when the app becomes visible.
+  let screenWakeLock = null;
+  const requestScreenWakeLock = async () => {
+    if (!navigator.wakeLock?.request || document.visibilityState !== "visible" || screenWakeLock) return;
+    try {
+      screenWakeLock = await navigator.wakeLock.request("screen");
+      screenWakeLock.addEventListener("release", () => { screenWakeLock = null; }, { once: true });
+    } catch (error) {
+      // Some browsers require the first tap before granting a wake lock. The
+      // pointer handler below retries without interrupting the teacher.
+      screenWakeLock = null;
+    }
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") requestScreenWakeLock();
+  });
+  document.addEventListener("pointerdown", requestScreenWakeLock, { passive: true });
+  window.addEventListener("pageshow", requestScreenWakeLock);
+  requestScreenWakeLock();
+
   if (isLocalTour) {
     sessionName.textContent = "Sample App Tour";
     document.body.dataset.userRole = "admin";
@@ -62,6 +84,32 @@
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
   window.dtSupabase = client;
+  let teacherProfileResolutionTimer = 0;
+
+  const stopUnresolvedTeacherSession = async (copy) => {
+    window.clearTimeout(teacherProfileResolutionTimer);
+    teacherProfileResolutionTimer = 0;
+    window.dtCurrentProfile = null;
+    delete document.body.dataset.currentTeacherId;
+    await client.auth.signOut();
+    message.textContent = copy || "We couldn’t open the Teacher Tools profile linked to this account. No sample or another teacher’s profile was opened. Please contact Dance Techniques.";
+    setGateState("login");
+  };
+
+  window.dtCompleteTeacherProfileResolution = async ({ profileId = "", ready = false } = {}) => {
+    const expectedProfile = window.dtCurrentProfile;
+    if (expectedProfile?.role !== "teacher" || expectedProfile.id !== profileId) return false;
+    const { data: { session } = {} } = await client.auth.getSession();
+    if (!session?.user || session.user.id !== profileId || !ready) {
+      await stopUnresolvedTeacherSession();
+      return false;
+    }
+    window.clearTimeout(teacherProfileResolutionTimer);
+    teacherProfileResolutionTimer = 0;
+    document.body.dataset.currentTeacherId = profileId;
+    setGateState("ready");
+    return true;
+  };
 
   const showSession = async (session) => {
     if (passwordRecoveryMode && session?.user) {
@@ -107,7 +155,15 @@
       button.classList.toggle("active", button.dataset.modeBtn === landingMode);
     });
     window.dtCurrentProfile = profile;
-    setGateState("ready");
+    if (profile.role === "teacher") {
+      setGateState("checking");
+      window.clearTimeout(teacherProfileResolutionTimer);
+      teacherProfileResolutionTimer = window.setTimeout(() => {
+        stopUnresolvedTeacherSession("Teacher Tools could not finish opening this profile. No sample or another teacher’s profile was opened. Please sign in again or contact Dance Techniques.");
+      }, 90000);
+    } else {
+      setGateState("ready");
+    }
     window.dispatchEvent(new CustomEvent("dt-auth-ready", { detail: { profile } }));
   };
 
@@ -127,7 +183,7 @@
       message.textContent = friendlyAuthError(error);
       return;
     }
-    await showSession(data.session);
+    message.textContent = "Opening your Teacher Tools profile…";
   });
 
   const signOut = async (event) => {
@@ -149,6 +205,15 @@
   document.getElementById("auth-back-home")?.addEventListener("click", () => {
     message.textContent = "";
     setGateState("landing");
+  });
+
+  document.getElementById("auth-password-toggle")?.addEventListener("click", (event) => {
+    const button = event.currentTarget;
+    const showing = passwordInput.type === "text";
+    passwordInput.type = showing ? "password" : "text";
+    button.setAttribute("aria-pressed", showing ? "false" : "true");
+    button.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+    passwordInput.focus({ preventScroll: true });
   });
 
   document.getElementById("auth-forgot")?.addEventListener("click", () => {
@@ -252,10 +317,6 @@
   });
 
   const establishCallbackSession = async () => {
-    let { data: current, error: currentError } = await client.auth.getSession();
-    if (currentError) throw currentError;
-    if (current.session?.user) return current.session;
-
     const code = authQuery.get("code");
     if (code) {
       const { data, error } = await client.auth.exchangeCodeForSession(code);
@@ -278,6 +339,10 @@
       if (error) throw error;
       return data.session;
     }
+
+    const { data: current, error: currentError } = await client.auth.getSession();
+    if (currentError) throw currentError;
+    if (current.session?.user) return current.session;
     return null;
   };
 
