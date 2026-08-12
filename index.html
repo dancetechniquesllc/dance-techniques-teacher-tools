@@ -2805,7 +2805,7 @@
     .enrollment-summary-card[aria-pressed="true"] { border-color: var(--berry); box-shadow: inset 0 0 0 1px var(--berry); }
     .enrollment-summary-card strong { color: var(--berry); font-size: 25px; line-height: 1; }
     .enrollment-summary-card small { color: var(--muted); font-size: 11px; font-weight: 700; }
-    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .enrollment-student-view-toggle button { min-height: 48px; padding: 9px 14px; border-radius: 12px; background: transparent; color: var(--fg); font-family: var(--font-body); font-size: 16px; font-weight: 800; }
     .enrollment-student-view-toggle button.is-selected { background: var(--blush); color: var(--berry); box-shadow: 0 1px 3px oklch(35% 0.04 25 / .08); }
     .enrollment-checklist-summary { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; margin: 0 0 14px; }
@@ -2839,7 +2839,7 @@
       .enrollment-summary-card strong { font-size: 21px; }
       .enrollment-summary-card small { font-size: 9px; }
       .enrollment-student-view-toggle button { padding-inline: 5px; font-size: 12px; }
-      .enrollment-student-view-toggle { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .enrollment-student-view-toggle { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .enrollment-checklist-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .dashboard-entity-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
@@ -7249,6 +7249,15 @@
     .roster-profile-identity .roster-photo-editor { display: block; cursor: pointer; }
     .roster-profile-identity .roster-photo-preview { width: 96px; height: 96px; border: 3px solid var(--blush); border-radius: 999px; box-shadow: 0 5px 18px rgb(94 56 46 / .12); transition: border-color .16s ease, transform .16s ease; }
     .roster-profile-identity .roster-photo-editor:hover .roster-photo-preview { border-color: var(--berry); transform: scale(1.02); }
+    .roster-profile-tabs { position: sticky; top: calc(var(--roster-profile-header-height) + 141px); z-index: 10; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; padding: 5px; border: 1px solid #eadbd5; border-radius: 14px; background: rgb(255 253 251 / .97); box-shadow: 0 7px 18px rgb(86 54 44 / .06); backdrop-filter: blur(10px); }
+    .roster-profile-tab { min-height: 44px; padding: 9px 12px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); font: inherit; font-size: 14px; font-weight: 900; cursor: pointer; }
+    .roster-profile-tab[aria-selected="true"] { background: var(--blush); color: var(--berry); box-shadow: 0 2px 7px rgb(74 42 35 / .08); }
+    .roster-profile-tab-panel { display: grid; gap: 14px; }
+    .roster-profile-tab-panel[hidden] { display: none !important; }
+    .roster-private-feed { display: grid; gap: 12px; }
+    .roster-private-feed-card { display: grid; gap: 8px; padding: 16px; border: 1px solid #eadbd5; border-radius: 14px; background: var(--surface); box-shadow: 0 4px 14px rgb(86 54 44 / .035); }
+    .roster-private-feed-card img { width: 100%; max-height: 420px; object-fit: contain; border-radius: 10px; background: var(--surface-soft); }
+    .roster-private-feed-card small { color: var(--muted); }
     .roster-profile-name-row { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
     .roster-profile-name-row input { min-height: 36px; padding-top: 7px; padding-bottom: 7px; }
     .roster-profile-two-row,
@@ -7267,6 +7276,12 @@
     .roster-profile-section-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
     .roster-profile-section-heading strong { display: block; color: #bc6f69; font-size: 15px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
     .roster-profile-section-heading small { display: block; margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .roster-parent-portal-heading { grid-template-columns: 42px minmax(0, 1fr) auto; }
+    .roster-parent-portal-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .roster-parent-portal-actions button { min-height: 38px; padding: 8px 13px; border-color: #aebaa6; background: #c8d3c0; color: #31402e; white-space: nowrap; }
+    .roster-parent-portal-actions button:hover,
+    .roster-parent-portal-actions button:focus-visible { background: color-mix(in srgb, #c8d3c0 84%, white); outline: 2px solid #68775f; outline-offset: 2px; }
+    .roster-parent-portal-status { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 12px; text-align: right; }
     .roster-profile-section-card .roster-profile-divider-before { margin-top: 0; padding-top: 0; border-top: 0; }
     .roster-profile-tools-heading { display: grid; gap: 3px; padding: 8px 4px 0; }
     .roster-profile-tools-heading strong { font-size: 20px; }
@@ -7295,8 +7310,13 @@
       .roster-edit-dialog > .roster-profile-header .roster-profile-close { min-width: 76px; padding: 0 13px; }
       .roster-profile-identity { grid-template-columns: 78px minmax(0, 1fr); gap: 12px; padding: 16px; }
       .roster-profile-identity .roster-photo-preview { width: 70px; height: 70px; }
+      .roster-profile-tabs { position: static; }
+      .roster-profile-tab { min-height: 40px; padding: 8px 5px; font-size: 12px; }
       .roster-profile-name-row { grid-template-columns: 1fr; }
       .roster-profile-section-card { padding: 16px; }
+      .roster-parent-portal-heading { grid-template-columns: 38px minmax(0, 1fr); }
+      .roster-parent-portal-actions { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .roster-parent-portal-actions button { width: 100%; padding-inline: 8px; }
     }
     .boutique-kit-workspace { display: grid; gap: 14px; }
     .boutique-backstage-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; padding: 8px; border: 1px solid var(--border); border-radius: 18px; background: var(--surface); }
@@ -8077,8 +8097,15 @@
       .boutique-kit-card .boutique-kit-location { grid-column: auto; grid-row: auto; }
     }
     .roster-profile-shirt-field .roster-profile-kit-check { min-height: 42px; margin-top: 0; }
-    .confirm-actions.roster-profile-actions { position: sticky; bottom: 0; z-index: 11; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; margin: 0; padding: 16px 24px 20px; border-top: 1px solid #eadbd5; background: rgb(251 250 247 / .97); backdrop-filter: blur(10px); }
-    .confirm-actions.roster-profile-actions > button { width: 100%; min-width: 0; }
+    .confirm-actions.roster-profile-actions { position: sticky; bottom: 0; z-index: 11; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; margin: 0; padding: 16px 24px 20px; border-top: 1px solid #eadbd5; background: rgb(251 250 247 / .97); backdrop-filter: blur(10px); }
+    .confirm-actions.roster-profile-actions > button { width: auto; min-width: 140px; }
+    #roster-delete-student { justify-self: start; border-color: var(--brick); background: var(--brick); color: white; }
+    #roster-delete-student:hover,
+    #roster-delete-student:focus-visible { background: color-mix(in srgb, var(--brick) 88%, black); outline: 2px solid color-mix(in srgb, var(--brick) 55%, white); outline-offset: 2px; }
+    #roster-contact-future-parent { justify-self: end; }
+    .roster-profile-actions button[form="roster-student-edit-form"] { justify-self: end; }
+    #roster-student-edit-overlay.is-future-dancer .roster-profile-actions { grid-template-columns: auto minmax(0, 1fr) auto; }
+    #roster-student-edit-overlay.is-future-dancer .roster-profile-actions button { width: auto; }
     .roster-profile-section-title { grid-column: 1 / -1; margin: 5px 0 -2px; padding-top: 12px; border-top: 1px solid var(--border); color: var(--berry); font-size: 12px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
     .roster-profile-raw { grid-column: 1 / -1; padding: 0; border: 1px solid #eadbd5; border-radius: 14px; background: var(--surface); overflow: hidden; box-shadow: 0 4px 14px rgb(86 54 44 / .035); }
     .roster-profile-raw summary { position: relative; min-height: 78px; display: grid; grid-template-columns: 48px minmax(0, 1fr) 28px; gap: 14px; align-items: center; padding: 14px 18px; cursor: pointer; list-style: none; font-weight: 850; }
@@ -16754,6 +16781,12 @@
             <label class="roster-future-trial-inline">Trial Date<input id="roster-edit-future-trial-date" type="date"></label>
           </div>
         </div>
+        <div class="roster-profile-tabs" role="tablist" aria-label="Dancer profile sections">
+          <button class="roster-profile-tab" type="button" role="tab" id="roster-profile-tab-profile" data-roster-profile-tab="profile" aria-controls="roster-profile-panel-profile" aria-selected="true">Profile</button>
+          <button class="roster-profile-tab" type="button" role="tab" id="roster-profile-tab-parent-portal" data-roster-profile-tab="parent-portal" aria-controls="roster-profile-panel-parent-portal" aria-selected="false">Parent Portal</button>
+          <button class="roster-profile-tab" type="button" role="tab" id="roster-profile-tab-histories" data-roster-profile-tab="histories" aria-controls="roster-profile-panel-histories" aria-selected="false">Histories</button>
+        </div>
+        <div class="roster-profile-tab-panel" id="roster-profile-panel-profile" role="tabpanel" aria-labelledby="roster-profile-tab-profile" data-roster-profile-panel="profile">
         <section class="roster-profile-section-card">
           <div class="roster-profile-section-heading">
             <span class="roster-profile-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"></circle><path d="M4.5 21v-2.2A6.5 6.5 0 0 1 11 12.3h2a6.5 6.5 0 0 1 6.5 6.5V21"></path></svg></span>
@@ -16796,14 +16829,6 @@
           <label>Parent Phone<input id="roster-edit-phone" type="tel"></label>
           <label>Parent Email<input id="roster-edit-email" type="email"></label>
         </div>
-        <div class="roster-profile-placeholder" id="roster-parent-portal-access">
-          <strong>Parent Portal Access</strong>
-          <p id="roster-parent-portal-status">Send an email invitation or copy a private text invitation for this dancer’s existing primary adult profile. The saved adult link—not typed or guessed information—is used.</p>
-          <div class="login-invite-button-row">
-            <button class="secondary" type="button" id="roster-parent-portal-invite">Send Secure Email Invite</button>
-            <button class="secondary" type="button" id="roster-parent-portal-text-invite">Copy Text Invitation</button>
-          </div>
-        </div>
         <div class="roster-future-only">
           <div class="roster-future-picture-cell"><span>Picture</span><div class="roster-future-picture-preview" id="roster-future-picture-preview">No picture uploaded.</div></div>
           <label>Teacher’s Feedback<textarea id="roster-edit-future-feedback"></textarea></label>
@@ -16834,7 +16859,6 @@
           </label>
         </div>
         </section>
-        <div class="roster-profile-tools-heading"><strong>Additional Tools</strong><small>Open a section to review more dancer records.</small></div>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h4"></path></svg></span><span class="roster-profile-tool-copy"><strong>Additional Information</strong><small>Enrollment, discounts, payment, and imported details.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-archive-grid">
           <label>Trial date<input id="roster-edit-trial-date" type="date"></label>
           <label>Enrollment history<input id="roster-edit-enrollment-history"></label>
@@ -16844,9 +16868,26 @@
           <label>Jotform submission ID<input id="roster-edit-jotform-id" readonly></label><label>Submitted<input id="roster-edit-submitted-at" readonly></label>
           <div class="full-field roster-profile-archive-grid" id="roster-edit-additional-information"></div>
         </div></details>
+        </div>
+        <div class="roster-profile-tab-panel" id="roster-profile-panel-parent-portal" role="tabpanel" aria-labelledby="roster-profile-tab-parent-portal" data-roster-profile-panel="parent-portal" hidden>
+          <section class="roster-profile-section-card">
+            <div class="roster-profile-section-heading roster-parent-portal-heading">
+              <span class="roster-profile-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m17 15 2 2 3-4"></path></svg></span>
+              <span><strong>Private Feed</strong><small>Posts shared only with this dancer’s linked family.</small></span>
+              <div class="roster-parent-portal-actions" id="roster-parent-portal-access">
+                <button class="secondary" type="button" id="roster-parent-portal-invite">Email Invite</button>
+                <button class="secondary" type="button" id="roster-parent-portal-text-invite">Text Invite</button>
+              </div>
+              <p class="roster-parent-portal-status" id="roster-parent-portal-status" role="status" aria-live="polite">Invitations use the dancer’s securely linked primary adult profile.</p>
+            </div>
+            <div class="roster-private-feed" id="roster-profile-private-feed"><div class="teacher-roster-empty">No private-feed posts have been shared with this dancer yet.</div></div>
+          </section>
+        </div>
+        <div class="roster-profile-tab-panel" id="roster-profile-panel-histories" role="tabpanel" aria-labelledby="roster-profile-tab-histories" data-roster-profile-panel="histories" hidden>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m8 15 2 2 5-5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Attendance</strong><small>Review attendance history and class helper records.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-attendance"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Newsletter History</strong><small>See family emails, deliveries, and detected opens.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M8 9V6a4 4 0 0 1 8 0v3"></path></svg></span><span class="roster-profile-tool-copy"><strong>Boutique Orders</strong><small>Track T-shirt, bag, pickup, and delivery status.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-shirt-field"><label>T-Shirt &amp; Bag Status<select id="roster-edit-kit-status"><option value="not_ready">To Fill</option><option value="ready">To Pick Up</option><option value="picked_up">To Deliver</option><option value="delivered">Delivered</option></select></label><div class="roster-profile-delivery-date"><span>T-Shirt &amp; Bag Delivery Date</span><strong id="roster-edit-kit-delivered-date">Not delivered</strong></div></div><div class="roster-profile-placeholder" id="roster-edit-boutique-orders">No boutique orders are assigned to this dancer.</div></details>
+        </div>
       </form>
       <div class="confirm-actions roster-profile-actions">
         <button class="danger-btn" type="button" id="roster-delete-student">Delete Dancer</button>
@@ -32676,13 +32717,13 @@
         });
         if (error || !data?.ok) throw new Error(data?.message || error?.message || "Invitation failed");
         status.textContent = `${data.message} It was sent to ${adult.full_name || "the linked adult"} at the saved adult-profile email and applies only to ${data.linkedStudentCount} linked dancer${data.linkedStudentCount === 1 ? "" : "s"}.`;
-        button.textContent = "Send Secure Email Again";
+        button.textContent = "Email Invite";
       } catch (error) {
         console.error("Parent Portal invitation could not be sent", error);
         status.textContent = error?.message || "The secure invitation could not be sent. No family access was changed.";
       } finally {
         button.disabled = false;
-        if (button.textContent.includes("…")) button.textContent = "Send Secure Email Invite";
+        if (button.textContent.includes("…")) button.textContent = "Email Invite";
       }
     };
 
@@ -32710,13 +32751,13 @@
         const message = `Welcome to Dance Techniques, ${firstName}! ${dancerFirstName}'s family has been selected as one of our first Parent Portal Founding Families! ✨\n\nUse your private invitation link below to create your account and access ${dancerFirstName}'s Parent Portal:\n${data.actionLink}\n\nThis invitation is specifically connected to your family, so please don’t forward it to anyone else. Thank you for helping us shape the magic! 💕`;
         await copyPrivateText(message);
         status.textContent = `Text invitation copied for ${adult.full_name || "the linked adult"}. Paste it into your personal text conversation. No email or automated SMS was sent.`;
-        button.textContent = "Copied — Prepare Fresh Link";
+        button.textContent = "Text Invite";
       } catch (error) {
         console.error("Parent Portal text invitation could not be prepared", error?.message || "Unknown error");
         status.textContent = error?.message || "The private text invitation could not be prepared. No message was sent.";
       } finally {
         button.disabled = false;
-        if (button.textContent.includes("…")) button.textContent = "Copy Text Invitation";
+        if (button.textContent.includes("…")) button.textContent = "Text Invite";
       }
     };
 
@@ -32806,6 +32847,28 @@
       const orders = boutiqueOrders.filter((order) => String(order.assigned_student_id || "") === String(student?.id || ""));
       container.innerHTML = orders.length ? orders.map((order) => `<div class="boutique-order-item"><strong>${rosterSafe(boutiqueOrderItemsLabel(order))}</strong><span>${rosterSafe(boutiqueStatusLabel(order.status))}</span></div>`).join("") : "No boutique orders are assigned to this dancer.";
     };
+    const setRosterProfileTab = (tabName = "profile") => {
+      const activeTab = ["profile", "parent-portal", "histories"].includes(tabName) ? tabName : "profile";
+      document.querySelectorAll("[data-roster-profile-tab]").forEach((button) => {
+        const selected = button.dataset.rosterProfileTab === activeTab;
+        button.setAttribute("aria-selected", String(selected));
+        button.tabIndex = selected ? 0 : -1;
+      });
+      document.querySelectorAll("[data-roster-profile-panel]").forEach((panel) => {
+        panel.hidden = panel.dataset.rosterProfilePanel !== activeTab;
+      });
+    };
+    const renderRosterProfilePrivateFeed = (student) => {
+      const container = document.getElementById("roster-profile-private-feed");
+      if (!container) return;
+      const posts = [student?.privateFeed, student?.privateFeedPosts, student?.parentPortalPosts, student?.posts]
+        .find((value) => Array.isArray(value)) || [];
+      container.innerHTML = posts.length ? [...posts].sort((left, right) => String(right.publishedAt || right.published_at || right.createdAt || right.created_at || "").localeCompare(String(left.publishedAt || left.published_at || left.createdAt || left.created_at || ""))).map((post) => {
+        const publishedAt = post.publishedAt || post.published_at || post.createdAt || post.created_at;
+        const mediaUrl = post.mediaUrl || post.media_url || post.photoUrl || post.photo_url || "";
+        return `<article class="roster-private-feed-card">${mediaUrl ? `<img src="${rosterSafe(mediaUrl)}" alt="Private-feed post for ${rosterSafe(rosterStudentFullName(student))}">` : ""}<strong>${rosterSafe(post.title || "Private Feed Post")}</strong>${post.caption || post.message ? `<p>${rosterSafe(post.caption || post.message)}</p>` : ""}<small>${publishedAt ? rosterSafe(new Date(publishedAt).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })) : "Shared with this dancer’s family"}</small></article>`;
+      }).join("") : `<div class="teacher-roster-empty">No private-feed posts have been shared with ${rosterSafe(rosterStudentFirstName(student) || "this dancer")} yet.</div>`;
+    };
     const openRosterStudentEditor = (rosterClass, student) => {
       editingRosterClassId = rosterClass.id;
       editingRosterStudentId = student.id;
@@ -32813,6 +32876,8 @@
       document.getElementById("roster-student-edit-form")?.classList.toggle("is-future-dancer", isFutureDancer);
       document.getElementById("roster-student-edit-overlay")?.classList.toggle("is-future-dancer", isFutureDancer);
       document.getElementById("roster-student-edit-title").textContent = rosterStudentFullName(student) || (isFutureDancer ? "Future Dancer" : "Dancer Profile");
+      setRosterProfileTab("profile");
+      renderRosterProfilePrivateFeed(student);
       document.getElementById("roster-contact-future-parent").hidden = !isFutureDancer;
       document.getElementById("roster-delete-student").textContent = "Delete Dancer";
       const intakeRecord = isFutureDancer ? null : enrollmentIntakeQueue.find((item) => item.placed_student_id === student.id || item.placed_class_enrollment_id === student.enrollmentId);
@@ -32847,14 +32912,14 @@
       const parentPortalInviteStatus = document.getElementById("roster-parent-portal-status");
       if (parentPortalInviteButton) {
         parentPortalInviteButton.disabled = false;
-        parentPortalInviteButton.textContent = "Send Secure Email Invite";
+        parentPortalInviteButton.textContent = "Email Invite";
       }
       const parentPortalTextInviteButton = document.getElementById("roster-parent-portal-text-invite");
       if (parentPortalTextInviteButton) {
         parentPortalTextInviteButton.disabled = false;
-        parentPortalTextInviteButton.textContent = "Copy Text Invitation";
+        parentPortalTextInviteButton.textContent = "Text Invite";
       }
-      if (parentPortalInviteStatus) parentPortalInviteStatus.textContent = "Send an email invitation or copy a private text invitation for this dancer’s existing primary adult profile. The saved adult link—not typed or guessed information—is used.";
+      if (parentPortalInviteStatus) parentPortalInviteStatus.textContent = "Invitations use the dancer’s securely linked primary adult profile.";
       document.getElementById("roster-edit-status").value = student.status || "enrolled";
       document.getElementById("roster-edit-tuition-discount").value = ["sibling", "staff", "director"].includes(student.tuitionDiscount || intakeRecord?.tuition_discount) ? (student.tuitionDiscount || intakeRecord?.tuition_discount) : "none";
       document.getElementById("roster-edit-tshirt-size").value = profileValue("tshirtSize", "tshirt_size");
@@ -42204,6 +42269,8 @@
     });
     document.getElementById("roster-student-edit-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "roster-student-edit-overlay") requestCloseRosterStudentEditor();
+      const tabButton = event.target.closest("[data-roster-profile-tab]");
+      if (tabButton) setRosterProfileTab(tabButton.dataset.rosterProfileTab);
     });
     document.getElementById("roster-parent-portal-invite")?.addEventListener("click", sendEditingStudentParentPortalInvite);
     document.getElementById("roster-parent-portal-text-invite")?.addEventListener("click", copyEditingStudentParentPortalTextInvite);
