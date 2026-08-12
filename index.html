@@ -23161,6 +23161,53 @@
       if (includeMessages) safeReplaceCollection(messageThreads, persisted.messageThreads || []);
     };
 
+    const reconcileTeachingTeamWithLiveProfiles = async (client) => {
+      if (!client) return false;
+      const [profilesResult, guardianAccountsResult] = await Promise.all([
+        client.from("profiles").select("id, full_name, role, color, phone, active"),
+        client.from("guardian_user_accounts").select("user_id, revoked_at")
+      ]);
+      if (profilesResult.error || guardianAccountsResult.error) {
+        console.error("Teaching Team could not complete its final live-profile check", profilesResult.error || guardianAccountsResult.error);
+        return false;
+      }
+      const guardianProfileIds = new Set((guardianAccountsResult.data || [])
+        .filter((account) => !account.revoked_at)
+        .map((account) => String(account.user_id || ""))
+        .filter(Boolean));
+      const liveStaffProfiles = (profilesResult.data || []).filter((item) => (
+        item.active !== false
+        && ["teacher", "director", "admin"].includes(String(item.role || "").toLowerCase())
+        && !guardianProfileIds.has(String(item.id))
+      ));
+      const liveStaffIds = new Set(liveStaffProfiles.map((item) => String(item.id)));
+      for (let index = teachers.length - 1; index >= 0; index -= 1) {
+        const teacherId = String(teachers[index]?.id || "");
+        if (isUuid(teacherId) && (!liveStaffIds.has(teacherId) || guardianProfileIds.has(teacherId))) teachers.splice(index, 1);
+      }
+      liveStaffProfiles.forEach((item) => {
+        const names = String(item.full_name || "").trim().split(/\s+/).filter(Boolean);
+        const firstName = names.shift() || "Teacher";
+        const lastName = names.join(" ");
+        let teacher = teachers.find((candidate) => String(candidate.id) === String(item.id));
+        if (!teacher) {
+          const sameNameSeed = teachers.find((candidate) => String(candidate.firstName || "").trim().toLowerCase() === firstName.toLowerCase());
+          teacher = sameNameSeed || createBlankTeacherProfile();
+          if (!sameNameSeed) teachers.push(teacher);
+        }
+        teacher.id = item.id;
+        teacher.firstName = firstName;
+        teacher.lastName = lastName;
+        const isCompanyProfile = String(item.full_name || "").trim().toLowerCase() === "dance techniques";
+        teacher.displayName = item.role === "admin" || isCompanyProfile ? String(item.full_name || "").trim() : `Ms. ${firstName}`;
+        teacher.teacherType = item.role === "teacher" ? "Teacher" : (item.role === "director" ? "Director" : "Admin");
+        teacher.status = "active";
+        teacher.color = item.color || teacher.color || "";
+        teacher.phone = item.phone || teacher.phone || "";
+      });
+      return true;
+    };
+
     const loadPersistedAppData = () => applyPersistedAppData(readPersistedAppData());
 
     loadPersistedAppData();
@@ -42758,6 +42805,7 @@
         const { data: teacherStates, error: teacherStatesError } = await client.from("teacher_portal_state").select("teacher_id, payload");
         if (teacherStatesError) console.error("Teacher cloud changes could not load for the Director Dashboard", teacherStatesError);
         else (teacherStates || []).forEach((teacherState) => applyTeacherCloudData(teacherState.payload, teacherState.teacher_id, { includeMessages: false, preserveDirectorData: true }));
+        await reconcileTeachingTeamWithLiveProfiles(client);
         teachers.forEach((teacher) => { if (currentTierByTeacher.has(teacher.id)) teacher.payTier = currentTierByTeacher.get(teacher.id); });
         const teacherPhotoResults = await Promise.all(teachers
           .filter((teacher) => teacher.photo && isUuid(teacher.id))
