@@ -7259,6 +7259,13 @@
     .roster-profile-tab[aria-selected="true"] { background: var(--blush); color: var(--berry); box-shadow: 0 2px 7px rgb(74 42 35 / .08); }
     .roster-profile-tab-panel { display: grid; gap: 14px; }
     .roster-profile-tab-panel[hidden] { display: none !important; }
+    .roster-private-feed-filters { display: grid; grid-template-columns: minmax(220px, 1fr) minmax(170px, .42fr) auto; gap: 10px; align-items: end; padding: 12px; border: 1px solid #eadbd5; border-radius: 14px; background: var(--surface-soft); }
+    .roster-private-feed-filter { display: grid; gap: 5px; color: var(--muted); font-size: 12px; font-weight: 800; }
+    .roster-private-feed-filter input { box-sizing: border-box; width: 100%; min-height: 42px; margin: 0; border: 1px solid #dcc7c1; border-radius: 10px; background: var(--surface); color: var(--ink); font: inherit; font-size: 14px; }
+    .roster-private-feed-filter input[type="search"] { padding: 9px 12px; }
+    .roster-private-feed-filter input[type="date"] { padding: 8px 10px; }
+    .roster-private-feed-filter-clear { min-height: 42px; margin: 0; white-space: nowrap; }
+    .roster-private-feed-filter-summary { grid-column: 1 / -1; margin: -2px 2px 0; color: var(--muted); font-size: 12px; }
     .roster-private-feed { display: grid; gap: 12px; }
     .roster-private-feed-card { position: relative; display: grid; gap: 8px; padding: 16px; border: 1px solid #eadbd5; border-radius: 14px; background: var(--surface); box-shadow: 0 4px 14px rgb(86 54 44 / .035); }
     .roster-private-feed-card.is-deleted { filter: grayscale(1); opacity: .58; background: #e7e4e2; }
@@ -7269,6 +7276,11 @@
     .roster-private-feed-deleted-label { width: max-content; padding: 4px 9px; border-radius: 999px; background: #77716e; color: white; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
     .roster-private-feed-card img { width: 100%; max-height: 420px; object-fit: contain; border-radius: 10px; background: var(--surface-soft); }
     .roster-private-feed-card small { color: var(--muted); }
+    @media (max-width: 620px) {
+      .roster-private-feed-filters { grid-template-columns: 1fr; }
+      .roster-private-feed-filter-summary { grid-column: 1; }
+      .roster-private-feed-filter-clear { width: 100%; }
+    }
     .roster-profile-name-row { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
     .roster-profile-name-row input { min-height: 36px; padding-top: 7px; padding-bottom: 7px; }
     .roster-profile-two-row,
@@ -16902,6 +16914,12 @@
                 <button class="secondary" type="button" id="roster-parent-portal-text-invite">Text Invite</button>
               </div>
               <p class="roster-parent-portal-status" id="roster-parent-portal-status" role="status" aria-live="polite">Invitations use the dancer’s securely linked primary adult profile.</p>
+            </div>
+            <div class="roster-private-feed-filters" aria-label="Filter Parent Portal posts">
+              <label class="roster-private-feed-filter">Search posts<input id="roster-private-feed-search" type="search" placeholder="Search title or post text" autocomplete="off"></label>
+              <label class="roster-private-feed-filter">Posted on<input id="roster-private-feed-date" type="date"></label>
+              <button class="secondary roster-private-feed-filter-clear" type="button" id="roster-private-feed-filter-clear">Clear</button>
+              <p class="roster-private-feed-filter-summary" id="roster-private-feed-filter-summary" role="status" aria-live="polite">Showing all Parent Portal posts.</p>
             </div>
             <div class="roster-private-feed" id="roster-profile-private-feed"><div class="teacher-roster-empty">No private-feed posts have been shared with this dancer yet.</div></div>
           </section>
@@ -32913,9 +32931,37 @@
         panel.hidden = panel.dataset.rosterProfilePanel !== activeTab;
       });
     };
+    let rosterPrivateFeedPosts = [];
+    let rosterPrivateFeedStudent = null;
+    const rosterPrivateFeedPostDate = (post) => {
+      const value = post?.publishedAt || post?.published_at || post?.createdAt || post?.created_at || "";
+      const date = value ? new Date(value) : null;
+      if (!date || Number.isNaN(date.getTime())) return "";
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+    const filteredRosterPrivateFeedPosts = (posts) => {
+      const query = String(document.getElementById("roster-private-feed-search")?.value || "").trim().toLowerCase();
+      const selectedDate = String(document.getElementById("roster-private-feed-date")?.value || "");
+      return posts.filter((post) => {
+        const searchable = [post.title, post.rawTitle, post.caption, post.rawCaption, post.message, post.audienceMode, post.audience_mode]
+          .filter(Boolean).join(" ").toLowerCase();
+        return (!query || searchable.includes(query)) && (!selectedDate || rosterPrivateFeedPostDate(post) === selectedDate);
+      });
+    };
     const rosterProfilePrivateFeedMarkup = (student, posts) => {
       const container = document.getElementById("roster-profile-private-feed");
       if (!container) return "";
+      rosterPrivateFeedPosts = Array.isArray(posts) ? posts : [];
+      rosterPrivateFeedStudent = student || null;
+      const visiblePosts = filteredRosterPrivateFeedPosts(rosterPrivateFeedPosts);
+      const filtersActive = Boolean(document.getElementById("roster-private-feed-search")?.value.trim() || document.getElementById("roster-private-feed-date")?.value);
+      const summary = document.getElementById("roster-private-feed-filter-summary");
+      if (summary) summary.textContent = filtersActive
+        ? `Showing ${visiblePosts.length} of ${rosterPrivateFeedPosts.length} Parent Portal posts.`
+        : `Showing all ${rosterPrivateFeedPosts.length} Parent Portal ${rosterPrivateFeedPosts.length === 1 ? "post" : "posts"}.`;
       const formattedPostCopy = (value) => {
         const inline = (line) => rosterSafe(line).replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>").replace(/\*([^*\n]+)\*/g, "<em>$1</em>");
         return String(value || "").replace(/\r\n?/g, "\n").split(/\n{2,}/).filter((block) => block.trim()).map((block) => {
@@ -32925,12 +32971,12 @@
             : `<p>${lines.map(inline).join("<br>")}</p>`;
         }).join("");
       };
-      container.innerHTML = posts.length ? [...posts].sort((left, right) => String(right.publishedAt || right.published_at || right.createdAt || right.created_at || "").localeCompare(String(left.publishedAt || left.published_at || left.createdAt || left.created_at || ""))).map((post) => {
+      container.innerHTML = visiblePosts.length ? [...visiblePosts].sort((left, right) => String(right.publishedAt || right.published_at || right.createdAt || right.created_at || "").localeCompare(String(left.publishedAt || left.published_at || left.createdAt || left.created_at || ""))).map((post) => {
         const publishedAt = post.publishedAt || post.published_at || post.createdAt || post.created_at;
         const mediaUrl = post.mediaUrl || post.media_url || post.photoUrl || post.photo_url || "";
         const deleted = Boolean(post.deletedAt || post.deleted_at);
         return `<article class="roster-private-feed-card${deleted ? " is-deleted" : ""}" data-private-feed-post-id="${rosterSafe(post.id)}">${deleted ? `<span class="roster-private-feed-deleted-label">Deleted from Parent Portal</span>` : `<div class="roster-private-feed-actions"><button type="button" class="roster-private-feed-action" data-private-feed-edit="${rosterSafe(post.id)}" aria-label="Edit ${rosterSafe(post.title || "post")}">✎</button><button type="button" class="roster-private-feed-action" data-private-feed-delete="${rosterSafe(post.id)}" aria-label="Delete ${rosterSafe(post.title || "post")}">×</button></div>`}${mediaUrl ? `<img src="${rosterSafe(mediaUrl)}" alt="Private-feed post for ${rosterSafe(rosterStudentFullName(student))}">` : ""}<strong>${rosterSafe(post.title || "Private Feed Post")}</strong>${post.caption || post.message ? `<div class="roster-private-feed-copy">${formattedPostCopy(post.caption || post.message)}</div>` : ""}<small>${publishedAt ? rosterSafe(new Date(publishedAt).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })) : "Shared with this dancer’s family"}</small></article>`;
-      }).join("") : `<div class="teacher-roster-empty">No private-feed posts have been shared with ${rosterSafe(rosterStudentFirstName(student) || "this dancer")} yet.</div>`;
+      }).join("") : `<div class="teacher-roster-empty">${filtersActive ? "No Parent Portal posts match these filters." : `No private-feed posts have been shared with ${rosterSafe(rosterStudentFirstName(student) || "this dancer")} yet.`}</div>`;
       container.querySelectorAll("[data-private-feed-edit]").forEach((button) => button.addEventListener("click", async () => {
         const post = posts.find((item) => String(item.id) === String(button.dataset.privateFeedEdit));
         if (!post) return;
@@ -32980,6 +33026,19 @@
         }
       }
     };
+    document.getElementById("roster-private-feed-search")?.addEventListener("input", () => {
+      if (rosterPrivateFeedStudent) rosterProfilePrivateFeedMarkup(rosterPrivateFeedStudent, rosterPrivateFeedPosts);
+    });
+    document.getElementById("roster-private-feed-date")?.addEventListener("change", () => {
+      if (rosterPrivateFeedStudent) rosterProfilePrivateFeedMarkup(rosterPrivateFeedStudent, rosterPrivateFeedPosts);
+    });
+    document.getElementById("roster-private-feed-filter-clear")?.addEventListener("click", () => {
+      const search = document.getElementById("roster-private-feed-search");
+      const date = document.getElementById("roster-private-feed-date");
+      if (search) search.value = "";
+      if (date) date.value = "";
+      if (rosterPrivateFeedStudent) rosterProfilePrivateFeedMarkup(rosterPrivateFeedStudent, rosterPrivateFeedPosts);
+    });
     const openRosterStudentEditor = (rosterClass, student) => {
       editingRosterClassId = rosterClass.id;
       editingRosterStudentId = student.id;
@@ -32987,6 +33046,10 @@
       document.getElementById("roster-student-edit-form")?.classList.toggle("is-future-dancer", isFutureDancer);
       document.getElementById("roster-student-edit-overlay")?.classList.toggle("is-future-dancer", isFutureDancer);
       document.getElementById("roster-student-edit-title").textContent = rosterStudentFullName(student) || (isFutureDancer ? "Future Dancer" : "Dancer Profile");
+      const privateFeedSearch = document.getElementById("roster-private-feed-search");
+      const privateFeedDate = document.getElementById("roster-private-feed-date");
+      if (privateFeedSearch) privateFeedSearch.value = "";
+      if (privateFeedDate) privateFeedDate.value = "";
       setRosterProfileTab("profile");
       void renderRosterProfilePrivateFeed(rosterClass, student);
       document.getElementById("roster-contact-future-parent").hidden = !isFutureDancer;
