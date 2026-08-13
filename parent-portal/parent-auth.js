@@ -167,15 +167,14 @@
     dialog.setAttribute("aria-labelledby", "pp-install-guide-title");
     dialog.innerHTML = `
       <div class="install-guide-card">
-        <div class="install-guide-mark" aria-hidden="true">🎀</div>
-        <h2 id="pp-install-guide-title">Save Your Parent Portal</h2>
-        <p class="install-guide-intro">Keep Dance Techniques one tap away. Which kind of phone are you using?</p>
+        <h2 id="pp-install-guide-title">Keep Dance Techniques<br><span>One Tap Away</span></h2>
+        <p class="install-guide-intro"><em>Add the Parent Portal to your Home Screen for quick, easy access.</em></p>
         <div class="install-device-choices" role="group" aria-label="Choose your phone type">
-          <button class="install-device-choice" type="button" data-install-device="iphone"><span aria-hidden="true">◉</span>iPhone</button>
-          <button class="install-device-choice" type="button" data-install-device="android"><span aria-hidden="true">◆</span>Android</button>
+          <button class="install-device-choice" type="button" data-install-device="iphone">iPhone</button>
+          <button class="install-device-choice" type="button" data-install-device="android">Android</button>
         </div>
         <section class="install-instructions" id="pp-install-instructions" aria-live="polite" hidden>
-          <h3></h3><ol class="install-steps"></ol><p class="install-guide-note"></p>
+          <ol class="install-steps"></ol><p class="install-guide-note"></p>
         </section>
         <div class="install-guide-actions">
           <button class="soft-button" type="button" data-install-later>Maybe Later</button>
@@ -187,7 +186,6 @@
       const guide = installInstructions[button.dataset.installDevice];
       dialog.querySelectorAll("[data-install-device]").forEach((choice) => choice.setAttribute("aria-pressed", String(choice === button)));
       const instructions = dialog.querySelector("#pp-install-instructions");
-      instructions.querySelector("h3").textContent = guide.title;
       instructions.querySelector(".install-steps").replaceChildren(...guide.steps.map((step) => {
         const item = document.createElement("li");
         item.textContent = step;
