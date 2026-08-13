@@ -7260,7 +7260,13 @@
     .roster-profile-tab-panel { display: grid; gap: 14px; }
     .roster-profile-tab-panel[hidden] { display: none !important; }
     .roster-private-feed { display: grid; gap: 12px; }
-    .roster-private-feed-card { display: grid; gap: 8px; padding: 16px; border: 1px solid #eadbd5; border-radius: 14px; background: var(--surface); box-shadow: 0 4px 14px rgb(86 54 44 / .035); }
+    .roster-private-feed-card { position: relative; display: grid; gap: 8px; padding: 16px; border: 1px solid #eadbd5; border-radius: 14px; background: var(--surface); box-shadow: 0 4px 14px rgb(86 54 44 / .035); }
+    .roster-private-feed-card.is-deleted { filter: grayscale(1); opacity: .58; background: #e7e4e2; }
+    .roster-private-feed-actions { position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 2; }
+    .roster-private-feed-action { width: 34px; height: 34px; padding: 0; border: 1px solid #dcc7c1; border-radius: 50%; background: rgb(255 255 255 / .92); color: var(--brick); font: 700 18px/1 Arial, sans-serif; }
+    .roster-private-feed-action:hover { background: var(--blush-soft); }
+    .roster-private-feed-card.is-deleted .roster-private-feed-action { display: none; }
+    .roster-private-feed-deleted-label { width: max-content; padding: 4px 9px; border-radius: 999px; background: #77716e; color: white; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
     .roster-private-feed-card img { width: 100%; max-height: 420px; object-fit: contain; border-radius: 10px; background: var(--surface-soft); }
     .roster-private-feed-card small { color: var(--muted); }
     .roster-profile-name-row { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -32922,8 +32928,34 @@
       container.innerHTML = posts.length ? [...posts].sort((left, right) => String(right.publishedAt || right.published_at || right.createdAt || right.created_at || "").localeCompare(String(left.publishedAt || left.published_at || left.createdAt || left.created_at || ""))).map((post) => {
         const publishedAt = post.publishedAt || post.published_at || post.createdAt || post.created_at;
         const mediaUrl = post.mediaUrl || post.media_url || post.photoUrl || post.photo_url || "";
-        return `<article class="roster-private-feed-card">${mediaUrl ? `<img src="${rosterSafe(mediaUrl)}" alt="Private-feed post for ${rosterSafe(rosterStudentFullName(student))}">` : ""}<strong>${rosterSafe(post.title || "Private Feed Post")}</strong>${post.caption || post.message ? `<div class="roster-private-feed-copy">${formattedPostCopy(post.caption || post.message)}</div>` : ""}<small>${publishedAt ? rosterSafe(new Date(publishedAt).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })) : "Shared with this dancer’s family"}</small></article>`;
+        const deleted = Boolean(post.deletedAt || post.deleted_at);
+        return `<article class="roster-private-feed-card${deleted ? " is-deleted" : ""}" data-private-feed-post-id="${rosterSafe(post.id)}">${deleted ? `<span class="roster-private-feed-deleted-label">Deleted from Parent Portal</span>` : `<div class="roster-private-feed-actions"><button type="button" class="roster-private-feed-action" data-private-feed-edit="${rosterSafe(post.id)}" aria-label="Edit ${rosterSafe(post.title || "post")}">✎</button><button type="button" class="roster-private-feed-action" data-private-feed-delete="${rosterSafe(post.id)}" aria-label="Delete ${rosterSafe(post.title || "post")}">×</button></div>`}${mediaUrl ? `<img src="${rosterSafe(mediaUrl)}" alt="Private-feed post for ${rosterSafe(rosterStudentFullName(student))}">` : ""}<strong>${rosterSafe(post.title || "Private Feed Post")}</strong>${post.caption || post.message ? `<div class="roster-private-feed-copy">${formattedPostCopy(post.caption || post.message)}</div>` : ""}<small>${publishedAt ? rosterSafe(new Date(publishedAt).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })) : "Shared with this dancer’s family"}</small></article>`;
       }).join("") : `<div class="teacher-roster-empty">No private-feed posts have been shared with ${rosterSafe(rosterStudentFirstName(student) || "this dancer")} yet.</div>`;
+      container.querySelectorAll("[data-private-feed-edit]").forEach((button) => button.addEventListener("click", async () => {
+        const post = posts.find((item) => String(item.id) === String(button.dataset.privateFeedEdit));
+        if (!post) return;
+        const title = window.prompt("Edit the Parent Portal post title:", post.rawTitle || post.title || "");
+        if (title === null) return;
+        const caption = window.prompt("Edit the Parent Portal post:", post.rawCaption ?? post.caption ?? "");
+        if (caption === null) return;
+        button.disabled = true;
+        try {
+          const { data, error } = await window.dtSupabase.functions.invoke("director-parent-portal-student-feed", { body: { action: "update", studentId: student.id, postId: post.id, title, caption } });
+          if (error || !data?.ok) throw new Error(data?.message || "The post could not be updated.");
+          const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(editingRosterClassId));
+          if (rosterClass) await renderRosterProfilePrivateFeed(rosterClass, student);
+        } catch (error) { window.alert(error.message || "The post could not be updated."); button.disabled = false; }
+      }));
+      container.querySelectorAll("[data-private-feed-delete]").forEach((button) => button.addEventListener("click", async () => {
+        if (!window.confirm("Are you sure you’d like to delete this post from Parent Portal?")) return;
+        button.disabled = true;
+        try {
+          const { data, error } = await window.dtSupabase.functions.invoke("director-parent-portal-student-feed", { body: { action: "delete", studentId: student.id, postId: button.dataset.privateFeedDelete } });
+          if (error || !data?.ok) throw new Error(data?.message || "The post could not be deleted.");
+          const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(editingRosterClassId));
+          if (rosterClass) await renderRosterProfilePrivateFeed(rosterClass, student);
+        } catch (error) { window.alert(error.message || "The post could not be deleted."); button.disabled = false; }
+      }));
     };
     const renderRosterProfilePrivateFeed = async (rosterClass, student) => {
       const container = document.getElementById("roster-profile-private-feed");
