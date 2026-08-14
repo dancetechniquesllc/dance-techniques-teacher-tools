@@ -17903,24 +17903,11 @@
       return currentRegistration;
     };
     const getPushServiceWorkerRegistration = async () => {
-      let registration = await notificationTimeout(
-        navigator.serviceWorker.getRegistration("./"),
-        5000,
-        "The app could not check this device’s notification service."
+      const registration = await notificationTimeout(
+        navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }),
+        8000,
+        "The notification service could not be installed on this device."
       );
-      if (!registration) {
-        registration = await notificationTimeout(
-          navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }),
-          8000,
-          "The notification service could not be installed on this device."
-        );
-      } else {
-        await notificationTimeout(
-          registration.update(),
-          8000,
-          "The notification service could not check for its latest update."
-        );
-      }
       return waitForServiceWorkerActivation(registration);
     };
     const subscribeNotificationSystem = (profile = window.dtCurrentProfile) => {

@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v210-notification-activation-race";
+const CACHE_NAME = "my-dance-techniques-v211-resilient-notification-worker";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -44,10 +44,17 @@ const CORE_ASSETS = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      await cache.addAll(CORE_ASSETS.filter((asset) => asset !== "./" && asset !== "./index.html"));
-      const response = await fetch("./index.html", { cache: "no-store" });
-      if (!response.ok) throw new Error("Dashboard navigation shell could not be refreshed.");
-      await cache.put("./index.html", response);
+      await Promise.allSettled(
+        CORE_ASSETS
+          .filter((asset) => asset !== "./" && asset !== "./index.html")
+          .map((asset) => cache.add(asset))
+      );
+      try {
+        const response = await fetch("./index.html", { cache: "no-store" });
+        if (response.ok) await cache.put("./index.html", response);
+      } catch (error) {
+        console.warn("Dashboard navigation shell will be cached after the next successful load.", error);
+      }
     })
   );
   self.skipWaiting();
