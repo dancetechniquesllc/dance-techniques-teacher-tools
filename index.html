@@ -19684,9 +19684,9 @@
 
     const saveSharedStudent = async (student, rosterClass) => {
       await syncStudentToEnrollmentIntake(student, rosterClass);
-      if (!sharedRosterReady || !window.dtSupabase) return;
+      if (!sharedRosterReady || !window.dtSupabase) return true;
       if (rosterClass.sharedSavePending) await rosterClass.sharedSavePending;
-      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rosterClass.id || "")) return;
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rosterClass.id || "")) return true;
       const studentPayload = {
         first_name: student.firstName, last_name: student.lastName, preferred_name: student.preferredName || null,
         birth_date: student.birthdate || null, gender: student.gender === "male" ? "male" : "female", classroom: student.classroom || null,
@@ -19736,6 +19736,29 @@
         if (photoUpdate.error) return sharedRosterError("The photo uploaded, but could not be attached to the dancer.", photoUpdate.error);
         student.photoPath = photoPath;
       }
+      return true;
+    };
+
+    const moveSharedStudentEnrollment = async (student, targetClass) => {
+      if (!sharedRosterReady || !window.dtSupabase) return true;
+      if (!student.enrollmentId || !student.id) {
+        showToast("This dancer is missing a linked class enrollment. Nothing was changed.");
+        return false;
+      }
+      const { data, error } = await window.dtSupabase.functions.invoke("director-move-student", { body: {
+        enrollmentId: student.enrollmentId,
+        studentId: student.id,
+        classId: targetClass.id,
+        status: dbEnrollmentStatus(student.status),
+        trialDate: student.trialDate || null
+      } });
+      if (error || !data?.ok || data?.classId !== targetClass.id) {
+        console.error("The dancer school move was not saved.", error || { data });
+        showToast(data?.message || "The school change was not saved. The dancer is still in the original class.");
+        return false;
+      }
+      student.enrollmentId = data.enrollmentId || student.enrollmentId;
+      return true;
     };
 
     const icons = {
@@ -42595,6 +42618,7 @@
         return;
       }
       const studentMovedClasses = targetClass.id !== rosterClass.id;
+      if (studentMovedClasses && !(await moveSharedStudentEnrollment(student, targetClass))) return;
       if (studentMovedClasses) {
         rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
         targetClass.students.push(student);
@@ -42606,11 +42630,12 @@
       } else {
         syncRosterCountToSource(rosterClass, { previousCount });
       }
-      closeRosterStudentEditor();
       renderClassesAndRosters();
       renderStudentLibrary();
       scheduleAppDataSave();
-      await saveSharedStudent(student, targetClass);
+      const saved = await saveSharedStudent(student, targetClass);
+      if (!saved) return;
+      closeRosterStudentEditor();
       if (studentMovedClasses) {
         await queueRosterChangeNotifications(student, rosterClass, targetClass, window.dtCurrentProfile?.role === "teacher");
       }
