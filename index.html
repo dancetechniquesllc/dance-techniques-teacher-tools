@@ -6507,6 +6507,8 @@
     .classroom-manager-list { display: grid; gap: 10px; margin: 14px 0; max-height: 46vh; overflow: auto; }
     .classroom-manager-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
     .classroom-manager-row small { display: block; color: var(--muted); }
+    .classroom-manager-actions { display: flex; gap: 8px; align-items: center; }
+    .classroom-manager-actions .danger { background: var(--brick); border-color: var(--brick); color: white; }
 
     .enrollment-queue-list {
       display: grid;
@@ -18564,7 +18566,7 @@
       detail.innerHTML = `<h3 id="enrollment-classroom-manager-title">Official Room Names</h3>
         <p>${escapeText(school?.nickname || school?.name || "Select an official school first")}</p>
         ${school ? `<form data-add-official-classroom><label class="enrollment-review-field"><span>New official classroom</span><input name="classroom" required autocomplete="off"></label><button class="primary" type="submit">Add classroom</button></form>
-        <div class="classroom-manager-list">${options.length ? options.map((name) => `<div class="classroom-manager-row"><label class="enrollment-review-field"><span>${enrollmentClassroomAssignmentCount(school, name)} students assigned</span><input value="${escapeText(name)}" data-classroom-rename-value="${escapeText(name)}"></label><button class="secondary" type="button" data-rename-official-classroom="${escapeText(name)}">Rename</button></div>`).join("") : `<div class="roster-empty">No official classrooms have been added for this school.</div>`}</div>` : `<div class="roster-empty">Choose an Official School before managing classrooms.</div>`}`;
+        <div class="classroom-manager-list">${options.length ? options.map((name) => `<div class="classroom-manager-row"><label class="enrollment-review-field"><span>${enrollmentClassroomAssignmentCount(school, name)} students assigned</span><input value="${escapeText(name)}" data-classroom-rename-value="${escapeText(name)}"></label><div class="classroom-manager-actions"><button class="secondary" type="button" data-rename-official-classroom="${escapeText(name)}">Rename</button><button class="danger" type="button" data-remove-official-classroom="${escapeText(name)}">Remove</button></div></div>`).join("") : `<div class="roster-empty">No official classrooms have been added for this school.</div>`}</div>` : `<div class="roster-empty">Choose an Official School before managing classrooms.</div>`}`;
     };
     const enrollmentMatchedTeacherId = (item) => item.matched_teacher_id || suggestEnrollmentClass(item)?.teacherId || "";
     const enrollmentMatchedDanceDay = (item) => {
@@ -33134,7 +33136,12 @@
         || enrollmentSchoolNameMatches(school.nickname, intakeRecord?.requested_school_name));
       const requestedSchoolName = schoolNames.find((schoolName) => enrollmentSchoolNameMatches(schoolName, requestedSchool?.name)
         || enrollmentSchoolNameMatches(schoolName, requestedSchool?.nickname));
-      const initialSchoolName = requestedSchoolName || (schoolNames.includes(rosterClass.schoolName) ? rosterClass.schoolName : (schoolNames[0] || ""));
+      // The active roster assignment is authoritative after placement. The
+      // enrollment's originally requested school remains useful during intake,
+      // but it must not pull a director-corrected dancer back to the old school.
+      const initialSchoolName = schoolNames.includes(rosterClass.schoolName)
+        ? rosterClass.schoolName
+        : (requestedSchoolName || schoolNames[0] || "");
       schoolSelect.value = initialSchoolName;
       const renderAssignedClassOptions = (schoolName, selectedClassId = "") => {
         const schoolClasses = activeClasses.filter((item) => enrollmentSchoolNameMatches(item.schoolName, schoolName));
@@ -40262,6 +40269,62 @@
         renderEnrollmentClassroomManager();
         return;
       }
+      const removeButton = event.target.closest("[data-remove-official-classroom]");
+      if (removeButton) {
+        const school = officialClassroomManagerSchool();
+        const roomName = normalizedClassroomName(removeButton.dataset.removeOfficialClassroom);
+        if (!school || !roomName) return;
+        const affectedEnrollments = enrollmentIntakeQueue.filter((entry) => enrollmentMatchedSchool(entry) === school && normalizedClassroomName(entry.official_classroom).toLowerCase() === roomName.toLowerCase());
+        const affectedStudents = rosterClasses.filter((rosterClass) => enrollmentSchoolNameMatches(rosterClass.schoolName, school.name || school.nickname))
+          .flatMap((rosterClass) => rosterClass.students).filter((student) => normalizedClassroomName(student.officialClassroom).toLowerCase() === roomName.toLowerCase());
+        const assignedCount = new Set([
+          ...affectedEnrollments.map((entry) => entry.placed_student_id || `enrollment:${entry.id}`),
+          ...affectedStudents.map((student) => student.id || `student:${rosterStudentFullName(student)}`)
+        ]).size;
+        const confirmation = assignedCount
+          ? `Remove “${roomName}” from Official Room Names? ${assignedCount} assigned student${assignedCount === 1 ? "" : "s"} will be changed to Unassigned.`
+          : `Remove “${roomName}” from Official Room Names?`;
+        if (!window.confirm(confirmation)) return;
+        const originalOptions = [...(school.classroomOptions || [])];
+        let enrollmentRecordsCleared = false;
+        let studentRecordsCleared = false;
+        try {
+          school.classroomOptions = originalOptions.filter((name) => normalizedClassroomName(name).toLowerCase() !== roomName.toLowerCase());
+          if (document.body.dataset.tourMode !== "true") {
+            if (!window.dtSupabase) throw new Error("Classroom service unavailable");
+            const enrollmentIds = affectedEnrollments.map((entry) => entry.id).filter(isUuid);
+            const studentIds = affectedStudents.map((student) => student.id).filter(isUuid);
+            if (enrollmentIds.length) {
+              const { error } = await window.dtSupabase.from("enrollments").update({ official_classroom: null }).in("id", enrollmentIds);
+              if (error) throw error;
+              enrollmentRecordsCleared = true;
+            }
+            if (studentIds.length) {
+              const { error } = await window.dtSupabase.from("students").update({ official_classroom: null }).in("id", studentIds);
+              if (error) throw error;
+              studentRecordsCleared = true;
+            }
+          }
+          await saveSchoolClassroomOptions(school);
+          affectedEnrollments.forEach((entry) => { entry.official_classroom = ""; });
+          affectedStudents.forEach((student) => { student.officialClassroom = ""; });
+          renderEnrollmentClassroomManager();
+          renderEnrollmentQueue();
+          renderContactSchools();
+          showToast(`${roomName} removed from Official Room Names.`);
+        } catch (error) {
+          console.error("Official classroom removal failed", error);
+          school.classroomOptions = originalOptions;
+          if (document.body.dataset.tourMode !== "true" && window.dtSupabase) {
+            const enrollmentIds = affectedEnrollments.map((entry) => entry.id).filter(isUuid);
+            const studentIds = affectedStudents.map((student) => student.id).filter(isUuid);
+            if (enrollmentRecordsCleared && enrollmentIds.length) await window.dtSupabase.from("enrollments").update({ official_classroom: roomName }).in("id", enrollmentIds);
+            if (studentRecordsCleared && studentIds.length) await window.dtSupabase.from("students").update({ official_classroom: roomName }).in("id", studentIds);
+          }
+          showToast("The room could not be removed. Existing assignments were kept.");
+        }
+        return;
+      }
       const renameButton = event.target.closest("[data-rename-official-classroom]");
       if (!renameButton) return;
       const item = officialClassroomManagerItem();
@@ -42512,7 +42575,10 @@
       student.parentRelationship = document.getElementById("roster-edit-parent-relationship").value.trim();
       student.enrollmentHistory = document.getElementById("roster-edit-enrollment-history").value.trim();
       student.relatedDancerName = document.getElementById("roster-edit-related-dancer").value.trim();
-      student.requestedSchoolName = document.getElementById("roster-edit-requested-school").value.trim();
+      // Once a director moves the dancer, keep the linked enrollment school in
+      // step with the official class assignment instead of preserving the
+      // parent's outdated requested location.
+      student.requestedSchoolName = targetClass.schoolName || document.getElementById("roster-edit-requested-school").value.trim();
       student.requestedDanceStyle = document.getElementById("roster-edit-requested-style").value;
       student.discountDetails = document.getElementById("roster-edit-discount-details").value.trim();
       student.paymentStatus = document.getElementById("roster-edit-payment-status").value;
