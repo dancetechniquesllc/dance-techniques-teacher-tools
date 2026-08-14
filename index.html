@@ -17867,6 +17867,32 @@
 
     let notificationSubscription = null;
     let pushDeviceSubscriptionReady = false;
+    let pushDeviceSetupIssue = "";
+    let pushDeviceSetupRunning = false;
+    const notificationTimeout = (promise, milliseconds, message) => Promise.race([
+      promise,
+      new Promise((_, reject) => window.setTimeout(() => reject(new Error(message)), milliseconds))
+    ]);
+    const getPushServiceWorkerRegistration = async () => {
+      let registration = await notificationTimeout(
+        navigator.serviceWorker.getRegistration("./"),
+        5000,
+        "The app could not check this device’s notification service."
+      );
+      if (!registration) {
+        await notificationTimeout(
+          navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }),
+          8000,
+          "The notification service could not be installed on this device."
+        );
+      }
+      registration = await notificationTimeout(
+        navigator.serviceWorker.ready,
+        8000,
+        "The notification service did not become ready. Close and reopen the installed app, then try again."
+      );
+      return registration;
+    };
     const subscribeNotificationSystem = (profile = window.dtCurrentProfile) => {
       if (!window.dtSupabase || !profile?.id || notificationSubscription) return;
       notificationSubscription = window.dtSupabase.channel(`notifications-${profile.id}`)
@@ -17892,6 +17918,8 @@
       document.querySelectorAll("[data-push-device-status]").forEach((status) => {
         status.textContent = pushReady
           ? "Desktop notifications are enabled and this device is registered."
+          : pushDeviceSetupIssue
+            ? pushDeviceSetupIssue
           : permission === "granted"
             ? "Notification permission is on, but this device still needs to finish registering."
           : permission === "denied"
@@ -17900,14 +17928,16 @@
       });
       document.querySelectorAll("[data-enable-push-notifications]").forEach((button) => {
         const deviceLabel = button.id === "enable-push-notifications" ? "Phone" : "Desktop";
-        button.textContent = pushReady
+        button.textContent = pushDeviceSetupRunning
+          ? "Finishing Notification Setup…"
+          : pushReady
           ? `${deviceLabel} Notifications Enabled`
           : permission === "granted"
             ? "Finish Notification Setup"
             : permission === "denied"
               ? "Notifications Blocked"
               : `Enable ${deviceLabel} Notifications`;
-        button.disabled = pushReady || permission === "denied";
+        button.disabled = pushDeviceSetupRunning || pushReady || permission === "denied";
       });
     };
 
@@ -17918,11 +17948,17 @@
         return false;
       }
       try {
-        const registration = await navigator.serviceWorker.ready;
-        pushDeviceSubscriptionReady = Boolean(await registration.pushManager.getSubscription());
+        const registration = await getPushServiceWorkerRegistration();
+        pushDeviceSubscriptionReady = Boolean(await notificationTimeout(
+          registration.pushManager.getSubscription(),
+          5000,
+          "The app could not verify this device’s push subscription."
+        ));
+        pushDeviceSetupIssue = "";
       } catch (error) {
         console.warn("Push device readiness could not be checked", error);
         pushDeviceSubscriptionReady = false;
+        pushDeviceSetupIssue = error?.message || "Notification registration could not be checked on this device.";
       }
       renderNotificationPreferences();
       return pushDeviceSubscriptionReady;
@@ -18244,36 +18280,53 @@
 
     const enablePhonePushNotifications = async () => {
       if (!("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined") return showToast("Phone push is not supported on this device");
+      if (pushDeviceSetupRunning) return;
+      pushDeviceSetupRunning = true;
+      pushDeviceSetupIssue = "";
+      renderNotificationPreferences();
       try {
-        const permission = await Notification.requestPermission();
+        const permission = Notification.permission === "granted"
+          ? "granted"
+          : await notificationTimeout(Notification.requestPermission(), 10000, "The browser did not finish asking for notification permission.");
         if (permission !== "granted") { pushDeviceSubscriptionReady = false; renderNotificationPreferences(); return showToast("Phone notifications were not enabled"); }
         const publicKey = String(window.DT_VAPID_PUBLIC_KEY || "");
         if (!publicKey) { pushDeviceSubscriptionReady = false; renderNotificationPreferences(); return showToast("Phone push will be ready after the secure push key is published"); }
-        const registration = await navigator.serviceWorker.ready;
-        const subscription = await registration.pushManager.getSubscription()
-          || await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) });
+        const registration = await getPushServiceWorkerRegistration();
+        const existingSubscription = await notificationTimeout(registration.pushManager.getSubscription(), 5000, "The app could not check this device’s existing notification registration.");
+        const subscription = existingSubscription || await notificationTimeout(
+          registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) }),
+          12000,
+          "This browser did not finish registering for push notifications. Close and reopen the installed app, then try again."
+        );
         const details = subscription.toJSON();
         if (!details.endpoint || !details.keys?.p256dh || !details.keys?.auth) throw new Error("The device returned an incomplete push subscription");
         const profile = window.dtCurrentProfile;
         if (window.dtSupabase && profile?.id) {
-          const { error } = await window.dtSupabase.from("push_subscriptions").upsert({ user_id: profile.id, endpoint: details.endpoint, p256dh: details.keys.p256dh, auth: details.keys.auth, user_agent: navigator.userAgent, active: true, last_used_at: new Date().toISOString() }, { onConflict: "endpoint" });
+          const { error } = await notificationTimeout(
+            window.dtSupabase.from("push_subscriptions").upsert({ user_id: profile.id, endpoint: details.endpoint, p256dh: details.keys.p256dh, auth: details.keys.auth, user_agent: navigator.userAgent, active: true, last_used_at: new Date().toISOString() }, { onConflict: "endpoint" }),
+            10000,
+            "The secure server did not finish saving this device’s notification registration."
+          );
           if (error) throw error;
         }
         pushDeviceSubscriptionReady = true;
-        renderNotificationPreferences();
-        await registration.showNotification("Dance Techniques notifications are on", {
+        pushDeviceSetupIssue = "";
+        await notificationTimeout(registration.showNotification("Dance Techniques notifications are on", {
           body: "This device is ready to receive Teacher Tools notifications.",
           icon: "./assets/app-icon-192.png?v=20260723-full-bleed-icon",
           badge: "./assets/favicon-64.png?v=20260723-full-bleed-icon",
           tag: "dance-techniques-push-ready",
           data: { url: "./?open=notifications" }
-        });
+        }), 8000, "Notifications were registered, but the confirmation alert could not be displayed.");
         showToast("Phone notifications enabled — confirmation sent");
       } catch (error) {
         console.error("Push notification setup did not finish", error);
         pushDeviceSubscriptionReady = false;
+        pushDeviceSetupIssue = error?.message || "Notifications could not finish setup on this device.";
+        showToast(pushDeviceSetupIssue);
+      } finally {
+        pushDeviceSetupRunning = false;
         renderNotificationPreferences();
-        showToast("Phone notifications could not finish setup");
       }
     };
 
