@@ -17873,6 +17873,26 @@
       promise,
       new Promise((_, reject) => window.setTimeout(() => reject(new Error(message)), milliseconds))
     ]);
+    const waitForServiceWorkerActivation = async (registration) => {
+      if (registration?.active?.state === "activated") return registration;
+      const worker = registration?.installing || registration?.waiting || registration?.active;
+      if (!worker) throw new Error("The notification service is installed but has no active worker. Refresh the app and try once more.");
+      if (worker.state === "activated") return registration;
+      await notificationTimeout(new Promise((resolve, reject) => {
+        const handleStateChange = () => {
+          if (worker.state === "activated") {
+            worker.removeEventListener("statechange", handleStateChange);
+            resolve();
+          } else if (worker.state === "redundant") {
+            worker.removeEventListener("statechange", handleStateChange);
+            reject(new Error("The notification service update was replaced before it could activate."));
+          }
+        };
+        worker.addEventListener("statechange", handleStateChange);
+        handleStateChange();
+      }), 12000, "The notification service could not activate. Refresh the app and try once more.");
+      return registration;
+    };
     const getPushServiceWorkerRegistration = async () => {
       let registration = await notificationTimeout(
         navigator.serviceWorker.getRegistration("./"),
@@ -17880,18 +17900,19 @@
         "The app could not check this device’s notification service."
       );
       if (!registration) {
-        await notificationTimeout(
+        registration = await notificationTimeout(
           navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }),
           8000,
           "The notification service could not be installed on this device."
         );
+      } else {
+        await notificationTimeout(
+          registration.update(),
+          8000,
+          "The notification service could not check for its latest update."
+        );
       }
-      registration = await notificationTimeout(
-        navigator.serviceWorker.ready,
-        8000,
-        "The notification service did not become ready. Close and reopen the installed app, then try again."
-      );
-      return registration;
+      return waitForServiceWorkerActivation(registration);
     };
     const subscribeNotificationSystem = (profile = window.dtCurrentProfile) => {
       if (!window.dtSupabase || !profile?.id || notificationSubscription) return;
