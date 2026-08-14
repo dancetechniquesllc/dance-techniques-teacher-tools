@@ -17878,20 +17878,29 @@
       const worker = registration?.installing || registration?.waiting || registration?.active;
       if (!worker) throw new Error("The notification service is installed but has no active worker. Refresh the app and try once more.");
       if (worker.state === "activated") return registration;
-      await notificationTimeout(new Promise((resolve, reject) => {
+      await notificationTimeout(new Promise((resolve) => {
         const handleStateChange = () => {
           if (worker.state === "activated") {
             worker.removeEventListener("statechange", handleStateChange);
             resolve();
           } else if (worker.state === "redundant") {
             worker.removeEventListener("statechange", handleStateChange);
-            reject(new Error("The notification service update was replaced before it could activate."));
+            // Another update won the activation race. Re-read the registration below.
+            resolve();
           }
         };
         worker.addEventListener("statechange", handleStateChange);
         handleStateChange();
       }), 12000, "The notification service could not activate. Refresh the app and try once more.");
-      return registration;
+      const currentRegistration = await notificationTimeout(
+        navigator.serviceWorker.getRegistration("./"),
+        5000,
+        "The app could not confirm the updated notification service."
+      );
+      if (currentRegistration?.active?.state !== "activated") {
+        throw new Error("The notification service is still activating. Wait a few seconds, then try once more.");
+      }
+      return currentRegistration;
     };
     const getPushServiceWorkerRegistration = async () => {
       let registration = await notificationTimeout(

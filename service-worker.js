@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v209-notification-registration-repair";
+const CACHE_NAME = "my-dance-techniques-v210-notification-activation-race";
 const CORE_ASSETS = [
   "./",
   "./index.html",
