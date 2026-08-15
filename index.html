@@ -2431,6 +2431,116 @@
     .teacher-roster-print-button { min-height: 42px; border: 1px solid color-mix(in srgb, #68775f 55%, var(--border)); border-radius: 999px; background: #c6d3b5; color: #31402e; font-weight: 850; }
     .teacher-roster-print-button:hover, .teacher-roster-print-button:focus-visible { background: color-mix(in srgb, #c6d3b5 82%, white); outline: 2px solid #68775f; outline-offset: 2px; }
     @media (max-width: 390px) { .teacher-roster-management-row { gap: 6px; } .teacher-roster-management-row button { font-size: 11px; } }
+
+    .enrollment-tempo-card {
+      position: relative;
+      display: grid;
+      gap: 10px;
+      margin: 0 0 14px;
+      padding: clamp(14px, 2.5vw, 22px);
+      overflow: hidden;
+      border: 2px solid #efc9c2;
+      border-radius: 22px;
+      background: #fffaf2 url("assets/enrollment-tempo/card-paper.png") center / 100% 100% no-repeat;
+      color: var(--fg);
+      box-shadow: var(--shadow);
+    }
+    .enrollment-tempo-card > * { position: relative; z-index: 1; }
+    .enrollment-tempo-card[hidden] { display: none; }
+    .enrollment-tempo-preview {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.34rem 0.7rem;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--sage) 38%, var(--surface));
+      color: var(--text);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .enrollment-tempo-card.is-celebrating { animation: enrollment-tempo-glow 1.3s ease both; }
+    .enrollment-tempo-card.is-major { border-color: #d9a62a; box-shadow: 0 14px 38px rgb(183 123 22 / .18); }
+    .enrollment-tempo-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; }
+    .enrollment-tempo-title { min-width: 0; text-align: center; }
+    .enrollment-tempo-title-script { display: block; margin: 0 0 4px; color: #481329; font-family: var(--font-script); font-size: clamp(20px, 3.6vw, 32px); font-weight: 400; line-height: 1; white-space: nowrap; }
+    .enrollment-tempo-title strong { display: block; color: #5e1635; font-size: clamp(18px, 3.4vw, 27px); line-height: 1; letter-spacing: .06em; }
+    .enrollment-tempo-title-divider { display: block; width: min(92%, 220px); height: 25px; margin: 6px auto 0; object-fit: contain; object-position: center; }
+    .enrollment-tempo-scope { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 7px; }
+    .enrollment-tempo-school { display: inline-flex; align-items: center; color: #161616; font-size: clamp(15px, 2.5vw, 22px); font-weight: 800; }
+    .teacher-roster-active-heading h3.is-all-schools-title { font-size: 17px; line-height: 1.18; }
+    .enrollment-tempo-count { display: grid; gap: 3px; min-width: 105px; justify-items: center; text-align: center; }
+    .enrollment-tempo-count strong { font-size: clamp(46px, 8.5vw, 72px); line-height: .8; color: #481329; }
+    .enrollment-tempo-count small { max-width: 105px; color: #52674a; font-size: clamp(11px, 1.8vw, 16px); font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: .02em; }
+    .enrollment-tempo-new { display: grid; place-items: center; min-height: 70px; margin: 0; padding: 12px 54px; border: 0; border-radius: 18px; background: url("assets/enrollment-tempo/new-dancer-watercolor.png") center / 100% 100% no-repeat; color: #481329; font-size: clamp(14px, 2.2vw, 18px); font-weight: 600; line-height: 1.3; text-align: center; }
+    .enrollment-tempo-new small { display: block; font-size: .44em; }
+    .enrollment-tempo-message { display: grid; gap: 5px; }
+    .enrollment-tempo-message p { margin: 0; font-size: clamp(13px, 1.9vw, 17px); line-height: 1.34; }
+    .enrollment-tempo-message p:first-child::before { content: "✦"; margin-right: 10px; color: #d59a24; }
+    .enrollment-tempo-message .tempo-celebration { color: var(--berry); font-weight: 850; }
+    .enrollment-tempo-target { display: grid; gap: 8px; padding-top: 1px; }
+    .enrollment-tempo-target strong { color: #171717; font-size: clamp(13px, 2.1vw, 18px); text-transform: uppercase; letter-spacing: .025em; }
+    .enrollment-tempo-target strong span { color: #6b183b; }
+    .enrollment-tempo-track { position: relative; height: 12px; margin: 3px 0 7px; overflow: visible; border: 1px solid #aeb89d; border-radius: 999px; background: #dbe0ce; box-shadow: inset 0 1px 3px rgb(76 92 68 / .12); }
+    .enrollment-tempo-track-fill { display: block; width: var(--tempo-progress); height: 100%; border-radius: inherit; background: linear-gradient(90deg, #c8747d, #dca2a1); }
+    .enrollment-tempo-track-marker { position: absolute; top: 50%; left: var(--tempo-marker-progress); width: 25px; height: 34px; transform: translate(-50%, -50%); object-fit: contain; filter: drop-shadow(0 2px 3px rgb(91 34 55 / .12)); }
+    .enrollment-tempo-target small { color: #52674a; font-family: Georgia, serif; font-size: clamp(14px, 2.4vw, 20px); font-weight: 500; font-style: italic; line-height: 1.2; text-align: center; }
+    .enrollment-tempo-target small .tempo-number { color: #681a3c; font-family: var(--font-body); font-size: 1.28em; font-style: normal; font-weight: 900; }
+    .enrollment-tempo-bottom-divider { display: block; width: min(48%, 250px); height: 28px; margin: 3px auto -5px; object-fit: contain; }
+    @media (max-width: 560px) {
+      .enrollment-tempo-card { gap: 9px; padding: 14px 13px; border-radius: 19px; }
+      .enrollment-tempo-heading { gap: 8px; }
+      .enrollment-tempo-title-divider { height: 24px; }
+      .enrollment-tempo-count { min-width: 68px; }
+      .enrollment-tempo-new { min-height: 62px; padding: 11px 42px; border-radius: 16px; }
+      .enrollment-tempo-track-marker { width: 23px; height: 31px; }
+    }
+    @keyframes enrollment-tempo-glow { 0% { transform: scale(.985); box-shadow: none; } 55% { transform: scale(1.01); box-shadow: 0 0 28px color-mix(in srgb, var(--warning) 38%, transparent); } 100% { transform: none; } }
+    .enrollment-tempo-confetti {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .enrollment-tempo-confetti-piece {
+      position: absolute;
+      top: -14%;
+      left: var(--confetti-x);
+      width: 8px;
+      height: 14px;
+      border-radius: 3px;
+      background: var(--confetti-color);
+      opacity: 0;
+      animation: enrollment-tempo-confetti-fall 2.35s cubic-bezier(.2,.7,.25,1) var(--confetti-delay) both;
+    }
+    .enrollment-tempo-confetti-piece.is-sparkle {
+      width: auto;
+      height: auto;
+      border-radius: 0;
+      background: transparent;
+      color: var(--confetti-color);
+      font-size: var(--sparkle-size);
+      line-height: 1;
+      filter: drop-shadow(0 0 5px color-mix(in srgb, var(--confetti-color) 58%, transparent));
+      animation-name: enrollment-tempo-sparkle-fall;
+    }
+    .enrollment-tempo-confetti.is-gold { --confetti-glow: #d7a62c; }
+    .enrollment-tempo-confetti.is-blush { --confetti-glow: var(--blush); }
+    @keyframes enrollment-tempo-confetti-fall {
+      0% { opacity: 0; transform: translate3d(0,-16px,0) rotate(0deg); }
+      12% { opacity: 1; }
+      100% { opacity: 0; transform: translate3d(var(--confetti-drift),112vh,0) rotate(var(--confetti-spin)); }
+    }
+    @keyframes enrollment-tempo-sparkle-fall {
+      0% { opacity: 0; transform: translate3d(0,-10px,0) scale(.45) rotate(0deg); }
+      18%, 50% { opacity: 1; }
+      100% { opacity: 0; transform: translate3d(var(--confetti-drift),108vh,0) scale(1.15) rotate(var(--confetti-spin)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .enrollment-tempo-confetti { display: none; }
+      .enrollment-tempo-card.is-celebrating { animation: none; }
+    }
     .teacher-new-enrollment-alert {
       display: grid;
       gap: 12px;
@@ -13945,6 +14055,11 @@
                 <button class="avatar" data-tab-jump="profile" data-profile-avatar aria-label="Open profile">T</button>
               </div>
 
+              <section class="enrollment-tempo-card" id="teacher-enrollment-tempo" aria-live="polite">
+                <div class="enrollment-tempo-heading"><h3>Your Enrollment Tempo ✨</h3><span class="enrollment-tempo-count"><strong>—</strong><small>dancers enrolled</small></span></div>
+                <div class="enrollment-tempo-message"><p>Opening your enrollment tempo…</p></div>
+              </section>
+
               <div class="teacher-roster-toolbar">
                 <button class="primary" type="button" id="teacher-roster-create-class">Create Class</button>
                 <button class="secondary roster-add-future-button" type="button" id="teacher-roster-add-future">Add Prospect Dancer</button>
@@ -20212,21 +20327,31 @@
 
     let currentViewTab = "today";
     let curriculumReturnTab = "curriculum";
+    let enrollmentTempoRosterVisit = 0;
+    let enrollmentTempoCelebrationKey = "";
 
     const setTab = (tab) => {
       if (!navigationGuardBypass && currentViewTab !== tab && hasUnsavedEdits) {
         runGuardedNavigation(() => setTab(tab));
         return;
       }
+      const enteringRosters = tab === "rosters" && currentViewTab !== "rosters";
       const topLevelTab = tab.startsWith("curriculum") ? "curriculum" : (tab === "my-day" ? "today" : (tab === "teacher-conversation" ? "messages" : tab));
       currentViewTab = tab;
+      if (enteringRosters) {
+        enrollmentTempoRosterVisit += 1;
+        enrollmentTempoCelebrationKey = "";
+      }
       document.body.dataset.teacherTab = topLevelTab;
       document.body.dataset.viewTab = tab;
       document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === `${tab}-view`));
       document.querySelectorAll("[data-tab]").forEach((button) => button.classList.toggle("active", button.dataset.tab === topLevelTab));
       const navValue = tab === "teacher-conversation" ? "messages" : tab;
       document.querySelectorAll("[data-nav-target]").forEach((button) => button.classList.toggle("active", button.dataset.navTarget === navValue));
-      if (tab === "rosters") renderTeacherRosters();
+      if (tab === "rosters") {
+        renderTeacherRosters();
+        void loadMyEnrollmentTempo();
+      }
       if (tab === "dancers") renderTeacherDancers();
       if (tab === "orders") renderTeacherOrders();
       if (tab === "pay") {
@@ -21198,6 +21323,161 @@
       renderWidgetDay("home-widget-next", nextClass);
       renderTempoLibraryAdmin();
       renderPaydaySummary();
+    };
+
+    const enrollmentTempoHasSurpassedComparison = (tempo) => Boolean(tempo?.all_time_record || tempo?.surpassed_2025);
+
+    const playEnrollmentTempoCelebration = (card, tempo) => {
+      if (!card || document.body.dataset.viewTab !== "rosters" || !enrollmentTempoHasSurpassedComparison(tempo)) return;
+      const isIndividualSchool = Boolean(tempo.school_id || tempo.school_name);
+      const theme = isIndividualSchool ? "blush" : "gold";
+      const scope = isIndividualSchool ? `school:${tempo.school_id || tempo.school_name}` : "all-schools";
+      const celebrationKey = `${enrollmentTempoRosterVisit}:${scope}:${Number(tempo.current) || 0}:${Number(tempo.baseline) || 0}`;
+      if (enrollmentTempoCelebrationKey === celebrationKey) return;
+      enrollmentTempoCelebrationKey = celebrationKey;
+      if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+
+      document.querySelector(".enrollment-tempo-confetti")?.remove();
+      const palette = theme === "gold"
+        ? ["#d7a62c", "#f2cf63", "#fff1b8", "#b77b16"]
+        : ["#dca79f", "#f4c8c4", "#b65b66", "#f9e0dd"];
+      const layer = document.createElement("div");
+      layer.className = `enrollment-tempo-confetti is-${theme}`;
+      layer.setAttribute("aria-hidden", "true");
+      for (let index = 0; index < 32; index += 1) {
+        const piece = document.createElement("span");
+        const sparkle = index % 5 === 0;
+        piece.className = `enrollment-tempo-confetti-piece${sparkle ? " is-sparkle" : ""}`;
+        piece.style.setProperty("--confetti-x", `${4 + ((index * 29) % 92)}%`);
+        piece.style.setProperty("--confetti-delay", `${(index % 9) * 0.075}s`);
+        piece.style.setProperty("--confetti-drift", `${((index * 17) % 42) - 21}px`);
+        piece.style.setProperty("--confetti-spin", `${180 + ((index * 47) % 360)}deg`);
+        piece.style.setProperty("--confetti-color", palette[index % palette.length]);
+        piece.style.setProperty("--sparkle-size", `${13 + (index % 4) * 3}px`);
+        if (sparkle) piece.textContent = "✦";
+        layer.appendChild(piece);
+      }
+      document.body.appendChild(layer);
+      window.setTimeout(() => layer.remove(), 2800);
+    };
+
+    const renderEnrollmentTempo = (tempo) => {
+      const card = document.getElementById("teacher-enrollment-tempo");
+      if (!card || !tempo) return;
+      const current = Math.max(0, Number(tempo.current) || 0);
+      const target = Math.max(current + 1, Number(tempo.next_milestone) || (Math.floor(current / 10) + 1) * 10);
+      const toTarget = Math.max(0, Number(tempo.to_milestone) || target - current);
+      const dancerWord = current === 1 ? "dancer" : "dancers";
+      const progress = tempo.milestone_reached ? 100 : Math.max(0, Math.min(100, (current % 10) * 10));
+      let message = "";
+      let targetLine = `Only <span class="tempo-number">${toTarget}</span> more dancers to go — keep the momentum moving!`;
+      let major = false;
+
+      if (tempo.all_time_record) {
+        major = true;
+        message = `<p class="tempo-celebration">New Record!</p><p>This is officially your biggest enrollment season yet!</p><p>You’re setting a new record — keep going!</p>`;
+      } else if (tempo.surpassed_2025) {
+        major = true;
+        message = `<p class="tempo-celebration">Look How Far You’ve Come!</p><p>You’ve now enrolled more dancers than your entire 2025 season total.</p><p>Way to grow your classes and keep the momentum moving!</p>`;
+      } else if (tempo.milestone_reached) {
+        message = `<p class="tempo-celebration">You did it! ${Number(tempo.milestone) || current} dancers enrolled!</p><p>What a milestone — keep that momentum moving!</p>`;
+        targetLine = "Your next celebration is already in sight!";
+      } else if (tempo.state === "ahead") {
+        message = `<p class="tempo-celebration">You’re ${Number(tempo.difference) || 0} dancers ahead of this time last year!</p><p>That’s ${Number(tempo.percent) || 0}% growth.</p>`;
+      } else if (tempo.state === "on_pace") {
+        message = `<p>You’re right on pace with last year.</p>`;
+        targetLine = `Just <span class="tempo-number">${toTarget}</span> more dancers to hit your next celebration!`;
+      } else if (tempo.state === "behind") {
+        message = `<p>Last year at this time: ${Number(tempo.baseline) || 0}</p><p>You’re only ${Number(tempo.gap) || 0} dancers away from catching last year’s pace — let’s close the gap!</p>`;
+        targetLine = "Keep the momentum moving!";
+      } else if (tempo.state === "ahead_from_zero") {
+        message = `<p class="tempo-celebration">You’re already ahead of where your classes were this time last year!</p>`;
+      } else {
+        message = `<p>Your classes are filling!</p>`;
+        targetLine = `Only <span class="tempo-number">${toTarget}</span> more to your next celebration — keep it going!`;
+      }
+
+      const newCount = Math.max(0, Number(tempo.new_since_last_login) || 0);
+      card.classList.toggle("is-major", major);
+      card.classList.toggle("is-celebrating", Boolean(major || tempo.milestone_reached || newCount));
+      card.innerHTML = `
+        <div class="enrollment-tempo-heading">
+          <div class="enrollment-tempo-title">
+            <span class="enrollment-tempo-title-script">Your Enrollment</span>
+            <strong>TEMPO</strong>
+            <img class="enrollment-tempo-title-divider" src="assets/enrollment-tempo/top-divider.png" alt="">
+            <div class="enrollment-tempo-scope">
+              <span class="enrollment-tempo-school">${escapeText(tempo.school_name || "All Schools")}</span>
+              ${tempo.preview ? `<span class="enrollment-tempo-preview">Preview data</span>` : ""}
+            </div>
+          </div>
+          <span class="enrollment-tempo-count"><strong>${current}</strong><small>${dancerWord} enrolled</small></span>
+        </div>
+        ${newCount ? `<p class="enrollment-tempo-new">Another dancer joined your classes!${newCount > 1 ? ` <small>+${newCount} since your last visit</small>` : ""}</p>` : ""}
+        <div class="enrollment-tempo-message">${message}</div>
+        <div class="enrollment-tempo-target">
+          <strong>Next celebration: <span>${target} dancers</span></strong>
+          <span class="enrollment-tempo-track" aria-label="Progress toward ${target} dancers" style="--tempo-progress:${progress}%;--tempo-marker-progress:${Math.max(5, Math.min(95, progress))}%">
+            <span class="enrollment-tempo-track-fill"></span>
+            <img class="enrollment-tempo-track-marker" src="assets/enrollment-tempo/ballet-shoes.png" alt="">
+          </span>
+          <small>${targetLine}</small>
+        </div>
+        <img class="enrollment-tempo-bottom-divider" src="assets/enrollment-tempo/bottom-divider.png" alt="">`;
+      playEnrollmentTempoCelebration(card, tempo);
+    };
+
+    const loadMyEnrollmentTempo = async () => {
+      const card = document.getElementById("teacher-enrollment-tempo");
+      if (!card) return;
+      const selectedSchool = teacherRosterSchoolFilter === "all"
+        ? null
+        : assignedTeacherSchools().find((school) => enrollmentSchoolNameMatches(school.name, teacherRosterSchoolFilter)
+          || enrollmentSchoolNameMatches(school.nickname, teacherRosterSchoolFilter));
+      if (document.body.dataset.tourMode === "true") {
+        const previewClasses = teacherRosterClasses().filter((rosterClass) => !selectedSchool
+          || enrollmentSchoolNameMatches(rosterClass.schoolName, selectedSchool.name)
+          || enrollmentSchoolNameMatches(rosterClass.schoolName, selectedSchool.nickname));
+        const previewCurrent = new Set(previewClasses.flatMap((rosterClass) => rosterEnrolled(rosterClass).map((student) => student.id))).size;
+        const previewCount = previewClasses.length ? previewCurrent : (selectedSchool ? 0 : 86);
+        const previewTarget = (Math.floor(previewCount / 10) + 1) * 10;
+        const previewBaseline = selectedSchool ? null : 21;
+        const previewState = previewBaseline === null
+          ? "no_baseline"
+          : previewCount > previewBaseline ? "ahead" : previewCount === previewBaseline ? "on_pace" : "behind";
+        card.hidden = false;
+        renderEnrollmentTempo({
+          preview: true,
+          school_name: selectedSchool?.nickname || selectedSchool?.name || "",
+          current: previewCount,
+          state: previewState,
+          baseline: previewBaseline,
+          difference: previewBaseline === null ? 0 : Math.max(0, previewCount - previewBaseline),
+          gap: previewBaseline === null ? 0 : Math.max(0, previewBaseline - previewCount),
+          percent: previewBaseline === null || previewCount <= previewBaseline ? null : Math.round(((previewCount - previewBaseline) / previewBaseline) * 100),
+          next_milestone: previewTarget,
+          to_milestone: previewTarget - previewCount,
+          milestone_reached: false,
+          new_since_last_login: selectedSchool ? 0 : 1,
+          surpassed_2025: true,
+          all_time_record: false
+        });
+        return;
+      }
+      if (window.dtCurrentProfile?.role !== "teacher" || !window.dtSupabase) {
+        card.hidden = true;
+        return;
+      }
+      card.hidden = false;
+      const { data, error } = await window.dtSupabase.rpc("get_my_enrollment_tempo", {
+        p_partner_school_id: selectedSchool?.id || null
+      });
+      if (error || !data) {
+        console.error("Enrollment Tempo could not be loaded.", error);
+        card.innerHTML = `<div class="enrollment-tempo-heading"><h3>Your Enrollment Tempo ✨</h3></div><div class="enrollment-tempo-message"><p>Your current tempo is taking a quick intermission. Your roster is still available below.</p></div>`;
+        return;
+      }
+      renderEnrollmentTempo(data);
     };
 
     const renderCurriculumNextClassWidget = () => {
@@ -31256,18 +31536,8 @@
         String(item?.matched_partner_school_id || "") === String(school.id || ""));
       const selectedSchool = schools.find((school) => enrollmentSchoolNameMatches(school.name, teacherRosterSchoolFilter)
         || enrollmentSchoolNameMatches(school.nickname, teacherRosterSchoolFilter));
-      if (teacherRosterSchoolFilter === "all" || !selectedSchool) {
-        const todaySchools = schools.filter((school) => Number(school.dayOfWeek) === homeWidgetDate.getDay());
-        const todaySchool = todaySchools.find((school) => schoolHasNewEnrollments(school))
-          || todaySchools.find(schoolHasClasses)
-          || todaySchools[0];
-        teacherRosterSchoolFilter = todaySchool?.name
-          || schools.find((school) => schoolHasNewEnrollments(school))?.name
-          || schools.find(schoolHasClasses)?.name
-          || schools[0]?.name
-          || "all";
-      }
-      filter.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
+      if (teacherRosterSchoolFilter !== "all" && !selectedSchool) teacherRosterSchoolFilter = "all";
+      filter.innerHTML = `<option value="all">All Schools</option>${schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("")}`;
       filter.value = teacherRosterSchoolFilter;
       const multiClassEditButton = document.getElementById("teacher-roster-multi-class-edit");
       const printRostersButton = document.getElementById("teacher-roster-print");
@@ -31319,8 +31589,11 @@
         const duration = classDurationForStudents(attendanceStudents.length) || "No duration";
         const durationClass = duration.startsWith("30") ? "duration-30" : duration.startsWith("45") ? "duration-45" : "";
         const classIsOpen = openTeacherRosterClassIds.has(rosterClass.id);
+        const classDisplayTitle = teacherRosterSchoolFilter === "all"
+          ? `${rosterSchoolNickname(rosterClass.schoolName)} – ${rosterClass.name}`
+          : rosterClass.name;
         return `<details class="teacher-roster-card teacher-roster-active-card" data-teacher-roster-details="${rosterSafe(rosterClass.id)}" ${classIsOpen ? "open" : ""}>
-          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(rosterClass.name)} class roster"><div class="teacher-roster-active-heading"><div><h3>${rosterSafe(rosterClass.name)}</h3><p>${rosterSafe(rosterClass.day || "Day not set")} · ${rosterSafe(rosterClass.time || "Time not set")}</p></div><span class="teacher-roster-duration ${durationClass}">${attendanceStudents.length} students · ${rosterSafe(duration)}</span><button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button></div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" disabled>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}" aria-label="Class Star">${classActionContent("teacher-class-action-star.png", "Class Star")}</button></div></summary>
+          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(classDisplayTitle)} class roster"><div class="teacher-roster-active-heading"><div><h3 class="${teacherRosterSchoolFilter === "all" ? "is-all-schools-title" : ""}">${rosterSafe(classDisplayTitle)}</h3><p>${rosterSafe(rosterClass.day || "Day not set")} · ${rosterSafe(rosterClass.time || "Time not set")}</p></div><span class="teacher-roster-duration ${durationClass}">${attendanceStudents.length} students · ${rosterSafe(duration)}</span><button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button></div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" disabled>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}" aria-label="Class Star">${classActionContent("teacher-class-action-star.png", "Class Star")}</button></div></summary>
           <div class="teacher-roster-card-body">
             ${classComplete ? `<div class="teacher-attendance-complete">✓ Class attendance complete for today</div>` : checkInSubmitted ? `<div class="teacher-attendance-complete">✓ Check-in recorded</div>` : ""}
             <div>${attendanceStudents.length ? teacherRosterClassroomMarkup(attendanceStudents, rosterClass) : `<div class="teacher-roster-empty">No dancers attending this class yet.</div>`}</div>
@@ -31816,7 +32089,9 @@
       teacherRosterSchoolFilter = event.target.value || "all";
       selectedTeacherRosterClassId = "";
       openTeacherRosterClassIds.clear();
+      enrollmentTempoCelebrationKey = "";
       renderTeacherRosters();
+      void loadMyEnrollmentTempo();
     });
     document.addEventListener("click", (event) => {
       const rosterButton = event.target.closest("[data-my-day-class-roster]");
