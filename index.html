@@ -8062,7 +8062,7 @@
     #newsletter-preview-document .newsletter-preview-editable *::selection { background: color-mix(in srgb, var(--newsletter-accent) 38%, transparent); }
     .newsletter-preview-editable:hover { outline-color: color-mix(in srgb, var(--newsletter-accent) 52%, transparent); }
     .newsletter-preview-editable:focus { outline: 2px solid var(--newsletter-accent); background: transparent; }
-    .newsletter-preview-section-editor { position: relative; margin: 16px 0; padding: 14px; border: 1px dashed color-mix(in srgb, var(--newsletter-accent) 42%, transparent); border-radius: 11px; background: rgb(255 255 255 / .35); }
+    .newsletter-preview-section-editor { position: relative; margin: 16px 0; padding: 18px; border: 1px dashed color-mix(in srgb, var(--newsletter-accent) 42%, transparent); border-radius: 11px; background: rgb(255 255 255 / .35); }
     .newsletter-preview-section-editor.is-dragging { opacity: .45; }
     .newsletter-preview-section-actions { position: absolute; inset: 6px 6px auto 6px; z-index: 2; display: flex; justify-content: space-between; gap: 4px; opacity: 0; transition: opacity .15s ease; }
     .newsletter-preview-section-editor:hover .newsletter-preview-section-actions,
@@ -8215,10 +8215,10 @@
     .newsletter-preview-header p { margin: 0; color: var(--newsletter-accent, var(--berry)); font-family: var(--newsletter-title-font, inherit); }
     .newsletter-preview-content { padding: 28px; color: #271e1c; font-family: var(--newsletter-body-font, "Avenir Next", "Helvetica Neue", Arial, sans-serif); font-size: var(--newsletter-body-size, 16px); font-weight: var(--newsletter-body-weight, 400); line-height: 1.65; }
     .newsletter-preview-content p { white-space: pre-wrap; }
-    .newsletter-video-card { display: block; position: relative; margin: 22px 0; border-radius: 12px; overflow: hidden; background: #1d1514; color: white; text-decoration: none; }
-    .newsletter-video-card img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; opacity: .86; }
-    .newsletter-video-play { position: absolute; inset: 50% auto auto 50%; width: 58px; height: 42px; display: grid; place-items: center; border-radius: 12px; background: #ff0033; color: white; font-size: 21px; transform: translate(-50%, -50%); }
-    .newsletter-youtube-editor-preview { width: 100%; margin: 12px 0 4px; }
+    .newsletter-video-card { display: block; position: relative; width: min(100%, 560px); margin: 22px auto; border-radius: 16px; overflow: hidden; background: #1d1514; color: white; text-align: center; text-decoration: none; box-shadow: 0 8px 22px rgba(69, 44, 40, .16); }
+    .newsletter-video-card img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; opacity: .9; }
+    .newsletter-video-play { position: absolute; inset: 50% auto auto 50%; width: 68px; height: 68px; display: grid; place-items: center; border: 3px solid rgba(255,255,255,.9); border-radius: 50%; background: rgba(101, 16, 63, .92); color: white; font: 800 28px/1 Arial, sans-serif; text-indent: 4px; transform: translate(-50%, -50%); box-shadow: 0 5px 16px rgba(0,0,0,.28); }
+    .newsletter-youtube-editor-preview { width: min(100%, 560px); margin: 12px auto 4px; }
     .newsletter-youtube-embed { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; border: 0; border-radius: 12px; background: #1d1514; box-shadow: 0 8px 22px rgba(69, 44, 40, .12); }
     .newsletter-youtube-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
     .newsletter-youtube-url-state { margin: 10px 0 2px; padding: 10px 12px; border: 1px solid #dfc9c4; border-radius: 10px; background: #fffaf6; color: #6c5752; font-size: 12px; line-height: 1.45; }
@@ -14905,6 +14905,11 @@
             <div class="admin-card-header">
               <div><h3>Newsletter Studio</h3><p><em>Create beautiful, personal updates for families and partner schools.</em></p></div>
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
+            </div>
+            <div class="communication-studio-toggle" role="tablist" aria-label="Communication Studio tools">
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="parents">Parent Messages</button>
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="team">Team Talk</button>
+              <button type="button" role="tab" aria-selected="true" data-communication-studio-view="newsletter">Newsletter Wizard</button>
             </div>
             <div class="newsletter-workflow-entry-grid" aria-label="Newsletter Studio workflows">
               <section class="newsletter-workflow-entry">
@@ -36277,8 +36282,11 @@
     const newsletterSectionMarkup = (section, context = newsletterSampleContext(), draft = newsletterDraft, sectionIndex = -1) => {
       const desktopSection = draft.breakpointVersions?.desktop?.sections?.[sectionIndex] || section;
       const mobileSection = draft.breakpointVersions?.mobile?.sections?.[sectionIndex] || section;
-      const desktopBackground = newsletterSectionBackgroundValue(desktopSection) || "transparent";
-      const mobileBackground = newsletterSectionBackgroundValue(mobileSection) || "transparent";
+      const defaultBackground = section.type === "personalized"
+        ? "#f7e4df"
+        : ["reminder", "calendar"].includes(section.type) ? "#fffaf6" : "transparent";
+      const desktopBackground = newsletterSectionBackgroundValue(desktopSection) || defaultBackground;
+      const mobileBackground = newsletterSectionBackgroundValue(mobileSection) || defaultBackground;
       const emailBackgroundImage = (value) => {
         const image = String(value || "").trim();
         return image ? `url('${image.replaceAll("'", "%27").replaceAll('"', "%22")}')` : "none";
@@ -36311,7 +36319,7 @@
       if (section.type === "youtube") {
         const details = newsletterYouTubeDetails(section.url);
         if (!details.original) return "";
-        return `<section class="newsletter-content-section newsletter-responsive-section" style="${sectionBackgroundStyle}"><a class="newsletter-video-card" href="${rosterSafe(details.original)}" target="_blank" rel="noopener noreferrer" aria-label="${details.videoId ? "Watch this video on YouTube" : "Open this link on YouTube"}">${details.videoId ? `<img src="https://i.ytimg.com/vi/${rosterSafe(details.videoId)}/hqdefault.jpg" alt="YouTube video preview">` : `<span style="display:grid;min-height:180px;place-items:center;padding:24px;text-align:center;">Open on YouTube</span>`}<span class="newsletter-video-play" aria-hidden="true">▶</span></a></section>`;
+        return `<section class="newsletter-content-section newsletter-responsive-section" style="${sectionBackgroundStyle}text-align:center;"><a class="newsletter-video-card" href="${rosterSafe(details.original)}" target="_blank" rel="noopener noreferrer" aria-label="${details.videoId ? "Play this video on YouTube" : "Open this link on YouTube"}" style="display:block;position:relative;box-sizing:border-box;width:100%;max-width:560px;margin:22px auto;border-radius:16px;overflow:hidden;background:#1d1514;color:#ffffff;text-align:center;text-decoration:none;box-shadow:0 8px 22px rgba(69,44,40,.16);">${details.videoId ? `<img src="https://i.ytimg.com/vi/${rosterSafe(details.videoId)}/hqdefault.jpg" alt="Video thumbnail" width="560" style="display:block;width:100%;max-width:560px;height:auto;aspect-ratio:16/9;object-fit:cover;border:0;opacity:.9;">` : `<span style="display:grid;min-height:180px;place-items:center;padding:24px;text-align:center;">Open on YouTube</span>`}<span class="newsletter-video-play" aria-hidden="true" style="position:absolute;left:50%;top:50%;display:block;box-sizing:border-box;width:68px;height:68px;margin:-34px 0 0 -34px;border:3px solid rgba(255,255,255,.9);border-radius:50%;background:rgba(101,16,63,.92);color:#ffffff;font:800 28px/62px Arial,sans-serif;text-align:center;text-indent:4px;box-shadow:0 5px 16px rgba(0,0,0,.28);">▶</span></a></section>`;
       }
       if (section.type === "button") {
         const colorKey = section.buttonColor || (draft.genderView === "male" ? "sage" : "berry");
@@ -36329,18 +36337,31 @@
         return `<section class="newsletter-content-section newsletter-social-links" style="display:flex;align-items:center;justify-content:center;gap:12px;margin:18px 0;padding:4px 0;background:transparent!important;text-align:center;">${hearts}</section>`;
       }
       if (section.type === "character") return `<section class="newsletter-content-section is-character newsletter-responsive-section" style="${sectionBackgroundStyle}"><span class="newsletter-character-graphic">${rosterSafe(section.text || "🩰")}</span>${section.title ? `<h2>${rosterSafe(section.title)}</h2>` : ""}</section>`;
-      const titleWidth = Math.max(20, Math.min(100, Number(section.titleWidth) || 100));
-      const textWidth = Math.max(20, Math.min(100, Number(section.textWidth) || 100));
-      const titleLeft = Math.max(0, Math.min(100 - titleWidth, Number(section.titleLeft) || 0));
-      const titleAlignment = section.titleAlign || "left";
+      const titleWidth = Math.max(20, Math.min(100, Number(desktopSection.titleWidth ?? section.titleWidth) || 100));
+      const textWidth = Math.max(20, Math.min(100, Number(desktopSection.textWidth ?? section.textWidth) || 100));
+      const mobileTitleWidth = Math.max(20, Math.min(100, Number(mobileSection.titleWidth ?? section.titleWidth) || 100));
+      const mobileTextWidth = Math.max(20, Math.min(100, Number(mobileSection.textWidth ?? section.textWidth) || 100));
+      const titleLeft = Math.max(0, Math.min(100 - titleWidth, Number(desktopSection.titleLeft ?? section.titleLeft) || 0));
+      const mobileTitleLeft = Math.max(0, Math.min(100 - mobileTitleWidth, Number(mobileSection.titleLeft ?? section.titleLeft) || 0));
+      const titleAlignment = desktopSection.titleAlign || section.titleAlign || "left";
+      const mobileTitleAlignment = mobileSection.titleAlign || section.titleAlign || titleAlignment;
       const titleMargins = titleAlignment === "center"
         ? "margin-left:auto;margin-right:auto;"
         : titleAlignment === "right"
           ? "margin-left:auto;margin-right:0;"
           : "margin-left:0;margin-right:auto;";
-      const textLeft = Math.max(0, Math.min(100 - textWidth, Number(section.textLeft) || 0));
-      const title = section.title ? `<h2 style="width:${titleWidth}%;max-width:100%;${titleMargins}text-align:${titleAlignment};${section.titleFont ? `font-family:${newsletterInlineFontStyle({ font: section.titleFont })}!important;` : ""}${section.titleTextSize ? `font-size:${Number(section.titleTextSize)}pt!important;` : ""}">${newsletterPersonalize(section.titleHtml || rosterSafe(section.title), context)}</h2>` : "";
-      const body = section.text ? `<div class="newsletter-rich-text" style="width:${textWidth}%;max-width:100%;margin-left:${textLeft}%;line-height:1.35;${section.textFont ? `font-family:${newsletterInlineFontStyle({ font: section.textFont })}!important;` : ""}${section.textTextSize ? `font-size:${Number(section.textTextSize)}pt!important;` : ""}">${newsletterPersonalize(section.textHtml || rosterSafe(section.text), context)}</div>` : "";
+      const textLeft = Math.max(0, Math.min(100 - textWidth, Number(desktopSection.textLeft ?? section.textLeft) || 0));
+      const mobileTextLeft = Math.max(0, Math.min(100 - mobileTextWidth, Number(mobileSection.textLeft ?? section.textLeft) || 0));
+      const titleFont = desktopSection.titleFont || section.titleFont || draft.font;
+      const textFont = desktopSection.textFont || section.textFont || draft.font;
+      const mobileTitleFont = mobileSection.titleFont || section.titleFont || titleFont;
+      const mobileTextFont = mobileSection.textFont || section.textFont || textFont;
+      const titleTextSize = Number(desktopSection.titleTextSize ?? section.titleTextSize) || 0;
+      const textTextSize = Number(desktopSection.textTextSize ?? section.textTextSize) || 0;
+      const mobileTitleTextSize = Number(mobileSection.titleTextSize ?? section.titleTextSize) || titleTextSize;
+      const mobileTextTextSize = Number(mobileSection.textTextSize ?? section.textTextSize) || textTextSize;
+      const title = section.title ? `<h2 class="newsletter-section-title" style="--section-title-mobile-width:${mobileTitleWidth}%;--section-title-mobile-left:${mobileTitleLeft}%;--section-title-mobile-align:${mobileTitleAlignment};--section-title-mobile-font:${newsletterInlineFontStyle({ font: mobileTitleFont })};--section-title-mobile-size:${mobileTitleTextSize ? `${mobileTitleTextSize}pt` : "inherit"};width:${titleWidth}%;max-width:100%;${titleMargins}text-align:${titleAlignment};font-family:${newsletterInlineFontStyle({ font: titleFont })}!important;${titleTextSize ? `font-size:${titleTextSize}pt!important;` : ""}">${newsletterPersonalize(section.titleHtml || rosterSafe(section.title), context)}</h2>` : "";
+      const body = section.text ? `<div class="newsletter-rich-text newsletter-section-body" style="--section-body-mobile-width:${mobileTextWidth}%;--section-body-mobile-left:${mobileTextLeft}%;--section-body-mobile-font:${newsletterInlineFontStyle({ font: mobileTextFont })};--section-body-mobile-size:${mobileTextTextSize ? `${mobileTextTextSize}pt` : "inherit"};width:${textWidth}%;max-width:100%;margin-left:${textLeft}%;line-height:1.35;font-family:${newsletterInlineFontStyle({ font: textFont })}!important;${textTextSize ? `font-size:${textTextSize}pt!important;` : ""}">${newsletterPersonalize(section.textHtml || rosterSafe(section.text), context)}</div>` : "";
       const textBoxes = (section.textBoxes || []).map((box) => {
         const width = Math.max(20, Math.min(100, Number(box.width) || 100));
         const left = Math.max(0, Math.min(100 - width, Number(box.left) || 0));
@@ -36647,20 +36668,23 @@
       const student = record?.student || {};
       const teacherId = record?.rosterClass?.teacherId || school.teacherId || school.assignedTeacherId || school.teacher_id || "";
       const timeOfDay = String(school.timeBlock || record?.rosterClass.timeBlock || "").trim().toUpperCase();
+      const savedSchoolNickname = String(school.nickname || "").trim();
+      const schoolNickname = savedSchoolNickname && !/^\[?school\s+nickname\]?$/i.test(savedSchoolNickname)
+        ? savedSchoolNickname
+        : rosterSchoolNickname(record?.rosterClass.schoolName || school.name || "your school");
       return {
         "[Parent First Name]": student.parentFirstName || String(student.parentName || "Dance Family").split(" ")[0] || "Dance Family",
         "[Dancer Name]": rosterStudentFirstName(student) || "your dancer",
         "[Dancer First Name]": student.firstName || student.first_name || rosterStudentFirstName(student) || "your dancer",
         "[Dancer Preferred Name]": rosterStudentFirstName(student) || "your dancer",
-        "[School Nickname]": school.nickname || rosterSchoolNickname(record?.rosterClass.schoolName || "your school"),
+        "[School Nickname]": schoolNickname,
         "[Teacher Name]": teacherId ? newsletterTeacherName(teacherId) : "your Dance Techniques teacher",
         "[Dance Day]": record?.rosterClass.day || "dance day",
         "[Dance Time]": friendlyScheduleTime(record?.rosterClass.time, "class time"),
         "[AM or PM]": timeOfDay === "AM" ? "Mornings" : timeOfDay === "PM" ? "Afternoons" : "Mornings or Afternoons",
         "[Director First Name]": String(school.directorName || "School Director").split(" ")[0],
-        // A school phrase is optional. An empty value deliberately removes its token
-        // rather than exposing a placeholder to families.
-        "[School Specific Phrase]": String(school.schoolSpecificPhrase || school.newsletterPhrase || school.newsletter_phrase || "").trim(),
+        // Internal school-specific phrasing is never included in family emails.
+        "[School Specific Phrase]": "",
         __teacherId: teacherId,
         __schoolConditionKeys: newsletterConditionSchoolKeys(school, record?.rosterClass || {})
       };
@@ -36720,9 +36744,20 @@
       if (!/school[\s-]*specific\s+phrase/i.test(personalized)) return personalized;
       const template = document.createElement("template");
       template.innerHTML = personalized;
-      template.content.querySelectorAll("p, div, li, span").forEach((node) => {
-        const text = String(node.textContent || "").replace(/\u00a0/g, " ").trim();
-        if (/^(?:\[?school[\s-]*specific\s+phrase\]?)[.!]?$/i.test(text) && !node.querySelector("img, a, button, svg")) node.remove();
+      const helperPhrasePattern = /^(?:\[?school[\s-]*specific\s+phrase\]?)[.!]?$/i;
+      const textWalker = document.createTreeWalker(template.content, NodeFilter.SHOW_TEXT);
+      const helperTextNodes = [];
+      while (textWalker.nextNode()) {
+        const text = String(textWalker.currentNode.nodeValue || "").replace(/\u00a0/g, " ").trim();
+        if (helperPhrasePattern.test(text)) helperTextNodes.push(textWalker.currentNode);
+      }
+      helperTextNodes.forEach((textNode) => {
+        const parent = textNode.parentElement;
+        if (parent?.matches("p, div, li, span") && !parent.querySelector("img, a, button, svg") && helperPhrasePattern.test(String(parent.textContent || "").replace(/\u00a0/g, " ").trim())) {
+          parent.remove();
+        } else {
+          textNode.remove();
+        }
       });
       return template.innerHTML;
     };
@@ -37058,6 +37093,13 @@
     };
 
     const newsletterEmailHtml = (context = newsletterSampleContext(), draft = newsletterDraft) => {
+      // A sent email must never depend on whichever device preview happened to
+      // be open when Send Test was clicked. Desktop is the canonical base and
+      // the saved mobile snapshot is applied only inside the mobile media query.
+      const savedBreakpointVersions = draft.breakpointVersions || {};
+      const desktopDraft = { ...draft, ...structuredClone(savedBreakpointVersions.desktop || {}), breakpointVersions: savedBreakpointVersions, genderView: draft.genderView };
+      const mobileDraft = { ...draft, ...structuredClone(savedBreakpointVersions.mobile || {}), breakpointVersions: savedBreakpointVersions, genderView: draft.genderView };
+      draft = desktopDraft;
       const accent = newsletterColors[draft.color] || newsletterColors.berry;
       const personalizeHtml = (html, fallback = "") => newsletterPersonalize(html || rosterSafe(fallback), context);
       const sections = draft.sections.map((section, index) => newsletterSectionMarkup(section, context, draft, index)).join("");
@@ -37072,19 +37114,25 @@
         const characterClass = newsletterGraphicIsCharacter(graphic) ? " is-character-graphic" : "";
         return `<img class="newsletter-email-floating-graphic${characterClass}" src="${rosterSafe(source)}" width="${desktopWidth}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:${desktop.x}%;top:${desktop.y}%;--desktop-x:${desktop.x}%;--desktop-y:${desktop.y}%;--mobile-x:${mobile.x}%;--mobile-y:${mobile.y}%;--desktop-width:${desktopWidth}px;--mobile-width:${mobileWidth}px;--desktop-scale:${desktopSize.scale};--mobile-scale:${mobileSize.scale};display:block;width:${desktopWidth}px;max-width:45%;height:auto;transform:translate(-50%,-50%) scale(${desktopSize.scale});">`;
       }).join("");
-      const backgroundBoxes = (draft.backgroundBoxes || []).map((box) => {
-        const color = newsletterColors[box.color] || newsletterColors.blush;
-        const border = newsletterColors[box.borderColor] || newsletterColors.berry;
-        const style = box.style === "outline-rounded"
-          ? `border:3px solid ${border};border-radius:18px;background:${color};`
-          : box.style === "solid-scalloped"
-            ? `border-radius:18px;background:${color};`
-            : `border-radius:18px;background:${color};`;
-        return `<div aria-hidden="true" style="position:absolute;z-index:0;left:${Math.max(5, Math.min(95, Number(box.x) || 50))}%;top:${Math.max(3, Math.min(97, Number(box.y) || 35))}%;width:${Math.max(80, Math.min(620, Number(box.width) || 360))}px;height:${Math.max(60, Math.min(700, Number(box.height) || 180))}px;transform:translate(-50%,-50%);${style}"></div>`;
+      const backgroundBoxes = (draft.backgroundBoxes || []).map((box, index) => {
+        const mobileBox = mobileDraft.backgroundBoxes?.[index] || box;
+        const boxRules = (value) => ({
+          x: Math.max(5, Math.min(95, Number(value.x) || 50)),
+          y: Math.max(3, Math.min(97, Number(value.y) || 35)),
+          width: Math.max(80, Math.min(620, Number(value.width) || 360)),
+          height: Math.max(60, Math.min(700, Number(value.height) || 180)),
+          color: newsletterColors[value.color] || newsletterColors.blush,
+          border: value.style === "outline-rounded" ? `3px solid ${newsletterColors[value.borderColor] || newsletterColors.berry}` : "0 solid transparent",
+          radius: "18px"
+        });
+        const desktopBox = boxRules(box);
+        const responsiveBox = boxRules(mobileBox);
+        return `<div class="newsletter-email-background-box" aria-hidden="true" style="position:absolute;z-index:0;left:${desktopBox.x}%;top:${desktopBox.y}%;width:${desktopBox.width}px;height:${desktopBox.height}px;transform:translate(-50%,-50%);background:${desktopBox.color};border:${desktopBox.border};border-radius:${desktopBox.radius};--mobile-box-x:${responsiveBox.x}%;--mobile-box-y:${responsiveBox.y}%;--mobile-box-width:${responsiveBox.width}px;--mobile-box-height:${responsiveBox.height}px;--mobile-box-color:${responsiveBox.color};--mobile-box-border:${responsiveBox.border};--mobile-box-radius:${responsiveBox.radius};"></div>`;
       }).join("");
       const templateClass = `template-${String(draft.template || "monthly").replace(/[^a-z0-9-]/gi, "")}${draft.genderView === "male" ? " is-boy-version" : ""}`;
       const versionStyles = draft.genderView === "male" ? `.is-boy-version .newsletter-header{border-color:#aeb9a6!important;background:#e7ece3!important}.is-boy-version .newsletter-header p,.is-boy-version .newsletter-content-section h2{color:#526149!important}.is-boy-version .newsletter-content-section.is-highlight{border-color:#b9c3b2;background:#e7ece3}.is-boy-version .newsletter-content-section.is-reminder{border-color:#68775f}.is-boy-version .newsletter-content-section.is-divider{background:#68775f}.is-boy-version .newsletter-footer{border-color:#b9c3b2;background:#e7ece3!important}` : "";
       const logoWidth = Math.max(60, Math.min(360, Number(draft.logoWidth) || 150));
+      const mobileLogoWidth = Math.max(60, Math.min(360, Number(mobileDraft.logoWidth) || logoWidth));
       const logoColor = newsletterColors[draft.logoColor] || newsletterColors.black;
       const badgeColor = newsletterColors[draft.logoBadgeColor] || newsletterColors.blush;
       const logoMask = `url('https://dancetechniquesllc.github.io/dance-techniques-teacher-tools/assets/dance-techniques-logo-only.png') center/contain no-repeat`;
@@ -37101,11 +37149,21 @@
         : draft.logoBadgeShape
         ? `<div role="img" aria-label="Dance Techniques" style="box-sizing:border-box;display:grid;place-items:center;width:${logoWidth}px;max-width:80%;aspect-ratio:1;margin:0 auto;padding:6%;overflow:hidden;${badgeStyle}">${draft.genderView === "male" ? `<span style="display:block;width:47.6%;height:47.6%;background:${logoColor};-webkit-mask:${boyLogoMask};mask:${boyLogoMask};"></span>` : `<span style="display:block;width:150%;max-width:none;aspect-ratio:2.15/1;background:${logoColor};-webkit-mask:${logoMask};mask:${logoMask};"></span>`}</div>`
         : logoOnly;
+      const desktopMessageWidth = Math.max(20, Math.min(100, Number(draft.messageWidth) || 100));
+      const desktopMessageLeft = Math.max(0, Math.min(100 - desktopMessageWidth, Number(draft.messageLeft) || 0));
+      const mobileMessageWidth = Math.max(20, Math.min(100, Number(mobileDraft.messageWidth) || 100));
+      const mobileMessageLeft = Math.max(0, Math.min(100 - mobileMessageWidth, Number(mobileDraft.messageLeft) || 0));
+      const desktopHeadlineFont = newsletterInlineFontStyle({ font: draft.headlineFont || draft.font });
+      const mobileHeadlineFont = newsletterInlineFontStyle({ font: mobileDraft.headlineFont || mobileDraft.font || draft.headlineFont || draft.font });
+      const desktopSubjectFont = newsletterInlineFontStyle({ font: draft.subjectFont || draft.font });
+      const mobileSubjectFont = newsletterInlineFontStyle({ font: mobileDraft.subjectFont || mobileDraft.font || draft.subjectFont || draft.font });
+      const desktopMessageFont = newsletterInlineFontStyle({ font: draft.messageFont || draft.font });
+      const mobileMessageFont = newsletterInlineFontStyle({ font: mobileDraft.messageFont || mobileDraft.font || draft.messageFont || draft.font });
       return `<!doctype html><html><head><style>
-        a{text-decoration:none!important}.newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p,.newsletter-rich-text{margin:0;line-height:1.35;white-space:pre-wrap}.newsletter-main>div{line-height:1.35}.newsletter-content-section li,.newsletter-main>div li{line-height:1.35}.newsletter-content-section li::marker,.newsletter-main>div li::marker{color:currentColor}.newsletter-content-section ul,.newsletter-content-section ol,.newsletter-main>div ul,.newsletter-main>div ol{margin:8px 0;padding-left:1.45em;white-space:normal}.newsletter-heart-list{list-style:none!important;padding-left:1.55em!important}.newsletter-heart-list>li{position:relative}.newsletter-heart-list>li:before{content:'♥';position:absolute;left:-1.35em;color:currentColor;font-size:.82em;line-height:1.75}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}@media(max-width:480px){.newsletter-email-floating-graphic{left:var(--mobile-x)!important;top:var(--mobile-y)!important;width:var(--mobile-width)!important;transform:translate(-50%,-50%) scale(var(--mobile-scale))!important}.newsletter-responsive-section{background-color:var(--section-bg-mobile)!important;background-image:var(--section-image-mobile)!important;background-size:var(--section-fit-mobile)!important;padding:var(--section-pad-mobile)!important;border-radius:var(--section-pad-mobile)!important}.newsletter-email-photo-frame{width:var(--newsletter-photo-mobile-width)!important;max-width:100%!important}.newsletter-email-photo-image{height:var(--newsletter-photo-mobile-height)!important;object-fit:var(--newsletter-photo-mobile-fit)!important}}
+        a{text-decoration:none!important}.newsletter-delivered-logo>div,.newsletter-delivered-logo>img{width:100%!important;max-width:100%!important}.newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p,.newsletter-rich-text{margin:0;line-height:1.35;white-space:pre-wrap}.newsletter-main>div{line-height:1.35}.newsletter-content-section li,.newsletter-main>div li{line-height:1.35}.newsletter-content-section li::marker,.newsletter-main>div li::marker{color:currentColor}.newsletter-content-section ul,.newsletter-content-section ol,.newsletter-main>div ul,.newsletter-main>div ol{margin:8px 0;padding-left:1.45em;white-space:normal}.newsletter-heart-list{list-style:none!important;padding-left:1.55em!important}.newsletter-heart-list>li{position:relative}.newsletter-heart-list>li:before{content:'♥';position:absolute;left:-1.35em;color:currentColor;font-size:.82em;line-height:1.75}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}@media(max-width:480px){.newsletter-delivered-logo{width:var(--newsletter-mobile-logo-width)!important}.newsletter-delivered-headline{font-family:var(--newsletter-mobile-headline-font)!important;font-size:var(--newsletter-mobile-headline-size)!important;text-align:var(--newsletter-mobile-headline-align)!important}.newsletter-delivered-subject{font-family:var(--newsletter-mobile-subject-font)!important;font-size:var(--newsletter-mobile-subject-size)!important}.newsletter-delivered-message{width:var(--newsletter-mobile-message-width)!important;margin-left:var(--newsletter-mobile-message-left)!important;font-family:var(--newsletter-mobile-message-font)!important;font-size:var(--newsletter-mobile-message-size)!important}.newsletter-section-title{width:var(--section-title-mobile-width)!important;margin-left:var(--section-title-mobile-left)!important;margin-right:0!important;text-align:var(--section-title-mobile-align)!important;font-family:var(--section-title-mobile-font)!important;font-size:var(--section-title-mobile-size)!important}.newsletter-section-body{width:var(--section-body-mobile-width)!important;margin-left:var(--section-body-mobile-left)!important;font-family:var(--section-body-mobile-font)!important;font-size:var(--section-body-mobile-size)!important}.newsletter-email-background-box{left:var(--mobile-box-x)!important;top:var(--mobile-box-y)!important;width:var(--mobile-box-width)!important;height:var(--mobile-box-height)!important;background:var(--mobile-box-color)!important;border:var(--mobile-box-border)!important;border-radius:var(--mobile-box-radius)!important}.newsletter-email-floating-graphic{left:var(--mobile-x)!important;top:var(--mobile-y)!important;width:var(--mobile-width)!important;transform:translate(-50%,-50%) scale(var(--mobile-scale))!important}.newsletter-responsive-section{background-color:var(--section-bg-mobile)!important;background-image:var(--section-image-mobile)!important;background-size:var(--section-fit-mobile)!important;padding:var(--section-pad-mobile)!important;border-radius:var(--section-pad-mobile)!important}.newsletter-email-photo-frame{width:var(--newsletter-photo-mobile-width)!important;max-width:100%!important}.newsletter-email-photo-image{height:var(--newsletter-photo-mobile-height)!important;object-fit:var(--newsletter-photo-mobile-fit)!important}}
         .template-welcome .newsletter-header{padding:38px 32px 30px!important;border-bottom:1px solid #dfb9b2;background:#f8e4df!important}.template-welcome .newsletter-header h1{max-width:520px;margin:0 auto 8px!important;color:#211817!important;font-family:Didot,Georgia,serif!important;font-size:32px;font-weight:500;line-height:1.08}.template-welcome .newsletter-header p{color:#8b4e61!important;font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.template-welcome .newsletter-main{padding:32px 38px 38px!important}.template-welcome .newsletter-content-section h2{color:#65103f;font-family:Didot,Georgia,serif;font-size:22px;font-weight:500}.template-welcome .newsletter-content-section.is-highlight{border:1px solid #e4c2bb;background:#f8e6e1}.template-welcome .newsletter-content-section.is-reminder{border:1px solid #dba9a1;border-radius:4px;background:#fffdf9}.template-welcome .newsletter-content-section.is-divider{background:#dba9a1}.template-welcome .newsletter-footer{border-top:1px solid #dfb9b2;background:#f8e4df!important}
         ${versionStyles}
-      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterInlineFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.35;">${backgroundBoxes}${graphics}<header class="newsletter-header" style="position:relative;z-index:2;padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);">${deliveredLogo}<h1 style="margin:0 0 7px;color:${accent};font-family:${newsletterInlineFontStyle({ font: draft.headlineFont || draft.font })};font-size:${draft.headlineTextSize ? `${Number(draft.headlineTextSize)}pt` : "29px"};text-align:${draft.headlineAlign || "center"};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p style="margin:0;color:${accent};font-family:${newsletterInlineFontStyle({ font: draft.subjectFont || draft.font })};font-size:${Number(draft.subjectTextSize) || Number(draft.textSize) || 12}pt;">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="position:relative;z-index:2;padding:30px;"><div style="width:${Math.max(20, Math.min(100, Number(draft.messageWidth) || 100))}%;max-width:100%;margin-left:${Math.max(0, Math.min(100 - Math.max(20, Math.min(100, Number(draft.messageWidth) || 100)), Number(draft.messageLeft) || 0))}%;font-family:${newsletterInlineFontStyle({ font: draft.messageFont || draft.font })};font-size:${Number(draft.messageTextSize) || Number(draft.textSize) || 12}pt;line-height:1.35;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="position:relative;z-index:2;padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+      </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterInlineFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.35;">${backgroundBoxes}${graphics}<header class="newsletter-header" style="position:relative;z-index:2;padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><div class="newsletter-delivered-logo" style="width:${logoWidth}px;max-width:80%;margin:0 auto;--newsletter-mobile-logo-width:${mobileLogoWidth}px">${deliveredLogo}</div><h1 class="newsletter-delivered-headline" style="--newsletter-mobile-headline-font:${mobileHeadlineFont};--newsletter-mobile-headline-size:${mobileDraft.headlineTextSize ? `${Number(mobileDraft.headlineTextSize)}pt` : "29px"};--newsletter-mobile-headline-align:${mobileDraft.headlineAlign || "center"};margin:0 0 7px;color:${accent};font-family:${desktopHeadlineFont};font-size:${draft.headlineTextSize ? `${Number(draft.headlineTextSize)}pt` : "29px"};text-align:${draft.headlineAlign || "center"};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-delivered-subject" style="--newsletter-mobile-subject-font:${mobileSubjectFont};--newsletter-mobile-subject-size:${Number(mobileDraft.subjectTextSize) || Number(mobileDraft.textSize) || 12}pt;margin:0;color:${accent};font-family:${desktopSubjectFont};font-size:${Number(draft.subjectTextSize) || Number(draft.textSize) || 12}pt;">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="position:relative;z-index:2;padding:30px;"><div class="newsletter-delivered-message" style="--newsletter-mobile-message-width:${mobileMessageWidth}%;--newsletter-mobile-message-left:${mobileMessageLeft}%;--newsletter-mobile-message-font:${mobileMessageFont};--newsletter-mobile-message-size:${Number(mobileDraft.messageTextSize) || Number(mobileDraft.textSize) || 12}pt;width:${desktopMessageWidth}%;max-width:100%;margin-left:${desktopMessageLeft}%;font-family:${desktopMessageFont};font-size:${Number(draft.messageTextSize) || Number(draft.textSize) || 12}pt;line-height:1.35;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="position:relative;z-index:2;padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
     };
     const newsletterRecipientMessages = () => {
       const records = newsletterFilteredRecords();
@@ -37204,7 +37262,7 @@
       setText("newsletter-recipient-summary", ["parents", "future"].includes(newsletterDraft.audience) ? `${parentCount} parent email${parentCount === 1 ? "" : "s"} selected` : newsletterDraft.audience === "schools" ? `${schoolCount} partner school${schoolCount === 1 ? "" : "s"} selected` : `${parentCount} parent email${parentCount === 1 ? "" : "s"} and ${schoolCount} partner school${schoolCount === 1 ? "" : "s"}`);
       setText("newsletter-preview-as", newsletterDraft.audience === "schools" ? "Previewing as a sample school director" : "Previewing as a sample parent");
       const videoId = newsletterYouTubeId(newsletterDraft.videoUrl);
-      const videoMarkup = newsletterDraft.videoUrl ? `<a class="newsletter-video-card" href="${rosterSafe(newsletterDraft.videoUrl)}" target="_blank" rel="noopener">${videoId ? `<img src="https://i.ytimg.com/vi/${rosterSafe(videoId)}/hqdefault.jpg" alt="YouTube video preview">` : `<span style="display:block;aspect-ratio:16/9;"></span>`}<span class="newsletter-video-play">▶</span></a>` : "";
+      const videoMarkup = newsletterDraft.videoUrl ? `<a class="newsletter-video-card" href="${rosterSafe(newsletterDraft.videoUrl)}" target="_blank" rel="noopener" aria-label="Play this video">${videoId ? `<img src="https://i.ytimg.com/vi/${rosterSafe(videoId)}/hqdefault.jpg" alt="Video thumbnail">` : `<span style="display:block;aspect-ratio:16/9;"></span>`}<span class="newsletter-video-play" aria-hidden="true">▶</span></a>` : "";
       const ctaMarkup = newsletterDraft.ctaLabel && newsletterDraft.ctaUrl ? `<p style="text-align:center;margin:24px 0;"><a href="${rosterSafe(newsletterDraft.ctaUrl)}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:var(--newsletter-accent);color:white;text-decoration:none;font-weight:800;">${rosterSafe(newsletterDraft.ctaLabel)}</a></p>` : "";
       const messagePosition = Math.max(0, Math.min(Number(newsletterDraft.messagePosition || 0), newsletterDraft.sections.length));
       const editableSections = newsletterDraft.sections.map(newsletterEditableSectionMarkup);
