@@ -2486,7 +2486,14 @@
     .enrollment-tempo-track-marker { position: absolute; top: 50%; left: var(--tempo-marker-progress); width: 25px; height: 34px; transform: translate(-50%, -50%); object-fit: contain; filter: drop-shadow(0 2px 3px rgb(91 34 55 / .12)); }
     .enrollment-tempo-target small { color: #52674a; font-family: Georgia, serif; font-size: clamp(14px, 2.4vw, 20px); font-weight: 500; font-style: italic; line-height: 1.2; text-align: center; }
     .enrollment-tempo-target small .tempo-number { color: #681a3c; font-family: var(--font-body); font-size: 1.28em; font-style: normal; font-weight: 900; }
-    .enrollment-tempo-bottom-divider { display: block; width: min(48%, 250px); height: 28px; margin: 3px auto -5px; object-fit: contain; }
+    .enrollment-tempo-bottom-divider {
+      display: block;
+      width: min(48%, 250px);
+      height: 28px;
+      margin: 3px auto -5px;
+      object-fit: contain;
+      clip-path: polygon(0 0, 68% 0, 68% 32%, 86% 32%, 86% 0, 100% 0, 100% 100%, 0 100%);
+    }
     @media (max-width: 560px) {
       .enrollment-tempo-card { gap: 9px; padding: 14px 13px; border-radius: 19px; }
       .enrollment-tempo-heading { gap: 8px; }
