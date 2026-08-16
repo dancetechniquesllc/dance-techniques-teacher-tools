@@ -36664,14 +36664,20 @@
       rosterClass.schoolName
     ].map((value) => String(value || "").trim().toLocaleLowerCase()).filter(Boolean))];
     const newsletterContextForRecord = (record) => {
-      const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, record?.rosterClass.schoolName)) || {};
+      const recordSchoolName = String(record?.rosterClass?.schoolName || "").trim();
+      const recordSchoolId = String(record?.rosterClass?.schoolId || record?.rosterClass?.school_id || "").trim();
+      const school = schoolLibrary.find((item) => (
+        (recordSchoolId && String(item.id || "") === recordSchoolId)
+        || enrollmentSchoolNameMatches(item.name, recordSchoolName)
+        || enrollmentSchoolNameMatches(item.nickname, recordSchoolName)
+      )) || {};
       const student = record?.student || {};
       const teacherId = record?.rosterClass?.teacherId || school.teacherId || school.assignedTeacherId || school.teacher_id || "";
       const timeOfDay = String(school.timeBlock || record?.rosterClass.timeBlock || "").trim().toUpperCase();
       const savedSchoolNickname = String(school.nickname || "").trim();
       const schoolNickname = savedSchoolNickname && !/^\[?school\s+nickname\]?$/i.test(savedSchoolNickname)
         ? savedSchoolNickname
-        : rosterSchoolNickname(record?.rosterClass.schoolName || school.name || "your school");
+        : rosterSchoolNickname(recordSchoolName || school.name || "your school");
       return {
         "[Parent First Name]": student.parentFirstName || String(student.parentName || "Dance Family").split(" ")[0] || "Dance Family",
         "[Dancer Name]": rosterStudentFirstName(student) || "your dancer",
@@ -36734,9 +36740,12 @@
       const personalized = Object.entries(context)
         .filter(([token]) => token.startsWith("["))
         .reduce((text, [token, replacement]) => {
-          const tokenLabel = token.slice(1, -1).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          const tokenPattern = new RegExp(`(?:\\[|&#91;|&lbrack;)${tokenLabel}(?:\\]|&#93;|&rbrack;)`, "gi");
-          return text.replaceAll(token, replacement).replace(tokenPattern, replacement);
+          const tokenWords = token.slice(1, -1).trim().split(/\s+/).map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+          const flexibleSpace = "(?:\\s|&nbsp;|&#160;|<[^>]+>)+";
+          const optionalSpace = "(?:\\s|&nbsp;|&#160;|<[^>]+>)*";
+          const tokenPattern = new RegExp(`(?:\\[|&#91;|&lbrack;)${optionalSpace}${tokenWords.join(flexibleSpace)}${optionalSpace}(?:\\]|&#93;|&rbrack;)`, "gi");
+          const safeReplacement = String(replacement || "");
+          return text.replaceAll(token, safeReplacement).replace(tokenPattern, () => safeReplacement);
         }, newsletterConditionalHtml(value, context));
       // Earlier drafts used this exact sentence as a visual stand-in while a
       // school-specific phrase was being planned. It is never family-facing copy;
