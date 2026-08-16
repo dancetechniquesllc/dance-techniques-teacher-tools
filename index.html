@@ -6928,8 +6928,8 @@
     .enrollment-placement-teacher strong { overflow-wrap: anywhere; }
     .enrollment-placement-class-section { display: grid; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
     .enrollment-placement-class-section > h4 { margin: 0; font-size: 16px; }
-    .enrollment-placement-class-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-    .enrollment-placement-class-card { min-height: 250px; }
+    .enrollment-placement-class-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: stretch; }
+    .enrollment-placement-class-card { min-height: 330px; padding: 14px 12px; align-content: start; }
     .enrollment-placement-class-card.is-assigned { border-color: var(--berry); background: color-mix(in srgb, var(--blush) 52%, var(--surface-soft)); box-shadow: inset 0 0 0 1px var(--berry); }
     .enrollment-class-suggestion {
       display: grid;
@@ -6948,6 +6948,19 @@
     .enrollment-class-card-actions button { min-height: 32px; padding: 6px 8px; border-radius: 999px; font-size: 9px; }
     .enrollment-class-card-assign { border-color: color-mix(in srgb, var(--berry) 28%, var(--border)); background: var(--blush); color: var(--berry); }
     .enrollment-class-card-assign.is-selected { border-color: var(--berry); background: var(--berry); color: #fff; }
+    .enrollment-class-compare-heading { display: grid; justify-items: center; gap: 4px; margin-bottom: 8px; text-align: center; }
+    .enrollment-class-compare-heading strong { color: var(--berry); font-size: 19px; }
+    .enrollment-class-compare-heading small { color: var(--muted); font-size: 9px; }
+    .enrollment-class-compare-bubbles { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .enrollment-class-compare-bubbles span { padding: 5px 8px; border-radius: 999px; background: color-mix(in srgb, var(--sage) 22%, var(--surface-soft)); color: var(--ink); font-size: 9px; font-weight: 750; }
+    .enrollment-class-compare-students { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 6px; width: 100%; margin: 7px 0 8px; }
+    .enrollment-class-compare-student { position: relative; display: grid; justify-items: center; align-content: start; gap: 2px; min-width: 0; padding: 5px 2px; border: 1px solid transparent; border-radius: 12px; text-align: center; }
+    .enrollment-class-compare-student .roster-student-photo { width: 45px; height: 45px; flex-basis: 45px; font-size: 12px; }
+    .enrollment-class-compare-student strong { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-size: 9px; }
+    .enrollment-class-compare-student small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 8px; }
+    .enrollment-class-compare-student.is-preview { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 13%, var(--surface-soft)); box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 36%, transparent), 0 0 14px color-mix(in srgb, var(--gold) 35%, transparent); }
+    .enrollment-class-preview-label { position: absolute; top: -7px; right: -4px; padding: 3px 6px; border-radius: 999px; background: var(--gold); color: #3f2d09; font-size: 7px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+    .enrollment-class-empty-roster { grid-column: 1 / -1; padding: 18px 8px; color: var(--muted); font-size: 9px; text-align: center; }
     .confirm-dialog.enrollment-class-preview-dialog { position: relative; width: min(760px, calc(100vw - 28px)); max-height: min(82vh, 760px); overflow: auto; }
     .enrollment-class-preview-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
     .enrollment-class-preview-heading h3 { margin: 0; }
@@ -6964,6 +6977,11 @@
     .enrollment-class-preview-actions { display: flex; justify-content: flex-end; margin-top: 14px; }
     .enrollment-class-preview-assign { width: min(190px, 100%); border-color: color-mix(in srgb, var(--berry) 28%, var(--border)); background: var(--blush); color: var(--berry); }
     .enrollment-class-preview-assign.is-selected { border-color: var(--berry); background: var(--berry); color: #fff; }
+    .confirm-dialog.full-class-celebration-dialog { width: min(520px, calc(100vw - 28px)); text-align: center; }
+    .full-class-celebration-dialog h3 { margin-bottom: 10px; color: var(--berry); font-size: clamp(25px, 4vw, 34px); }
+    .full-class-celebration-dialog p { margin: 0 auto 12px; max-width: 420px; color: var(--ink); line-height: 1.55; }
+    .full-class-celebration-dialog .full-class-celebration-closing { color: var(--berry); font-weight: 850; }
+    .full-class-celebration-dialog button { width: min(220px, 100%); margin-top: 8px; background: var(--blush); color: var(--berry); }
     .enrollment-placement-approve-actions button.is-blocked { opacity: .58; cursor: help; }
     .enrollment-review-save-actions,
     .enrollment-placement-approve-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
@@ -6977,6 +6995,7 @@
     .enrollment-review-card > .section-title h3 { font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; font-size: clamp(25px, 2.25vw, 32px); font-weight: 600 !important; line-height: 1.05; }
     .enrollment-review-card > .section-title p { margin-top: 3px; color: var(--muted); font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; font-size: 9px; font-weight: 400 !important; letter-spacing: .02em; }
     .enrollment-placement-grid label { font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; font-weight: 500 !important; }
+    @media (max-width: 1100px) { .enrollment-placement-class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 980px) { .enrollment-queue-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 780px) { .enrollment-queue-filters { grid-template-columns: 1fr; } }
     @media (max-width: 560px) { .enrollment-queue-list { grid-template-columns: 1fr; } }
@@ -7103,16 +7122,23 @@
     .roster-school-results-line { height: 1px; margin: 8px 0 14px; background: var(--border); }
     .roster-school-class-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
     .confirm-dialog.roster-multi-class-dialog { width: calc(100vw - 28px); max-width: 1800px; max-height: calc(100vh - 28px); overflow: auto; padding: 24px; border-radius: 14px; }
-    .roster-multi-class-filters { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; margin: 18px 0; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); }
-    .roster-multi-class-filters label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; }
-    .roster-multi-class-filters select { min-height: 42px; }
-    .roster-multi-class-grid { display: grid; gap: 24px; margin-top: 8px; }
-    .roster-multi-class-section { min-height: 180px; padding: 4px 2px 18px; border-radius: 14px; outline: none; transition: background .16s ease, box-shadow .16s ease; }
+    .roster-multi-class-toolbar { position: sticky; top: -24px; z-index: 20; display: grid; grid-template-columns: minmax(210px, 1fr) auto auto auto; align-items: end; gap: 10px; margin: 16px 0 20px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(12px); }
+    .roster-multi-class-toolbar label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 850; }
+    .roster-multi-class-toolbar select, .roster-multi-class-toolbar button { min-height: 42px; }
+    .roster-multi-change-count { min-height: 42px; display: grid; place-items: center; padding: 0 14px; border-radius: 999px; background: var(--surface-soft); color: var(--berry); font-size: 12px; font-weight: 900; white-space: nowrap; }
+    .roster-multi-class-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 8px; }
+    .roster-multi-class-section { position: relative; min-height: 330px; padding: 16px; border: 1px solid var(--border); border-radius: 18px; background: color-mix(in srgb, var(--surface) 92%, transparent); outline: none; transition: opacity .16s ease, background .16s ease, box-shadow .16s ease; }
     .roster-multi-class-section.is-drop-target { background: color-mix(in srgb, var(--blush) 45%, transparent); box-shadow: inset 0 0 0 2px var(--accent-strong); }
+    .roster-multi-class-section.is-suggested { box-shadow: 0 0 0 3px #d7aa42, 0 0 24px rgb(215 170 66 / .38); }
+    .roster-multi-class-section.is-over-capacity { border-color: var(--brick); background: color-mix(in srgb, var(--blush) 68%, var(--surface)); }
+    .roster-multi-class-section.is-dimmed { opacity: .5; }
+    .roster-multi-class-section.is-dimmed:hover, .roster-multi-class-section.is-dimmed.is-drop-target { opacity: 1; }
     .roster-multi-class-section:focus-visible { box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--accent-strong) 72%, transparent); }
-    .roster-multi-class-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-    .roster-multi-class-title-row h4 { margin: 0; font-size: 22px; }
-    .roster-multi-class-title-row small { color: var(--muted); }
+    .roster-multi-class-title-row { display: grid; justify-items: center; gap: 5px; padding-top: 34px; text-align: center; }
+    .roster-multi-class-title-row h4 { margin: 0; color: var(--berry); font-size: 25px; }
+    .roster-multi-class-title-row small { color: var(--muted); font-size: 12px; font-weight: 750; }
+    .roster-multi-capacity { position: absolute; top: 14px; right: 14px; padding: 5px 10px; border-radius: 999px; background: var(--sage-light); color: var(--sage-dark); font-weight: 900; }
+    .roster-multi-class-section.is-over-capacity .roster-multi-capacity { background: var(--brick); color: white; }
     .roster-multi-class-divider { height: 2px; margin: 9px 0 16px; border-radius: 999px; background: var(--blush); }
     .roster-multi-student-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
     .roster-multi-student { display: grid; justify-items: center; align-content: start; gap: 6px; min-width: 0; padding: 12px 8px; border: 1px solid transparent; border-radius: 14px; outline: none; background: transparent; text-align: center; cursor: grab; touch-action: none; }
@@ -7123,13 +7149,17 @@
     .roster-multi-drag-ghost { position: fixed; z-index: 100000; width: min(190px, 30vw); margin: 0; border: 2px solid var(--accent-strong); border-radius: 14px; background: var(--surface); box-shadow: 0 14px 34px rgb(60 39 36 / .3); opacity: .96; pointer-events: none; transform: translate(-50%, -50%) rotate(1.5deg); }
     .roster-multi-drag-ghost .roster-student-photo { width: 64px; height: 64px; }
     .roster-multi-student.is-keyboard-selected { border-color: var(--accent-strong); background: color-mix(in srgb, var(--blush) 30%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blush) 50%, transparent); }
+    .roster-multi-student.is-selected { border-color: var(--berry); background: var(--blush); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blush) 62%, transparent); }
+    .roster-multi-student.is-moved { border-color: var(--moved-teacher-color, var(--berry)); background: color-mix(in srgb, var(--moved-teacher-color, var(--blush)) 24%, white); box-shadow: 0 0 0 3px color-mix(in srgb, var(--moved-teacher-color, var(--berry)) 48%, transparent), 0 0 18px color-mix(in srgb, var(--moved-teacher-color, var(--berry)) 30%, transparent); }
     .roster-multi-student .roster-student-photo { width: 76px; height: 76px; }
     .roster-multi-student strong { max-width: 100%; font-size: 15px; line-height: 1.15; }
     .roster-multi-student small { max-width: 100%; color: var(--muted); font-size: 11px; line-height: 1.25; }
     .roster-multi-empty { grid-column: 1 / -1; min-height: 92px; display: grid; place-items: center; border: 1px dashed var(--border); border-radius: 12px; color: var(--muted); font-size: 12px; }
     @media (max-width: 760px) {
       .confirm-dialog.roster-multi-class-dialog { width: calc(100vw - 12px); max-height: calc(100vh - 12px); padding: 16px; }
-      .roster-multi-class-filters { grid-template-columns: 1fr; }
+      .roster-multi-class-toolbar { position: static; grid-template-columns: 1fr 1fr; }
+      .roster-multi-class-toolbar label { grid-column: 1 / -1; }
+      .roster-multi-class-grid { grid-template-columns: 1fr; }
       .roster-multi-student-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
       .roster-multi-student { padding: 9px 4px; }
       .roster-multi-student .roster-student-photo { width: 58px; height: 58px; }
@@ -15286,7 +15316,7 @@
                     <div class="enrollment-review-card" id="enrollment-review-detail"></div>
                   </div>
                 </div>
-                <div class="confirm-overlay" id="enrollment-class-preview-overlay" aria-hidden="true">
+    <div class="confirm-overlay" id="enrollment-class-preview-overlay" aria-hidden="true">
                   <div class="confirm-dialog enrollment-class-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-class-preview-title">
                     <div id="enrollment-class-preview-detail"></div>
                   </div>
@@ -15323,13 +15353,13 @@
             <div class="confirm-overlay" id="roster-multi-class-overlay" aria-hidden="true">
               <div class="confirm-dialog roster-multi-class-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-multi-class-title">
                 <div class="roster-profile-header"><div><h3 id="roster-multi-class-title">Rearrange Classes</h3><p class="subtle" id="roster-multi-class-school"></p></div><button class="roster-profile-close" type="button" id="roster-multi-class-close" aria-label="Close Rearrange Classes">×</button></div>
-                <div class="roster-multi-class-filters">
-                  <label>Student Order<select id="roster-multi-sort"><option value="first-name">Student First Name · Alphabetical</option><option value="classroom">Official Classroom</option><option value="age">Age · Youngest First</option></select></label>
-                  <label>Classroom<select id="roster-multi-classroom-filter"><option value="all">All Classrooms</option></select></label>
-                  <label>Age<select id="roster-multi-age-filter"><option value="all">All Ages</option></select></label>
+                <div class="roster-multi-class-toolbar">
+                  <label>School<select id="roster-multi-school-select"></select></label>
+                  <span class="roster-multi-change-count" id="roster-multi-change-count">0 dancers moved</span>
+                  <button class="secondary" type="button" id="roster-multi-class-undo" disabled>Undo All</button>
+                  <button class="primary" type="button" id="roster-multi-class-save" disabled>Save Changes</button>
                 </div>
                 <div class="roster-multi-class-grid" id="roster-multi-class-grid"></div>
-                <div class="confirm-actions"><button class="primary" type="button" id="roster-multi-class-cancel">Done</button></div>
               </div>
             </div>
             <div class="archived-students-footer">
@@ -16530,6 +16560,17 @@
         <button class="danger-btn" type="button" id="master-event-delete-confirm">Delete Event</button>
       </div>
     </div>
+  </div>
+  <div class="confirm-overlay" id="full-class-celebration-overlay" aria-hidden="true">
+      <div class="confirm-dialog full-class-celebration-dialog" role="dialog" aria-modal="true" aria-labelledby="full-class-celebration-title">
+        <h3 id="full-class-celebration-title">You Filled a Class!</h3>
+        <div id="full-class-celebration-copy">
+          <p><strong id="full-class-celebration-class">This class</strong> has officially reached capacity — way to go!</p>
+          <p><strong id="full-class-celebration-dancer">This dancer</strong> will need to be assigned to another available class, or it may be time to consider adding another class and splitting the group.</p>
+          <p class="full-class-celebration-closing">Great job filling those dance shoes! ✨</p>
+        </div>
+        <button type="button" id="full-class-celebration-action" data-close-full-class-celebration>Choose Another Class</button>
+      </div>
   </div>
   <div class="confirm-overlay" id="schedule-event-delete-confirm-overlay" aria-hidden="true">
     <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="schedule-event-delete-confirm-title">
@@ -19149,21 +19190,57 @@
         !selectedClassId ? "Assigned Class" : "",
         !selectedTeacherId ? "Class Teacher" : ""
       ].filter(Boolean);
-      const enrollmentClassCards = [...schoolClasses].sort((left, right) => (left.time || "").localeCompare(right.time || "") || left.name.localeCompare(right.name, undefined, { numeric: true })).map((rosterClass) => {
+      const enrollmentClassCards = [...schoolClasses].sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true })).map((rosterClass) => {
         const enrolledCount = rosterEnrolled(rosterClass).length;
-        const teacher = teachers.find((candidate) => candidate.id === rosterClass.teacherId) || {};
-        const teacherName = rosterTeacherName(rosterClass.teacherId);
-        const dayBubble = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "U";
+        const currentStudents = rosterEnrolled(rosterClass).slice().sort((left, right) => rosterStudentFullName(left).localeCompare(rosterStudentFullName(right)));
+        const studentAges = currentStudents.map((student) => {
+          const birthdate = new Date(`${student.birthdate || ""}T12:00:00`);
+          if (Number.isNaN(birthdate.getTime())) return null;
+          const today = new Date();
+          let months = (today.getFullYear() - birthdate.getFullYear()) * 12 + today.getMonth() - birthdate.getMonth();
+          if (today.getDate() < birthdate.getDate()) months -= 1;
+          return Math.max(0, months);
+        }).filter((months) => Number.isFinite(months)).sort((left, right) => left - right);
+        const shortAge = (months) => `${Math.floor(months / 12)} yr ${months % 12} mo`;
+        const ageRange = studentAges.length ? `${shortAge(studentAges[0])} – ${shortAge(studentAges[studentAges.length - 1])}` : "Age range unavailable";
         const isSuggested = rosterClass.id === item.suggested_dance_class_id;
         const isAssigned = rosterClass.id === selectedClassId;
+        const previewFirstName = item.student_preferred_name || item.student_first_name || "Dancer";
+        const previewLastInitial = (item.student_last_name || "").trim().charAt(0);
+        const previewName = `${previewFirstName}${previewLastInitial ? ` ${previewLastInitial}.` : ""}`;
+        const previewInitials = `${previewFirstName.charAt(0)}${previewLastInitial}`.toUpperCase();
+        const previewClassroom = item.official_classroom || item.classroom || "Classroom not entered";
+        const previewAge = item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided";
+        const studentsMarkup = currentStudents.map((student) => {
+          const fullName = rosterStudentFullName(student).trim();
+          const parts = fullName.split(/\s+/).filter(Boolean);
+          const firstName = student.preferredName || student.firstName || parts[0] || "Dancer";
+          const lastInitial = (student.lastName || parts[parts.length - 1] || "").charAt(0);
+          const displayName = `${firstName}${lastInitial ? ` ${lastInitial}.` : ""}`;
+          const classroom = student.officialClassroom || student.classroom || "Classroom not entered";
+          return `<div class="enrollment-class-compare-student">
+            <span class="roster-student-photo">${student.photo ? `<img src="${escapeText(student.photo)}" alt="">` : escapeText(rosterStudentInitials(student))}</span>
+            <strong title="${escapeText(displayName)}">${escapeText(displayName)}</strong>
+            <small title="${escapeText(classroom)}">${escapeText(classroom)}</small>
+            <small>${escapeText(rosterAge(student.birthdate))}</small>
+          </div>`;
+        }).join("");
+        const previewMarkup = isAssigned ? `<div class="enrollment-class-compare-student is-preview">
+          <span class="enrollment-class-preview-label">Preview</span>
+          <span class="roster-student-photo">${escapeText(previewInitials || "DT")}</span>
+          <strong title="${escapeText(previewName)}">${escapeText(previewName)}</strong>
+          <small title="${escapeText(previewClassroom)}">${escapeText(previewClassroom)}</small>
+          <small>${escapeText(previewAge)}</small>
+        </div>` : "";
+        const recommendedCapacity = classRecommendedCapacity(rosterClass);
         return `<article class="roster-class-card enrollment-placement-class-card ${isAssigned ? "is-assigned" : ""}">
-          <span class="roster-class-day-bubble" title="${escapeText(rosterClass.day || "Dance day not set")}">${escapeText(dayBubble)}</span>
-          <span class="roster-class-badge teacher-identity-bubble ${teacherProfileColorClass(teacher)}" title="${escapeText(teacherName)}">${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="${escapeText(teacherName)}">` : escapeText(initialsFor(teacher) || "T")}</span>
-          <strong>${escapeText(rosterClass.name)}</strong>
-          <small>${escapeText(teacherName)}</small>
-          <small>${escapeText(rosterClass.day || "Day not set")} · ${escapeText(friendlyScheduleTime(rosterClass.time))}</small>
-          <small class="roster-enrollment-bubble ${enrolledCount >= rosterClass.capacity ? "full" : (enrolledCount >= 7 ? "ready" : "low")}">${enrolledCount}/${rosterClass.capacity} Enrolled${enrolledCount >= rosterClass.capacity ? " · Full" : ""}</small>
+          <div class="enrollment-class-compare-heading">
+            <strong>${escapeText(rosterClass.name)}</strong>
+            <small>${escapeText(ageRange)}</small>
+          </div>
+          <div class="enrollment-class-compare-bubbles"><span>${enrolledCount}/${recommendedCapacity} Enrolled${enrolledCount >= recommendedCapacity ? " · Full" : ""}</span></div>
           ${isSuggested ? `<span class="enrollment-class-suggestion"><strong>✦ Suggest Class ✦</strong><small>${escapeText(suggestion?.reason || "Best match for this enrollment")}</small></span>` : ""}
+          <div class="enrollment-class-compare-students">${studentsMarkup || (!previewMarkup ? `<div class="enrollment-class-empty-roster">No dancers assigned yet.</div>` : "")}${previewMarkup}</div>
           <span class="enrollment-class-card-actions">
             <button class="secondary" type="button" data-enrollment-view-class="${escapeText(rosterClass.id)}">View Class</button>
             <button class="enrollment-class-card-assign ${isAssigned ? "is-selected" : ""}" type="button" data-enrollment-assign-class="${escapeText(rosterClass.id)}">${isAssigned ? "Class Selected" : "Assign Class"}</button>
@@ -19342,7 +19419,7 @@
         <div class="enrollment-class-preview-meta">
           <span>${escapeText(rosterTeacherName(rosterClass.teacherId))}</span>
           <span>${escapeText(rosterClass.day || "Day not set")} · ${escapeText(friendlyScheduleTime(rosterClass.time))}</span>
-          <span>${students.length}/${rosterClass.capacity} Enrolled</span>
+          <span>${students.length}/${classRecommendedCapacity(rosterClass)} Enrolled</span>
         </div>
         ${classroomMarkup || `<div class="roster-empty">No enrolled dancers are currently in this class.</div>`}
         <div class="enrollment-class-preview-actions"><button class="enrollment-class-preview-assign ${assigned ? "is-selected" : ""}" type="button" data-enrollment-assign-class="${escapeText(rosterClass.id)}">${assigned ? "Class Selected" : "Assign Class"}</button></div>`;
@@ -19416,6 +19493,57 @@
       window.alert(`This dancer can’t be placed yet.\n\nPlease complete: ${missing.join(", ")}.`);
       return true;
     };
+    const isTotsAgeClass = (rosterClass) => String(rosterClass?.ageGroup || rosterClass?.age_group || "").trim().toLowerCase() === "tots";
+    const classRecommendedCapacity = (rosterClass) => isTotsAgeClass(rosterClass) ? 8 : Number(rosterClass?.capacity || 12);
+    const showFullClassCelebration = (rosterClass, dancerName) => {
+      const overlay = document.getElementById("full-class-celebration-overlay");
+      const totsClass = isTotsAgeClass(rosterClass);
+      if (!overlay) return window.alert(totsClass
+        ? "🎉 This Tots Class is Full!\n\nThis Level 1 class has reached its recommended maximum of 8 dancers.\n\nWe intentionally keep our youngest classes small so dancers ages 18 months–2 years have enough space, support, and individual attention to participate successfully and receive meaningful instruction.\n\nPlease assign this dancer to another available class or consider opening an additional Tots class."
+        : `You Filled a Class!\n\n${rosterClass?.name || "This class"} has officially reached capacity — way to go!\n\n${dancerName || "This dancer"} will need to be assigned to another available class, or it may be time to consider adding another class and splitting the group.\n\nGreat job filling those dance shoes! ✨`);
+      const title = document.getElementById("full-class-celebration-title");
+      const copy = document.getElementById("full-class-celebration-copy");
+      const action = document.getElementById("full-class-celebration-action");
+      if (title) title.textContent = totsClass ? "🎉 This Tots Class is Full!" : "You Filled a Class!";
+      if (copy) copy.innerHTML = totsClass
+        ? `<p>This Level 1 class has reached its recommended maximum of <strong>8 dancers</strong>.</p><p>We intentionally keep our youngest classes small so dancers ages 18 months–2 years have enough space, support, and individual attention to participate successfully and receive meaningful instruction.</p><p>Please assign this dancer to another available class or consider opening an additional Tots class.</p>`
+        : `<p><strong>${escapeText(rosterClass?.name || "This class")}</strong> has officially reached capacity — way to go!</p><p><strong>${escapeText(dancerName || "This dancer")}</strong> will need to be assigned to another available class, or it may be time to consider adding another class and splitting the group.</p><p class="full-class-celebration-closing">Great job filling those dance shoes! ✨</p>`;
+      if (action) {
+        action.textContent = totsClass ? "Discuss with Admin" : "Choose Another Class";
+        action.toggleAttribute("data-discuss-full-class-admin", totsClass);
+      }
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+    };
+    const closeFullClassCelebration = () => {
+      const overlay = document.getElementById("full-class-celebration-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+    };
+    const openAdminConversationFromFullClass = () => {
+      closeFullClassCelebration();
+      const viewerName = teacherMessageViewerName();
+      const adminThread = teacherVisibleMessageThreads(viewerName).find((thread) => thread.type === "private"
+        && thread.participants.includes(viewerName)
+        && thread.participants.some((participant) => /^(admin|admins)$/i.test(String(participant || "").trim())));
+      selectedTeacherMessageAudience = "staff";
+      if (adminThread) {
+        selectedTeacherMessageThreadId = adminThread.id;
+        renderTeacherMessages();
+        setTab("teacher-conversation");
+        window.setTimeout(scrollTeacherConversationToReply, 80);
+        return;
+      }
+      selectedTeacherMessageThreadId = "";
+      renderTeacherMessages();
+      setTab("messages");
+      window.setTimeout(() => {
+        const recipientSelect = document.getElementById("teacher-private-recipient");
+        const adminOption = [...(recipientSelect?.options || [])].find((option) => option.textContent.trim() === "ADMIN");
+        if (recipientSelect && adminOption) recipientSelect.value = adminOption.value;
+        recipientSelect?.focus();
+      }, 80);
+    };
     const explainBlockedClassAssignment = (item, rosterClass) => {
       if (!item) {
         window.alert("Open an Enrollment Card before assigning a class.");
@@ -19433,8 +19561,8 @@
         window.alert(`${rosterClass.name} cannot be assigned yet because it does not have a teacher.`);
         return true;
       }
-      if (rosterEnrolled(rosterClass).length >= Number(rosterClass.capacity || 12)) {
-        window.alert(`${rosterClass.name} cannot be assigned because the class is full.`);
+      if (rosterEnrolled(rosterClass).length >= classRecommendedCapacity(rosterClass)) {
+        showFullClassCelebration(rosterClass, [item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "This dancer");
         return true;
       }
       return false;
@@ -23738,6 +23866,24 @@
 
     loadPersistedAppData();
 
+    if (document.body.dataset.tourMode === "true") {
+      const previewMadeline = {
+        id: "madeline-spataro-preview",
+        firstName: "Madeline",
+        lastName: "Spataro",
+        classroom: "Preschool",
+        status: "enrolled"
+      };
+      rosterClasses.forEach((rosterClass) => {
+        rosterClass.students = rosterClass.students.filter((student) => (
+          student.id !== previewMadeline.id
+          && `${student.firstName || ""} ${student.lastName || ""}`.trim().toLowerCase() !== "madeline spataro"
+        ));
+      });
+      const previewMadelineClass = rosterClasses.find((rosterClass) => rosterClass.id === "primrose-rockwall-ages-3-5");
+      previewMadelineClass?.students.unshift(previewMadeline);
+    }
+
     const sampleRosterLastNames = {
       "ava-m": "Martinez", "charlotte-r": "Reynolds", "ella-s": "Sullivan", "lily-j": "Johnson",
       "mia-b": "Bennett", "zoe-k": "Kim", "nora-p": "Parker", "grace-t": "Turner", "hazel-c": "Collins"
@@ -24167,7 +24313,11 @@
     let sharedStaffAnnouncementsReady = false;
     let staffMessageRecipients = [];
     const readReceiptTeacherNames = () => {
-      const activeNames = teachers
+      const recipientNames = staffMessageRecipients
+        .filter((recipient) => recipient.role === "teacher")
+        .map((recipient) => sharedTeamTalkSenderName(recipient.full_name))
+        .filter(Boolean);
+      const activeNames = recipientNames.length ? recipientNames : teachers
         .filter((teacher) => teacher.status !== "inactive" && isUuid(teacher.id))
         .map(teacherNameForMessages)
         .filter(Boolean);
@@ -24232,7 +24382,7 @@
       if (messageIds.length) {
         const { data: receiptRows, error: receiptError } = await client
           .from("staff_team_talk_read_receipts")
-          .select("message_id, viewer_id, read_at")
+          .select("message_id, viewer_id, viewer_name, viewer_role, read_at")
           .in("message_id", messageIds);
         if (receiptError) console.error("Team Talk read receipts could not sync", receiptError);
         (receiptRows || []).forEach((receipt) => {
@@ -24256,9 +24406,11 @@
       thread.messages.forEach((message) => {
         message.receipts = receiptsByMessage.get(message.id) || [];
         message.readBy = message.receipts.map((receipt) => {
+          if (receipt.viewer_name) return sharedTeamTalkSenderName(receipt.viewer_name);
           const teacher = teachers.find((item) => item.id === receipt.viewer_id);
           return teacher ? teacherNameForMessages(teacher) : "";
         }).filter(Boolean);
+        message.readByIds = message.receipts.map((receipt) => receipt.viewer_id).filter(Boolean);
         message.reactions = reactionsByMessage.get(message.id) || [];
         message.reaction = message.reactions.find((reaction) => reaction.reactor_id === profile.id)?.reaction || "";
       });
@@ -24275,6 +24427,7 @@
         .channel("staff-team-talk")
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "staff_team_talk_messages" }, () => loadSharedTeamTalk())
         .on("postgres_changes", { event: "*", schema: "public", table: "staff_team_talk_reactions" }, () => loadSharedTeamTalk())
+        .on("postgres_changes", { event: "*", schema: "public", table: "staff_team_talk_read_receipts" }, () => loadSharedTeamTalk())
         .subscribe();
     };
     const mapSharedStaffAnnouncement = (row) => ({
@@ -24401,7 +24554,7 @@
       if (!window.dtSupabase || staffDirectMessageSubscription || document.body.dataset.tourMode === "true") return;
       staffDirectMessageSubscription = window.dtSupabase
         .channel(`staff-direct-messages-${window.dtCurrentProfile?.id || "staff"}`)
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "staff_direct_messages" }, () => loadSharedDirectMessages())
+        .on("postgres_changes", { event: "*", schema: "public", table: "staff_direct_messages" }, () => loadSharedDirectMessages())
         .subscribe();
     };
     const postSharedDirectMessage = async (recipientProfileId, text) => {
@@ -24447,7 +24600,12 @@
     const markSharedConversationRead = async (thread) => {
       const profile = window.dtCurrentProfile;
       if (!thread || !profile || !window.dtSupabase || document.body.dataset.tourMode === "true") return;
-      const unreadMessages = (thread.messages || []).filter((message) => message?.id && message.authorId !== profile.id && !(message.readBy || []).includes(teacherMessageViewerName()));
+      const unreadMessages = (thread.messages || []).filter((message) => (
+        message?.id &&
+        message.authorId !== profile.id &&
+        !(message.readByIds || []).includes(profile.id) &&
+        !(message.readBy || []).includes(teacherMessageViewerName())
+      ));
       if (!unreadMessages.length) return;
       const rpcName = thread.id === pinnedMessageThreadId
         ? "mark_team_talk_message_read"
@@ -32157,6 +32315,7 @@
       rosterMultiClassOpenedFromTeacherTools = true;
       rosterMultiClassSchoolName = teacherRosterSchoolFilter;
       mountRosterMultiClassOverlayForTeacherTools();
+      beginRosterMultiClassSession();
       renderRosterMultiClassEdit();
     });
     document.getElementById("teacher-roster-print")?.addEventListener("click", () => {
@@ -34837,12 +34996,13 @@
     });
 
     let rosterMultiClassSchoolName = "";
-    let rosterMultiClassSort = "first-name";
-    let rosterMultiClassClassroomFilter = "all";
-    let rosterMultiClassAgeFilter = "all";
+    let rosterMultiClassSnapshot = new Map();
+    let rosterMultiClassSelected = new Map();
+    let rosterMultiClassMovedIds = new Set();
     let rosterMultiClassDragStudent = null;
     let rosterMultiClassPointerDrag = null;
     let rosterMultiClassDragGhost = null;
+    let rosterMultiClassTouchSelectionMode = false;
     let rosterMultiClassOpenedFromTeacherTools = false;
     let rosterMultiClassOverlayHome = null;
     let rosterMultiClassOverlayNextSibling = null;
@@ -34860,12 +35020,36 @@
       rosterMultiClassOverlayHome = null;
       rosterMultiClassOverlayNextSibling = null;
     };
+    const rosterMultiHasUnsavedChanges = () => rosterMultiClassMovedIds.size > 0;
+    const restoreRosterMultiClassSnapshot = () => {
+      rosterMultiClassSnapshot.forEach(({ student, classId }) => {
+        const currentClass = rosterClasses.find((item) => item.students?.some((candidate) => candidate.id === student.id));
+        const originalClass = rosterClasses.find((item) => item.id === classId);
+        if (!currentClass || !originalClass || currentClass.id === originalClass.id) return;
+        currentClass.students.splice(currentClass.students.findIndex((candidate) => candidate.id === student.id), 1);
+        originalClass.students.push(student);
+      });
+      rosterMultiClassSelected.clear();
+      rosterMultiClassMovedIds.clear();
+      rosterMultiClassTouchSelectionMode = false;
+    };
+    const beginRosterMultiClassSession = () => {
+      const classes = rosterClasses.filter((item) => item.sourceActive !== false && enrollmentSchoolNameMatches(item.schoolName, rosterMultiClassSchoolName));
+      rosterMultiClassSnapshot = new Map(rosterMultiClassStudents(classes).map(({ rosterClass, student }) => [student.id, { student, classId: rosterClass.id }]));
+      rosterMultiClassSelected.clear();
+      rosterMultiClassMovedIds.clear();
+    };
     const closeRosterMultiClassEdit = () => {
+      if (rosterMultiHasUnsavedChanges() && !window.confirm("Leave without saving your class changes?")) return;
+      if (rosterMultiHasUnsavedChanges()) restoreRosterMultiClassSnapshot();
       rosterMultiClassSchoolName = "";
       rosterMultiClassDragStudent = null;
       rosterMultiClassPointerDrag = null;
       rosterMultiClassDragGhost?.remove();
       rosterMultiClassDragGhost = null;
+      rosterMultiClassSnapshot.clear();
+      rosterMultiClassSelected.clear();
+      rosterMultiClassMovedIds.clear();
       const overlay = document.getElementById("roster-multi-class-overlay");
       overlay?.classList.remove("active");
       overlay?.setAttribute("aria-hidden", "true");
@@ -34885,12 +35069,28 @@
       const lastInitial = String(student?.lastName || "").trim().slice(0, 1).toUpperCase();
       return `${firstName}${lastInitial ? ` ${lastInitial}.` : ""}`;
     };
+    const rosterMultiAgeRange = (students) => {
+      const dated = students.filter((student) => student.birthdate).sort((left, right) => right.birthdate.localeCompare(left.birthdate));
+      return dated.length ? `${rosterAge(dated[0].birthdate)} – ${rosterAge(dated[dated.length - 1].birthdate)}` : "Ages not entered";
+    };
+    const rosterMultiSchoolOptions = () => {
+      const active = rosterClasses.filter((item) => item.sourceActive !== false);
+      const allowed = rosterMultiClassOpenedFromTeacherTools
+        ? active.filter((item) => item.teacherId === profileTeacher?.id)
+        : active;
+      const byDisplayName = new Map();
+      allowed.map((item) => item.schoolName).filter(Boolean).forEach((school) => {
+        const key = rosterSchoolNickname(school).trim().toLowerCase();
+        if (!byDisplayName.has(key) || school === rosterMultiClassSchoolName) byDisplayName.set(key, school);
+      });
+      return [...byDisplayName.values()].sort((left, right) => rosterSchoolNickname(left).localeCompare(rosterSchoolNickname(right)));
+    };
     const renderRosterMultiClassEdit = () => {
       const overlay = document.getElementById("roster-multi-class-overlay");
       const grid = document.getElementById("roster-multi-class-grid");
       if (!overlay || !grid || !rosterMultiClassSchoolName) return closeRosterMultiClassEdit();
       const classes = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false && enrollmentSchoolNameMatches(rosterClass.schoolName, rosterMultiClassSchoolName))
-        .sort((left, right) => (left.time || "").localeCompare(right.time || "") || left.name.localeCompare(right.name, undefined, { numeric: true }));
+        .sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true }));
       const records = rosterMultiClassStudents(classes);
       const uniqueSchoolStudents = [...new Map(records.map(({ student }) => [student.id || rosterStudentFullName(student), student])).values()];
       const firstNameCounts = uniqueSchoolStudents.reduce((counts, student) => {
@@ -34899,46 +35099,37 @@
         return counts;
       }, new Map());
       const duplicateFirstNames = new Set([...firstNameCounts].filter(([, count]) => count > 1).map(([name]) => name));
-      const classroomOptions = [...new Set(records.map(({ student }) => rosterMultiOfficialClassroom(student)).filter(Boolean))].sort((left, right) => left.localeCompare(right));
-      const ageOptions = [...new Set(records.map(({ student }) => rosterAge(student.birthdate)).filter(Boolean))].sort((left, right) => {
-        const leftNumber = Number.parseInt(left, 10);
-        const rightNumber = Number.parseInt(right, 10);
-        return (Number.isFinite(leftNumber) ? leftNumber : 999) - (Number.isFinite(rightNumber) ? rightNumber : 999) || left.localeCompare(right);
-      });
       setText("roster-multi-class-school", rosterSchoolNickname(rosterMultiClassSchoolName));
-      const sortSelect = document.getElementById("roster-multi-sort");
-      const classroomSelect = document.getElementById("roster-multi-classroom-filter");
-      const ageSelect = document.getElementById("roster-multi-age-filter");
-      if (sortSelect) sortSelect.value = rosterMultiClassSort;
-      if (classroomSelect) {
-        classroomSelect.innerHTML = `<option value="all">All Classrooms</option>${classroomOptions.map((classroom) => `<option value="${rosterSafe(classroom)}">${rosterSafe(classroom)}</option>`).join("")}`;
-        classroomSelect.value = classroomOptions.includes(rosterMultiClassClassroomFilter) ? rosterMultiClassClassroomFilter : "all";
-        rosterMultiClassClassroomFilter = classroomSelect.value;
+      const schoolSelect = document.getElementById("roster-multi-school-select");
+      const schools = rosterMultiSchoolOptions();
+      if (schoolSelect) {
+        schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("");
+        schoolSelect.value = rosterMultiClassSchoolName;
       }
-      if (ageSelect) {
-        ageSelect.innerHTML = `<option value="all">All Ages</option>${ageOptions.map((age) => `<option value="${rosterSafe(age)}">${rosterSafe(age)}</option>`).join("")}`;
-        ageSelect.value = ageOptions.includes(rosterMultiClassAgeFilter) ? rosterMultiClassAgeFilter : "all";
-        rosterMultiClassAgeFilter = ageSelect.value;
-      }
+      setText("roster-multi-change-count", `${rosterMultiClassMovedIds.size} dancer${rosterMultiClassMovedIds.size === 1 ? "" : "s"} moved`);
+      document.getElementById("roster-multi-class-undo").disabled = !rosterMultiHasUnsavedChanges();
+      document.getElementById("roster-multi-class-save").disabled = !rosterMultiHasUnsavedChanges();
+      const selectedRecord = [...rosterMultiClassSelected.values()][0];
+      const suggestedClassId = selectedRecord ? suggestEnrollmentClass({
+        requested_school_name: rosterMultiClassSchoolName,
+        student_classroom: rosterMultiOfficialClassroom(selectedRecord.student),
+        student_birth_date: selectedRecord.student.birthdate
+      })?.classId : "";
       grid.innerHTML = classes.length ? classes.map((rosterClass) => {
         const enrolled = rosterEnrolled(rosterClass);
-        const students = enrolled.filter((student) =>
-          (rosterMultiClassClassroomFilter === "all" || rosterMultiOfficialClassroom(student) === rosterMultiClassClassroomFilter) &&
-          (rosterMultiClassAgeFilter === "all" || rosterAge(student.birthdate) === rosterMultiClassAgeFilter)
-        ).sort((left, right) => {
-          if (rosterMultiClassSort === "classroom") return rosterMultiOfficialClassroom(left).localeCompare(rosterMultiOfficialClassroom(right)) || rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right));
-          if (rosterMultiClassSort === "age") return rosterMultiAgeValue(right) - rosterMultiAgeValue(left) || rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right));
-          return rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right)) || (left.lastName || "").localeCompare(right.lastName || "");
-        });
-        return `<section class="roster-multi-class-section" tabindex="0" role="button" aria-label="Move selected dancer to ${rosterSafe(rosterClass.name)}" data-roster-multi-drop-class="${rosterSafe(rosterClass.id)}">
-          <div class="roster-multi-class-title-row"><h4>${rosterSafe(rosterClass.name)}</h4><small>${enrolled.length}/${rosterClass.capacity || 12} students · ${rosterSafe(rosterClass.day || "Day not set")} ${rosterSafe(friendlyScheduleTime(rosterClass.time, ""))}</small></div>
+        const capacity = classRecommendedCapacity(rosterClass);
+        const overCapacity = enrolled.length > capacity;
+        const full = enrolled.length >= capacity;
+        const students = [...enrolled].sort((left, right) => rosterStudentFirstName(left).localeCompare(rosterStudentFirstName(right)) || (left.lastName || "").localeCompare(right.lastName || ""));
+        return `<section class="roster-multi-class-section ${suggestedClassId === rosterClass.id ? "is-suggested" : ""} ${overCapacity ? "is-over-capacity" : ""} ${selectedRecord && full && selectedRecord.rosterClass.id !== rosterClass.id ? "is-dimmed" : ""}" tabindex="0" role="button" aria-label="Move selected dancer to ${rosterSafe(rosterClass.name)}" data-roster-multi-drop-class="${rosterSafe(rosterClass.id)}">
+          <div class="roster-multi-class-title-row"><h4>${rosterSafe(rosterClass.name)}</h4><small>${rosterSafe(rosterMultiAgeRange(enrolled))}</small><span class="roster-multi-capacity">${enrolled.length}/${capacity} Enrolled${overCapacity ? " · Over Capacity" : full ? " · Full" : ""}</span></div>
           <div class="roster-multi-class-divider"></div>
-          <div class="roster-multi-student-grid">${students.length ? students.map((student) => `<article class="roster-multi-student" draggable="true" tabindex="0" role="button" aria-grabbed="false" aria-label="Move ${rosterSafe(rosterStudentFullName(student))} to another class" data-roster-multi-student="${rosterSafe(student.id)}" data-roster-multi-source-class="${rosterSafe(rosterClass.id)}" title="Drag to move ${rosterSafe(rosterStudentFullName(student))} to another class">
+          <div class="roster-multi-student-grid">${students.length ? students.map((student) => `<article class="roster-multi-student ${rosterMultiClassSelected.has(student.id) ? "is-selected" : ""} ${rosterMultiClassMovedIds.has(student.id) ? "is-moved" : ""}" style="--moved-teacher-color:${rosterSafe(teacherProfileColor(teachers.find((teacher) => teacher.id === rosterClass.teacherId)))}" draggable="true" tabindex="0" role="button" aria-grabbed="${rosterMultiClassSelected.has(student.id) ? "true" : "false"}" aria-label="Move ${rosterSafe(rosterStudentFullName(student))} to another class" data-roster-multi-student="${rosterSafe(student.id)}" data-roster-multi-source-class="${rosterSafe(rosterClass.id)}" title="Drag to move ${rosterSafe(rosterStudentFullName(student))} to another class">
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
             <strong>${rosterSafe(rosterMultiStudentDisplayName(student, duplicateFirstNames))}</strong>
             <small>${rosterSafe(rosterMultiOfficialClassroomLabel(student))}</small>
             <small>${rosterSafe(rosterAge(student.birthdate))}</small>
-          </article>`).join("") : `<div class="roster-multi-empty">${enrolled.length ? "No students match these filters." : "Drag students here to add them to this class."}</div>`}</div>
+          </article>`).join("") : `<div class="roster-multi-empty">Drag students here to add them to this class.</div>`}</div>
         </section>`;
       }).join("") : `<div class="roster-empty">No active classes are available for this school.</div>`;
       overlay.classList.add("active");
@@ -40821,6 +41012,14 @@
       showToast(`${rosterClass.name} selected`);
     });
 
+    document.getElementById("full-class-celebration-overlay")?.addEventListener("click", (event) => {
+      if (event.target.closest("[data-discuss-full-class-admin]")) {
+        openAdminConversationFromFullClass();
+        return;
+      }
+      if (event.target.id === "full-class-celebration-overlay" || event.target.closest("[data-close-full-class-celebration]")) closeFullClassCelebration();
+    });
+
     document.getElementById("enrollment-classroom-manager-overlay")?.addEventListener("click", async (event) => {
       if (event.target.id === "enrollment-classroom-manager-overlay" || event.target.closest("[data-close-enrollment-classroom-manager]")) {
         enrollmentClassroomManagerOpen = false;
@@ -42550,6 +42749,7 @@
       if (multiClassButton) {
         rosterMultiClassOpenedFromTeacherTools = false;
         rosterMultiClassSchoolName = multiClassButton.dataset.rosterMultiClassOpen;
+        beginRosterMultiClassSession();
         renderRosterMultiClassEdit();
         return;
       }
@@ -42576,8 +42776,8 @@
         const student = rosterClass.students.find((item) => item.id === enrollButton.dataset.rosterEnroll);
         if (!student) return;
         const previousCount = rosterEnrolled(rosterClass).length;
-        if (rosterEnrolled(rosterClass).length >= rosterClass.capacity) {
-          showToast("This class is at capacity. Add a new class before approving enrollment.");
+        if (rosterEnrolled(rosterClass).length >= classRecommendedCapacity(rosterClass)) {
+          showFullClassCelebration(rosterClass, rosterStudentFirstName(student));
           return;
         }
         student.status = "enrolled";
@@ -42646,21 +42846,25 @@
       }
     });
     document.getElementById("roster-multi-class-close")?.addEventListener("click", closeRosterMultiClassEdit);
-    document.getElementById("roster-multi-class-cancel")?.addEventListener("click", closeRosterMultiClassEdit);
     document.getElementById("roster-multi-class-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "roster-multi-class-overlay") closeRosterMultiClassEdit();
     });
-    document.getElementById("roster-multi-sort")?.addEventListener("change", (event) => {
-      rosterMultiClassSort = event.target.value;
+    document.getElementById("roster-multi-school-select")?.addEventListener("change", (event) => {
+      const nextSchool = event.target.value;
+      if (nextSchool === rosterMultiClassSchoolName) return;
+      if (rosterMultiHasUnsavedChanges() && !window.confirm("Leave this school without saving your class changes?")) {
+        event.target.value = rosterMultiClassSchoolName;
+        return;
+      }
+      if (rosterMultiHasUnsavedChanges()) restoreRosterMultiClassSnapshot();
+      rosterMultiClassSchoolName = nextSchool;
+      beginRosterMultiClassSession();
       renderRosterMultiClassEdit();
     });
-    document.getElementById("roster-multi-classroom-filter")?.addEventListener("change", (event) => {
-      rosterMultiClassClassroomFilter = event.target.value;
+    document.getElementById("roster-multi-class-undo")?.addEventListener("click", () => {
+      restoreRosterMultiClassSnapshot();
       renderRosterMultiClassEdit();
-    });
-    document.getElementById("roster-multi-age-filter")?.addEventListener("change", (event) => {
-      rosterMultiClassAgeFilter = event.target.value;
-      renderRosterMultiClassEdit();
+      showToast("All unsaved class moves were undone");
     });
     const clearRosterMultiClassDragVisuals = () => {
       rosterMultiClassDragGhost?.remove();
@@ -42683,34 +42887,89 @@
       rosterMultiClassDragGhost = ghost;
       return ghost;
     };
+    const rosterMultiDraggedItems = (dragged) => {
+      if (rosterMultiClassSelected.has(dragged.studentId)) return [...rosterMultiClassSelected.values()];
+      const sourceClass = rosterClasses.find((item) => item.id === dragged.sourceClassId);
+      const student = sourceClass?.students.find((item) => item.id === dragged.studentId);
+      return student ? [{ student, rosterClass: sourceClass }] : [];
+    };
     const moveRosterMultiClassStudent = async (dragged, targetClassId) => {
       if (!dragged || !targetClassId) return false;
-      const sourceClass = rosterClasses.find((item) => item.id === dragged.sourceClassId);
       const targetClass = rosterClasses.find((item) => item.id === targetClassId);
-      const student = sourceClass?.students.find((item) => item.id === dragged.studentId);
-      if (!sourceClass || !targetClass || !student || sourceClass.id === targetClass.id) return false;
-      if (rosterEnrolled(targetClass).length >= Number(targetClass.capacity || 12)) {
-        window.alert(`${targetClass.name} is full. Increase its capacity or choose another class before moving ${rosterStudentFirstName(student)}.`);
-        return false;
+      const items = rosterMultiDraggedItems(dragged);
+      if (!targetClass || !items.length) return false;
+      let movedCount = 0;
+      items.forEach(({ student }) => {
+        const sourceClass = rosterClasses.find((item) => item.students?.some((candidate) => candidate.id === student.id));
+        if (!sourceClass || sourceClass.id === targetClass.id) return;
+        sourceClass.students.splice(sourceClass.students.findIndex((candidate) => candidate.id === student.id), 1);
+        targetClass.students.push(student);
+        const originalClassId = rosterMultiClassSnapshot.get(student.id)?.classId;
+        if (targetClass.id !== originalClassId) rosterMultiClassMovedIds.add(student.id); else rosterMultiClassMovedIds.delete(student.id);
+        movedCount += 1;
+      });
+      rosterMultiClassSelected.clear();
+      rosterMultiClassTouchSelectionMode = false;
+      renderRosterMultiClassEdit();
+      showToast(`${movedCount} dancer${movedCount === 1 ? "" : "s"} moved to ${targetClass.name} · Save Changes when ready`);
+      return movedCount > 0;
+    };
+    document.getElementById("roster-multi-class-save")?.addEventListener("click", async () => {
+      const classes = rosterClasses.filter((item) => item.sourceActive !== false && enrollmentSchoolNameMatches(item.schoolName, rosterMultiClassSchoolName));
+      const invalidClass = classes.find((item) => rosterEnrolled(item).length > classRecommendedCapacity(item));
+      if (invalidClass) {
+        const sampleMoved = rosterEnrolled(invalidClass).find((student) => rosterMultiClassMovedIds.has(student.id));
+        showFullClassCelebration(invalidClass, rosterStudentFullName(sampleMoved) || "This dancer");
+        document.querySelector(`[data-roster-multi-drop-class="${CSS.escape(invalidClass.id)}"]`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
       }
-      const sourceCount = rosterEnrolled(sourceClass).length;
-      const targetCount = rosterEnrolled(targetClass).length;
-      sourceClass.students.splice(sourceClass.students.indexOf(student), 1);
-      targetClass.students.push(student);
-      syncRosterCountToSource(sourceClass, { previousCount: sourceCount });
-      syncRosterCountToSource(targetClass, { previousCount: targetCount });
+      const saveButton = document.getElementById("roster-multi-class-save");
+      saveButton.disabled = true;
+      saveButton.textContent = "Saving…";
+      const changes = [...rosterMultiClassMovedIds].map((studentId) => {
+        const original = rosterMultiClassSnapshot.get(studentId);
+        const sourceClass = rosterClasses.find((item) => item.id === original?.classId);
+        const targetClass = rosterClasses.find((item) => item.students?.some((student) => student.id === studentId));
+        return original && sourceClass && targetClass ? { student: original.student, sourceClass, targetClass } : null;
+      }).filter(Boolean);
+      let saved = true;
+      for (const change of changes) {
+        if (await saveSharedStudent(change.student, change.targetClass) === false) { saved = false; break; }
+      }
+      if (!saved) {
+        saveButton.disabled = false;
+        saveButton.textContent = "Save Changes";
+        showToast("The class changes could not all be saved. Nothing else was changed.");
+        return;
+      }
+      changes.forEach(({ student, sourceClass, targetClass }) => queueRosterChangeNotifications(student, sourceClass, targetClass, rosterMultiClassOpenedFromTeacherTools));
+      classes.forEach((item) => syncRosterCountToSource(item));
+      scheduleAppDataSave();
+      beginRosterMultiClassSession();
       renderRosterMultiClassEdit();
       renderClassesAndRosters();
       if (rosterMultiClassOpenedFromTeacherTools) renderTeacherRosters();
-      scheduleAppDataSave();
-      await saveSharedStudent(student, targetClass);
-      await queueRosterChangeNotifications(student, sourceClass, targetClass, rosterMultiClassOpenedFromTeacherTools);
-      showToast(`${rosterStudentFirstName(student)} moved to ${targetClass.name}`);
-      return true;
-    };
+      showToast(`${changes.length} class change${changes.length === 1 ? "" : "s"} saved`);
+    });
+    document.getElementById("roster-multi-class-grid")?.addEventListener("click", (event) => {
+      const card = event.target.closest("[data-roster-multi-student]");
+      if (!card || !event.shiftKey) return;
+      const rosterClass = rosterClasses.find((item) => item.id === card.dataset.rosterMultiSourceClass);
+      const student = rosterClass?.students.find((item) => item.id === card.dataset.rosterMultiStudent);
+      if (!student) return;
+      if (rosterMultiClassSelected.has(student.id)) rosterMultiClassSelected.delete(student.id);
+      else rosterMultiClassSelected.set(student.id, { student, rosterClass });
+      renderRosterMultiClassEdit();
+    });
     document.getElementById("roster-multi-class-grid")?.addEventListener("dragstart", (event) => {
       const studentCard = event.target.closest("[data-roster-multi-student]");
       if (!studentCard) return;
+      const rosterClass = rosterClasses.find((item) => item.id === studentCard.dataset.rosterMultiSourceClass);
+      const student = rosterClass?.students.find((item) => item.id === studentCard.dataset.rosterMultiStudent);
+      if (student && !rosterMultiClassSelected.has(student.id)) {
+        rosterMultiClassSelected.clear();
+        rosterMultiClassSelected.set(student.id, { student, rosterClass });
+      }
       rosterMultiClassDragStudent = {
         studentId: studentCard.dataset.rosterMultiStudent,
         sourceClassId: studentCard.dataset.rosterMultiSourceClass
@@ -42760,14 +43019,20 @@
         startX: event.clientX,
         startY: event.clientY,
         active: false,
-        card: studentCard
+        card: studentCard,
+        held: false,
+        holdTimer: window.setTimeout(() => {
+          if (rosterMultiClassPointerDrag?.pointerId === event.pointerId) rosterMultiClassPointerDrag.held = true;
+        }, 450)
       };
       studentCard.setPointerCapture?.(event.pointerId);
     });
     document.getElementById("roster-multi-class-grid")?.addEventListener("pointermove", (event) => {
       const dragged = rosterMultiClassPointerDrag;
       if (!dragged || dragged.pointerId !== event.pointerId) return;
+      if (dragged.held) return;
       if (!dragged.active && Math.hypot(event.clientX - dragged.startX, event.clientY - dragged.startY) < 10) return;
+      window.clearTimeout(dragged.holdTimer);
       dragged.active = true;
       event.preventDefault();
       dragged.card.classList.add("is-dragging");
@@ -42780,6 +43045,20 @@
     const finishRosterMultiClassPointerDrag = async (event) => {
       const dragged = rosterMultiClassPointerDrag;
       if (!dragged || dragged.pointerId !== event.pointerId) return;
+      window.clearTimeout(dragged.holdTimer);
+      if (!dragged.active && (dragged.held || rosterMultiClassTouchSelectionMode)) {
+        const rosterClass = rosterClasses.find((item) => item.id === dragged.sourceClassId);
+        const student = rosterClass?.students.find((item) => item.id === dragged.studentId);
+        if (student) {
+          if (rosterMultiClassSelected.has(student.id)) rosterMultiClassSelected.delete(student.id);
+          else rosterMultiClassSelected.set(student.id, { student, rosterClass });
+          rosterMultiClassTouchSelectionMode = true;
+        }
+        rosterMultiClassPointerDrag = null;
+        clearRosterMultiClassDragVisuals();
+        renderRosterMultiClassEdit();
+        return;
+      }
       const targetSection = dragged.active
         ? document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-roster-multi-drop-class]")
         : null;
@@ -42790,6 +43069,7 @@
     document.getElementById("roster-multi-class-grid")?.addEventListener("pointerup", finishRosterMultiClassPointerDrag);
     document.getElementById("roster-multi-class-grid")?.addEventListener("pointercancel", (event) => {
       if (!rosterMultiClassPointerDrag || rosterMultiClassPointerDrag.pointerId !== event.pointerId) return;
+      window.clearTimeout(rosterMultiClassPointerDrag.holdTimer);
       rosterMultiClassPointerDrag = null;
       clearRosterMultiClassDragVisuals();
     });
@@ -42828,6 +43108,11 @@
       if (event.target.id !== "roster-class-profile-overlay") return;
       rosterClassProfileOpen = false;
       renderClassesAndRosters();
+    });
+    window.addEventListener("beforeunload", (event) => {
+      if (!rosterMultiHasUnsavedChanges()) return;
+      event.preventDefault();
+      event.returnValue = "";
     });
 
     document.getElementById("roster-profile-close")?.addEventListener("click", requestCloseRosterStudentEditor);
