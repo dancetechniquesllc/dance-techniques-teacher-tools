@@ -24166,7 +24166,13 @@
     let staffAnnouncementSubscription = null;
     let sharedStaffAnnouncementsReady = false;
     let staffMessageRecipients = [];
-    const readReceiptTeacherNames = ["Lexi", "Tiffany", "Erika", "Makayla", "Sofia"];
+    const readReceiptTeacherNames = () => {
+      const activeNames = teachers
+        .filter((teacher) => teacher.status !== "inactive" && isUuid(teacher.id))
+        .map(teacherNameForMessages)
+        .filter(Boolean);
+      return [...new Set(activeNames)];
+    };
     const orderedMessageThreads = (threads) => threads.slice().sort((a, b) => {
       if (a.id === pinnedMessageThreadId) return -1;
       if (b.id === pinnedMessageThreadId) return 1;
@@ -24221,6 +24227,20 @@
       if (!thread) return false;
       thread.messages = (data || []).map(mapSharedTeamTalkMessage);
       await hydrateTeamTalkAttachmentUrls(thread.messages);
+      const messageIds = thread.messages.map((message) => message.id);
+      const receiptsByMessage = new Map();
+      if (messageIds.length) {
+        const { data: receiptRows, error: receiptError } = await client
+          .from("staff_team_talk_read_receipts")
+          .select("message_id, viewer_id, read_at")
+          .in("message_id", messageIds);
+        if (receiptError) console.error("Team Talk read receipts could not sync", receiptError);
+        (receiptRows || []).forEach((receipt) => {
+          const list = receiptsByMessage.get(receipt.message_id) || [];
+          list.push(receipt);
+          receiptsByMessage.set(receipt.message_id, list);
+        });
+      }
       const { data: reactionRows, error: reactionError } = await client
         .from("staff_team_talk_reactions")
         .select("message_id, reactor_id, reactor_name, reaction, created_at")
@@ -24234,6 +24254,11 @@
         reactionsByMessage.set(reaction.message_id, list);
       });
       thread.messages.forEach((message) => {
+        message.receipts = receiptsByMessage.get(message.id) || [];
+        message.readBy = message.receipts.map((receipt) => {
+          const teacher = teachers.find((item) => item.id === receipt.viewer_id);
+          return teacher ? teacherNameForMessages(teacher) : "";
+        }).filter(Boolean);
         message.reactions = reactionsByMessage.get(message.id) || [];
         message.reaction = message.reactions.find((reaction) => reaction.reactor_id === profile.id)?.reaction || "";
       });
@@ -24323,7 +24348,7 @@
       if (!client || !profile || document.body.dataset.tourMode === "true") return false;
       const { data, error } = await client
         .from("staff_direct_messages")
-        .select("id, author_id, recipient_id, author_name, author_role, recipient_name, recipient_role, body, created_at")
+        .select("id, author_id, recipient_id, author_name, author_role, recipient_name, recipient_role, body, created_at, read_at")
         .order("created_at", { ascending: true })
         .limit(500);
       if (error) {
@@ -24357,7 +24382,8 @@
           role: row.author_role === "director" ? "Director" : row.author_role === "admin" ? "Admin" : "Teacher",
           time: new Date(row.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
           createdAt: row.created_at,
-          text: row.body
+          text: row.body,
+          readBy: row.read_at ? [sharedStaffDisplayName(row.recipient_name, row.recipient_role)] : []
         });
         thread.activityOrder = Date.parse(row.created_at) || thread.activityOrder;
       });
@@ -24417,6 +24443,24 @@
         message.readMarkedLocally = false;
         console.error("Announcement read receipt could not save", error);
       }
+    };
+    const markSharedConversationRead = async (thread) => {
+      const profile = window.dtCurrentProfile;
+      if (!thread || !profile || !window.dtSupabase || document.body.dataset.tourMode === "true") return;
+      const unreadMessages = (thread.messages || []).filter((message) => message?.id && message.authorId !== profile.id && !(message.readBy || []).includes(teacherMessageViewerName()));
+      if (!unreadMessages.length) return;
+      const rpcName = thread.id === pinnedMessageThreadId
+        ? "mark_team_talk_message_read"
+        : (thread.type === "private" ? "mark_staff_direct_message_read" : "");
+      if (!rpcName) return;
+      const results = await Promise.all(unreadMessages.map((message) => window.dtSupabase.rpc(rpcName, { target_message_id: message.id })));
+      const failed = results.find((result) => result.error);
+      if (failed) {
+        console.error("Message read receipt could not save", failed.error);
+        return;
+      }
+      if (thread.id === pinnedMessageThreadId) await loadSharedTeamTalk();
+      else await loadSharedDirectMessages();
     };
     const postSharedTeamTalkMessage = async (text, attachmentFile = null) => {
       let attachmentPath = "";
@@ -24508,7 +24552,7 @@
       return others.map(personDisplayName).join(" + ") || thread.title;
     };
     const readReceiptNamesFor = (thread, message) => {
-      if (thread.type === "announcement" || thread.type === "team") return readReceiptTeacherNames;
+      if (thread.type === "announcement" || thread.type === "team") return readReceiptTeacherNames();
       return thread.participants.filter((participant) => participant !== message.from && participant !== "Admins");
     };
     const inboxTimeDateLabel = (value = "") => {
@@ -24919,6 +24963,7 @@
       if (selectedTeacherMessageThreadId && !threads.some((thread) => thread.id === selectedTeacherMessageThreadId)) selectedTeacherMessageThreadId = "";
       if (selectedTeacherMessageThreadId) clearThreadUnreadFor(selectedTeacherMessageThreadId, viewerName);
       const activeThread = threads.find((thread) => thread.id === selectedTeacherMessageThreadId);
+      if (activeThread) void markSharedConversationRead(activeThread);
       renderLatestTeacherAnnouncement(announcementThreads[0], viewerName);
       renderTeamTalkPreview(pinnedThreads[0]);
       renderThreadButtons("teacher-thread-list", inboxThreads, selectedTeacherMessageThreadId, "data-teacher-thread", viewerName);
