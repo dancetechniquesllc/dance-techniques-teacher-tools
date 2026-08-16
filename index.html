@@ -36663,9 +36663,13 @@
       school.nickname,
       rosterClass.schoolName
     ].map((value) => String(value || "").trim().toLocaleLowerCase()).filter(Boolean))];
+    const newsletterResolvedValue = (value = "") => {
+      const normalized = String(value || "").replace(/\u00a0/g, " ").trim();
+      return /^\[[^\]]+\]$/.test(normalized) ? "" : normalized;
+    };
     const newsletterContextForRecord = (record) => {
-      const recordSchoolName = String(record?.rosterClass?.schoolName || "").trim();
-      const recordSchoolId = String(record?.rosterClass?.schoolId || record?.rosterClass?.school_id || "").trim();
+      const recordSchoolName = newsletterResolvedValue(record?.rosterClass?.schoolName || record?.student?.schoolName || record?.student?.school_name);
+      const recordSchoolId = newsletterResolvedValue(record?.rosterClass?.schoolId || record?.rosterClass?.school_id || record?.student?.schoolId || record?.student?.school_id);
       const school = schoolLibrary.find((item) => (
         (recordSchoolId && String(item.id || "") === recordSchoolId)
         || enrollmentSchoolNameMatches(item.name, recordSchoolName)
@@ -36674,10 +36678,12 @@
       const student = record?.student || {};
       const teacherId = record?.rosterClass?.teacherId || school.teacherId || school.assignedTeacherId || school.teacher_id || "";
       const timeOfDay = String(school.timeBlock || record?.rosterClass.timeBlock || "").trim().toUpperCase();
-      const savedSchoolNickname = String(school.nickname || "").trim();
-      const schoolNickname = savedSchoolNickname && !/^\[?school\s+nickname\]?$/i.test(savedSchoolNickname)
-        ? savedSchoolNickname
-        : rosterSchoolNickname(recordSchoolName || school.name || "your school");
+      const savedSchoolNickname = newsletterResolvedValue(school.nickname);
+      const schoolNameFallback = newsletterResolvedValue(recordSchoolName) || newsletterResolvedValue(school.name);
+      const schoolNickname = savedSchoolNickname
+        || newsletterResolvedValue(rosterSchoolNickname(schoolNameFallback))
+        || schoolNameFallback
+        || "your school";
       return {
         "[Parent First Name]": student.parentFirstName || String(student.parentName || "Dance Family").split(" ")[0] || "Dance Family",
         "[Dancer Name]": rosterStudentFirstName(student) || "your dancer",
@@ -37168,11 +37174,15 @@
       const mobileSubjectFont = newsletterInlineFontStyle({ font: mobileDraft.subjectFont || mobileDraft.font || draft.subjectFont || draft.font });
       const desktopMessageFont = newsletterInlineFontStyle({ font: draft.messageFont || draft.font });
       const mobileMessageFont = newsletterInlineFontStyle({ font: mobileDraft.messageFont || mobileDraft.font || draft.messageFont || draft.font });
-      return `<!doctype html><html><head><style>
+      const emailHtml = `<!doctype html><html><head><style>
         a{text-decoration:none!important}.newsletter-delivered-logo>div,.newsletter-delivered-logo>img{width:100%!important;max-width:100%!important}.newsletter-content-section{margin:20px 0}.newsletter-content-section h2{margin:0 0 7px;font-size:1.35em}.newsletter-content-section p,.newsletter-rich-text{margin:0;line-height:1.35;white-space:pre-wrap}.newsletter-main>div{line-height:1.35}.newsletter-content-section li,.newsletter-main>div li{line-height:1.35}.newsletter-content-section li::marker,.newsletter-main>div li::marker{color:currentColor}.newsletter-content-section ul,.newsletter-content-section ol,.newsletter-main>div ul,.newsletter-main>div ol{margin:8px 0;padding-left:1.45em;white-space:normal}.newsletter-heart-list{list-style:none!important;padding-left:1.55em!important}.newsletter-heart-list>li{position:relative}.newsletter-heart-list>li:before{content:'♥';position:absolute;left:-1.35em;color:currentColor;font-size:.82em;line-height:1.75}.newsletter-content-section.is-highlight{padding:18px;border-radius:12px;background:#f7e4df}.newsletter-content-section.is-divider{height:1px;margin:25px 0;background:${accent}}.newsletter-content-section.is-quote{padding:18px 20px;border-left:4px solid ${accent};background:#fffaf6;font-style:italic}.newsletter-content-section.is-reminder{padding:18px;border:2px solid ${accent};border-radius:12px}@media(max-width:480px){.newsletter-delivered-logo{width:var(--newsletter-mobile-logo-width)!important}.newsletter-delivered-headline{font-family:var(--newsletter-mobile-headline-font)!important;font-size:var(--newsletter-mobile-headline-size)!important;text-align:var(--newsletter-mobile-headline-align)!important}.newsletter-delivered-subject{font-family:var(--newsletter-mobile-subject-font)!important;font-size:var(--newsletter-mobile-subject-size)!important}.newsletter-delivered-message{width:var(--newsletter-mobile-message-width)!important;margin-left:var(--newsletter-mobile-message-left)!important;font-family:var(--newsletter-mobile-message-font)!important;font-size:var(--newsletter-mobile-message-size)!important}.newsletter-section-title{width:var(--section-title-mobile-width)!important;margin-left:var(--section-title-mobile-left)!important;margin-right:0!important;text-align:var(--section-title-mobile-align)!important;font-family:var(--section-title-mobile-font)!important;font-size:var(--section-title-mobile-size)!important}.newsletter-section-body{width:var(--section-body-mobile-width)!important;margin-left:var(--section-body-mobile-left)!important;font-family:var(--section-body-mobile-font)!important;font-size:var(--section-body-mobile-size)!important}.newsletter-email-background-box{left:var(--mobile-box-x)!important;top:var(--mobile-box-y)!important;width:var(--mobile-box-width)!important;height:var(--mobile-box-height)!important;background:var(--mobile-box-color)!important;border:var(--mobile-box-border)!important;border-radius:var(--mobile-box-radius)!important}.newsletter-email-floating-graphic{left:var(--mobile-x)!important;top:var(--mobile-y)!important;width:var(--mobile-width)!important;transform:translate(-50%,-50%) scale(var(--mobile-scale))!important}.newsletter-responsive-section{background-color:var(--section-bg-mobile)!important;background-image:var(--section-image-mobile)!important;background-size:var(--section-fit-mobile)!important;padding:var(--section-pad-mobile)!important;border-radius:var(--section-pad-mobile)!important}.newsletter-email-photo-frame{width:var(--newsletter-photo-mobile-width)!important;max-width:100%!important}.newsletter-email-photo-image{height:var(--newsletter-photo-mobile-height)!important;object-fit:var(--newsletter-photo-mobile-fit)!important}}
         .template-welcome .newsletter-header{padding:38px 32px 30px!important;border-bottom:1px solid #dfb9b2;background:#f8e4df!important}.template-welcome .newsletter-header h1{max-width:520px;margin:0 auto 8px!important;color:#211817!important;font-family:Didot,Georgia,serif!important;font-size:32px;font-weight:500;line-height:1.08}.template-welcome .newsletter-header p{color:#8b4e61!important;font-size:13px;font-weight:700;letter-spacing:.11em;text-transform:uppercase}.template-welcome .newsletter-main{padding:32px 38px 38px!important}.template-welcome .newsletter-content-section h2{color:#65103f;font-family:Didot,Georgia,serif;font-size:22px;font-weight:500}.template-welcome .newsletter-content-section.is-highlight{border:1px solid #e4c2bb;background:#f8e6e1}.template-welcome .newsletter-content-section.is-reminder{border:1px solid #dba9a1;border-radius:4px;background:#fffdf9}.template-welcome .newsletter-content-section.is-divider{background:#dba9a1}.template-welcome .newsletter-footer{border-top:1px solid #dfb9b2;background:#f8e4df!important}
         ${versionStyles}
       </style></head><body style="margin:0;background:#f3ece8;color:#271e1c;"><div class="${templateClass}" style="position:relative;max-width:680px;margin:0 auto;background:#fffaf6;font-family:${newsletterInlineFontStyle(draft)};font-size:${newsletterFontSize(draft)};line-height:1.35;">${backgroundBoxes}${graphics}<header class="newsletter-header" style="position:relative;z-index:2;padding:34px 30px;text-align:center;background:linear-gradient(135deg,#f8dfdc,#fff7f0);"><div class="newsletter-delivered-logo" style="width:${logoWidth}px;max-width:80%;margin:0 auto;--newsletter-mobile-logo-width:${mobileLogoWidth}px">${deliveredLogo}</div><h1 class="newsletter-delivered-headline" style="--newsletter-mobile-headline-font:${mobileHeadlineFont};--newsletter-mobile-headline-size:${mobileDraft.headlineTextSize ? `${Number(mobileDraft.headlineTextSize)}pt` : "29px"};--newsletter-mobile-headline-align:${mobileDraft.headlineAlign || "center"};margin:0 0 7px;color:${accent};font-family:${desktopHeadlineFont};font-size:${draft.headlineTextSize ? `${Number(draft.headlineTextSize)}pt` : "29px"};text-align:${draft.headlineAlign || "center"};">${personalizeHtml(draft.headlineHtml, draft.headline || "Dance Techniques Newsletter")}</h1><p class="newsletter-delivered-subject" style="--newsletter-mobile-subject-font:${mobileSubjectFont};--newsletter-mobile-subject-size:${Number(mobileDraft.subjectTextSize) || Number(mobileDraft.textSize) || 12}pt;margin:0;color:${accent};font-family:${desktopSubjectFont};font-size:${Number(draft.subjectTextSize) || Number(draft.textSize) || 12}pt;">${personalizeHtml(draft.subjectHtml, draft.subject || "")}</p></header><main class="newsletter-main" style="position:relative;z-index:2;padding:30px;"><div class="newsletter-delivered-message" style="--newsletter-mobile-message-width:${mobileMessageWidth}%;--newsletter-mobile-message-left:${mobileMessageLeft}%;--newsletter-mobile-message-font:${mobileMessageFont};--newsletter-mobile-message-size:${Number(mobileDraft.messageTextSize) || Number(mobileDraft.textSize) || 12}pt;width:${desktopMessageWidth}%;max-width:100%;margin-left:${desktopMessageLeft}%;font-family:${desktopMessageFont};font-size:${Number(draft.messageTextSize) || Number(draft.textSize) || 12}pt;line-height:1.35;white-space:pre-wrap;">${personalizeHtml(draft.messageHtml, draft.message || "")}</div>${sections}</main><footer class="newsletter-footer" style="position:relative;z-index:2;padding:22px 30px;text-align:center;background:#f8e5e5;color:#6b5954;font-size:12px;">Dance Techniques · Beautiful movement, joyful confidence.<br><a href="mailto:dancetechniquesllc@gmail.com?subject=Email%20preferences" style="color:${accent};">Manage email preferences</a></footer></div></body></html>`;
+      // Resolve once more after every section has been assembled. Rich-text
+      // editors can split a field across several inline tags; this final pass
+      // guarantees the completed email—not just each source block—is personalized.
+      return newsletterPersonalize(emailHtml, context);
     };
     const newsletterRecipientMessages = () => {
       const records = newsletterFilteredRecords();
@@ -37204,6 +37214,13 @@
       return messages;
     };
     const sendNewsletterMessages = async ({ messages, mode, confirmed = false, sendId = crypto.randomUUID() }) => {
+      const personalizedFieldPattern = /\[(?:Parent First Name|Dancer Name|Dancer First Name|Dancer Preferred Name|School Nickname|Teacher Name|Dance Day|Dance Time|AM or PM|Director First Name|School Specific Phrase)\]/gi;
+      const unresolvedFields = [...new Set(messages.flatMap((message) => {
+        const template = document.createElement("template");
+        template.innerHTML = String(message.html || "");
+        return String(template.content.textContent || "").match(personalizedFieldPattern) || [];
+      }))];
+      if (unresolvedFields.length) throw new Error(`Personalized fields still need recipient data: ${unresolvedFields.join(", ")}. Nothing was sent.`);
       if (!window.dtSupabase) throw new Error("Sign in to the live Director Dashboard before sending.");
       const { data, error } = await window.dtSupabase.functions.invoke("send-newsletter", { body: { messages, mode, confirmed, sendId } });
       if (error) {
