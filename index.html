@@ -9568,6 +9568,9 @@
       color: oklch(38% 0.012 250);
       border-color: oklch(82% 0.01 250);
     }
+    .school-library-lifecycle.current { background: #dce6d8; color: #42533e; border-color: var(--sage); }
+    .school-library-lifecycle.unassigned { background: #f7e3b8; color: #594313; border-color: var(--gold); }
+    .school-library-lifecycle.former { background: #dedbd9; color: #625d5a; border-color: #aaa4a0; }
 
     .school-library-list { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
     .school-library-card { border-radius: 14px; }
@@ -9597,7 +9600,8 @@
     .school-profile-nickname { grid-column: 2 / span 6; }
     .school-profile-isd { grid-column: 8 / span 5; }
     .school-profile-divider { grid-column: 1 / -1; height: 2px; margin: 7px 0; border-radius: 999px; background: #edcfcb; }
-    .school-profile-teacher { grid-column: span 5; }
+    .school-profile-status { grid-column: span 3; }
+    .school-profile-teacher { grid-column: span 4; }
     .school-profile-day { grid-column: span 4; }
     .school-profile-time { grid-column: span 3; }
     .school-profile-benefit { grid-column: 1 / -1; }
@@ -13044,7 +13048,7 @@
       .school-library-list { grid-template-columns: 1fr; }
       .school-library-card[open] .school-library-body { grid-template-columns: 1fr; }
       .school-profile-name, .school-profile-nickname, .school-profile-initials, .school-profile-isd,
-      .school-profile-divider, .school-profile-teacher, .school-profile-day, .school-profile-time, .school-profile-benefit,
+      .school-profile-divider, .school-profile-status, .school-profile-teacher, .school-profile-day, .school-profile-time, .school-profile-benefit,
       .school-profile-season, .school-profile-notes, .school-profile-classrooms,
       .school-profile-director, .school-profile-phone, .school-profile-email, .school-profile-address { grid-column: 1; }
     }
@@ -15228,7 +15232,10 @@
               <label class="school-library-filter-control">AM/PM
                 <select id="school-library-time-filter" aria-label="Filter partner schools by AM or PM"></select>
               </label>
-              <button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="school-library-teacher-filter,school-library-isd-filter,school-library-day-filter,school-library-time-filter">Reset Filter</button>
+              <label class="school-library-filter-control">Status
+                <select id="school-library-status-filter" aria-label="Filter partner schools by status"></select>
+              </label>
+              <button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="school-library-teacher-filter,school-library-isd-filter,school-library-day-filter,school-library-time-filter,school-library-status-filter">Reset Filter</button>
             </div>
             <div class="dashboard-filter-reset-row"><button class="primary" type="button" id="add-library-school">Add School</button></div>
             <div class="school-library-list" id="admin-school-library-list" aria-label="Admin school library"></div>
@@ -17713,15 +17720,28 @@
     const partnerSchoolSeed = Array.isArray(window.partnerSchoolDirectory) && window.partnerSchoolDirectory.length
       ? window.partnerSchoolDirectory
       : teachers[0].schools.map((school) => ({ ...school, assignedTeacherId: "lexi" }));
+    const normalizeSchoolLifecycleStatus = (school = {}) => {
+      const status = String(school.lifecycleStatus || school.lifecycle_status || "").trim().toLowerCase();
+      if (["former", "archived", "inactive"].includes(status) || school.active === false) return "former";
+      if (["unassigned", "future", "prospective"].includes(status)) return "unassigned";
+      return "current";
+    };
+    const schoolLifecycleLabel = (school = {}) => ({
+      current: "Current",
+      unassigned: "Unassigned",
+      former: "Former"
+    })[normalizeSchoolLifecycleStatus(school)] || "Current";
     const schoolLibrary = partnerSchoolSeed.map((school, index) => ({
       ...JSON.parse(JSON.stringify(school)),
+      lifecycleStatus: normalizeSchoolLifecycleStatus(school),
       color: school.color || partnerSchoolColors[index % partnerSchoolColors.length]
     }));
     const schoolLibraryFilters = {
       teacher: "all",
       isd: "all",
       day: "all",
-      time: "all"
+      time: "all",
+      status: "all"
     };
 
     const rosterClasses = [
@@ -19660,10 +19680,13 @@
       if (document.body.dataset.tourMode === "true") return true;
       if (!client || !profile) return false;
       setSharedRosterState("loading", "Opening your shared roster…", "Only records available to this account will appear.");
+      const partnerSchoolsQuery = profile.role === "teacher"
+        ? client.from("partner_schools").select("*").eq("active", true)
+        : client.from("partner_schools").select("*");
       const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("guardian_user_accounts").select("user_id, revoked_at"),
-        client.from("partner_schools").select("*").eq("active", true),
+        partnerSchoolsQuery,
         client.from("teacher_school_assignments").select("id, teacher_id, partner_school_id, active, created_at, updated_at").order("updated_at", { ascending: false }),
         client.from("dance_classes").select("*").eq("status", "active"),
         client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled"]),
@@ -19797,7 +19820,8 @@
           assignedTeacherId: databaseAssignedTeacherId || localAssignedTeacherId || "",
           recoveredFromInactiveAssignment: Boolean(recoveredInactiveAssignment?.teacher_id),
           classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "",
-          importantNotes: school.important_notes || "", updatedAt: school.updated_at || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
+          importantNotes: school.important_notes || "", lifecycleStatus: normalizeSchoolLifecycleStatus(school),
+          active: school.active !== false, updatedAt: school.updated_at || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
           };
         });
         replaceCollection(schoolLibrary, mergedSchools);
@@ -23575,7 +23599,9 @@
           console.error(`The assignment for ${school.name || school.id} was blocked because the teacher does not have a live profile yet.`);
           return false;
         }
-        const targetTeacherId = isUuid(school.assignedTeacherId) ? school.assignedTeacherId : null;
+        const targetTeacherId = normalizeSchoolLifecycleStatus(school) === "current" && isUuid(school.assignedTeacherId)
+          ? school.assignedTeacherId
+          : null;
         const { data, error } = await client.rpc("set_school_teacher_assignment", {
           target_school_id: school.id,
           target_teacher_id: targetTeacherId
@@ -26719,6 +26745,7 @@
       const isdFilter = document.getElementById("school-library-isd-filter");
       const dayFilter = document.getElementById("school-library-day-filter");
       const timeFilter = document.getElementById("school-library-time-filter");
+      const statusFilter = document.getElementById("school-library-status-filter");
       if (teacherFilter) {
         teacherFilter.innerHTML = `
           <option value="all">All Teachers</option>
@@ -26741,6 +26768,15 @@
         timeFilter.innerHTML = `<option value="all">All Times</option><option value="unassigned">Unassigned</option><option value="AM">AM</option><option value="PM">PM</option>`;
         timeFilter.value = schoolLibraryFilters.time;
       }
+      if (statusFilter) {
+        statusFilter.innerHTML = `
+          <option value="all">Current &amp; Unassigned</option>
+          <option value="current">Current</option>
+          <option value="unassigned">Unassigned</option>
+          <option value="former">Former</option>
+        `;
+        statusFilter.value = schoolLibraryFilters.status;
+      }
       const sortedSchools = schoolLibrary
         .map((school, index) => ({ school, index }))
         .filter(({ school }) => (
@@ -26752,6 +26788,9 @@
             || (schoolLibraryFilters.day === "unassigned" ? !school.dayOfWeek : String(school.dayOfWeek) === schoolLibraryFilters.day))
           && (schoolLibraryFilters.time === "all"
             || (schoolLibraryFilters.time === "unassigned" ? !school.timeBlock : school.timeBlock === schoolLibraryFilters.time))
+          && (schoolLibraryFilters.status === "all"
+            ? normalizeSchoolLifecycleStatus(school) !== "former"
+            : normalizeSchoolLifecycleStatus(school) === schoolLibraryFilters.status)
         ))
         .sort((a, b) => (
           (a.school.name || "").localeCompare(b.school.name || "")
@@ -26761,6 +26800,8 @@
         const assigned = Boolean(school.assignedTeacherId);
         const assignmentClass = assigned ? teacherAssignmentColorClass(school.assignedTeacherId) : "unassigned";
         const isdLabel = school.isd || "No ISD";
+        const lifecycleStatus = normalizeSchoolLifecycleStatus(school);
+        const lifecycleLabel = schoolLifecycleLabel(school);
         const dayName = weekdayNames[school.dayOfWeek] || "Day";
         const dayShort = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[dayName] || "U";
         const classroomOptions = school.classroomOptions || [];
@@ -26785,6 +26826,7 @@
                 <small class="school-directory-isd">${escapeText(isdLabel)}</small>
                 <small aria-label="${enrolledStudentCount} currently enrolled students">Students Enrolled: ${enrolledStudentCount}</small>
                 <span class="school-directory-preview-tags">
+                  <span class="status school-library-lifecycle ${lifecycleStatus}">${escapeText(lifecycleLabel)}</span>
                   <span class="status school-library-assignment ${assignmentClass}" ${teacherAssignmentStyle(school.assignedTeacherId)}>${escapeText(assignment)}</span>
                 </span>
               </span>
@@ -26816,6 +26858,7 @@
                 <span class="calendar-field-label">AM/PM</span>
               </label>
               <span class="school-library-bubble-stack">
+                <span class="status school-library-lifecycle ${lifecycleStatus}">${escapeText(lifecycleLabel)}</span>
                 <span class="status school-library-assignment ${assignmentClass}" ${teacherAssignmentStyle(school.assignedTeacherId)}>${escapeText(assignment)}</span>
                 <span class="status school-library-isd-bubble">${escapeText(isdLabel)}</span>
               </span>
@@ -26840,6 +26883,14 @@
                 <span class="calendar-field-label">ISD</span>
               </label>
               <div class="school-profile-divider"></div>
+              <label class="calendar-field school-profile-status">
+                <select aria-label="Status for ${escapeText(school.name || "school")}" data-school-library-field="lifecycleStatus">
+                  <option value="current" ${lifecycleStatus === "current" ? "selected" : ""}>Current</option>
+                  <option value="unassigned" ${lifecycleStatus === "unassigned" ? "selected" : ""}>Unassigned</option>
+                  <option value="former" ${lifecycleStatus === "former" ? "selected" : ""}>Former</option>
+                </select>
+                <span class="calendar-field-label">School Status</span>
+              </label>
               <label class="calendar-field school-profile-teacher">
                 <select aria-label="Assigned teacher for ${escapeText(school.name || "school")}" data-school-library-field="assignedTeacherId">
                   <option value="" ${school.assignedTeacherId ? "" : "selected"}>UNASSIGNED</option>
@@ -26920,6 +26971,11 @@
       const assignmentClass = school.assignedTeacherId ? teacherAssignmentColorClass(school.assignedTeacherId) : "unassigned";
       const teacherBubbles = card.querySelectorAll(".school-library-assignment");
       const isdBubble = card.querySelector(".school-library-isd-bubble");
+      const lifecycleStatus = normalizeSchoolLifecycleStatus(school);
+      card.querySelectorAll(".school-library-lifecycle").forEach((bubble) => {
+        bubble.textContent = schoolLifecycleLabel(school);
+        bubble.className = `status school-library-lifecycle ${lifecycleStatus}`;
+      });
       teacherBubbles.forEach((teacherBubble) => {
         teacherBubble.textContent = assignment;
         teacherBubble.className = `status school-library-assignment ${assignmentClass}`;
@@ -29099,7 +29155,9 @@
         season_start_date: school.seasonStartDate || null,
         partnership_benefit: school.partnershipBenefit || null,
         important_notes: school.importantNotes || null,
-        classroom_options: school.classroomOptions || []
+        classroom_options: school.classroomOptions || [],
+        lifecycle_status: normalizeSchoolLifecycleStatus(school),
+        active: normalizeSchoolLifecycleStatus(school) !== "former"
       };
       let query = isUuid(school.id)
         ? window.dtSupabase.from("partner_schools").update(payload).eq("id", school.id)
@@ -29135,6 +29193,7 @@
         email: "",
         importantNotes: "",
         partnershipBenefit: "",
+        lifecycleStatus: "unassigned",
         assignedTeacherId: "",
         color: schoolColors[schoolLibrary.length % schoolColors.length]
       });
@@ -29856,9 +29915,12 @@
       const fieldName = field.dataset.schoolLibraryField;
       const previousValue = school[fieldName];
       school[fieldName] = schoolLibraryFieldValue(field);
+      if (fieldName === "lifecycleStatus" && normalizeSchoolLifecycleStatus(school) !== "current") {
+        school.assignedTeacherId = "";
+      }
       syncPartnerSchoolReferences(school, fieldName, previousValue);
       updateSchoolLibraryCardBubbles(card, school);
-      if (fieldName === "assignedTeacherId") {
+      if (fieldName === "assignedTeacherId" || fieldName === "lifecycleStatus") {
         renderTeacherProfileList();
         markAdminDashboardReview("schoolLibrary");
         saveAppData();
@@ -29872,7 +29934,8 @@
       ["school-library-teacher-filter", "teacher"],
       ["school-library-isd-filter", "isd"],
       ["school-library-day-filter", "day"],
-      ["school-library-time-filter", "time"]
+      ["school-library-time-filter", "time"],
+      ["school-library-status-filter", "status"]
     ].forEach(([id, filterName]) => {
       document.getElementById(id)?.addEventListener("change", (event) => {
         schoolLibraryFilters[filterName] = event.target.value || "all";
