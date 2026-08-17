@@ -25032,9 +25032,6 @@
       const supportsAttachment = thread.type === "team";
       if (attachmentRow) attachmentRow.hidden = !supportsAttachment;
       if (attachmentNote) attachmentNote.hidden = !supportsAttachment;
-      if (supportsAttachment && document.getElementById("teacher-conversation-view")?.classList.contains("active")) {
-        requestAnimationFrame(() => composer.scrollIntoView({ block: "end" }));
-      }
     };
     const scrollTeacherConversationToReply = () => requestAnimationFrame(() => {
       const composer = document.getElementById("teacher-reply-composer");
@@ -25140,6 +25137,10 @@
     };
 
     const renderTeacherMessages = () => {
+      const conversationIsActive = document.getElementById("teacher-conversation-view")?.classList.contains("active");
+      const readingOlderMessages = conversationIsActive
+        && (document.documentElement.scrollHeight - (window.scrollY + window.innerHeight) > 160);
+      const readingScrollPosition = window.scrollY;
       const viewerName = teacherMessageViewerName();
       renderTeacherPrivateRecipients();
       if (notificationShowcaseMode && !notificationShowcaseMessagesSeeded) {
@@ -25173,6 +25174,9 @@
       );
       renderTeacherReplyComposer(activeThread);
       updateMessagesHomeBadge();
+      if (readingOlderMessages) {
+        requestAnimationFrame(() => window.scrollTo({ top: readingScrollPosition, behavior: "auto" }));
+      }
     };
 
     const renderTeacherPrivateRecipients = () => {
