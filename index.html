@@ -12237,6 +12237,12 @@
     .master-schedule-entry { display:grid; gap:2px; margin-top:6px; padding:7px 8px; border-left:7px solid var(--master-teacher-color); border-radius:8px; background:color-mix(in srgb,var(--master-teacher-color) 20%,white); }
     .master-schedule-entry strong { font-size:12px; line-height:1.15; }
     .master-schedule-entry small { color:var(--ink); font-size:10px; line-height:1.25; }
+    .master-schedule-entry-lines { display:grid; gap:4px; margin-top:3px; }
+    .master-schedule-entry-line { display:grid; gap:1px; padding-top:4px; border-top:1px solid rgb(101 16 63 / .12); }
+    .master-schedule-entry-line:first-child { padding-top:0; border-top:0; }
+    .master-schedule-entry-line > span { font-size:10px; font-weight:800; line-height:1.2; }
+    .master-schedule-entry-line > small { display:block; }
+    .master-schedule-entry-line.is-closed { opacity:.72; }
     .master-schedule-event-sparkle { margin-right:4px; color:#160f0d; font-size:15px; font-weight:950; line-height:1; }
     .master-schedule-entry.is-team-meeting { border-left-color:var(--brick); background:var(--blush); }
     .master-schedule-entry-actions { display:flex; flex-wrap:wrap; gap:5px; margin-top:4px; }
@@ -18750,6 +18756,7 @@
       return "unmapped";
     };
     const enrollmentBatchStepConfig = {
+      "new": { field: "additional_information", nestedField: "initial_reviewed_at", label: "Initial review", buttonLabel: "Complete Initial Review", note: "Marks the selected enrollment records as reviewed, then moves them to Assign to Class. It does not place dancers or complete later checklist steps." },
       "assign-brightwheel": { field: "brightwheel_profile_created_at", label: "Brightwheel Assignment" },
       "record-fee": { field: "additional_information", nestedField: "enrollment_fee_recorded_at", label: "Enrollment fee record", note: "Records that the existing enrollment-fee status was reviewed. It does not process or change a payment." },
       "bill-recital": { field: "invoice_sent_at", label: "The Recital Experience" },
@@ -18768,6 +18775,7 @@
       const placed = item?.status === "placed" || Boolean(item?.placed_student_id);
       const feeRecorded = enrollmentFeeRecorded(item);
       const anyComplete = placed
+        || Boolean(item?.additional_information?.initial_reviewed_at)
         || Boolean(item?.brightwheel_profile_created_at)
         || feeRecorded
         || Boolean(item?.invoice_sent_at)
@@ -28244,16 +28252,18 @@
         const classEntries = rosterClasses.filter((rosterClass) => String(rosterClass.day || "").trim().toLowerCase() === String(weekdayNames[weekday]).toLowerCase()).map((rosterClass) => {
           const teacher = teachers.find((candidate) => candidate.id === rosterClass.teacherId);
           if (!teacher || teacher.status === "inactive" || isCompanyTeacherProfile(teacher)) return null;
-          const schoolKey = `${teacher.id}::${String(rosterClass.schoolName || "").trim().toLowerCase()}`;
+          const school = schoolLibrary.find((candidate) => enrollmentSchoolNameMatches(candidate.name, rosterClass.schoolName) || enrollmentSchoolNameMatches(candidate.nickname, rosterClass.schoolName))
+            || (teacher.schools || []).find((candidate) => enrollmentSchoolNameMatches(candidate.name, rosterClass.schoolName) || enrollmentSchoolNameMatches(candidate.nickname, rosterClass.schoolName));
+          const schoolKey = `${teacher.id}::${String(school?.id || school?.name || school?.nickname || rosterClass.schoolName || "").trim().toLowerCase()}`;
           if (scheduledSchoolKeys.has(schoolKey)) return null;
           scheduledSchoolKeys.add(schoolKey);
-          const school = schoolLibrary.find((candidate) => candidate.name === rosterClass.schoolName)
-            || (teacher.schools || []).find((candidate) => candidate.name === rosterClass.schoolName);
           if (school?.seasonStartDate && school.seasonStartDate > dateKey) return null;
           const closure = scheduleClosures.find((item) => item.date === dateKey && isdNameMatches(item.isd, school?.isd));
           return {
             teacher,
-            title: rosterClass.schoolName || rosterClass.name || "Scheduled Class",
+            school: school?.nickname || school?.name || rosterClass.schoolName || rosterClass.name || "Scheduled Class",
+            time: rosterClass.time || "",
+            timeBlock: school?.timeBlock || "AM",
             detail: closure ? `No Class · ${closure.reason || "District closure"}` : "",
             closed: Boolean(closure)
           };
@@ -28264,11 +28274,44 @@
             const sharedEventId = item.sharedEventId || item.id || [item.date, item.time, item.title].join("::");
             if (scheduledEventKeys.has(sharedEventId)) return null;
             scheduledEventKeys.add(sharedEventId);
-            return { teacher, title: item.title || "Team Event", detail: `${friendlyScheduleTime(item.time, "Time not set")}${item.address ? ` · ${item.address}` : ""}`, closed: false, event: true, teamEvent: item.audience === "all", sharedEventId, eventType: item.eventType || item.title || "" };
+            return { teacher, title: item.title || "Team Event", school: item.schoolName || item.school || "", time: item.time || "", detail: friendlyScheduleTime(item.time, "Time not set"), closed: false, event: true, teamEvent: item.audience === "all", sharedEventId, eventType: item.eventType || item.title || "" };
           }).filter(Boolean)
         ));
-        const entries = [...classEntries, ...eventEntries];
-        cells.push(`<article class="master-schedule-day${calendarTodayClass(dateKey)}"><span class="master-schedule-date">${day}</span>${entries.length ? entries.map((entry) => `<div class="master-schedule-entry ${entry.closed ? "is-closed" : ""} ${entry.teamEvent && String(entry.eventType).toLowerCase() === "meeting" ? "is-team-meeting" : ""}" style="--master-teacher-color:${escapeText(teacherProfileColor(entry.teacher))}"><strong>${entry.event ? '<span class="master-schedule-event-sparkle" aria-hidden="true">✦</span>' : ""}${escapeText(entry.title)}</strong><small>${entry.teamEvent ? "All Teachers" : escapeText(teacherNickname(entry.teacher))}${entry.detail ? ` · ${escapeText(entry.detail)}` : ""}</small>${entry.event && entry.sharedEventId ? `<span class="master-schedule-entry-actions"><button type="button" data-master-event-edit="${escapeText(entry.sharedEventId)}">Edit</button><button type="button" data-master-event-delete="${escapeText(entry.sharedEventId)}">Delete</button></span>` : ""}</div>`).join("") : '<div class="master-schedule-empty">No scheduled classes</div>'}</article>`);
+        const teamEvents = eventEntries.filter((entry) => entry.teamEvent);
+        const teacherGroups = new Map();
+        [...classEntries, ...eventEntries.filter((entry) => !entry.teamEvent)].forEach((entry) => {
+          const key = entry.teacher.id;
+          if (!teacherGroups.has(key)) teacherGroups.set(key, { teacher: entry.teacher, items: [] });
+          teacherGroups.get(key).items.push(entry);
+        });
+        const scheduleMinutes = (entry) => {
+          const value = String(entry.time || "").trim();
+          const twentyFourHour = value.match(/^(\d{1,2}):(\d{2})/);
+          if (twentyFourHour) return Number(twentyFourHour[1]) * 60 + Number(twentyFourHour[2]);
+          const twelveHour = value.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+          if (twelveHour) {
+            let hour = Number(twelveHour[1]) % 12;
+            if (twelveHour[3].toUpperCase() === "PM") hour += 12;
+            return hour * 60 + Number(twelveHour[2] || 0);
+          }
+          return String(entry.timeBlock || "AM").toUpperCase() === "PM" ? 12 * 60 : 0;
+        };
+        const eventActions = (entry) => entry.event && entry.sharedEventId ? `<span class="master-schedule-entry-actions"><button type="button" data-master-event-edit="${escapeText(entry.sharedEventId)}">Edit</button><button type="button" data-master-event-delete="${escapeText(entry.sharedEventId)}">Delete</button></span>` : "";
+        const teacherCards = [...teacherGroups.values()]
+          .sort((left, right) => teacherNickname(left.teacher).localeCompare(teacherNickname(right.teacher)))
+          .map(({ teacher, items }) => {
+            const lines = items.sort((left, right) => scheduleMinutes(left) - scheduleMinutes(right)).map((entry) => entry.event
+              ? `<span class="master-schedule-entry-line"><span><span class="master-schedule-event-sparkle" aria-hidden="true">✦</span>${escapeText(entry.title)}</span>${entry.school ? `<small>${escapeText(entry.school)}</small>` : ""}<small>${escapeText(entry.detail)}</small>${eventActions(entry)}</span>`
+              : `<span class="master-schedule-entry-line ${entry.closed ? "is-closed" : ""}"><span>${escapeText(entry.school)}</span>${entry.time ? `<small>${escapeText(friendlyScheduleTime(entry.time, entry.timeBlock || ""))}</small>` : `<small>${escapeText(entry.timeBlock || "AM")}</small>`}${entry.detail ? `<small>${escapeText(entry.detail)}</small>` : ""}</span>`).join("");
+            return `<div class="master-schedule-entry" style="--master-teacher-color:${escapeText(teacherProfileColor(teacher))}"><strong>${escapeText(teacherNickname(teacher))}</strong><span class="master-schedule-entry-lines">${lines}</span></div>`;
+          });
+        const teamCards = teamEvents.map((entry) => {
+          const isMeeting = String(entry.eventType || "").trim().toLowerCase() === "meeting";
+          const titleLabel = isMeeting ? "Team Meeting" : (entry.title || entry.eventType || "Team Event");
+          return `<div class="master-schedule-entry is-team-meeting" style="--master-teacher-color:var(--blush)"><strong><span class="master-schedule-event-sparkle" aria-hidden="true">✦</span>${escapeText(titleLabel)}</strong><small>Entire Team${entry.detail ? ` · ${escapeText(entry.detail)}` : ""}</small>${eventActions(entry)}</div>`;
+        });
+        const entries = [...teamCards, ...teacherCards];
+        cells.push(`<article class="master-schedule-day${calendarTodayClass(dateKey)}"><span class="master-schedule-date">${day}</span>${entries.length ? entries.join("") : '<div class="master-schedule-empty">No scheduled classes</div>'}</article>`);
       }
       grid.innerHTML = cells.join("");
     };
