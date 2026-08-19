@@ -60,6 +60,12 @@
       min-height: 100vh;
     }
 
+    html.modal-scroll-locked,
+    html.modal-scroll-locked body {
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
     button, input, select, textarea {
       font: inherit;
     }
@@ -517,6 +523,9 @@
       place-items:center;
       padding:16px;
       background:rgb(35 25 25 / .38);
+      overflow-y:auto;
+      overscroll-behavior:contain;
+      -webkit-overflow-scrolling:touch;
     }
     .mini-app-notification-overlay.open { display:grid; }
     .mini-app-notification-dialog {
@@ -12718,6 +12727,9 @@
       justify-content: center;
       padding: 18px;
       background: oklch(16% 0.03 250 / 0.38);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }
 
     .confirm-overlay.active {
@@ -17540,6 +17552,27 @@
   <script src="supabase-auth.js?v=20260810-teacher-login-design"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <script>
+    const modalScrollLockSelector = [
+      ".confirm-overlay.active",
+      ".mini-app-notification-overlay.open",
+      "dialog[open]"
+    ].join(",");
+
+    const syncModalScrollLock = () => {
+      document.documentElement.classList.toggle(
+        "modal-scroll-locked",
+        Boolean(document.querySelector(modalScrollLockSelector))
+      );
+    };
+
+    new MutationObserver(syncModalScrollLock).observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class", "open"],
+      childList: true,
+      subtree: true
+    });
+    syncModalScrollLock();
+
     const teachers = [
       {
         id: "lexi",
