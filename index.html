@@ -2916,6 +2916,7 @@
     .teacher-student-attendance-entry { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg); }
     .teacher-student-attendance-entry strong { font-size: 11px; }
     .teacher-student-attendance-entry small { color: var(--muted); font-size: 10px; }
+    .student-email-history-resend { grid-column: 2; justify-self: end; width: auto; min-height: 26px; margin-top: 3px; padding: 4px 10px; border-radius: 999px; font-size: 9px; line-height: 1; }
     @media (max-width: 520px) {
       .teacher-student-profile-edit-form { grid-template-columns: 1fr; }
       .teacher-student-profile-edit-form .is-wide, .teacher-student-profile-edit-actions { grid-column: 1; }
@@ -34085,7 +34086,7 @@
         newsletterHistoryPanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Email History</strong><span>${history.length} sent</span></div>${history.length ? history.map((entry) => {
           const status = entry.openedAt ? "Opened" : entry.deliveredAt ? "Delivered" : entry.status === "hard_bounce" ? "Not delivered" : "Sent";
           const canResend = entry.kind === "welcome" && ["admin", "director"].includes(document.body.dataset.userRole || "");
-          return `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(entry.title || "Family Email")}</strong><strong>${rosterSafe(status)}</strong><small>Sent: ${rosterSafe(emailDateTime(entry.sentAt))}</small><small>Sent to: ${rosterSafe(entry.email || "Parent email not recorded")}</small><small>Delivered: ${rosterSafe(emailDateTime(entry.deliveredAt))}</small><small>Opened/viewed: ${rosterSafe(emailDateTime(entry.openedAt))}</small>${canResend ? `<button class="secondary" type="button" data-resend-student-welcome="${rosterSafe(student.id)}">Resend to Current Profile Email</button>` : ""}</div>`;
+          return `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(entry.title || "Family Email")}</strong><strong>${rosterSafe(status)}</strong><small>Sent: ${rosterSafe(emailDateTime(entry.sentAt))}</small><small>Sent to: ${rosterSafe(entry.email || "Parent email not recorded")}</small><small>Delivered: ${rosterSafe(emailDateTime(entry.deliveredAt))}</small><small>Opened/viewed: ${rosterSafe(emailDateTime(entry.openedAt))}</small>${canResend ? `<button class="secondary student-email-history-resend" type="button" data-resend-student-welcome="${rosterSafe(student.id)}">Resend</button>` : ""}</div>`;
         }).join("") : `<div class="teacher-roster-empty">No family emails have been sent to this dancer yet.</div>`}`;
       }
       pendingRosterStudentPhoto = student.photo || "";
