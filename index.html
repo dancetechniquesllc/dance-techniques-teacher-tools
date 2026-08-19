@@ -15286,7 +15286,6 @@
                     <option value="new">New Enrollments (no checklist items complete)</option>
                     <option value="assign-class">Assign to Class</option>
                     <option value="assign-brightwheel">Brightwheel Assignment</option>
-                    <option value="record-fee">Record Enrollment Fee</option>
                     <option value="bill-recital">Bill The Recital Experience</option>
                     <option value="implement-billing">Implement Billing Plan</option>
                     <option value="welcome-email">Welcome Email</option>
@@ -17120,8 +17119,8 @@
             <option value="inactive">Inactive</option>
           </select>
           </label>
-          <label>Tuition Discount
-          <select id="roster-edit-tuition-discount"><option value="none">None</option><option value="sibling">Sibling</option><option value="staff">Staff</option><option value="director">Director</option></select>
+          <label>Tuition Circumstances
+          <select id="roster-edit-tuition-discount"><option value="none">None</option><option value="meadow_oaks">Meadow Oaks Rate — $65</option><option value="sibling">Sibling</option><option value="staff">Staff</option><option value="director">Director</option></select>
           </label>
         </div>
         </section>
@@ -18097,11 +18096,21 @@
       return currentRegistration;
     };
     const getPushServiceWorkerRegistration = async () => {
-      const registration = await notificationTimeout(
-        navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }),
-        8000,
-        "The notification service could not be installed on this device."
+      // Re-registering an existing worker while iOS is activating it can
+      // replace the update before PushManager finishes. Reuse the installed
+      // registration and only install when this app has no worker yet.
+      let registration = await notificationTimeout(
+        navigator.serviceWorker.getRegistration("./"),
+        5000,
+        "The app could not check the notification service on this device."
       );
+      if (!registration) {
+        registration = await notificationTimeout(
+          navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" }),
+          8000,
+          "The notification service could not be installed on this device."
+        );
+      }
       return waitForServiceWorkerActivation(registration);
     };
     const subscribeNotificationSystem = (profile = window.dtCurrentProfile) => {
@@ -18122,7 +18131,15 @@
       const phoneDeviceLabel = document.getElementById("push-device-label");
       const phoneDeviceStatus = document.getElementById("push-device-status");
       if (phoneDeviceLabel) phoneDeviceLabel.textContent = pushReady ? "Phone Push On" : permission === "granted" ? "Finish Setup" : "In-App";
-      if (phoneDeviceStatus) phoneDeviceStatus.textContent = pushReady ? "Phone notifications are enabled and this device is registered." : permission === "granted" ? "Notification permission is on, but this device still needs to finish registering." : permission === "denied" ? "Phone notifications are blocked in this device’s browser settings." : "Notifications will always remain available inside Teacher Tools.";
+      if (phoneDeviceStatus) phoneDeviceStatus.textContent = pushReady
+        ? "Phone notifications are enabled and this device is registered."
+        : pushDeviceSetupIssue
+          ? pushDeviceSetupIssue
+          : permission === "granted"
+            ? "Notification permission is on, but this device still needs to finish registering."
+            : permission === "denied"
+              ? "Phone notifications are blocked in this device’s browser settings."
+              : "Notifications will always remain available inside Teacher Tools.";
       document.querySelectorAll("[data-push-device-label]").forEach((label) => {
         label.textContent = pushReady ? "Desktop Push On" : permission === "granted" ? "Finish Setup" : "In-App";
       });
@@ -18160,12 +18177,27 @@
       }
       try {
         const registration = await getPushServiceWorkerRegistration();
-        pushDeviceSubscriptionReady = Boolean(await notificationTimeout(
+        const browserSubscription = await notificationTimeout(
           registration.pushManager.getSubscription(),
           5000,
           "The app could not verify this device’s push subscription."
-        ));
-        pushDeviceSetupIssue = "";
+        );
+        pushDeviceSubscriptionReady = Boolean(browserSubscription);
+        const profile = window.dtCurrentProfile;
+        if (pushDeviceSubscriptionReady && window.dtSupabase && profile?.id) {
+          const endpoint = browserSubscription.toJSON()?.endpoint || browserSubscription.endpoint;
+          const { data, error } = await notificationTimeout(
+            window.dtSupabase.from("push_subscriptions").select("id, active").eq("user_id", profile.id).eq("endpoint", endpoint).eq("active", true).maybeSingle(),
+            8000,
+            "The app could not confirm that this phone is linked to your Teacher Tools account."
+          );
+          if (error) throw error;
+          pushDeviceSubscriptionReady = Boolean(data?.id);
+          if (!pushDeviceSubscriptionReady) {
+            pushDeviceSetupIssue = "This phone has notification permission, but it still needs to be linked to your Teacher Tools account.";
+          }
+        }
+        if (pushDeviceSubscriptionReady) pushDeviceSetupIssue = "";
       } catch (error) {
         console.warn("Push device readiness could not be checked", error);
         pushDeviceSubscriptionReady = false;
@@ -18493,6 +18525,7 @@
       if (!("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined") return showToast("Phone push is not supported on this device");
       if (pushDeviceSetupRunning) return;
       pushDeviceSetupRunning = true;
+      window.dtPushSetupInProgress = true;
       pushDeviceSetupIssue = "";
       renderNotificationPreferences();
       try {
@@ -18537,6 +18570,7 @@
         showToast(pushDeviceSetupIssue);
       } finally {
         pushDeviceSetupRunning = false;
+        window.dtPushSetupInProgress = false;
         renderNotificationPreferences();
       }
     };
@@ -18677,11 +18711,24 @@
         teacherName: teacher?.displayName || [teacher?.firstName, teacher?.lastName].filter(Boolean).join(" "), reason: `${ageReason}; ${classroomReason}` };
     };
 
+    const isMeadowOaksSchoolName = (value = "") => /\bmeadow\s+oaks\b/i.test(String(value).replace(/[^a-z0-9]+/gi, " ").trim());
+    const enrollmentUsesMeadowOaksRate = (item, suggestion) => {
+      const rosterClass = rosterClasses.find((entry) => entry.id === (item?.matched_dance_class_id || suggestion?.classId));
+      const school = schoolLibrary.find((entry) => entry.id === item?.matched_partner_school_id
+        || enrollmentSchoolNameMatches(entry.name, item?.requested_school_name)
+        || enrollmentSchoolNameMatches(entry.nickname, item?.requested_school_name));
+      return [item?.requested_school_name, rosterClass?.schoolName, school?.name, school?.nickname].some(isMeadowOaksSchoolName);
+    };
+    const effectiveEnrollmentTuitionType = (item, suggestion) => {
+      if (enrollmentUsesMeadowOaksRate(item, suggestion)) return "meadow_oaks";
+      const discountText = [item?.discount_code, item?.discount_details].filter(Boolean).join(" ").toLowerCase();
+      return item?.tuition_discount || (/additional dancer|sibling/.test(discountText) ? "sibling" : /staff|employee/.test(discountText) ? "staff" : "none");
+    };
+
     const suggestedEnrollmentTuition = (item, suggestion) => {
-      const discountText = [item.discount_code, item.discount_details].filter(Boolean).join(" ").toLowerCase();
-      const discountType = item.tuition_discount || (/additional dancer|sibling/.test(discountText) ? "sibling" : /staff|employee/.test(discountText) ? "staff" : "none");
+      const discountType = effectiveEnrollmentTuitionType(item, suggestion);
       const discounted = ["sibling", "staff", "director"].includes(discountType);
-      const monthlyTuition = discountType === "director" ? 0 : discounted ? 45 : 55;
+      const monthlyTuition = discountType === "director" ? 0 : discountType === "meadow_oaks" ? 65 : discounted ? 45 : 55;
       const start = new Date(item.submitted_at || item.created_at || Date.now());
       if (Number.isNaN(start.valueOf())) return { classCount: 0, amount: 0, monthlyTuition, discounted, nextMonth: true };
       const rosterClass = rosterClasses.find((entry) => entry.id === (item.matched_dance_class_id || suggestion?.classId))
@@ -18735,10 +18782,6 @@
     };
 
     const enrollmentWelcomeSending = new Set();
-    const enrollmentFeeRecorded = (item) => Boolean(
-      item?.enrollment_fee_recorded_at
-      || item?.additional_information?.enrollment_fee_recorded_at
-    );
     const enrollmentFeeStatusLabel = (item) => {
       const status = String(item?.payment_status || "").trim().toLowerCase();
       if (!status || status === "unknown") return "Status Not Recorded";
@@ -18753,12 +18796,12 @@
       if (!value || ["none", "no discount", "full tuition", "standard"].includes(value)) return "none";
       if (["sibling", "sibling discount", "additional dancer", "additional child", "multi child", "multiple child"].includes(value)) return "sibling";
       if (["staff", "staff discount", "employee", "employee discount", "team member"].includes(value)) return "staff";
+      if (["meadow oaks", "meadow oaks rate", "meadow oaks tuition"].includes(value)) return "meadow_oaks";
       return "unmapped";
     };
     const enrollmentBatchStepConfig = {
       "new": { field: "additional_information", nestedField: "initial_reviewed_at", label: "Initial review", buttonLabel: "Complete Initial Review", note: "Marks the selected enrollment records as reviewed, then moves them to Assign to Class. It does not place dancers or complete later checklist steps." },
       "assign-brightwheel": { field: "brightwheel_profile_created_at", label: "Brightwheel Assignment" },
-      "record-fee": { field: "additional_information", nestedField: "enrollment_fee_recorded_at", label: "Enrollment fee record", note: "Records that the existing enrollment-fee status was reviewed. It does not process or change a payment." },
       "bill-recital": { field: "invoice_sent_at", label: "The Recital Experience" },
       "implement-billing": { field: "enrollment_active_at", label: "Billing plan" },
       "welcome-email": { action: "send-welcome", label: "Welcome emails", buttonLabel: "Send Welcome Email", note: "Sends the matching Girl or Boy Welcome Email to each selected dancer’s parent." }
@@ -18767,24 +18810,23 @@
     const enrollmentLeaderAuthorized = () => document.body.dataset.tourMode === "true"
       || ["admin", "director"].includes(window.dtCurrentProfile?.role || profile?.role);
     const enrollmentTuitionDiscountLabel = (item) => {
+      if (enrollmentUsesMeadowOaksRate(item, suggestEnrollmentClass(item))) return "Meadow Oaks Rate · $65";
       const discount = String(item?.tuition_discount || "").trim().toLowerCase();
       if (!discount || discount === "none") return "";
+      if (discount === "meadow_oaks") return "Meadow Oaks Rate · $65";
       return discount.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
     };
     const enrollmentNextChecklistStep = (item) => {
       const placed = item?.status === "placed" || Boolean(item?.placed_student_id);
-      const feeRecorded = enrollmentFeeRecorded(item);
       const anyComplete = placed
         || Boolean(item?.additional_information?.initial_reviewed_at)
         || Boolean(item?.brightwheel_profile_created_at)
-        || feeRecorded
         || Boolean(item?.invoice_sent_at)
         || Boolean(item?.enrollment_active_at)
         || Boolean(item?.parent_invited_at);
       if (!anyComplete) return "new";
       if (!placed) return "assign-class";
       if (!item.brightwheel_profile_created_at) return "assign-brightwheel";
-      if (!feeRecorded) return "record-fee";
       if (!item.invoice_sent_at) return "bill-recital";
       if (!item.enrollment_active_at) return "implement-billing";
       if (!item.parent_invited_at) return "welcome-email";
@@ -18813,7 +18855,6 @@
       if (stage === "complete") return "Checklist Complete";
       const labels = {
         "assign-brightwheel": "Brightwheel Assignment",
-        "record-fee": "Enrollment Fee Recorded",
         "bill-recital": "The Recital Experience Added",
         "implement-billing": "Billing Plan",
         "welcome-email": "Welcome Email"
@@ -18965,13 +19006,13 @@
       if (typeSelect) typeSelect.value = enrollmentTypeFilter;
       if (feeSelect) {
         const billingView = enrollmentChecklistFilter === "implement-billing";
-        if (paymentFilterLabel) paymentFilterLabel.firstChild.nodeValue = billingView ? "Tuition Discount " : "Enrollment Fee Payment Status ";
+        if (paymentFilterLabel) paymentFilterLabel.firstChild.nodeValue = billingView ? "Tuition Circumstances " : "Enrollment Fee Payment Status ";
         if (billingView) {
           const values = ["none", "sibling", "staff"];
           if (enrollmentTuitionDiscountFilter !== "all" && !values.includes(enrollmentTuitionDiscountFilter)) enrollmentTuitionDiscountFilter = "all";
           feeSelect.innerHTML = `<option value="all">All</option><option value="none">None</option><option value="sibling">Sibling</option><option value="staff">Staff</option>`;
           feeSelect.value = enrollmentTuitionDiscountFilter;
-          feeSelect.setAttribute("aria-label", "Tuition Discount");
+          feeSelect.setAttribute("aria-label", "Tuition Circumstances");
         } else {
           const values = [...new Set(["unpaid", ...enrollmentIntakeQueue.map(enrollmentFeeStatusKey)])].sort();
           if (enrollmentFeeStatusFilter !== "all" && !values.includes(enrollmentFeeStatusFilter)) enrollmentFeeStatusFilter = "all";
@@ -19188,7 +19229,7 @@
           <small>${escapeText(enrollmentDisplaySchoolName(item))}</small>
           <small class="enrollment-card-age">${escapeText(item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided")}</small>
           ${enrollmentChecklistFilter === "implement-billing" ? `<span class="enrollment-card-billing-bubbles">
-            ${billingDiscount ? `<span class="enrollment-card-billing-bubble discount" aria-label="Tuition Discount: ${escapeText(billingDiscount)}"><span>Tuition Discount</span><b>${escapeText(billingDiscount)}</b></span>` : ""}
+            ${billingDiscount ? `<span class="enrollment-card-billing-bubble discount" aria-label="Tuition Circumstances: ${escapeText(billingDiscount)}"><span>Tuition Circumstances</span><b>${escapeText(billingDiscount)}</b></span>` : ""}
             ${billingTuition ? `<span class="enrollment-card-billing-bubble tuition" aria-label="Suggested Tuition: ${escapeText(billingTuition)}"><span>Suggested Tuition</span><b>${escapeText(billingTuition)}</b></span>` : `<span class="enrollment-card-billing-bubble tuition" aria-label="Suggested Tuition unavailable"><span>Suggested Tuition</span><b>Unavailable</b></span>`}
           </span>` : ""}
           ${placed ? `<span class="enrollment-stage-bubble">${escapeText(enrollmentWorkflowLabel(item))}</span>` : `<span class="enrollment-priority-bubble ${priorityStyle}">${escapeText(priority.label)}</span>`}
@@ -19379,7 +19420,7 @@
             </div>
             <div class="enrollment-editor-finance">
               <label class="enrollment-review-field ${item.payment_status === "paid" ? "" : "fee-unpaid"}"><span>Enrollment Fee Status</span><select name="payment_status"><option value="unpaid" ${item.payment_status !== "paid" ? "selected" : ""}>Unpaid</option><option value="paid" ${item.payment_status === "paid" ? "selected" : ""}>Paid</option></select></label>
-              <label class="enrollment-review-field"><span>Tuition Discount</span><select name="tuition_discount"><option value="none" ${!item.tuition_discount || item.tuition_discount === "none" ? "selected" : ""}>None</option><option value="sibling" ${item.tuition_discount === "sibling" ? "selected" : ""}>Sibling</option><option value="staff" ${item.tuition_discount === "staff" ? "selected" : ""}>Staff</option><option value="director" ${item.tuition_discount === "director" ? "selected" : ""}>Director</option></select></label>
+              <label class="enrollment-review-field"><span>Tuition Circumstances</span><select name="tuition_discount"><option value="none" ${effectiveEnrollmentTuitionType(item, suggestion) === "none" ? "selected" : ""}>None</option><option value="meadow_oaks" ${effectiveEnrollmentTuitionType(item, suggestion) === "meadow_oaks" ? "selected" : ""}>Meadow Oaks Rate — $65</option><option value="sibling" ${effectiveEnrollmentTuitionType(item, suggestion) === "sibling" ? "selected" : ""}>Sibling</option><option value="staff" ${effectiveEnrollmentTuitionType(item, suggestion) === "staff" ? "selected" : ""}>Staff</option><option value="director" ${effectiveEnrollmentTuitionType(item, suggestion) === "director" ? "selected" : ""}>Director</option></select></label>
               <div class="enrollment-review-field suggested"><span>Suggested Tuition</span><strong>${tuition.beforeSeason ? `$${tuition.amount.toFixed(2)} · Full Tuition` : tuition.nextMonth ? `$${tuition.monthlyTuition.toFixed(2)} Next Month` : `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`}</strong><small>${tuition.beforeSeason ? `Season starts ${new Date(`${tuition.seasonStartDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric" })}.` : tuition.nextMonth ? "No remaining classes this month." : `${tuition.classCount} remaining ${tuition.classCount === 1 ? "class" : "classes"}.`}</small></div>
             </div>
             <div class="enrollment-editor-admin-grid">
@@ -19398,7 +19439,6 @@
           <div class="enrollment-checklist">
             <button class="primary" type="button" disabled>✓ Placed in Class</button>
             <button class="${item.brightwheel_profile_created_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="brightwheel_profile_created_at">${item.brightwheel_profile_created_at ? "✓ " : "○ "}Brightwheel Assignment</button>
-            <button class="${enrollmentFeeRecorded(item) ? "primary" : "secondary"}" type="button" disabled>${enrollmentFeeRecorded(item) ? "✓ " : "○ "}Enrollment Fee Recorded</button>
             <button class="${item.invoice_sent_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="invoice_sent_at">${item.invoice_sent_at ? "✓ " : "○ "}The Recital Experience Added</button>
             <button class="${item.enrollment_active_at ? "primary" : "secondary"}" type="button" data-enrollment-checklist="enrollment_active_at">${item.enrollment_active_at ? "✓ " : "○ "}Billing Plan${enrollmentTuitionDiscountLabel(item) ? `: ${escapeText(enrollmentTuitionDiscountLabel(item))}` : ""}</button>
             <button class="${item.parent_invited_at ? "primary" : "secondary"}" type="button" data-enrollment-welcome-email ${item.parent_invited_at || enrollmentWelcomeSending.has(item.id) ? "disabled" : ""}>${enrollmentWelcomeSending.has(item.id) ? "Sending… " : item.parent_invited_at ? "✓ " : "○ "}Welcome Email</button>
@@ -33388,7 +33428,6 @@
         ["new", "Brand New"],
         ["assign-class", "Assign to Class"],
         ["assign-brightwheel", "Brightwheel Assignment"],
-        ["record-fee", "Enrollment Fee Recorded"],
         ["bill-recital", "The Recital Experience Added"],
         ["implement-billing", "Implement Billing Plan"],
         ["welcome-email", "Welcome Email"]
@@ -33857,7 +33896,10 @@
       }
       if (parentPortalInviteStatus) parentPortalInviteStatus.textContent = "Invitations use the dancer’s securely linked primary adult profile.";
       document.getElementById("roster-edit-status").value = student.status || "enrolled";
-      document.getElementById("roster-edit-tuition-discount").value = ["sibling", "staff", "director"].includes(student.tuitionDiscount || intakeRecord?.tuition_discount) ? (student.tuitionDiscount || intakeRecord?.tuition_discount) : "none";
+      const rosterTuitionType = isMeadowOaksSchoolName(rosterClass.schoolName)
+        ? "meadow_oaks"
+        : (student.tuitionDiscount || intakeRecord?.tuition_discount);
+      document.getElementById("roster-edit-tuition-discount").value = ["meadow_oaks", "sibling", "staff", "director"].includes(rosterTuitionType) ? rosterTuitionType : "none";
       document.getElementById("roster-edit-tshirt-size").value = profileValue("tshirtSize", "tshirt_size");
       const kitStatus = student.kitReceived ? "delivered" : student.kitPickedUp ? "picked_up" : student.kitReady ? "ready" : "not_ready";
       document.getElementById("roster-edit-kit-status").value = kitStatus;
@@ -40798,18 +40840,31 @@
     document.getElementById("enrollment-student-intake-slot")?.appendChild(enrollmentQueuePanel);
     enrollmentQueuePanel?.removeAttribute("hidden");
 
-    const enrollmentWelcomeTemplates = () => {
-      persistNewsletterActiveVersion();
-      syncNewsletterAutoSendWelcome();
-      const autoSendWelcome = newsletterCanonicalWelcome?.female && newsletterCanonicalWelcome?.male
+    const enrollmentWelcomeTemplates = async () => {
+      // Auto Send must use the latest pair that was successfully published to
+      // the shared template library. Never substitute an unsaved editor draft
+      // or a stale browser copy for a live enrollment email.
+      if (document.body.dataset.tourMode !== "true") {
+        if (!window.dtSupabase) throw new Error("Sign in to the live Director Dashboard before sending welcome emails.");
+        const loaded = await loadNewsletterCanonicalWelcomeStore(window.dtSupabase);
+        if (!loaded) throw new Error("The latest saved Girl and Boy Welcome Emails could not be opened. Nothing was sent.");
+      }
+      const savedWelcome = newsletterCanonicalWelcome?.female && newsletterCanonicalWelcome?.male
         ? newsletterCanonicalWelcome
         : newsletterDraft.autoSendTemplates?.welcome;
-      const legacyWelcome = newsletterExistingWelcomeVersions();
-      const girlTemplate = autoSendWelcome?.female || legacyWelcome?.female;
-      const boyTemplate = autoSendWelcome?.male || legacyWelcome?.male;
-      return { girlTemplate, boyTemplate };
+      const girlTemplate = savedWelcome?.female;
+      const boyTemplate = savedWelcome?.male;
+      if (girlTemplate?.template !== "welcome" || boyTemplate?.template !== "welcome") {
+        throw new Error("Save and publish both the Girl and Boy Welcome Emails before sending. Nothing was sent.");
+      }
+      return {
+        girlTemplate: structuredClone(girlTemplate),
+        boyTemplate: structuredClone(boyTemplate),
+        version: savedWelcome?.version || savedWelcome?.sourceVersion || null,
+        updatedAt: savedWelcome?.updatedAt || null
+      };
     };
-    const prepareEnrollmentWelcomeDelivery = (item, templates = enrollmentWelcomeTemplates()) => {
+    const prepareEnrollmentWelcomeDelivery = (item, templates) => {
       const gender = String(item.student_gender || "").trim().toLowerCase();
       if (!["female", "male"].includes(gender)) {
         return { error: "Choose Female or Male in the dancer’s profile before selecting a welcome template." };
@@ -40851,7 +40906,14 @@
         showToast("Only an administrator or director can send a welcome email.");
         return;
       }
-      const prepared = prepareEnrollmentWelcomeDelivery(item);
+      let templates;
+      try {
+        templates = await enrollmentWelcomeTemplates();
+      } catch (error) {
+        showToast(error.message || "The latest saved Welcome Emails could not be opened.");
+        return;
+      }
+      const prepared = prepareEnrollmentWelcomeDelivery(item, templates);
       if (prepared.error) { showToast(prepared.error); return; }
       const { gender, recipient, message } = prepared;
       if (document.body.dataset.tourMode === "true") {
@@ -40888,10 +40950,29 @@
     const sendSelectedEnrollmentWelcomeEmails = async (items) => {
       const role = document.body.dataset.userRole || "";
       if (!["admin", "director"].includes(role)) return { succeeded: [], failed: items.map((item) => item.id), message: "Only an administrator or director can send welcome emails." };
-      const templates = enrollmentWelcomeTemplates();
-      const prepared = items.map((item) => ({ item, delivery: prepareEnrollmentWelcomeDelivery(item, templates) }));
+      let templates;
+      try {
+        templates = await enrollmentWelcomeTemplates();
+      } catch (error) {
+        return {
+          succeeded: [],
+          failed: items.map((item) => item.id),
+          failureMessage: error.message || "The latest saved Welcome Emails could not be opened."
+        };
+      }
+      let prepared = items.map((item) => ({ item, delivery: prepareEnrollmentWelcomeDelivery(item, templates) }));
+      const missingRosterMessage = "This dancer’s class record is not available yet. Review the class placement before sending.";
+      // Enrollment intake and shared rosters load independently. A director can
+      // reach the Welcome Email batch while the intake list is current but the
+      // roster copy used for personalization is still stale. Refresh it once
+      // before rejecting otherwise-valid, fully placed dancers.
+      if (document.body.dataset.tourMode !== "true" && prepared.some(({ delivery }) => delivery.error === missingRosterMessage)) {
+        await loadSharedClassesAndRosters(window.dtCurrentProfile);
+        prepared = items.map((item) => ({ item, delivery: prepareEnrollmentWelcomeDelivery(item, templates) }));
+      }
       const failed = prepared.filter(({ delivery }) => delivery.error).map(({ item }) => item.id);
       const ready = prepared.filter(({ delivery }) => !delivery.error);
+      const validationSummary = [...new Set(prepared.map(({ delivery }) => delivery.error).filter(Boolean))].join(" ");
       if (document.body.dataset.tourMode === "true") {
         return { succeeded: [], failed, message: `${ready.length} welcome email${ready.length === 1 ? " is" : "s are"} ready. Demo mode did not send them.` };
       }
@@ -40900,7 +40981,9 @@
       // Welcome templates can be image-rich. Sending small groups keeps every
       // selected family in the action without creating an oversized request.
       const chunks = Array.from({ length: Math.ceil(ready.length / 5) }, (_, index) => ready.slice(index * 5, index * 5 + 5));
-      for (const chunk of chunks) {
+      let failureMessage = "";
+      for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex += 1) {
+        const chunk = chunks[chunkIndex];
         try {
           await sendNewsletterMessages({
             mode: "send",
@@ -40910,8 +40993,12 @@
           });
         } catch (error) {
           console.error("Welcome email batch send failed", chunk.map(({ item }) => item.id), error);
-          failed.push(...chunk.map(({ item }) => item.id));
-          continue;
+          // A whole group failing usually means the shared delivery service,
+          // sender, or account limit is unavailable. Stop immediately instead
+          // of repeating the same failed request for every selected family.
+          failureMessage = error.message || "The welcome email service could not send this batch.";
+          chunks.slice(chunkIndex).flat().forEach(({ item }) => failed.push(item.id));
+          break;
         }
         const sentAt = new Date().toISOString();
         try {
@@ -40924,7 +41011,7 @@
           sentButUnmarked.push(...chunk.map(({ item }) => item.id));
         }
       }
-      return { succeeded, failed, sentButUnmarked };
+      return { succeeded, failed: [...new Set(failed)], sentButUnmarked, failureMessage: failureMessage || validationSummary };
     };
 
     const completeEnrollmentBatch = async () => {
@@ -40952,7 +41039,9 @@
         renderEnrollmentQueue();
         if (result.message) showToast(result.message);
         else if (result.sentButUnmarked?.length) showToast(`${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${result.sentButUnmarked.length} sent email${result.sentButUnmarked.length === 1 ? " needs" : "s need"} checklist follow-up; do not resend them.`);
-        else if (failed.length) showToast(`${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${failed.length} could not be sent and remain selected.`);
+        else if (failed.length) showToast(result.failureMessage
+          ? `${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${failed.length} remain selected. ${result.failureMessage}`
+          : `${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${failed.length} could not be sent and remain selected.`);
         else showToast(`${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent.`);
         return;
       }
@@ -41493,6 +41582,7 @@
         const editableFields = ["student_first_name", "student_last_name", "student_preferred_name", "student_birth_date", "student_gender", "tshirt_size", "student_classroom", "official_classroom", "parent_first_name", "parent_last_name", "parent_relationship", "parent_phone", "parent_email", "requested_school_name", "requested_dance_style", "tuition_discount", "payment_status", "medical_notes", "registration_notes"];
         const values = new FormData(editForm);
         editableFields.forEach((field) => { item[field] = String(values.get(field) || "").trim(); });
+        if (enrollmentUsesMeadowOaksRate(item, suggestEnrollmentClass(item))) item.tuition_discount = "meadow_oaks";
         const hiddenAdditionalInformation = Object.fromEntries(Object.entries(item.additional_information || {})
           .filter(([label]) => !additionalInformationFieldIsVisible(label)));
         item.additional_information = { ...hiddenAdditionalInformation, ...Object.fromEntries([...editForm.querySelectorAll("[data-enrollment-additional-information]")]
@@ -43584,7 +43674,9 @@
       student.parentLastName = document.getElementById("roster-edit-parent-last-name").value.trim();
       student.parentName = [student.parentFirstName, student.parentLastName].filter(Boolean).join(" ");
       student.status = nextStatus;
-      student.tuitionDiscount = document.getElementById("roster-edit-tuition-discount").value || "none";
+      student.tuitionDiscount = isMeadowOaksSchoolName(targetClass.schoolName)
+        ? "meadow_oaks"
+        : document.getElementById("roster-edit-tuition-discount").value || "none";
       student.tshirtSize = document.getElementById("roster-edit-tshirt-size").value.trim();
       const kitWasReady = Boolean(student.kitReady);
       const kitWasPickedUp = Boolean(student.kitPickedUp);
