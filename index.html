@@ -2930,7 +2930,7 @@
     .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .enrollment-student-view-toggle button { min-height: 48px; padding: 9px 14px; border-radius: 12px; background: transparent; color: var(--fg); font-family: var(--font-body); font-size: 16px; font-weight: 800; }
     .enrollment-student-view-toggle button.is-selected { background: var(--blush); color: var(--berry); box-shadow: 0 1px 3px oklch(35% 0.04 25 / .08); }
-    .enrollment-checklist-summary { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 7px; margin: 0 0 14px; }
+    .enrollment-checklist-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 7px; margin: 0 0 14px; }
     .enrollment-checklist-summary[hidden] { display: none; }
     .enrollment-checklist-summary button { min-height: 76px; display: grid; place-content: center; gap: 4px; padding: 8px 6px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); color: var(--fg); font: inherit; text-align: center; }
     .enrollment-checklist-summary button strong { color: var(--berry); font-size: 20px; line-height: 1; }
@@ -12675,6 +12675,33 @@
       font-weight: 720;
       transition: .22s ease;
       z-index: 20;
+      max-width: min(760px, calc(100vw - 28px));
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      white-space: pre-wrap;
+    }
+
+    .toast-message {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .toast-dismiss {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .16);
+      color: inherit;
+      width: 30px;
+      height: 30px;
+      flex: 0 0 30px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
     }
 
     .toast.show {
@@ -15283,7 +15310,6 @@
                 <label>Checklist Next Step
                   <select id="enrollment-checklist-filter">
                     <option value="all">All Incomplete Enrollments</option>
-                    <option value="new">New Enrollments (no checklist items complete)</option>
                     <option value="assign-class">Assign to Class</option>
                     <option value="assign-brightwheel">Brightwheel Assignment</option>
                     <option value="bill-recital">Bill The Recital Experience</option>
@@ -18800,7 +18826,6 @@
       return "unmapped";
     };
     const enrollmentBatchStepConfig = {
-      "new": { field: "additional_information", nestedField: "initial_reviewed_at", label: "Initial review", buttonLabel: "Complete Initial Review", note: "Marks the selected enrollment records as reviewed, then moves them to Assign to Class. It does not place dancers or complete later checklist steps." },
       "assign-brightwheel": { field: "brightwheel_profile_created_at", label: "Brightwheel Assignment" },
       "bill-recital": { field: "invoice_sent_at", label: "The Recital Experience" },
       "implement-billing": { field: "enrollment_active_at", label: "Billing plan" },
@@ -18818,13 +18843,6 @@
     };
     const enrollmentNextChecklistStep = (item) => {
       const placed = item?.status === "placed" || Boolean(item?.placed_student_id);
-      const anyComplete = placed
-        || Boolean(item?.additional_information?.initial_reviewed_at)
-        || Boolean(item?.brightwheel_profile_created_at)
-        || Boolean(item?.invoice_sent_at)
-        || Boolean(item?.enrollment_active_at)
-        || Boolean(item?.parent_invited_at);
-      if (!anyComplete) return "new";
       if (!placed) return "assign-class";
       if (!item.brightwheel_profile_created_at) return "assign-brightwheel";
       if (!item.invoice_sent_at) return "bill-recital";
@@ -18850,7 +18868,6 @@
     const enrollmentWorkflowStage = (item) => enrollmentNextChecklistStep(item);
     const enrollmentWorkflowLabel = (item) => {
       const stage = enrollmentWorkflowStage(item);
-      if (stage === "new") return "New Enrollment";
       if (stage === "assign-class") return "Not Placed";
       if (stage === "complete") return "Checklist Complete";
       const labels = {
@@ -20399,11 +20416,33 @@
     ];
 
     const toast = document.getElementById("toast");
-    const showToast = (message) => {
-      toast.textContent = message;
+    const dismissToast = () => {
+      clearTimeout(window.toastTimer);
+      toast.classList.remove("show");
+    };
+    const showToast = (message, options = {}) => {
+      const text = String(message || "");
+      const looksLikeError = /could not|couldn['’]t|\bfailed\b|\bfailure\b|\berror\b|unavailable|not supported|not enabled|nothing was|did not|only an? |must be|required|no valid/i.test(text);
+      const persistent = options.persistent ?? looksLikeError;
+      toast.replaceChildren();
+      const messageNode = document.createElement("span");
+      messageNode.className = "toast-message";
+      messageNode.textContent = text;
+      toast.append(messageNode);
+      if (persistent) {
+        const dismiss = document.createElement("button");
+        dismiss.className = "toast-dismiss";
+        dismiss.type = "button";
+        dismiss.setAttribute("aria-label", "Dismiss message");
+        dismiss.textContent = "×";
+        dismiss.addEventListener("click", dismissToast, { once: true });
+        toast.append(dismiss);
+      }
+      toast.setAttribute("role", persistent ? "alert" : "status");
+      toast.setAttribute("aria-live", persistent ? "assertive" : "polite");
       toast.classList.add("show");
       clearTimeout(window.toastTimer);
-      window.toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+      if (!persistent) window.toastTimer = setTimeout(dismissToast, 1800);
     };
 
     let hasUnsavedEdits = false;
@@ -33425,7 +33464,6 @@
       summary.hidden = enrollmentStudentsView !== "enrollments";
       if (summary.hidden) return;
       const steps = [
-        ["new", "Brand New"],
         ["assign-class", "Assign to Class"],
         ["assign-brightwheel", "Brightwheel Assignment"],
         ["bill-recital", "The Recital Experience Added"],
@@ -33435,7 +33473,7 @@
       const eligible = enrollmentIntakeQueue.filter(enrollmentBelongsInWorkflow);
       summary.innerHTML = steps.map(([step, label]) => {
         const count = eligible.filter((item) => enrollmentNextChecklistStep(item) === step).length;
-        return `<button type="button" data-enrollment-summary-step="${step}" aria-pressed="${enrollmentChecklistFilter === step ? "true" : "false"}"><strong>${count}</strong><small>${rosterSafe(label)}${step === "new" ? " (New Enrollments)" : ""}</small></button>`;
+        return `<button type="button" data-enrollment-summary-step="${step}" aria-pressed="${enrollmentChecklistFilter === step ? "true" : "false"}"><strong>${count}</strong><small>${rosterSafe(label)}</small></button>`;
       }).join("");
     };
 
@@ -41040,11 +41078,11 @@
         (result.sentButUnmarked || []).forEach((id) => enrollmentBatchSelected.delete(id));
         enrollmentBatchCompleting = false;
         renderEnrollmentQueue();
-        if (result.message) showToast(result.message);
-        else if (result.sentButUnmarked?.length) showToast(`${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${result.sentButUnmarked.length} sent email${result.sentButUnmarked.length === 1 ? " needs" : "s need"} checklist follow-up; do not resend them.`);
+        if (result.message) showToast(result.message, { persistent: Boolean(failed.length) });
+        else if (result.sentButUnmarked?.length) showToast(`${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${result.sentButUnmarked.length} sent email${result.sentButUnmarked.length === 1 ? " needs" : "s need"} checklist follow-up; do not resend them.`, { persistent: true });
         else if (failed.length) showToast(result.failureMessage
           ? `${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${failed.length} remain selected. ${result.failureMessage}`
-          : `${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${failed.length} could not be sent and remain selected.`);
+          : `${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent. ${failed.length} could not be sent and remain selected.`, { persistent: true });
         else showToast(`${succeeded.length} welcome email${succeeded.length === 1 ? "" : "s"} sent.`);
         return;
       }
