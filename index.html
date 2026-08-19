@@ -19947,7 +19947,7 @@
         const school = schoolById.get(assignment?.partner_school_id) || {};
         return {
           id: item.id, assignmentId: item.teacher_school_assignment_id, name: item.name, ageGroup: item.age_group, level: String(item.level),
-          time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", schoolName: school.name || "Partner School",
+          time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", partnerSchoolId: school.id || assignment?.partner_school_id || "", schoolName: school.name || "Partner School",
           day: weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
           updatedAt: item.updated_at || "",
           helperHistory: Array.isArray(item.helper_history) ? item.helper_history : [],
@@ -36891,16 +36891,19 @@
       return /^\[[^\]]+\]$/.test(normalized) ? "" : normalized;
     };
     const newsletterContextForRecord = (record) => {
-      const recordSchoolName = newsletterResolvedValue(record?.rosterClass?.schoolName || record?.student?.schoolName || record?.student?.school_name);
-      const recordSchoolId = newsletterResolvedValue(record?.rosterClass?.schoolId || record?.rosterClass?.school_id || record?.student?.schoolId || record?.student?.school_id);
+      // School details belong to the class and Partner School records. Student
+      // cards intentionally do not duplicate school nicknames.
+      const rosterClass = record?.rosterClass || {};
+      const recordSchoolName = newsletterResolvedValue(rosterClass.schoolName);
+      const recordSchoolId = newsletterResolvedValue(rosterClass.partnerSchoolId || rosterClass.schoolId || rosterClass.school_id);
       const school = schoolLibrary.find((item) => (
         (recordSchoolId && String(item.id || "") === recordSchoolId)
         || enrollmentSchoolNameMatches(item.name, recordSchoolName)
         || enrollmentSchoolNameMatches(item.nickname, recordSchoolName)
       )) || {};
       const student = record?.student || {};
-      const teacherId = record?.rosterClass?.teacherId || school.teacherId || school.assignedTeacherId || school.teacher_id || "";
-      const timeOfDay = String(school.timeBlock || record?.rosterClass.timeBlock || "").trim().toUpperCase();
+      const teacherId = rosterClass.teacherId || school.teacherId || school.assignedTeacherId || school.teacher_id || "";
+      const timeOfDay = String(school.timeBlock || rosterClass.timeBlock || "").trim().toUpperCase();
       const savedSchoolNickname = newsletterResolvedValue(school.nickname);
       const schoolNameFallback = newsletterResolvedValue(recordSchoolName) || newsletterResolvedValue(school.name);
       const schoolNickname = savedSchoolNickname
@@ -36914,14 +36917,14 @@
         "[Dancer Preferred Name]": rosterStudentFirstName(student) || "your dancer",
         "[School Nickname]": schoolNickname,
         "[Teacher Name]": teacherId ? newsletterTeacherName(teacherId) : "your Dance Techniques teacher",
-        "[Dance Day]": record?.rosterClass.day || "dance day",
-        "[Dance Time]": friendlyScheduleTime(record?.rosterClass.time, "class time"),
+        "[Dance Day]": rosterClass.day || "dance day",
+        "[Dance Time]": friendlyScheduleTime(rosterClass.time, "class time"),
         "[AM or PM]": timeOfDay === "AM" ? "Mornings" : timeOfDay === "PM" ? "Afternoons" : "Mornings or Afternoons",
         "[Director First Name]": String(school.directorName || "School Director").split(" ")[0],
         // Internal school-specific phrasing is never included in family emails.
         "[School Specific Phrase]": "",
         __teacherId: teacherId,
-        __schoolConditionKeys: newsletterConditionSchoolKeys(school, record?.rosterClass || {})
+        __schoolConditionKeys: newsletterConditionSchoolKeys(school, rosterClass)
       };
     };
     const newsletterSampleContext = () => newsletterContextForRecord(newsletterFilteredRecords()[0] || newsletterAudienceRecords()[0] || boutiqueKitRecords()[0]);
@@ -36965,8 +36968,39 @@
         span.title = `${matches ? "Shown" : "Hidden"} for this preview · ${labels.join(", ") || "Selected schools"}`;
       });
     };
+    const newsletterPersonalizeAcrossTextNodes = (value = "", context = {}) => {
+      const template = document.createElement("template");
+      template.innerHTML = String(value || "");
+      Object.entries(context).filter(([token]) => token.startsWith("[")).forEach(([token, replacement]) => {
+        const tokenWords = token.slice(1, -1).trim().split(/\s+/).map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+        const tokenPattern = new RegExp(`\\[\\s*${tokenWords.join("[\\s\\u200B-\\u200D\\uFEFF]+")}\\s*\\]`, "gi");
+        while (true) {
+          const walker = document.createTreeWalker(template.content, NodeFilter.SHOW_TEXT);
+          const nodes = [];
+          let combined = "";
+          while (walker.nextNode()) {
+            const node = walker.currentNode;
+            nodes.push({ node, start: combined.length, end: combined.length + node.nodeValue.length });
+            combined += node.nodeValue;
+          }
+          const match = tokenPattern.exec(combined);
+          if (!match) break;
+          const matchStart = match.index;
+          const matchEnd = matchStart + match[0].length;
+          const startEntry = nodes.find(({ start, end }) => matchStart >= start && matchStart <= end);
+          const endEntry = [...nodes].reverse().find(({ start, end }) => matchEnd >= start && matchEnd <= end);
+          if (!startEntry || !endEntry) break;
+          const range = document.createRange();
+          range.setStart(startEntry.node, matchStart - startEntry.start);
+          range.setEnd(endEntry.node, matchEnd - endEntry.start);
+          range.deleteContents();
+          range.insertNode(document.createTextNode(String(replacement || "")));
+        }
+      });
+      return template.innerHTML;
+    };
     const newsletterPersonalize = (value = "", context = newsletterSampleContext()) => {
-      const personalized = Object.entries(context)
+      let personalized = Object.entries(context)
         .filter(([token]) => token.startsWith("["))
         .reduce((text, [token, replacement]) => {
           const tokenWords = token.slice(1, -1).trim().split(/\s+/).map((word) => word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
@@ -36976,6 +37010,7 @@
           const safeReplacement = String(replacement || "");
           return text.replaceAll(token, safeReplacement).replace(tokenPattern, () => safeReplacement);
         }, newsletterConditionalHtml(value, context));
+      personalized = newsletterPersonalizeAcrossTextNodes(personalized, context);
       // Earlier drafts used this exact sentence as a visual stand-in while a
       // school-specific phrase was being planned. It is never family-facing copy;
       // remove it cleanly unless the editor has been given real wording instead.
