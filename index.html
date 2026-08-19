@@ -24220,7 +24220,9 @@
       return "private";
     };
     const fullName = (teacher) => `${teacher.firstName} ${teacher.lastName}`.trim();
-    const isCompanyTeacherProfile = (teacher) => (teacher?.displayName || fullName(teacher || {})).trim().toLowerCase() === "dance techniques";
+    function isCompanyTeacherProfile(teacher) {
+      return (teacher?.displayName || fullName(teacher || {})).trim().toLowerCase() === "dance techniques";
+    }
     const teacherFilterProfiles = () => teachers.filter((teacher) => !isCompanyTeacherProfile(teacher));
     const teacherFilterIdIsVisible = (teacherId) => {
       const teacher = teachers.find((candidate) => candidate.id === teacherId);
