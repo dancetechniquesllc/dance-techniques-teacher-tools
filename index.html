@@ -40978,9 +40978,12 @@
       }
       const succeeded = [];
       const sentButUnmarked = [];
-      // Welcome templates can be image-rich. Sending small groups keeps every
-      // selected family in the action without creating an oversized request.
-      const chunks = Array.from({ length: Math.ceil(ready.length / 5) }, (_, index) => ready.slice(index * 5, index * 5 + 5));
+      // Welcome templates are intentionally image-rich. Even five personalized
+      // versions can exceed the delivery provider's request-size ceiling once
+      // each version carries the saved visual layout. Send one family per
+      // request so the batch action remains reliable without changing the
+      // approved Welcome Email design.
+      const chunks = ready.map((delivery) => [delivery]);
       let failureMessage = "";
       for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex += 1) {
         const chunk = chunks[chunkIndex];
