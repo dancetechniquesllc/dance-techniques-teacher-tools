@@ -17194,7 +17194,7 @@
         </div>
         <div class="roster-profile-tab-panel" id="roster-profile-panel-histories" role="tabpanel" aria-labelledby="roster-profile-tab-histories" data-roster-profile-panel="histories" hidden>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m8 15 2 2 5-5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Attendance</strong><small>Review attendance history and class helper records.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-attendance"></section></details>
-        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Newsletter History</strong><small>See family emails, deliveries, and detected opens.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
+        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Email History</strong><small>See welcome emails, newsletters, deliveries, and detected opens.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M8 9V6a4 4 0 0 1 8 0v3"></path></svg></span><span class="roster-profile-tool-copy"><strong>Boutique Orders</strong><small>Track T-shirt, bag, pickup, and delivery status.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-shirt-field"><label>T-Shirt &amp; Bag Status<select id="roster-edit-kit-status"><option value="not_ready">To Fill</option><option value="ready">To Pick Up</option><option value="picked_up">To Deliver</option><option value="delivered">Delivered</option></select></label><div class="roster-profile-delivery-date"><span>T-Shirt &amp; Bag Delivery Date</span><strong id="roster-edit-kit-delivered-date">Not delivered</strong></div></div><div class="roster-profile-placeholder" id="roster-edit-boutique-orders">No boutique orders are assigned to this dancer.</div></details>
         </div>
       </form>
@@ -19781,7 +19781,10 @@
       const partnerSchoolsQuery = profile.role === "teacher"
         ? client.from("partner_schools").select("*").eq("active", true)
         : client.from("partner_schools").select("*");
-      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult] = await Promise.all([
+      const emailHistoryQuery = ["admin", "director"].includes(profile.role)
+        ? client.from("student_email_deliveries").select("id,student_id,enrollment_id,recipient_email,email_kind,title,subject,gender,send_id,status,sent_at,delivered_at,first_opened_at,last_opened_at,clicked_at").order("sent_at", { ascending: false })
+        : Promise.resolve({ data: [], error: null });
+      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("guardian_user_accounts").select("user_id, revoked_at"),
         partnerSchoolsQuery,
@@ -19790,11 +19793,12 @@
         client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled"]),
         client.from("student_notes").select("id, student_id, note, created_at").order("created_at", { ascending: false }),
         client.from("class_enrollments").select("id, dance_class_id, student_id, ended_date, students(*)").eq("status", "withdrawn").order("ended_date", { ascending: false }),
-        client.from("class_attendance_records").select("dance_class_id, student_id, attendance_date, status, check_in_at, check_out_at")
+        client.from("class_attendance_records").select("dance_class_id, student_id, attendance_date, status, check_in_at, check_out_at"),
+        emailHistoryQuery
       ]);
       const attendanceTableUnavailable = attendanceResult.error?.code === "42P01";
       const failed = [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult,
-        attendanceTableUnavailable ? { error: null } : attendanceResult].find((result) => result.error);
+        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult].find((result) => result.error);
       if (failed) {
         sharedRosterReady = false;
         replaceCollection(rosterClasses, []);
@@ -19931,6 +19935,26 @@
         console.error("The shared partner-school table is empty; the preserved directory remains visible and will not be overwritten.");
       }
       const enrollments = enrollmentsResult.data || [];
+      const emailHistoryByStudent = new Map();
+      (emailHistoryResult.data || []).forEach((entry) => {
+        if (!emailHistoryByStudent.has(entry.student_id)) emailHistoryByStudent.set(entry.student_id, []);
+        emailHistoryByStudent.get(entry.student_id).push({
+          id: entry.id,
+          enrollmentId: entry.enrollment_id || "",
+          email: entry.recipient_email || "",
+          kind: entry.email_kind || "newsletter",
+          title: entry.title || entry.subject || "Family Email",
+          subject: entry.subject || "",
+          gender: entry.gender || "",
+          sendId: entry.send_id || "",
+          status: entry.status || "sent",
+          sentAt: entry.sent_at || "",
+          deliveredAt: entry.delivered_at || "",
+          openedAt: entry.first_opened_at || "",
+          lastOpenedAt: entry.last_opened_at || "",
+          clickedAt: entry.clicked_at || ""
+        });
+      });
       const attendanceByClass = new Map();
       (attendanceResult.data || []).forEach((record) => {
         if (!attendanceByClass.has(record.dance_class_id)) attendanceByClass.set(record.dance_class_id, {});
@@ -19965,7 +19989,7 @@
               parentFirstName: student.parent_first_name || "", parentLastName: student.parent_last_name || "", parentPhone: student.parent_phone || "",
               parentEmail: student.parent_email || "", tuitionDiscount: student.tuition_discount || "none", medicalNotes: student.medical_notes || "", registrationNotes: student.registration_notes || "",
               notes: note?.note || student.registration_notes || "", additionalInformation: student.additional_information && typeof student.additional_information === "object" ? { ...student.additional_information } : {},
-              teacherFeedback: student.additional_information?.teacher_feedback || "", photoPath: student.photo_path || "", photo: "" };
+              teacherFeedback: student.additional_information?.teacher_feedback || "", newsletterHistory: emailHistoryByStudent.get(student.id) || [], photoPath: student.photo_path || "", photo: "" };
           })
         };
       });
@@ -34055,7 +34079,14 @@
           { title: "Welcome to Dance", sentAt: "2026-07-18T14:30:00Z", email: profileValue("parentEmail", "parent_email") || "parent@example.com", status: "clicked", openedAt: "2026-07-18T15:04:00Z" },
           { title: "July Parent Newsletter", sentAt: "2026-07-01T13:00:00Z", email: profileValue("parentEmail", "parent_email") || "parent@example.com", status: "delivered", openedAt: "" }
         ] : []);
-        newsletterHistoryPanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Newsletter History</strong><span>${history.length} sent</span></div>${history.length ? history.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(entry.title || "Newsletter")}</strong><strong>${rosterSafe(entry.status === "clicked" ? "Link clicked" : entry.status === "opened" ? "Open detected" : "Delivered")}</strong><small>Sent ${rosterSafe(new Date(entry.sentAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))} · ${rosterSafe(entry.email || "Parent email")}</small><small>${entry.openedAt ? `First open detected ${rosterSafe(new Date(entry.openedAt).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }))}` : "No open detected"}</small></div>`).join("") : `<div class="teacher-roster-empty">No newsletters have been sent to this dancer’s family yet.</div>`}`;
+        const emailDateTime = (value) => value && !Number.isNaN(new Date(value).getTime())
+          ? new Date(value).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })
+          : "Not recorded";
+        newsletterHistoryPanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Email History</strong><span>${history.length} sent</span></div>${history.length ? history.map((entry) => {
+          const status = entry.openedAt ? "Opened" : entry.deliveredAt ? "Delivered" : entry.status === "hard_bounce" ? "Not delivered" : "Sent";
+          const canResend = entry.kind === "welcome" && ["admin", "director"].includes(document.body.dataset.userRole || "");
+          return `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(entry.title || "Family Email")}</strong><strong>${rosterSafe(status)}</strong><small>Sent: ${rosterSafe(emailDateTime(entry.sentAt))}</small><small>Sent to: ${rosterSafe(entry.email || "Parent email not recorded")}</small><small>Delivered: ${rosterSafe(emailDateTime(entry.deliveredAt))}</small><small>Opened/viewed: ${rosterSafe(emailDateTime(entry.openedAt))}</small>${canResend ? `<button class="secondary" type="button" data-resend-student-welcome="${rosterSafe(student.id)}">Resend to Current Profile Email</button>` : ""}</div>`;
+        }).join("") : `<div class="teacher-roster-empty">No family emails have been sent to this dancer yet.</div>`}`;
       }
       pendingRosterStudentPhoto = student.photo || "";
       rosterStudentProfileDirty = false;
@@ -40979,12 +41010,12 @@
         updatedAt: savedWelcome?.updatedAt || null
       };
     };
-    const prepareEnrollmentWelcomeDelivery = (item, templates) => {
+    const prepareEnrollmentWelcomeDelivery = (item, templates, { recipientOverride = "" } = {}) => {
       const gender = String(item.student_gender || "").trim().toLowerCase();
       if (!["female", "male"].includes(gender)) {
         return { error: "Choose Female or Male in the dancer’s profile before selecting a welcome template." };
       }
-      const recipient = String(item.parent_email || "").trim().toLowerCase();
+      const recipient = String(recipientOverride || item.parent_email || "").trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) {
         return { error: "Add a valid parent email before sending the welcome email." };
       }
@@ -41010,12 +41041,17 @@
           to: recipient,
           name: [item.parent_first_name, item.parent_last_name].filter(Boolean).join(" ") || item.parent_name || "",
           subject: newsletterPersonalize(version.subject || version.headline || "Welcome to Dance Techniques", context),
-          html: newsletterEmailHtml(context, { ...version, genderView: gender })
+          html: newsletterEmailHtml(context, { ...version, genderView: gender }),
+          studentId: record.student.id,
+          enrollmentId: item.id,
+          emailKind: "welcome",
+          title: "Welcome to Dance Techniques",
+          gender
         }
       };
     };
-    const sendEnrollmentWelcomeEmail = async (item) => {
-      if (!item || enrollmentWelcomeSending.has(item.id) || item.parent_invited_at) return;
+    const sendEnrollmentWelcomeEmail = async (item, { resend = false, recipientOverride = "" } = {}) => {
+      if (!item || enrollmentWelcomeSending.has(item.id) || (!resend && item.parent_invited_at)) return;
       const role = document.body.dataset.userRole || "";
       if (!["admin", "director"].includes(role)) {
         showToast("Only an administrator or director can send a welcome email.");
@@ -41028,7 +41064,7 @@
         showToast(error.message || "The latest saved Welcome Emails could not be opened.");
         return;
       }
-      const prepared = prepareEnrollmentWelcomeDelivery(item, templates);
+      const prepared = prepareEnrollmentWelcomeDelivery(item, templates, { recipientOverride });
       if (prepared.error) { showToast(prepared.error); return; }
       const { gender, recipient, message } = prepared;
       if (document.body.dataset.tourMode === "true") {
@@ -41041,17 +41077,19 @@
         await sendNewsletterMessages({
           mode: "send",
           confirmed: true,
-          sendId: `welcome-${item.id}-${gender}`,
+          sendId: resend ? `welcome-resend-${item.id}-${crypto.randomUUID()}` : `welcome-${item.id}-${gender}`,
           messages: [message]
         });
         const sentAt = new Date().toISOString();
-        const { error } = await window.dtSupabase.from("enrollments").update({ parent_invited_at: sentAt }).eq("id", item.id);
-        item.parent_invited_at = sentAt;
+        const { error } = resend
+          ? { error: null }
+          : await window.dtSupabase.from("enrollments").update({ parent_invited_at: sentAt }).eq("id", item.id);
+        if (!resend) item.parent_invited_at = sentAt;
         if (error) {
           console.error("Welcome email status update failed", error);
           showToast("Welcome email sent, but its checklist status could not be saved. Please contact support before retrying.");
         } else {
-          showToast(`${gender === "male" ? "Boy" : "Girl"} welcome email sent.`);
+          showToast(`${resend ? "Welcome email resent" : `${gender === "male" ? "Boy" : "Girl"} welcome email sent`} to ${recipient}.`);
         }
       } catch (error) {
         console.error("Welcome email send failed", error);
@@ -41060,6 +41098,22 @@
         enrollmentWelcomeSending.delete(item.id);
         renderEnrollmentQueue();
       }
+    };
+
+    const resendStudentWelcomeEmail = async (studentId) => {
+      const rosterClass = rosterClasses.find((item) => item.students.some((student) => student.id === studentId));
+      const student = rosterClass?.students.find((item) => item.id === studentId);
+      const intakeRecord = enrollmentIntakeQueue.find((item) => item.placed_student_id === studentId || item.placed_class_enrollment_id === student?.enrollmentId);
+      if (!student || !intakeRecord) return showToast("This dancer’s welcome-email record could not be matched.");
+      const currentEmail = String(student.parentEmail || "").trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(currentEmail)) return showToast("Save a valid parent email in this profile before resending.");
+      const confirmed = window.confirm(`Resend the Welcome to Dance Techniques email to the current profile address?\n\n${currentEmail}`);
+      if (!confirmed) return;
+      await sendEnrollmentWelcomeEmail(intakeRecord, { resend: true, recipientOverride: currentEmail });
+      await loadSharedClassesAndRosters(window.dtCurrentProfile);
+      const refreshedClass = rosterClasses.find((item) => item.students.some((record) => record.id === studentId));
+      const refreshedStudent = refreshedClass?.students.find((record) => record.id === studentId);
+      if (refreshedClass && refreshedStudent) openRosterStudentEditor(refreshedClass, refreshedStudent);
     };
 
     const sendSelectedEnrollmentWelcomeEmails = async (items) => {
@@ -43760,6 +43814,8 @@
       if (event.target.id === "roster-student-edit-overlay") requestCloseRosterStudentEditor();
       const tabButton = event.target.closest("[data-roster-profile-tab]");
       if (tabButton) setRosterProfileTab(tabButton.dataset.rosterProfileTab);
+      const resendWelcomeButton = event.target.closest("[data-resend-student-welcome]");
+      if (resendWelcomeButton) void resendStudentWelcomeEmail(resendWelcomeButton.dataset.resendStudentWelcome);
     });
     document.getElementById("roster-parent-portal-invite")?.addEventListener("click", sendEditingStudentParentPortalInvite);
     document.getElementById("roster-parent-portal-text-invite")?.addEventListener("click", copyEditingStudentParentPortalTextInvite);
