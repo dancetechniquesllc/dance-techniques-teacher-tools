@@ -7,6 +7,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>My Dance Techniques</title>
+  <script>
+    document.documentElement.dataset.localPreview = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname) ? "true" : "false";
+  </script>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png?v=20260723-full-bleed-icon" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png?v=20260723-full-bleed-icon" />
@@ -2916,6 +2919,13 @@
     .teacher-student-attendance-entry { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 9px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--bg); }
     .teacher-student-attendance-entry strong { font-size: 11px; }
     .teacher-student-attendance-entry small { color: var(--muted); font-size: 10px; }
+    .student-email-history-entry { gap: 7px 10px; padding: 12px; }
+    .student-email-history-title { grid-column: 1 / -1; font-size: 15px !important; line-height: 1.2; }
+    .student-email-history-sent { grid-column: 1 / -1; font-size: 11px !important; line-height: 1.4; }
+    .student-email-history-statuses { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+    .student-email-history-status { display: inline-flex; align-items: center; min-height: 24px; padding: 4px 9px; border-radius: 999px; background: oklch(94% 0.05 78); color: oklch(43% 0.11 78); font-size: 9px; font-weight: 850; line-height: 1.15; }
+    .student-email-history-status.is-complete { background: var(--sage-light); color: var(--sage-dark); }
+    .student-email-history-status.is-failed { background: color-mix(in srgb, var(--brick) 18%, white); color: var(--brick); }
     .student-email-history-resend { grid-column: 2; justify-self: end; width: auto; min-height: 26px; margin-top: 3px; padding: 4px 10px; border-radius: 999px; font-size: 9px; line-height: 1; }
     @media (max-width: 520px) {
       .teacher-student-profile-edit-form { grid-template-columns: 1fr; }
@@ -9289,7 +9299,8 @@
     .system-health-copy { min-width: 0; }
     .system-health-copy strong, .system-health-copy small { display: block; }
     .system-health-copy small { margin-top: 2px; color: var(--muted); line-height: 1.4; }
-    .system-health-state { padding: 5px 9px; border-radius: 999px; background: color-mix(in srgb, var(--gold) 20%, white); color: var(--ink); font-size: 10px; font-weight: 900; white-space: nowrap; }
+    .system-health-state { padding: 5px 9px; border: 0; border-radius: 999px; background: color-mix(in srgb, var(--gold) 20%, white); color: var(--ink); font: inherit; font-size: 10px; font-weight: 900; white-space: nowrap; }
+    button.system-health-state:not(:disabled) { cursor: pointer; }
     .system-health-row[data-health-state="ok"] .system-health-state { background: var(--sage-light); color: var(--sage-dark); }
     .system-health-row[data-health-state="error"] .system-health-state { background: color-mix(in srgb, var(--brick) 18%, white); color: var(--brick); }
     .system-health-actions { display: flex; flex-wrap: wrap; gap: 9px; }
@@ -13519,6 +13530,7 @@
     body[data-authenticated="true"] .session-strip { display: flex; }
     body[data-authenticated="true"] .topbar .brand { display: none; }
     body[data-authenticated="true"] .topbar { justify-content: flex-end; }
+    html:not([data-local-preview="true"]) .switcher { display: none !important; }
     body[data-authenticated="true"]:not([data-tour-mode="true"]) .switcher { display: none; }
     body[data-authenticated="true"]:not([data-tour-mode="true"]) .topbar { display: none; }
     body[data-user-role="teacher"] [data-mode-btn="admin"] { display: none; }
@@ -16816,7 +16828,7 @@
         <div class="system-health-list">
           <div class="system-health-row" data-system-health-check="release" data-health-state="pending"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Release &amp; Publish Check</strong><small>Confirms this dashboard loaded correctly and records the version being used for DD, TT, and PP.</small></div><span class="system-health-state">Check needed</span></div>
           <div class="system-health-row" data-system-health-check="accounts" data-health-state="pending"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Teacher Accounts &amp; Roles</strong><small>Flags duplicate, missing, inactive, or conflicting staff identities before a teacher disappears or a guardian appears as staff.</small></div><span class="system-health-state">Check needed</span></div>
-          <div class="system-health-row" data-system-health-check="notifications" data-health-state="pending"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Notification Delivery</strong><small>Checks this device’s permission and registration. Delivery reports organize Sent, Delivered, Opened, Failed, and Disabled results.</small></div><span class="system-health-state">Check needed</span></div>
+          <div class="system-health-row" data-system-health-check="notifications" data-health-state="pending"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Notification Delivery</strong><small>Checks this device’s permission and registration. Delivery reports organize Sent, Delivered, Opened, Failed, and Disabled results.</small></div><button class="system-health-state" type="button" data-enable-push-notifications>Set Up</button></div>
           <div class="system-health-row" data-system-health-check="deliveries" data-health-state="pending"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Posts, Messages &amp; Invitations</strong><small>Surfaces failed Parent Portal posts, messages, invitations, and secure server calls with safe retry tracking.</small></div><span class="system-health-state">Monitor</span></div>
           <div class="system-health-row" data-system-health-check="data" data-health-state="pending"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Data Ownership &amp; Sync</strong><small>Checks enrollment, dancer, school, class, and teacher records for disagreements so approved corrections do not revert.</small></div><span class="system-health-state">Monitor</span></div>
           <div class="system-health-row" data-system-health-check="activity" data-health-state="pending"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Activity Log &amp; Undo</strong><small>Organizes who changed schools, classes, accounts, events, and Parent Portal posts—and whether each change synced.</small></div><span class="system-health-state">Ready to track</span></div>
@@ -18219,13 +18231,13 @@
         button.textContent = pushDeviceSetupRunning
           ? "Finishing Notification Setup…"
           : pushReady
-          ? `${deviceLabel} Notifications Enabled`
+          ? `Repair ${deviceLabel} Notifications`
           : permission === "granted"
             ? "Finish Notification Setup"
             : permission === "denied"
               ? "Notifications Blocked"
               : `Enable ${deviceLabel} Notifications`;
-        button.disabled = pushDeviceSetupRunning || pushReady || permission === "denied";
+        button.disabled = pushDeviceSetupRunning || permission === "denied";
       });
     };
 
@@ -18597,7 +18609,14 @@
         if (!publicKey) { pushDeviceSubscriptionReady = false; renderNotificationPreferences(); return showToast("Phone push will be ready after the secure push key is published"); }
         const registration = await getPushServiceWorkerRegistration();
         const existingSubscription = await notificationTimeout(registration.pushManager.getSubscription(), 5000, "The app could not check this device’s existing notification registration.");
-        const subscription = existingSubscription || await notificationTimeout(
+        if (existingSubscription) {
+          await notificationTimeout(
+            existingSubscription.unsubscribe(),
+            8000,
+            "The old notification registration could not be replaced. Restart the app and try Repair Notifications again."
+          );
+        }
+        const subscription = await notificationTimeout(
           registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) }),
           12000,
           "This browser did not finish registering for push notifications. Close and reopen the installed app, then try again."
@@ -18612,6 +18631,12 @@
             "The secure server did not finish saving this device’s notification registration."
           );
           if (error) throw error;
+          const { error: deactivateError } = await notificationTimeout(
+            window.dtSupabase.from("push_subscriptions").update({ active: false }).eq("user_id", profile.id).neq("endpoint", details.endpoint),
+            10000,
+            "The secure server saved this device, but could not retire an older notification registration."
+          );
+          if (deactivateError) console.warn("Older push registrations could not be retired", deactivateError);
         }
         pushDeviceSubscriptionReady = true;
         pushDeviceSetupIssue = "";
@@ -23623,7 +23648,8 @@
       payload.teacher = {
         ...(payload.teacher && typeof payload.teacher === "object" ? payload.teacher : {}),
         id: teacher.id,
-        photo: teacher.photo || ""
+        photo: teacher.photo || "",
+        photoOwnerId: teacher.photo ? teacher.id : ""
       };
       const { error } = await client.from("teacher_portal_state").upsert({
         teacher_id: teacher.id,
@@ -23961,6 +23987,7 @@
       }
       pendingPersistentAdminReviewFlags = persisted.adminDashboardReviewFlags || null;
       teachers.forEach((teacher) => { if (!teacher.payTier) teacher.payTier = "tier_b_teacher"; });
+      repairCrossedProfilePhotos();
       profileTeacher = teachers.find((teacher) => teacher.id === currentTeacherId) || teachers[0] || profileTeacher;
     };
 
@@ -23996,6 +24023,22 @@
         liveTeacher.loginEmail = signedInEmail;
       }
       if (includeMessages) safeReplaceCollection(messageThreads, persisted.messageThreads || []);
+    };
+
+    const repairCrossedProfilePhotos = () => {
+      teachers.filter((teacher) => isCompanyTeacherProfile(teacher)).forEach((teacher) => {
+        teacher.photo = "";
+        teacher.photoOwnerId = "";
+      });
+      const lexi = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "lexi");
+      const tiffany = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "tiffany");
+      if (lexi?.photo && tiffany?.photo && lexi.photo === tiffany.photo) {
+        lexi.photo = "";
+        lexi.photoOwnerId = "";
+        console.warn("A crossed Lexi/Tiffany profile photo was removed. Upload Lexi’s correct photo to restore it.");
+        return true;
+      }
+      return false;
     };
 
     const reconcileTeachingTeamWithLiveProfiles = async (client) => {
@@ -26550,6 +26593,11 @@
     const renderProfileHero = () => {
       const name = fullName(profileTeacher);
       const displayName = profileTeacher.displayName || name;
+      const isCompanyProfile = isCompanyTeacherProfile(profileTeacher);
+      const signedInTeacher = teachers.find((teacher) => teacher.id === window.dtCurrentProfile?.id);
+      const teacherToolsProfile = document.body.dataset.teacherToolsViewer === "true"
+        ? profileTeacher
+        : signedInTeacher || profileTeacher;
       setText("admin-profile-title", displayName);
       setText("teacher-profile-display-name", displayName);
       setText("admin-profile-email", profileTeacher.email);
@@ -26565,34 +26613,44 @@
         loginBadge.textContent = loginStatus;
         loginBadge.className = `status ${inviteStatusClass(loginStatus)}`;
       }
-      const avatarText = profileTeacher.photo ? "" : (initialsFor(profileTeacher)?.[0] || "T").toUpperCase();
       syncTeacherProfileColorRules();
-      ["admin-avatar-upload", "teacher-header-photo", "teacher-profile-photo"].forEach((id) => {
+      [
+        { id: "admin-avatar-upload", teacher: profileTeacher, company: isCompanyProfile },
+        { id: "teacher-header-photo", teacher: teacherToolsProfile, company: isCompanyTeacherProfile(teacherToolsProfile) },
+        { id: "teacher-profile-photo", teacher: teacherToolsProfile, company: isCompanyTeacherProfile(teacherToolsProfile) }
+      ].forEach(({ id, teacher, company }) => {
         const avatar = document.getElementById(id);
         if (!avatar) return;
+        const avatarText = company || teacher.photo ? "" : (initialsFor(teacher)?.[0] || "T").toUpperCase();
         avatar.textContent = avatarText;
         avatar.classList.add("teacher-identity-bubble");
-        avatar.style.backgroundImage = profileTeacher.photo ? `url("${profileTeacher.photo}")` : "";
-        avatar.style.backgroundColor = profileTeacher.photo ? "" : teacherProfileColor(profileTeacher);
-        avatar.style.color = profileTeacher.photo ? "" : coordinatedInitialColor(teacherProfileColor(profileTeacher));
-        avatar.style.borderColor = profileTeacher.photo ? teacherProfileColor(profileTeacher) : "";
-        avatar.style.borderWidth = profileTeacher.photo ? "3px" : "";
+        avatar.style.backgroundImage = company ? `url("assets/dance-techniques-logo-only.png")` : teacher.photo ? `url("${teacher.photo}")` : "";
+        avatar.style.backgroundColor = company ? "var(--blush)" : teacher.photo ? "" : teacherProfileColor(teacher);
+        avatar.style.backgroundSize = company ? "68%" : "cover";
+        avatar.style.color = teacher.photo || company ? "" : coordinatedInitialColor(teacherProfileColor(teacher));
+        avatar.style.borderColor = teacher.photo && !company ? teacherProfileColor(teacher) : "";
+        avatar.style.borderWidth = teacher.photo && !company ? "3px" : "";
+        if (id === "admin-avatar-upload") {
+          avatar.disabled = company;
+          avatar.setAttribute("aria-label", company ? "Dance Techniques Admin logo" : `Upload a photo for ${displayName}`);
+        }
       });
       document.querySelectorAll("[data-profile-avatar]").forEach((avatar) => {
+        const avatarText = isCompanyProfile || profileTeacher.photo ? "" : (initialsFor(profileTeacher)?.[0] || "T").toUpperCase();
         avatar.textContent = avatarText;
         avatar.classList.add("teacher-identity-bubble");
-        avatar.style.backgroundImage = profileTeacher.photo ? `url("${profileTeacher.photo}")` : "";
-        avatar.style.backgroundColor = profileTeacher.photo ? "" : teacherProfileColor(profileTeacher);
-        avatar.style.color = profileTeacher.photo ? "" : coordinatedInitialColor(teacherProfileColor(profileTeacher));
-        avatar.style.borderColor = profileTeacher.photo ? teacherProfileColor(profileTeacher) : "";
-        avatar.style.borderWidth = profileTeacher.photo ? "3px" : "";
+        avatar.style.backgroundImage = isCompanyProfile ? `url("assets/dance-techniques-logo-only.png")` : profileTeacher.photo ? `url("${profileTeacher.photo}")` : "";
+        avatar.style.backgroundColor = isCompanyProfile ? "var(--blush)" : profileTeacher.photo ? "" : teacherProfileColor(profileTeacher);
+        avatar.style.backgroundSize = isCompanyProfile ? "68%" : "cover";
+        avatar.style.color = profileTeacher.photo || isCompanyProfile ? "" : coordinatedInitialColor(teacherProfileColor(profileTeacher));
+        avatar.style.borderColor = profileTeacher.photo && !isCompanyProfile ? teacherProfileColor(profileTeacher) : "";
+        avatar.style.borderWidth = profileTeacher.photo && !isCompanyProfile ? "3px" : "";
         avatar.setAttribute("aria-label", `Open ${displayName} profile`);
       });
       const deactivate = document.getElementById("deactivate-profile");
       if (deactivate) deactivate.textContent = profileTeacher.status === "active" ? "Deactivate" : "Reactivate";
       const isOwnAccount = document.body.dataset.tourMode === "true"
         || Boolean(window.dtCurrentProfile?.id && window.dtCurrentProfile.id === profileTeacher.id);
-      const isCompanyProfile = isCompanyTeacherProfile(profileTeacher);
       ["restore-previous-autosave", "restore-assignments"].forEach((id) => {
         const restoreButton = document.getElementById(id);
         if (restoreButton) restoreButton.style.display = isCompanyProfile ? "" : "none";
@@ -30365,8 +30423,15 @@
       document.getElementById(button.dataset.focusField)?.focus();
     }));
 
+    let profilePhotoTargetTeacherId = "";
     ["admin-avatar-upload", "teacher-header-photo", "teacher-profile-photo"].forEach((id) => {
       document.getElementById(id)?.addEventListener("click", () => {
+        if (id === "admin-avatar-upload" && isCompanyTeacherProfile(profileTeacher)) return;
+        if (id !== "admin-avatar-upload" && document.body.dataset.teacherToolsViewer !== "true") {
+          const signedInTeacher = teachers.find((teacher) => teacher.id === window.dtCurrentProfile?.id);
+          if (signedInTeacher) profileTeacher = signedInTeacher;
+        }
+        profilePhotoTargetTeacherId = profileTeacher.id;
         document.getElementById("admin-photo-input")?.click();
       });
     });
@@ -30439,11 +30504,16 @@
       resolve(result);
     };
     const persistProfilePhoto = async (photo) => {
-      profileTeacher.photo = photo;
+      const targetTeacher = teachers.find((teacher) => teacher.id === profilePhotoTargetTeacherId);
+      if (!targetTeacher || isCompanyTeacherProfile(targetTeacher)) throw new Error("The correct teacher profile could not be confirmed for this photo.");
+      targetTeacher.photo = photo;
+      targetTeacher.photoOwnerId = targetTeacher.id;
+      profileTeacher = targetTeacher;
+      profilePhotoTargetTeacherId = "";
       renderProfileHero();
       renderTeacherProfileList();
       saveAppData();
-      const [workspaceSaved, teacherPhotoSaved] = await Promise.all([saveCloudAppData(), saveTeacherPhotoToCloud(profileTeacher)]);
+      const [workspaceSaved, teacherPhotoSaved] = await Promise.all([saveCloudAppData(), saveTeacherPhotoToCloud(targetTeacher)]);
       if (workspaceSaved !== false && teacherPhotoSaved === true) {
         clearUnsavedEdits();
         showToast("Profile photo saved");
@@ -34080,13 +34150,23 @@
           { title: "Welcome to Dance", sentAt: "2026-07-18T14:30:00Z", email: profileValue("parentEmail", "parent_email") || "parent@example.com", status: "clicked", openedAt: "2026-07-18T15:04:00Z" },
           { title: "July Parent Newsletter", sentAt: "2026-07-01T13:00:00Z", email: profileValue("parentEmail", "parent_email") || "parent@example.com", status: "delivered", openedAt: "" }
         ] : []);
-        const emailDateTime = (value) => value && !Number.isNaN(new Date(value).getTime())
-          ? new Date(value).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })
-          : "Not recorded";
+        const emailDate = (value) => value && !Number.isNaN(new Date(value).getTime())
+          ? new Date(value).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })
+          : "an unknown date";
+        const emailTime = (value) => value && !Number.isNaN(new Date(value).getTime())
+          ? new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+          : "an unknown time";
         newsletterHistoryPanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Email History</strong><span>${history.length} sent</span></div>${history.length ? history.map((entry) => {
-          const status = entry.openedAt ? "Opened" : entry.deliveredAt ? "Delivered" : entry.status === "hard_bounce" ? "Not delivered" : "Sent";
+          const deliveryFailed = /fail|bounce|block|invalid|reject|error|drop|spam|unsubscrib/i.test(String(entry.status || ""));
+          const deliveryComplete = Boolean(entry.deliveredAt || entry.openedAt || /deliver|open|click/i.test(String(entry.status || "")));
+          const deliveredLabel = entry.deliveredAt
+            ? `Delivered on ${emailDate(entry.deliveredAt)} at ${emailTime(entry.deliveredAt)}`
+            : deliveryComplete ? "Delivered" : deliveryFailed ? "Failed Delivery" : "Delivery Pending";
+          const openedLabel = entry.openedAt
+            ? `Viewed on ${emailDate(entry.openedAt)} at ${emailTime(entry.openedAt)}`
+            : deliveryFailed ? "Unable to View" : "Not Viewed Yet";
           const canResend = entry.kind === "welcome" && ["admin", "director"].includes(document.body.dataset.userRole || "");
-          return `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(entry.title || "Family Email")}</strong><strong>${rosterSafe(status)}</strong><small>Sent: ${rosterSafe(emailDateTime(entry.sentAt))}</small><small>Sent to: ${rosterSafe(entry.email || "Parent email not recorded")}</small><small>Delivered: ${rosterSafe(emailDateTime(entry.deliveredAt))}</small><small>Opened/viewed: ${rosterSafe(emailDateTime(entry.openedAt))}</small>${canResend ? `<button class="secondary student-email-history-resend" type="button" data-resend-student-welcome="${rosterSafe(student.id)}">Resend</button>` : ""}</div>`;
+          return `<div class="teacher-student-attendance-entry student-email-history-entry"><strong class="student-email-history-title">${rosterSafe(entry.title || "Family Email")}</strong><small class="student-email-history-sent">Sent to ${rosterSafe(entry.email || "Parent email not recorded")} on ${rosterSafe(emailDate(entry.sentAt))} at ${rosterSafe(emailTime(entry.sentAt))}</small><div class="student-email-history-statuses"><span class="student-email-history-status ${deliveryComplete ? "is-complete" : deliveryFailed ? "is-failed" : ""}">${rosterSafe(deliveredLabel)}</span><span class="student-email-history-status ${entry.openedAt ? "is-complete" : deliveryFailed ? "is-failed" : ""}">${rosterSafe(openedLabel)}</span></div>${canResend ? `<button class="secondary student-email-history-resend" type="button" data-resend-student-welcome="${rosterSafe(student.id)}">Resend</button>` : ""}</div>`;
         }).join("") : `<div class="teacher-roster-empty">No family emails have been sent to this dancer yet.</div>`}`;
       }
       pendingRosterStudentPhoto = student.photo || "";
@@ -44438,13 +44518,8 @@
         if (teacherStatesError) console.error("Teacher cloud changes could not load for the Director Dashboard", teacherStatesError);
         else (teacherStates || []).forEach((teacherState) => applyTeacherCloudData(teacherState.payload, teacherState.teacher_id, { includeMessages: false, preserveDirectorData: true }));
         await reconcileTeachingTeamWithLiveProfiles(client);
+        repairCrossedProfilePhotos();
         teachers.forEach((teacher) => { if (currentTierByTeacher.has(teacher.id)) teacher.payTier = currentTierByTeacher.get(teacher.id); });
-        const teacherPhotoResults = await Promise.all(teachers
-          .filter((teacher) => teacher.photo && isUuid(teacher.id))
-          .map((teacher) => saveTeacherPhotoToCloud(teacher)));
-        if (teacherPhotoResults.some((saved) => saved === false)) {
-          showToast("Some teacher profile photos still need attention.");
-        }
         if (recoveredTeachers.length) {
           const teacherRecoveryResults = await Promise.all(recoveredTeachers.map((teacher) => saveTeacherRecordToCloud(teacher)));
           recoveredTeachers.forEach((teacher) => { delete teacher.recoveredFromInactive; });
