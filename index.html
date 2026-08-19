@@ -37480,7 +37480,16 @@
       }))];
       if (unresolvedFields.length) throw new Error(`Personalized fields still need recipient data: ${unresolvedFields.join(", ")}. Nothing was sent.`);
       if (!window.dtSupabase) throw new Error("Sign in to the live Director Dashboard before sending.");
-      const { data, error } = await window.dtSupabase.functions.invoke("send-newsletter", { body: { messages, mode, confirmed, sendId } });
+      let data;
+      let error;
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        ({ data, error } = await window.dtSupabase.functions.invoke("send-newsletter", { body: { messages, mode, confirmed, sendId } }));
+        const responseReachedService = error?.context instanceof Response;
+        if (!error || responseReachedService || attempt === 1) break;
+        // A dropped browser-to-Edge-Function connection is safe to retry with
+        // the same Brevo idempotency key. Service responses are never retried.
+        await new Promise((resolve) => window.setTimeout(resolve, 700));
+      }
       if (error) {
         let serviceMessage = data?.message || "";
         if (!serviceMessage && error.context instanceof Response) {
@@ -41097,7 +41106,7 @@
           await sendNewsletterMessages({
             mode: "send",
             confirmed: true,
-            sendId: `welcome-batch-${crypto.randomUUID()}`,
+            sendId: `welcome-${chunk[0].item.id}-${chunk[0].delivery.gender}`,
             messages: chunk.map(({ delivery }) => delivery.message)
           });
         } catch (error) {
