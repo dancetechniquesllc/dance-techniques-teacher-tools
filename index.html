@@ -43117,11 +43117,10 @@
         renderClassesAndRosters();
         return;
       }
-      const wasTotsClass = setting === "ageGroup" && isTotsAgeClass(rosterClass);
       rosterClass[setting] = field.value;
       if (setting === "ageGroup") {
         rosterClass.classroom = field.value;
-        if (wasTotsClass && !isTotsAgeClass(rosterClass)) rosterClass.capacity = 12;
+        if (!isTotsAgeClass(rosterClass) && Number(rosterClass.capacity) === 8) rosterClass.capacity = 12;
       }
       const { row } = linkedSchoolClassRow(rosterClass);
       if (row) {
