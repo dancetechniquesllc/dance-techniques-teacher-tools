@@ -7517,6 +7517,55 @@
     .boutique-backstage-tab[aria-selected="true"] { background: var(--blush); color: var(--berry); box-shadow: 0 2px 7px rgb(74 42 35 / .08); }
     .boutique-backstage-tab[aria-selected="true"] small { color: var(--berry); }
     .boutique-backstage-panel[hidden] { display: none; }
+    .preorder-campaigns { display: grid; gap: 14px; }
+    .preorder-campaign { display: grid; gap: 14px; }
+    .preorder-campaign[hidden] { display: none; }
+    .preorder-heading-copy { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .preorder-heading-copy img { width: 52px; height: 52px; flex: 0 0 auto; object-fit: cover; border: 2px solid var(--border); border-radius: 50%; background: var(--blush-soft); }
+    .preorder-heading-copy span { display: grid; gap: 2px; min-width: 0; }
+    .preorder-heading-copy small { color: var(--muted); font-size: 11px; font-weight: 800; }
+    .preorder-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .preorder-summary { display: grid; gap: 3px; min-height: 82px; padding: 13px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); text-align: center; }
+    .preorder-summary strong { color: var(--berry); font-size: 25px; line-height: 1; }
+    .preorder-summary span { font-size: 11px; font-weight: 900; }
+    .preorder-summary small { color: var(--muted); font-size: 10px; }
+    .preorder-planner { overflow-x: auto; border: 1px solid var(--border); border-radius: 14px; }
+    .preorder-planner table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    .preorder-planner th, .preorder-planner td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: center; }
+    .preorder-planner th:first-child, .preorder-planner td:first-child { text-align: left; }
+    .preorder-planner tr:last-child td { border-bottom: 0; }
+    .preorder-planner th { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .04em; }
+    .preorder-planner input { width: 74px; min-height: 38px; padding: 7px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); text-align: center; font: inherit; font-weight: 900; }
+    .preorder-toolbar { display: grid; grid-template-columns: minmax(180px, 1.4fr) repeat(3, minmax(130px, .8fr)); gap: 9px; }
+    .preorder-toolbar input, .preorder-toolbar select { width: 100%; min-height: 42px; padding: 8px 11px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--fg); font: inherit; font-weight: 800; }
+    .preorder-actions { display: flex; justify-content: space-between; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .preorder-actions span { display: flex; gap: 8px; flex-wrap: wrap; }
+    .preorder-order-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .preorder-order-card { position: relative; display: grid; gap: 7px; min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: 15px; background: var(--surface); }
+    .preorder-order-card h4, .preorder-order-card p { margin: 0; }
+    .preorder-order-card h4 { padding-right: 90px; font-size: 15px; }
+    .preorder-order-card p, .preorder-order-card small { color: var(--muted); font-size: 11px; }
+    .preorder-order-card .preorder-line { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+    .preorder-order-card .preorder-line strong { text-align: right; }
+    .preorder-order-card .preorder-line.is-not-personalized > span { color: #b4232f; font-weight: 900; }
+    .preorder-status { position: absolute; top: 11px; right: 11px; padding: 5px 8px; border-radius: 999px; background: #f8ecd6; color: #805515; font-size: 9px; font-weight: 900; }
+    .preorder-status.is-green { background: #e3efe1; color: #28522e; }
+    .preorder-status.is-red { background: #f6dce1; color: #8c2338; }
+    .preorder-match { display: flex; align-items: center; gap: 6px; padding-top: 5px; border-top: 1px solid var(--border); }
+    .preorder-match select { min-width: 0; flex: 1; min-height: 36px; padding: 6px 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font: inherit; font-size: 11px; }
+    .preorder-card-actions { display: flex; justify-content: flex-end; gap: 7px; }
+    .preorder-card-actions button { min-height: 34px; padding: 7px 10px; font-size: 11px; }
+    @media (max-width: 900px) {
+      .preorder-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .preorder-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .preorder-order-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 560px) {
+      .preorder-summary-grid, .preorder-toolbar, .preorder-order-grid { grid-template-columns: minmax(0, 1fr); }
+      .preorder-heading-copy img { width: 44px; height: 44px; }
+      .preorder-actions > span { width: 100%; }
+      .preorder-actions button { flex: 1; }
+    }
     .boutique-stock-heading { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; }
     .boutique-stock-heading-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     #boutique-add-product-open { background: var(--sage); color: #233425; }
@@ -15200,6 +15249,12 @@
                     <span class="boutique-kit-action-group"><button class="secondary boutique-quantity-button" type="button" id="boutique-order-quantities">Pull Stock</button><button class="secondary" type="button" id="boutique-order-select-visible">Select All</button><button class="secondary" type="button" id="boutique-order-clear-selection">Clear Selection</button><button type="button" id="boutique-order-advance-selected">Mark Filled</button></span>
                   </div>
                   <div class="boutique-kit-list boutique-order-card-grid" id="director-boutique-order-list"><div class="boutique-kit-empty">Opening Wix orders…</div></div>
+                </div>
+              </article>
+              <article class="admin-card">
+                <div class="section-title boutique-kit-heading"><div class="boutique-kit-title"><svg class="admin-nav-icon" aria-hidden="true"><use href="#icon-boutique-backend"></use></svg><h3>Preorders</h3></div><div class="boutique-kit-heading-actions"><button class="secondary" type="button" id="preorder-sync">Refresh Jotform</button><button class="boutique-kit-collapse" type="button" id="preorders-collapse" aria-expanded="false" aria-controls="preorders-body" aria-label="Expand Preorders"><span aria-hidden="true">⌄</span></button></div></div>
+                <div class="boutique-kit-body" id="preorders-body" hidden>
+                  <div class="preorder-campaigns" id="preorder-campaigns"><div class="boutique-kit-empty">Opening preorders…</div></div>
                 </div>
               </article>
             </div>
@@ -31098,6 +31153,7 @@
         ];
         renderDirectorBoutiqueOrders();
         renderTeacherOrders();
+        await loadBoutiquePreorders(profile);
         renderBoutiqueStock();
         return;
       }
@@ -31123,6 +31179,7 @@
         order.wix_created_at && new Date(order.wix_created_at).valueOf() >= new Date(boutiqueOrdersGoLiveAt).valueOf()
       ));
       await loadBoutiqueStock(profile);
+      await loadBoutiquePreorders(profile);
       renderDirectorBoutiqueOrders();
       renderBoutiqueStock();
     };
@@ -31132,6 +31189,196 @@
       else {
         await loadBoutiqueOrders(window.dtCurrentProfile, { sync: false });
         showToast("Wix Orders refreshed");
+      }
+    });
+
+    let boutiquePreorderCampaigns = [];
+    const preorderStatusLabel = (status) => ({
+      new: "New", ordered: "Ordered from Vendor", received: "Received",
+      ready_to_distribute: "Ready to Distribute", delivered: "Delivered",
+      payment_failed: "Payment Failed", cancelled: "Cancelled", refunded: "Refunded"
+    })[status] || "New";
+    const preorderStatusClass = (status) => ["received", "ready_to_distribute", "delivered"].includes(status) ? "is-green" : ["payment_failed", "cancelled", "refunded"].includes(status) ? "is-red" : "";
+    const preorderActiveOrder = (order) => order.payment_status === "paid" && !["cancelled", "refunded", "payment_failed"].includes(order.status);
+    const preorderCampaignOrders = (campaign) => campaign.boutique_preorder_orders || [];
+    const preorderCampaignExtras = (campaign) => Object.fromEntries((campaign.boutique_preorder_extras || []).map((item) => [item.size, Math.max(0, Number(item.quantity) || 0)]));
+    const preorderOrderedSizes = (campaign, values) => [...new Set([...(campaign.sizes || []), ...values.filter(Boolean)])].sort((left, right) => {
+      const leftIndex = (campaign.sizes || []).indexOf(left);
+      const rightIndex = (campaign.sizes || []).indexOf(right);
+      if (leftIndex !== -1 || rightIndex !== -1) return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex);
+      return boutiqueShirtSizeSort(left, right);
+    });
+    const preorderDate = (value) => value ? new Date(`${value}T12:00:00`).toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" }) : "No deadline";
+    const preorderSubmittedAt = (value) => value ? new Date(value).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "Submission time unavailable";
+    const preorderStudentOptions = (selectedId = "") => boutiqueKitRecords().sort((left, right) => rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student))).map(({ student, rosterClass }) => `<option value="${rosterSafe(student.id)}" ${String(student.id) === String(selectedId) ? "selected" : ""}>${rosterSafe(rosterStudentFullName(student))} · ${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))}</option>`).join("");
+
+    const preorderFilteredOrders = (campaign) => {
+      const search = String(document.getElementById(`preorder-search-${campaign.id}`)?.value || "").trim().toLowerCase();
+      const status = document.getElementById(`preorder-status-${campaign.id}`)?.value || "all";
+      const school = document.getElementById(`preorder-school-${campaign.id}`)?.value || "all";
+      const size = document.getElementById(`preorder-size-${campaign.id}`)?.value || "all";
+      return preorderCampaignOrders(campaign).filter((order) => {
+        if (status === "needs_review" && order.match_status !== "needs_review") return false;
+        if (!["all", "needs_review"].includes(status) && order.status !== status) return false;
+        if (school !== "all" && order.school_name !== school) return false;
+        if (size !== "all" && order.size !== size) return false;
+        return !search || [order.dancer_name, order.school_name, order.size, order.personalization, order.jotform_submission_id].filter(Boolean).join(" ").toLowerCase().includes(search);
+      });
+    };
+
+    const preorderPlannerMarkup = (campaign) => {
+      const orders = preorderCampaignOrders(campaign).filter(preorderActiveOrder);
+      const extras = preorderCampaignExtras(campaign);
+      const sizes = preorderOrderedSizes(campaign, [...orders.map((item) => item.size), ...Object.keys(extras)]);
+      return `<div class="preorder-planner"><table><thead><tr><th>Size</th><th>Customer Orders</th><th>Planned Extras</th><th>Order From Vendor</th></tr></thead><tbody>${sizes.map((size) => {
+        const customerCount = orders.filter((order) => order.size === size).reduce((sum, order) => sum + Math.max(1, Number(order.quantity) || 1), 0);
+        const extraCount = extras[size] || 0;
+        return `<tr><td><strong>${rosterSafe(size)}</strong></td><td>${customerCount}</td><td><input type="number" inputmode="numeric" min="0" step="1" value="${extraCount}" data-preorder-extra-campaign="${rosterSafe(campaign.id)}" data-preorder-extra-size="${rosterSafe(size)}" aria-label="Extra ${rosterSafe(size)} quarter zips"></td><td><strong>${customerCount + extraCount}</strong></td></tr>`;
+      }).join("")}</tbody></table></div>`;
+    };
+
+    const preorderOrderCardMarkup = (campaign, order) => {
+      const matched = boutiqueOrderStudentRecord(order.assigned_student_id);
+      const nextStatus = order.status === "received" ? "ready_to_distribute" : order.status === "ready_to_distribute" ? "delivered" : "";
+      const noPersonalization = /^no$/i.test(String(order.personalization || "").trim());
+      return `<article class="preorder-order-card"><span class="preorder-status ${preorderStatusClass(order.status)}">${rosterSafe(preorderStatusLabel(order.status))}</span><h4>${rosterSafe(order.dancer_name)}</h4><p>${rosterSafe(order.school_name)} · Submitted ${rosterSafe(preorderSubmittedAt(order.submitted_at))}</p><span class="preorder-line"><span>Size</span><strong>${rosterSafe(order.size)}${Number(order.quantity) > 1 ? ` × ${Number(order.quantity)}` : ""}</strong></span><span class="preorder-line ${noPersonalization ? "is-not-personalized" : ""}"><span>Personalization</span><strong>${noPersonalization ? "" : rosterSafe(order.personalization || "")}</strong></span><span class="preorder-line"><span>Paid</span><strong>${Number(order.amount_total || 0).toLocaleString("en-US", { style: "currency", currency: "USD" })}</strong></span><label class="preorder-match"><span class="status ${order.match_status === "matched" ? "success" : "danger"}">${order.match_status === "matched" ? "Matched" : "Needs Review"}</span><select data-preorder-assign="${rosterSafe(order.id)}" aria-label="Match ${rosterSafe(order.dancer_name)} to a profile"><option value="">Choose dancer profile</option>${preorderStudentOptions(matched?.student.id || order.assigned_student_id)}</select></label>${nextStatus ? `<div class="preorder-card-actions"><button type="button" data-preorder-order-status="${rosterSafe(order.id)}" data-preorder-next-status="${nextStatus}">${rosterSafe(preorderStatusLabel(nextStatus))}</button></div>` : ""}</article>`;
+    };
+
+    const renderBoutiquePreorders = () => {
+      const container = document.getElementById("preorder-campaigns");
+      if (!container) return;
+      if (!boutiquePreorderCampaigns.length) {
+        container.innerHTML = `<div class="boutique-kit-empty">No preorder campaigns have been connected yet.</div>`;
+        return;
+      }
+      container.innerHTML = boutiquePreorderCampaigns.map((campaign) => {
+        const orders = preorderCampaignOrders(campaign);
+        const activeOrders = orders.filter(preorderActiveOrder);
+        const pieces = activeOrders.reduce((sum, order) => sum + Math.max(1, Number(order.quantity) || 1), 0);
+        const extras = Object.values(preorderCampaignExtras(campaign)).reduce((sum, value) => sum + value, 0);
+        const needsReview = orders.filter((order) => order.match_status === "needs_review" && preorderActiveOrder(order)).length;
+        const schools = [...new Set(orders.map((order) => order.school_name).filter(Boolean))].sort();
+        const sizes = preorderOrderedSizes(campaign, orders.map((order) => order.size));
+        const visible = preorderFilteredOrders(campaign);
+        const action = campaign.vendor_status === "collecting" ? { status: "ordered", label: "Mark Ordered from Vendor" } : campaign.vendor_status === "ordered" ? { status: "received", label: "Mark Shipment Received" } : null;
+        return `<section class="preorder-campaign" data-preorder-campaign="${rosterSafe(campaign.id)}"><div class="preorder-heading-copy">${campaign.image_url ? `<img src="${rosterSafe(campaign.image_url)}" alt="">` : ""}<span><strong>${rosterSafe(campaign.title)}</strong><small>Closes ${rosterSafe(preorderDate(campaign.deadline))} · ${rosterSafe(campaign.vendor_status === "collecting" ? "Collecting Orders" : campaign.vendor_status === "ordered" ? "Ordered from Vendor" : campaign.vendor_status === "received" ? "Shipment Received" : "Closed")}</small></span></div><div class="preorder-summary-grid"><span class="preorder-summary"><strong>${activeOrders.length}</strong><span>Paid Orders</span><small>Active submissions</small></span><span class="preorder-summary"><strong>${pieces}</strong><span>Items Ordered</span><small>Across all sizes</small></span><span class="preorder-summary"><strong>${pieces + extras}</strong><span>Order Quantity</span><small>Orders + extras</small></span><span class="preorder-summary"><strong>${needsReview}</strong><span>Needs Review</span><small>Profile matches</small></span></div>${preorderPlannerMarkup(campaign)}<div class="preorder-toolbar"><input id="preorder-search-${rosterSafe(campaign.id)}" type="search" placeholder="Search dancer or personalization" aria-label="Search ${rosterSafe(campaign.title)}"><select id="preorder-status-${rosterSafe(campaign.id)}" aria-label="Preorder status"><option value="all">All statuses</option><option value="needs_review">Needs review</option>${["new", "ordered", "received", "ready_to_distribute", "delivered", "payment_failed", "cancelled", "refunded"].map((status) => `<option value="${status}">${rosterSafe(preorderStatusLabel(status))}</option>`).join("")}</select><select id="preorder-school-${rosterSafe(campaign.id)}" aria-label="Preorder school"><option value="all">All schools</option>${schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}</select><select id="preorder-size-${rosterSafe(campaign.id)}" aria-label="Preorder size"><option value="all">All sizes</option>${sizes.map((size) => `<option value="${rosterSafe(size)}">${rosterSafe(size)}</option>`).join("")}</select></div><div class="preorder-actions"><strong id="preorder-visible-${rosterSafe(campaign.id)}">${visible.length} order${visible.length === 1 ? "" : "s"}</strong><span><button class="secondary" type="button" data-preorder-save-extras="${rosterSafe(campaign.id)}">Save Extras</button>${action ? `<button type="button" data-preorder-campaign-status="${rosterSafe(campaign.id)}" data-preorder-next-status="${action.status}">${action.label}</button>` : ""}</span></div><div class="preorder-order-grid" id="preorder-orders-${rosterSafe(campaign.id)}">${visible.length ? visible.map((order) => preorderOrderCardMarkup(campaign, order)).join("") : `<div class="boutique-kit-empty">No preorder orders match these filters.</div>`}</div></section>`;
+      }).join("");
+    };
+
+    const renderBoutiquePreorderOrderList = (campaign) => {
+      const visible = preorderFilteredOrders(campaign);
+      setText(`preorder-visible-${campaign.id}`, `${visible.length} order${visible.length === 1 ? "" : "s"}`);
+      const list = document.getElementById(`preorder-orders-${campaign.id}`);
+      if (list) list.innerHTML = visible.length ? visible.map((order) => preorderOrderCardMarkup(campaign, order)).join("") : `<div class="boutique-kit-empty">No preorder orders match these filters.</div>`;
+    };
+
+    const loadBoutiquePreorders = async (profile = window.dtCurrentProfile) => {
+      if (document.body.dataset.tourMode === "true") {
+        boutiquePreorderCampaigns = [{ id: "sample-preorder", slug: "quarter-zip-2026", title: "Quarter Zip Pre-Order", product_name: "Quarter Zip Pullover", jotform_form_id: "262304247468055", deadline: "2026-09-15", unit_price: 30, sizes: ["18-24M", "2T", "3T", "4T", "5/6", "7/8"], image_url: "https://www.jotform.com/uploads/dancetechniques/form_files/screenshot_2026_08_18_at_8_05_00_pm_e2ccb8b6012d37fb6bf4f1cc27c52fea.png", vendor_status: "collecting", boutique_preorder_extras: [{ size: "3T", quantity: 2 }], boutique_preorder_orders: [
+          { id: "sample-preorder-1", jotform_submission_id: "2623001", status: "new", payment_status: "paid", amount_total: 32.48, quantity: 1, size: "3T", personalization: "ISABEL", dancer_name: "Isabel Maldonado", school_name: "Primrose Rowlett", assigned_student_id: null, match_status: "needs_review", submitted_at: new Date().toISOString() },
+          { id: "sample-preorder-2", jotform_submission_id: "2623002", status: "new", payment_status: "paid", amount_total: 64.95, quantity: 2, size: "4T", personalization: "NO", dancer_name: "Lacy Tito", school_name: "Cotton Mill", assigned_student_id: null, match_status: "needs_review", submitted_at: new Date(Date.now() - 86400000).toISOString() }
+        ] }];
+        renderBoutiquePreorders();
+        return;
+      }
+      if (!window.dtSupabase || !profile || !["admin", "director"].includes(profile.role)) return;
+      const { data, error } = await window.dtSupabase.from("boutique_preorder_campaigns")
+        .select("id,slug,title,product_name,jotform_form_id,deadline,unit_price,sizes,image_url,vendor_status,inventory_received_at,active,boutique_preorder_extras(size,quantity),boutique_preorder_orders(id,jotform_submission_id,status,payment_status,transaction_id,amount_total,quantity,size,personalization,dancer_name,school_name,assigned_student_id,match_status,submitted_at,ordered_at,received_at,ready_at,delivered_at)")
+        .eq("active", true).order("deadline", { ascending: true });
+      if (error) {
+        console.error("Preorders could not load", error);
+        const errorContainer = document.getElementById("preorder-campaigns");
+        if (errorContainer) errorContainer.innerHTML = `<div class="boutique-kit-empty">Preorders could not open. Refresh and try again.</div>`;
+        return;
+      }
+      boutiquePreorderCampaigns = data || [];
+      renderBoutiquePreorders();
+      renderBoutiqueStock();
+    };
+
+    const refreshPreordersFromJotform = async () => {
+      const button = document.getElementById("preorder-sync");
+      button?.toggleAttribute("disabled", true);
+      const results = await Promise.all(boutiquePreorderCampaigns.map((campaign) => window.dtSupabase.functions.invoke("jotform-preorder-sync", { body: { action: "sync", formId: campaign.jotform_form_id } })));
+      button?.toggleAttribute("disabled", false);
+      const failed = results.find((result) => result.error || result.data?.ok === false);
+      if (failed) return showToast(failed.data?.message || "Jotform preorders could not refresh.");
+      await loadBoutiquePreorders();
+      showToast("Jotform preorders refreshed");
+    };
+
+    document.getElementById("preorder-sync")?.addEventListener("click", () => document.body.dataset.tourMode === "true" ? showToast("Preview preorder data is already current") : refreshPreordersFromJotform());
+    document.getElementById("preorder-campaigns")?.addEventListener("input", (event) => {
+      if (!event.target.matches(".preorder-toolbar input")) return;
+      const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(event.target.closest("[data-preorder-campaign]")?.dataset.preorderCampaign));
+      if (campaign) renderBoutiquePreorderOrderList(campaign);
+    });
+    document.getElementById("preorder-campaigns")?.addEventListener("change", async (event) => {
+      const assign = event.target.closest("[data-preorder-assign]");
+      if (!assign) {
+        const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(event.target.closest("[data-preorder-campaign]")?.dataset.preorderCampaign));
+        if (campaign && event.target.matches(".preorder-toolbar select")) renderBoutiquePreorderOrderList(campaign);
+        return;
+      }
+      const order = boutiquePreorderCampaigns.flatMap(preorderCampaignOrders).find((item) => String(item.id) === String(assign.dataset.preorderAssign));
+      if (!order) return;
+      if (document.body.dataset.tourMode === "true") {
+        order.assigned_student_id = assign.value || null;
+        order.match_status = assign.value ? "matched" : "needs_review";
+        renderBoutiquePreorders();
+        return showToast(assign.value ? "Preorder matched" : "Preorder needs review");
+      }
+      const { error } = await window.dtSupabase.from("boutique_preorder_orders").update({ assigned_student_id: assign.value || null, match_status: assign.value ? "matched" : "needs_review" }).eq("id", order.id);
+      if (error) return showToast("That preorder match could not be saved.");
+      await loadBoutiquePreorders();
+      showToast("Preorder match saved");
+    });
+    document.getElementById("preorder-campaigns")?.addEventListener("click", async (event) => {
+      const extrasButton = event.target.closest("[data-preorder-save-extras]");
+      if (extrasButton) {
+        const campaignId = extrasButton.dataset.preorderSaveExtras;
+        const rows = [...document.querySelectorAll(`[data-preorder-extra-campaign="${CSS.escape(campaignId)}"]`)].map((input) => ({ campaign_id: campaignId, size: input.dataset.preorderExtraSize, quantity: Math.max(0, Number(input.value) || 0) }));
+        if (document.body.dataset.tourMode === "true") {
+          const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(campaignId));
+          if (campaign) campaign.boutique_preorder_extras = rows;
+          renderBoutiquePreorders();
+          return showToast("Extra quantities saved in preview");
+        }
+        const { error } = await window.dtSupabase.from("boutique_preorder_extras").upsert(rows, { onConflict: "campaign_id,size" });
+        if (error) return showToast("Extra quantities could not be saved.");
+        await loadBoutiquePreorders();
+        return showToast("Extra quantities saved");
+      }
+      const campaignButton = event.target.closest("[data-preorder-campaign-status]");
+      if (campaignButton) {
+        const campaignId = campaignButton.dataset.preorderCampaignStatus;
+        const nextStatus = campaignButton.dataset.preorderNextStatus;
+        if (document.body.dataset.tourMode === "true") {
+          const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(campaignId));
+          if (campaign) { campaign.vendor_status = nextStatus; preorderCampaignOrders(campaign).filter(preorderActiveOrder).forEach((order) => { order.status = nextStatus === "ordered" ? "ordered" : "received"; }); }
+          renderBoutiquePreorders(); renderBoutiqueStock();
+          return showToast(nextStatus === "ordered" ? "Preorder marked ordered from vendor" : "Preorder shipment received");
+        }
+        campaignButton.disabled = true;
+        const { error } = await window.dtSupabase.rpc("set_boutique_preorder_campaign_status", { target_campaign_id: campaignId, target_status: nextStatus });
+        if (error) { campaignButton.disabled = false; return showToast(error.message || "The preorder campaign could not be updated."); }
+        await loadBoutiquePreorders(); await loadBoutiqueStock();
+        return showToast(nextStatus === "ordered" ? "Preorder marked ordered from vendor" : "Shipment added to boutique inventory");
+      }
+      const orderButton = event.target.closest("[data-preorder-order-status]");
+      if (orderButton) {
+        const orderId = orderButton.dataset.preorderOrderStatus;
+        const nextStatus = orderButton.dataset.preorderNextStatus;
+        if (document.body.dataset.tourMode === "true") {
+          const order = boutiquePreorderCampaigns.flatMap(preorderCampaignOrders).find((item) => String(item.id) === String(orderId));
+          if (order) order.status = nextStatus;
+          renderBoutiquePreorders();
+          return showToast(`Preorder marked ${preorderStatusLabel(nextStatus).toLowerCase()}`);
+        }
+        const { error } = await window.dtSupabase.rpc("set_boutique_preorder_order_status", { target_order_id: orderId, target_status: nextStatus });
+        if (error) return showToast(error.message || "That preorder could not be updated.");
+        await loadBoutiquePreorders();
+        return showToast(`Preorder marked ${preorderStatusLabel(nextStatus).toLowerCase()}`);
       }
     });
 
@@ -34465,7 +34712,7 @@
           return boutiqueStockSizeKey(student.tshirtSize || student.tshirt_size) === boutiqueStockSizeKey(stockItem.size);
         }).length
         : 0;
-      const claimed = boutiqueOrders.filter((order) => order.status === "to_fill").flatMap((order) => order.boutique_order_items || []).reduce((count, orderItem) => {
+      let claimed = boutiqueOrders.filter((order) => order.status === "to_fill").flatMap((order) => order.boutique_order_items || []).reduce((count, orderItem) => {
       const productMatches = normalizeProduct(orderItem?.name) === normalizeProduct(stockItem?.product);
       if (!productMatches) return count;
       const orderSize = boutiqueStockSizeKey(boutiqueOrderItemSize(orderItem));
@@ -34475,6 +34722,10 @@
         : !orderSize || boutiqueStockSizeKey(stockItem?.size) === orderSize;
       return sizeMatches ? count + Math.max(1, Number(orderItem?.quantity) || 1) : count;
     }, enrollmentKitClaims);
+      claimed += boutiquePreorderCampaigns.reduce((campaignCount, campaign) => {
+        if (normalizeProduct(campaign.product_name) !== normalizeProduct(stockItem?.product)) return campaignCount;
+        return campaignCount + preorderCampaignOrders(campaign).filter((order) => ["received", "ready_to_distribute"].includes(order.status) && order.payment_status === "paid" && boutiqueStockSizeKey(order.size) === boutiqueStockSizeKey(stockItem?.size)).reduce((sum, order) => sum + Math.max(1, Number(order.quantity) || 1), 0);
+      }, 0);
       const physicalTotal = boutiqueStockTotal(stockItem);
       if (stockItem?.printedByDT === false) return { claimed, total: Math.max(0, physicalTotal - claimed), printed: null, blank: null, needsPrinting: 0 };
       const physicalPrinted = Math.max(0, Number(stockItem?.printed) || 0);
@@ -35218,6 +35469,7 @@
     });
     attachBoutiqueCollapse("boutique-kit-collapse", "boutique-kit-body", "T-Shirt and Bag Fulfillment");
     attachBoutiqueCollapse("boutique-orders-collapse", "boutique-orders-body", "Boutique Orders");
+    attachBoutiqueCollapse("preorders-collapse", "preorders-body", "Preorders");
     document.getElementById("boutique-kit-list")?.addEventListener("click", (event) => {
       const card = event.target.closest("[data-boutique-kit-select-card]");
       if (!card) return;
