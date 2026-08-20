@@ -24026,7 +24026,7 @@
     };
 
     const repairCrossedProfilePhotos = () => {
-      teachers.filter((teacher) => isCompanyTeacherProfile(teacher)).forEach((teacher) => {
+      teachers.filter((teacher) => String(teacher?.displayName || `${teacher?.firstName || ""} ${teacher?.lastName || ""}`).trim().toLowerCase() === "dance techniques").forEach((teacher) => {
         teacher.photo = "";
         teacher.photoOwnerId = "";
       });
@@ -43117,8 +43117,12 @@
         renderClassesAndRosters();
         return;
       }
+      const wasTotsClass = setting === "ageGroup" && isTotsAgeClass(rosterClass);
       rosterClass[setting] = field.value;
-      if (setting === "ageGroup") rosterClass.classroom = field.value;
+      if (setting === "ageGroup") {
+        rosterClass.classroom = field.value;
+        if (wasTotsClass && !isTotsAgeClass(rosterClass)) rosterClass.capacity = 12;
+      }
       const { row } = linkedSchoolClassRow(rosterClass);
       if (row) {
         if (setting === "name") row.title = field.value;
