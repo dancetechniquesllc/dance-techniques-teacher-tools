@@ -2926,6 +2926,16 @@
     .student-email-history-status { display: inline-flex; align-items: center; min-height: 24px; padding: 4px 9px; border-radius: 999px; background: oklch(94% 0.05 78); color: oklch(43% 0.11 78); font-size: 9px; font-weight: 850; line-height: 1.15; }
     .student-email-history-status.is-complete { background: var(--sage-light); color: var(--sage-dark); }
     .student-email-history-status.is-failed { background: color-mix(in srgb, var(--brick) 18%, white); color: var(--brick); }
+    .student-billing-history-list { display: grid; gap: 10px; }
+    .student-billing-history-card { display: grid; grid-template-columns: minmax(150px,1fr) auto; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); }
+    .student-billing-history-card strong,.student-billing-history-card small { display: block; }
+    .student-billing-history-card small { margin-top: 4px; color: var(--muted); }
+    .student-billing-history-actions { display: grid; justify-items: end; gap: 8px; }
+    .student-billing-history-status { display: inline-flex; padding: 5px 9px; border-radius: 999px; background: #ecebea; color: #666; font-size: 10px; font-weight: 850; }
+    .student-billing-history-status.is-successful { background: var(--sage-light); color: var(--sage-dark); }
+    .student-billing-history-status.is-late { background: #fff1cf; color: #76500a; }
+    .student-billing-history-status.is-due { background: color-mix(in srgb, var(--brick) 18%, white); color: var(--brick); }
+    .student-billing-view { min-height: 34px; padding: 7px 11px; }
     .student-email-history-resend { grid-column: 2; justify-self: end; width: auto; min-height: 26px; margin-top: 3px; padding: 4px 10px; border-radius: 999px; font-size: 9px; line-height: 1; }
     @media (max-width: 520px) {
       .teacher-student-profile-edit-form { grid-template-columns: 1fr; }
@@ -6476,18 +6486,18 @@
       background: var(--surface);
     }
 
-    .finance-folio-cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+    .finance-folio-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
     .finance-folio-card {
-      min-height: 154px;
+      min-height: 138px;
       display: grid;
-      align-content: space-between;
+      place-content: center;
       gap: 14px;
-      padding: 18px;
+      padding: 22px 18px;
       border: 1px solid var(--border);
       border-radius: 14px;
       background: var(--surface);
       color: var(--fg);
-      text-align: left;
+      text-align: center;
     }
     .finance-folio-card:not(:disabled):hover { border-color: var(--berry); transform: translateY(-1px); }
     .finance-folio-card:disabled { opacity: .48; cursor: default; }
@@ -6495,6 +6505,97 @@
     .finance-folio-card strong { display: block; font-size: 18px; }
     .finance-folio-card small { display: block; margin-top: 5px; color: var(--muted); font-family: "Avenir Next", sans-serif; font-weight: 400; line-height: 1.35; }
     .finance-folio-card .status { justify-self: start; }
+    .finance-folio-symbol { width: 64px; height: 64px; justify-self: center; color: var(--fg); overflow: visible; }
+    .finance-folio-symbol .accent { fill: var(--blush); stroke: none; }
+    .finance-folio-symbol .line { fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+    .invoice-category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .invoice-category-card { display: grid; place-content: center; gap: 10px; min-height: 138px; padding: 22px 18px; border: 1px solid var(--border); border-radius: 14px; background: var(--blush); color: var(--fg); text-align: center; font: inherit; cursor: pointer; }
+    .invoice-category-card:hover { border-color: var(--berry); transform: translateY(-1px); }
+    .invoice-category-card h4 { margin: 0; font-size: 19px; }
+    .invoice-category-card p { margin: 0; color: var(--muted); font-family: "Avenir Next", sans-serif; font-size: 13px; line-height: 1.45; }
+    .invoice-tuition-toggle { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
+    .invoice-tuition-toggle button { flex: 1 1 135px; min-height: 62px; display: grid; place-content: center; gap: 3px; border: 0; border-radius: 11px; background: transparent; color: var(--fg); font: inherit; font-weight: 750; cursor: pointer; }
+    .invoice-tuition-toggle button small { color: var(--muted); font-size: 11px; font-weight: 600; }
+    .invoice-tuition-toggle button[aria-selected="true"] small { color: rgba(255,255,255,.8); }
+    .invoice-tuition-toggle button[aria-selected="true"] { background: var(--brick); color: #fff; box-shadow: 0 5px 14px rgba(148,74,83,.18); }
+    .tuition-roster-tools { display: grid; grid-template-columns: repeat(5, minmax(145px, 1fr)) auto; align-items: end; gap: 10px; }
+    .tuition-roster-tools label { display: grid; gap: 5px; font-size: 12px; font-weight: 750; }
+    .tuition-roster-tools input, .tuition-roster-tools select { width: 100%; min-height: 42px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 11px; background: #fff; font: inherit; }
+    .tuition-roster-tools small { color: var(--muted); }
+    .tuition-reset-filters { min-height: 42px; padding: 10px 16px; border: 1px solid var(--sage); border-radius: 11px; background: var(--sage); color: #fff; font: inherit; font-weight: 800; cursor: pointer; }
+    .tuition-filter-summary { min-height: 20px; color: var(--muted); font-size: 12px; text-align: right; }
+    .tuition-plan-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .tuition-plan-card { display: grid; place-content: center; gap: 7px; min-height: 150px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); color: var(--fg); text-align: center; font: inherit; cursor: pointer; }
+    .tuition-plan-card:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(63,30,32,.08); }
+    .tuition-plan-card.is-not-enrolled { border-color: #c9c7c5; background: #ecebea; color: #777; }
+    .tuition-plan-card.is-paid { border-color: #9caf91; background: #e7efe3; }
+    .tuition-plan-card.is-late { border-color: #d6a24d; background: #fff1cf; }
+    .tuition-plan-card.is-unpaid { border-color: #a64d45; background: #f6ded9; }
+    .tuition-plan-card small { display: block; color: var(--muted); font-size: 11px; }
+    .tuition-plan-card .tuition-price { color: var(--berry); font-size: 20px; font-weight: 800; }
+    .tuition-plan-card.is-free .tuition-price { color: var(--sage); }
+    .tuition-invoice-details { display: grid; gap: 10px; }
+    .tuition-invoice-detail-row { display: grid; grid-template-columns: minmax(130px,.65fr) 1fr; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+    .tuition-invoice-detail-row span { color: var(--muted); font-size: 12px; font-weight: 750; }
+    .tuition-invoice-detail-row strong { text-align: right; }
+    .monthly-statement-preview { position: relative; width: min(100%, 650px); aspect-ratio: 1102 / 1427; margin: 0 auto; overflow: hidden; background: #fffdf8 url('assets/invoices/monthly-dance-statement-3-row.png') center/100% 100% no-repeat; color: #102541; font-family: Georgia, serif; box-shadow: 0 12px 34px rgba(63,30,32,.14); }
+    .monthly-statement-preview .statement-field { position: absolute; margin: 0; font-size: clamp(7px, 1.15vw, 12px); line-height: 1.05; font-weight: 500; }
+    .statement-logo { position: absolute; left: 36%; top: 3.2%; width: 28%; height: 10%; object-fit: contain; }
+    .statement-invoice-date { left: 52.5%; top: 29%; width: 21%; text-align: center; }
+    .statement-due-date { left: 76%; top: 29%; width: 21%; text-align: center; }
+    .statement-billed { left: 6.2%; top: 36.05%; width: 37%; height: 7.05%; display: flex; align-items: center; justify-content: center; text-align: center; white-space: pre-line; font-family: "Parisienne", cursive; font-size: clamp(13px, 2.25vw, 24px)!important; }
+    .statement-dancers { left: 68.8%; top: 37.2%; width: 26%; white-space: pre-line; }
+    .statement-school { left: 68.8%; top: 39.8%; width: 26%; }
+    .statement-teacher { left: 68.8%; top: 42%; width: 26%; }
+    .statement-lines { position: absolute; left: 6%; right: 5.5%; top: 47.8%; display: grid; grid-template-rows: repeat(3, 1fr); height: 8.2%; }
+    .statement-line { display: grid; grid-template-columns: 1fr 21%; align-items: center; gap: 8px; font-size: clamp(7px, 1.08vw, 11px); }
+    .statement-line strong { text-align: center; font-weight: 500; }
+    .statement-line s { margin-right: 5px; color: #8c4d54; }
+    .statement-total { right: 11%; top: 58.05%; width: 25%; text-align: center; color: #8d2630; font-size: clamp(15px, 3.4vw, 34px)!important; }
+    .statement-payment-due { left: 24.5%; top: 68.35%; width: 35%; }
+    .statement-payment-method { left: 24.5%; top: 70.9%; width: 35%; }
+    .statement-payment-status { left: 24.5%; top: 73.5%; width: 35%; }
+    .statement-payment-status.is-unpaid { color: #9b3d3d; font-weight: 750; }
+    .statement-unpaid-notice { position: absolute; left: 63.7%; top: 68.55%; width: 29.2%; height: 8.05%; display: grid; place-content: center; padding: 1.2% 2%; border-radius: 3px; background: #f8e5e2; color: #8d2630; text-align: center; font-family: Georgia, serif; font-size: clamp(6px, .92vw, 10px); font-weight: 700; line-height: 1.2; box-shadow: none; }
+    .tuition-statement-section { border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); overflow: hidden; }
+    .tuition-statement-section summary { padding: 14px 16px; color: var(--berry); font-weight: 800; cursor: pointer; }
+    .tuition-statement-section[open] summary { border-bottom: 1px solid var(--border); }
+    .tuition-statement-section > div { padding: 16px; }
+    .invoice-email-receipt { display: grid; gap: 8px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
+    .invoice-email-receipt h4 { margin: 0; }
+    .invoice-email-receipt small { color: var(--muted); }
+    .invoice-email-receipt-statuses { display: flex; flex-wrap: wrap; gap: 8px; }
+    .invoice-email-receipt-status { padding: 6px 9px; border-radius: 999px; background: #fff1cf; color: #76500a; font-size: 11px; font-weight: 800; }
+    .invoice-email-receipt-status.is-complete { background: #e7efe3; color: #365b3b; }
+    .invoice-settings-dialog { width: min(1050px, calc(100vw - 28px)); max-height: calc(100vh - 28px); padding: 0; border: 0; background: transparent; }
+    .invoice-settings-dialog::backdrop { background: rgba(45,27,28,.52); backdrop-filter: blur(3px); }
+    .invoice-settings-card { display: grid; gap: 16px; max-height: calc(100vh - 28px); overflow: auto; padding: 22px; border-radius: 22px; background: var(--surface); box-shadow: 0 24px 70px rgba(63,30,32,.3); }
+    .invoice-settings-head { display: flex; align-items: start; justify-content: space-between; gap: 14px; }
+    .invoice-settings-head h3 { margin: 0; font-size: 24px; }
+    .invoice-settings-close { width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--blush); color: var(--fg); font-size: 24px; cursor: pointer; }
+    .invoice-settings-field { display: grid; gap: 7px; font-weight: 750; }
+    .invoice-settings-field[hidden], #recital-payment-dashboard[hidden], .invoice-settings-help[hidden] { display: none; }
+    .invoice-settings-field input, .invoice-settings-field select { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 11px; background: #fff; color: var(--fg); font: inherit; }
+    .recital-exclusion-results { display: grid; gap: 7px; }
+    .recital-exclusion-result { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface-soft); color: var(--fg); text-align: left; font: inherit; cursor: pointer; }
+    .recital-exclusion-result:hover { border-color: var(--berry); }
+    .recital-exclusion-result span { display: grid; gap: 2px; }
+    .recital-exclusion-result small { color: var(--muted); }
+    .invoice-settings-help { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .invoice-settings-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .recital-payment-tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 7px; border-radius: 14px; background: var(--surface-soft); }
+    .recital-payment-tabs button { flex: 1 1 130px; min-height: 40px; border: 0; border-radius: 10px; background: transparent; color: var(--fg); font: inherit; font-weight: 750; cursor: pointer; }
+    .recital-payment-tabs button[aria-selected="true"] { background: var(--brick); color: #fff; }
+    .recital-payment-list { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+    .recital-payment-card { display: grid; align-content: start; justify-items: center; gap: 9px; min-width: 0; padding: 13px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-soft); text-align: center; }
+    .recital-payment-card.is-failed { border-color: #c96e72; background: #fff0f0; box-shadow: inset 0 0 0 1px rgba(161,49,56,.08); }
+    .recital-payment-card.is-failed .recital-payment-card-head > strong { color: #a13138; }
+    .recital-payment-card-head { display: grid; justify-items: center; gap: 8px; width: 100%; }
+    .recital-payment-card-head > span { display: grid; justify-items: center; gap: 2px; min-width: 0; }
+    .recital-payment-card-head > strong { color: var(--berry); font-size: 13px; }
+    .recital-payment-card small { display: block; color: var(--muted); font-size: 11px; line-height: 1.35; }
+    .recital-progress { width: 100%; height: 9px; overflow: hidden; border-radius: 999px; background: var(--border); }
+    .recital-progress span { display: block; height: 100%; border-radius: inherit; background: var(--sage); }
     .payroll-workspace { display: grid; gap: 14px; }
     .payroll-workspace[hidden] { display: none; }
     .payroll-landing-summary { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
@@ -6581,9 +6682,15 @@
       .payroll-student-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .partnership-payment-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .partnership-payment-toolbar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .recital-payment-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tuition-plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 720px) {
       .finance-folio-cards, .payroll-landing-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .invoice-category-grid { grid-template-columns: 1fr; }
+      .recital-payment-list { grid-template-columns: 1fr; }
+      .tuition-plan-grid { grid-template-columns: 1fr; }
+      .tuition-roster-tools { grid-template-columns: 1fr; }
       .payroll-stub-teacher-grid { grid-template-columns: 1fr; }
       .payroll-wizard { grid-template-columns: 1fr; }
       .payroll-step-list { grid-template-columns: repeat(5, minmax(0, 1fr)); }
@@ -14973,11 +15080,18 @@
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
             <div class="finance-folio-cards" id="finance-folio-cards">
-              <button class="finance-folio-card" type="button" id="open-payroll-workspace"><span class="finance-folio-card-icon">$</span><span><strong>Payroll</strong><small>Prepare, review, approve, and preserve every payday.</small></span><span class="status pending">Ready to Build</span></button>
-              <button class="finance-folio-card" type="button" id="open-school-partnership-payments"><span class="finance-folio-card-icon">%</span><span><strong>School Partnership Payments</strong><small>Calculate, review, and preserve every partner-school payment.</small></span><span class="status pending">Ready to Build</span></button>
-              <button class="finance-folio-card" type="button" disabled><span class="finance-folio-card-icon">#</span><span><strong>Invoices</strong><small>Keep issued and received invoices together.</small></span><span class="status disabled">Coming Soon</span></button>
-              <button class="finance-folio-card" type="button" disabled><span class="finance-folio-card-icon">−</span><span><strong>Expenses</strong><small>Organize operating expenses and receipts.</small></span><span class="status disabled">Coming Soon</span></button>
-              <button class="finance-folio-card" type="button" disabled><span class="finance-folio-card-icon">⌁</span><span><strong>Taxes &amp; Reports</strong><small>Year-round financial reporting in one place.</small></span><span class="status disabled">Coming Soon</span></button>
+              <button class="finance-folio-card" type="button" id="open-family-invoices">
+                <svg class="finance-folio-symbol" viewBox="0 0 64 64" aria-hidden="true"><circle class="accent" cx="32" cy="30" r="17"/><circle class="line" cx="32" cy="30" r="17"/><path class="line" d="M36 23.5c-1.2-1.3-2.8-2-4.8-2-2.8 0-4.7 1.5-4.7 3.7 0 5.8 10.8 2.4 10.8 8.3 0 2.4-2.1 4-5.1 4-2.3 0-4.3-.8-5.7-2.3M32 18.5v22.8M8 54l12-12M20 42H10M20 42v10"/></svg>
+                <span><strong>Invoices</strong></span>
+              </button>
+              <button class="finance-folio-card" type="button" id="open-payroll-workspace">
+                <svg class="finance-folio-symbol" viewBox="0 0 64 64" aria-hidden="true"><circle class="accent" cx="27" cy="31" r="17"/><circle class="line" cx="27" cy="31" r="17"/><path class="line" d="M31 24.5c-1.2-1.3-2.8-2-4.8-2-2.8 0-4.7 1.5-4.7 3.7 0 5.8 10.8 2.4 10.8 8.3 0 2.4-2.1 4-5.1 4-2.3 0-4.3-.8-5.7-2.3M27 19.5v22.8M40 17h10v10M50 17 39 28"/></svg>
+                <span><strong>Payroll</strong></span>
+              </button>
+              <button class="finance-folio-card" type="button" id="open-school-partnership-payments">
+                <svg class="finance-folio-symbol" viewBox="0 0 64 64" aria-hidden="true"><path class="line" d="M8 31 32 10l24 21M13 27v26h38V27"/><circle class="accent" cx="32" cy="34" r="11"/><circle class="line" cx="32" cy="34" r="11"/><path class="line" d="M35.5 29.5c-.9-.9-2-1.4-3.5-1.4-2 0-3.4 1.1-3.4 2.6 0 4.1 7.7 1.7 7.7 5.9 0 1.7-1.5 2.8-3.7 2.8-1.7 0-3.1-.6-4.1-1.6M32.4 25.7v16"/></svg>
+                <span><strong>School Partnership Payments</strong></span>
+              </button>
             </div>
             <section class="payroll-workspace" id="payroll-workspace" hidden>
               <div class="admin-card-header"><div><h3>Payroll</h3><p><em>Every class, adjustment, and payment—beautifully accounted for.</em></p></div><button class="secondary" type="button" id="close-payroll-workspace">Finance Folio</button></div>
@@ -15010,6 +15124,86 @@
               <div class="partnership-payment-grid" id="partnership-payment-grid"></div>
               <section class="partnership-payment-detail" id="partnership-payment-detail" hidden></section>
             </section>
+            <section class="payroll-workspace" id="family-invoice-workspace" hidden>
+              <div class="admin-card-header"><div><h3>Family Invoices</h3><p><em>Review every family invoice before a card is charged.</em></p></div><button class="secondary" type="button" id="close-family-invoices">Finance Folio</button></div>
+              <div class="invoice-category-grid" aria-label="Automatic family charges">
+                <button class="invoice-category-card" type="button" data-open-invoice-settings="enrollment">
+                  <div><h4>Enrollment Fee</h4></div>
+                </button>
+                <button class="invoice-category-card" type="button" data-open-invoice-settings="recital">
+                  <div><h4>The Recital Experience</h4></div>
+                </button>
+                <button class="invoice-category-card" type="button" data-open-invoice-settings="credit">
+                  <div><h4>Assign a Credit</h4></div>
+                </button>
+              </div>
+              <div class="invoice-tuition-toggle" role="tablist" aria-label="Tuition types">
+                <button type="button" role="tab" aria-selected="true" data-invoice-tuition-type="tuition"><strong>Tuition</strong><small>$55 · <span data-tuition-count="tuition">0</span> dancers</small></button>
+                <button type="button" role="tab" aria-selected="false" data-invoice-tuition-type="sibling"><strong>Sibling</strong><small>$45 · <span data-tuition-count="sibling">0</span> dancers</small></button>
+                <button type="button" role="tab" aria-selected="false" data-invoice-tuition-type="school-staff"><strong>School Staff</strong><small>$45 · <span data-tuition-count="school-staff">0</span> dancers</small></button>
+                <button type="button" role="tab" aria-selected="false" data-invoice-tuition-type="other"><strong>Other</strong><small>Miscellaneous · <span data-tuition-count="other">0</span> dancers</small></button>
+              </div>
+              <div class="tuition-roster-tools">
+                <label>Tuition Month<select id="tuition-plan-month"><option value="2026-08">August 2026</option><option value="2026-09">September 2026</option><option value="2026-10">October 2026</option><option value="2026-11">November 2026</option><option value="2026-12">December 2026</option><option value="2027-01">January 2027</option><option value="2027-02">February 2027</option><option value="2027-03">March 2027</option><option value="2027-04">April 2027</option><option value="2027-05">May 2027</option><option value="2027-06">June 2027</option><option value="2027-07">July 2027</option></select></label>
+                <label>Payment Status<select id="tuition-status-filter"><option value="all">All Statuses</option><option value="not-enrolled">Not Yet Enrolled</option><option value="paid">Paid on Time</option><option value="late">Paid Late</option><option value="unpaid">Unpaid</option></select></label>
+                <label>Teacher<select id="tuition-teacher-filter"><option value="all">All Teachers</option></select></label>
+                <label>School<select id="tuition-school-filter"><option value="all">All Schools</option></select></label>
+                <label>Find a Dancer<input id="tuition-plan-search" type="search" placeholder="Search dancer or school"></label>
+                <button class="tuition-reset-filters" id="tuition-reset-filters" type="button">Reset Filters</button>
+              </div>
+              <div class="tuition-filter-summary" id="tuition-plan-summary"></div>
+              <div class="tuition-plan-grid" id="tuition-plan-grid" aria-live="polite"></div>
+              <div class="admin-card">
+                <div class="admin-card-header"><div><h3>Monthly Family Billing · Sandbox</h3><p>Review saved cards, approve automatic billing, inspect invoice lines, and handle withdrawal requests before anything is charged.</p></div><span class="status pending" id="family-billing-review-badge">Review</span></div>
+                <button class="secondary" type="button" id="family-billing-review-refresh">Refresh Billing Review</button>
+                <p class="subtle" id="family-billing-review-status" role="status" aria-live="polite">No production charges are available from this screen.</p>
+                <div class="system-health-list" id="family-billing-review-list"></div>
+              </div>
+            </section>
+            <dialog class="invoice-settings-dialog" id="invoice-settings-dialog" aria-labelledby="invoice-settings-title">
+              <form class="invoice-settings-card" id="invoice-settings-form" method="dialog">
+                <div class="invoice-settings-head"><div><small>Automatic Assignment</small><h3 id="invoice-settings-title">Invoice Setup</h3></div><button class="invoice-settings-close" type="button" data-close-invoice-settings aria-label="Close">×</button></div>
+                <p class="invoice-settings-help" id="invoice-settings-description"></p>
+                <label class="invoice-settings-field"><span id="invoice-settings-price-label">Price per dancer</span>
+                  <input id="invoice-settings-price" type="number" min="0" step="0.01" inputmode="decimal" required>
+                </label>
+                <div class="invoice-settings-field" id="credit-assignment-fields" hidden>
+                  <label for="credit-dancer-search">Dancer profile</label>
+                  <input id="credit-dancer-search" type="search" autocomplete="off" placeholder="Search dancer name">
+                  <div class="recital-exclusion-results" id="credit-dancer-results" aria-live="polite"></div>
+                  <p class="invoice-settings-help" id="credit-selected-dancer">No dancer selected.</p>
+                  <label for="credit-reason">Reason for credit</label>
+                  <input id="credit-reason" type="text" maxlength="180" placeholder="Example: Staff discount correction">
+                </div>
+                <div class="invoice-settings-field" id="recital-exclusion-field" hidden>
+                  <label for="recital-exclusion-search">Exclude a dancer profile</label>
+                  <input id="recital-exclusion-search" type="search" autocomplete="off" placeholder="Search dancer name">
+                  <div class="recital-exclusion-results" id="recital-exclusion-results" aria-live="polite"></div>
+                </div>
+                <p class="invoice-settings-help" id="recital-exclusion-help" hidden>Search for a dancer and select the matching profile. The dancer will move into No Recital immediately.</p>
+                <section id="recital-payment-dashboard" hidden>
+                  <div class="recital-payment-tabs" role="tablist" aria-label="Recital Experience payment status">
+                    <button type="button" role="tab" aria-selected="true" data-recital-payment-view="paid">Paid</button>
+                    <button type="button" role="tab" aria-selected="false" data-recital-payment-view="full">Full Amount Due</button>
+                    <button type="button" role="tab" aria-selected="false" data-recital-payment-view="plan">Payment Plans</button>
+                    <button type="button" role="tab" aria-selected="false" data-recital-payment-view="excluded">No Recital</button>
+                  </div>
+                  <div class="recital-payment-list" id="recital-payment-list"></div>
+                </section>
+                <p class="subtle" id="invoice-settings-feedback" role="status" aria-live="polite"></p>
+                <div class="invoice-settings-actions"><button class="secondary" type="button" data-close-invoice-settings>Cancel</button><button class="primary" type="submit">Save Setup</button></div>
+              </form>
+            </dialog>
+            <dialog class="invoice-settings-dialog" id="tuition-invoice-dialog" aria-labelledby="tuition-invoice-title">
+              <div class="invoice-settings-card">
+                <div class="invoice-settings-head"><div><small id="tuition-invoice-school"></small><h3 id="tuition-invoice-title">Tuition Invoice</h3></div><button class="invoice-settings-close" type="button" data-close-tuition-invoice aria-label="Close">×</button></div>
+                <p class="invoice-settings-help" id="tuition-invoice-preview-note">Local preview details only. Live details will come from the invoice and Square payment record.</p>
+                <details class="tuition-statement-section" open><summary>Invoice</summary><div id="tuition-statement-preview"></div></details>
+                <div class="invoice-email-receipt" id="tuition-invoice-email-receipt"></div>
+                <div class="tuition-invoice-details" id="tuition-invoice-details"></div>
+                <div class="invoice-settings-actions"><button class="primary" type="button" data-close-tuition-invoice>Done</button></div>
+              </div>
+            </dialog>
           </section>
 
           <section class="admin-profile-card admin-section-page" id="admin-home-newsletter-studio">
@@ -15208,7 +15402,7 @@
                 <button class="stat teacher-order-summary-pickup" type="button" data-boutique-summary-status="ready"><strong id="boutique-kits-ready">0</strong><span>T-Shirts &amp; Bags</span><small>To Pick Up</small></button>
                 <button class="stat teacher-order-summary-deliver" type="button" data-boutique-summary-status="picked_up"><strong id="boutique-kits-picked-up">0</strong><span>T-Shirts &amp; Bags</span><small>To Deliver</small></button>
                 <button class="stat boutique-summary-delivered" type="button" data-boutique-summary-status="received"><strong id="boutique-kits-received">0</strong><span>T-Shirts &amp; Bags</span><small>Delivered</small></button>
-                <button class="stat boutique-summary-unassigned" type="button" data-boutique-order-summary-status="unassigned"><strong id="boutique-orders-unassigned">0</strong><span>Boutique Orders</span><small>Unassigned</small></button>
+                <button class="stat boutique-summary-unassigned" type="button" data-boutique-order-summary-status="unassigned"><strong id="boutique-orders-unassigned">0</strong><span>Boutique Orders</span><small>To Be Assigned</small></button>
                 <button class="stat teacher-order-summary-fill" type="button" data-boutique-order-summary-status="to_fill"><strong id="boutique-orders-to-fill">0</strong><span>Boutique Orders</span><small>To Fill</small></button>
                 <button class="stat teacher-order-summary-pickup" type="button" data-boutique-order-summary-status="to_pick_up"><strong id="boutique-orders-to-pick-up">0</strong><span>Boutique Orders</span><small>To Pick Up</small></button>
                 <button class="stat teacher-order-summary-deliver" type="button" data-boutique-order-summary-status="to_deliver"><strong id="boutique-orders-to-deliver">0</strong><span>Boutique Orders</span><small>To Deliver</small></button>
@@ -15237,7 +15431,7 @@
                 <div class="boutique-kit-body" id="boutique-orders-body" hidden>
                   <div class="wix-sync-status" role="status" aria-live="polite"><span><strong id="wix-sync-status-title">Checking Wix Orders…</strong><small id="wix-sync-status-detail">Opening the latest approved orders.</small></span><button class="secondary" type="button" id="wix-orders-refresh">Refresh Wix Orders</button></div>
                   <div class="boutique-kit-toolbar">
-                    <select id="boutique-order-status-filter" aria-label="Boutique order status"><option value="unassigned">Unassigned</option><option value="to_fill">To fill</option><option value="to_pick_up">To pick up</option><option value="to_deliver">To deliver</option><option value="delivered">Delivered</option><option value="all">All orders</option></select>
+                    <select id="boutique-order-status-filter" aria-label="Boutique order status"><option value="unassigned">To Be Assigned</option><option value="to_fill">To fill</option><option value="to_pick_up">To pick up</option><option value="to_deliver">To deliver</option><option value="delivered">Delivered</option><option value="all">All orders</option></select>
                     <select id="boutique-order-day-filter" aria-label="Boutique order dance day"><option value="all">All days</option></select>
                     <select id="boutique-order-school-filter" aria-label="Boutique order partner school"><option value="all">All schools</option></select>
                     <select id="boutique-order-teacher-filter" aria-label="Boutique order teacher"><option value="all">All teachers</option></select>
@@ -17262,6 +17456,7 @@
         </div>
         <div class="roster-profile-tab-panel" id="roster-profile-panel-histories" role="tabpanel" aria-labelledby="roster-profile-tab-histories" data-roster-profile-panel="histories" hidden>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m8 15 2 2 5-5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Attendance</strong><small>Review attendance history and class helper records.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-attendance"></section></details>
+        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M15.5 8.5H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8.5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Billing</strong><small>Review monthly invoices, payments, and outstanding balances.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-billing-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Email History</strong><small>See welcome emails, newsletters, deliveries, and detected opens.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M8 9V6a4 4 0 0 1 8 0v3"></path></svg></span><span class="roster-profile-tool-copy"><strong>Boutique Orders</strong><small>Track T-shirt, bag, pickup, and delivery status.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-shirt-field"><label>T-Shirt &amp; Bag Status<select id="roster-edit-kit-status"><option value="not_ready">To Fill</option><option value="ready">To Pick Up</option><option value="picked_up">To Deliver</option><option value="delivered">Delivered</option></select></label><div class="roster-profile-delivery-date"><span>T-Shirt &amp; Bag Delivery Date</span><strong id="roster-edit-kit-delivered-date">Not delivered</strong></div></div><div class="roster-profile-placeholder" id="roster-edit-boutique-orders">No boutique orders are assigned to this dancer.</div></details>
         </div>
@@ -31178,6 +31373,7 @@
       boutiqueOrders = (data || []).filter((order) => (
         order.wix_created_at && new Date(order.wix_created_at).valueOf() >= new Date(boutiqueOrdersGoLiveAt).valueOf()
       ));
+      await autoAssignCertainBoutiqueOrders();
       await loadBoutiqueStock(profile);
       await loadBoutiquePreorders(profile);
       renderDirectorBoutiqueOrders();
@@ -31552,6 +31748,33 @@
         const searchable = normalizeBoutiqueMatch(`${rosterStudentFullName(record.student)} ${record.rosterClass.schoolName} ${record.student.parentName} ${record.student.parentEmail}`);
         return { ...record, score, reasons, matchesSearch: !query || searchable.includes(query) };
       }).filter((record) => record.matchesSearch).sort((a, b) => b.score - a.score || rosterStudentFullName(a.student).localeCompare(rosterStudentFullName(b.student)));
+    };
+
+    const boutiqueCertainStudentMatch = (order) => {
+      const enteredName = normalizeBoutiqueMatch(boutiqueOrderDancerName(order));
+      const enteredSchool = normalizeBoutiqueMatch(boutiqueOrderSchoolName(order));
+      if (!enteredName || !enteredSchool) return null;
+      const matches = boutiqueKitRecords().filter(({ rosterClass, student }) => {
+        const legalName = normalizeBoutiqueMatch(`${student.firstName || ""} ${student.lastName || ""}`);
+        const preferredName = normalizeBoutiqueMatch(`${student.preferredName || ""} ${student.lastName || ""}`);
+        const schoolNames = [rosterClass.schoolName, rosterSchoolNickname(rosterClass.schoolName)].map(normalizeBoutiqueMatch).filter(Boolean);
+        return (enteredName === legalName || enteredName === preferredName) && schoolNames.includes(enteredSchool);
+      });
+      const uniqueStudents = [...new Map(matches.map(match => [String(match.student.id), match])).values()];
+      return uniqueStudents.length === 1 ? uniqueStudents[0] : null;
+    };
+
+    const autoAssignCertainBoutiqueOrders = async () => {
+      const certain = boutiqueOrders.filter(order => !order.assigned_student_id).map(order => ({ order, match: boutiqueCertainStudentMatch(order) })).filter(item => item.match);
+      if (!certain.length) return 0;
+      if (document.body.dataset.tourMode !== "true") {
+        for (const { order, match } of certain) {
+          const { error } = await window.dtSupabase.from("boutique_orders").update({ assigned_student_id: match.student.id }).eq("id", order.id).is("assigned_student_id", null);
+          if (error) { console.error("Certain boutique order match could not be saved", error); continue; }
+          order.assigned_student_id = match.student.id;
+        }
+      } else certain.forEach(({ order, match }) => { order.assigned_student_id = match.student.id; });
+      return certain.filter(({ order }) => order.assigned_student_id).length;
     };
 
     const renderBoutiqueAssignmentSuggestions = () => {
@@ -34392,6 +34615,35 @@
         const absentCount = attendanceHistory.filter((entry) => entry.status === "absent").length;
         const helperCount = new Set(attendanceHistory.filter((entry) => entry.wasHelper).map((entry) => entry.helperWeek)).size;
         attendancePanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Attendance History</strong><span>${tardyCount} Tardy · ${absentCount} Absent · ${helperCount} Class Helper</span></div>${attendanceHistory.length ? attendanceHistory.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(new Date(`${entry.date}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))} · ${rosterSafe(entry.status[0].toUpperCase() + entry.status.slice(1))}${entry.wasHelper ? `<span class="roster-attendance-helper-sparkle" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}</strong><strong>${rosterSafe(rosterClass.name)}</strong><small>In ${rosterSafe(teacherAttendanceTimeLabel(entry.checkInAt))}</small><small>Out ${rosterSafe(teacherAttendanceTimeLabel(entry.checkOutAt))}</small></div>`).join("") : `<div class="teacher-roster-empty">No attendance recorded yet.</div>`}`;
+      }
+      const billingHistoryPanel = document.getElementById("roster-profile-billing-history");
+      if (billingHistoryPanel) {
+        const records = student.tuitionPayments || student.tuition_payments || {};
+        const today = new Date();
+        const seasonStart = new Date(today.getMonth() >= 7 ? today.getFullYear() : today.getFullYear() - 1, 7, 1, 12);
+        const enrolledValue = student.enrolledAt || student.enrolled_at || student.enrollmentStart || student.enrollment_start;
+        const enrolledAt = enrolledValue && !Number.isNaN(new Date(enrolledValue).getTime()) ? new Date(enrolledValue) : seasonStart;
+        const cursor = new Date(Math.max(new Date(enrolledAt.getFullYear(), enrolledAt.getMonth(), 1, 12).getTime(), seasonStart.getTime()));
+        const months = [];
+        while (cursor <= today && months.length < 12) { months.push(`${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`); cursor.setMonth(cursor.getMonth() + 1); }
+        Object.keys(records).filter(key => /^\d{4}-\d{2}$/.test(key) && !months.includes(key)).forEach(key => months.push(key));
+        months.sort().reverse();
+        const plan = tuitionPlanForStudent(student);
+        const dancerName = `${student.firstName || student.first_name || ""} ${student.lastName || student.last_name || ""}`.trim().toLowerCase();
+        const dateLabel = value => value && !Number.isNaN(new Date(value).getTime()) ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
+        billingHistoryPanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Monthly Invoices</strong><span>${months.length} ${months.length === 1 ? "month" : "months"}</span></div><div class="student-billing-history-list">${months.map((month, index) => {
+          const record = records[month] || {};
+          let rawStatus = String(record.status || student.tuitionPaymentStatus || student.tuition_payment_status || "").toLowerCase();
+          if (!rawStatus && ["127.0.0.1", "localhost"].includes(location.hostname)) rawStatus = dancerName === "aaleah hubbard" ? "unpaid" : index % 7 === 6 ? "late" : "paid";
+          const isLate = ["late", "paid_late"].includes(rawStatus) || Number(record.lateFeeCents || record.late_fee_cents || 0) > 0;
+          const isPaid = ["paid", "completed", "paid_on_time"].includes(rawStatus);
+          const status = isLate ? { label: "Paid Late", className: "is-late" } : isPaid ? { label: "Successful", className: "is-successful" } : { label: "Still Due", className: "is-due" };
+          const paidAt = record.paidAt || record.paid_at || (isPaid || isLate ? new Date(`${month}-${isLate ? "10" : "01"}T12:00:00`) : null);
+          const monthDate = new Date(`${month}-01T12:00:00`);
+          const title = `${monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })} Monthly Invoice`;
+          const amountPaid = isPaid || isLate ? plan.price + (isLate ? 10 : 0) : 0;
+          return `<article class="student-billing-history-card"><div><strong>${rosterSafe(title)}</strong><small>Amount Paid: $${amountPaid.toFixed(2)} · Date Paid: ${rosterSafe(dateLabel(paidAt))}</small></div><div class="student-billing-history-actions"><span class="student-billing-history-status ${status.className}">${status.label}</span><button class="secondary student-billing-view" type="button" data-view-student-invoice="${rosterSafe(student.id)}" data-invoice-month="${month}">View Invoice</button></div></article>`;
+        }).join("")}</div>`;
       }
       const newsletterHistoryPanel = document.getElementById("roster-profile-newsletter-history");
       if (newsletterHistoryPanel) {
@@ -38528,6 +38780,309 @@
       document.getElementById("partnership-payment-workspace").hidden = true;
       document.getElementById("finance-folio-cards").hidden = false;
     });
+    document.getElementById("open-family-invoices")?.addEventListener("click", () => {
+      document.getElementById("finance-folio-cards").hidden = true;
+      document.getElementById("payroll-workspace").hidden = true;
+      document.getElementById("partnership-payment-workspace").hidden = true;
+      document.getElementById("family-invoice-workspace").hidden = false;
+      refreshFamilyBillingReview();
+      renderTuitionPlanRoster();
+    });
+    document.getElementById("close-family-invoices")?.addEventListener("click", () => {
+      document.getElementById("family-invoice-workspace").hidden = true;
+      document.getElementById("finance-folio-cards").hidden = false;
+    });
+    const invoiceSetupPreview = { enrollmentPrice: 0, recitalPrice: 125, excludedDancerIds: [], recitalView: "paid", creditDancerId: "" };
+    const invoiceSchoolNickname = (schoolName) => {
+      const school = schoolLibrary.find((entry) => enrollmentSchoolNameMatches(entry.name, schoolName) || enrollmentSchoolNameMatches(entry.nickname, schoolName));
+      return school?.nickname || school?.name || schoolName || "Dance Techniques";
+    };
+    const invoicePreviewDancers = () => {
+      const seen = new Set();
+      return rosterClasses.flatMap((rosterClass) => (rosterClass.students || []).map((student) => ({ student, schoolName: invoiceSchoolNickname(rosterClass.schoolName || rosterClass.school), teacherName: rosterTeacherName(rosterClass.teacherId) })))
+        .filter(({ student }) => student?.id && !seen.has(student.id) && seen.add(student.id))
+        .sort((a, b) => `${a.student.firstName || ""} ${a.student.lastName || ""}`.localeCompare(`${b.student.firstName || ""} ${b.student.lastName || ""}`));
+    };
+    let selectedTuitionPlan = "tuition";
+    const tuitionPlanForStudent = (student) => {
+      const discount = String(student?.tuitionDiscount || student?.tuition_discount || "none").trim().toLowerCase();
+      if (discount === "sibling") return { key: "sibling", label: "Sibling", price: 45, detail: "Sibling discount" };
+      if (discount === "staff") return { key: "school-staff", label: "School Staff", price: 45, detail: "Staff discount" };
+      if (discount === "director") return { key: "other", label: "Director", price: 0, detail: "Free tuition" };
+      if (discount === "meadow_oaks") return { key: "other", label: "Meadow Oaks", price: 65, detail: "Meadow Oaks rate" };
+      return { key: "tuition", label: "Tuition", price: 55, detail: "Standard tuition" };
+    };
+    const tuitionMonthStatus = (student, month, index) => {
+      const monthStart = new Date(`${month}-01T12:00:00`);
+      const monthEnd = new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 0, 23, 59, 59);
+      const enrolledValue = student?.enrolledAt || student?.enrolled_at || student?.enrollmentStart || student?.enrollment_start || student?.startedDate || student?.started_date;
+      const enrolledAt = enrolledValue ? new Date(enrolledValue) : null;
+      if (enrolledAt && !Number.isNaN(enrolledAt.valueOf()) && enrolledAt > monthEnd) return { key: "not-enrolled", label: "Not Enrolled Yet" };
+      const monthRecord = student?.tuitionPayments?.[month] || student?.tuition_payments?.[month] || {};
+      const saved = String(monthRecord.status || student?.tuitionPaymentStatus || student?.tuition_payment_status || "").trim().toLowerCase();
+      const lateFee = Number(monthRecord.lateFeeCents || monthRecord.late_fee_cents || student?.lateFeeCents || student?.late_fee_cents || 0);
+      if (["unpaid", "failed", "declined", "past_due"].includes(saved)) return { key: "unpaid", label: "Unpaid" };
+      if (["late", "paid_late"].includes(saved) || lateFee > 0) return { key: "late", label: "Paid Late · $10 Late Fee" };
+      if (["paid", "completed", "paid_on_time"].includes(saved)) return { key: "paid", label: "Paid On Time" };
+      if (["127.0.0.1", "localhost"].includes(location.hostname)) return index % 17 === 0 ? { key: "unpaid", label: "Unpaid" } : index % 11 === 0 ? { key: "late", label: "Paid Late · $10 Late Fee" } : { key: "paid", label: "Paid On Time" };
+      return { key: "unpaid", label: "Unpaid" };
+    };
+    const renderTuitionPlanRoster = () => {
+      const grid = document.getElementById("tuition-plan-grid");
+      if (!grid) return;
+      const month = document.getElementById("tuition-plan-month")?.value || "2026-08";
+      const dancers = invoicePreviewDancers().map((entry, index) => ({ ...entry, plan: tuitionPlanForStudent(entry.student), payment: tuitionMonthStatus(entry.student, month, index) }));
+      ["tuition", "sibling", "school-staff", "other"].forEach(key => {
+        const count = dancers.filter(entry => entry.plan.key === key).length;
+        const node = document.querySelector(`[data-tuition-count="${key}"]`);
+        if (node) node.textContent = count;
+      });
+      const teachers = [...new Set(dancers.map(entry => entry.teacherName).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+      const schools = [...new Set(dancers.map(entry => entry.schoolName).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+      const teacherFilter = document.getElementById("tuition-teacher-filter");
+      const schoolFilter = document.getElementById("tuition-school-filter");
+      if (teacherFilter && teacherFilter.options.length <= 1) teacherFilter.innerHTML = `<option value="all">All Teachers</option>${teachers.map(name => `<option value="${escapeText(name)}">${escapeText(name)}</option>`).join("")}`;
+      if (schoolFilter && schoolFilter.options.length <= 1) schoolFilter.innerHTML = `<option value="all">All Schools</option>${schools.map(name => `<option value="${escapeText(name)}">${escapeText(name)}</option>`).join("")}`;
+      const query = String(document.getElementById("tuition-plan-search")?.value || "").trim().toLowerCase();
+      const status = document.getElementById("tuition-status-filter")?.value || "all";
+      const teacher = teacherFilter?.value || "all";
+      const school = schoolFilter?.value || "all";
+      const visible = dancers.filter(({ student, schoolName, teacherName, plan, payment }) => plan.key === selectedTuitionPlan
+        && (status === "all" || payment.key === status)
+        && (teacher === "all" || teacherName === teacher)
+        && (school === "all" || schoolName === school)
+        && (!query || `${student.firstName || student.first_name || ""} ${student.lastName || student.last_name || ""} ${schoolName} ${teacherName}`.toLowerCase().includes(query)));
+      document.getElementById("tuition-plan-summary").textContent = `${visible.length} ${visible.length === 1 ? "dancer" : "dancers"} shown`;
+      grid.innerHTML = visible.length ? visible.map(({ student, schoolName, plan, payment }) => {
+        return `<button type="button" class="tuition-plan-card is-${payment.key} ${plan.price === 0 ? "is-free" : ""}" data-open-tuition-invoice="${escapeText(student.id)}"><strong>${escapeText(`${student.firstName || student.first_name || "Dancer"} ${student.lastName || student.last_name || ""}`.trim())}</strong><small>${escapeText(schoolName)}</small><span class="tuition-price">${payment.key === "not-enrolled" ? "—" : plan.price === 0 ? "Free" : `$${plan.price.toFixed(2)}`}</span><small>${escapeText(payment.label)}</small></button>`;
+      }).join("") : `<div class="payroll-placeholder">No dancers match this tuition plan and search.</div>`;
+    };
+    const invoiceExampleForDancer = (entry, monthLabel, monthDate, plan, payment) => {
+      const first = entry.student.firstName || entry.student.first_name || "Dancer";
+      const last = entry.student.lastName || entry.student.last_name || "";
+      const normalized = `${first} ${last}`.trim().toLowerCase();
+      const invoiceDate = new Date(monthDate);
+      invoiceDate.setDate(invoiceDate.getDate() - 3);
+      const dueDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1, 12);
+      const base = { billedTo: `${last || first} Family`, dancers: `${first} ${last}`.trim(), school: entry.schoolName, teacher: entry.teacherName, invoiceDate, dueDate, status: payment.label, lines: [{ description: `${monthLabel.split(" ")[0]} Dance Tuition - ${first}`, amount: plan.price }], total: plan.price };
+      if (normalized === "aaleah hubbard") return { ...base, status: "Unpaid", lines: [...base.lines, { description: "Late Fee", amount: 10 }], total: 65 };
+      if (normalized === "abigail valentine") return { ...base, status: "AUTO-PAY ENROLLED", total: 55 };
+      if (last.toLowerCase() === "wlazlo") return { ...base, billedTo: "Wlazlo Family", dancers: "Campbell & Harper Wlazlo", lines: [
+        { description: `${monthLabel.split(" ")[0]} Dance Tuition - Campbell`, amount: 55 },
+        { description: `${monthLabel.split(" ")[0]} Dance Tuition - Harper - Sibling Discount`, amount: 45, standard: 55 }
+      ], total: 100 };
+      return base;
+    };
+    const renderMonthlyStatementExample = (example) => {
+      const dateLabel = (date) => date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+      const lines = [...example.lines, ...Array(Math.max(0, 3 - example.lines.length)).fill(null)].slice(0, 3);
+      document.getElementById("tuition-statement-preview").innerHTML = `<div class="monthly-statement-preview" aria-label="Populated monthly dance statement preview">
+        <img class="statement-logo" src="assets/invoices/dance-techniques-logo-only.png" alt="Dance Techniques">
+        <p class="statement-field statement-invoice-date">${escapeText(dateLabel(example.invoiceDate))}</p><p class="statement-field statement-due-date">${escapeText(dateLabel(example.dueDate))}</p>
+        <p class="statement-field statement-billed">${escapeText(example.billedTo)}</p><p class="statement-field statement-dancers">${escapeText(example.dancers)}</p><p class="statement-field statement-school">${escapeText(example.school)}</p><p class="statement-field statement-teacher">${escapeText(example.teacher)}</p>
+        <div class="statement-lines">${lines.map(line => `<div class="statement-line">${line ? `<span>${escapeText(line.description)}</span><strong>${line.standard ? `<s>$${line.standard.toFixed(2)}</s>` : ""}$${line.amount.toFixed(2)}</strong>` : "<span></span><strong></strong>"}</div>`).join("")}</div>
+        <p class="statement-field statement-total">$${example.total.toFixed(2)}</p>
+        <p class="statement-field statement-payment-due">${escapeText(dateLabel(example.dueDate))}</p><p class="statement-field statement-payment-method">Auto-Withdrawal / Parent Portal</p><p class="statement-field statement-payment-status ${example.status === "Unpaid" ? "is-unpaid" : ""}">${escapeText(example.status)}</p>
+        ${example.status === "Unpaid" ? `<div class="statement-unpaid-notice">Payment unsuccessful —<br>$${example.total.toFixed(2)} remains due.</div>` : ""}
+      </div>`;
+    };
+    const openTuitionInvoice = (studentId, fallbackEntry = null) => {
+      const entry = invoicePreviewDancers().find(({ student }) => String(student.id) === String(studentId)) || fallbackEntry;
+      if (!entry) return;
+      const month = document.getElementById("tuition-plan-month")?.value || "2026-08";
+      const plan = tuitionPlanForStudent(entry.student);
+      const allInPlan = invoicePreviewDancers().filter(({ student }) => tuitionPlanForStudent(student).key === plan.key);
+      const payment = tuitionMonthStatus(entry.student, month, Math.max(0, allInPlan.findIndex(({ student }) => student.id === studentId)));
+      const monthRecord = entry.student?.tuitionPayments?.[month] || entry.student?.tuition_payments?.[month] || {};
+      const monthDate = new Date(`${month}-01T12:00:00`);
+      const preview = ["127.0.0.1", "localhost"].includes(location.hostname);
+      const formatDate = (value) => value ? new Date(value).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "Not recorded";
+      const previewSentDate = new Date(monthDate);
+      previewSentDate.setDate(previewSentDate.getDate() - 3);
+      const sentDate = monthRecord.invoiceSentAt || monthRecord.invoice_sent_at || (preview ? previewSentDate : null);
+      const paidDay = payment.key === "late" ? 10 : payment.key === "paid" ? 1 : null;
+      const previewPaidDate = paidDay ? new Date(monthDate.getFullYear(), monthDate.getMonth(), paidDay, 12) : null;
+      const paidDate = monthRecord.paidAt || monthRecord.paid_at || (preview ? previewPaidDate : null);
+      const lastFour = String(monthRecord.cardLastFour || monthRecord.card_last_four || entry.student?.cardLastFour || entry.student?.card_last_four || (preview ? "4242" : "")).trim();
+      const payer = String(monthRecord.payerFullName || monthRecord.payer_full_name || entry.student?.payerFullName || entry.student?.payer_full_name || entry.student?.parentName || entry.student?.parent_name || entry.student?.guardianName || entry.student?.guardian_name || (preview ? "Preview Payer" : "Not recorded")).trim();
+      const dancerName = `${entry.student.firstName || entry.student.first_name || "Dancer"} ${entry.student.lastName || entry.student.last_name || ""}`.trim();
+      const monthLabel = monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      const invoiceExample = invoiceExampleForDancer(entry, monthLabel, monthDate, plan, payment);
+      renderMonthlyStatementExample(invoiceExample);
+      const openedValue = monthRecord.invoiceOpenedAt || monthRecord.invoice_opened_at || monthRecord.firstOpenedAt || monthRecord.first_opened_at;
+      const previewOpened = preview && dancerName.toLowerCase() !== "aaleah hubbard" ? new Date(previewSentDate.getTime() + 42 * 60 * 1000) : null;
+      const openedAt = openedValue || previewOpened;
+      document.getElementById("tuition-invoice-email-receipt").innerHTML = `<h4>Email Receipt</h4><small>Sent to the family email on ${escapeText(formatDate(sentDate))}</small><div class="invoice-email-receipt-statuses"><span class="invoice-email-receipt-status is-complete">Delivered</span><span class="invoice-email-receipt-status ${openedAt ? "is-complete" : ""}">${openedAt ? `Viewed on ${escapeText(formatDate(openedAt))} at ${escapeText(new Date(openedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }))}` : "Not viewed yet"}</span></div>`;
+      document.getElementById("tuition-invoice-title").textContent = `${dancerName} · ${monthLabel}`;
+      document.getElementById("tuition-invoice-school").textContent = entry.schoolName;
+      document.getElementById("tuition-invoice-details").innerHTML = `
+        <div class="tuition-invoice-detail-row"><span>Invoice Sent</span><strong>${escapeText(formatDate(sentDate))}</strong></div>
+        <div class="tuition-invoice-detail-row"><span>Invoice</span><strong>${escapeText(`${plan.label === "Tuition" ? "Tuition" : `${plan.label} Tuition`} · ${plan.price === 0 ? "Free" : `$${plan.price.toFixed(2)}`}`)}</strong></div>
+        <div class="tuition-invoice-detail-row"><span>Payment Status</span><strong>${escapeText(payment.label)}</strong></div>
+        <div class="tuition-invoice-detail-row"><span>Date Paid</span><strong>${escapeText(payment.key === "paid" || payment.key === "late" ? formatDate(paidDate) : "Not paid")}</strong></div>
+        <div class="tuition-invoice-detail-row"><span>Card</span><strong>${lastFour ? `Ending in ${escapeText(lastFour)}` : "Not recorded"}</strong></div>
+        <div class="tuition-invoice-detail-row"><span>Payer</span><strong>${escapeText(payer)}</strong></div>`;
+      document.getElementById("tuition-invoice-dialog").showModal();
+    };
+    document.getElementById("tuition-plan-grid")?.addEventListener("click", (event) => {
+      const card = event.target.closest("[data-open-tuition-invoice]");
+      if (card) openTuitionInvoice(card.dataset.openTuitionInvoice);
+    });
+    document.getElementById("roster-profile-billing-history")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-view-student-invoice]");
+      if (!button) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const monthSelect = document.getElementById("tuition-plan-month");
+      if (monthSelect && [...monthSelect.options].some(option => option.value === button.dataset.invoiceMonth)) monthSelect.value = button.dataset.invoiceMonth;
+      const { rosterClass, student } = currentEditingRosterStudent();
+      const fallbackEntry = student ? { student, schoolName: invoiceSchoolNickname(rosterClass?.schoolName || rosterClass?.school), teacherName: rosterTeacherName(rosterClass?.teacherId) } : null;
+      openTuitionInvoice(button.dataset.viewStudentInvoice, fallbackEntry);
+    });
+    document.querySelectorAll("[data-close-tuition-invoice]").forEach(button => button.addEventListener("click", () => document.getElementById("tuition-invoice-dialog")?.close()));
+    const recitalPreviewStatus = (student, index) => {
+      const saved = String(student?.recitalPaymentStatus || student?.recital_payment_status || "").toLowerCase();
+      if (saved.includes("paid")) return "paid";
+      if (saved.includes("plan") || saved.includes("installment")) return "plan";
+      if (saved.includes("due") || saved.includes("full")) return "full";
+      return ["paid", "full", "plan"][index % 3];
+    };
+    const renderRecitalPaymentPreview = () => {
+      const list = document.getElementById("recital-payment-list");
+      if (!list) return;
+      const dancers = invoicePreviewDancers();
+      const matching = invoiceSetupPreview.recitalView === "excluded"
+        ? dancers.filter(({ student }) => invoiceSetupPreview.excludedDancerIds.includes(student.id)).map(entry => ({ ...entry, status: "excluded" }))
+        : dancers.filter(({ student }) => !invoiceSetupPreview.excludedDancerIds.includes(student.id)).map((entry, index) => ({ ...entry, status: recitalPreviewStatus(entry.student, index) })).filter(entry => entry.status === invoiceSetupPreview.recitalView);
+      if (!matching.length) { list.innerHTML = `<div class="payroll-placeholder">No dancers are currently in this category.</div>`; return; }
+      list.innerHTML = matching.map(({ student, schoolName }, index) => {
+        const name = escapeText(`${student.firstName || student.first_name || "Dancer"} ${student.lastName || student.last_name || ""}`.trim());
+        if (invoiceSetupPreview.recitalView === "plan") {
+          const paid = Math.min(invoiceSetupPreview.recitalPrice, index % 2 ? 75 : 50);
+          const percent = invoiceSetupPreview.recitalPrice ? Math.round((paid / invoiceSetupPreview.recitalPrice) * 100) : 100;
+          return `<article class="recital-payment-card"><div class="recital-payment-card-head"><span><strong>${name}</strong><small>${escapeText(schoolName)}</small></span><strong>$${paid.toFixed(2)} / $${invoiceSetupPreview.recitalPrice.toFixed(2)}</strong></div><div class="recital-progress" aria-label="${percent}% paid"><span style="width:${percent}%"></span></div><small>$${Math.max(0, invoiceSetupPreview.recitalPrice - paid).toFixed(2)} remaining · Final balance drafts January 1, 2027</small></article>`;
+        }
+        const amount = invoiceSetupPreview.recitalView === "paid" ? invoiceSetupPreview.recitalPrice : 0;
+        const savedDraftStatus = String(student?.recitalAutodraftStatus || student?.recital_autodraft_status || "").toLowerCase();
+        const failedDraft = invoiceSetupPreview.recitalView === "full" && (savedDraftStatus === "failed" || (["127.0.0.1", "localhost"].includes(location.hostname) && index === 0));
+        const detail = invoiceSetupPreview.recitalView === "paid" ? `$${amount.toFixed(2)} paid` : invoiceSetupPreview.recitalView === "excluded" ? "No charge assigned" : failedDraft ? `Autodraft Failed · $${invoiceSetupPreview.recitalPrice.toFixed(2)} due` : `$${invoiceSetupPreview.recitalPrice.toFixed(2)} due`;
+        return `<article class="recital-payment-card ${failedDraft ? "is-failed" : ""}"><div class="recital-payment-card-head"><span><strong>${name}</strong><small>${escapeText(schoolName)}</small></span><strong>${detail}</strong>${failedDraft ? "<small>January 1, 2027 attempt needs follow-up</small>" : ""}</div></article>`;
+      }).join("");
+    };
+    const openInvoiceSettings = (type) => {
+      const recital = type === "recital";
+      const credit = type === "credit";
+      const dialog = document.getElementById("invoice-settings-dialog");
+      dialog.dataset.invoiceType = type;
+      document.getElementById("invoice-settings-title").textContent = credit ? "Assign a Credit" : recital ? "The Recital Experience" : "Enrollment Fee";
+      document.getElementById("invoice-settings-description").textContent = credit ? "Choose the dancer, enter the credit amount, and document why the family is receiving it." : recital ? "Set the $125 experience price, review how each dancer is paying, or exclude a dancer who should not receive this assignment." : "Set the one-time fee automatically assigned when a dancer enrolls.";
+      document.getElementById("invoice-settings-price-label").textContent = credit ? "Credit amount" : "Price per dancer";
+      document.getElementById("invoice-settings-price").value = (credit ? 0 : recital ? invoiceSetupPreview.recitalPrice : invoiceSetupPreview.enrollmentPrice).toFixed(2);
+      document.getElementById("credit-assignment-fields").hidden = !credit;
+      document.getElementById("recital-exclusion-field").hidden = !recital;
+      document.getElementById("recital-exclusion-help").hidden = !recital;
+      document.getElementById("recital-payment-dashboard").hidden = !recital;
+      if (recital) {
+        document.getElementById("recital-exclusion-search").value = "";
+        document.getElementById("recital-exclusion-results").replaceChildren();
+        renderRecitalPaymentPreview();
+      }
+      if (credit) {
+        invoiceSetupPreview.creditDancerId = "";
+        document.getElementById("credit-dancer-search").value = "";
+        document.getElementById("credit-dancer-results").replaceChildren();
+        document.getElementById("credit-selected-dancer").textContent = "No dancer selected.";
+        document.getElementById("credit-reason").value = "";
+      }
+      document.getElementById("invoice-settings-feedback").textContent = "Preview setup only. Saving here cannot create or charge an invoice.";
+      dialog.showModal();
+    };
+    document.querySelectorAll("[data-open-invoice-settings]").forEach((button) => button.addEventListener("click", () => openInvoiceSettings(button.dataset.openInvoiceSettings)));
+    document.querySelectorAll("[data-close-invoice-settings]").forEach((button) => button.addEventListener("click", () => document.getElementById("invoice-settings-dialog")?.close()));
+    document.querySelector(".recital-payment-tabs")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-recital-payment-view]");
+      if (!button) return;
+      invoiceSetupPreview.recitalView = button.dataset.recitalPaymentView;
+      document.querySelectorAll("[data-recital-payment-view]").forEach(item => item.setAttribute("aria-selected", String(item === button)));
+      renderRecitalPaymentPreview();
+    });
+    document.getElementById("recital-exclusion-search")?.addEventListener("input", (event) => {
+      const query = event.currentTarget.value.trim().toLowerCase();
+      const results = document.getElementById("recital-exclusion-results");
+      if (query.length < 2) { results.replaceChildren(); return; }
+      const matches = invoicePreviewDancers().filter(({ student }) => {
+        const name = `${student.firstName || student.first_name || ""} ${student.lastName || student.last_name || ""}`.trim().toLowerCase();
+        return !invoiceSetupPreview.excludedDancerIds.includes(student.id) && (name.includes(query) || query.split(/\s+/).every(part => name.includes(part)));
+      }).slice(0, 6);
+      results.innerHTML = matches.length ? matches.map(({ student, schoolName }) => `<button class="recital-exclusion-result" type="button" data-exclude-recital-dancer="${escapeText(student.id)}"><span><strong>${escapeText(`${student.firstName || student.first_name || "Dancer"} ${student.lastName || student.last_name || ""}`.trim())}</strong><small>${escapeText(schoolName)}</small></span><b>Move to No Recital</b></button>`).join("") : `<div class="payroll-placeholder">No close dancer matches found.</div>`;
+    });
+    document.getElementById("recital-exclusion-results")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-exclude-recital-dancer]");
+      if (!button) return;
+      if (!invoiceSetupPreview.excludedDancerIds.includes(button.dataset.excludeRecitalDancer)) invoiceSetupPreview.excludedDancerIds.push(button.dataset.excludeRecitalDancer);
+      invoiceSetupPreview.recitalView = "excluded";
+      document.querySelectorAll("[data-recital-payment-view]").forEach(item => item.setAttribute("aria-selected", String(item.dataset.recitalPaymentView === "excluded")));
+      document.getElementById("recital-exclusion-search").value = "";
+      document.getElementById("recital-exclusion-results").replaceChildren();
+      renderRecitalPaymentPreview();
+    });
+    document.getElementById("credit-dancer-search")?.addEventListener("input", (event) => {
+      const query = event.currentTarget.value.trim().toLowerCase();
+      const results = document.getElementById("credit-dancer-results");
+      if (query.length < 2) { results.replaceChildren(); return; }
+      const matches = invoicePreviewDancers().filter(({ student }) => `${student.firstName || student.first_name || ""} ${student.lastName || student.last_name || ""}`.trim().toLowerCase().includes(query)).slice(0, 6);
+      results.innerHTML = matches.length ? matches.map(({ student, schoolName }) => `<button class="recital-exclusion-result" type="button" data-credit-dancer="${escapeText(student.id)}"><span><strong>${escapeText(`${student.firstName || student.first_name || "Dancer"} ${student.lastName || student.last_name || ""}`.trim())}</strong><small>${escapeText(schoolName)}</small></span><b>Select</b></button>`).join("") : `<div class="payroll-placeholder">No close dancer matches found.</div>`;
+    });
+    document.getElementById("credit-dancer-results")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-credit-dancer]");
+      if (!button) return;
+      invoiceSetupPreview.creditDancerId = button.dataset.creditDancer;
+      const match = invoicePreviewDancers().find(({ student }) => student.id === invoiceSetupPreview.creditDancerId);
+      document.getElementById("credit-selected-dancer").textContent = match ? `${match.student.firstName || match.student.first_name || "Dancer"} ${match.student.lastName || match.student.last_name || ""} · ${match.schoolName}`.trim() : "Dancer selected";
+      document.getElementById("credit-dancer-search").value = "";
+      document.getElementById("credit-dancer-results").replaceChildren();
+    });
+    document.getElementById("invoice-settings-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const dialog = document.getElementById("invoice-settings-dialog");
+      const price = Number(document.getElementById("invoice-settings-price").value);
+      if (!Number.isFinite(price) || price < 0) return;
+      if (dialog.dataset.invoiceType === "credit") {
+        if (!invoiceSetupPreview.creditDancerId) return showToast("Choose a dancer for this credit");
+        if (!price) return showToast("Enter a credit amount");
+        if (!document.getElementById("credit-reason").value.trim()) return showToast("Add a reason for this credit");
+      } else if (dialog.dataset.invoiceType === "recital") invoiceSetupPreview.recitalPrice = price;
+      else invoiceSetupPreview.enrollmentPrice = price;
+      const cardStatus = dialog.dataset.invoiceType === "credit" ? null : document.getElementById(dialog.dataset.invoiceType === "recital" ? "recital-fee-card-status" : "enrollment-fee-card-status");
+      if (cardStatus) cardStatus.textContent = `$${price.toFixed(2)} · Automatic${dialog.dataset.invoiceType === "recital" && invoiceSetupPreview.excludedDancerIds.length ? ` · ${invoiceSetupPreview.excludedDancerIds.length} Excluded` : ""}`;
+      dialog.close();
+      showToast(dialog.dataset.invoiceType === "credit" ? "Credit preview assigned" : "Invoice preview setup saved");
+    });
+    document.querySelector(".invoice-tuition-toggle")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-invoice-tuition-type]");
+      if (!button) return;
+      selectedTuitionPlan = button.dataset.invoiceTuitionType;
+      document.querySelectorAll("[data-invoice-tuition-type]").forEach((item) => item.setAttribute("aria-selected", String(item === button)));
+      renderTuitionPlanRoster();
+      const label = button.querySelector("strong")?.textContent || button.textContent.trim();
+      const status = document.getElementById("family-billing-review-status");
+      if (status) status.textContent = `${label} invoices selected. Preview examples only; no charge can be made from this local preview.`;
+    });
+    document.getElementById("tuition-plan-search")?.addEventListener("input", renderTuitionPlanRoster);
+    document.getElementById("tuition-plan-month")?.addEventListener("change", renderTuitionPlanRoster);
+    document.getElementById("tuition-status-filter")?.addEventListener("change", renderTuitionPlanRoster);
+    document.getElementById("tuition-teacher-filter")?.addEventListener("change", renderTuitionPlanRoster);
+    document.getElementById("tuition-school-filter")?.addEventListener("change", renderTuitionPlanRoster);
+    document.getElementById("tuition-reset-filters")?.addEventListener("click", () => {
+      selectedTuitionPlan = "tuition";
+      document.querySelectorAll("[data-invoice-tuition-type]").forEach(item => item.setAttribute("aria-selected", String(item.dataset.invoiceTuitionType === "tuition")));
+      document.getElementById("tuition-plan-month").value = "2026-08";
+      document.getElementById("tuition-status-filter").value = "all";
+      document.getElementById("tuition-teacher-filter").value = "all";
+      document.getElementById("tuition-school-filter").value = "all";
+      document.getElementById("tuition-plan-search").value = "";
+      renderTuitionPlanRoster();
+    });
     document.getElementById("partnership-payment-workspace")?.addEventListener("input", (event) => {
       if (event.target.id !== "partnership-payment-search") return;
       schoolPartnershipPaymentState.search = event.target.value;
@@ -40877,6 +41432,99 @@
       }
     });
 
+    async function refreshFamilyBillingReview() {
+      const list = document.getElementById("family-billing-review-list");
+      const status = document.getElementById("family-billing-review-status");
+      const badge = document.getElementById("family-billing-review-badge");
+      if (!list || !window.dtSupabase || document.body.dataset.tourMode === "true") return;
+      list.replaceChildren();
+      if (status) status.textContent = "Loading family billing approvals and withdrawal requests…";
+      try {
+        const [{ data: accounts, error: accountError }, { data: withdrawals, error: withdrawalError }, { data: cycles, error: cycleError }] = await Promise.all([
+          window.dtSupabase.from("family_billing_accounts").select("id,payment_method_status,card_brand,card_last_four,card_consent_at,automatic_billing_enabled,guardians(full_name,email)").eq("square_environment", "sandbox").order("updated_at", { ascending: false }),
+          window.dtSupabase.from("student_withdrawal_requests").select("id,requested_last_dance_day,parent_note,submitted_at,students(first_name,last_name),guardians(full_name)").eq("status", "pending_review").order("submitted_at", { ascending: true }),
+          window.dtSupabase.from("family_billing_cycles").select("id,cycle_month,cycle_type,total_cents,status,family_billing_cycle_lines(description,amount_cents)").in("status", ["review_required", "failed_follow_up"]).order("cycle_month", { ascending: false }).limit(30)
+        ]);
+        if (accountError || withdrawalError || cycleError) throw accountError || withdrawalError || cycleError;
+        const pendingAccounts = (accounts || []).filter(account => account.card_consent_at && !account.automatic_billing_enabled);
+        const addRow = (title, copy, action) => {
+          const row = document.createElement("div"); row.className = "system-health-row";
+          const dot = document.createElement("span"); dot.className = "system-health-dot";
+          const text = document.createElement("div"); text.className = "system-health-copy";
+          const strong = document.createElement("strong"); strong.textContent = title;
+          const small = document.createElement("small"); small.textContent = copy;
+          text.append(strong, small); row.append(dot, text); if (action) row.append(action); list.append(row);
+        };
+        pendingAccounts.forEach(account => {
+          const guardian = Array.isArray(account.guardians) ? account.guardians[0] : account.guardians;
+          const button = document.createElement("button"); button.className = "system-health-state"; button.type = "button"; button.textContent = "Approve Billing";
+          button.addEventListener("click", async () => {
+            if (!window.confirm(`Approve Sandbox automatic billing for ${guardian?.full_name || "this family"}? Approved billing can charge their saved Sandbox card immediately when an approved prorated cycle is queued.`)) return;
+            button.disabled = true;
+            const { error } = await window.dtSupabase.rpc("set_family_automatic_billing_approval", { target_billing_account_id: account.id, target_enabled: true });
+            if (error) { showToast(error.message || "Billing approval could not be saved"); button.disabled = false; return; }
+            showToast("Sandbox automatic billing approved"); refreshFamilyBillingReview();
+          });
+          addRow(guardian?.full_name || "Family billing account", `${guardian?.email || "No email"} · ${account.card_brand || "Card"} ending ${account.card_last_four || "••••"} · Parent consent received`, button);
+        });
+        (cycles || []).forEach(cycle => {
+          const lines = (cycle.family_billing_cycle_lines || []).map(line => `${line.description} $${(Number(line.amount_cents || 0) / 100).toFixed(2)}`).join(" · ");
+          let action = null;
+          if (cycle.status === "review_required") {
+            action = document.createElement("button"); action.className = "system-health-state"; action.type = "button"; action.textContent = "Approve & Charge";
+            action.addEventListener("click", async () => {
+              if (!window.confirm(`Approve this $${(Number(cycle.total_cents || 0) / 100).toFixed(2)} Sandbox family charge? If the family has approved automatic billing, the charge becomes eligible immediately on its scheduled date.`)) return;
+              action.disabled = true;
+              const { error } = await window.dtSupabase.rpc("approve_family_billing_cycle", { target_cycle_id: cycle.id });
+              if (error) { showToast(error.message || "Billing cycle could not be approved"); action.disabled = false; return; }
+              showToast("Sandbox billing cycle approved"); refreshFamilyBillingReview();
+            });
+          }
+          addRow(cycle.status === "failed_follow_up" ? "Manual payment follow-up" : "Billing cycle needs review", `${cycle.cycle_month} · ${lines || "No lines"} · One family charge $${(Number(cycle.total_cents || 0) / 100).toFixed(2)}`, action);
+        });
+        (withdrawals || []).forEach(request => {
+          const student = Array.isArray(request.students) ? request.students[0] : request.students;
+          const guardian = Array.isArray(request.guardians) ? request.guardians[0] : request.guardians;
+          const action = document.createElement("button"); action.className = "system-health-state"; action.type = "button"; action.textContent = "Review";
+          action.addEventListener("click", async () => {
+            const choice = window.prompt("Enter refund, credit, or none. No adjustment happens until you confirm the amount next.", "none")?.trim().toLowerCase();
+            const decision = { refund: "refund_to_card", credit: "family_credit", none: "no_adjustment" }[choice];
+            if (!decision) return;
+            const dollars = decision === "no_adjustment" ? 0 : Number(window.prompt("Adjustment amount in dollars", "0.00"));
+            if (!Number.isFinite(dollars) || dollars < 0) return showToast("Enter a valid adjustment amount");
+            if (decision === "refund_to_card") {
+              if (!window.confirm(`Issue a $${dollars.toFixed(2)} refund to the family’s latest completed Square Sandbox payment now?`)) return;
+              const { data, error } = await window.dtSupabase.functions.invoke("square-family-billing-refund", { body: { requestId: request.id, amountCents: Math.round(dollars * 100) } });
+              if (error || !data?.ok) return showToast(data?.message || error?.message || "Sandbox refund could not be completed");
+              showToast(data.message || "Sandbox refund submitted"); refreshFamilyBillingReview(); return;
+            }
+            const { error } = await window.dtSupabase.rpc("review_student_withdrawal_request", { target_request_id: request.id, target_decision: decision, target_adjustment_cents: Math.round(dollars * 100), target_director_note: null });
+            if (error) return showToast(error.message || "Withdrawal review could not be saved");
+            showToast("Withdrawal reviewed"); refreshFamilyBillingReview();
+          });
+          addRow(`${student?.first_name || "Dancer"} ${student?.last_name || ""}`.trim(), `${guardian?.full_name || "Parent"} · Last dance day ${request.requested_last_dance_day}${request.parent_note ? ` · ${request.parent_note}` : ""}`, action);
+        });
+        const reviewCount = pendingAccounts.length + (withdrawals || []).length + (cycles || []).length;
+        if (!reviewCount) addRow("Nothing waiting for review", "Saved cards, prepared billing cycles, final failed attempts, and withdrawal requests will appear here.");
+        if (badge) { badge.textContent = reviewCount ? `${reviewCount} to Review` : "Clear"; badge.className = `status ${reviewCount ? "pending" : "ok"}`; }
+        if (status) status.textContent = "Sandbox only. Approving a billing cycle is the action that queues its charge; merely viewing this list changes nothing.";
+      } catch (error) {
+        const localPreview = ["127.0.0.1", "localhost"].includes(location.hostname);
+        if (localPreview) {
+          list.innerHTML = `
+            <div class="system-health-row"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Sample Family · September Invoice</strong><small>Monthly Tuition $55.00 · One family charge $55.00</small></div><button class="system-health-state" type="button" disabled>Approve &amp; Charge</button></div>
+            <div class="system-health-row"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Sample New Dancer · Prorated Invoice</strong><small>Prorated Tuition $27.50 · 2 dance days remaining · One family charge $27.50</small></div><button class="system-health-state" type="button" disabled>Approve &amp; Charge</button></div>
+            <div class="system-health-row"><span class="system-health-dot"></span><div class="system-health-copy"><strong>Sample Declined Payment</strong><small>Tuition $55.00 · Late Fee $10.00 · Final attempt total $65.00</small></div><span class="system-health-state">Needs Follow-Up</span></div>`;
+          if (status) status.textContent = "Preview examples only. Buttons are disabled and no charge can be made from this local preview.";
+          if (badge) { badge.textContent = "3 Examples"; badge.className = "status pending"; }
+        } else {
+          if (status) status.textContent = error?.message || "Family billing review could not be loaded.";
+          if (badge) { badge.textContent = "Unavailable"; badge.className = "status pending"; }
+        }
+      }
+    }
+    document.getElementById("family-billing-review-refresh")?.addEventListener("click", refreshFamilyBillingReview);
+
     const setProfileLoginSetupOpen = (open) => {
       const overlay = document.getElementById("profile-login-setup-overlay");
       if (!overlay) return;
@@ -40888,6 +41536,7 @@
         if (title) title.textContent = "Account Info";
         if (copy) copy.textContent = `Account access, security, and notification settings for ${teacherNickname(profileTeacher)}.`;
         refreshSquareSandboxTestActions();
+        refreshFamilyBillingReview();
         updateSystemHealthSummary();
         window.setTimeout(() => document.getElementById("profile-login-email")?.focus(), 60);
       } else {

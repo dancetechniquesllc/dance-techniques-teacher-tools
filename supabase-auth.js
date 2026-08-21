@@ -135,8 +135,9 @@
       .maybeSingle();
 
     if (error || !profile) {
-      await client.auth.signOut();
-      message.textContent = "We couldn’t verify this account. Please contact Dance Techniques.";
+      message.textContent = error
+        ? "You’re still signed in, but we couldn’t load this account. Check your connection and try again."
+        : "This signed-in account does not have an active Dance Techniques profile. Please contact Dance Techniques.";
       setGateState("login");
       return;
     }
@@ -378,12 +379,24 @@
     };
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (refreshingForAppUpdate) return;
+      // Do not reload while iOS is creating and saving a PushManager
+      // subscription. Interrupting that flow leaves permission granted but no
+      // phone attached to the signed-in teacher.
+      if (window.dtPushSetupInProgress) return;
       refreshingForAppUpdate = true;
       window.location.reload();
     });
     window.addEventListener("load", async () => {
-      const registration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
-      registration.update().catch((error) => console.warn("App update check did not finish", error));
+      let registration = await navigator.serviceWorker.getRegistration("./");
+      if (!registration) registration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
+      // A forced update on every launch can continuously replace the worker on
+      // iPhone. Limit explicit checks; normal service-worker registration still
+      // handles published updates.
+      const lastWorkerCheck = Number(window.localStorage?.getItem("dt-worker-update-check-at") || 0);
+      if (Date.now() - lastWorkerCheck > 6 * 60 * 60 * 1000) {
+        window.localStorage?.setItem("dt-worker-update-check-at", String(Date.now()));
+        registration.update().catch((error) => console.warn("App update check did not finish", error));
+      }
       checkForPublishedAppUpdate();
     });
   }
