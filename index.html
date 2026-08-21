@@ -15137,6 +15137,7 @@
                   <div><h4>Assign a Credit</h4></div>
                 </button>
               </div>
+              <p class="subtle"><strong>Billing scope:</strong> Primrose Rowlett · Class 5 only</p>
               <div class="invoice-tuition-toggle" role="tablist" aria-label="Tuition types">
                 <button type="button" role="tab" aria-selected="true" data-invoice-tuition-type="tuition"><strong>Tuition</strong><small>$55 · <span data-tuition-count="tuition">0</span> dancers</small></button>
                 <button type="button" role="tab" aria-selected="false" data-invoice-tuition-type="sibling"><strong>Sibling</strong><small>$45 · <span data-tuition-count="sibling">0</span> dancers</small></button>
@@ -38799,10 +38800,18 @@
     };
     const invoicePreviewDancers = () => {
       const seen = new Set();
-      return rosterClasses.flatMap((rosterClass) => (rosterClass.students || []).map((student) => ({ student, schoolName: invoiceSchoolNickname(rosterClass.schoolName || rosterClass.school), teacherName: rosterTeacherName(rosterClass.teacherId) })))
+      return rosterClasses.flatMap((rosterClass) => (rosterClass.students || []).map((student) => ({ student, schoolName: invoiceSchoolNickname(rosterClass.schoolName || rosterClass.school), className: rosterClass.name || rosterClass.className || rosterClass.class_name || rosterClass.classroom || "", teacherName: rosterTeacherName(rosterClass.teacherId) })))
         .filter(({ student }) => student?.id && !seen.has(student.id) && seen.add(student.id))
         .sort((a, b) => `${a.student.firstName || ""} ${a.student.lastName || ""}`.localeCompare(`${b.student.firstName || ""} ${b.student.lastName || ""}`));
     };
+    const rowlettClass5InvoiceDancers = () => invoicePreviewDancers().filter(({ schoolName, className }) => {
+      const school = String(schoolName || "").trim().toLowerCase();
+      const classroom = String(className || "").trim().toLowerCase();
+      return school === "primrose rowlett" && classroom === "class 5";
+    });
+    const activeInvoiceDancers = () => ["127.0.0.1", "localhost"].includes(location.hostname)
+      ? invoicePreviewDancers()
+      : rowlettClass5InvoiceDancers();
     let selectedTuitionPlan = "tuition";
     const tuitionPlanForStudent = (student) => {
       const discount = String(student?.tuitionDiscount || student?.tuition_discount || "none").trim().toLowerCase();
@@ -38831,7 +38840,7 @@
       const grid = document.getElementById("tuition-plan-grid");
       if (!grid) return;
       const month = document.getElementById("tuition-plan-month")?.value || "2026-08";
-      const dancers = invoicePreviewDancers().map((entry, index) => ({ ...entry, plan: tuitionPlanForStudent(entry.student), payment: tuitionMonthStatus(entry.student, month, index) }));
+      const dancers = activeInvoiceDancers().map((entry, index) => ({ ...entry, plan: tuitionPlanForStudent(entry.student), payment: tuitionMonthStatus(entry.student, month, index) }));
       ["tuition", "sibling", "school-staff", "other"].forEach(key => {
         const count = dancers.filter(entry => entry.plan.key === key).length;
         const node = document.querySelector(`[data-tuition-count="${key}"]`);
