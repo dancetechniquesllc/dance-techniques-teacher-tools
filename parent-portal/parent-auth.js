@@ -52,7 +52,10 @@
   const photoZoom = document.getElementById("dancer-photo-zoom");
   const photoStatus = document.getElementById("dancer-photo-status");
   let activePhotoStudent = null;
+  let activePhotoGuardian = null;
   let activePhotoObjectUrl = "";
+  let photoOffsetX = 0;
+  let photoOffsetY = 0;
 
   const closePhotoDialog = () => {
     photoDialog?.close();
@@ -61,10 +64,24 @@
     if (activePhotoObjectUrl) URL.revokeObjectURL(activePhotoObjectUrl);
     activePhotoObjectUrl = "";
     activePhotoStudent = null;
+    activePhotoGuardian = null;
+    photoOffsetX = 0;
+    photoOffsetY = 0;
   };
 
   const chooseDancerPhoto = (student) => {
     activePhotoStudent = student;
+    activePhotoGuardian = null;
+    document.getElementById("dancer-photo-title").textContent = "📸 Picture Perfect!";
+    document.getElementById("dancer-photo-guidance").innerHTML = "Please fill the frame with <strong>just your dancer’s face</strong>—nice and close!<br><br>A clear profile photo helps their Dance Techniques teachers quickly recognize your dancer and makes <strong>class check-in easy-peasy</strong>. ✨<br><br><strong>One sweet smile. One easy check-in.</strong>";
+    photoInput.click();
+  };
+
+  const chooseGuardianPhoto = (guardian) => {
+    activePhotoGuardian = guardian;
+    activePhotoStudent = null;
+    document.getElementById("dancer-photo-title").textContent = "📸 Picture Perfect!";
+    document.getElementById("dancer-photo-guidance").innerHTML = "Fill the frame with <strong>your face</strong>—nice and close!<br><br>Your photo helps your dancer’s teachers quickly recognize who they’re speaking with in the Parent Portal.<br><br><strong>One friendly face. One connected dance family.</strong> ✨";
     photoInput.click();
   };
 
@@ -75,8 +92,10 @@
     canvas.height = 512;
     const zoom = Number(photoZoom.value || 100) / 100;
     const sourceSize = Math.min(photoImage.naturalWidth, photoImage.naturalHeight) / zoom;
-    const sourceX = (photoImage.naturalWidth - sourceSize) / 2;
-    const sourceY = (photoImage.naturalHeight - sourceSize) / 2;
+    const stageSize = document.getElementById("dancer-photo-stage").clientWidth || 310;
+    const renderedScale = stageSize / sourceSize;
+    const sourceX = Math.max(0, Math.min(photoImage.naturalWidth - sourceSize, (photoImage.naturalWidth - sourceSize) / 2 - photoOffsetX / renderedScale));
+    const sourceY = Math.max(0, Math.min(photoImage.naturalHeight - sourceSize, (photoImage.naturalHeight - sourceSize) / 2 - photoOffsetY / renderedScale));
     canvas.getContext("2d").drawImage(photoImage, sourceX, sourceY, sourceSize, sourceSize, 0, 0, 512, 512);
     canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("The photo could not be prepared.")), "image/jpeg", 0.9);
   });
@@ -87,44 +106,70 @@
     const size = stage.clientWidth;
     const baseScale = Math.max(size / photoImage.naturalWidth, size / photoImage.naturalHeight);
     const scale = baseScale * (Number(photoZoom.value || 100) / 100);
-    photoImage.style.width = `${photoImage.naturalWidth * scale}px`;
-    photoImage.style.height = `${photoImage.naturalHeight * scale}px`;
-    photoImage.style.left = `${(size - photoImage.naturalWidth * scale) / 2}px`;
-    photoImage.style.top = `${(size - photoImage.naturalHeight * scale) / 2}px`;
+    const width = photoImage.naturalWidth * scale;
+    const height = photoImage.naturalHeight * scale;
+    const maxX = Math.max(0, (width - size) / 2);
+    const maxY = Math.max(0, (height - size) / 2);
+    photoOffsetX = Math.max(-maxX, Math.min(maxX, photoOffsetX));
+    photoOffsetY = Math.max(-maxY, Math.min(maxY, photoOffsetY));
+    photoImage.style.width = `${width}px`;
+    photoImage.style.height = `${height}px`;
+    photoImage.style.left = `${(size - width) / 2 + photoOffsetX}px`;
+    photoImage.style.top = `${(size - height) / 2 + photoOffsetY}px`;
   };
 
   photoInput?.addEventListener("change", () => {
     const file = photoInput.files?.[0];
-    if (!file || !activePhotoStudent) return;
+    if (!file || (!activePhotoStudent && !activePhotoGuardian)) return;
     if (!/^image\/(jpeg|png|webp)$/i.test(file.type) || file.size > 5 * 1024 * 1024) {
       photoStatus.textContent = "Choose a JPG, PNG, or WebP photo smaller than 5 MB.";
       photoDialog.showModal();
       return;
     }
     activePhotoObjectUrl = URL.createObjectURL(file);
-    photoImage.onload = () => { photoZoom.value = "100"; updateCropPreview(); };
+    photoImage.onload = () => { photoZoom.value = "100"; photoOffsetX = 0; photoOffsetY = 0; updateCropPreview(); };
     photoImage.src = activePhotoObjectUrl;
     photoDialog.showModal();
   });
   photoZoom?.addEventListener("input", updateCropPreview);
+  const photoStage = document.getElementById("dancer-photo-stage");
+  let photoDrag = null;
+  photoStage?.addEventListener("pointerdown", (event) => {
+    if (!photoImage.naturalWidth) return;
+    photoDrag = { x: event.clientX, y: event.clientY, offsetX: photoOffsetX, offsetY: photoOffsetY };
+    photoStage.setPointerCapture(event.pointerId);
+  });
+  photoStage?.addEventListener("pointermove", (event) => {
+    if (!photoDrag) return;
+    photoOffsetX = photoDrag.offsetX + event.clientX - photoDrag.x;
+    photoOffsetY = photoDrag.offsetY + event.clientY - photoDrag.y;
+    updateCropPreview();
+  });
+  ["pointerup", "pointercancel"].forEach((name) => photoStage?.addEventListener(name, () => { photoDrag = null; }));
   document.getElementById("dancer-photo-cancel")?.addEventListener("click", closePhotoDialog);
   document.getElementById("dancer-photo-save")?.addEventListener("click", async () => {
-    if (!client || !activePhotoStudent) return;
+    if (!client || (!activePhotoStudent && !activePhotoGuardian)) return;
     const save = document.getElementById("dancer-photo-save");
     save.disabled = true;
     photoStatus.textContent = "Saving this sweet smile securely…";
     try {
       const blob = await makeCroppedPhoto();
-      const path = `${activePhotoStudent.id}/${crypto.randomUUID()}.jpg`;
-      const { error: uploadError } = await client.storage.from("student-photos").upload(path, blob, { contentType: "image/jpeg", upsert: false });
+      const isGuardian = Boolean(activePhotoGuardian);
+      const record = activePhotoGuardian || activePhotoStudent;
+      const bucket = isGuardian ? "guardian-photos" : "student-photos";
+      const path = `${record.id}/${crypto.randomUUID()}.jpg`;
+      const { error: uploadError } = await client.storage.from(bucket).upload(path, blob, { contentType: "image/jpeg", upsert: false });
       if (uploadError) throw uploadError;
-      const { error: linkError } = await client.rpc("set_parent_dancer_photo", { target_student_id: activePhotoStudent.id, target_photo_path: path });
+      const { error: linkError } = isGuardian
+        ? await client.rpc("set_parent_guardian_photo", { target_photo_path: path })
+        : await client.rpc("set_parent_dancer_photo", { target_student_id: activePhotoStudent.id, target_photo_path: path });
       if (linkError) throw linkError;
-      const { data } = await client.storage.from("student-photos").createSignedUrl(path, 3600);
-      document.querySelectorAll(`[data-photo-student-id="${CSS.escape(activePhotoStudent.id)}"]`).forEach((bubble) => {
+      const { data } = await client.storage.from(bucket).createSignedUrl(path, 3600);
+      const selector = isGuardian ? `[data-photo-guardian-id="${CSS.escape(record.id)}"]` : `[data-photo-student-id="${CSS.escape(record.id)}"]`;
+      document.querySelectorAll(selector).forEach((bubble) => {
         const image = document.createElement("img");
         image.src = data?.signedUrl || activePhotoObjectUrl;
-        image.alt = dancerName(activePhotoStudent);
+        image.alt = isGuardian ? (record.full_name || "Parent profile") : dancerName(record);
         bubble.replaceChildren(image);
       });
       closePhotoDialog();
@@ -214,7 +259,16 @@
   const loadClassPosts = async () => {
     const { data, error } = await client.functions.invoke("parent-portal-class-feed", { body: {} });
     if (error || !data?.ok) throw error || new Error(data?.message || "Class feed unavailable");
-    return Array.isArray(data.posts) ? data.posts : [];
+    const posts = Array.isArray(data.posts) ? data.posts : [];
+    const postIds = [...new Set(posts.map((post) => post.sourcePostId).filter(Boolean))];
+    if (!postIds.length) return posts;
+    const { data: hearts, error: heartError } = await client
+      .from("parent_portal_class_post_hearts")
+      .select("post_id")
+      .in("post_id", postIds);
+    if (heartError) throw heartError;
+    const heartedPostIds = new Set((hearts || []).map((heart) => String(heart.post_id)));
+    return posts.map((post) => ({ ...post, hearted: heartedPostIds.has(String(post.sourcePostId)) }));
   };
 
   const loadNewsletters = async () => {
@@ -332,7 +386,7 @@
     const visiblePosts = posts.filter((post) => Array.isArray(post.studentIds) && post.studentIds.includes(selectedStudentId));
     feed.replaceChildren();
     if (!visiblePosts.length) {
-      feed.innerHTML = '<img class="family-updates-empty" src="assets/feed/family-updates-empty.png?v=4" alt="The magic will appear here. Photos, class moments, celebrations, and special updates from your dancer’s day will appear here.">';
+      feed.innerHTML = '<div class="family-updates-empty-card"><img class="family-updates-empty" src="assets/feed/family-updates-empty.png?v=4" alt="The magic will appear here. Photos, class moments, celebrations, and special updates from your dancer’s day will appear here."><button class="heart family-updates-empty-heart" type="button" aria-label="Heart this welcome card" aria-pressed="false" title="Heart">♡</button></div>';
       return;
     }
     visiblePosts.forEach((post) => {
@@ -365,6 +419,42 @@
         appendPostBody(copy, post.caption);
         article.append(copy);
       }
+      const actions = document.createElement("div");
+      actions.className = "post-actions";
+      const heart = document.createElement("button");
+      heart.type = "button";
+      heart.className = `heart${post.hearted ? " liked" : ""}`;
+      heart.textContent = post.hearted ? "♥" : "♡";
+      heart.setAttribute("aria-pressed", String(Boolean(post.hearted)));
+      heart.setAttribute("aria-label", post.hearted ? "Remove heart from this post" : "Heart this post");
+      heart.title = post.hearted ? "Remove heart" : "Heart";
+      heart.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!client || heart.disabled) return;
+        heart.disabled = true;
+        try {
+          const { data: liked, error } = await client.rpc("toggle_parent_portal_post_heart", {
+            target_post_id: post.sourcePostId
+          });
+          if (error) throw error;
+          post.hearted = liked === true;
+          heart.classList.toggle("liked", post.hearted);
+          heart.textContent = post.hearted ? "♥" : "♡";
+          heart.setAttribute("aria-pressed", String(post.hearted));
+          heart.setAttribute("aria-label", post.hearted ? "Remove heart from this post" : "Heart this post");
+          heart.title = post.hearted ? "Remove heart" : "Heart";
+          window.dispatchEvent(new CustomEvent("parent-portal:post-heart-changed", {
+            detail: { postId: post.sourcePostId, hearted: post.hearted }
+          }));
+        } catch (error) {
+          console.warn("The post heart could not be saved.");
+        } finally {
+          heart.disabled = false;
+        }
+      });
+      actions.append(heart);
+      article.append(actions);
       feed.append(article);
     });
   };
@@ -377,7 +467,14 @@
     const firstName = dancerName(firstStudent);
 
     document.querySelectorAll(".preview").forEach((node) => node.remove());
-    document.querySelector(".profile-button .mini-avatar").textContent = guardianInitials;
+    const headerAvatar = document.querySelector(".profile-button .mini-avatar");
+    headerAvatar.dataset.photoGuardianId = guardian.id;
+    if (guardian.photoUrl) {
+      const image = document.createElement("img");
+      image.src = guardian.photoUrl;
+      image.alt = guardian.full_name || "Parent profile";
+      headerAvatar.replaceChildren(image);
+    } else headerAvatar.textContent = guardianInitials;
     const homeWelcome = document.querySelector("#home > .welcome, .dancer-feedback-row > .welcome");
     homeWelcome.querySelector("h1").textContent = `Bonjour, ${guardian.first_name || guardian.full_name || "Dance Family"}!`;
     homeWelcome.querySelector("p").textContent = students.length === 1
@@ -433,20 +530,25 @@
     document.getElementById("calendar-page-title").textContent = `${firstName}’s Dance Days`;
 
     const paymentsGrid = document.querySelector(".payments-grid");
-    paymentsGrid.innerHTML = '<article class="payment-card wide"><small>Family tuition</small><h2>No Tuition Account Connected Yet</h2><p class="payment-empty">Only verified charges, credits, payment-method status, and receipts for this family will appear here after secure billing is connected.</p></article>';
+    const tuitionPlanCard = paymentsGrid.querySelector(".payment-card");
+    if (tuitionPlanCard) {
+      tuitionPlanCard.querySelector("h2").textContent = "No Active Plan Yet";
+      tuitionPlanCard.querySelector(".payment-empty").textContent = "When Dance Techniques activates each dancer’s tuition plan, the monthly amount and first-of-the-month schedule will appear here.";
+    }
 
     const profileCard = document.querySelector("#profile .profile-card");
     profileCard.innerHTML = `
-      <span class="avatar">${guardianInitials}</span>
+      <button class="avatar family-dancer-bubble" type="button" data-photo-guardian-id="${guardian.id}" aria-label="Add or change your profile photo">${guardian.photoUrl ? `<img src="${guardian.photoUrl}" alt="${guardian.full_name || "Parent profile"}">` : guardianInitials}</button>
       <h2></h2>
       <p></p>
       <section class="family-dancers" aria-labelledby="family-dancers-title">
         <h3 id="family-dancers-title">My Dancers</h3>
         <div class="family-dancer-grid"></div>
       </section>
-      <div class="profile-list"><button type="button" id="pp-sign-out">Sign Out <span>›</span></button></div>`;
+      <div class="profile-list"><button type="button" id="open-withdrawal-request">Request Withdrawal <span>›</span></button><button type="button" id="pp-sign-out">Sign Out <span>›</span></button></div>`;
     profileCard.querySelector("h2").textContent = guardian.full_name || [guardian.first_name, guardian.last_name].filter(Boolean).join(" ") || "Parent Portal Family";
     profileCard.querySelector("p").textContent = `Authorized family access for ${students.map(dancerName).join(" and ")}.`;
+    profileCard.querySelector("[data-photo-guardian-id]").addEventListener("click", () => chooseGuardianPhoto(guardian));
     const dancerGrid = profileCard.querySelector(".family-dancer-grid");
     students.forEach((student) => {
       const card = document.createElement("article");
@@ -471,6 +573,197 @@
     });
   };
 
+  const loadDirectorElenaPreview = async () => {
+    const { data: students, error: studentError } = await client
+      .from("students")
+      .select("id,first_name,last_name,preferred_name,status,photo_path")
+      .ilike("first_name", "Elena Eden")
+      .ilike("last_name", "Mancol-Bilbo")
+      .eq("status", "enrolled");
+    if (studentError) throw studentError;
+    const candidates = Array.isArray(students) ? students : [];
+    if (!candidates.length) throw new Error("Elena’s enrolled dancer record was not found.");
+
+    const candidateIds = candidates.map((student) => student.id);
+    const { data: enrollmentRows, error: enrollmentError } = await client
+      .from("class_enrollments")
+      .select("student_id,dance_class_id,status,enrolled_date,dance_classes(id,name,start_time,classroom,teacher_school_assignment_id)")
+      .in("student_id", candidateIds)
+      .eq("status", "enrolled");
+    if (enrollmentError) throw enrollmentError;
+    const classRows = (enrollmentRows || []).map((row) => ({
+      ...row,
+      danceClass: Array.isArray(row.dance_classes) ? row.dance_classes[0] : row.dance_classes
+    })).filter((row) => row.danceClass);
+    const assignmentIds = [...new Set(classRows.map((row) => row.danceClass.teacher_school_assignment_id).filter(Boolean))];
+    const { data: assignments, error: assignmentError } = assignmentIds.length
+      ? await client.from("teacher_school_assignments")
+        .select("id,teacher_id,partner_school_id,profiles(id,full_name,color),partner_schools(name,nickname,dance_day,time_of_day)")
+        .in("id", assignmentIds)
+      : { data: [], error: null };
+    if (assignmentError) throw assignmentError;
+    const teacherIds = [...new Set((assignments || []).map((assignment) => assignment.teacher_id).filter(Boolean))];
+    const { data: teacherStates } = teacherIds.length
+      ? await client.from("teacher_portal_state").select("teacher_id,payload").in("teacher_id", teacherIds)
+      : { data: [] };
+    const teacherStateById = new Map((teacherStates || []).map((state) => [String(state.teacher_id), state.payload || {}]));
+    const teacherPhotoById = new Map((teacherStates || []).map((state) => [String(state.teacher_id), state.payload?.teacher?.photo || ""]));
+    const assignmentById = new Map((assignments || []).map((assignment) => [String(assignment.id), assignment]));
+    const enrichedRows = classRows.map((row) => {
+      const assignment = assignmentById.get(String(row.danceClass.teacher_school_assignment_id));
+      const school = Array.isArray(assignment?.partner_schools) ? assignment.partner_schools[0] : assignment?.partner_schools;
+      const teacherRecord = Array.isArray(assignment?.profiles) ? assignment.profiles[0] : assignment?.profiles;
+      const teacher = teacherRecord ? { ...teacherRecord, photo: teacherPhotoById.get(String(assignment?.teacher_id)) || "" } : teacherRecord;
+      return { ...row, assignment, school, teacher, teacherState: teacherStateById.get(String(assignment?.teacher_id)) || {} };
+    });
+    const preferredRow = enrichedRows.find((row) => /primrose rowlett/i.test(`${row.school?.nickname || ""} ${row.school?.name || ""}`) && /class\s*5/i.test(row.danceClass.name || "")) || enrichedRows[0];
+    const student = candidates.find((candidate) => candidate.id === preferredRow?.student_id) || candidates[0];
+
+    const { data: guardianLinks, error: guardianError } = await client
+      .from("student_guardians")
+      .select("relationship,is_primary,guardians(id,first_name,last_name,full_name,email,phone)")
+      .eq("student_id", student.id)
+      .order("is_primary", { ascending: false });
+    if (guardianError) throw guardianError;
+    const guardianLink = guardianLinks?.[0];
+    const guardian = Array.isArray(guardianLink?.guardians) ? guardianLink.guardians[0] : guardianLink?.guardians;
+    if (!guardian) throw new Error("Elena’s linked adult record was not found.");
+
+    if (student.photo_path) {
+      const { data } = await client.storage.from("student-photos").createSignedUrl(student.photo_path, 3600);
+      student.photoUrl = data?.signedUrl || "";
+    }
+
+    const classIds = enrichedRows.filter((row) => row.student_id === student.id).map((row) => row.danceClass.id);
+    const { data: postRows, error: postError } = classIds.length
+      ? await client.from("parent_portal_class_posts")
+        .select("id,dance_class_id,teacher_id,title,caption,media_path,published_at,audience_mode,deleted_at,parent_portal_class_post_recipients(student_id)")
+        .in("dance_class_id", classIds)
+        .is("deleted_at", null)
+        .lte("published_at", new Date().toISOString())
+        .order("published_at", { ascending: false })
+      : { data: [], error: null };
+    if (postError) throw postError;
+    const classById = new Map(enrichedRows.map((row) => [String(row.danceClass.id), row]));
+    const visiblePostRows = (postRows || []).filter((post) => post.audience_mode !== "private"
+      || (post.parent_portal_class_post_recipients || []).some((recipient) => String(recipient.student_id) === String(student.id)));
+    const classPosts = await Promise.all(visiblePostRows.map(async (post) => {
+      const row = classById.get(String(post.dance_class_id));
+      const signed = post.media_path
+        ? await client.storage.from("parent-portal-class-media").createSignedUrl(post.media_path, 3600)
+        : { data: null };
+      return {
+        sourcePostId: post.id,
+        studentIds: [student.id],
+        title: post.title || "Dance Class Update",
+        caption: post.caption || "",
+        imageUrl: signed.data?.signedUrl || "",
+        publishedAt: post.published_at,
+        className: row?.danceClass?.name || "Dance Class",
+        teacherName: row?.teacher?.full_name || "Dance Techniques",
+        teacherColor: row?.teacher?.color || "#DBA9A1"
+      };
+    }));
+    return { context: { guardian, students: [student] }, scheduleRows: enrichedRows.filter((row) => row.student_id === student.id), classPosts };
+  };
+
+  const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
+    renderTruthfulEmptyStates(context, classPosts, []);
+    const first = scheduleRows[0];
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const schoolName = first?.school?.nickname || first?.school?.name || "School not assigned";
+    const dayName = Number.isInteger(first?.school?.dance_day) ? dayNames[first.school.dance_day] : "Dance Day";
+    const timeBlock = first?.school?.time_of_day || "";
+    const teacherName = first?.teacher?.full_name || "Dance Techniques Teacher";
+    const teacherPhoto = first?.teacher?.photo || (/lexi/i.test(first?.teacher?.full_name || "") ? "assets/people/ms-lexi-profile.png" : "");
+    const teacherLabel = /^Ms\./i.test(teacherName) ? teacherName : `Ms. ${teacherName.split(" ")[0]}`;
+    const nextClassDate = new Date();
+    nextClassDate.setHours(12, 0, 0, 0);
+    if (Number.isInteger(first?.school?.dance_day)) nextClassDate.setDate(nextClassDate.getDate() + ((first.school.dance_day - nextClassDate.getDay() + 7) % 7));
+    const curriculumAnchor = new Date(nextClassDate.getFullYear(), 8, 1, 12, 0, 0, 0);
+    if (Number.isInteger(first?.school?.dance_day)) curriculumAnchor.setDate(curriculumAnchor.getDate() + ((first.school.dance_day - curriculumAnchor.getDay() + 7) % 7));
+    const curriculumWeekOffset = Math.round((nextClassDate.getTime() - curriculumAnchor.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    const curriculumStyle = Math.abs(curriculumWeekOffset) % 2 === 0 ? "Ballet" : "Tap";
+    const classSummary = document.querySelector(".today");
+    classSummary.classList.add("class-summary");
+    classSummary.innerHTML = `<img class="class-summary-art" src="assets/curriculum/${curriculumStyle.toLowerCase()}-day.png" alt="${curriculumStyle} shoes"><div class="class-summary-copy"><span class="eyebrow">Elena Eden’s class</span><h2>${dayName}${timeBlock ? ` <span class="class-time-dot">•</span> ${timeBlock === "AM" ? "Morning" : "Afternoon"}` : ""}</h2><p>${schoolName} · ${curriculumStyle} with ${teacherLabel}</p><button class="class-summary-link" type="button" data-page="calendar"><img src="assets/navigation/calendar.png" alt=""><strong>View full schedule</strong><span aria-hidden="true">›</span></button></div>`;
+    const calendar = document.getElementById("monthly-calendar");
+    document.getElementById("calendar-page-title").textContent = "Elena Eden’s Upcoming Dance Days";
+    document.querySelector("#calendar .eyebrow").textContent = "Weekly schedule";
+    calendar.setAttribute("aria-label", "Elena Eden’s upcoming class calendar");
+    const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const dateAtNoon = (value) => {
+      const date = new Date(`${String(value || "").slice(0, 10)}T12:00:00`);
+      return Number.isNaN(date.getTime()) ? null : date;
+    };
+    const firstFourWeekdays = (year, month, weekday) => {
+      const date = new Date(year, month, 1, 12, 0, 0, 0);
+      date.setDate(1 + ((weekday - date.getDay() + 7) % 7));
+      return Array.from({ length: 4 }, (_, index) => new Date(year, month, date.getDate() + (index * 7), 12, 0, 0, 0));
+    };
+    const curriculumForDate = (date, danceDay) => {
+      const anchor = new Date(2026, 8, 1, 12, 0, 0, 0);
+      anchor.setDate(anchor.getDate() + ((danceDay - anchor.getDay() + 7) % 7));
+      const weekOffset = Math.round((date.getTime() - anchor.getTime()) / (7 * 24 * 60 * 60 * 1000));
+      return Math.abs(weekOffset) % 2 === 0 ? "Ballet" : "Tap";
+    };
+    const previewClosures = new Map([
+      ["2026-11-26", "Thanksgiving Break"],
+      ["2026-12-24", "Winter Break"],
+      ["2027-03-18", "Spring Break"]
+    ]);
+    const normalize = (value) => String(value || "").trim().toLowerCase();
+    const schoolAliases = [first?.school?.name, first?.school?.nickname, schoolName].map(normalize).filter(Boolean);
+    const savedReschedules = (first?.teacherState?.teacher?.reschedules || first?.teacherState?.reschedules || []).filter((change) => {
+      const changedSchool = normalize(change?.schoolName);
+      return !changedSchool || schoolAliases.includes(changedSchool);
+    });
+    const changesByOriginalDate = new Map(savedReschedules.filter((change) => change?.originalDate).map((change) => [String(change.originalDate).slice(0, 10), change]));
+    const danceDay = Number.isInteger(first?.school?.dance_day) ? first.school.dance_day : 4;
+    const monthRange = Array.from({ length: 10 }, (_, index) => {
+      const date = new Date(2026, 7 + index, 1, 12, 0, 0, 0);
+      return { year: date.getFullYear(), month: date.getMonth() };
+    });
+    const monthEntries = new Map(monthRange.map(({ year, month }) => [`${year}-${month}`, firstFourWeekdays(year, month, danceDay).map((date) => {
+      const iso = isoDate(date);
+      const closure = previewClosures.get(iso);
+      const change = changesByOriginalDate.get(iso);
+      const curriculum = curriculumForDate(date, danceDay);
+      if (closure) return { date, type: "holiday", title: `No Class: ${closure}` };
+      if (change?.status === "cancelled") return { date, type: "holiday", title: change.reason ? `No Class: ${change.reason}` : "No Class: Cancelled" };
+      if (change?.status === "date_tbd") return { date, type: "rescheduled", title: "New class date needed", badge: "↻" };
+      if (change?.status === "rescheduled") {
+        const movedDate = dateAtNoon(change.newDate);
+        return { date, type: "rescheduled", title: movedDate ? `Moved to ${new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(movedDate)}` : "Class rescheduled", badge: "↻" };
+      }
+      return { date, type: "scheduled", title: `${curriculum} Day`, curriculum };
+    })]));
+    savedReschedules.filter((change) => change?.status === "rescheduled" && change?.newDate).forEach((change) => {
+      const date = dateAtNoon(change.newDate);
+      if (!date) return;
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      if (!monthEntries.has(key)) return;
+      monthEntries.get(key).push({ date, type: "makeup", title: `${change.curriculum || curriculumForDate(date, danceDay)} Makeup Class`, badge: "↻", curriculum: change.curriculum || curriculumForDate(date, danceDay) });
+      monthEntries.get(key).sort((left, right) => left.date - right.date);
+    });
+    const monthFormatter = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+    const dayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "short" });
+    const today = new Date();
+    calendar.innerHTML = monthRange.map(({ year, month }, index) => {
+      const entries = monthEntries.get(`${year}-${month}`) || [];
+      const open = (today.getFullYear() === year && today.getMonth() === month) || (index === 0 && today < new Date(2026, 7, 1));
+      const cards = entries.map((entry) => {
+        const icon = entry.curriculum ? `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${entry.curriculum.toLowerCase()}-day.png" alt="${entry.curriculum} day">` : "";
+        const attendance = entry.type === "scheduled" ? `<button type="button" data-open-attendance="${isoDate(entry.date)}">Can’t Make It?</button>` : "";
+        const badge = entry.badge ? `<span class="calendar-state-badge" aria-hidden="true">${entry.badge}</span>` : "";
+        return `<article class="calendar-week-card ${entry.type}">${badge}<time datetime="${isoDate(entry.date)}">${entry.date.getDate()}<small>${dayFormatter.format(entry.date)}</small></time>${icon}<strong>${entry.title}</strong>${attendance}</article>`;
+      }).join("");
+      return `<details class="calendar-month"${open ? " open" : ""}><summary>${monthFormatter.format(new Date(year, month, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`;
+    }).join("");
+    document.getElementById("threads").innerHTML = `<button class="conversation-card teacher" type="button" data-conversation="teacher" aria-label="Open message thread with ${teacherLabel}"><span class="conversation-avatar teacher${teacherPhoto ? " has-photo" : ""}">${teacherPhoto ? `<img class="teacher-profile-photo" src="${teacherPhoto}" alt="${teacherLabel}">` : initials(teacherName, "")}</span><h3>${teacherLabel}</h3><p class="conversation-role">Elena Eden’s personal teacher</p></button><button class="conversation-card admin" type="button" data-conversation="admin" aria-label="Open message thread with Dance Techniques Admin"><span class="conversation-avatar admin"><img src="assets/brand/dance-techniques-logo.png" alt="Dance Techniques"></span><h3>Dance Techniques Admin</h3><p class="conversation-role">Questions about accounts, tuition, or enrollment</p></button>`;
+    revealFamilyPortal();
+  };
+
   const openFamilyPortal = async ({ activate = false } = {}) => {
     if (openingSession) return;
     openingSession = true;
@@ -487,10 +780,11 @@
     openingSession = false;
     if (error || !context?.guardian || !Array.isArray(context.students) || !context.students.length) {
       const timedOut = String(error?.message || "").includes("timed out");
-      if (!timedOut) await client.auth.signOut();
       await stopSession(timedOut
         ? "Your family account is connected, but it took too long to open. Check your connection and tap Return to Log In to try again."
-        : "This login is not linked to an active dancer and adult profile. No other family information was opened. Please contact Dance Techniques.");
+        : error
+          ? "Your family account is still signed in, but its information could not be loaded. Check your connection and try again."
+          : "This login is signed in but is not linked to an active dancer and adult profile. No other family information was opened. Please contact Dance Techniques.");
       return;
     }
     // Open the authorized family shell immediately. Optional content must never
@@ -498,16 +792,23 @@
     renderTruthfulEmptyStates(context, [], []);
     history.replaceState({}, "", "/parent-portal/");
     revealFamilyPortal();
+    window.dispatchEvent(new CustomEvent("dt-parent-context", { detail: context }));
     if (activate) showFirstLoginInstallGuide();
     const loadDancerPhotos = Promise.allSettled((context.students || []).map(async (student) => {
       if (!student.photo_path) return;
       const { data } = await settleWithin(client.storage.from("student-photos").createSignedUrl(student.photo_path, 3600), 5000, "Dancer photo");
       student.photoUrl = data?.signedUrl || "";
     }));
+    const loadGuardianPhoto = (async () => {
+      if (!context.guardian.photo_path) return;
+      const { data } = await settleWithin(client.storage.from("guardian-photos").createSignedUrl(context.guardian.photo_path, 3600), 5000, "Parent photo");
+      context.guardian.photoUrl = data?.signedUrl || "";
+    })();
     Promise.allSettled([
       settleWithin(loadClassPosts(), 8000, "Class feed"),
       settleWithin(loadNewsletters(), 8000, "Newsletter archive"),
-      loadDancerPhotos
+      loadDancerPhotos,
+      loadGuardianPhoto
     ]).then((results) => {
       const classPosts = results[0].status === "fulfilled" ? results[0].value : [];
       const newsletters = results[1].status === "fulfilled" ? results[1].value : [];
@@ -528,29 +829,34 @@
   const initialize = async () => {
     const familyPreview = new URLSearchParams(window.location.search).get("family-preview");
     if (familyPreview === "elena") {
-      const previewCurriculumStyle = /tap/i.test(new URLSearchParams(window.location.search).get("curriculum") || "") ? "Tap" : "Ballet";
-      const previewCurriculumIcon = previewCurriculumStyle === "Tap" ? "tap-day.png" : "ballet-day.png";
-      renderTruthfulEmptyStates({
-        guardian: { first_name: "Erik", last_name: "Mancol-Bilbo", full_name: "Erik Mancol-Bilbo" },
-        students: [{ id: "elena-preview", first_name: "Elena Eden", last_name: "Mancol-Bilbo" }]
-      }, [], []);
-      const classSummary = document.querySelector(".today");
-      classSummary.classList.add("class-summary");
-      classSummary.innerHTML = `
-        <img class="class-summary-art" src="assets/curriculum/${previewCurriculumIcon}" alt="${previewCurriculumStyle} Day">
-        <div class="class-summary-copy">
-          <span class="eyebrow">Elena’s class</span>
-          <h2>Thursday <span class="class-time-dot">•</span> Morning</h2>
-          <p>Primrose Rowlett · ${previewCurriculumStyle} with Ms. Lexi</p>
-          <button class="class-summary-link" type="button" data-page="calendar"><img src="assets/navigation/calendar.png" alt=""><strong>View full schedule</strong><span aria-hidden="true">›</span></button>
-        </div>`;
-      document.getElementById("monthly-calendar").innerHTML = `
-        <article class="calendar-card">
-          <div class="calendar-title"><h2>Regular Dance Day</h2><span class="tag">Thursday</span></div>
-          <h3>Primrose Rowlett · Class 5</h3>
-          <p>Morning class with Ms. Lexi</p>
-        </article>`;
-      revealFamilyPortal();
+      if (window.supabase?.createClient) {
+        client = window.supabase.createClient(projectUrl, publishableKey, {
+          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+        });
+        window.dtParentSupabase = client;
+        const { data: { session } = {} } = await client.auth.getSession();
+        if (session?.user) {
+          try {
+            renderDirectorElenaPreview(await loadDirectorElenaPreview());
+            return;
+          } catch (error) {
+            console.warn("Elena’s live preview records could not be loaded.", error);
+          }
+        }
+      }
+      renderDirectorElenaPreview({
+        context: {
+          guardian: { first_name: "Erik", last_name: "Mancol-Bilbo", full_name: "Erik Mancol-Bilbo" },
+          students: [{ id: "elena-preview", first_name: "Elena Eden", last_name: "Mancol-Bilbo" }]
+        },
+        scheduleRows: [{
+          student_id: "elena-preview",
+          danceClass: { id: "rowlett-class-5-preview", name: "Class 5" },
+          school: { name: "Primrose Rowlett", nickname: "Primrose Rowlett", dance_day: 4, time_of_day: "AM" },
+          teacher: { full_name: "Ms. Lexi", color: "#E8679B", photo: "assets/people/ms-lexi-profile.png" }
+        }],
+        classPosts: []
+      });
       return;
     }
     if (!window.supabase?.createClient) {
