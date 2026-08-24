@@ -691,7 +691,7 @@
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
     renderTruthfulEmptyStates(context, classPosts, []);
     const overview = document.getElementById("parent-financial-overview");
-    if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan"><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><button class="parent-financial-metric" type="button" data-open-billing-setup><small>Automatic Payments</small><strong>Setup</strong><span>Card and approval needed</span></button><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No family credits</span></article>';
+    if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan" data-monthly-tuition-card><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><button class="parent-financial-metric" type="button" data-open-billing-setup><small>Automatic Payments</small><strong>Setup</strong><span>Card and approval needed</span></button><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No family credits</span></article>';
     renderParentInvoiceTimeline(Array.from({ length: 9 }, (_, index) => {
       const due = new Date(2026, 8 + index, 1, 12);
       const issued = new Date(due);
@@ -822,8 +822,21 @@
     history.replaceState({}, "", "/parent-portal/");
     revealFamilyPortal();
     if (context.guardian?.id) {
-      client.from("family_billing_accounts").select("card_brand,card_last_four,payment_method_status").eq("guardian_id", context.guardian.id).limit(1).maybeSingle().then(({ data }) => {
+      client.from("family_billing_accounts").select("id,card_brand,card_last_four,payment_method_status").eq("guardian_id", context.guardian.id).limit(1).maybeSingle().then(async ({ data }) => {
         if (data?.payment_method_status === "verified" && data.card_brand && data.card_last_four) window.renderParentAutomaticPayments?.(data.card_brand, data.card_last_four);
+        if (!data?.id) return;
+        const { data: cycle } = await client.from("family_billing_cycles").select("id,cycle_month,subtotal_cents,late_fee_cents,total_cents,status").eq("billing_account_id", data.id).order("cycle_month", { ascending: false }).limit(1).maybeSingle();
+        if (!cycle?.id || cycle.status === "paid") return;
+        const { data: attempts } = await client.from("family_billing_attempts").select("attempt_stage,status,scheduled_for,amount_cents").eq("cycle_id", cycle.id).order("scheduled_for", { ascending: true });
+        const declined = (attempts || []).filter((attempt) => ["declined", "failed"].includes(attempt.status));
+        const fifthFailed = declined.some((attempt) => attempt.attempt_stage === "fifth");
+        const firstFailed = declined.some((attempt) => attempt.attempt_stage === "first");
+        const nextAttempt = fifthFailed ? "tenth" : firstFailed ? "fifth" : "";
+        if (!nextAttempt) return;
+        const scheduled = (attempts || []).find((attempt) => attempt.attempt_stage === nextAttempt);
+        const month = new Date(`${cycle.cycle_month}T12:00:00`).toLocaleDateString("en-US", { month: "long" });
+        const amount = nextAttempt === "tenth" ? Number(scheduled?.amount_cents || cycle.total_cents || 0) / 100 : Number(scheduled?.amount_cents || cycle.subtotal_cents || 0) / 100;
+        window.renderParentMonthlyTuition?.({ amount, nextAttempt, month });
       });
     }
     window.dispatchEvent(new CustomEvent("dt-parent-context", { detail: context }));
