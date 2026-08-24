@@ -691,7 +691,7 @@
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
     renderTruthfulEmptyStates(context, classPosts, []);
     const overview = document.getElementById("parent-financial-overview");
-    if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan"><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><article class="parent-financial-metric"><small>Current Status</small><strong>Setup</strong><span>Card and approval needed</span></article><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No family credits</span></article>';
+    if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan"><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><button class="parent-financial-metric" type="button" data-open-billing-setup><small>Automatic Payments</small><strong>Setup</strong><span>Card and approval needed</span></button><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No family credits</span></article>';
     renderParentInvoiceTimeline(Array.from({ length: 9 }, (_, index) => {
       const due = new Date(2026, 8 + index, 1, 12);
       const issued = new Date(due);
