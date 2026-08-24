@@ -720,7 +720,7 @@
     const month = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
     const dancer = String(student.preferred_name || student.first_name || "Your dancer").trim();
     document.getElementById("calendar-page-title").textContent = `${dancer}’s Upcoming Dance Days`;
-    calendar.innerHTML = months.map(({ year, month: monthIndex }, index) => { const cards = datesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const canceled = change?.status === "cancelled"; const curriculum = week % 2 === 0 ? "Ballet" : "Tap"; return `<article class="calendar-week-card ${canceled ? "holiday" : "scheduled"}"><time datetime="${iso(date)}">${date.getDate()}<span class="calendar-date-sparkle" aria-hidden="true">✦</span><small>${day.format(date)}</small></time>${canceled ? `<strong>No Class${change.reason ? `: ${change.reason}` : ""}</strong>` : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day"><strong>${curriculum} Day</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
+    calendar.innerHTML = months.filter(({ year, month: monthIndex }) => datesForMonth(year, monthIndex).length).map(({ year, month: monthIndex }, index) => { const cards = datesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const canceled = change?.status === "cancelled"; const curriculum = week % 2 === 0 ? "Ballet" : "Tap"; return `<article class="calendar-week-card ${canceled ? "holiday" : "scheduled"}"><time datetime="${iso(date)}">${date.getDate()}<span class="calendar-date-sparkle" aria-hidden="true">✦</span><small>${day.format(date)}</small></time>${canceled ? `<strong>No Class${change.reason ? `: ${change.reason}` : ""}</strong>` : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day"><strong>${curriculum} Day</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
   };
 
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
@@ -814,9 +814,9 @@
     const monthFormatter = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
     const dayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "short" });
     const today = new Date();
-    calendar.innerHTML = monthRange.map(({ year, month }, index) => {
+    calendar.innerHTML = monthRange.filter(({ year, month }) => (monthEntries.get(`${year}-${month}`) || []).length).map(({ year, month }, index) => {
       const entries = monthEntries.get(`${year}-${month}`) || [];
-      const open = (today.getFullYear() === year && today.getMonth() === month) || (index === 0 && today < new Date(2026, 7, 1));
+      const open = index === 0 || (today.getFullYear() === year && today.getMonth() === month);
       const cards = entries.map((entry) => {
         const icon = entry.curriculum ? `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${entry.curriculum.toLowerCase()}-day.png" alt="${entry.curriculum} day">` : "";
         const attendance = entry.type === "scheduled" ? `<button type="button" data-open-attendance="${isoDate(entry.date)}">Can’t Make It?</button>` : "";
