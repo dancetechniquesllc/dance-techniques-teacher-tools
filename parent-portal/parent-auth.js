@@ -821,6 +821,11 @@
     renderTruthfulEmptyStates(context, [], []);
     history.replaceState({}, "", "/parent-portal/");
     revealFamilyPortal();
+    if (context.guardian?.id) {
+      client.from("family_billing_accounts").select("card_brand,card_last_four,payment_method_status").eq("guardian_id", context.guardian.id).limit(1).maybeSingle().then(({ data }) => {
+        if (data?.payment_method_status === "verified" && data.card_brand && data.card_last_four) window.renderParentAutomaticPayments?.(data.card_brand, data.card_last_four);
+      });
+    }
     window.dispatchEvent(new CustomEvent("dt-parent-context", { detail: context }));
     if (activate) showFirstLoginInstallGuide();
     const loadDancerPhotos = Promise.allSettled((context.students || []).map(async (student) => {
