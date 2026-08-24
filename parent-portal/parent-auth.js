@@ -688,6 +688,41 @@
   };
   window.renderParentInvoiceTimeline = renderParentInvoiceTimeline;
 
+  const loadAuthorizedFamilySchedule = async (students = []) => {
+    const studentIds = students.map((student) => student.id).filter(Boolean);
+    if (!studentIds.length) return [];
+    const { data: enrollments, error } = await client.from("class_enrollments").select("student_id,dance_class_id,status,dance_classes(id,name,start_time,teacher_school_assignment_id)").in("student_id", studentIds).eq("status", "enrolled");
+    if (error) throw error;
+    const rows = (enrollments || []).map((row) => ({ ...row, danceClass: Array.isArray(row.dance_classes) ? row.dance_classes[0] : row.dance_classes })).filter((row) => row.danceClass);
+    const assignmentIds = [...new Set(rows.map((row) => row.danceClass.teacher_school_assignment_id).filter(Boolean))];
+    const { data: assignments } = assignmentIds.length ? await client.from("teacher_school_assignments").select("id,teacher_id,partner_school_id,profiles(id,full_name,color),partner_schools(name,nickname,dance_day,time_of_day)").in("id", assignmentIds) : { data: [] };
+    const teacherIds = [...new Set((assignments || []).map((assignment) => assignment.teacher_id).filter(Boolean))];
+    const { data: teacherStates } = teacherIds.length ? await client.from("teacher_portal_state").select("teacher_id,payload").in("teacher_id", teacherIds) : { data: [] };
+    const assignmentById = new Map((assignments || []).map((assignment) => [String(assignment.id), assignment]));
+    const stateByTeacher = new Map((teacherStates || []).map((state) => [String(state.teacher_id), state.payload || {}]));
+    return rows.map((row) => { const assignment = assignmentById.get(String(row.danceClass.teacher_school_assignment_id)); return { ...row, assignment, school: Array.isArray(assignment?.partner_schools) ? assignment.partner_schools[0] : assignment?.partner_schools, teacher: Array.isArray(assignment?.profiles) ? assignment.profiles[0] : assignment?.profiles, teacherState: stateByTeacher.get(String(assignment?.teacher_id)) || {} }; }).filter((row) => row.school);
+  };
+
+  const renderAuthorizedFamilyCalendar = (scheduleRows = [], student = {}) => {
+    const first = scheduleRows.find((row) => String(row.student_id) === String(student.id)) || scheduleRows[0];
+    const calendar = document.getElementById("monthly-calendar");
+    if (!first?.school || !calendar) return;
+    const danceDay = Number.isInteger(first.school.dance_day) ? first.school.dance_day : 4;
+    const iso = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const firstFour = (year, month) => { const date = new Date(year, month, 1, 12); date.setDate(1 + ((danceDay - date.getDay() + 7) % 7)); return Array.from({ length: 4 }, (_, index) => new Date(year, month, date.getDate() + index * 7, 12)); };
+    const datesForMonth = (year, month) => year === 2026 && month === 7 ? (danceDay === 1 ? [new Date(2026, 7, 31, 12)] : []) : firstFour(year, month);
+    const normalize = (value) => String(value || "").trim().toLowerCase();
+    const schoolNames = [first.school.name, first.school.nickname].map(normalize).filter(Boolean);
+    const changes = (first.teacherState?.teacher?.reschedules || first.teacherState?.reschedules || []).filter((change) => !change?.schoolName || schoolNames.includes(normalize(change.schoolName)));
+    const changeByDate = new Map(changes.filter((change) => change.originalDate).map((change) => [String(change.originalDate).slice(0, 10), change]));
+    const months = Array.from({ length: 10 }, (_, index) => { const date = new Date(2026, 7 + index, 1, 12); return { year: date.getFullYear(), month: date.getMonth() }; });
+    const day = new Intl.DateTimeFormat(undefined, { weekday: "short" });
+    const month = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+    const dancer = String(student.preferred_name || student.first_name || "Your dancer").trim();
+    document.getElementById("calendar-page-title").textContent = `${dancer}’s Upcoming Dance Days`;
+    calendar.innerHTML = months.map(({ year, month: monthIndex }, index) => { const cards = datesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const canceled = change?.status === "cancelled"; const curriculum = week % 2 === 0 ? "Ballet" : "Tap"; return `<article class="calendar-week-card ${canceled ? "holiday" : "scheduled"}"><time datetime="${iso(date)}">${date.getDate()}<span class="calendar-date-sparkle" aria-hidden="true">✦</span><small>${day.format(date)}</small></time>${canceled ? `<strong>No Class${change.reason ? `: ${change.reason}` : ""}</strong>` : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day"><strong>${curriculum} Day</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
+  };
+
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
     renderTruthfulEmptyStates(context, classPosts, []);
     const overview = document.getElementById("parent-financial-overview");
@@ -753,7 +788,8 @@
       const date = new Date(2026, 7 + index, 1, 12, 0, 0, 0);
       return { year: date.getFullYear(), month: date.getMonth() };
     });
-    const monthEntries = new Map(monthRange.map(({ year, month }) => [`${year}-${month}`, firstFourWeekdays(year, month, danceDay).map((date) => {
+    const datesForMonth = (year, month) => year === 2026 && month === 7 ? (danceDay === 1 ? [new Date(2026, 7, 31, 12)] : []) : firstFourWeekdays(year, month, danceDay);
+    const monthEntries = new Map(monthRange.map(({ year, month }) => [`${year}-${month}`, datesForMonth(year, month).map((date) => {
       const iso = isoDate(date);
       const closure = previewClosures.get(iso);
       const change = changesByOriginalDate.get(iso);
@@ -785,7 +821,7 @@
         const icon = entry.curriculum ? `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${entry.curriculum.toLowerCase()}-day.png" alt="${entry.curriculum} day">` : "";
         const attendance = entry.type === "scheduled" ? `<button type="button" data-open-attendance="${isoDate(entry.date)}">Can’t Make It?</button>` : "";
         const badge = entry.badge ? `<span class="calendar-state-badge" aria-hidden="true">${entry.badge}</span>` : "";
-        return `<article class="calendar-week-card ${entry.type}">${badge}<time datetime="${isoDate(entry.date)}">${entry.date.getDate()}<small>${dayFormatter.format(entry.date)}</small></time>${icon}<strong>${entry.title}</strong>${attendance}</article>`;
+        return `<article class="calendar-week-card ${entry.type}">${badge}<time datetime="${isoDate(entry.date)}">${entry.date.getDate()}<span class="calendar-date-sparkle" aria-hidden="true">✦</span><small>${dayFormatter.format(entry.date)}</small></time>${icon}<strong>${entry.title}</strong>${attendance}</article>`;
       }).join("");
       return `<details class="calendar-month"${open ? " open" : ""}><summary>${monthFormatter.format(new Date(year, month, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`;
     }).join("");
@@ -855,13 +891,16 @@
       settleWithin(loadClassPosts(), 8000, "Class feed"),
       settleWithin(loadNewsletters(), 8000, "Newsletter archive"),
       loadDancerPhotos,
-      loadGuardianPhoto
+      loadGuardianPhoto,
+      settleWithin(loadAuthorizedFamilySchedule(context.students), 8000, "Family schedule")
     ]).then((results) => {
       const classPosts = results[0].status === "fulfilled" ? results[0].value : [];
       const newsletters = results[1].status === "fulfilled" ? results[1].value : [];
+      const scheduleRows = results[4].status === "fulfilled" ? results[4].value : [];
       if (results[0].status === "rejected") console.warn("Class feed is temporarily unavailable.");
       if (results[1].status === "rejected") console.warn("Newsletters are temporarily unavailable.");
       renderTruthfulEmptyStates(context, classPosts, newsletters);
+      if (scheduleRows.length) renderAuthorizedFamilyCalendar(scheduleRows, context.students[0]);
     });
   };
 
