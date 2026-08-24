@@ -666,12 +666,38 @@
     return { context: { guardian, students: [student] }, scheduleRows: enrichedRows.filter((row) => row.student_id === student.id), classPosts };
   };
 
+  const renderParentInvoiceTimeline = (invoiceRows = []) => {
+    const upcomingPanel = document.getElementById("parent-scheduled-invoices");
+    const historyPanel = document.getElementById("parent-payment-history");
+    const money = (value) => `$${Number(value || 0).toFixed(2)}`;
+    const dateLabel = (value) => {
+      const date = value ? new Date(value) : null;
+      return date && !Number.isNaN(date.getTime())
+        ? date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+        : "Date unavailable";
+    };
+    const paidStatuses = new Set(["paid", "successful", "completed"]);
+    const paid = invoiceRows.filter((invoice) => paidStatuses.has(String(invoice.status || "").toLowerCase()));
+    const upcoming = invoiceRows.filter((invoice) => !paidStatuses.has(String(invoice.status || "").toLowerCase()));
+    if (upcomingPanel) {
+      upcomingPanel.innerHTML = upcoming.length ? upcoming.map((invoice) => `<div><span><strong>${invoice.title}</strong><br><small>Invoice appears ${dateLabel(invoice.invoiceDate)} · Drafts ${dateLabel(invoice.dueDate)}</small></span><strong>${money(invoice.amount)}</strong></div>`).join("") : '<div><span>No upcoming invoices.</span><strong>—</strong></div>';
+    }
+    if (historyPanel) {
+      historyPanel.innerHTML = paid.length ? paid.map((invoice) => `<div><span><strong>${invoice.title}</strong><br><small>Paid ${dateLabel(invoice.paidAt)} · Card ending in ${invoice.cardLastFour || "—"} · ${invoice.payerName || "Payer unavailable"}</small></span><strong>${money(invoice.amount)}</strong></div>`).join("") : '<div><span>No completed payments yet.</span><strong>—</strong></div>';
+    }
+  };
+  window.renderParentInvoiceTimeline = renderParentInvoiceTimeline;
+
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
     renderTruthfulEmptyStates(context, classPosts, []);
     const overview = document.getElementById("parent-financial-overview");
     if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan"><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><article class="parent-financial-metric"><small>Current Status</small><strong>Setup</strong><span>Card and approval needed</span></article><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No family credits</span></article>';
-    const scheduledInvoices = document.getElementById("parent-scheduled-invoices");
-    if (scheduledInvoices) scheduledInvoices.innerHTML = Array.from({ length: 9 }, (_, index) => { const due = new Date(2026, 8 + index, 1, 12); const issued = new Date(due); issued.setDate(issued.getDate() - 3); return `<div><span><strong>${due.toLocaleDateString("en-US", { month: "long", year: "numeric" })} Dance Tuition</strong><br><small>Invoice appears ${issued.toLocaleDateString("en-US", { month: "short", day: "numeric" })} · Drafts ${due.toLocaleDateString("en-US", { month: "short", day: "numeric" })}</small></span><strong>$55.00</strong></div>`; }).join("");
+    renderParentInvoiceTimeline(Array.from({ length: 9 }, (_, index) => {
+      const due = new Date(2026, 8 + index, 1, 12);
+      const issued = new Date(due);
+      issued.setDate(issued.getDate() - 3);
+      return { title: `${due.toLocaleDateString("en-US", { month: "long", year: "numeric" })} Dance Tuition`, amount: 55, invoiceDate: issued, dueDate: due, status: "scheduled" };
+    }));
     const first = scheduleRows[0];
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const schoolName = first?.school?.nickname || first?.school?.name || "School not assigned";
