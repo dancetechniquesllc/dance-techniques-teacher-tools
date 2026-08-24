@@ -720,7 +720,7 @@
     const month = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
     const dancer = String(student.preferred_name || student.first_name || "Your dancer").trim();
     document.getElementById("calendar-page-title").textContent = `${dancer}’s Upcoming Dance Days`;
-    calendar.innerHTML = months.filter(({ year, month: monthIndex }) => datesForMonth(year, monthIndex).length).map(({ year, month: monthIndex }, index) => { const cards = datesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const canceled = change?.status === "cancelled"; const curriculum = week % 2 === 0 ? "Ballet" : "Tap"; return `<article class="calendar-week-card ${canceled ? "holiday" : "scheduled"}"><time datetime="${iso(date)}">${date.getDate()}<span class="calendar-date-sparkle" aria-hidden="true">✦</span><small>${day.format(date)}</small></time>${canceled ? `<strong>No Class${change.reason ? `: ${change.reason}` : ""}</strong>` : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day"><strong>${curriculum} Day</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
+    calendar.innerHTML = months.filter(({ year, month: monthIndex }) => datesForMonth(year, monthIndex).length).map(({ year, month: monthIndex }, index) => { const cards = datesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const winterBreak = year === 2027 && monthIndex === 0 && week === 0; const canceled = winterBreak || change?.status === "cancelled"; const reason = winterBreak ? "Winter Break" : change?.reason; const curriculum = week % 2 === 0 ? "Ballet" : "Tap"; return `<article class="calendar-week-card ${canceled ? "holiday" : "scheduled"}"><time datetime="${iso(date)}">${date.getDate()}<span class="calendar-date-sparkle" aria-hidden="true">✦</span><small>${day.format(date)}</small></time>${canceled ? `<strong>No Class${reason ? `: ${reason}` : ""}</strong>` : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day"><strong>${curriculum} Day</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
   };
 
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
@@ -774,6 +774,11 @@
     const previewClosures = new Map([
       ["2026-11-26", "Thanksgiving Break"],
       ["2026-12-24", "Winter Break"],
+      ["2027-01-04", "Winter Break"],
+      ["2027-01-05", "Winter Break"],
+      ["2027-01-06", "Winter Break"],
+      ["2027-01-07", "Winter Break"],
+      ["2027-01-08", "Winter Break"],
       ["2027-03-18", "Spring Break"]
     ]);
     const normalize = (value) => String(value || "").trim().toLowerCase();
