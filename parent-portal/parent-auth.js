@@ -669,6 +669,10 @@
 
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
     renderTruthfulEmptyStates(context, classPosts, []);
+    const tuitionPlanCard = document.getElementById("parent-tuition-plan");
+    if (tuitionPlanCard) tuitionPlanCard.innerHTML = '<small>Elena Eden · Monthly Tuition</small><h2>$55.00 on the 1st</h2><span class="payment-status">September 1, 2026–May 1, 2027</span><p class="payment-empty">Standard RC5 tuition plan. The plan remains in setup until a card is saved and Dance Techniques approves automatic billing.</p>';
+    const enrollmentHistory = document.getElementById("parent-enrollment-fee-history");
+    if (enrollmentHistory) enrollmentHistory.querySelector("small").textContent = "Enrollment Fee · Elena Eden";
     const first = scheduleRows[0];
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const schoolName = first?.school?.nickname || first?.school?.name || "School not assigned";
