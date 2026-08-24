@@ -529,11 +529,10 @@
     calendar.innerHTML = '<p class="payment-empty">No authorized class schedule is available yet.</p>';
     document.getElementById("calendar-page-title").textContent = `${firstName}’s Dance Days`;
 
-    const paymentsGrid = document.querySelector(".payments-grid");
-    const tuitionPlanCard = paymentsGrid.querySelector(".payment-card");
+    const tuitionPlanCard = document.getElementById("parent-tuition-plan");
     if (tuitionPlanCard) {
-      tuitionPlanCard.querySelector("h2").textContent = "No Active Plan Yet";
-      tuitionPlanCard.querySelector(".payment-empty").textContent = "When Dance Techniques activates each dancer’s tuition plan, the monthly amount and first-of-the-month schedule will appear here.";
+      tuitionPlanCard.querySelector("strong").textContent = "Not Assigned";
+      tuitionPlanCard.querySelector("span").textContent = "Waiting for Dance Techniques";
     }
 
     const profileCard = document.querySelector("#profile .profile-card");
@@ -669,10 +668,10 @@
 
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
     renderTruthfulEmptyStates(context, classPosts, []);
-    const tuitionPlanCard = document.getElementById("parent-tuition-plan");
-    if (tuitionPlanCard) tuitionPlanCard.innerHTML = '<small>Elena Eden · Monthly Tuition</small><h2>$55.00 on the 1st</h2><span class="payment-status">September 1, 2026–May 1, 2027</span><p class="payment-empty">Standard RC5 tuition plan. The plan remains in setup until a card is saved and Dance Techniques approves automatic billing.</p>';
-    const enrollmentHistory = document.getElementById("parent-enrollment-fee-history");
-    if (enrollmentHistory) enrollmentHistory.querySelector("small").textContent = "Enrollment Fee · Elena Eden";
+    const overview = document.getElementById("parent-financial-overview");
+    if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan"><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><article class="parent-financial-metric"><small>Current Status</small><strong>Setup</strong><span>Card and approval needed</span></article><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No family credits</span></article>';
+    const scheduledInvoices = document.getElementById("parent-scheduled-invoices");
+    if (scheduledInvoices) scheduledInvoices.innerHTML = Array.from({ length: 9 }, (_, index) => { const due = new Date(2026, 8 + index, 1, 12); const issued = new Date(due); issued.setDate(issued.getDate() - 3); return `<div><span><strong>${due.toLocaleDateString("en-US", { month: "long", year: "numeric" })} Dance Tuition</strong><br><small>Invoice appears ${issued.toLocaleDateString("en-US", { month: "short", day: "numeric" })} · Drafts ${due.toLocaleDateString("en-US", { month: "short", day: "numeric" })}</small></span><strong>$55.00</strong></div>`; }).join("");
     const first = scheduleRows[0];
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const schoolName = first?.school?.nickname || first?.school?.name || "School not assigned";
