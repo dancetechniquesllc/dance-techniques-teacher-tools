@@ -881,6 +881,14 @@
       });
     }
     window.dispatchEvent(new CustomEvent("dt-parent-context", { detail: context }));
+    client.rpc("parent_portal_preorder_match_status", { target_form_id: "262304247468055" }).then(({ data, error: preorderError }) => {
+      if (preorderError || !data?.matched) return;
+      document.querySelectorAll(".jacket-preorder").forEach((card) => {
+        card.classList.add("is-ordered");
+        card.setAttribute("aria-label", "Quarter Zip Jacket Pre-Order received");
+        card.title = "Pre-order received";
+      });
+    });
     if (activate) showFirstLoginInstallGuide();
     const loadDancerPhotos = Promise.allSettled((context.students || []).map(async (student) => {
       if (!student.photo_path) return;
