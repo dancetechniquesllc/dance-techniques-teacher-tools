@@ -15,6 +15,29 @@
   let client = null;
   let openingSession = false;
   let activeSetupAccessToken = "";
+  const parentVapidPublicKey = "BFgsYSQnkEQ8aUqbeweRXsPaaccqTz5hFGjzh3ybTOTxybs8ZLfHuQcPhQhMEpq7tCekPQjubaEFWsuasMgK5yI";
+  const urlBase64ToBytes = (value) => Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=")), (character) => character.charCodeAt(0));
+
+  const enableParentPush = async (trigger) => {
+    if (!client || !("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined") return;
+    const original = trigger.querySelector("small")?.textContent || "";
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== "granted") throw new Error("Notifications were not allowed on this device.");
+      const registration = await navigator.serviceWorker.ready;
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToBytes(parentVapidPublicKey) });
+      const json = subscription.toJSON();
+      const { data: { user } } = await client.auth.getUser();
+      const { error } = await client.from("parent_push_subscriptions").upsert({ user_id: user.id, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth, active: true, updated_at: new Date().toISOString() }, { onConflict: "endpoint" });
+      if (error) throw error;
+      trigger.classList.add("is-complete");
+      trigger.querySelector(".launch-checklist-check").textContent = "✓";
+      trigger.querySelector("small").textContent = "Complete — notifications are enabled on this device.";
+    } catch (error) {
+      trigger.querySelector("small").textContent = error?.message || original || "Notifications could not be enabled.";
+    }
+  };
 
   const showView = (name) => {
     Object.entries(views).forEach(([key, view]) => { if (view) view.hidden = key !== name; });
@@ -1063,6 +1086,8 @@
     history.replaceState({}, "", "/parent-portal/");
     showView("login");
   });
+
+  document.querySelector("[data-enable-parent-push]")?.addEventListener("click", (event) => enableParentPush(event.currentTarget));
 
   initialize();
 })();

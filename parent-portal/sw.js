@@ -1,4 +1,4 @@
-const CACHE = "dt-parent-portal-secure-family-v35";
+const CACHE = "dt-parent-portal-secure-family-v36";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -37,4 +37,20 @@ self.addEventListener("fetch", (event) => {
     caches.open(CACHE).then((cache) => cache.put(event.request, copy));
     return response;
   }).catch(() => caches.match(event.request)));
+});
+
+self.addEventListener("push", (event) => {
+  const payload = event.data?.json?.() || {};
+  event.waitUntil(self.registration.showNotification(payload.title || "Dance Techniques", {
+    body: payload.body || "",
+    icon: "./assets/brand/dance-techniques-logo.png",
+    badge: "./assets/brand/dance-techniques-logo.png",
+    tag: payload.tag || "parent-portal",
+    data: { url: payload.url || "./?open=boutique" }
+  }));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  event.waitUntil(clients.openWindow(event.notification.data?.url || "./?open=boutique"));
 });
