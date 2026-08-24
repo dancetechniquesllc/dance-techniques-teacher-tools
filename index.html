@@ -414,6 +414,55 @@
     }
     .director-message-shortcut svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
     .director-message-shortcut:hover, .director-message-shortcut:focus-visible { border-color: var(--berry); transform: translateY(-1px); }
+    .director-task-shortcut { position:relative; width:42px; height:42px; display:grid; place-items:center; padding:0; border:1px solid var(--accent-strong); border-radius:999px; background:var(--blush); color:var(--berry); box-shadow:0 6px 14px oklch(22% 0.03 245 / .07); }
+    .director-task-shortcut svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+    .director-task-shortcut:hover,.director-task-shortcut:focus-visible { transform:translateY(-1px); outline:3px solid oklch(78% .05 24 / .35); outline-offset:2px; }
+    body[data-user-role="teacher"] .director-task-shortcut { display:none; }
+    .director-task-dialog { width:min(620px,calc(100vw - 28px)); max-height:min(760px,calc(100vh - 36px)); padding:0; border:1px solid var(--border); border-radius:22px; background:var(--surface); color:var(--fg); box-shadow:0 22px 60px rgb(50 27 29 / .24); }
+    .director-task-dialog::backdrop { background:rgb(34 20 21 / .38); backdrop-filter:blur(3px); }
+    .director-task-head { position:sticky; top:0; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:18px 20px; border-bottom:1px solid var(--border); background:var(--surface); }
+    .director-task-head h2,.director-task-head p { margin:0; }
+    .director-task-head p { color:var(--muted); font-size:11px; }
+    .director-task-head-actions { --director-task-control-size:34px; display:flex; align-items:center; gap:7px; }
+    .director-task-sort { height:var(--director-task-control-size); min-height:var(--director-task-control-size); padding:0 25px 0 12px; border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--fg); font-size:9px; font-weight:850; }
+    .director-task-history-button { min-width:108px; height:var(--director-task-control-size); min-height:var(--director-task-control-size); padding:0 15px; border:1px solid var(--brick); border-radius:999px; background:var(--brick); color:white; font-size:10px; font-weight:850; line-height:1; white-space:nowrap; }
+    .director-task-add { width:var(--director-task-control-size); min-width:var(--director-task-control-size); height:var(--director-task-control-size); min-height:var(--director-task-control-size); aspect-ratio:1 / 1; padding:0; border:1px solid #78906f; border-radius:50%; background:color-mix(in srgb,var(--sage) 62%,white); color:#40533a; font-size:22px; line-height:1; }
+    .director-task-add svg,.director-task-close svg { display:block; width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; }
+    .director-task-close { width:var(--director-task-control-size); min-width:var(--director-task-control-size); height:var(--director-task-control-size); min-height:var(--director-task-control-size); aspect-ratio:1 / 1; padding:0; border:0; border-radius:50%; background:var(--blush); color:var(--brick); font-size:21px; }
+    .director-task-list { display:grid; gap:11px; padding:16px 20px 22px; }
+    .director-task-item { position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:start; padding:48px 13px 42px; border:3px solid var(--task-assignee-color,var(--border)); border-radius:15px; background:color-mix(in srgb,var(--surface) 92%,var(--blush)); cursor:pointer; }
+    .director-task-item.is-complete { opacity:.58; }
+    .director-task-item input { width:20px; height:20px; margin:3px 0 0; accent-color:var(--brick); }
+    .director-task-context { display:grid; gap:7px; min-width:0; }
+    .director-task-context > strong { font-size:13px; }
+    .director-task-context > small { color:var(--muted); font-size:10px; }
+    .director-task-message-snapshot { padding:10px 12px; border-radius:14px 14px 14px 5px; background:var(--blush); font-size:12px; line-height:1.35; }
+    .director-task-assignee { position:absolute; top:10px; right:45px; width:150px; min-height:29px; padding:4px 26px 4px 9px; border:1px solid var(--task-assignee-color,var(--border)); border-radius:999px; background:var(--surface); color:var(--fg); font-size:10px; font-weight:850; }
+    .director-task-priority { position:absolute; top:10px; left:10px; width:29px; height:29px; display:grid; place-items:center; padding:0; border:1px solid #c69224; border-radius:999px; background:var(--surface); color:#b57908; font-size:17px; line-height:1; }
+    .director-task-priority svg { display:block; width:16px; height:16px; fill:currentColor; }
+    .director-task-priority[aria-pressed="true"] { background:#f2cf78; color:#6b4700; box-shadow:0 0 0 2px color-mix(in srgb,#c69224 30%,transparent); }
+    .director-task-remove { position:absolute; top:10px; right:10px; width:29px; height:29px; display:grid; place-items:center; padding:0; border:1px solid var(--brick); border-radius:999px; background:var(--blush); color:var(--brick); }
+    .director-task-remove svg { display:block; width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; }
+    .director-task-add,.director-task-close,.director-task-priority,.director-task-remove,.director-task-note-add { display:flex !important; align-items:center; justify-content:center; box-sizing:border-box; line-height:0; }
+    .director-task-add svg,.director-task-close svg,.director-task-priority svg,.director-task-remove svg,.director-task-note-add svg { flex:0 0 auto; margin:0; transform:none; }
+    .director-task-note-add { position:absolute; right:10px; bottom:9px; width:27px; height:27px; display:grid; place-items:center; padding:0; border:1px solid #78906f; border-radius:999px; background:color-mix(in srgb,var(--sage) 62%,white); color:#40533a; font-size:18px; line-height:1; }
+    .director-task-note-add svg { display:block; width:13px; height:13px; fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; }
+    .director-task-notes { display:grid; gap:4px; margin-top:2px; }
+    .director-task-note { padding:6px 8px; border-radius:8px; background:color-mix(in srgb,var(--sage) 30%,white); font-size:10px; }
+    .director-task-completed { color:var(--muted); font-size:10px; font-weight:800; }
+    .director-task-complete-dialog { width:min(390px,calc(100vw - 28px)); padding:0; border:1px solid var(--border); border-radius:20px; background:var(--surface); color:var(--fg); box-shadow:0 22px 60px rgb(50 27 29 / .24); }
+    .director-task-complete-dialog::backdrop { background:rgb(34 20 21 / .38); backdrop-filter:blur(3px); }
+    .director-task-complete-card { display:grid; gap:18px; padding:24px; text-align:center; }
+    .director-task-complete-card h2 { margin:0; font-size:21px; }
+    .director-task-complete-actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .director-task-complete-actions button { min-height:40px; border-radius:999px; font-weight:850; }
+    .director-task-complete-yes { border:1px solid var(--brick); background:var(--brick); color:white; }
+    .director-task-complete-cancel { border:1px solid var(--border); background:var(--surface); color:var(--fg); }
+    .director-task-remove-confirm { border:1px solid var(--brick); background:var(--brick); color:white; }
+    .parent-message-task-button { position:absolute; top:-7px; right:-30px; width:22px; height:22px; display:grid; place-items:center; padding:0; border:0; border-radius:0; background:transparent; color:var(--brick); box-shadow:none; }
+    .parent-message-task-button svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; }
+    .admin-parent-task-control { position:absolute; right:10px; bottom:10px; width:27px; height:27px; display:grid; place-items:center; border:1px solid var(--brick); border-radius:7px; background:var(--surface); color:var(--brick); }
+    .admin-parent-task-control svg { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2; }
     .director-settings-shortcut {
       width: 42px;
       height: 42px;
@@ -2751,6 +2800,37 @@
     .teacher-class-post-confirm input { width: 20px; height: 20px; margin: 0; accent-color: var(--brick); }
     .teacher-class-post-status { min-height: 20px; margin: 0; color: var(--brick); font-size: 12px; font-weight: 750; }
     #teacher-class-post-overlay { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
+    #teacher-activities-overlay { padding: max(12px, env(safe-area-inset-top)) 12px max(12px, env(safe-area-inset-bottom)); }
+    .teacher-activities-dialog { width: min(620px, 100%); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+    .teacher-activities-header { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .teacher-activities-header h3,.teacher-activities-header p { margin:0; }
+    .teacher-activities-header p { margin-top:4px; }
+    .teacher-activities-close { flex:0 0 38px; width:38px; min-height:38px; padding:0; border-radius:999px; background:var(--blush); color:var(--brick); font-size:23px; }
+    .teacher-activities-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px 10px; margin-top:18px; }
+    .teacher-activities-featured { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .teacher-activities-choice { display:grid; justify-items:center; align-content:center; gap:7px; min-height:132px; padding:9px 8px 11px; border:1px solid var(--border); border-radius:14px; background:var(--surface); color:var(--fg); font:inherit; font-weight:850; text-align:center; }
+    .teacher-activities-choice:hover,.teacher-activities-choice:focus-visible { border-color:var(--brick); background:var(--blush); color:var(--brick); outline:3px solid var(--brick); outline-offset:2px; }
+    .teacher-activities-featured .teacher-activities-choice { min-height:150px; }
+    .teacher-activity-badge { display:block; width:min(88px,100%); aspect-ratio:1; object-fit:contain; pointer-events:none; }
+    .teacher-activities-featured .teacher-activity-badge { width:min(112px,100%); }
+    .teacher-activity-tile-title { display:block; line-height:1.15; }
+    .teacher-activities-step { margin-top:18px; }
+    .teacher-activities-step h4 { margin:0 0 5px; }
+    .teacher-activities-recipient-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin:14px 0; }
+    .teacher-activities-recipient-grid button { display:grid; justify-items:center; gap:8px; min-height:148px; padding:10px; border:1px solid var(--brick); border-radius:14px; background:var(--surface); color:var(--brick); font:inherit; font-weight:850; }
+    .teacher-activities-recipient-grid button[aria-pressed="true"] { box-shadow:inset 0 0 0 3px var(--brick); background:var(--blush); }
+    .teacher-activities-recipient-grid .teacher-activity-badge { width:min(104px,100%); }
+    .teacher-activities-private-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin:14px 0; }
+    .teacher-activities-private-dancer { display:grid; justify-items:center; gap:6px; min-width:0; padding:8px 4px; border:1px solid var(--border); border-radius:14px; background:var(--surface); color:var(--fg); font:inherit; font-size:11px; font-weight:800; text-align:center; }
+    .teacher-activities-private-dancer .roster-student-photo { width:58px; height:58px; }
+    .teacher-activities-private-dancer[aria-pressed="true"] { border-color:var(--brick); background:var(--blush); box-shadow:inset 0 0 0 2px var(--brick); }
+    .teacher-activities-draft-note { padding:13px; border-radius:12px; background:var(--blush); color:var(--brick); font-size:12px; font-weight:750; }
+    .teacher-alert-sms-option { display:flex; align-items:flex-start; gap:10px; margin:13px 0; padding:13px; border:1px solid var(--border); border-radius:14px; background:var(--surface-soft); cursor:pointer; }
+    .teacher-alert-sms-option input { width:20px; height:20px; margin:1px 0 0; accent-color:var(--brick); }
+    .teacher-alert-sms-option span { display:grid; gap:3px; }
+    .teacher-alert-sms-option strong { color:var(--brick); font-size:13px; }
+    .teacher-alert-sms-option small { color:var(--muted); font-size:11px; }
+    .teacher-alert-review { display:grid; gap:12px; margin-top:14px; padding:15px; border:1px solid var(--border); border-radius:15px; background:var(--surface-soft); }
     .confirm-dialog.teacher-class-post-dialog {
       width: min(620px, 100%);
       max-height: min(820px, calc(100dvh - max(24px, env(safe-area-inset-top)) - max(24px, env(safe-area-inset-bottom))));
@@ -2808,6 +2888,10 @@
     .teacher-class-post-dialog > .confirm-actions button { min-height: 46px; font-size: 13px; }
     @media (max-width: 620px) {
       #teacher-class-post-overlay { align-items: flex-end; padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
+      #teacher-activities-overlay { align-items:flex-end; padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom)); }
+      .teacher-activities-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .teacher-activities-choice { min-height:122px; }
+      .teacher-activity-badge { width:min(78px,100%); }
       .confirm-dialog.teacher-class-post-dialog { max-height: calc(100dvh - max(16px, env(safe-area-inset-top)) - max(16px, env(safe-area-inset-bottom))); border-radius: 18px; }
       .teacher-class-post-header { padding: 15px 16px 11px; }
       .teacher-class-post-header h3 { font-size: 24px; }
@@ -4989,6 +5073,68 @@
 
     .admin-parent-message-preview h3 { margin: 0 0 6px; }
     .admin-parent-message-preview p { max-width: 520px; margin: 0 auto; }
+    .admin-parent-message-filters { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px 11px; margin:14px 0 8px; padding:12px; border:1px solid var(--border); border-radius:16px; background:var(--surface); text-align:left; }
+    .admin-parent-message-filters label { display:grid; gap:4px; min-width:0; }
+    .admin-parent-message-filters label > span { padding-left:3px; color:var(--muted); font-size:9px; font-weight:850; }
+    .admin-parent-message-filters select,.admin-parent-message-filters input { width:100%; min-width:0; height:38px; min-height:38px; padding:0 12px; border:1px solid var(--border); border-radius:12px; background:var(--surface); color:var(--fg); font-size:11px; font-weight:750; }
+    .admin-parent-message-count { margin:8px 0 3px !important; text-align:left; }
+    .admin-parent-message-preview-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px; margin-top:12px; text-align:left; }
+    .admin-parent-message-preview-card { position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px 12px; align-items:center; min-width:0; min-height:190px; padding:44px 15px 14px; border:3px solid var(--admin-parent-teacher-color,var(--border)); border-radius:17px; background:var(--surface); color:var(--fg); text-align:left; box-shadow:0 7px 18px rgb(70 38 40 / .05); }
+    .admin-parent-message-preview-card:hover,.admin-parent-message-preview-card:focus-visible { outline:3px solid color-mix(in srgb,var(--admin-parent-teacher-color,var(--brick)) 30%,transparent); outline-offset:2px; }
+    .admin-parent-message-preview-card .teacher-parent-student-bubble { width:58px; height:58px; border-color:var(--admin-parent-teacher-color,var(--blush-dark)); }
+    .admin-parent-message-preview-copy { display:grid; gap:3px; min-width:0; }
+    .admin-parent-message-preview-copy strong { font-size:15px; }
+    .admin-parent-message-preview-copy small { color:var(--muted); font-size:10px; line-height:1.25; }
+    .admin-parent-message-preview-copy > span { position:relative; grid-column:1 / -1; margin-top:7px; padding:10px 12px; border-radius:14px 14px 14px 5px; background:var(--message-preview-bg,var(--blush)); font-size:11.5px; line-height:1.35; }
+    .admin-parent-message-preview-copy > span.message-preview-primary-parent { --message-preview-bg:color-mix(in srgb,var(--sage) 62%,white); }
+    .admin-parent-message-preview-copy > span.message-preview-additional-guardian { --message-preview-bg:#f2cf78; }
+    .admin-parent-message-preview-copy > span.message-preview-admin { --message-preview-bg:var(--blush); justify-self:end; border-radius:14px 14px 5px 14px; }
+    .admin-parent-message-preview-copy > span::after,.admin-family-message::after { content:""; position:absolute; bottom:10px; left:-7px; width:8px; height:13px; background:inherit; clip-path:polygon(100% 0,100% 100%,0 50%); }
+    .admin-parent-message-preview-copy > span.message-preview-admin::after,.admin-family-message.admin::after { right:-7px; left:auto; transform:none; clip-path:polygon(0 0,100% 50%,0 100%); }
+    .admin-parent-message-preview-meta { grid-column:1 / -1; display:flex; align-items:center; gap:7px; padding-right:34px; color:var(--muted); font-size:10px; }
+    .admin-parent-message-unread { display:grid; place-items:center; min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:var(--brick); color:white; font-size:9px; font-weight:900; }
+    .admin-parent-dance-badges { position:absolute; top:11px; right:11px; display:flex; gap:5px; }
+    .admin-parent-dance-badge { display:grid; place-items:center; min-width:34px; height:25px; padding:0 8px; border-radius:999px; background:color-mix(in srgb,var(--admin-parent-teacher-color,var(--blush)) 20%,white); color:color-mix(in srgb,var(--admin-parent-teacher-color,var(--brick)) 72%,black); font-size:10px; font-weight:900; }
+    .admin-parent-thread-dialog { width:min(650px,calc(100vw - 28px)); max-height:min(780px,calc(100vh - 36px)); padding:0; border:1px solid var(--border); border-radius:22px; background:var(--surface); color:var(--fg); box-shadow:0 22px 60px rgb(50 27 29 / .24); }
+    .admin-parent-thread-dialog::backdrop { background:rgb(34 20 21 / .38); backdrop-filter:blur(3px); }
+    .admin-parent-thread-head { position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:17px 19px; border-bottom:1px solid var(--border); background:var(--surface); }
+    .admin-parent-thread-head h2,.admin-parent-thread-head p { margin:0; }
+    .admin-parent-thread-head p { margin-top:3px; color:var(--muted); font-size:10px; }
+    .admin-parent-thread-head-actions { display:flex; align-items:center; gap:8px; }
+    .admin-parent-dancer-details { height:34px; min-height:34px; padding:0 14px; border:1px solid var(--border); border-radius:999px; background:var(--surface); color:var(--brick); font-size:10px; font-weight:850; white-space:nowrap; }
+    .admin-parent-thread-close { width:34px; height:34px; padding:0; border:0; border-radius:999px; background:var(--blush); color:var(--brick); font-size:21px; }
+    .admin-parent-thread-messages { display:grid; gap:12px; padding:18px 20px 24px; }
+    .admin-family-message { position:relative; width:fit-content; max-width:82%; padding:11px 13px; border-radius:16px 16px 16px 5px; }
+    .admin-family-message.admin { justify-self:end; border-radius:16px 16px 5px 16px; background:var(--blush); }
+    .admin-family-message.primary-parent { background:color-mix(in srgb,var(--sage) 62%,white); }
+    .admin-family-message.additional-guardian { background:#f2cf78; }
+    .admin-family-message strong,.admin-family-message p,.admin-family-message small { display:block; margin:0; }
+    .admin-family-message strong { margin-bottom:4px; font-size:10px; }
+    .admin-family-message p { white-space:pre-line; font-size:12px; line-height:1.4; }
+    .admin-family-message small { margin-top:5px; color:var(--muted); font-size:9px; }
+    .admin-family-message:not(.admin) { padding-right:42px; }
+    .admin-family-message .parent-message-task-button { top:auto; right:8px; bottom:8px; }
+    .admin-family-message-reaction { position:absolute; top:-10px; right:-10px; bottom:auto; width:27px; min-width:27px; height:27px; min-height:27px; aspect-ratio:1 / 1; display:flex; align-items:center; justify-content:center; padding:0; border:1px solid var(--border); border-radius:50%; background:var(--surface); color:var(--brick); font-size:12px; line-height:0; }
+    .admin-family-message-reaction[aria-pressed="true"] { border-color:var(--brick); background:var(--blush); box-shadow:0 0 0 2px color-mix(in srgb,var(--brick) 18%,transparent); }
+    .admin-parent-thread-compose { position:sticky; bottom:0; z-index:2; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px; padding:13px 18px 16px; border-top:1px solid var(--border); background:var(--surface); }
+    .admin-parent-thread-compose textarea { min-height:48px; max-height:120px; resize:vertical; padding:11px 12px; border:1px solid var(--border); border-radius:14px; background:var(--surface); color:var(--fg); font:inherit; font-size:11px; }
+    .admin-parent-thread-compose button { align-self:stretch; min-width:82px; padding:0 16px; border:1px solid var(--brick); border-radius:14px; background:var(--brick); color:white; font-weight:850; }
+    .rc5-preinvite-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:16px 0; padding:14px; border:1px solid var(--border); border-radius:14px; background:var(--blush); text-align:left; }
+    .rc5-preinvite-toolbar span { display:grid; gap:3px; }
+    .rc5-preinvite-toolbar small { color:var(--muted); }
+    .rc5-preinvite-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    .rc5-family-readiness { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:10px; margin:14px 0; text-align:left; }
+    .rc5-family-card { position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:5px 10px; align-items:center; min-height:116px; padding:42px 13px 13px; border:1px solid var(--rc5-teacher-color,var(--border)); border-radius:13px; background:var(--surface); }
+    .rc5-family-card-copy { min-width:0; display:grid; gap:4px; }
+    .rc5-family-card small { color:var(--muted); }
+    .rc5-family-card .teacher-parent-student-bubble { border:3px solid var(--rc5-teacher-color,var(--border)); }
+    .rc5-dance-badges { position:absolute; top:10px; right:10px; display:flex; gap:5px; }
+    .rc5-dance-badge { display:grid; place-items:center; min-width:31px; height:24px; padding:0 8px; border-radius:999px; background:color-mix(in srgb,var(--rc5-teacher-color,var(--blush)) 22%,white); color:color-mix(in srgb,var(--rc5-teacher-color,var(--brick)) 72%,black); font-size:10px; font-weight:900; }
+    .rc5-family-card .rc5-family-status { grid-column:2; }
+    .rc5-family-status { width:max-content; padding:5px 8px; border-radius:999px; background:#eee7e1; color:#665b55; font-size:10px; font-weight:850; }
+    .rc5-family-status.has-message { background:var(--sage-light); color:var(--sage-dark); }
+    @media (max-width:640px) { .rc5-preinvite-toolbar { align-items:stretch; flex-direction:column; } .rc5-preinvite-actions { display:grid; } }
+    @media (max-width:760px) { .admin-parent-message-filters { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 
     .teacher-staff-history-row {
       display: flex;
@@ -5062,7 +5208,7 @@
       width: 100%;
       min-height: 82px;
       padding: 10px;
-      border: 1px solid var(--border);
+      border: 3px solid var(--teacher-parent-assigned-color, var(--border));
       border-radius: 13px;
       background: var(--surface);
       color: var(--fg);
@@ -5071,11 +5217,14 @@
 
     .teacher-parent-conversation-card:hover,
     .teacher-parent-conversation-card:focus-visible {
-      border-color: var(--brick);
       background: var(--surface-soft);
-      outline: 3px solid rgb(148 74 83 / .18);
+      outline: 3px solid color-mix(in srgb,var(--teacher-parent-assigned-color,var(--brick)) 28%,transparent);
       outline-offset: 1px;
     }
+    .teacher-parent-conversation-card.message-unread,
+    .admin-parent-message-preview-card.message-unread { background:color-mix(in srgb,var(--blush) 70%,white); box-shadow:inset 4px 0 0 var(--brick); }
+    .teacher-parent-conversation-card.message-needs-response,
+    .admin-parent-message-preview-card.message-needs-response { background:color-mix(in srgb,#f2cf78 28%,white); box-shadow:inset 4px 0 0 #c69224; }
 
     .teacher-parent-student-bubble {
       width: 48px;
@@ -5083,7 +5232,7 @@
       display: grid;
       place-items: center;
       overflow: hidden;
-      border: 3px solid var(--blush-dark);
+      border: 3px solid var(--teacher-parent-assigned-color, var(--blush-dark));
       border-radius: 50%;
       background: var(--blush);
       color: var(--brick);
@@ -5163,6 +5312,7 @@
     }
 
     .teacher-parent-preview-message {
+      position: relative;
       width: fit-content;
       max-width: 84%;
       padding: 10px 12px;
@@ -5179,6 +5329,14 @@
       color: var(--teacher-parent-message-text, var(--fg));
     }
 
+    .teacher-parent-preview-message .parent-message-task-button {
+      top: auto;
+      right: 8px;
+      bottom: 8px;
+    }
+    .teacher-parent-preview-message.parent { padding-right:42px; }
+
+    .teacher-parent-preview-message p { white-space:pre-line; }
     .teacher-parent-preview-message p,
     .teacher-parent-preview-message small { display: block; margin: 0; }
     .teacher-parent-preview-message small { margin-top: 5px; color: var(--muted); font-size: 9.5px; }
@@ -13687,9 +13845,10 @@
     body[data-authenticated="true"] .topbar .brand { display: none; }
     body[data-authenticated="true"] .topbar { justify-content: flex-end; }
     html:not([data-local-preview="true"]) .switcher { display: none !important; }
-    body[data-authenticated="true"]:not([data-tour-mode="true"]) .switcher { display: none; }
-    body[data-authenticated="true"]:not([data-tour-mode="true"]) .topbar { display: none; }
-    body[data-user-role="teacher"] [data-mode-btn="admin"] { display: none; }
+    html:not([data-local-preview="true"]) body[data-authenticated="true"]:not([data-tour-mode="true"]) .switcher { display: none; }
+    html:not([data-local-preview="true"]) body[data-authenticated="true"]:not([data-tour-mode="true"]) .topbar { display: none; }
+    html:not([data-local-preview="true"]) body[data-user-role="teacher"] [data-mode-btn="admin"] { display: none; }
+    html[data-local-preview="true"] body[data-mode="teacher"] > .app > .topbar { display: flex !important; }
     .session-strip button { padding: 7px 11px; font-size: 12px; }
     .session-strip .director-settings-shortcut { padding: 0; }
     body.auth-checking > .app { visibility: hidden; }
@@ -14030,6 +14189,11 @@
           </div>
         </details>
         <button class="director-message-shortcut" type="button" data-admin-open-section="messages" aria-label="Open Messages" title="Messages"><svg viewBox="0 0 32 32" aria-hidden="true"><use href="#icon-messages"></use></svg><span class="notification-unread-count" id="admin-messages-shortcut-bubble" aria-hidden="true"></span></button>
+        <button class="director-task-shortcut" type="button" data-open-director-tasks aria-label="Open Tasks" title="Tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="m8 12 2.5 2.5L16 9"></path></svg><span class="notification-unread-count" id="director-task-count" aria-label="0 open tasks">0</span></button>
+        <dialog class="director-task-dialog" id="director-task-dialog" aria-labelledby="director-task-title"><div class="director-task-head"><div><h2 id="director-task-title">0 Tasks</h2><p id="director-task-subtitle">Parent messages and follow-ups</p></div><div class="director-task-head-actions"><select class="director-task-sort" id="director-task-sort" aria-label="Sort tasks"><option value="priority">Top Priority</option><option value="recent">Most Recent</option><option value="lexi">Ms. Lexi</option><option value="tiffany">Ms. Tiffany</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select><button class="director-task-history-button" type="button" data-director-task-history>Task History</button><button class="director-task-add" type="button" data-director-task-add aria-label="Add a task" title="Add Task"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button><button class="director-task-close" type="button" data-close-director-tasks aria-label="Close Tasks"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"></path></svg></button></div></div><div class="director-task-list" id="director-task-list"></div></dialog>
+        <dialog class="director-task-complete-dialog" id="director-task-complete-dialog" aria-labelledby="director-task-complete-title"><div class="director-task-complete-card"><h2 id="director-task-complete-title">Mark as Complete?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-task-complete-cancel>Cancel</button><button class="director-task-complete-yes" type="button" data-task-complete-confirm>Yes</button></div></div></dialog>
+        <dialog class="director-task-complete-dialog" id="director-task-remove-dialog" aria-labelledby="director-task-remove-title"><div class="director-task-complete-card"><h2 id="director-task-remove-title">Remove Task?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-task-remove-cancel>Cancel</button><button class="director-task-remove-confirm" type="button" data-task-remove-confirm>Remove</button></div></div></dialog>
+        <dialog class="admin-parent-thread-dialog" id="admin-parent-thread-dialog" aria-labelledby="admin-parent-thread-title"><div class="admin-parent-thread-head"><div><h2 id="admin-parent-thread-title">Family Conversation</h2><p id="admin-parent-thread-subtitle"></p></div><div class="admin-parent-thread-head-actions"><button class="admin-parent-dancer-details" type="button" aria-label="Dancer Details coming soon" title="Personalized fields will be added here later">Dancer Details</button><button class="admin-parent-thread-close" type="button" data-close-admin-parent-thread aria-label="Close family conversation">×</button></div></div><div class="admin-parent-thread-messages" id="admin-parent-thread-messages"></div><form class="admin-parent-thread-compose" id="admin-parent-thread-compose"><textarea id="admin-parent-thread-reply" aria-label="Reply to family conversation" placeholder="Reply to the family"></textarea><button type="submit">Send</button></form></dialog>
         <button class="director-settings-shortcut" type="button" data-open-director-settings aria-label="Open Director Settings" title="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path><path d="M19.1 13.1c.05-.36.08-.73.08-1.1s-.03-.74-.08-1.1l2-1.55-2-3.46-2.48 1a8.5 8.5 0 0 0-1.9-1.1L14.35 3h-4l-.37 2.79a8.5 8.5 0 0 0-1.9 1.1l-2.48-1-2 3.46 2 1.55c-.05.36-.08.73-.08 1.1s.03.74.08 1.1l-2 1.55 2 3.46 2.48-1a8.5 8.5 0 0 0 1.9 1.1l.37 2.79h4l.37-2.79a8.5 8.5 0 0 0 1.9-1.1l2.48 1 2-3.46-2-1.55Z"></path></svg></button>
         <button class="secondary" id="auth-sign-out" type="button">Sign Out</button>
       </div>
@@ -14444,6 +14608,7 @@
                     <div id="teacher-parent-preview-thread-content"></div>
                   </div>
                 </section>
+                <dialog class="director-task-complete-dialog" id="teacher-parent-escalate-dialog" aria-labelledby="teacher-parent-escalate-title"><div class="director-task-complete-card"><h2 id="teacher-parent-escalate-title">Escalate to Admin?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-teacher-escalate-cancel>Cancel</button><button class="director-task-complete-yes" type="button" data-teacher-escalate-confirm>Yes, Escalate</button></div></div></dialog>
 
                 <section class="panel teacher-message-audience-panel" id="teacher-messages-staff-panel" role="tabpanel" aria-labelledby="teacher-messages-staff-tab">
                   <button class="team-talk-card" type="button" data-teacher-thread="team-meeting">
@@ -15941,6 +16106,10 @@
               <div class="admin-parent-message-preview">
                 <h3>Parent Messages</h3>
                 <p class="subtle">Preview only — these sample conversations demonstrate the intended Director inbox. No messages can be sent.</p>
+                <div class="rc5-preinvite-toolbar">
+                  <span><strong>RC5 Pre-Invite Setup</strong><small>Review every Primrose Rowlett Class 5 family and finish billing before sending Parent Portal invitations.</small></span>
+                  <div class="rc5-preinvite-actions"><button class="secondary" type="button" data-open-rc5-messages>Show RC5 Families</button><button class="primary" type="button" data-open-rc5-billing>Set Up RC5 Billing</button></div>
+                </div>
                 <div class="admin-parent-message-filters" role="group" aria-label="Filter Parent Messages preview">
                   <label><span>School</span><select id="admin-parent-school-filter" aria-label="Filter parent messages by school"></select></label>
                   <label><span>Class</span><select id="admin-parent-class-filter" aria-label="Filter parent messages by class"></select></label>
@@ -17150,6 +17319,17 @@
       </div>
     </div>
   </div>
+  <div class="confirm-overlay" id="teacher-activities-overlay" aria-hidden="true">
+    <div class="confirm-dialog teacher-activities-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-activities-title">
+      <div class="teacher-activities-header">
+        <div><h3 id="teacher-activities-title">Post to Parent Portal</h3><p class="subtle" id="teacher-activities-class-name">Choose an activity for this class.</p></div>
+        <button class="teacher-activities-close" type="button" data-teacher-activities-close aria-label="Close Activities">&times;</button>
+      </div>
+      <div id="teacher-activities-content"></div>
+      <p class="teacher-activities-draft-note">Picture posts use the secure composer. Other activity types remain local previews until their delivery tools are connected.</p>
+    </div>
+  </div>
+
   <div class="confirm-overlay" id="teacher-class-post-overlay" aria-hidden="true">
     <div class="confirm-dialog teacher-class-post-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-class-post-title" aria-describedby="teacher-class-post-audience">
       <div class="teacher-class-post-header">
@@ -25518,23 +25698,26 @@
       target.innerHTML = `
         <div class="teacher-parent-thread-header">
           <div>
-            <h3>${escapeText(conversation.studentName)}</h3>
-            <p class="subtle">${escapeText(conversation.school)} · ${escapeText(conversation.className)}</p>
+            <h3>${escapeText(conversation.studentName)}’s Family Group Chat</h3>
+            <p class="subtle">All linked guardians · ${escapeText(conversation.school)} · ${escapeText(conversation.className)}</p>
           </div>
         </div>
         <div class="teacher-parent-preview-messages" aria-label="Sample conversation for ${escapeText(conversation.studentName)}">
-          ${conversation.messages.map((message) => {
-            const teacherColor = message.author === "teacher" ? messageAssignedColor(message.label, "Teacher") : "";
+          ${conversation.messages.map((message, messageIndex) => {
+            const isOutgoing = message.author !== "parent";
+            const teacherColor = isOutgoing ? messageAssignedColor(message.label, "Teacher") : "";
             const teacherStyle = teacherColor
               ? ` style="--teacher-parent-message-color:${escapeText(teacherColor)};--teacher-parent-message-text:${escapeText(coordinatedInitialColor(teacherColor))}"`
               : "";
             return `
-            <article class="teacher-parent-preview-message ${message.author === "teacher" ? "teacher" : "parent"}"${teacherStyle}>
+            <article class="teacher-parent-preview-message ${isOutgoing ? "teacher" : "parent"}"${teacherStyle}>
+              ${message.author === "parent" && !message.escalatedToAdmin ? `<button class="parent-message-task-button" type="button" data-parent-message-task="${messageIndex}" aria-label="Escalate this message from ${escapeText(message.label || "parent")} to Admin" title="Escalate to Admin"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="m8 12 2.5 2.5L16 9"></path></svg></button>` : ""}
               <p>${escapeText(message.text)}</p>
               <small>${escapeText(`${message.label} · ${message.time}`)}</small>
               ${message.author === "parent" && message.acknowledgedByTeacher === true
                 ? `<small aria-label="Acknowledged by teacher">♥ Acknowledged by teacher</small>`
                 : ""}
+              ${message.escalatedToAdmin ? `<small>Escalated to Admin · No teacher follow-up needed</small>` : ""}
             </article>
           `;
           }).join("")}
@@ -25562,17 +25745,18 @@
       const conversations = filteredTeacherParentPreviewConversations();
       if (!list) return;
       list.innerHTML = conversations.length ? conversations.map((conversation) => `
-        <button class="teacher-parent-conversation-card" type="button" data-parent-preview-conversation="${escapeText(conversation.id)}" aria-label="Open preview conversation for ${escapeText(conversation.studentName)}, ${escapeText(conversation.school)}, ${escapeText(conversation.className)}">
-          <span class="teacher-parent-student-bubble" aria-hidden="true">${escapeText(conversation.initials)}</span>
+        <button class="teacher-parent-conversation-card ${parentConversationStatusClass(conversation)}" style="--teacher-parent-assigned-color:${escapeText(parentConversationAssignedColor(conversation))}" type="button" data-parent-preview-conversation="${escapeText(conversation.id)}" aria-label="Open family group conversation for ${escapeText(conversation.studentName)}, ${escapeText(conversation.school)}, ${escapeText(conversation.className)}">
+          ${parentStudentBubbleMarkup(parentConversationStudent(conversation), conversation.initials)}
           <span class="teacher-parent-conversation-copy">
             <strong>${escapeText(conversation.studentName)}</strong>
+            <small>${escapeText(familyConversationLabel(conversation))}</small>
             <small>${escapeText(conversation.school)} · ${escapeText(conversation.className)}</small>
-            <span>${escapeText(conversation.newestPreview)}</span>
+            ${conversation.messages?.length ? `<span>${escapeText(conversation.messages.at(-1)?.text || conversation.newestPreview || "")}</span>` : ""}
           </span>
-          <span class="teacher-parent-conversation-meta">
+          ${conversation.messages?.length ? `<span class="teacher-parent-conversation-meta">
             <time>${escapeText(conversation.timestamp)}</time>
             ${conversation.unread ? `<span class="teacher-parent-unread" aria-label="${conversation.unread} unread message${conversation.unread === 1 ? "" : "s"}">${conversation.unread}</span>` : ""}
-          </span>
+          </span>` : ""}
         </button>
       `).join("") : `<p class="teacher-parent-preview-empty">No sample conversations match these filters.</p>`;
     };
@@ -29033,6 +29217,178 @@
       </section>
     `;
 
+    var teacherParentPreviewConversations = window.teacherParentPreviewConversations || [];
+    var teacherParentPreviewFilters = window.teacherParentPreviewFilters || { school: "all", className: "all", status: "all" };
+    var selectedTeacherParentPreviewId = window.selectedTeacherParentPreviewId || "";
+    var adminParentMessageFilters = window.adminParentMessageFilters || { school: "all", className: "all", day: "all", teacher: "all", status: "all", search: "" };
+    var directorParentTasks = (() => { try { return JSON.parse(localStorage.getItem("dt-director-parent-tasks") || "[]"); } catch { return []; } })();
+    var directorTaskHistoryOpen = false;
+    var directorTaskSort = "priority";
+    var pendingDirectorTaskCompleteId = "";
+    var pendingDirectorTaskRemoveId = "";
+    var pendingTeacherEscalation = null;
+    const saveDirectorParentTasks = () => localStorage.setItem("dt-director-parent-tasks", JSON.stringify(directorParentTasks));
+    const directorTaskAssigneeColor = (assignee) => messageAssignedColor(assignee === "Ms. Tiffany" ? "Tiffany" : "Lexi", "Teacher");
+    const renderDirectorParentTasks = () => {
+      const list = document.getElementById("director-task-list");
+      const count = document.getElementById("director-task-count");
+      const openCount = directorParentTasks.filter((task) => !task.complete).length;
+      if (count) { count.textContent = String(openCount); count.setAttribute("aria-label", `${openCount} open task${openCount === 1 ? "" : "s"}`); }
+      setText("director-task-title", directorTaskHistoryOpen ? `Task History · ${directorParentTasks.filter((task) => task.complete).length}` : `${openCount} Task${openCount === 1 ? "" : "s"}`);
+      setText("director-task-subtitle", directorTaskHistoryOpen ? "Completed tasks, notes, and completion dates" : "Parent messages and follow-ups");
+      const historyButton = document.querySelector("[data-director-task-history]");
+      if (historyButton) historyButton.textContent = directorTaskHistoryOpen ? "Current Tasks" : "Task History";
+      const sortSelect = document.getElementById("director-task-sort");
+      if (sortSelect) sortSelect.value = directorTaskSort;
+      if (!list) return;
+      const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
+      const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+      const tomorrowName = tomorrowDate.toLocaleDateString("en-US", { weekday: "long" });
+      const taskDanceDay = (task) => {
+        if (task.danceDay) return task.danceDay;
+        const conversation = teacherParentPreviewConversations.find((item) => item.id === task.conversationId || String(task.id).startsWith(`${item.id}-`));
+        return conversation ? adminParentConversationMetadata(conversation).day : "";
+      };
+      let visibleTasks = directorParentTasks.filter((task) => Boolean(task.complete) === directorTaskHistoryOpen);
+      if (directorTaskSort === "lexi") visibleTasks = visibleTasks.filter((task) => (task.assignee || "Ms. Lexi") === "Ms. Lexi");
+      if (directorTaskSort === "tiffany") visibleTasks = visibleTasks.filter((task) => task.assignee === "Ms. Tiffany");
+      if (directorTaskSort === "today") visibleTasks = visibleTasks.filter((task) => taskDanceDay(task) === todayName);
+      if (directorTaskSort === "tomorrow") visibleTasks = visibleTasks.filter((task) => taskDanceDay(task) === tomorrowName);
+      if (directorTaskSort === "priority") visibleTasks.sort((left, right) => Number(Boolean(right.priority)) - Number(Boolean(left.priority)) || Number(right.createdAtMs || 0) - Number(left.createdAtMs || 0));
+      if (directorTaskSort === "recent") visibleTasks.sort((left, right) => Number(right.createdAtMs || 0) - Number(left.createdAtMs || 0));
+      list.innerHTML = visibleTasks.length ? visibleTasks.map((task) => {
+        const assignee = task.assignee || (task.teacherName === "Ms. Tiffany" ? "Ms. Tiffany" : "Ms. Lexi");
+        const notes = Array.isArray(task.notes) ? task.notes : [];
+        return `<article class="director-task-item ${task.complete ? "is-complete" : ""}" data-director-task-open="${escapeText(task.id)}" style="--task-assignee-color:${escapeText(directorTaskAssigneeColor(assignee))}"><input type="checkbox" data-director-task-complete="${escapeText(task.id)}" ${task.complete ? "checked disabled" : ""} aria-label="Mark ${escapeText(task.studentName || task.message)} complete"><select class="director-task-assignee" data-director-task-assignee="${escapeText(task.id)}" aria-label="Assign task"><option ${assignee === "Ms. Lexi" ? "selected" : ""}>Ms. Lexi</option><option ${assignee === "Ms. Tiffany" ? "selected" : ""}>Ms. Tiffany</option></select><button class="director-task-priority" type="button" data-director-task-priority="${escapeText(task.id)}" aria-label="${task.priority ? "Remove top priority" : "Mark top priority"}" aria-pressed="${task.priority ? "true" : "false"}" title="Top Priority"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.76 5.59 6.17.9-4.46 4.35 1.05 6.14L12 16.88l-5.52 2.9 1.05-6.14-4.46-4.35 6.17-.9L12 2.8Z"></path></svg></button><span class="director-task-context"><strong>${escapeText(task.studentName ? `${task.studentName} · ${task.sender}` : "General Task")}</strong>${task.escalatedBy ? `<small><strong>Escalated by ${escapeText(task.escalatedBy)}</strong></small>` : ""}<span class="director-task-message-snapshot">${escapeText(task.message)}</span>${task.teacherName || task.school ? `<small>${escapeText([task.teacherName, task.school, task.className].filter(Boolean).join(" · "))}</small>` : ""}${notes.length ? `<span class="director-task-notes">${notes.map((note) => `<span class="director-task-note">${escapeText(note.text)} · ${escapeText(note.createdAt)}</span>`).join("")}</span>` : ""}${task.complete && task.completedAt ? `<span class="director-task-completed">Completed ${escapeText(task.completedAt)} by ${escapeText(assignee)}</span>` : ""}</span>${!task.complete ? `<button class="director-task-note-add" type="button" data-director-task-note="${escapeText(task.id)}" aria-label="Add note" title="Add Note"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button>` : ""}</article>`;
+      }).join("") : `<p class="admin-parent-message-preview-empty">${directorTaskHistoryOpen ? "No completed tasks yet." : "No open tasks. Use + to add one or save a parent message."}</p>`;
+      visibleTasks.forEach((task) => {
+        const card = list.querySelector(`[data-director-task-open="${CSS.escape(task.id)}"]`);
+        if (!card) return;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "director-task-remove";
+        remove.dataset.directorTaskRemove = task.id;
+        remove.setAttribute("aria-label", "Remove task");
+        remove.title = "Remove Task";
+        remove.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"></path></svg>';
+        card.append(remove);
+      });
+    };
+    const addParentMessageToTasks = (conversation, message, messageIndex, options = {}) => {
+      const id = `${conversation.id}-${messageIndex}`;
+      if (directorParentTasks.some((task) => task.id === id)) { showToast("That parent message is already in Tasks."); return false; }
+      const metadata = adminParentConversationMetadata(conversation);
+      directorParentTasks.unshift({ id, conversationId: conversation.id, complete: false, priority: false, createdAtMs: Date.now(), message: message.text, sender: message.label || "Parent", studentName: conversation.studentName, teacherName: metadata.teacherName || "Teacher not assigned", school: conversation.school || "School unavailable", className: conversation.className || "Class unavailable", danceDay: metadata.day || "", assignee: options.assignee || (metadata.teacherName === "Ms. Tiffany" ? "Ms. Tiffany" : "Ms. Lexi"), escalatedBy: options.escalatedBy || "", notes: [] });
+      saveDirectorParentTasks(); renderDirectorParentTasks(); showToast("Parent message added to Tasks.");
+      return true;
+    };
+
+    const rc5RosterClass = () => rosterClasses.find((rosterClass) => (
+      rosterClass.sourceActive !== false
+      && /rowlett/i.test(String(rosterClass.schoolName || ""))
+      && /(?:class\s*)?5\b/i.test(String(rosterClass.name || rosterClass.className || ""))
+    ));
+    if (document.documentElement.dataset.localPreview === "true" && !teacherParentPreviewConversations.length) {
+      const sampleClass = rc5RosterClass();
+      const sampleStudent = sampleClass ? [...(sampleClass.students || [])]
+        .filter((student) => student.status === "enrolled")
+        .sort((left, right) => `${left.firstName || left.first_name || ""} ${left.lastName || left.last_name || ""}`.localeCompare(`${right.firstName || right.first_name || ""} ${right.lastName || right.last_name || ""}`))[0] : null;
+      if (sampleClass && sampleStudent) {
+        const sampleFirstName = sampleStudent.firstName || sampleStudent.first_name || "Dancer";
+        const sampleLastName = sampleStudent.lastName || sampleStudent.last_name || "";
+        const sampleStudentName = `${sampleFirstName} ${sampleLastName}`.trim();
+        const sampleParentName = sampleStudent.parentName || [sampleStudent.parentFirstName, sampleStudent.parentLastName].filter(Boolean).join(" ") || "Parent";
+        teacherParentPreviewConversations.push({
+          id: "rc5-sample-unenrollment-task",
+          studentName: sampleStudentName,
+          initials: `${sampleFirstName[0] || ""}${sampleLastName[0] || ""}`.toUpperCase(),
+          school: sampleClass.schoolName,
+          className: sampleClass.name || sampleClass.className || "Class 5",
+          unread: 1,
+          order: Date.now(),
+          timestamp: "Just now",
+          newestPreview: "Hi! We need to unenroll and have a last dance day to share.",
+          messages: [
+            { author: "parent", label: sampleParentName, time: "10:31 AM", text: `Hi! We need to unenroll ${sampleFirstName}. Her last dance day will be September 24.`, acknowledgedByTeacher: false },
+            { author: "admin", label: "Dance Techniques Admin", time: "10:38 AM", text: "Thank you for letting us know. I’m adding this to our follow-up list so we can review the account.", acknowledgedByTeacher: true },
+            { author: "parent", label: `Jordan ${sampleLastName || "Guardian"}`, time: "Just now", text: "Thank you! Please let both of us know if you need anything else from the family.", acknowledgedByTeacher: false }
+          ]
+        });
+      }
+    }
+    const rc5ClassForMessages = rc5RosterClass();
+    if (rc5ClassForMessages) {
+      [...(rc5ClassForMessages.students || [])]
+        .filter((student) => student.status === "enrolled")
+        .sort((left, right) => `${left.firstName || left.first_name || ""} ${left.lastName || left.last_name || ""}`.localeCompare(`${right.firstName || right.first_name || ""} ${right.lastName || right.last_name || ""}`))
+        .forEach((student, studentIndex) => {
+        const firstName = student.firstName || student.first_name || "Dancer";
+        const lastName = student.lastName || student.last_name || "";
+        const studentName = `${firstName} ${lastName}`.trim();
+        const alreadyIncluded = teacherParentPreviewConversations.some((conversation) => String(conversation.studentName || "").trim().toLowerCase() === studentName.trim().toLowerCase());
+        if (alreadyIncluded) return;
+        const parentName = student.parentName || [student.parentFirstName, student.parentLastName].filter(Boolean).join(" ") || "Primary adult not linked";
+        teacherParentPreviewConversations.push({
+          id: `rc5-family-${student.id || student.studentId || studentIndex}`,
+          studentName,
+          initials: `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase(),
+          school: rc5ClassForMessages.schoolName,
+          className: rc5ClassForMessages.name || rc5ClassForMessages.className || "Class 5",
+          guardianNames: [parentName],
+          unread: 0,
+          order: 0,
+          timestamp: "Pre-invite",
+          newestPreview: "No messages yet · Pre-invite",
+          messages: []
+        });
+      });
+    }
+    const parentConversationStudent = (conversation) => {
+      const targetName = String(conversation?.studentName || "").trim().toLowerCase();
+      const matchingClass = rosterClasses.find((rosterClass) => (
+        (!conversation?.school || enrollmentSchoolNameMatches(rosterClass.schoolName, conversation.school))
+        && (!conversation?.className || String(rosterClass.name || "").trim().toLowerCase() === String(conversation.className).trim().toLowerCase())
+        && (rosterClass.students || []).some((student) => rosterStudentFullName(student).trim().toLowerCase() === targetName)
+      ));
+      return matchingClass?.students.find((student) => rosterStudentFullName(student).trim().toLowerCase() === targetName) || null;
+    };
+    const parentConversationAssignedColor = (conversation) => {
+      const matchingClass = rosterClasses.find((rosterClass) => (
+        rosterClass.sourceActive !== false
+        && (!conversation?.school || enrollmentSchoolNameMatches(rosterClass.schoolName, conversation.school))
+        && (!conversation?.className || String(rosterClass.name || rosterClass.className || "").trim().toLowerCase() === String(conversation.className).trim().toLowerCase())
+      ));
+      const teacher = matchingClass ? teachers.find((item) => String(item.id) === String(matchingClass.teacherId)) : null;
+      return teacher ? teacherProfileColor(teacher) : adminMessageColor;
+    };
+    const parentStudentBubbleMarkup = (student, fallbackInitials = "") => `<span class="teacher-parent-student-bubble" aria-hidden="true">${student?.photo ? `<img src="${escapeText(student.photo)}" alt="">` : escapeText(fallbackInitials || (student ? rosterStudentInitials(student) : ""))}</span>`;
+    const familyConversationLabel = (conversation) => {
+      const parentNames = adminParentConversationMetadata(conversation).parentNames;
+      return parentNames.length > 1
+        ? `Family group · ${parentNames.length} linked adults`
+        : "Family group · All linked guardians";
+    };
+    const renderRc5FamilyReadiness = () => {
+      const target = document.getElementById("rc5-family-readiness");
+      if (!target) return;
+      const rosterClass = rc5RosterClass();
+      const students = rosterClass ? sortRosterStudents(rosterEnrolled(rosterClass)) : [];
+      target.hidden = false;
+      target.innerHTML = students.length ? students.map((student) => {
+        const dancerName = rosterStudentFullName(student);
+        const conversation = teacherParentPreviewConversations.find((item) => String(item.studentName || "").trim().toLowerCase() === dancerName.trim().toLowerCase());
+        const parentName = student.parentName || [student.parentFirstName, student.parentLastName].filter(Boolean).join(" ") || "Primary adult not linked";
+        const teacher = teachers.find((item) => String(item.id) === String(rosterClass.teacherId));
+        const teacherName = teacher?.displayName || (teacher ? `Ms. ${teacher.firstName}` : "Teacher not assigned");
+        const teacherColor = teacher ? teacherProfileColor(teacher) : adminMessageColor;
+        const assignedSchool = teacher?.schools?.find((school) => enrollmentSchoolNameMatches(school.name, rosterClass.schoolName));
+        const schoolName = assignedSchool?.nickname || rosterClass.schoolName || "School not assigned";
+        const dayBadge = String(rosterClass.day || "").slice(0, 3).toUpperCase() || "DAY";
+        const timeBadge = /\bPM\b/i.test(String(rosterClass.time || rosterClass.timeBlock || "")) ? "PM" : "AM";
+        return `<article class="rc5-family-card" style="--rc5-teacher-color:${escapeText(teacherColor)}"><span class="rc5-dance-badges"><span class="rc5-dance-badge">${escapeText(dayBadge)}</span><span class="rc5-dance-badge">${timeBadge}</span></span>${parentStudentBubbleMarkup(student)}<span class="rc5-family-card-copy"><strong>${escapeText(dancerName)}</strong><small>${escapeText(parentName)}</small><small>${escapeText(`${teacherName} · ${schoolName}`)}</small></span><span class="rc5-family-status ${conversation ? "has-message" : ""}">${conversation ? "Family chat available" : "No messages yet · Pre-invite"}</span></article>`;
+      }).join("") : `<p class="admin-parent-message-preview-empty">RC5 could not be found in the loaded roster.</p>`;
+    };
+
     const adminParentConversationMetadata = (conversation) => {
       const matchingClasses = rosterClasses.filter((rosterClass) => (
         rosterClass.sourceActive !== false
@@ -29042,14 +29398,42 @@
       const days = [...new Set(matchingClasses.map((rosterClass) => rosterClass.day).filter(Boolean))];
       const teacherIds = [...new Set(matchingClasses.map((rosterClass) => rosterClass.teacherId).filter(Boolean))];
       const teacher = teacherIds.length === 1 ? teachers.find((item) => String(item.id) === String(teacherIds[0])) : null;
-      const parentNames = [...new Set((conversation.messages || []).filter((message) => message.author === "parent").map((message) => String(message.label || "").trim()).filter(Boolean))];
-      return { day: days.length === 1 ? days[0] : "", teacherName: teacher ? (teacher.displayName || fullName(teacher)) : "", parentNames };
+      const messageParentNames = (conversation.messages || []).filter((message) => message.author === "parent").map((message) => String(message.label || "").trim()).filter(Boolean);
+      const parentNames = [...new Set(messageParentNames.length ? messageParentNames : (conversation.guardianNames || []))];
+      const timeValue = matchingClasses[0]?.time || matchingClasses[0]?.timeBlock || "";
+      return { day: days.length === 1 ? days[0] : "", timeBlock: /\bPM\b/i.test(String(timeValue)) ? "PM" : "AM", teacher, teacherName: teacher ? (teacher.displayName || fullName(teacher)) : "", parentNames };
     };
 
     const adminParentConversationNotReplied = (conversation) => {
       const messages = Array.isArray(conversation.messages) ? conversation.messages : [];
       const latest = messages.at(-1);
       return Boolean(latest && latest.author === "parent" && latest.acknowledgedByTeacher !== true);
+    };
+    const adminParentMessageSenderType = (conversation, message) => {
+      if (message?.author !== "parent") return "admin";
+      const firstParent = (conversation.messages || []).find((item) => item.author === "parent")?.label || "Parent";
+      return message?.label === firstParent ? "primary-parent" : "additional-guardian";
+    };
+    const parentConversationStatusClass = (conversation) => Number(conversation?.unread || 0) > 0
+      ? "message-unread"
+      : (adminParentConversationNotReplied(conversation) ? "message-needs-response" : "message-current");
+    const openAdminParentConversation = (conversation) => {
+      const dialog = document.getElementById("admin-parent-thread-dialog");
+      const messages = document.getElementById("admin-parent-thread-messages");
+      if (!dialog || !messages || !conversation) return;
+      const metadata = adminParentConversationMetadata(conversation);
+      const parentSenders = [...new Set((conversation.messages || []).filter((message) => message.author === "parent").map((message) => message.label).filter(Boolean))];
+      setText("admin-parent-thread-title", `${conversation.studentName}’s Family Conversation`);
+      const danceScheduleLabel = metadata.day ? `${metadata.day} ${metadata.timeBlock === "PM" ? "Afternoons" : "Mornings"}` : "Schedule unavailable";
+      setText("admin-parent-thread-subtitle", `${parentSenders.join(" & ") || "All linked guardians"} · ${metadata.teacherName || "Teacher not assigned"} · ${conversation.school} · ${danceScheduleLabel}`);
+      messages.innerHTML = (conversation.messages || []).map((message, messageIndex) => {
+        const senderType = adminParentMessageSenderType(conversation, message);
+        const parentControls = message.author === "parent" ? `<button class="parent-message-task-button" type="button" data-admin-thread-task="${messageIndex}" aria-label="Add this message from ${escapeText(message.label)} to Tasks" title="Add to Tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="m8 12 2.5 2.5L16 9"></path></svg></button><button class="admin-family-message-reaction" type="button" data-admin-thread-react="${messageIndex}" aria-label="${message.adminReaction ? "Remove heart reaction" : "React with a heart"}" aria-pressed="${message.adminReaction ? "true" : "false"}" title="React">♥</button>` : "";
+        return `<article class="admin-family-message ${senderType}">${parentControls}<strong>${escapeText(message.label || (message.author === "admin" ? "Dance Techniques Admin" : "Parent"))}</strong><p>${escapeText(message.text)}</p><small>${escapeText(message.time || "")}</small></article>`;
+      }).join("");
+      dialog.dataset.conversationId = conversation.id;
+      if (!dialog.open) dialog.showModal();
+      requestAnimationFrame(() => { messages.scrollTop = messages.scrollHeight; });
     };
 
     const adminParentFilterOptions = (conversations, field) => [...new Set(conversations.map((conversation) => {
@@ -29096,8 +29480,17 @@
       setText("admin-parent-message-count", `Showing ${filtered.length} of ${teacherParentPreviewConversations.length} preview conversation${teacherParentPreviewConversations.length === 1 ? "" : "s"}`);
       list.innerHTML = filtered.length ? filtered.map((conversation) => {
         const metadata = adminParentConversationMetadata(conversation);
-        const context = [conversation.school, conversation.className, metadata.day, metadata.teacherName].filter(Boolean).join(" · ");
-        return `<button class="admin-parent-message-preview-card" type="button" data-admin-parent-preview="${escapeText(conversation.id)}" aria-label="Open preview conversation for ${escapeText(conversation.studentName)}"><span class="teacher-parent-student-bubble" aria-hidden="true">${escapeText(conversation.initials || "")}</span><span class="admin-parent-message-preview-copy"><strong>${escapeText(conversation.studentName)}</strong><small>${escapeText(context || "Class details unavailable")}</small><span>${escapeText(conversation.newestPreview || "No message preview")}</span></span><span class="admin-parent-message-preview-meta"><time>${escapeText(conversation.timestamp || "Time unavailable")}</time>${conversation.unread ? `<span class="admin-parent-message-unread" aria-label="${conversation.unread} unread">${conversation.unread}</span>` : ""}</span></button>`;
+        const teacherColor = metadata.teacher ? teacherProfileColor(metadata.teacher) : adminMessageColor;
+        const dayBadge = String(metadata.day || "").slice(0,3).toUpperCase() || "DAY";
+        const parentLine = metadata.parentNames.length ? metadata.parentNames.join(" & ") : "All linked guardians";
+        const hasMessages = Boolean(conversation.messages?.length);
+        const latestMessageRecord = hasMessages ? conversation.messages.at(-1) : null;
+        const latestMessage = latestMessageRecord?.text || conversation.newestPreview || "";
+        const latestSenderType = latestMessageRecord ? adminParentMessageSenderType(conversation, latestMessageRecord) : "";
+        const taskControl = conversation.messages?.length ? `<span class="admin-parent-task-control" data-admin-parent-task-latest aria-label="Add latest parent message to Tasks" title="Add to Tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="m8 12 2.5 2.5L16 9"></path></svg></span>` : "";
+        const messagePreview = hasMessages ? `<span class="message-preview-${escapeText(latestSenderType)}">${escapeText(latestMessage)}</span>` : "";
+        const messageMeta = hasMessages ? `<span class="admin-parent-message-preview-meta"><time>${escapeText(conversation.timestamp || "Time unavailable")}</time>${conversation.unread ? `<span class="admin-parent-message-unread" aria-label="${conversation.unread} unread">${conversation.unread} unread</span>` : ""}</span>` : "";
+        return `<button class="admin-parent-message-preview-card ${parentConversationStatusClass(conversation)}" style="--admin-parent-teacher-color:${escapeText(teacherColor)}" type="button" data-admin-parent-preview="${escapeText(conversation.id)}" aria-label="Open family group conversation for ${escapeText(conversation.studentName)}"><span class="admin-parent-dance-badges"><span class="admin-parent-dance-badge">${escapeText(dayBadge)}</span><span class="admin-parent-dance-badge">${escapeText(metadata.timeBlock)}</span></span>${parentStudentBubbleMarkup(parentConversationStudent(conversation), conversation.initials)}<span class="admin-parent-message-preview-copy"><strong>${escapeText(conversation.studentName)}</strong><small>${escapeText(parentLine)}</small><small>${escapeText(`${metadata.teacherName || "Teacher not assigned"} · ${conversation.school || "School unavailable"}`)}</small>${messagePreview}</span>${messageMeta}${taskControl}</button>`;
       }).join("") : '<p class="admin-parent-message-preview-empty">No preview conversations match these filters.</p>';
     };
 
@@ -29763,6 +30156,22 @@
       scrollTeacherConversationToReply();
     };
 
+    var selectedTeacherMessageAudience = window.selectedTeacherMessageAudience || "staff";
+    const renderTeacherMessageAudience = () => {
+      const parentsSelected = selectedTeacherMessageAudience === "parents";
+      const parentsButton = document.getElementById("teacher-messages-parents-tab");
+      const staffButton = document.getElementById("teacher-messages-staff-tab");
+      const parentsPanel = document.getElementById("teacher-messages-parents-panel");
+      const staffPanel = document.getElementById("teacher-messages-staff-panel");
+      parentsButton?.setAttribute("aria-selected", String(parentsSelected));
+      staffButton?.setAttribute("aria-selected", String(!parentsSelected));
+      if (parentsButton) parentsButton.tabIndex = parentsSelected ? 0 : -1;
+      if (staffButton) staffButton.tabIndex = parentsSelected ? -1 : 0;
+      if (parentsPanel) parentsPanel.hidden = !parentsSelected;
+      if (staffPanel) staffPanel.hidden = parentsSelected;
+      if (parentsSelected) renderTeacherParentPreview();
+    };
+
     document.getElementById("teacher-announcement-thread-list")?.addEventListener("click", selectTeacherMessageThread);
     document.getElementById("teacher-pinned-thread-list")?.addEventListener("click", selectTeacherMessageThread);
     document.getElementById("teacher-thread-list")?.addEventListener("click", selectTeacherMessageThread);
@@ -29823,6 +30232,29 @@
       buttons[nextIndex].click();
       buttons[nextIndex].focus();
     });
+    document.getElementById("admin-messages-parents-panel")?.addEventListener("click", (event) => {
+      if (event.target.closest("[data-open-rc5-messages]")) {
+        const rc5Conversation = teacherParentPreviewConversations.find((conversation) => /rowlett/i.test(String(conversation.school || "")) && /(?:class\s*)?5\b/i.test(String(conversation.className || "")));
+        adminParentMessageFilters.school = rc5Conversation?.school || "all";
+        adminParentMessageFilters.className = rc5Conversation?.className || "all";
+        adminParentMessageFilters.day = "all";
+        adminParentMessageFilters.teacher = "all";
+        adminParentMessageFilters.status = "all";
+        adminParentMessageFilters.search = "";
+        renderAdminParentMessagePreview();
+        document.getElementById("admin-parent-message-preview-list")?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        return;
+      }
+      if (event.target.closest("[data-open-rc5-billing]")) {
+        openAdminSection("finance-folio");
+        document.getElementById("finance-folio-cards").hidden = true;
+        document.getElementById("payroll-workspace").hidden = true;
+        document.getElementById("partnership-payment-workspace").hidden = true;
+        document.getElementById("family-invoice-workspace").hidden = false;
+        refreshFamilyBillingReview();
+        renderTuitionPlanRoster();
+      }
+    });
     document.getElementById("admin-messages-parents-panel")?.addEventListener("change", (event) => {
       event.stopPropagation();
       if (event.target.id === "admin-parent-school-filter") {
@@ -29845,7 +30277,53 @@
       const button = event.target.closest("[data-admin-parent-preview]");
       if (!button) return;
       const conversation = teacherParentPreviewConversations.find((item) => item.id === button.dataset.adminParentPreview);
-      showToast(conversation ? `${conversation.studentName}'s parent conversation is a preview only. No message can be sent.` : "This parent conversation is a preview only.");
+      if (event.target.closest("[data-admin-parent-task-latest]")) {
+        const messageIndex = Math.max(0, (conversation?.messages?.length || 1) - 1);
+        const message = conversation?.messages?.[messageIndex];
+        if (conversation && message) addParentMessageToTasks(conversation, message, messageIndex);
+        return;
+      }
+      if (conversation) openAdminParentConversation(conversation);
+    });
+    document.querySelector("[data-close-admin-parent-thread]")?.addEventListener("click", () => document.getElementById("admin-parent-thread-dialog")?.close());
+    document.getElementById("admin-parent-thread-messages")?.addEventListener("click", (event) => {
+      const dialog = document.getElementById("admin-parent-thread-dialog");
+      const conversation = teacherParentPreviewConversations.find((item) => item.id === dialog?.dataset.conversationId);
+      const reactionButton = event.target.closest("[data-admin-thread-react]");
+      if (reactionButton && conversation) {
+        const message = conversation.messages?.[Number(reactionButton.dataset.adminThreadReact)];
+        if (message) {
+          message.adminReaction = message.adminReaction ? "" : "heart";
+          message.acknowledgedByTeacher = Boolean(message.adminReaction);
+          conversation.unread = 0;
+          openAdminParentConversation(conversation);
+          renderAdminParentMessagePreview();
+        }
+        return;
+      }
+      const taskButton = event.target.closest("[data-admin-thread-task]");
+      if (!taskButton) return;
+      const messageIndex = Number(taskButton.dataset.adminThreadTask);
+      const message = conversation?.messages?.[messageIndex];
+      if (conversation && message) addParentMessageToTasks(conversation, message, messageIndex);
+    });
+    document.getElementById("admin-parent-thread-compose")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const dialog = document.getElementById("admin-parent-thread-dialog");
+      const reply = document.getElementById("admin-parent-thread-reply");
+      const conversation = teacherParentPreviewConversations.find((item) => item.id === dialog?.dataset.conversationId);
+      const text = reply?.value.trim();
+      if (!conversation || !text) return;
+      const now = new Date();
+      conversation.messages = Array.isArray(conversation.messages) ? conversation.messages : [];
+      conversation.messages.push({ author:"admin", label:"Dance Techniques Admin", time:now.toLocaleTimeString([], { hour:"numeric", minute:"2-digit" }), text, acknowledgedByTeacher:true });
+      conversation.newestPreview = text;
+      conversation.timestamp = "Just now";
+      conversation.order = Date.now();
+      conversation.unread = 0;
+      reply.value = "";
+      openAdminParentConversation(conversation);
+      renderAdminParentMessagePreview();
     });
     document.getElementById("teacher-messages-parents-panel")?.addEventListener("change", (event) => {
       event.stopPropagation();
@@ -29855,6 +30333,18 @@
       renderTeacherParentPreview();
     });
     document.getElementById("teacher-messages-parents-panel")?.addEventListener("click", (event) => {
+      const taskButton = event.target.closest("[data-parent-message-task]");
+      if (taskButton) {
+        const conversation = teacherParentPreviewConversations.find((item) => item.id === selectedTeacherParentPreviewId);
+        const messageIndex = Number(taskButton.dataset.parentMessageTask);
+        const message = conversation?.messages?.[messageIndex];
+        if (conversation && message) {
+          const metadata = adminParentConversationMetadata(conversation);
+          pendingTeacherEscalation = { conversationId:conversation.id, messageIndex, escalatedBy:metadata.teacherName || "Dancer’s Teacher" };
+          document.getElementById("teacher-parent-escalate-dialog")?.showModal();
+        }
+        return;
+      }
       const conversationButton = event.target.closest("[data-parent-preview-conversation]");
       if (conversationButton) {
         selectedTeacherParentPreviewId = conversationButton.dataset.parentPreviewConversation || "";
@@ -29868,6 +30358,113 @@
         document.getElementById("teacher-parent-conversation-list")?.querySelector("button")?.focus();
       }
     });
+    document.querySelector("[data-teacher-escalate-cancel]")?.addEventListener("click", () => {
+      pendingTeacherEscalation = null;
+      document.getElementById("teacher-parent-escalate-dialog")?.close();
+    });
+    document.querySelector("[data-teacher-escalate-confirm]")?.addEventListener("click", () => {
+      const pending = pendingTeacherEscalation;
+      pendingTeacherEscalation = null;
+      const conversation = teacherParentPreviewConversations.find((item) => item.id === pending?.conversationId);
+      const message = conversation?.messages?.[pending?.messageIndex];
+      if (!conversation || !message) { document.getElementById("teacher-parent-escalate-dialog")?.close(); return; }
+      const added = addParentMessageToTasks(conversation, message, pending.messageIndex, { escalatedBy:pending.escalatedBy, assignee:"Ms. Lexi" });
+      if (added) {
+        message.acknowledgedByTeacher = true;
+        message.escalatedToAdmin = true;
+        const automaticReply = "Thanks for reaching out! Your dancer’s teacher has passed your message along to our Dance Director team so the right person can take care of you. 💕\n\nYour message is now on our team’s to-do list, and a Dance Director will follow up with you soon. No need to reach out again — we’ve got you!";
+        conversation.messages.push({ author:"teacher", label:"Dance Techniques", time:new Date().toLocaleTimeString([], { hour:"numeric", minute:"2-digit" }), text:automaticReply, acknowledgedByTeacher:true, automaticEscalationReply:true });
+        conversation.newestPreview = automaticReply;
+        conversation.timestamp = "Just now";
+        conversation.order = Date.now();
+        conversation.unread = 0;
+        renderTeacherParentPreview();
+        renderAdminParentMessagePreview();
+        showToast(`Escalated by ${pending.escalatedBy}. Admin will take it from here.`);
+      }
+      document.getElementById("teacher-parent-escalate-dialog")?.close();
+    });
+    document.querySelector("[data-open-director-tasks]")?.addEventListener("click", () => {
+      directorTaskHistoryOpen = false;
+      renderDirectorParentTasks();
+      document.getElementById("director-task-dialog")?.showModal();
+    });
+    document.querySelector("[data-close-director-tasks]")?.addEventListener("click", () => document.getElementById("director-task-dialog")?.close());
+    document.querySelector("[data-director-task-history]")?.addEventListener("click", () => { directorTaskHistoryOpen = !directorTaskHistoryOpen; renderDirectorParentTasks(); });
+    document.getElementById("director-task-sort")?.addEventListener("change", (event) => { directorTaskSort = event.target.value || "priority"; renderDirectorParentTasks(); });
+    document.querySelector("[data-director-task-add]")?.addEventListener("click", () => {
+      const message = window.prompt("What needs to be done?")?.trim();
+      if (!message) return;
+      directorParentTasks.unshift({ id: `manual-${Date.now()}`, complete: false, priority: false, createdAtMs: Date.now(), message, sender: "", studentName: "", teacherName: "", school: "", className: "", danceDay: "", assignee: "Ms. Lexi", notes: [] });
+      saveDirectorParentTasks(); renderDirectorParentTasks();
+    });
+    document.getElementById("director-task-list")?.addEventListener("change", (event) => {
+      const assigneeSelect = event.target.closest("[data-director-task-assignee]");
+      if (assigneeSelect) {
+        const task = directorParentTasks.find((item) => item.id === assigneeSelect.dataset.directorTaskAssignee);
+        if (task) { task.assignee = assigneeSelect.value; saveDirectorParentTasks(); renderDirectorParentTasks(); }
+        return;
+      }
+      const checkbox = event.target.closest("[data-director-task-complete]");
+      if (!checkbox) return;
+      const task = directorParentTasks.find((item) => item.id === checkbox.dataset.directorTaskComplete);
+      if (!task) return;
+      checkbox.checked = false;
+      pendingDirectorTaskCompleteId = task.id;
+      document.getElementById("director-task-complete-dialog")?.showModal();
+    });
+    document.querySelector("[data-task-complete-cancel]")?.addEventListener("click", () => { pendingDirectorTaskCompleteId = ""; document.getElementById("director-task-complete-dialog")?.close(); });
+    document.querySelector("[data-task-complete-confirm]")?.addEventListener("click", () => {
+      const task = directorParentTasks.find((item) => item.id === pendingDirectorTaskCompleteId);
+      if (task) {
+        task.complete = true;
+        task.completedAt = new Date().toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
+        saveDirectorParentTasks();
+      }
+      pendingDirectorTaskCompleteId = "";
+      document.getElementById("director-task-complete-dialog")?.close();
+      renderDirectorParentTasks();
+    });
+    document.querySelector("[data-task-remove-cancel]")?.addEventListener("click", () => { pendingDirectorTaskRemoveId = ""; document.getElementById("director-task-remove-dialog")?.close(); });
+    document.querySelector("[data-task-remove-confirm]")?.addEventListener("click", () => {
+      directorParentTasks = directorParentTasks.filter((task) => task.id !== pendingDirectorTaskRemoveId);
+      pendingDirectorTaskRemoveId = "";
+      saveDirectorParentTasks();
+      document.getElementById("director-task-remove-dialog")?.close();
+      renderDirectorParentTasks();
+    });
+    document.getElementById("director-task-list")?.addEventListener("click", (event) => {
+      const removeButton = event.target.closest("[data-director-task-remove]");
+      if (removeButton) {
+        pendingDirectorTaskRemoveId = removeButton.dataset.directorTaskRemove;
+        document.getElementById("director-task-remove-dialog")?.showModal();
+        return;
+      }
+      const priorityButton = event.target.closest("[data-director-task-priority]");
+      if (priorityButton) {
+        const task = directorParentTasks.find((item) => item.id === priorityButton.dataset.directorTaskPriority);
+        if (task) { task.priority = !task.priority; saveDirectorParentTasks(); renderDirectorParentTasks(); }
+        return;
+      }
+      if (event.target.closest("input,select,button")) return;
+      const taskCard = event.target.closest("[data-director-task-open]");
+      const task = directorParentTasks.find((item) => item.id === taskCard?.dataset.directorTaskOpen);
+      if (!task) return;
+      const conversation = teacherParentPreviewConversations.find((item) => item.id === task.conversationId || String(task.id).startsWith(`${item.id}-`));
+      if (conversation) { document.getElementById("director-task-dialog")?.close(); openAdminParentConversation(conversation); }
+    });
+    document.getElementById("director-task-list")?.addEventListener("click", (event) => {
+      const noteButton = event.target.closest("[data-director-task-note]");
+      if (!noteButton) return;
+      const note = window.prompt("Add a note")?.trim();
+      if (!note) return;
+      const task = directorParentTasks.find((item) => item.id === noteButton.dataset.directorTaskNote);
+      if (!task) return;
+      task.notes = Array.isArray(task.notes) ? task.notes : [];
+      task.notes.push({ text: note, createdAt: new Date().toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) });
+      saveDirectorParentTasks(); renderDirectorParentTasks();
+    });
+    renderDirectorParentTasks();
 
     document.getElementById("admin-thread-list")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-admin-thread]");
@@ -32706,6 +33303,13 @@
     };
 
     let teacherClassPostClassId = "";
+    let teacherActivitiesClassId = "";
+    let teacherActivitiesType = "";
+    let teacherActivitiesAudience = "";
+    let teacherActivitiesCurriculumSection = "";
+    let teacherActivitiesSmsSelected = false;
+    let teacherActivitiesAlertReview = false;
+    const teacherActivitiesPrivateDancerIds = new Set();
     let teacherClassPostFile = null;
     let teacherClassPostPreviewUrl = "";
     let teacherClassPostIdempotencyKey = "";
@@ -32780,6 +33384,63 @@
       resetTeacherClassPost();
       setTeacherRosterOverlay("teacher-class-post-overlay", false);
     };
+
+    const teacherActivityLabel = (value) => ({ photos:"Picture", videos:"Video", alert:"Alert", applause:"Applause", incident:"Incident", curriculum:"Curriculum", drafts:"Drafts" })[value] || "Activity";
+    const teacherActivityBadge = (value) => ({ photos:"teacher-activity-picture.png", videos:"teacher-activity-video.png", alert:"teacher-activity-alert.png", applause:"teacher-activity-applause.png", incident:"teacher-activity-incident.png", curriculum:"teacher-activity-curriculum.png", drafts:"teacher-activity-drafts.png", gallery:"teacher-activity-gallery.png", class:"teacher-activity-class-feed.png", private:"teacher-activity-private-feed.png" })[value] || "";
+    const teacherActivityTile = (value, label = teacherActivityLabel(value)) => `<img class="teacher-activity-badge" src="assets/${teacherActivityBadge(value)}" alt="" aria-hidden="true"><span class="teacher-activity-tile-title">${rosterSafe(label)}</span>`;
+    const teacherActivitiesClass = () => teacherRosterClasses().find((item) => String(item.id) === String(teacherActivitiesClassId));
+    const teacherActivitiesMenuMarkup = () => `<div class="teacher-activities-grid" aria-label="Choose an activity">
+      <button class="teacher-activities-choice" type="button" data-teacher-activity-type="photos">${teacherActivityTile("photos")}</button>
+      <button class="teacher-activities-choice" type="button" data-teacher-activity-type="videos">${teacherActivityTile("videos")}</button>
+      <button class="teacher-activities-choice" type="button" data-teacher-activity-type="alert">${teacherActivityTile("alert")}</button>
+      <button class="teacher-activities-choice" type="button" data-teacher-activity-type="applause">${teacherActivityTile("applause")}</button>
+      <button class="teacher-activities-choice" type="button" data-teacher-activity-type="incident">${teacherActivityTile("incident")}</button>
+      <button class="teacher-activities-choice" type="button" data-teacher-activity-type="curriculum">${teacherActivityTile("curriculum")}</button>
+    </div><div class="teacher-activities-featured">
+      <button class="teacher-activities-choice" type="button" data-teacher-class-gallery>${teacherActivityTile("gallery", "Class Gallery")}</button>
+      <button class="teacher-activities-choice" type="button" data-teacher-activity-type="drafts">${teacherActivityTile("drafts")}</button>
+    </div>`;
+    const teacherActivitiesDancers = () => {
+      const rosterClass = teacherActivitiesClass();
+      return rosterClass ? sortRosterStudents(rosterEnrolled(rosterClass)) : [];
+    };
+    const teacherActivitiesPrivateGrid = () => `<div class="teacher-activities-private-grid">${teacherActivitiesDancers().map((student) => {
+      const id = String(student.id), selected = teacherActivitiesPrivateDancerIds.has(id);
+      return `<button class="teacher-activities-private-dancer" type="button" data-teacher-activity-private-dancer="${rosterSafe(id)}" aria-pressed="${selected}"><span class="roster-student-photo">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}</span><span>${rosterSafe(rosterStudentFirstName(student))}</span></button>`;
+    }).join("")}</div>`;
+    const teacherActivitiesCurriculumEvent = (rosterClass) => {
+      const todayMatch = eventsForTeachingDate(isoDate(homeWidgetDate)).find((event) => event.hasCurriculum && enrollmentSchoolNameMatches(event.school, rosterClass.schoolName));
+      if (todayMatch) return todayMatch;
+      const current = currentTeachingEvent();
+      return current?.hasCurriculum && enrollmentSchoolNameMatches(current.school, rosterClass.schoolName) ? current : null;
+    };
+    const teacherCurriculumShareSections = (rosterClass) => { const event=teacherActivitiesCurriculumEvent(rosterClass), lesson=frenchLessonDisplay(curriculumWeeks[event?.curriculumKey]?.vocab || ""); return [{id:"french",label:"En Français",badge:"assets/curriculum-french-word.png",lesson,available:Boolean(event?.curriculumKey)}]; };
+    const teacherCurriculumSectionChooserMarkup = (rosterClass) => { const sections=teacherCurriculumShareSections(rosterClass); return `<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-activities-back>← Activities</button><h4>Curriculum</h4><p class="subtle">Choose a curriculum section to prepare for this class feed.</p><div class="teacher-activities-grid">${sections.map((section)=>`<button class="teacher-activities-choice" type="button" data-teacher-curriculum-section="${section.id}" ${section.available ? "" : "disabled"}><img class="teacher-activity-badge" src="${section.badge}" alt=""><span>${section.label}</span></button>`).join("")}</div>${sections.some((section)=>section.available)?"":`<div class="teacher-roster-empty">No curriculum section is available for this class today.</div>`}<p class="teacher-activities-draft-note">Curriculum shares are Class Feed only and remain preview drafts.</p></section>`; };
+    const teacherCurriculumSharePreviewMarkup = (rosterClass) => { const section=teacherCurriculumShareSections(rosterClass).find((item)=>item.id===teacherActivitiesCurriculumSection); if(!section?.available)return teacherCurriculumSectionChooserMarkup(rosterClass); return `<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-curriculum-sections-back>← Curriculum</button><div class="teacher-alert-review"><p><strong>Class Feed Preview · ${section.label}</strong></p><img class="teacher-activity-badge" src="${section.badge}" alt=""><p><strong>${rosterSafe(section.lesson.term)}</strong><br><em>${rosterSafe(section.lesson.pronunciation)}</em><br>${rosterSafe(section.lesson.translation)}</p><p>Ballet speaks French—and soon, our little dancers will too!</p></div><p class="teacher-activities-draft-note">Draft only — this preview has not been posted.</p></section>`; };
+    const teacherActivitiesResetStep = () => { teacherActivitiesType=""; teacherActivitiesAudience=""; teacherActivitiesCurriculumSection=""; teacherActivitiesSmsSelected=false; teacherActivitiesAlertReview=false; teacherActivitiesPrivateDancerIds.clear(); };
+    const renderTeacherActivities = () => {
+      const content = document.getElementById("teacher-activities-content"), rosterClass = teacherActivitiesClass();
+      if (!content || !rosterClass) return;
+      setText("teacher-activities-class-name", `${rosterSchoolNickname(rosterClass.schoolName)} · ${rosterClass.name}`);
+      if (!teacherActivitiesType) { content.innerHTML = teacherActivitiesMenuMarkup(); return; }
+      if (teacherActivitiesType === "drafts") { content.innerHTML = `<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-activities-back>← Activities</button><h4>Drafts</h4><div class="teacher-roster-empty">No activity drafts yet.</div></section>`; return; }
+      if (teacherActivitiesType === "incident") { content.innerHTML = `<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-activities-back>← Activities</button><h4>Incidents</h4><p class="subtle">Incidents are always private.</p><div class="teacher-activities-grid"><button class="teacher-activities-choice" type="button" data-teacher-incident-type="potty">${teacherActivityTile("", "Potty Accident").replace('src="assets/"','src="assets/teacher-incident-potty.png"')}</button><button class="teacher-activities-choice" type="button" data-teacher-incident-type="boo-boo">${teacherActivityTile("", "Boo Boo Report").replace('src="assets/"','src="assets/teacher-incident-boo-boo.png"')}</button><button class="teacher-activities-choice" type="button" data-teacher-incident-type="home-help">${teacherActivityTile("", "Help from Home").replace('src="assets/"','src="assets/teacher-incident-home-help.png"')}</button></div></section>`; return; }
+      if (teacherActivitiesType === "curriculum") { content.innerHTML=teacherActivitiesCurriculumSection ? teacherCurriculumSharePreviewMarkup(rosterClass) : teacherCurriculumSectionChooserMarkup(rosterClass); return; }
+      const count = teacherActivitiesPrivateDancerIds.size;
+      if (teacherActivitiesType === "alert" && teacherActivitiesAlertReview) { content.innerHTML = `<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-alert-review-back>← Review Recipients</button><h4>Alert Draft Review</h4><div class="teacher-alert-review"><p><strong>Parent Portal:</strong> ${teacherActivitiesAudience === "class" ? "All linked families in this class" : `${count} selected dancer ${count === 1 ? "family" : "families"}`}</p><p><strong>SMS:</strong> ${teacherActivitiesSmsSelected ? "Selected for the same audience" : "Not selected"}</p></div><p class="teacher-activities-draft-note">Preview only — this alert is not posted or sent.</p></section>`; return; }
+      const pictureAudienceOnly = teacherActivitiesType === "photos";
+      const privateSelection = teacherActivitiesAudience === "private" && !pictureAudienceOnly
+        ? teacherActivitiesPrivateGrid() + `<p class="teacher-activities-draft-note">${count ? `${count} dancer${count === 1 ? "" : "s"} selected.` : "No dancers selected yet."}</p>`
+        : teacherActivitiesAudience === "private"
+          ? `<p class="teacher-activities-draft-note">Choose the individual dancer profiles in the next step.</p>`
+          : teacherActivitiesAudience === "class"
+            ? `<p class="teacher-activities-draft-note">This will include all ${teacherActivitiesDancers().length} enrolled dancers in this class.</p>`
+            : "";
+      const privateNeedsSelection = teacherActivitiesAudience === "private" && !pictureAudienceOnly && !count;
+      content.innerHTML = `<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-activities-back>← Activities</button><h4>${teacherActivityLabel(teacherActivitiesType)}</h4><p class="subtle">Who should receive this?</p><div class="teacher-activities-recipient-grid"><button type="button" data-teacher-activity-audience="class" aria-pressed="${teacherActivitiesAudience === "class"}">${teacherActivityTile("class", "Class Feed")}</button><button type="button" data-teacher-activity-audience="private" aria-pressed="${teacherActivitiesAudience === "private"}">${teacherActivityTile("private", "Private Feed")}</button></div>${privateSelection}${teacherActivitiesType === "alert" && teacherActivitiesAudience ? `<label class="teacher-alert-sms-option"><input type="checkbox" data-teacher-alert-sms ${teacherActivitiesSmsSelected ? "checked" : ""}><span><strong>Also send as SMS</strong><small>Text the same authorized families receiving this alert.</small></span></label>` : ""}${teacherActivitiesAudience ? `<div class="confirm-actions"><button class="primary" type="button" data-teacher-activity-continue ${privateNeedsSelection ? "disabled" : ""}>Continue to Draft</button></div>` : ""}</section>`;
+    };
+    const openTeacherActivities = (classId) => { const rosterClass=teacherRosterClasses().find((item)=>String(item.id)===String(classId)); if(!rosterClass||!rosterEnrolled(rosterClass).length)return showToast("This class has no enrolled dancers to receive a post"); teacherActivitiesClassId=rosterClass.id; teacherActivitiesResetStep(); renderTeacherActivities(); setTeacherRosterOverlay("teacher-activities-overlay",true); };
+    const closeTeacherActivities = () => { teacherActivitiesClassId=""; teacherActivitiesResetStep(); setTeacherRosterOverlay("teacher-activities-overlay",false); };
 
     const openTeacherClassPost = (classId) => {
       const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(classId));
@@ -33432,8 +34093,31 @@
       if (!launch) return;
       event.preventDefault();
       event.stopPropagation();
-      openTeacherClassPost(launch.dataset.teacherClassPost);
+      openTeacherActivities(launch.dataset.teacherClassPost);
     });
+    document.getElementById("teacher-activities-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "teacher-activities-overlay" || event.target.closest("[data-teacher-activities-close]")) return closeTeacherActivities();
+      if (event.target.closest("[data-teacher-activities-back]")) { teacherActivitiesResetStep(); renderTeacherActivities(); return; }
+      if (event.target.closest("[data-teacher-class-gallery]")) { document.getElementById("teacher-activities-content").innerHTML = `<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-activities-back>← Activities</button><h4>Class Gallery</h4><p class="subtle">A shared class gallery is planned for a future Parent Portal build.</p><p class="teacher-activities-draft-note">Preview only — nothing was uploaded or posted.</p></section>`; return; }
+      const activity = event.target.closest("[data-teacher-activity-type]");
+      if (activity) { teacherActivitiesType=activity.dataset.teacherActivityType; teacherActivitiesAudience=""; teacherActivitiesPrivateDancerIds.clear(); renderTeacherActivities(); return; }
+      const curriculum = event.target.closest("[data-teacher-curriculum-section]");
+      if (curriculum) { teacherActivitiesCurriculumSection=curriculum.dataset.teacherCurriculumSection || ""; renderTeacherActivities(); return; }
+      if (event.target.closest("[data-teacher-curriculum-sections-back]")) { teacherActivitiesCurriculumSection=""; renderTeacherActivities(); return; }
+      const audience = event.target.closest("[data-teacher-activity-audience]");
+      if (audience) { teacherActivitiesAudience=audience.dataset.teacherActivityAudience; teacherActivitiesPrivateDancerIds.clear(); teacherActivitiesSmsSelected=false; renderTeacherActivities(); return; }
+      const dancer = event.target.closest("[data-teacher-activity-private-dancer]");
+      if (dancer) { const id=String(dancer.dataset.teacherActivityPrivateDancer); if(teacherActivitiesPrivateDancerIds.has(id))teacherActivitiesPrivateDancerIds.delete(id);else teacherActivitiesPrivateDancerIds.add(id); renderTeacherActivities(); return; }
+      const incident = event.target.closest("[data-teacher-incident-type]");
+      if (incident) { const label=({potty:"Potty Accident","boo-boo":"Boo Boo Report","home-help":"Help from Home"})[incident.dataset.teacherIncidentType]; document.getElementById("teacher-activities-content").innerHTML=`<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-activities-back>← Activities</button><h4>${label}</h4><p class="subtle">Private incident draft — choose one dancer.</p><label>Dancer<select id="teacher-incident-dancer"><option value="">Choose one dancer</option>${teacherActivitiesDancers().map((student)=>`<option value="${rosterSafe(student.id)}">${rosterSafe(rosterStudentFullName(student))}</option>`).join("")}</select></label><p class="teacher-activities-draft-note">Preview only — nothing will be sent yet.</p></section>`; return; }
+      if (event.target.closest("[data-teacher-alert-review-back]")) { teacherActivitiesAlertReview=false; renderTeacherActivities(); return; }
+      if (event.target.closest("[data-teacher-activity-continue]")) {
+        if (teacherActivitiesType === "alert") { teacherActivitiesAlertReview=true; renderTeacherActivities(); return; }
+        if (teacherActivitiesType === "photos") { const classId=teacherActivitiesClassId, audienceMode=teacherActivitiesAudience, ids=[...teacherActivitiesPrivateDancerIds]; closeTeacherActivities(); openTeacherClassPost(classId); teacherClassPostAudienceMode=audienceMode === "private" ? "private" : "class"; teacherClassPostStudentIds.clear(); ids.forEach((id)=>teacherClassPostStudentIds.add(id)); renderTeacherClassPostAudience(); return; }
+        showToast(`${teacherActivityLabel(teacherActivitiesType)} draft preview is ready — nothing was posted`);
+      }
+    });
+    document.getElementById("teacher-activities-overlay")?.addEventListener("change", (event) => { if(event.target.matches("[data-teacher-alert-sms]")){ teacherActivitiesSmsSelected=event.target.checked; } });
     document.getElementById("teacher-class-post-cancel")?.addEventListener("click", closeTeacherClassPost);
     document.getElementById("teacher-class-post-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "teacher-class-post-overlay") closeTeacherClassPost();
@@ -39195,6 +39879,20 @@
       }
       await loadStaffFeedbackInbox();
       showToast(status === "resolved" ? "Feedback resolved" : "Feedback marked reviewed");
+    };
+
+    var selectedAdminMessageAudience = window.selectedAdminMessageAudience || "staff";
+    const renderAdminMessageAudience = () => {
+      const parentsSelected = selectedAdminMessageAudience === "parents";
+      const parentsTab = document.getElementById("admin-messages-parents-tab");
+      const staffTab = document.getElementById("admin-messages-staff-tab");
+      const parentsPanel = document.getElementById("admin-messages-parents-panel");
+      const staffPanel = document.getElementById("admin-messages-staff-panel");
+      if (parentsTab) { parentsTab.setAttribute("aria-selected", String(parentsSelected)); parentsTab.tabIndex = parentsSelected ? 0 : -1; }
+      if (staffTab) { staffTab.setAttribute("aria-selected", String(!parentsSelected)); staffTab.tabIndex = parentsSelected ? -1 : 0; }
+      if (parentsPanel) parentsPanel.hidden = !parentsSelected;
+      if (staffPanel) staffPanel.hidden = parentsSelected;
+      if (parentsSelected) renderAdminParentMessagePreview();
     };
 
     const updateCommunicationStudioToggles = () => {
@@ -45737,6 +46435,10 @@
     renderNotificationCenter();
     renderNotificationPreferences();
     if (document.body.dataset.tourMode === "true") openDashboardDeepLink();
+    if (document.body.dataset.tourMode === "true"
+      && new URLSearchParams(location.search).get("teacher-preview") === "1") {
+      window.setTimeout(() => document.querySelector('[data-mode-btn="teacher"]')?.click(), 0);
+    }
     if (document.body.dataset.tourMode === "true"
       && ["127.0.0.1", "localhost"].includes(location.hostname)
       && new URLSearchParams(location.search).get("enrollment-preview") === "csv") {
