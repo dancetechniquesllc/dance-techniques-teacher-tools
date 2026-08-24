@@ -6692,11 +6692,29 @@
     .tuition-plan-card small { display: block; color: var(--muted); font-size: 11px; }
     .tuition-plan-card .tuition-price { color: var(--berry); font-size: 20px; font-weight: 800; }
     .tuition-plan-card.is-free .tuition-price { color: var(--sage); }
-    .tuition-invoice-details { display: grid; gap: 10px; }
+    .tuition-invoice-details { display: grid; grid-template-columns: minmax(230px,.72fr) minmax(0,1.45fr); overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: #fff; }
+    .tuition-invoice-total-panel { display: grid; place-content: center; gap: 18px; min-height: 265px; padding: 28px; border-right: 1px solid var(--border); text-align: center; background: linear-gradient(145deg,#fffaf8,#fff); }
+    .tuition-invoice-total-panel small { color: var(--brick); font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+    .tuition-invoice-total-panel strong { color: var(--berry); font-family: Georgia,serif; font-size: clamp(42px,5vw,64px); font-weight: 500; }
+    .tuition-invoice-payment-status { justify-self: center; padding: 9px 18px; border: 1px solid #efc8c3; border-radius: 10px; background: #fff0ee; color: #c95555; font-size: 13px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+    .tuition-invoice-payment-status.is-paid { border-color: #bfd7ba; background: #edf6e9; color: #3f7d49; }
+    .tuition-invoice-facts { display: grid; align-content: center; padding: 24px 28px; }
     .tuition-invoice-detail-row { display: grid; grid-template-columns: minmax(130px,.65fr) 1fr; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+    .tuition-invoice-detail-row:last-child { border-bottom: 0; }
     .tuition-invoice-detail-row span { color: var(--muted); font-size: 12px; font-weight: 750; }
     .tuition-invoice-detail-row strong { text-align: right; }
-    .monthly-statement-preview { position: relative; width: min(100%, 650px); aspect-ratio: 1102 / 1427; margin: 0 auto; overflow: hidden; background: #fffdf8 url('assets/invoices/monthly-dance-statement-3-row.png') center/100% 100% no-repeat; color: #102541; font-family: Georgia, serif; box-shadow: 0 12px 34px rgba(63,30,32,.14); }
+    .invoice-email-receipt { display: grid; grid-template-columns: 86px 1fr; align-items: center; gap: 18px; padding: 22px 28px; border: 1px solid var(--border); border-radius: 18px; background: #fff; }
+    .invoice-email-receipt-icon { display: block; width: 86px; height: 68px; object-fit: contain; }
+    .invoice-email-receipt h4 { margin: 0 0 6px; font-size: 18px; }
+    .invoice-email-receipt small { color: var(--muted); }
+    .invoice-email-receipt-statuses { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .invoice-email-receipt-status { padding: 7px 12px; border: 1px solid #e4c986; border-radius: 999px; background: #fff2d7; color: #805707; font-size: 12px; font-weight: 800; }
+    .invoice-email-receipt-status.is-complete { border-color: #bfd7ba; background: #edf6e9; color: #3f7d49; }
+    .tuition-late-fee-control { display: flex; justify-content: flex-end; align-items: center; gap: 10px; font-weight: 800; }
+    .tuition-late-fee-control input { width: 22px; height: 22px; margin: 0; accent-color: var(--brick); cursor: pointer; }
+    .tuition-late-fee-control span { color: var(--brick); font-size: 12px; }
+    @media (max-width: 720px) { .tuition-invoice-details { grid-template-columns: 1fr; } .tuition-invoice-total-panel { min-height: 205px; border-right: 0; border-bottom: 1px solid var(--border); } }
+    .monthly-statement-preview { position: relative; width: min(100%, 650px); aspect-ratio: 1102 / 1427; margin: 0 auto; overflow: hidden; background: #fffdf8 url('assets/invoices/monthly-dance-statement-3-row-no-bottom-florals.png') center/100% 100% no-repeat; color: #102541; font-family: Georgia, serif; box-shadow: 0 12px 34px rgba(63,30,32,.14); }
     .monthly-statement-preview .statement-field { position: absolute; margin: 0; font-size: clamp(7px, 1.15vw, 12px); line-height: 1.05; font-weight: 500; }
     .statement-logo { position: absolute; left: 36%; top: 3.2%; width: 28%; height: 10%; object-fit: contain; }
     .statement-invoice-date { left: 52.5%; top: 29%; width: 21%; text-align: center; }
@@ -15310,7 +15328,7 @@
                 <button type="button" role="tab" aria-selected="false" data-invoice-tuition-type="other"><strong>Other</strong><small>Miscellaneous · <span data-tuition-count="other">0</span> dancers</small></button>
               </div>
               <div class="tuition-roster-tools">
-                <label>Tuition Month<select id="tuition-plan-month"><option value="2026-08">August 2026</option><option value="2026-09">September 2026</option><option value="2026-10">October 2026</option><option value="2026-11">November 2026</option><option value="2026-12">December 2026</option><option value="2027-01">January 2027</option><option value="2027-02">February 2027</option><option value="2027-03">March 2027</option><option value="2027-04">April 2027</option><option value="2027-05">May 2027</option><option value="2027-06">June 2027</option><option value="2027-07">July 2027</option></select></label>
+                <label>Tuition Month<select id="tuition-plan-month"><option value="2026-09">September 2026</option><option value="2026-10">October 2026</option><option value="2026-11">November 2026</option><option value="2026-12">December 2026</option><option value="2027-01">January 2027</option><option value="2027-02">February 2027</option><option value="2027-03">March 2027</option><option value="2027-04">April 2027</option><option value="2027-05">May 2027</option><option value="2027-06">June 2027</option><option value="2027-07">July 2027</option></select></label>
                 <label>Payment Status<select id="tuition-status-filter"><option value="all">All Statuses</option><option value="not-enrolled">Not Yet Enrolled</option><option value="paid">Paid on Time</option><option value="late">Paid Late</option><option value="unpaid">Unpaid</option></select></label>
                 <label>Teacher<select id="tuition-teacher-filter"><option value="all">All Teachers</option></select></label>
                 <label>School<select id="tuition-school-filter"><option value="all">All Schools</option></select></label>
@@ -15364,9 +15382,9 @@
               <div class="invoice-settings-card">
                 <div class="invoice-settings-head"><div><small id="tuition-invoice-school"></small><h3 id="tuition-invoice-title">Tuition Invoice</h3></div><button class="invoice-settings-close" type="button" data-close-tuition-invoice aria-label="Close">×</button></div>
                 <p class="invoice-settings-help" id="tuition-invoice-preview-note">Local preview details only. Live details will come from the invoice and Square payment record.</p>
-                <details class="tuition-statement-section" open><summary>Invoice</summary><div id="tuition-statement-preview"></div></details>
                 <div class="invoice-email-receipt" id="tuition-invoice-email-receipt"></div>
                 <div class="tuition-invoice-details" id="tuition-invoice-details"></div>
+                <details class="tuition-statement-section"><summary>Invoice</summary><div id="tuition-statement-preview"></div></details>
                 <div class="invoice-settings-actions"><button class="primary" type="button" data-close-tuition-invoice>Done</button></div>
               </div>
             </dialog>
@@ -35305,7 +35323,7 @@
       if (billingHistoryPanel) {
         const records = student.tuitionPayments || student.tuition_payments || {};
         const today = new Date();
-        const seasonStart = new Date(today.getMonth() >= 7 ? today.getFullYear() : today.getFullYear() - 1, 7, 1, 12);
+        const seasonStart = new Date(today.getMonth() >= 7 ? today.getFullYear() : today.getFullYear() - 1, 8, 1, 12);
         const enrolledValue = student.enrolledAt || student.enrolled_at || student.enrollmentStart || student.enrollment_start;
         const enrolledAt = enrolledValue && !Number.isNaN(new Date(enrolledValue).getTime()) ? new Date(enrolledValue) : seasonStart;
         const cursor = new Date(Math.max(new Date(enrolledAt.getFullYear(), enrolledAt.getMonth(), 1, 12).getTime(), seasonStart.getTime()));
@@ -39523,7 +39541,7 @@
     const renderTuitionPlanRoster = () => {
       const grid = document.getElementById("tuition-plan-grid");
       if (!grid) return;
-      const month = document.getElementById("tuition-plan-month")?.value || "2026-08";
+      const month = document.getElementById("tuition-plan-month")?.value || "2026-09";
       const dancers = activeInvoiceDancers().map((entry, index) => ({ ...entry, plan: tuitionPlanForStudent(entry.student), payment: tuitionMonthStatus(entry.student, month, index) }));
       ["tuition", "sibling", "school-staff", "other"].forEach(key => {
         const count = dancers.filter(entry => entry.plan.key === key).length;
@@ -39550,7 +39568,7 @@
         return `<button type="button" class="tuition-plan-card is-${payment.key} ${plan.price === 0 ? "is-free" : ""}" data-open-tuition-invoice="${escapeText(student.id)}"><strong>${escapeText(`${student.firstName || student.first_name || "Dancer"} ${student.lastName || student.last_name || ""}`.trim())}</strong><small>${escapeText(schoolName)}</small><span class="tuition-price">${payment.key === "not-enrolled" ? "—" : plan.price === 0 ? "Free" : `$${plan.price.toFixed(2)}`}</span><small>${escapeText(payment.label)}</small></button>`;
       }).join("") : `<div class="payroll-placeholder">No dancers match this tuition plan and search.</div>`;
     };
-    const invoiceExampleForDancer = (entry, monthLabel, monthDate, plan, payment) => {
+    const invoiceExampleForDancer = (entry, monthLabel, monthDate, plan, payment, lateFeeApplied = false) => {
       const first = entry.student.firstName || entry.student.first_name || "Dancer";
       const last = entry.student.lastName || entry.student.last_name || "";
       const normalized = `${first} ${last}`.trim().toLowerCase();
@@ -39558,13 +39576,13 @@
       invoiceDate.setDate(invoiceDate.getDate() - 3);
       const dueDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1, 12);
       const base = { billedTo: `${last || first} Family`, dancers: `${first} ${last}`.trim(), school: entry.schoolName, teacher: entry.teacherName, invoiceDate, dueDate, status: payment.label, lines: [{ description: `${monthLabel.split(" ")[0]} Dance Tuition - ${first}`, amount: plan.price }], total: plan.price };
-      if (normalized === "aaleah hubbard") return { ...base, status: "Unpaid", lines: [...base.lines, { description: "Late Fee", amount: 10 }], total: 65 };
+      if (normalized === "aaleah hubbard") return { ...base, status: "Unpaid", lines: lateFeeApplied ? [...base.lines, { description: "Late Fee", amount: 10 }] : base.lines, total: lateFeeApplied ? 65 : 55 };
       if (normalized === "abigail valentine") return { ...base, status: "AUTO-PAY ENROLLED", total: 55 };
       if (last.toLowerCase() === "wlazlo") return { ...base, billedTo: "Wlazlo Family", dancers: "Campbell & Harper Wlazlo", lines: [
         { description: `${monthLabel.split(" ")[0]} Dance Tuition - Campbell`, amount: 55 },
         { description: `${monthLabel.split(" ")[0]} Dance Tuition - Harper - Sibling Discount`, amount: 45, standard: 55 }
       ], total: 100 };
-      return base;
+      return lateFeeApplied ? { ...base, lines: [...base.lines, { description: "Late Fee", amount: 10 }], total: base.total + 10 } : base;
     };
     const renderMonthlyStatementExample = (example) => {
       const dateLabel = (date) => date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
@@ -39579,10 +39597,13 @@
         ${example.status === "Unpaid" ? `<div class="statement-unpaid-notice">Payment unsuccessful —<br>$${example.total.toFixed(2)} remains due.</div>` : ""}
       </div>`;
     };
+    const waivedInvoiceLateFees = new Set();
+    let currentTuitionInvoiceEntry = null;
     const openTuitionInvoice = (studentId, fallbackEntry = null) => {
       const entry = invoicePreviewDancers().find(({ student }) => String(student.id) === String(studentId)) || fallbackEntry;
       if (!entry) return;
-      const month = document.getElementById("tuition-plan-month")?.value || "2026-08";
+      currentTuitionInvoiceEntry = entry;
+      const month = document.getElementById("tuition-plan-month")?.value || "2026-09";
       const plan = tuitionPlanForStudent(entry.student);
       const allInPlan = invoicePreviewDancers().filter(({ student }) => tuitionPlanForStudent(student).key === plan.key);
       const payment = tuitionMonthStatus(entry.student, month, Math.max(0, allInPlan.findIndex(({ student }) => student.id === studentId)));
@@ -39600,26 +39621,41 @@
       const payer = String(monthRecord.payerFullName || monthRecord.payer_full_name || entry.student?.payerFullName || entry.student?.payer_full_name || entry.student?.parentName || entry.student?.parent_name || entry.student?.guardianName || entry.student?.guardian_name || (preview ? "Preview Payer" : "Not recorded")).trim();
       const dancerName = `${entry.student.firstName || entry.student.first_name || "Dancer"} ${entry.student.lastName || entry.student.last_name || ""}`.trim();
       const monthLabel = monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-      const invoiceExample = invoiceExampleForDancer(entry, monthLabel, monthDate, plan, payment);
+      const lateFeeKey = `${studentId}:${month}`;
+      const recordedLateFee = Number(monthRecord.lateFeeCents || monthRecord.late_fee_cents || entry.student?.lateFeeCents || entry.student?.late_fee_cents || 0) > 0;
+      const lateFeeBegins = new Date(monthDate.getFullYear(), monthDate.getMonth(), 10, 0, 0, 0);
+      const lateFeeAvailable = payment.key === "unpaid" && (recordedLateFee || new Date() >= lateFeeBegins);
+      const lateFeeApplied = lateFeeAvailable && !waivedInvoiceLateFees.has(lateFeeKey);
+      const invoiceExample = invoiceExampleForDancer(entry, monthLabel, monthDate, plan, payment, lateFeeApplied);
       renderMonthlyStatementExample(invoiceExample);
       const openedValue = monthRecord.invoiceOpenedAt || monthRecord.invoice_opened_at || monthRecord.firstOpenedAt || monthRecord.first_opened_at;
       const previewOpened = preview && dancerName.toLowerCase() !== "aaleah hubbard" ? new Date(previewSentDate.getTime() + 42 * 60 * 1000) : null;
       const openedAt = openedValue || previewOpened;
-      document.getElementById("tuition-invoice-email-receipt").innerHTML = `<h4>Email Receipt</h4><small>Sent to the family email on ${escapeText(formatDate(sentDate))}</small><div class="invoice-email-receipt-statuses"><span class="invoice-email-receipt-status is-complete">Delivered</span><span class="invoice-email-receipt-status ${openedAt ? "is-complete" : ""}">${openedAt ? `Viewed on ${escapeText(formatDate(openedAt))} at ${escapeText(new Date(openedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }))}` : "Not viewed yet"}</span></div>`;
+      document.getElementById("tuition-invoice-email-receipt").innerHTML = `<img class="invoice-email-receipt-icon" src="assets/invoices/email-receipt-envelope.png" alt=""><div><h4>Email Receipt</h4><small>${sentDate ? `Sent to family email on ${escapeText(formatDate(sentDate))}` : "Not sent to family email yet"}</small><div class="invoice-email-receipt-statuses"><span class="invoice-email-receipt-status ${sentDate ? "is-complete" : ""}">${sentDate ? "✓ Delivered" : "Pending delivery"}</span><span class="invoice-email-receipt-status ${openedAt ? "is-complete" : ""}">${openedAt ? `Viewed on ${escapeText(formatDate(openedAt))} at ${escapeText(new Date(openedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }))}` : "◉ Not viewed"}</span></div></div>`;
       document.getElementById("tuition-invoice-title").textContent = `${dancerName} · ${monthLabel}`;
       document.getElementById("tuition-invoice-school").textContent = entry.schoolName;
-      document.getElementById("tuition-invoice-details").innerHTML = `
-        <div class="tuition-invoice-detail-row"><span>Invoice Sent</span><strong>${escapeText(formatDate(sentDate))}</strong></div>
-        <div class="tuition-invoice-detail-row"><span>Invoice</span><strong>${escapeText(`${plan.label === "Tuition" ? "Tuition" : `${plan.label} Tuition`} · ${plan.price === 0 ? "Free" : `$${plan.price.toFixed(2)}`}`)}</strong></div>
-        <div class="tuition-invoice-detail-row"><span>Payment Status</span><strong>${escapeText(payment.label)}</strong></div>
-        <div class="tuition-invoice-detail-row"><span>Date Paid</span><strong>${escapeText(payment.key === "paid" || payment.key === "late" ? formatDate(paidDate) : "Not paid")}</strong></div>
-        <div class="tuition-invoice-detail-row"><span>Card</span><strong>${lastFour ? `Ending in ${escapeText(lastFour)}` : "Not recorded"}</strong></div>
-        <div class="tuition-invoice-detail-row"><span>Payer</span><strong>${escapeText(payer)}</strong></div>`;
+      const paymentComplete = payment.key === "paid" || payment.key === "late";
+      document.getElementById("tuition-invoice-details").innerHTML = `<div class="tuition-invoice-total-panel"><small>Tuition Invoice</small><strong>$${invoiceExample.total.toFixed(2)}</strong><span class="tuition-invoice-payment-status ${paymentComplete ? "is-paid" : ""}">${escapeText(paymentComplete ? payment.label : "Unpaid")}</span></div><div class="tuition-invoice-facts">
+        <div class="tuition-invoice-detail-row"><span>Payer</span><strong>${escapeText(payer)}</strong></div>
+        <div class="tuition-invoice-detail-row"><span>Invoice sent</span><strong>${sentDate ? escapeText(formatDate(sentDate)) : "Not sent"}</strong></div>
+        <div class="tuition-invoice-detail-row"><span>Payment method</span><strong>${lastFour ? `Card ending in ${escapeText(lastFour)}` : "—"}</strong></div>
+        <div class="tuition-invoice-detail-row"><span>Date paid</span><strong>${paymentComplete ? escapeText(formatDate(paidDate)) : "—"}</strong></div>
+        ${lateFeeAvailable ? `<div class="tuition-invoice-detail-row"><span>Late fee</span><label class="tuition-late-fee-control"><input type="checkbox" data-toggle-invoice-late-fee="${escapeText(studentId)}" data-invoice-month="${escapeText(month)}" ${lateFeeApplied ? "checked" : ""}><span>$10 Late Fee Applied</span></label></div>` : ""}
+      </div>`;
       document.getElementById("tuition-invoice-dialog").showModal();
     };
     document.getElementById("tuition-plan-grid")?.addEventListener("click", (event) => {
       const card = event.target.closest("[data-open-tuition-invoice]");
       if (card) openTuitionInvoice(card.dataset.openTuitionInvoice);
+    });
+    document.getElementById("tuition-invoice-details")?.addEventListener("change", (event) => {
+      const checkbox = event.target.closest("[data-toggle-invoice-late-fee]");
+      if (!checkbox) return;
+      const lateFeeKey = `${checkbox.dataset.toggleInvoiceLateFee}:${checkbox.dataset.invoiceMonth}`;
+      if (checkbox.checked) waivedInvoiceLateFees.delete(lateFeeKey);
+      else waivedInvoiceLateFees.add(lateFeeKey);
+      openTuitionInvoice(checkbox.dataset.toggleInvoiceLateFee, currentTuitionInvoiceEntry);
+      showToast(checkbox.checked ? "Late fee restored" : "Late fee removed from this invoice");
     });
     document.getElementById("roster-profile-billing-history")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-view-student-invoice]");
@@ -39769,7 +39805,7 @@
     document.getElementById("tuition-reset-filters")?.addEventListener("click", () => {
       selectedTuitionPlan = "tuition";
       document.querySelectorAll("[data-invoice-tuition-type]").forEach(item => item.setAttribute("aria-selected", String(item.dataset.invoiceTuitionType === "tuition")));
-      document.getElementById("tuition-plan-month").value = "2026-08";
+      document.getElementById("tuition-plan-month").value = "2026-09";
       document.getElementById("tuition-status-filter").value = "all";
       document.getElementById("tuition-teacher-filter").value = "all";
       document.getElementById("tuition-school-filter").value = "all";
