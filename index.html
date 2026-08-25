@@ -19695,6 +19695,14 @@
       "trialattendancepending", "trialcompleted", "trialcompletedat",
       "futuredancerarchived", "futuredancerarchivedat", "parentcontacthistory"
     ]);
+    const normalizedEnrollmentShirtSize = (size, gender = "") => {
+      const raw = String(size || "").trim();
+      const key = raw.toUpperCase().replace(/\s*\(.+?\)/g, "").replace(/[^A-Z0-9]/g, "");
+      const isBoy = String(gender || "").trim().toLowerCase() === "male";
+      if (isBoy && ["5T", "XS", "YXS", "S", "YS", "SC"].includes(key)) return "SC";
+      if (!isBoy && ["XS", "YXS", "S", "YS", "SC"].includes(key)) return "SC";
+      return raw;
+    };
     const additionalInformationFieldIsVisible = (label) => {
       const normalized = String(label || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
       if (!normalized || hiddenEnrollmentMetadataKeys.has(normalized)) return false;
@@ -19983,7 +19991,7 @@
             <span class="enrollment-history-bubble ${historyBadge.style}" role="status" aria-label="Enrollment history: ${escapeText(historyBadge.label)}" title="Enrollment history">${escapeText(historyBadge.label)}</span>
             <span>${escapeText(item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided")}</span>
             <span>${escapeText(item.student_gender || "Gender not provided")}</span>
-            <span>${escapeText(item.tshirt_size || "Size not provided")}</span>
+            <span>${escapeText(normalizedEnrollmentShirtSize(item.tshirt_size, item.student_gender) || "Size not provided")}</span>
           </div>
           </header>
         </div>
@@ -19999,7 +20007,7 @@
               <label class="enrollment-review-field span-4"><span>Student Last Name</span><input name="student_last_name" value="${escapeText(item.student_last_name || "")}"></label>
               <label class="enrollment-review-field span-3"><span>Birthday</span><input name="student_birth_date" type="date" value="${escapeText(item.student_birth_date || "")}"></label>
               <label class="enrollment-review-field span-3"><span>Gender</span><select name="student_gender">${enrollmentChoiceOptions(["Female", "Male"], item.student_gender || "")}</select></label>
-              <label class="enrollment-review-field span-3"><span>T-Shirt Size</span><select name="tshirt_size">${enrollmentChoiceOptions(["2T", "3T", "4T", "5T", "XS", "S", "M", "L", "XL"], item.tshirt_size || "")}</select></label>
+              <label class="enrollment-review-field span-3"><span>T-Shirt Size</span><select name="tshirt_size">${enrollmentChoiceOptions(["2T", "3T", "4T", "5T", "SC", "MC", "L", "XL"], normalizedEnrollmentShirtSize(item.tshirt_size, item.student_gender))}</select></label>
               <label class="enrollment-review-field span-3"><span>2025 Recital</span><select name="requested_dance_style">${recitalAnswerOptions(item.requested_dance_style || "")}</select></label>
               <label class="enrollment-review-field span-6"><span>Medical Information</span><textarea name="medical_notes" data-entered-content-cue placeholder="Add any medical conditions, allergies, or important health information…">${escapeText(item.medical_notes || "")}</textarea><small class="entered-content-cue" hidden>✓ Information entered</small></label>
               <label class="enrollment-review-field span-6"><span>Registration Notes</span><textarea name="registration_notes" data-entered-content-cue placeholder="Add notes about this enrollment, schedule requests, transitions, etc…">${escapeText(item.registration_notes || "")}</textarea><small class="entered-content-cue" hidden>✓ Information entered</small></label>
@@ -20562,7 +20570,7 @@
             const note = notesByStudent.get(student.id);
             return { id: student.id, enrollmentId: enrollment.id, noteId: note?.id || "", firstName: student.first_name, lastName: student.last_name,
               preferredName: student.preferred_name || "", birthdate: student.birth_date, gender: student.gender === "male" ? "male" : "female",
-              classroom: student.classroom || item.classroom || "", officialClassroom: student.official_classroom || "", tshirtSize: student.tshirt_size || "", kitReceived: Boolean(student.kit_received),
+              classroom: student.classroom || item.classroom || "", officialClassroom: student.official_classroom || "", tshirtSize: normalizedEnrollmentShirtSize(student.tshirt_size, student.gender), kitReceived: Boolean(student.kit_received),
               kitReady: Boolean(student.kit_ready), kitReadyAt: student.kit_ready_at || "", kitReadyBy: student.kit_ready_by || "",
               kitPickedUp: Boolean(student.kit_picked_up), kitPickedUpAt: student.kit_picked_up_at || "", kitPickedUpBy: student.kit_picked_up_by || "",
               kitDeliveredAt: student.kit_delivered_at || "", kitDeliveredBy: student.kit_delivered_by || "",
@@ -20709,7 +20717,7 @@
         student_preferred_name: optional(student.preferredName),
         student_birth_date: optional(student.birthdate),
         student_gender: optional(student.gender),
-        tshirt_size: optional(student.tshirtSize),
+        tshirt_size: optional(normalizedEnrollmentShirtSize(student.tshirtSize, student.gender)),
         student_classroom: optional(student.classroom),
         official_classroom: optional(student.officialClassroom),
         parent_name: parentName,
@@ -20756,7 +20764,7 @@
           preferredName: item.student_preferred_name || "",
           birthdate: item.student_birth_date || student.birthdate,
           gender: item.student_gender || student.gender,
-          tshirtSize: item.tshirt_size || "",
+          tshirtSize: normalizedEnrollmentShirtSize(item.tshirt_size, item.student_gender),
           classroom: item.student_classroom || "",
           officialClassroom: item.official_classroom || "",
           parentName: item.parent_name || "",
@@ -20804,7 +20812,7 @@
       const studentPayload = {
         first_name: student.firstName, last_name: student.lastName, preferred_name: student.preferredName || null,
         birth_date: student.birthdate || null, gender: student.gender === "male" ? "male" : "female", classroom: student.classroom || null,
-        official_classroom: student.officialClassroom || null, tshirt_size: student.tshirtSize || null,
+        official_classroom: student.officialClassroom || null, tshirt_size: normalizedEnrollmentShirtSize(student.tshirtSize, student.gender) || null,
         tuition_discount: student.tuitionDiscount || "none",
         kit_ready: Boolean(student.kitReady || student.kitPickedUp || student.kitReceived),
         kit_ready_at: (student.kitReady || student.kitPickedUp || student.kitReceived) ? (student.kitReadyAt || student.kitPickedUpAt || student.kitDeliveredAt || new Date().toISOString()) : null,
@@ -32638,7 +32646,7 @@
       const selectionAttribute = pickupSelectable ? `data-teacher-order-pickup="${rosterSafe(key)}"` : selfFillSelectable ? `data-teacher-order-self-fill="${rosterSafe(key)}"` : "";
       const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
       const receivesSageBoyShirt = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
-      return `<div class="teacher-order-card ${selectable ? "is-pickup-active" : ""} ${selected ? "is-selected" : ""}" ${selectionAttribute}><span class="teacher-order-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))}</small><small class="teacher-order-shirt-size ${receivesSageBoyShirt ? "is-sage-boy" : ""}">${rosterSafe(student.tshirtSize || "Size not entered")}</small>${dateLabel ? `<small>Delivered ${rosterSafe(dateLabel)}</small>` : ""}</span></div>`;
+      return `<div class="teacher-order-card ${selectable ? "is-pickup-active" : ""} ${selected ? "is-selected" : ""}" ${selectionAttribute}><span class="teacher-order-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))}</small><small class="teacher-order-shirt-size ${receivesSageBoyShirt ? "is-sage-boy" : ""}">${rosterSafe(normalizedEnrollmentShirtSize(student.tshirtSize, student.gender) || "Size not entered")}</small>${dateLabel ? `<small>Delivered ${rosterSafe(dateLabel)}</small>` : ""}</span></div>`;
     };
 
     function renderTeacherOrders() {
@@ -32888,10 +32896,10 @@
           const isBoy = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
           const sizeKey = boutiqueStockSizeKey(size);
           const combined = ["M", "YM", "MC"].includes(sizeKey)
-            ? "M / MC"
+            ? "MC"
             : isBoy
-              ? (["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "5T / XS / S" : size)
-              : (["XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "XS / S" : size);
+              ? (["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "SC" : size)
+              : (["XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "SC" : size);
           const group = isBoy ? quantities.boy : quantities.girl;
           group.set(combined, (group.get(combined) || 0) + 1);
         }
@@ -34458,7 +34466,7 @@
       student.preferredName = String(values.get("preferredName") || "").trim();
       student.lastName = lastName;
       student.birthdate = String(values.get("birthdate") || "").trim();
-      student.tshirtSize = String(values.get("tshirtSize") || "").trim();
+      student.tshirtSize = normalizedEnrollmentShirtSize(values.get("tshirtSize"), student.gender);
       student.parentPhone = String(values.get("parentPhone") || "").trim();
       student.parentEmail = String(values.get("parentEmail") || "").trim();
       student.medicalNotes = String(values.get("medicalNotes") || "").trim();
@@ -35591,7 +35599,7 @@
       if (sortBy === "last") return `${student.lastName || ""} ${rosterStudentFirstName(student)}`;
       if (sortBy === "classroom") return student.classroom || "";
       if (["oldest", "youngest", "birthdate"].includes(sortBy)) return student.birthdate || (sortBy === "oldest" ? "9999" : "");
-      if (sortBy === "tshirt") return student.tshirtSize || student.tshirt_size || "";
+      if (sortBy === "tshirt") return normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender);
       if (sortBy === "parent") return student.parentName || "";
       if (sortBy === "phone") return student.parentPhone || "";
       if (sortBy === "email") return student.parentEmail || "";
@@ -35626,7 +35634,7 @@
         ["age", "Age", (student) => rosterAge(student.birthdate)],
         ["birthdate", "Birthdate", (student) => rosterSafe(student.birthdate || "—")],
         ["gender", "Gender", (student) => rosterSafe(student.gender || "—")],
-        ["tshirt", "T-Shirt", (student) => rosterSafe(student.tshirtSize || student.tshirt_size || "—")],
+        ["tshirt", "T-Shirt", (student) => rosterSafe(normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender) || "—")],
         ["parent", "Parent", (student) => rosterSafe(student.parentName || "—")],
         ["phone", "Parent Phone", (student) => rosterSafe(student.parentPhone || "—")],
         ["email", "Parent Email", (student) => rosterSafe(student.parentEmail || "—")],
@@ -35970,7 +35978,7 @@
         if (day !== "all" && rosterClass.day !== day) return false;
         if (school !== "all" && rosterClass.schoolName !== school) return false;
         if (teacher !== "all" && rosterClass.teacherId !== teacher) return false;
-        const tshirtSize = student.tshirtSize || student.tshirt_size || "";
+        const tshirtSize = normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender);
         if (size !== "all" && tshirtSize !== size) return false;
         if (!search) return true;
         const searchable = [student.firstName, student.preferredName, student.lastName, student.parentName, student.parentFirstName, student.parentLastName, student.parentEmail, student.parentPhone, rosterClass.schoolName, rosterClass.name].filter(Boolean).join(" ").toLowerCase();
@@ -36016,7 +36024,7 @@
       }
       if (sizeSelect) {
         const current = sizeSelect.value || "all";
-        const sizes = [...new Set(students.map((student) => student.tshirtSize || student.tshirt_size || "").filter(Boolean))].sort();
+        const sizes = [...new Set(students.map((student) => normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender)).filter(Boolean))].sort();
         sizeSelect.innerHTML = `<option value="all">All sizes</option>${sizes.map((value) => `<option value="${rosterSafe(value)}">${rosterSafe(value)}</option>`).join("")}`;
         sizeSelect.value = sizes.includes(current) ? current : "all";
       }
@@ -36028,7 +36036,7 @@
       const list = document.getElementById("boutique-kit-list");
       if (list) list.innerHTML = visibleRecords.length ? visibleRecords.map(({ rosterClass, student }) => {
         const status = boutiqueKitStatus(student);
-        const size = student.tshirtSize || student.tshirt_size || "Size not entered";
+        const size = normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender) || "Size not entered";
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
         const selectable = status === "waiting";
         const receivesSageBoyShirt = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
@@ -36641,10 +36649,10 @@
           const isBoy = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
           const sizeKey = boutiqueStockSizeKey(size);
           const combined = ["M", "YM", "MC"].includes(sizeKey)
-            ? "M / MC"
+            ? "MC"
             : isBoy
-              ? (["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "5T / XS / S" : size)
-              : (["XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "XS / S" : size);
+              ? (["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "SC" : size)
+              : (["XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "SC" : size);
           const group = isBoy ? quantities.boy : quantities.girl;
           group.set(combined, (group.get(combined) || 0) + 1);
         }
@@ -46010,7 +46018,7 @@
       student.tuitionDiscount = isMeadowOaksSchoolName(targetClass.schoolName)
         ? "meadow_oaks"
         : document.getElementById("roster-edit-tuition-discount").value || "none";
-      student.tshirtSize = document.getElementById("roster-edit-tshirt-size").value.trim();
+      student.tshirtSize = normalizedEnrollmentShirtSize(document.getElementById("roster-edit-tshirt-size").value, student.gender);
       const kitWasReady = Boolean(student.kitReady);
       const kitWasPickedUp = Boolean(student.kitPickedUp);
       const kitWasReceived = Boolean(student.kitReceived);
