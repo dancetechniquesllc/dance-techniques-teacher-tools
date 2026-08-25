@@ -1961,6 +1961,8 @@
     .teacher-order-card strong, .teacher-order-card small { display: block; font-family: var(--font-body); }
     .teacher-order-card strong { font-size: 14px; font-weight: 800; line-height: 1.15; }
     .teacher-order-card small { color: var(--muted); font-size: 10px; font-weight: 400; line-height: 1.3; }
+    .teacher-order-card .teacher-order-shirt-size { display: inline-grid; min-width: 42px; min-height: 26px; place-items: center; margin: 5px auto 0; padding: 3px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 900; }
+    .teacher-order-card .teacher-order-shirt-size.is-sage-boy { background: var(--sage); }
     .teacher-order-day-bubble { position: absolute; top: 6px; right: 6px; min-width: 22px; height: 22px; display: grid; place-items: center; padding: 0 4px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 8px; font-weight: 950; }
     .teacher-order-select { display: contents; color: inherit; text-align: left; }
     .teacher-order-card.is-pickup-active { cursor: pointer; }
@@ -32635,7 +32637,8 @@
       const dateLabel = status === "delivered" && student.kitDeliveredAt ? new Date(student.kitDeliveredAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "";
       const selectionAttribute = pickupSelectable ? `data-teacher-order-pickup="${rosterSafe(key)}"` : selfFillSelectable ? `data-teacher-order-self-fill="${rosterSafe(key)}"` : "";
       const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
-      return `<div class="teacher-order-card ${selectable ? "is-pickup-active" : ""} ${selected ? "is-selected" : ""}" ${selectionAttribute}><span class="teacher-order-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))}</small><small>${rosterSafe(student.tshirtSize || "Size not entered")}</small>${dateLabel ? `<small>Delivered ${rosterSafe(dateLabel)}</small>` : ""}</span></div>`;
+      const receivesSageBoyShirt = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
+      return `<div class="teacher-order-card ${selectable ? "is-pickup-active" : ""} ${selected ? "is-selected" : ""}" ${selectionAttribute}><span class="teacher-order-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))}</small><small class="teacher-order-shirt-size ${receivesSageBoyShirt ? "is-sage-boy" : ""}">${rosterSafe(student.tshirtSize || "Size not entered")}</small>${dateLabel ? `<small>Delivered ${rosterSafe(dateLabel)}</small>` : ""}</span></div>`;
     };
 
     function renderTeacherOrders() {
@@ -32876,22 +32879,36 @@
     });
     document.getElementById("teacher-orders-size-quantities")?.addEventListener("click", () => {
       const records = filteredTeacherOrderRecords(teacherOrderRecords()).filter(({ student }) => !student.kitReady && !student.kitPickedUp && !student.kitReceived);
-      const quantities = new Map();
+      const quantities = { girl: new Map(), boy: new Map() };
       let missingSizes = 0;
       records.forEach(({ student }) => {
         const size = String(student.tshirtSize || "").trim();
         if (!size) missingSizes += 1;
-        else quantities.set(size, (quantities.get(size) || 0) + 1);
+        else {
+          const isBoy = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
+          const sizeKey = boutiqueStockSizeKey(size);
+          const combined = ["M", "YM", "MC"].includes(sizeKey)
+            ? "M / MC"
+            : isBoy
+              ? (["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "5T / XS / S" : size)
+              : (["XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "XS / S" : size);
+          const group = isBoy ? quantities.boy : quantities.girl;
+          group.set(combined, (group.get(combined) || 0) + 1);
+        }
       });
-      const sortedQuantities = [...quantities.entries()].sort(([left], [right]) => boutiqueShirtSizeSort(left, right));
+      const sortedGirls = [...quantities.girl.entries()].sort(([left], [right]) => boutiqueShirtSizeSort(left, right));
+      const sortedBoys = [...quantities.boy.entries()].sort(([left], [right]) => boutiqueShirtSizeSort(left, right));
       const list = document.getElementById("boutique-quantity-list");
       const title = document.getElementById("boutique-quantity-title");
       const summary = document.getElementById("boutique-quantity-summary");
       const missing = document.getElementById("boutique-quantity-missing");
-      list?.classList.remove("is-shirt-columns");
+      list?.classList.add("is-shirt-columns");
       if (title) title.textContent = "Pull Sizes";
       if (summary) summary.textContent = `${records.length} unfilled order${records.length === 1 ? "" : "s"} matching the selected Day and School`;
-      if (list) list.innerHTML = sortedQuantities.length ? sortedQuantities.map(([size, count]) => `<label class="boutique-quantity-row"><input type="checkbox"><strong>${rosterSafe(size)}</strong><span>${count}</span></label>`).join("") : `<div class="boutique-kit-empty">No unfilled T-Shirt sizes match these filters.</div>`;
+      if (list) {
+        const rows = (items) => items.length ? items.map(([size, count]) => `<label class="boutique-quantity-row"><input type="checkbox"><strong>${rosterSafe(size)}</strong><span>${count}</span></label>`).join("") : `<div class="boutique-kit-empty">None</div>`;
+        list.innerHTML = [...sortedGirls, ...sortedBoys].length ? `<section class="boutique-quantity-column is-girl"><h4>Girls</h4>${rows(sortedGirls)}</section><section class="boutique-quantity-column is-boy"><h4>Boys</h4>${rows(sortedBoys)}</section>` : `<div class="boutique-kit-empty">No unfilled T-Shirt sizes match these filters.</div>`;
+      }
       if (missing) {
         missing.hidden = missingSizes === 0;
         missing.textContent = missingSizes ? `${missingSizes} dancer${missingSizes === 1 ? " is" : "s are"} missing a T-Shirt size.` : "";
