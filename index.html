@@ -17751,7 +17751,7 @@
         </div>
         <div class="roster-profile-tab-panel" id="roster-profile-panel-histories" role="tabpanel" aria-labelledby="roster-profile-tab-histories" data-roster-profile-panel="histories" hidden>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m8 15 2 2 5-5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Attendance</strong><small>Review attendance history and class helper records.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-attendance"></section></details>
-        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M15.5 8.5H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8.5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Billing</strong><small>Review monthly invoices, payments, and outstanding balances.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-billing-history"></section></details>
+        <details class="roster-profile-raw" id="roster-profile-tuition-plan"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M15.5 8.5H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8.5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Tuition Plan</strong><small>Open this dancer’s complete financial hub.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-billing-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Email History</strong><small>See welcome emails, newsletters, deliveries, and detected opens.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M8 9V6a4 4 0 0 1 8 0v3"></path></svg></span><span class="roster-profile-tool-copy"><strong>Boutique Orders</strong><small>Track T-shirt, bag, pickup, and delivery status.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-shirt-field"><label>T-Shirt &amp; Bag Status<select id="roster-edit-kit-status"><option value="not_ready">To Fill</option><option value="ready">To Pick Up</option><option value="picked_up">To Deliver</option><option value="delivered">Delivered</option></select></label><div class="roster-profile-delivery-date"><span>T-Shirt &amp; Bag Delivery Date</span><strong id="roster-edit-kit-delivered-date">Not delivered</strong></div></div><div class="roster-profile-placeholder" id="roster-edit-boutique-orders">No boutique orders are assigned to this dancer.</div></details>
         </div>
@@ -35473,32 +35473,10 @@
       }
       const billingHistoryPanel = document.getElementById("roster-profile-billing-history");
       if (billingHistoryPanel) {
-        const records = student.tuitionPayments || student.tuition_payments || {};
-        const today = new Date();
-        const seasonStart = new Date(today.getMonth() >= 7 ? today.getFullYear() : today.getFullYear() - 1, 8, 1, 12);
-        const enrolledValue = student.enrolledAt || student.enrolled_at || student.enrollmentStart || student.enrollment_start;
-        const enrolledAt = enrolledValue && !Number.isNaN(new Date(enrolledValue).getTime()) ? new Date(enrolledValue) : seasonStart;
-        const cursor = new Date(Math.max(new Date(enrolledAt.getFullYear(), enrolledAt.getMonth(), 1, 12).getTime(), seasonStart.getTime()));
-        const months = [];
-        while (cursor <= today && months.length < 12) { months.push(`${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`); cursor.setMonth(cursor.getMonth() + 1); }
-        Object.keys(records).filter(key => /^\d{4}-\d{2}$/.test(key) && !months.includes(key)).forEach(key => months.push(key));
-        months.sort().reverse();
-        const plan = tuitionPlanForStudent(student);
-        const dancerName = `${student.firstName || student.first_name || ""} ${student.lastName || student.last_name || ""}`.trim().toLowerCase();
-        const dateLabel = value => value && !Number.isNaN(new Date(value).getTime()) ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—";
-        billingHistoryPanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Monthly Invoices</strong><span>${months.length} ${months.length === 1 ? "month" : "months"}</span></div><div class="student-billing-history-list">${months.map((month, index) => {
-          const record = records[month] || {};
-          let rawStatus = String(record.status || student.tuitionPaymentStatus || student.tuition_payment_status || "").toLowerCase();
-          if (!rawStatus && ["127.0.0.1", "localhost"].includes(location.hostname)) rawStatus = dancerName === "aaleah hubbard" ? "unpaid" : index % 7 === 6 ? "late" : "paid";
-          const isLate = ["late", "paid_late"].includes(rawStatus) || Number(record.lateFeeCents || record.late_fee_cents || 0) > 0;
-          const isPaid = ["paid", "completed", "paid_on_time"].includes(rawStatus);
-          const status = isLate ? { label: "Paid Late", className: "is-late" } : isPaid ? { label: "Successful", className: "is-successful" } : { label: "Still Due", className: "is-due" };
-          const paidAt = record.paidAt || record.paid_at || (isPaid || isLate ? new Date(`${month}-${isLate ? "10" : "01"}T12:00:00`) : null);
-          const monthDate = new Date(`${month}-01T12:00:00`);
-          const title = `${monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })} Monthly Invoice`;
-          const amountPaid = isPaid || isLate ? plan.price + (isLate ? 10 : 0) : 0;
-          return `<article class="student-billing-history-card"><div><strong>${rosterSafe(title)}</strong><small>Amount Paid: $${amountPaid.toFixed(2)} · Date Paid: ${rosterSafe(dateLabel(paidAt))}</small></div><div class="student-billing-history-actions"><span class="student-billing-history-status ${status.className}">${status.label}</span><button class="secondary student-billing-view" type="button" data-view-student-invoice="${rosterSafe(student.id)}" data-invoice-month="${month}">View Invoice</button></div></article>`;
-        }).join("")}</div>`;
+        billingHistoryPanel.innerHTML = `<div class="teacher-roster-empty">Opening this section shows the complete Tuition Plan.</div>`;
+        billingHistoryPanel.dataset.studentId = String(student.id || "");
+        billingHistoryPanel.dataset.schoolName = rosterClass.schoolName || rosterClass.school || "";
+        billingHistoryPanel.dataset.teacherName = rosterTeacherName(rosterClass.teacherId);
       }
       const newsletterHistoryPanel = document.getElementById("roster-profile-newsletter-history");
       if (newsletterHistoryPanel) {
@@ -39819,7 +39797,7 @@
       document.getElementById("dancer-financial-hub-title").textContent = `${dancerName} · Financial Hub`;
       document.getElementById("dancer-financial-hub-school").textContent = `${entry.schoolName} · ${entry.teacherName}`;
       document.getElementById("dancer-financial-overview").innerHTML = `
-        <article class="dancer-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>${enrolledDate ? `Enrolled ${enrolledDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : "Enrollment date not recorded"}</span></article>
+        <article class="dancer-financial-metric"><small>Enrollment Fee</small><strong>$55.00</strong><span>${enrolledDate ? `Paid on ${enrolledDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : "Paid · Enrollment date not recorded"}</span></article>
         <article class="dancer-financial-metric"><small>${escapeText(tuitionTitle)}</small><strong>${plan.price === 0 ? "Free" : `$${plan.price.toFixed(2)}`}</strong><span>Drafts September 1–May 1</span></article>
         <article class="dancer-financial-metric"><small>Current Status</small><strong>${escapeText(currentPayment.label)}</strong><span>${monthDate.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span></article>
         <button class="dancer-financial-metric" type="button" data-open-credit-ledger><small>Credit Available</small><strong>$${creditTotal.toFixed(2)}</strong><span>View itemized credits</span></button>`;
@@ -39902,6 +39880,20 @@
       const { rosterClass, student } = currentEditingRosterStudent();
       const fallbackEntry = student ? { student, schoolName: invoiceSchoolNickname(rosterClass?.schoolName || rosterClass?.school), teacherName: rosterTeacherName(rosterClass?.teacherId) } : null;
       openTuitionInvoice(button.dataset.viewStudentInvoice, fallbackEntry);
+    });
+    document.getElementById("roster-profile-tuition-plan")?.addEventListener("toggle", (event) => {
+      const section = event.currentTarget;
+      if (!section.open) return;
+      section.open = false;
+      const { rosterClass, student } = currentEditingRosterStudent();
+      if (!student) return;
+      currentTuitionInvoiceEntry = {
+        student,
+        schoolName: invoiceSchoolNickname(rosterClass?.schoolName || rosterClass?.school),
+        teacherName: rosterTeacherName(rosterClass?.teacherId)
+      };
+      renderDancerFinancialHub(currentTuitionInvoiceEntry);
+      document.getElementById("dancer-financial-hub-dialog")?.showModal();
     });
     document.querySelectorAll("[data-close-tuition-invoice]").forEach(button => button.addEventListener("click", () => document.getElementById("tuition-invoice-dialog")?.close()));
     document.getElementById("open-dancer-financial-hub")?.addEventListener("click", openDancerFinancialHub);
