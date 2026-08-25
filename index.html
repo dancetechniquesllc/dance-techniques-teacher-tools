@@ -20557,6 +20557,7 @@
               kitPickedUp: Boolean(student.kit_picked_up), kitPickedUpAt: student.kit_picked_up_at || "", kitPickedUpBy: student.kit_picked_up_by || "",
               kitDeliveredAt: student.kit_delivered_at || "", kitDeliveredBy: student.kit_delivered_by || "",
               status: uiStudentStatus(enrollment.status), trialDate: enrollment.trial_date || "", parentName: student.parent_name || "",
+              systemEntryDate: student.created_at || "", createdAt: student.created_at || "", enrolledAt: student.created_at || "",
               parentFirstName: student.parent_first_name || "", parentLastName: student.parent_last_name || "", parentPhone: student.parent_phone || "",
               parentEmail: student.parent_email || "", tuitionDiscount: student.tuition_discount || "none", medicalNotes: student.medical_notes || "", registrationNotes: student.registration_notes || "",
               notes: note?.note || student.registration_notes || "", additionalInformation: student.additional_information && typeof student.additional_information === "object" ? { ...student.additional_information } : {},
@@ -39791,7 +39792,7 @@
       const month = document.getElementById("tuition-plan-month")?.value || "2026-09";
       const monthDate = new Date(`${month}-01T12:00:00`);
       const currentPayment = tuitionMonthStatus(student, month, 0);
-      const enrolledValue = student.enrolledAt || student.enrolled_at || student.enrollmentStart || student.enrollment_start || student.enrolledDate || student.enrolled_date;
+      const enrolledValue = student.systemEntryDate || student.system_entry_date || student.createdAt || student.created_at || student.enrolledAt || student.enrolled_at || student.enrollmentStart || student.enrollment_start || student.enrolledDate || student.enrolled_date;
       const enrolledDate = enrolledValue && !Number.isNaN(new Date(enrolledValue).getTime()) ? new Date(enrolledValue) : null;
       const tuitionTitle = plan.key === "tuition" ? "Monthly Tuition" : plan.key === "sibling" ? "Sibling Tuition" : plan.key === "school-staff" ? "School Staff Tuition" : plan.label === "Meadow Oaks" ? "Meadow Oaks Tuition" : `${plan.label} Tuition`;
       document.getElementById("dancer-financial-hub-title").textContent = `${dancerName} · Financial Hub`;
