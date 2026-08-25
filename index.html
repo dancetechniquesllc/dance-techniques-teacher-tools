@@ -35855,6 +35855,7 @@
     const boutiqueEnrollmentShirtProduct = (student) => String(student?.gender || student?.dancerGender || "").toLowerCase() === "male" ? "Sage Boy T" : "Blush Signature T";
     const boutiqueEnrollmentShirtStockSizeKey = (product, size) => {
       const sizeKey = boutiqueStockSizeKey(size);
+      if (["M", "YM", "MC"].includes(sizeKey)) return "MC";
       if (product === "Sage Boy T" && ["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey)) return "SC";
       if (product === "Blush Signature T" && ["XS", "YXS", "S", "YS", "SC"].includes(sizeKey)) return "SC";
       return sizeKey;
@@ -36622,9 +36623,11 @@
         else {
           const isBoy = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
           const sizeKey = boutiqueStockSizeKey(size);
-          const combined = isBoy
-            ? (["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "5T / XS / S" : size)
-            : (["XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "XS / S" : size);
+          const combined = ["M", "YM", "MC"].includes(sizeKey)
+            ? "M / MC"
+            : isBoy
+              ? (["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "5T / XS / S" : size)
+              : (["XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "XS / S" : size);
           const group = isBoy ? quantities.boy : quantities.girl;
           group.set(combined, (group.get(combined) || 0) + 1);
         }
