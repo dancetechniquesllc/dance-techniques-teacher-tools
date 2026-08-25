@@ -7957,12 +7957,13 @@
     .boutique-stock-size-breakdown span { display: grid; gap: 2px; padding: 6px 4px; border-radius: 8px; background: var(--surface-soft); text-align: center; }
     .boutique-stock-size-breakdown b { color: var(--muted); font-size: 9px; }
     .boutique-stock-size-breakdown strong { color: var(--berry); font-size: 13px; }
-    .boutique-stock-card.is-blush-signature { justify-items: center; text-align: center; }
-    .boutique-stock-card.is-blush-signature .boutique-stock-card-header { display: grid; justify-items: center; gap: 8px; padding-top: 24px; }
-    .boutique-stock-card.is-blush-signature .boutique-stock-size { order: -1; width: 58px; min-width: 58px; height: 58px; min-height: 58px; padding: 0; border-radius: 50%; background: var(--blush); box-shadow: 0 0 0 3px rgb(215 164 164 / .35); font-size: 14px; }
-    .boutique-stock-card.is-blush-signature .boutique-stock-size.is-two-line { gap: 1px; align-content: center; line-height: 1; }
-    .boutique-stock-card.is-blush-signature .boutique-stock-size.is-two-line small { display: block; font-size: 9px; font-weight: 900; }
-    .boutique-stock-card.is-blush-signature .boutique-stock-counts { width: 100%; }
+    .boutique-stock-card.is-enrollment-shirt { justify-items: center; text-align: center; }
+    .boutique-stock-card.is-enrollment-shirt .boutique-stock-card-header { display: grid; justify-items: center; gap: 8px; padding-top: 24px; }
+    .boutique-stock-card.is-enrollment-shirt .boutique-stock-size { order: -1; width: 58px; min-width: 58px; height: 58px; min-height: 58px; padding: 0; border-radius: 50%; background: var(--blush); box-shadow: 0 0 0 3px rgb(215 164 164 / .35); font-size: 14px; }
+    .boutique-stock-card.is-enrollment-shirt.is-sage-boy .boutique-stock-size { background: var(--sage); box-shadow: 0 0 0 3px rgb(164 184 155 / .42); }
+    .boutique-stock-card.is-enrollment-shirt .boutique-stock-size.is-two-line { gap: 1px; align-content: center; line-height: 1; }
+    .boutique-stock-card.is-enrollment-shirt .boutique-stock-size.is-two-line small { display: block; font-size: 9px; font-weight: 900; }
+    .boutique-stock-card.is-enrollment-shirt .boutique-stock-counts { width: 100%; }
     .boutique-stock-card.is-white-dance-bag { display: flex; flex-direction: column; align-items: center; text-align: center; }
     .boutique-stock-card.is-white-dance-bag .boutique-stock-card-header { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; padding-top: 24px; }
     .boutique-stock-card.is-white-dance-bag .boutique-stock-card-header > div, .boutique-stock-card.is-white-dance-bag .boutique-stock-card-header h4, .boutique-stock-card.is-white-dance-bag .boutique-stock-card-header p { width: 100%; text-align: center; }
@@ -35919,6 +35920,8 @@
           const total = claimState.total;
           const state = boutiqueStockState(item, total, claimState.printed);
           const isBlushSignature = item.product === "Blush Signature T";
+          const isSageBoy = item.product === "Sage Boy T";
+          const isEnrollmentShirt = isBlushSignature || isSageBoy;
           const isWhiteDanceBag = ["White Dance Bag", "2026 Girl Bag", "2026 Boy Bag"].includes(item.product);
           const isBoutiqueProduct = boutiqueStockFilter === "apparel";
           const isExternalProduct = item.printedByDT === false;
@@ -35926,7 +35929,7 @@
           const sizeMarkup = sizeParts ? `${rosterSafe(sizeParts[1])}<small>${rosterSafe(sizeParts[2])}</small>` : rosterSafe(item.size);
           const printAlert = Number(item.needsPrinting || 0) + Number(claimState.needsPrinting || 0);
           const cardSubtitle = isExternalProduct && item.sizesOffered ? `${item.category || "Boutique Apparel"} · ${item.sizesOffered}` : (["Blush Signature T", "Sage Boy T"].includes(item.product) ? "Enrollment Shirt" : (item.category || "Boutique Apparel"));
-          return `<article class="boutique-stock-card ${state.className ? `is-${state.className}` : ""} ${isBlushSignature ? "is-blush-signature" : ""} ${isWhiteDanceBag ? "is-white-dance-bag" : ""} ${isBoutiqueProduct ? "is-boutique-product" : ""}"><button class="boutique-stock-edit" type="button" data-boutique-stock-edit="${rosterSafe(item.stockId)}" aria-label="Edit ${rosterSafe(item.product)} ${rosterSafe(item.size)} inventory" title="Edit inventory">✎</button><div class="boutique-stock-card-header">${isBoutiqueProduct ? `<span class="boutique-stock-product-photo"><img src="${rosterSafe(boutiqueStockProductImage(item))}" alt="${rosterSafe(item.product)} product image"></span>` : ""}<span class="boutique-stock-size ${sizeParts ? "is-two-line" : ""}">${sizeMarkup}</span><div><h4>${rosterSafe(item.product)}</h4><p>${rosterSafe(cardSubtitle)}</p></div></div><div class="boutique-stock-counts ${isExternalProduct ? "is-total-only" : "has-claim"}">${isExternalProduct ? boutiqueStockTotalMarkup(total) : boutiqueStockCountMarkup(claimState.printed, claimState.blank, claimState.claimed)}</div>${boutiqueStockSizeBreakdownMarkup(item)}${isExternalProduct ? boutiqueStockClaimMarkup(claimState.claimed) : ""}<span class="boutique-stock-status ${state.className}">${state.label}</span>${printAlert ? `<span class="boutique-stock-print-alert" role="status">⚠ ${printAlert} ${printAlert === 1 ? "shirt needs" : "shirts need"} printing</span>` : ""}</article>`;
+          return `<article class="boutique-stock-card ${state.className ? `is-${state.className}` : ""} ${isEnrollmentShirt ? "is-enrollment-shirt" : ""} ${isSageBoy ? "is-sage-boy" : ""} ${isWhiteDanceBag ? "is-white-dance-bag" : ""} ${isBoutiqueProduct ? "is-boutique-product" : ""}"><button class="boutique-stock-edit" type="button" data-boutique-stock-edit="${rosterSafe(item.stockId)}" aria-label="Edit ${rosterSafe(item.product)} ${rosterSafe(item.size)} inventory" title="Edit inventory">✎</button><div class="boutique-stock-card-header">${isBoutiqueProduct ? `<span class="boutique-stock-product-photo"><img src="${rosterSafe(boutiqueStockProductImage(item))}" alt="${rosterSafe(item.product)} product image"></span>` : ""}<span class="boutique-stock-size ${sizeParts ? "is-two-line" : ""}">${sizeMarkup}</span><div><h4>${rosterSafe(item.product)}</h4><p>${rosterSafe(cardSubtitle)}</p></div></div><div class="boutique-stock-counts ${isExternalProduct ? "is-total-only" : "has-claim"}">${isExternalProduct ? boutiqueStockTotalMarkup(total) : boutiqueStockCountMarkup(claimState.printed, claimState.blank, claimState.claimed)}</div>${boutiqueStockSizeBreakdownMarkup(item)}${isExternalProduct ? boutiqueStockClaimMarkup(claimState.claimed) : ""}<span class="boutique-stock-status ${state.className}">${state.label}</span>${printAlert ? `<span class="boutique-stock-print-alert" role="status">⚠ ${printAlert} ${printAlert === 1 ? "shirt needs" : "shirts need"} printing</span>` : ""}</article>`;
         }).join("");
     };
     const filteredBoutiqueKitRecords = () => {
