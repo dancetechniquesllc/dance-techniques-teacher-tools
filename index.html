@@ -8149,6 +8149,7 @@
     .boutique-kit-status.is-received { border-color: #c8c8c3; background: #ecece8; color: #555; }
     .boutique-kit-empty { padding: 24px; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted); text-align: center; }
     .boutique-quantity-dialog { width: min(430px, 100%); }
+    .boutique-quantity-dialog:has(.boutique-quantity-list.is-shirt-columns) { width: min(760px, calc(100vw - 28px)); }
     .boutique-quantity-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .boutique-quantity-close { width: 32px; height: 32px; min-height: 32px; display: grid; place-items: center; padding: 0; border: 1px solid var(--border); border-radius: 999px; background: var(--blush); color: var(--fg); font-size: 19px; line-height: 1; }
     .boutique-quantity-list { display: grid; gap: 8px; margin: 16px 0; }
@@ -8156,6 +8157,11 @@
     .boutique-quantity-row input { width: 18px; height: 18px; min-height: 0; accent-color: var(--berry); }
     .boutique-quantity-row strong { font-size: 16px; }
     .boutique-quantity-row span { min-width: 38px; padding: 4px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 14px; font-weight: 950; text-align: center; }
+    .boutique-quantity-list.is-shirt-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 16px; }
+    .boutique-quantity-column { display: grid; gap: 8px; }
+    .boutique-quantity-column h4 { margin: 0 0 3px; text-align: center; font-size: 18px; }
+    .boutique-quantity-column.is-boy .boutique-quantity-row span { background: var(--sage); }
+    @media (max-width: 620px) { .boutique-quantity-list.is-shirt-columns { grid-template-columns: 1fr 1fr; gap: 8px; } .boutique-quantity-list.is-shirt-columns .boutique-quantity-row { grid-template-columns: 20px minmax(0, 1fr) auto; gap: 6px; padding: 9px 7px; } .boutique-quantity-list.is-shirt-columns .boutique-quantity-row strong { font-size: 12px; } .boutique-quantity-list.is-shirt-columns .boutique-quantity-row span { min-width: 32px; padding: 4px 6px; } }
     .boutique-stock-group { display: grid; gap: 6px; padding: 11px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface); }
     .boutique-stock-group h4 { margin: 0 0 2px; color: var(--fg); font-size: 15px; }
     .boutique-stock-group .boutique-quantity-row { padding: 8px 9px; background: var(--surface-soft); }
@@ -32882,6 +32888,7 @@
       const title = document.getElementById("boutique-quantity-title");
       const summary = document.getElementById("boutique-quantity-summary");
       const missing = document.getElementById("boutique-quantity-missing");
+      list?.classList.remove("is-shirt-columns");
       if (title) title.textContent = "Pull Sizes";
       if (summary) summary.textContent = `${records.length} unfilled order${records.length === 1 ? "" : "s"} matching the selected Day and School`;
       if (list) list.innerHTML = sortedQuantities.length ? sortedQuantities.map(([size, count]) => `<label class="boutique-quantity-row"><input type="checkbox"><strong>${rosterSafe(size)}</strong><span>${count}</span></label>`).join("") : `<div class="boutique-kit-empty">No unfilled T-Shirt sizes match these filters.</div>`;
@@ -35848,8 +35855,8 @@
     const boutiqueEnrollmentShirtProduct = (student) => String(student?.gender || student?.dancerGender || "").toLowerCase() === "male" ? "Sage Boy T" : "Blush Signature T";
     const boutiqueEnrollmentShirtStockSizeKey = (product, size) => {
       const sizeKey = boutiqueStockSizeKey(size);
-      if (product === "Sage Boy T" && ["5T", "XS", "YXS", "SC"].includes(sizeKey)) return "SC";
-      if (product === "Blush Signature T" && ["XS", "YXS"].includes(sizeKey)) return "SC";
+      if (product === "Sage Boy T" && ["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey)) return "SC";
+      if (product === "Blush Signature T" && ["XS", "YXS", "S", "YS", "SC"].includes(sizeKey)) return "SC";
       return sizeKey;
     };
     const boutiqueEnrollmentShirtStockForStudent = (student) => {
@@ -36607,20 +36614,33 @@
     document.getElementById("boutique-kit-quantities")?.addEventListener("click", () => {
       const records = filteredBoutiqueKitRecords();
       setText("boutique-quantity-title", "Pull Sizes");
-      const quantities = new Map();
+      const quantities = { girl: new Map(), boy: new Map() };
       let missingSizes = 0;
       records.forEach(({ student }) => {
         const size = String(student.tshirtSize || student.tshirt_size || "").trim();
         if (!size) missingSizes += 1;
-        else quantities.set(size, (quantities.get(size) || 0) + 1);
+        else {
+          const isBoy = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
+          const sizeKey = boutiqueStockSizeKey(size);
+          const combined = isBoy
+            ? (["5T", "XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "5T / XS / S" : size)
+            : (["XS", "YXS", "S", "YS", "SC"].includes(sizeKey) ? "XS / S" : size);
+          const group = isBoy ? quantities.boy : quantities.girl;
+          group.set(combined, (group.get(combined) || 0) + 1);
+        }
       });
-      const sortedQuantities = [...quantities.entries()].sort(([left], [right]) => boutiqueShirtSizeSort(left, right));
+      const sortedGirls = [...quantities.girl.entries()].sort(([left], [right]) => boutiqueShirtSizeSort(left, right));
+      const sortedBoys = [...quantities.boy.entries()].sort(([left], [right]) => boutiqueShirtSizeSort(left, right));
       const list = document.getElementById("boutique-quantity-list");
       const summary = document.getElementById("boutique-quantity-summary");
       const missing = document.getElementById("boutique-quantity-missing");
-      const sizedTotal = sortedQuantities.reduce((total, [, count]) => total + count, 0);
+      const sizedTotal = [...sortedGirls, ...sortedBoys].reduce((total, [, count]) => total + count, 0);
       if (summary) summary.textContent = `${records.length} visible dancer${records.length === 1 ? "" : "s"} · ${sizedTotal} shirt${sizedTotal === 1 ? "" : "s"} with sizes`;
-      if (list) list.innerHTML = sortedQuantities.length ? sortedQuantities.map(([size, count]) => `<label class="boutique-quantity-row"><input type="checkbox"><strong>${rosterSafe(size)}</strong><span>${count}</span></label>`).join("") : `<div class="boutique-kit-empty">No T-Shirt sizes are entered for the visible dancers.</div>`;
+      if (list) {
+        list.classList.add("is-shirt-columns");
+        const rows = (items) => items.length ? items.map(([size, count]) => `<label class="boutique-quantity-row"><input type="checkbox"><strong>${rosterSafe(size)}</strong><span>${count}</span></label>`).join("") : `<div class="boutique-kit-empty">None</div>`;
+        list.innerHTML = sizedTotal ? `<section class="boutique-quantity-column is-girl"><h4>Girls</h4>${rows(sortedGirls)}</section><section class="boutique-quantity-column is-boy"><h4>Boys</h4>${rows(sortedBoys)}</section>` : `<div class="boutique-kit-empty">No T-Shirt sizes are entered for the visible dancers.</div>`;
+      }
       if (missing) {
         missing.hidden = missingSizes === 0;
         missing.textContent = `${missingSizes} visible dancer${missingSizes === 1 ? " is" : "s are"} missing a T-Shirt size and ${missingSizes === 1 ? "is" : "are"} not included above.`;
@@ -36645,6 +36665,7 @@
       setText("boutique-quantity-title", "Pull Stock");
       setText("boutique-quantity-summary", `${orders.length} visible order${orders.length === 1 ? "" : "s"}`);
       const list = document.getElementById("boutique-quantity-list");
+      list?.classList.remove("is-shirt-columns");
       if (list) list.innerHTML = groups.length ? groups.map(([itemName, group]) => {
         const sizes = [...group.sizes.entries()].sort(([left], [right]) => boutiqueShirtSizeSort(left, right));
         if (!sizes.length) return `<label class="boutique-quantity-row boutique-stock-no-size"><input type="checkbox"><strong>${rosterSafe(itemName)}</strong><span>${group.noSize}</span></label>`;
