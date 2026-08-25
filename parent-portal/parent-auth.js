@@ -19,6 +19,28 @@
   const urlBase64ToBytes = (value) => Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=")), (character) => character.charCodeAt(0));
   const ordinalDate = (day) => { const lastTwo = day % 100; return `${day}${lastTwo >= 11 && lastTwo <= 13 ? "th" : day % 10 === 1 ? "st" : day % 10 === 2 ? "nd" : day % 10 === 3 ? "rd" : "th"}`; };
 
+  const updateLaunchChecklistProgress = () => {
+    const items = [...document.querySelectorAll("#launch-checklist-dialog .launch-checklist-item")];
+    if (!items.length) return;
+    const complete = items.filter((item) => item.classList.contains("is-complete")).length;
+    const label = `${complete} of ${items.length} complete`;
+    const progressLabel = document.querySelector("#launch-checklist-dialog .launch-checklist-progress-line span:last-child");
+    const track = document.querySelector("#launch-checklist-dialog .launch-checklist-track");
+    if (progressLabel) progressLabel.textContent = label;
+    if (track) {
+      track.setAttribute("aria-label", `${complete} of ${items.length} setup steps complete`);
+      track.querySelector("span")?.style.setProperty("width", `${(complete / items.length) * 100}%`);
+    }
+  };
+
+  const completeChecklistItem = (trigger, message) => {
+    if (!trigger) return;
+    trigger.classList.add("is-complete");
+    trigger.querySelector(".launch-checklist-check").textContent = "✓";
+    trigger.querySelector("small").textContent = message;
+    updateLaunchChecklistProgress();
+  };
+
   const enableParentPush = async (trigger) => {
     if (!client || !("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined") return;
     const original = trigger.querySelector("small")?.textContent || "";
@@ -32,9 +54,7 @@
       const { data: { user } } = await client.auth.getUser();
       const { error } = await client.from("parent_push_subscriptions").upsert({ user_id: user.id, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth, active: true, updated_at: new Date().toISOString() }, { onConflict: "endpoint" });
       if (error) throw error;
-      trigger.classList.add("is-complete");
-      trigger.querySelector(".launch-checklist-check").textContent = "✓";
-      trigger.querySelector("small").textContent = "Complete — notifications are enabled on this device.";
+      completeChecklistItem(trigger, "Complete — device permission is allowed and Parent Portal push notifications are active.");
     } catch (error) {
       trigger.querySelector("small").textContent = error?.message || original || "Notifications could not be enabled.";
     }
@@ -268,6 +288,11 @@
     }));
     dialog.querySelector("[data-install-later]").addEventListener("click", () => dialog.close("later"));
     dialog.querySelector("[data-install-done]").addEventListener("click", () => dialog.close("done"));
+    dialog.addEventListener("close", () => {
+      if (dialog.returnValue !== "done") return;
+      localStorage.setItem("dt-parent-pwa-installed", "true");
+      completeChecklistItem(document.querySelector("[data-install-parent-app]"), "Complete — Parent Portal was added to this Home Screen.");
+    });
     dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close("later"); });
     return dialog;
   };
@@ -1187,6 +1212,23 @@
   });
 
   document.querySelector("[data-enable-parent-push]")?.addEventListener("click", (event) => enableParentPush(event.currentTarget));
+  document.querySelector("[data-install-parent-app]")?.addEventListener("click", showFirstLoginInstallGuide);
+  document.querySelector("[data-checklist-billing]")?.addEventListener("click", () => {
+    document.getElementById("launch-checklist-dialog")?.close();
+    document.getElementById("open-billing-setup")?.click();
+  });
+  document.querySelectorAll("[data-enable-parent-push], [data-install-parent-app], [data-checklist-billing]").forEach((trigger) => trigger.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    trigger.click();
+  }));
+  if (localStorage.getItem("dt-parent-pwa-installed") === "true") completeChecklistItem(document.querySelector("[data-install-parent-app]"), "Complete — Parent Portal was added to this Home Screen.");
+  const automaticPaymentsCard = document.querySelector("[data-open-billing-setup], [data-automatic-payments-card]");
+  if (automaticPaymentsCard) new MutationObserver(() => {
+    const value = automaticPaymentsCard.querySelector("strong")?.textContent?.trim() || "";
+    if (value && value !== "Setup") completeChecklistItem(document.querySelector("[data-checklist-billing]"), `Complete — automatic withdrawal is set up with ${value}.`);
+  }).observe(automaticPaymentsCard, { childList: true, subtree: true, characterData: true });
+  updateLaunchChecklistProgress();
 
   initialize();
 })();
