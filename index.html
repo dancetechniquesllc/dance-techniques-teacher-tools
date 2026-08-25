@@ -35721,7 +35721,7 @@
     const selectedBoutiqueKitIds = new Set();
     const boutiqueKitRecords = () => [...new Map(rosterClasses.filter((item) => item.sourceActive !== false).flatMap((rosterClass) => rosterEnrolled(rosterClass).map((student) => ({ rosterClass, student }))).map((record) => [record.student.id, record])).values()];
     const boutiqueKitStatus = (student) => student.kitReceived ? "received" : student.kitPickedUp ? "picked_up" : student.kitReady ? "ready" : "waiting";
-    const boutiqueShirtSizeOrder = ["NB", "0-3M", "3-6M", "6-9M", "9-12M", "12M", "18M", "24M", "2T", "3T", "4T", "5T", "6T", "6", "6X", "7", "8", "YXS", "YS", "YM", "YL", "YXL", "AXS", "AS", "AM", "AL", "AXL", "A2XL", "A3XL"];
+    const boutiqueShirtSizeOrder = ["NB", "0-3M", "3-6M", "6-9M", "9-12M", "12M", "18M", "24M", "2T", "3T", "4T", "5T", "SC", "MC", "6T", "6", "6X", "7", "8", "YXS", "YS", "YM", "YL", "YXL", "AXS", "AS", "AM", "AL", "AXL", "A2XL", "A3XL"];
     // Initial read-only import from the supplied 2026–27 Boutique Inventory sheet.
     // This is kept separate from fulfillment records until the stock store is connected.
     let boutiqueEnrollmentShirtStock = [
@@ -35805,7 +35805,11 @@
     let boutiqueApparelCategory = "all";
     let editingBoutiqueStockItem = null;
     const boutiqueShirtSizeSort = (left, right) => {
-      const normalize = (value) => String(value).toUpperCase().replaceAll(" ", "");
+      const normalize = (value) => {
+        const key = String(value || "").toUpperCase().replace(/\s*\(.+?\)/g, "").replace(/[^A-Z0-9-]/g, "");
+        if (["M", "YM", "MC"].includes(key)) return "MC";
+        return key;
+      };
       const leftIndex = boutiqueShirtSizeOrder.indexOf(normalize(left));
       const rightIndex = boutiqueShirtSizeOrder.indexOf(normalize(right));
       if (leftIndex !== -1 || rightIndex !== -1) return (leftIndex === -1 ? 999 : leftIndex) - (rightIndex === -1 ? 999 : rightIndex);
@@ -36024,7 +36028,7 @@
       }
       if (sizeSelect) {
         const current = sizeSelect.value || "all";
-        const sizes = [...new Set(students.map((student) => normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender)).filter(Boolean))].sort();
+        const sizes = [...new Set(students.map((student) => normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender)).filter(Boolean))].sort(boutiqueShirtSizeSort);
         sizeSelect.innerHTML = `<option value="all">All sizes</option>${sizes.map((value) => `<option value="${rosterSafe(value)}">${rosterSafe(value)}</option>`).join("")}`;
         sizeSelect.value = sizes.includes(current) ? current : "all";
       }
