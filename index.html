@@ -35695,9 +35695,9 @@
       ["SC (6–8)", 8, 0], ["MC (7–9)", 3, 0], ["AS", 0, 0], ["AM", 4, 0],
       ["AL", 9, 0], ["AXL", 2, 0], ["A2X", 7, 0]
     ].map(([size, printed, blank]) => ({ stockId: `blush-signature-${size}`, product: "Blush Signature T", category: "Enrollment Kit", color: "Blush", size, printed, blank }))
-      .concat(["2T", "3T", "4T", "5T", "SC (6-8)", "MC (7-9)"].map((size) => ({
+      .concat([["2T", 12], ["3T", 10], ["4T", 12], ["SC (5T/XS/6-8)", 12], ["MC (7-9)", 4]].map(([size, printed]) => ({
         stockId: `sage-boy-t-${size}`, product: "Sage Boy T", category: "Enrollment Kit", color: "Sage", size,
-        printed: 0, blank: 0, eligibleGenders: ["male"]
+        printed, blank: 0, eligibleGenders: ["male"]
       })))
       .concat([
         { stockId: "enrollment-white-dance-bag", product: "White Dance Bag", category: "Enrollment Kit", color: "White", size: "One Size", total: 200, printedByDT: false },
@@ -35799,7 +35799,8 @@
             return schoolMatches && genderMatches;
           }
           const expectedShirtProduct = String(student.gender || student.dancerGender || "").toLowerCase() === "male" ? "Sage Boy T" : "Blush Signature T";
-          return stockItem.product === expectedShirtProduct && boutiqueStockSizeKey(student.tshirtSize || student.tshirt_size) === boutiqueStockSizeKey(stockItem.size);
+          return stockItem.product === expectedShirtProduct
+            && boutiqueEnrollmentShirtStockSizeKey(expectedShirtProduct, student.tshirtSize || student.tshirt_size) === boutiqueEnrollmentShirtStockSizeKey(expectedShirtProduct, stockItem.size);
         }).length
         : 0;
       let claimed = boutiqueOrders.filter((order) => order.status === "to_fill").flatMap((order) => order.boutique_order_items || []).reduce((count, orderItem) => {
@@ -35843,10 +35844,17 @@
     const boutiqueStockProductImage = (item) => String(item?.imageUrl || "../../parent-portal/assets/boutique.png");
     const boutiqueStockSizeKey = (size) => String(size || "").toUpperCase().replace(/\s*\(.+?\)/g, "").replace(/[^A-Z0-9]/g, "");
     const boutiqueEnrollmentShirtProduct = (student) => String(student?.gender || student?.dancerGender || "").toLowerCase() === "male" ? "Sage Boy T" : "Blush Signature T";
+    const boutiqueEnrollmentShirtStockSizeKey = (product, size) => {
+      const sizeKey = boutiqueStockSizeKey(size);
+      if (product === "Sage Boy T" && ["5T", "XS", "YXS", "SC"].includes(sizeKey)) return "SC";
+      if (product === "Blush Signature T" && ["XS", "YXS"].includes(sizeKey)) return "SC";
+      return sizeKey;
+    };
     const boutiqueEnrollmentShirtStockForStudent = (student) => {
       const size = student?.tshirtSize || student?.tshirt_size;
       const product = boutiqueEnrollmentShirtProduct(student);
-      return boutiqueEnrollmentShirtStock.find((item) => item.product === product && boutiqueStockSizeKey(item.size) === boutiqueStockSizeKey(size)) || null;
+      const requestedSizeKey = boutiqueEnrollmentShirtStockSizeKey(product, size);
+      return boutiqueEnrollmentShirtStock.find((item) => item.product === product && boutiqueEnrollmentShirtStockSizeKey(product, item.size) === requestedSizeKey) || null;
     };
     const allocateEnrollmentShirtStock = (student) => {
       const size = String(student?.tshirtSize || student?.tshirt_size || "").trim();
