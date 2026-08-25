@@ -35695,6 +35695,10 @@
       ["SC (6–8)", 8, 0], ["MC (7–9)", 3, 0], ["AS", 0, 0], ["AM", 4, 0],
       ["AL", 9, 0], ["AXL", 2, 0], ["A2X", 7, 0]
     ].map(([size, printed, blank]) => ({ stockId: `blush-signature-${size}`, product: "Blush Signature T", category: "Enrollment Kit", color: "Blush", size, printed, blank }))
+      .concat(["2T", "3T", "4T", "5T", "SC (6-8)", "MC (7-9)"].map((size) => ({
+        stockId: `sage-boy-t-${size}`, product: "Sage Boy T", category: "Enrollment Kit", color: "Sage", size,
+        printed: 0, blank: 0, eligibleGenders: ["male"]
+      })))
       .concat([
         { stockId: "enrollment-white-dance-bag", product: "White Dance Bag", category: "Enrollment Kit", color: "White", size: "One Size", total: 200, printedByDT: false },
         { stockId: "enrollment-2026-girl-bag", product: "2026 Girl Bag", category: "Enrollment Kit", color: "Blush", size: "One Size", total: 0, printedByDT: false },
@@ -35794,7 +35798,8 @@
             const genderMatches = !Array.isArray(stockItem.eligibleGenders) || !stockItem.eligibleGenders.length || stockItem.eligibleGenders.some((gender) => String(gender).toLowerCase() === studentGender);
             return schoolMatches && genderMatches;
           }
-          return boutiqueStockSizeKey(student.tshirtSize || student.tshirt_size) === boutiqueStockSizeKey(stockItem.size);
+          const expectedShirtProduct = String(student.gender || student.dancerGender || "").toLowerCase() === "male" ? "Sage Boy T" : "Blush Signature T";
+          return stockItem.product === expectedShirtProduct && boutiqueStockSizeKey(student.tshirtSize || student.tshirt_size) === boutiqueStockSizeKey(stockItem.size);
         }).length
         : 0;
       let claimed = boutiqueOrders.filter((order) => order.status === "to_fill").flatMap((order) => order.boutique_order_items || []).reduce((count, orderItem) => {
@@ -35837,11 +35842,17 @@
     const boutiqueStockItemById = (stockId) => [...boutiqueEnrollmentShirtStock, ...boutiqueApparelStock].find((item) => item.stockId === stockId) || null;
     const boutiqueStockProductImage = (item) => String(item?.imageUrl || "../../parent-portal/assets/boutique.png");
     const boutiqueStockSizeKey = (size) => String(size || "").toUpperCase().replace(/\s*\(.+?\)/g, "").replace(/[^A-Z0-9]/g, "");
-    const boutiqueEnrollmentShirtStockForSize = (size) => boutiqueEnrollmentShirtStock.find((item) => item.product === "Blush Signature T" && boutiqueStockSizeKey(item.size) === boutiqueStockSizeKey(size)) || null;
+    const boutiqueEnrollmentShirtProduct = (student) => String(student?.gender || student?.dancerGender || "").toLowerCase() === "male" ? "Sage Boy T" : "Blush Signature T";
+    const boutiqueEnrollmentShirtStockForStudent = (student) => {
+      const size = student?.tshirtSize || student?.tshirt_size;
+      const product = boutiqueEnrollmentShirtProduct(student);
+      return boutiqueEnrollmentShirtStock.find((item) => item.product === product && boutiqueStockSizeKey(item.size) === boutiqueStockSizeKey(size)) || null;
+    };
     const allocateEnrollmentShirtStock = (student) => {
       const size = String(student?.tshirtSize || student?.tshirt_size || "").trim();
-      const stockItem = boutiqueEnrollmentShirtStockForSize(size);
-      if (!size || !stockItem) return { ok: false, reason: size ? `No Blush Signature T stock card exists for ${size}.` : "This dancer needs a T-Shirt size before their kit can be prepared." };
+      const product = boutiqueEnrollmentShirtProduct(student);
+      const stockItem = boutiqueEnrollmentShirtStockForStudent(student);
+      if (!size || !stockItem) return { ok: false, reason: size ? `No ${product} stock card exists for ${size}.` : "This dancer needs a T-Shirt size before their kit can be prepared." };
       if (Number(stockItem.printed || 0) > 0) {
         stockItem.printed -= 1;
         student.kitStockAllocation = "printed";
@@ -35853,7 +35864,7 @@
         student.kitStockAllocation = "blank";
         return { ok: true, source: "blank", stockItem };
       }
-      return { ok: false, reason: `No ${size} Blush Signature T shirts are available.` };
+      return { ok: false, reason: `No ${size} ${product} shirts are available.` };
     };
     const renderBoutiqueStock = () => {
       const grid = document.getElementById("boutique-stock-grid");
@@ -35879,8 +35890,10 @@
         if (boutiqueApparelCategory !== "all") source = source.filter((item) => String(item.category || "Uncategorized").trim() === boutiqueApparelCategory);
       }
       const enrollmentDisplayOrder = (item) => {
-        if (item.product === "Blush Signature T") return ["2T", "3T", "4T", "5T", "SC", "MC"].indexOf(String(item.size).replace(/\s*\(.+?\)/, ""));
-        return ["White Dance Bag", "2026 Girl Bag", "2026 Boy Bag"].indexOf(item.product) + 6;
+        const sizeIndex = ["2T", "3T", "4T", "5T", "SC", "MC"].indexOf(String(item.size).replace(/\s*\(.+?\)/, ""));
+        if (item.product === "Blush Signature T") return sizeIndex;
+        if (item.product === "Sage Boy T") return sizeIndex + 6;
+        return ["White Dance Bag", "2026 Girl Bag", "2026 Boy Bag"].indexOf(item.product) + 12;
       };
       const stockTitle = document.querySelector("#boutique-panel-stock .boutique-stock-heading h3");
       const stockCopy = document.querySelector("#boutique-panel-stock .boutique-stock-heading p");
@@ -35904,7 +35917,7 @@
           const sizeParts = String(item.size).match(/^(SC|MC)\s*(\(.+\))$/i);
           const sizeMarkup = sizeParts ? `${rosterSafe(sizeParts[1])}<small>${rosterSafe(sizeParts[2])}</small>` : rosterSafe(item.size);
           const printAlert = Number(item.needsPrinting || 0) + Number(claimState.needsPrinting || 0);
-          const cardSubtitle = isExternalProduct && item.sizesOffered ? `${item.category || "Boutique Apparel"} · ${item.sizesOffered}` : (isBlushSignature ? "Enrollment Shirt" : (item.category || "Boutique Apparel"));
+          const cardSubtitle = isExternalProduct && item.sizesOffered ? `${item.category || "Boutique Apparel"} · ${item.sizesOffered}` : (["Blush Signature T", "Sage Boy T"].includes(item.product) ? "Enrollment Shirt" : (item.category || "Boutique Apparel"));
           return `<article class="boutique-stock-card ${state.className ? `is-${state.className}` : ""} ${isBlushSignature ? "is-blush-signature" : ""} ${isWhiteDanceBag ? "is-white-dance-bag" : ""} ${isBoutiqueProduct ? "is-boutique-product" : ""}"><button class="boutique-stock-edit" type="button" data-boutique-stock-edit="${rosterSafe(item.stockId)}" aria-label="Edit ${rosterSafe(item.product)} ${rosterSafe(item.size)} inventory" title="Edit inventory">✎</button><div class="boutique-stock-card-header">${isBoutiqueProduct ? `<span class="boutique-stock-product-photo"><img src="${rosterSafe(boutiqueStockProductImage(item))}" alt="${rosterSafe(item.product)} product image"></span>` : ""}<span class="boutique-stock-size ${sizeParts ? "is-two-line" : ""}">${sizeMarkup}</span><div><h4>${rosterSafe(item.product)}</h4><p>${rosterSafe(cardSubtitle)}</p></div></div><div class="boutique-stock-counts ${isExternalProduct ? "is-total-only" : "has-claim"}">${isExternalProduct ? boutiqueStockTotalMarkup(total) : boutiqueStockCountMarkup(claimState.printed, claimState.blank, claimState.claimed)}</div>${boutiqueStockSizeBreakdownMarkup(item)}${isExternalProduct ? boutiqueStockClaimMarkup(claimState.claimed) : ""}<span class="boutique-stock-status ${state.className}">${state.label}</span>${printAlert ? `<span class="boutique-stock-print-alert" role="status">⚠ ${printAlert} ${printAlert === 1 ? "shirt needs" : "shirts need"} printing</span>` : ""}</article>`;
         }).join("");
     };
@@ -36655,15 +36668,16 @@
       records.forEach(({ student }) => {
         if (unavailableReason) return;
         const size = String(student?.tshirtSize || student?.tshirt_size || "").trim();
-        const stockItem = boutiqueEnrollmentShirtStockForSize(size);
+        const product = boutiqueEnrollmentShirtProduct(student);
+        const stockItem = boutiqueEnrollmentShirtStockForStudent(student);
         const available = stockItem ? availableByStockId.get(stockItem.stockId) : null;
         if (!size || !stockItem || !available) {
-          unavailableReason = size ? `No Blush Signature T stock card exists for ${size}.` : "A selected dancer needs a T-Shirt size before their kit can be prepared.";
+          unavailableReason = size ? `No ${product} stock card exists for ${size}.` : "A selected dancer needs a T-Shirt size before their kit can be prepared.";
           return;
         }
         if (available.printed > 0) available.printed -= 1;
         else if (available.blank > 0) available.blank -= 1;
-        else unavailableReason = `Not enough ${size} Blush Signature T shirts are available.`;
+        else unavailableReason = `Not enough ${size} ${product} shirts are available.`;
       });
       if (unavailableReason) return showToast(unavailableReason);
       const allocations = records.map(({ student }) => ({ student, result: allocateEnrollmentShirtStock(student) }));
