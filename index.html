@@ -39881,6 +39881,12 @@
       const fallbackEntry = student ? { student, schoolName: invoiceSchoolNickname(rosterClass?.schoolName || rosterClass?.school), teacherName: rosterTeacherName(rosterClass?.teacherId) } : null;
       openTuitionInvoice(button.dataset.viewStudentInvoice, fallbackEntry);
     });
+    // These dialogs are shared by Finance Folio and student profiles. Keep them
+    // at the document level so a hidden workspace cannot hide an open dialog.
+    ["tuition-invoice-dialog", "dancer-financial-hub-dialog", "no-recital-dialog", "credit-ledger-dialog"].forEach((dialogId) => {
+      const dialog = document.getElementById(dialogId);
+      if (dialog && dialog.parentElement !== document.body) document.body.append(dialog);
+    });
     document.getElementById("roster-profile-tuition-plan")?.addEventListener("toggle", (event) => {
       const section = event.currentTarget;
       if (!section.open) return;
