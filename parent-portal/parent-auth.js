@@ -297,12 +297,33 @@
   };
 
   const loadNewsletters = async () => {
-    const { data, error } = await client
-      .from("parent_portal_newsletters")
-      .select("id,subject,body,sent_at,source,read_at")
-      .order("sent_at", { ascending: false });
-    if (error) throw error;
-    return Array.isArray(data) ? data : [];
+    const [portalResult, deliveryResult] = await Promise.all([
+      client.from("parent_portal_newsletters").select("id,subject,body,sent_at,source,read_at").order("sent_at", { ascending: false }),
+      client.rpc("parent_portal_email_archive")
+    ]);
+    if (portalResult.error) throw portalResult.error;
+    if (deliveryResult.error) throw deliveryResult.error;
+    const deliveries = (deliveryResult.data || []).map((delivery) => ({
+      id: `delivery-${delivery.id}`,
+      delivery_id: delivery.id,
+      subject: delivery.subject || "Welcome to Dance Techniques",
+      sent_at: delivery.sent_at,
+      source: delivery.email_kind || "email",
+      read_at: delivery.portal_read_at || null,
+      body: [
+        `Sent to ${delivery.recipient_email}.`,
+        delivery.first_opened_at
+          ? `Viewed ${new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(delivery.first_opened_at))}.`
+          : delivery.delivered_at
+            ? "Delivered to the family email address."
+            : "Sent to the family email address."
+      ].join("\n\n")
+    }));
+    const actualWelcomeExists = deliveries.some((newsletter) => String(newsletter.source).toLowerCase() === "welcome");
+    const portalNewsletters = (portalResult.data || []).filter((newsletter) => !(
+      actualWelcomeExists && newsletter.source === "system" && /welcome/i.test(newsletter.subject || "")
+    ));
+    return [...deliveries, ...portalNewsletters].sort((left, right) => new Date(right.sent_at) - new Date(left.sent_at));
   };
 
   const renderNewsletterArchive = (newsletters) => {
@@ -330,15 +351,22 @@
       dot.setAttribute("aria-label", `${unreadCount} unread newsletter${unreadCount === 1 ? "" : "s"}`);
     };
     refreshUnreadCount();
+    const dialog = document.getElementById("newsletter-mobile-dialog");
+    const formatDate = (value) => value && !Number.isNaN(new Date(value).getTime())
+      ? new Intl.DateTimeFormat(undefined, { dateStyle:"medium", timeStyle:"short" }).format(new Date(value)) : "Date unavailable";
     newsletters.forEach((newsletter) => {
-      const details = document.createElement("details");
-      details.className = `newsletter-card${newsletter.read_at ? "" : " is-unread"}`;
-      const summary = document.createElement("summary");
+      const details = document.createElement("button");
+      details.type = "button";
+      details.className = `newsletter-card${newsletter.read_at ? " is-read" : " is-unread"}`;
+      details.setAttribute("aria-label", `Open ${newsletter.subject}`);
+      const summary = document.createElement("span");
+      summary.className = "newsletter-summary";
       const subject = document.createElement("strong");
       subject.textContent = newsletter.subject;
       const sent = document.createElement("span");
       sent.className = "date";
-      sent.textContent = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(newsletter.sent_at));
+      const sentDate = newsletter.sent_at ? new Date(newsletter.sent_at) : null;
+      sent.textContent = `Sent ${sentDate && !Number.isNaN(sentDate.getTime()) ? formatDate(sentDate) : "date unavailable"}`;
       summary.append(subject);
       if (!newsletter.read_at) {
         const unread = document.createElement("span");
@@ -348,25 +376,37 @@
         summary.append(unread);
       }
       summary.append(sent);
-      const body = document.createElement("div");
-      body.className = "newsletter-archive-copy";
-      String(newsletter.body || "").split(/\n{2,}/).filter(Boolean).forEach((paragraph) => {
-        const copy = document.createElement("p");
-        copy.textContent = paragraph;
-        body.append(copy);
-      });
-      details.append(summary, body);
-      details.addEventListener("toggle", async () => {
-        if (!details.open || newsletter.read_at || !client) return;
-        const { data, error } = await client.rpc("mark_parent_portal_newsletter_read", { target_newsletter_id: newsletter.id });
-        if (error || data !== true) return;
-        newsletter.read_at = new Date().toISOString();
-        details.classList.remove("is-unread");
+      const status = document.createElement("span");
+      status.className = "newsletter-status";
+      status.textContent = newsletter.read_at ? `Read · ${formatDate(newsletter.read_at)}` : "Unread";
+      summary.append(status);
+      details.append(summary);
+      details.addEventListener("click", async () => {
+        document.getElementById("newsletter-mobile-title").textContent = newsletter.subject;
+        document.getElementById("newsletter-mobile-sent").textContent = `Sent ${formatDate(newsletter.sent_at)}`;
+        const popupBody = document.getElementById("newsletter-mobile-body");
+        popupBody.replaceChildren();
+        String(newsletter.body || "").split(/\n{2,}/).filter(Boolean).forEach((paragraph) => { const copy=document.createElement("p");copy.textContent=paragraph;popupBody.append(copy); });
+        dialog?.showModal();
+        if (newsletter.read_at || !client) return;
+        let readAt = null;
+        if (newsletter.delivery_id) {
+          const { data, error } = await client.rpc("mark_parent_portal_email_read", { target_delivery_id:newsletter.delivery_id });
+          if (!error) readAt = data;
+        } else {
+          const { data, error } = await client.rpc("mark_parent_portal_newsletter_read", { target_newsletter_id:newsletter.id });
+          if (!error && data === true) readAt = new Date().toISOString();
+        }
+        if (!readAt) return;
+        newsletter.read_at = readAt;
+        details.classList.remove("is-unread");details.classList.add("is-read");
         details.querySelector(".newsletter-unread-indicator")?.remove();
+        status.textContent = `Read · ${formatDate(readAt)}`;
         refreshUnreadCount();
       });
       panel.append(details);
     });
+    dialog?.querySelector("[data-close-newsletter]")?.addEventListener("click",()=>dialog.close());
   };
 
   const appendPostInlineFormatting = (element, text) => {
@@ -549,6 +589,7 @@
       const panel = document.getElementById(id);
       if (panel) panel.innerHTML = `<p class="payment-empty">No ${id === "archive" ? "newsletters" : id} are available for this family yet.</p>`;
     });
+    window.renderParentPortalForms?.();
     renderNewsletterArchive(newsletters);
     const calendar = document.getElementById("monthly-calendar");
     calendar.innerHTML = '<p class="payment-empty">No authorized class schedule is available yet.</p>';
@@ -580,7 +621,7 @@
       const card = document.createElement("article");
       const name = dancerName(student);
       card.className = "family-dancer-card";
-      card.innerHTML = `<button class="family-dancer-bubble" type="button" aria-label="Add or change dancer profile photo"></button><strong></strong><small>Tap the photo to add or change it</small>`;
+      card.innerHTML = `<button class="family-dancer-bubble" type="button" aria-label="Add or change dancer profile photo"></button><span class="family-dancer-name-row"><strong></strong><button class="parent-profile-edit-pencil" type="button" data-family-preview="dancer" aria-label="Edit ${name}’s information" title="Edit Dancer Information">✎</button></span><small>Tap the photo to add or change it</small>`;
       const bubble = card.querySelector(".family-dancer-bubble");
       bubble.dataset.photoStudentId = student.id;
       if (student.photoUrl) {
@@ -591,6 +632,10 @@
       } else bubble.textContent = initials(student.first_name, student.last_name);
       bubble.addEventListener("click", () => chooseDancerPhoto(student));
       card.querySelector("strong").textContent = name;
+      const edit = card.querySelector('[data-family-preview="dancer"]');
+      edit.dataset.familyDancerId = student.id;
+      edit.dataset.familyDancer = name;
+      edit.dataset.familyInitials = initials(student.first_name, student.last_name);
       dancerGrid.append(card);
     });
     document.getElementById("pp-sign-out").addEventListener("click", async () => {
@@ -690,7 +735,47 @@
         teacherColor: row?.teacher?.color || "#DBA9A1"
       };
     }));
-    return { context: { guardian, students: [student] }, scheduleRows: enrichedRows.filter((row) => row.student_id === student.id), classPosts };
+    const { data: deliveryRows, error: deliveryError } = await client
+      .from("student_email_deliveries")
+      .select("id,subject,recipient_email,email_kind,status,sent_at,delivered_at,first_opened_at")
+      .eq("student_id", student.id)
+      .in("status", ["sent", "delivered", "opened"])
+      .order("sent_at", { ascending: false });
+    if (deliveryError) throw deliveryError;
+    const newsletters = (deliveryRows || []).map((delivery) => ({
+      id: `delivery-${delivery.id}`,
+      delivery_id: delivery.id,
+      subject: delivery.subject || "Welcome to Dance Techniques",
+      sent_at: delivery.sent_at,
+      source: delivery.email_kind || "email",
+      read_at: delivery.first_opened_at || delivery.sent_at,
+      body: `Sent to ${delivery.recipient_email}.\n\n${delivery.first_opened_at ? "Viewed by the recipient." : delivery.delivered_at ? "Delivered to the family email address." : "Sent to the family email address."}`
+    }));
+    const { data: familyNewsletterRows, error: familyNewsletterError } = await client
+      .from("parent_portal_newsletters")
+      .select("id,subject,body,sent_at,source,read_at")
+      .eq("guardian_id", guardian.id)
+      .order("sent_at", { ascending: false });
+    if (familyNewsletterError) throw familyNewsletterError;
+    const actualWelcomeExists = newsletters.some((newsletter) => String(newsletter.source).toLowerCase() === "welcome");
+    const familyNewsletters = (familyNewsletterRows || []).filter((newsletter) => !(
+      actualWelcomeExists && newsletter.source === "system" && /welcome/i.test(newsletter.subject || "")
+    ));
+    newsletters.push(...familyNewsletters);
+    newsletters.sort((left, right) => new Date(right.sent_at) - new Date(left.sent_at));
+    const { data: preorderRows } = await client
+      .from("boutique_preorder_orders")
+      .select("campaign_id,status")
+      .eq("assigned_student_id", student.id)
+      .eq("match_status", "matched")
+      .eq("payment_status", "paid");
+    const activeCampaignIds = [...new Set((preorderRows || [])
+      .filter((order) => !["cancelled", "refunded", "payment_failed"].includes(order.status))
+      .map((order) => order.campaign_id))];
+    const { data: preorderCampaign } = activeCampaignIds.length
+      ? await client.from("boutique_preorder_campaigns").select("id").in("id", activeCampaignIds).eq("jotform_form_id", "262304247468055").limit(1).maybeSingle()
+      : { data: null };
+    return { context: { guardian, students: [student] }, scheduleRows: enrichedRows.filter((row) => row.student_id === student.id), classPosts, newsletters, preorderMatched: Boolean(preorderCampaign?.id) };
   };
 
   const renderParentInvoiceTimeline = (invoiceRows = []) => {
@@ -742,16 +827,31 @@
     const schoolNames = [first.school.name, first.school.nickname].map(normalize).filter(Boolean);
     const changes = (first.teacherState?.teacher?.reschedules || first.teacherState?.reschedules || []).filter((change) => !change?.schoolName || schoolNames.includes(normalize(change.schoolName)));
     const changeByDate = new Map(changes.filter((change) => change.originalDate).map((change) => [String(change.originalDate).slice(0, 10), change]));
+    const movedByDate = new Map(changes.filter((change) => change.status === "rescheduled" && change.newDate).map((change) => [String(change.newDate).slice(0, 10), change]));
+    const visibleDatesForMonth = (year, monthIndex) => {
+      const dates = datesForMonth(year, monthIndex);
+      changes.filter((change) => change.status === "rescheduled" && change.newDate).forEach((change) => {
+        const moved = new Date(`${String(change.newDate).slice(0, 10)}T12:00:00`);
+        if (!Number.isNaN(moved.getTime()) && moved.getFullYear() === year && moved.getMonth() === monthIndex && !dates.some((date) => iso(date) === iso(moved))) dates.push(moved);
+      });
+      return dates.sort((left, right) => left - right);
+    };
     const months = Array.from({ length: 10 }, (_, index) => { const date = new Date(2026, 7 + index, 1, 12); return { year: date.getFullYear(), month: date.getMonth() }; });
     const day = new Intl.DateTimeFormat(undefined, { weekday: "short" });
     const month = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
     const dancer = String(student.preferred_name || student.first_name || "Your dancer").trim();
     document.getElementById("calendar-page-title").textContent = `${dancer}’s Upcoming Dance Days`;
-    calendar.innerHTML = months.filter(({ year, month: monthIndex }) => datesForMonth(year, monthIndex).length).map(({ year, month: monthIndex }, index) => { const cards = datesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const canceled = change?.status === "cancelled"; const reason = change?.reason; const curriculum = week % 2 === 0 ? "Ballet" : "Tap"; return `<article class="calendar-week-card ${canceled ? "holiday" : "scheduled"}"><time datetime="${iso(date)}"><span class="calendar-date-line"><span class="calendar-date-sparkle" aria-hidden="true">✦</span><span>${ordinalDate(date.getDate())}</span><span class="calendar-date-sparkle" aria-hidden="true">✦</span></span><small>${day.format(date)}</small></time><span class="calendar-icon-slot">${canceled ? "" : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day">`}</span>${canceled ? `<strong>No Class${reason ? `: ${reason}` : ""}</strong>` : `<strong>${curriculum} Day</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
+    calendar.innerHTML = months.filter(({ year, month: monthIndex }) => visibleDatesForMonth(year, monthIndex).length).map(({ year, month: monthIndex }, index) => { const cards = visibleDatesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const moved = movedByDate.get(iso(date)); const canceled = change?.status === "cancelled" || change?.status === "rescheduled" || change?.status === "date_tbd"; const reason = change?.reason; const curriculum = moved?.curriculum || change?.curriculum || (week % 2 === 0 ? "Ballet" : "Tap"); const unavailable = change?.status === "rescheduled" ? `Class moved to ${new Intl.DateTimeFormat(undefined,{month:"short",day:"numeric"}).format(new Date(`${String(change.newDate).slice(0,10)}T12:00:00`))}` : change?.status === "date_tbd" ? "New class date coming soon" : `No Class${reason ? `: ${reason}` : ""}`; return `<article class="calendar-week-card ${canceled ? "holiday" : moved ? "makeup" : "scheduled"}"><time datetime="${iso(date)}"><span class="calendar-date-line"><span class="calendar-date-sparkle" aria-hidden="true">✦</span><span>${ordinalDate(date.getDate())}</span><span class="calendar-date-sparkle" aria-hidden="true">✦</span></span><small>${day.format(date)}</small></time><span class="calendar-icon-slot">${canceled ? "" : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day">`}</span>${canceled ? `<strong>${unavailable}</strong>` : `<strong>${moved ? `${curriculum} Makeup Class` : `${curriculum} Day`}</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
+    calendar.querySelectorAll("[data-open-attendance]").forEach((button) => {
+      button.dataset.classDate = button.dataset.openAttendance;
+      button.dataset.classId = first.danceClass.id;
+      button.dataset.studentId = student.id;
+    });
   };
 
-  const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
-    renderTruthfulEmptyStates(context, classPosts, []);
+  const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts, newsletters = [], preorderMatched = false }) => {
+    renderTruthfulEmptyStates(context, classPosts, newsletters);
+    window.renderParentPortalForms?.(preorderMatched);
     const overview = document.getElementById("parent-financial-overview");
     if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan" data-monthly-tuition-card><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><button class="parent-financial-metric" type="button" data-open-billing-setup><small>Automatic Payments</small><strong>Setup</strong><span>Card and approval needed</span></button><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No family credits</span></article>';
     renderParentInvoiceTimeline(Array.from({ length: 9 }, (_, index) => {
@@ -859,6 +959,9 @@
       }).join("");
       return `<details class="calendar-month"${open ? " open" : ""}><summary>${monthFormatter.format(new Date(year, month, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`;
     }).join("");
+    // The same assigned-school schedule renderer is used in director preview and live family sessions.
+    // This keeps teacher reschedules authoritative instead of maintaining a second sample calendar.
+    renderAuthorizedFamilyCalendar(scheduleRows, context.students[0]);
     document.getElementById("threads").innerHTML = `<button class="conversation-card teacher" type="button" data-conversation="teacher" aria-label="Open message thread with ${teacherLabel}"><span class="conversation-avatar teacher${teacherPhoto ? " has-photo" : ""}">${teacherPhoto ? `<img class="teacher-profile-photo" src="${teacherPhoto}" alt="${teacherLabel}">` : initials(teacherName, "")}</span><h3>${teacherLabel}</h3><p class="conversation-role">Elena Eden’s personal teacher</p></button><button class="conversation-card admin" type="button" data-conversation="admin" aria-label="Open message thread with Dance Techniques Admin"><span class="conversation-avatar admin"><img src="assets/brand/dance-techniques-logo.png" alt="Dance Techniques"></span><h3>Dance Techniques Admin</h3><p class="conversation-role">Questions about accounts, tuition, or enrollment</p></button>`;
     revealFamilyPortal();
   };
@@ -911,7 +1014,9 @@
     }
     window.dispatchEvent(new CustomEvent("dt-parent-context", { detail: context }));
     client.rpc("parent_portal_preorder_match_status", { target_form_id: "262304247468055" }).then(({ data, error: preorderError }) => {
-      if (preorderError || !data?.matched) return;
+      if (preorderError) return;
+      window.renderParentPortalForms?.(Boolean(data?.matched));
+      if (!data?.matched) return;
       document.querySelectorAll(".jacket-preorder").forEach((card) => {
         card.classList.add("is-ordered");
         card.setAttribute("aria-label", "Quarter Zip Jacket Pre-Order received");
@@ -972,19 +1077,7 @@
           }
         }
       }
-      renderDirectorElenaPreview({
-        context: {
-          guardian: { first_name: "Erik", last_name: "Mancol-Bilbo", full_name: "Erik Mancol-Bilbo" },
-          students: [{ id: "elena-preview", first_name: "Elena Eden", last_name: "Mancol-Bilbo" }]
-        },
-        scheduleRows: [{
-          student_id: "elena-preview",
-          danceClass: { id: "rowlett-class-5-preview", name: "Class 5" },
-          school: { name: "Primrose Rowlett", nickname: "Primrose Rowlett", dance_day: 4, time_of_day: "AM" },
-          teacher: { full_name: "Ms. Lexi", color: "#E8679B", photo: "assets/people/ms-lexi-profile.png" }
-        }],
-        classPosts: []
-      });
+      await stopSession("Elena’s family view requires an active Director Dashboard sign-in. No sample family data was loaded.");
       return;
     }
     if (!window.supabase?.createClient) {

@@ -1951,8 +1951,10 @@
     .teacher-order-summary-pickup { --order-status-color: #b18408; }
     .teacher-order-summary-deliver { --order-status-color: #668066; }
     .teacher-orders-search { width: 100%; }
-    .teacher-orders-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .teacher-orders-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .teacher-orders-filters label { display: grid; gap: 4px; color: var(--ink); font-family: var(--font-body); font-size: 10px; font-weight: 800; }
     .teacher-orders-filters select { width: 100%; padding-right: 34px; font-family: var(--font-body); font-size: 11px; font-weight: 400; }
+    @media (max-width: 700px) { .teacher-orders-filters { grid-template-columns: 1fr 1fr; } }
     .teacher-orders-ready-heading h3 { margin-bottom: 2px; }
     .teacher-orders-ready-heading p { margin: 0; color: var(--muted); font-family: var(--font-body); font-size: 11px; font-weight: 400; line-height: 1.3; }
     .teacher-orders-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
@@ -1974,8 +1976,10 @@
     .teacher-orders-pickup-actions button { min-width: min(260px, 100%); }
     .teacher-orders-fill-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; margin-bottom: 10px; }
     .teacher-orders-fill-actions button { width: 100%; min-width: 0; padding-inline: 6px; border-color: color-mix(in oklch, var(--berry) 25%, var(--border)); border-radius: 10px; background: var(--blush); color: var(--berry); font-size: 11px; }
-    .teacher-orders-fill-actions #teacher-orders-size-quantities { grid-column: 2; }
-    .teacher-orders-fill-actions #teacher-orders-self-fill-button { grid-column: 3; border-color: var(--fg); background: var(--fg); color: white; }
+    .teacher-orders-fill-actions #teacher-orders-size-quantities,
+    .teacher-orders-fill-actions #teacher-boutique-pull-items { grid-column: 2; }
+    .teacher-orders-fill-actions #teacher-orders-self-fill-button,
+    .teacher-orders-fill-actions #teacher-boutique-fill-button { grid-column: 3; border-color: var(--fg); background: var(--fg); color: white; }
     .teacher-orders-step-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; margin-bottom: 10px; }
     .teacher-orders-step-actions button { grid-column: 3; width: 100%; min-width: 0; padding-inline: 6px; border: 1px solid var(--fg); border-radius: 10px; background: var(--fg); color: white; font-size: 11px; }
     .teacher-order-fulfillment-group { padding: 0; overflow: hidden; }
@@ -7798,6 +7802,26 @@
     .roster-private-feed-deleted-label { width: max-content; padding: 4px 9px; border-radius: 999px; background: #77716e; color: white; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; }
     .roster-private-feed-card img { width: 100%; max-height: 420px; object-fit: contain; border-radius: 10px; background: var(--surface-soft); }
     .roster-private-feed-card small { color: var(--muted); }
+    .roster-class-action-row { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; width:min(100%,1080px); }
+    .roster-class-action-row > button { display:flex; min-width:0; min-height:70px; align-items:center; justify-content:center; gap:8px; padding:10px 12px; text-align:center; }
+    .roster-class-action-row > button img { width:38px; height:38px; flex:0 0 38px; border-radius:50%; object-fit:cover; }
+    .roster-class-action-row .roster-class-post-button img { width:52px; height:34px; border-radius:999px; }
+    .roster-personal-feed-dialog { width:min(780px,calc(100vw - 28px)); }
+    .roster-personal-feed-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:18px; }
+    .roster-personal-feed-dancer { display:grid; justify-items:center; gap:8px; padding:14px 8px; border:1px solid var(--line); border-radius:16px; background:var(--surface); }
+    .roster-personal-feed-dancer .roster-student-photo { width:68px; height:68px; }
+    @media(max-width:900px){.roster-class-action-row{grid-template-columns:repeat(2,minmax(0,1fr))}.roster-personal-feed-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    .roster-class-feed-dialog { width:min(900px, calc(100vw - 28px)); max-height:min(88vh, 920px); overflow:auto; }
+    .roster-class-feed-header { display:flex; align-items:center; justify-content:space-between; gap:18px; padding-bottom:16px; border-bottom:1px solid var(--line); }
+    .roster-class-feed-title { display:flex; align-items:center; gap:14px; min-width:0; }
+    .roster-class-feed-title img { width:72px; height:72px; flex:0 0 72px; border-radius:50%; object-fit:cover; }
+    .roster-class-feed-title h3 { margin:0; }
+    .roster-class-feed-title p { margin:4px 0 0; color:var(--muted); }
+    .roster-class-feed-posts { display:grid; gap:16px; margin-top:18px; }
+    .roster-class-feed-post { display:grid; gap:10px; padding:18px; border:1px solid var(--line); border-radius:18px; background:var(--surface); }
+    .roster-class-feed-post > img { width:100%; max-height:520px; object-fit:contain; border-radius:14px; background:var(--surface-soft); }
+    .roster-class-feed-post h4,.roster-class-feed-post p { margin:0; }
+    .roster-class-feed-post time { color:var(--muted); font-size:.9rem; }
     @media (max-width: 620px) {
       .roster-private-feed-filters { grid-template-columns: 1fr; }
       .roster-private-feed-filter-summary { grid-column: 1; }
@@ -13736,16 +13760,17 @@
 
     .portal-choice-grid { position: relative; z-index: 2; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 2vw, 30px); margin-top: 12px; }
     .portal-choice { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 500px; padding: 20px clamp(15px, 1.8vw, 28px) 22px; border: 1px solid rgba(221, 196, 188, .72); border-radius: 22px; background: rgba(255, 253, 250, .88); box-shadow: 0 12px 28px rgba(123, 91, 82, .1); text-align: center; }
+    .portal-choice.is-parent { padding-top: 58px; }
     .portal-choice.is-active { border-color: rgba(216, 121, 128, .58); box-shadow: 0 16px 36px rgba(182, 106, 111, .16); }
     .coming-banner { position: absolute; z-index: 2; width: calc(100% + 14px); max-width: none; height: auto; left: 50%; top: -24px; transform: translateX(-50%); }
-    .welcome-banner { display: flex; width: min(240px, calc(100% - 42px)); min-height: 48px; align-items: center; justify-content: center; top: -17px; border: 2px solid #fffaf6; border-radius: 999px; color: #fff; background: #dba9a1; box-shadow: 0 8px 20px rgba(159, 100, 91, .2); font-family: "Bodoni 72 Smallcaps", "Bodoni 72", Didot, Georgia, serif; font-size: 20px; letter-spacing: .12em; text-transform: uppercase; }
+    .welcome-banner { width: calc(100% + 28px); top: -20px; filter: drop-shadow(0 8px 12px rgba(159, 100, 91, .14)); }
     .portal-illustration { width: 100%; height: 225px; margin: 6px auto 0; object-fit: contain; }
     .portal-choice h2 { margin: -14px 0 0; color: #d2777e; font-family: "Bodoni 72 Smallcaps", "Bodoni 72", Didot, Georgia, serif; font-size: clamp(27px, 2.25vw, 38px); font-weight: 400; letter-spacing: .04em; text-transform: lowercase; }
     .portal-divider { width: 76%; height: 20px; margin: 3px auto 7px; position: relative; }
     .portal-divider::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; height: 1px; background: #efccc7; }
     .portal-divider::after { content: "♥"; position: relative; padding: 0 9px; color: #eab568; background: #fffdfa; }
     .portal-choice p { max-width: 390px; min-height: 76px; margin: 0 auto 16px; color: #625956; font-family: "Avenir Next Ultra Light", "Avenir Next", sans-serif; font-size: clamp(14px, 1.15vw, 17px); font-weight: 200; line-height: 1.45; }
-    .portal-entry { display: flex; width: 100%; min-height: 48px; align-items: center; justify-content: center; margin-top: 0; border-radius: 999px; color: white; background: #dba9a1; box-shadow: 0 8px 18px rgba(159, 100, 91, .22); font-family: "Bodoni 72 Smallcaps", "Bodoni 72", Didot, Georgia, serif; font-size: 18px; font-weight: 400; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; }
+    .portal-entry { display: flex; width: 100%; min-height: 48px; align-items: center; justify-content: center; margin-top: auto; border-radius: 999px; color: white; background: #dba9a1; box-shadow: 0 8px 18px rgba(159, 100, 91, .22); font-family: "Bodoni 72 Smallcaps", "Bodoni 72", Didot, Georgia, serif; font-size: 18px; font-weight: 400; letter-spacing: .12em; text-decoration: none; text-transform: uppercase; }
     .portal-entry:disabled { cursor: not-allowed; background: #bdb5b0; box-shadow: 0 7px 15px rgba(90, 80, 76, .12); opacity: .9; }
     .landing-site-link { position: relative; z-index: 2; display: flex; width: min(480px, 90%); min-height: 50px; align-items: center; justify-content: center; margin: 18px auto 0; border-radius: 999px; color: white; background: #dba9a1; box-shadow: 0 9px 20px rgba(159, 100, 91, .2); font-size: 16px; letter-spacing: .1em; text-decoration: none; text-transform: uppercase; }
 
@@ -14186,7 +14211,7 @@
       </header>
       <div class="portal-choice-grid">
         <article class="portal-choice is-parent">
-          <span class="coming-banner welcome-banner">Welcome</span>
+          <img class="coming-banner welcome-banner" src="assets/my-dance-techniques/welcome-banner-watercolor.png" alt="Welcome">
           <img class="portal-illustration" src="assets/my-dance-techniques/parent-portal-illustration-twirla-peeking.png" alt="Twirla peeking from a phone with a dancer check-in alert">
           <h2>parent portal</h2><div class="portal-divider" aria-hidden="true"></div>
           <p>View your dancer’s photos, class updates, important information, manage enrollment, and stay connected all year long.</p>
@@ -14606,8 +14631,10 @@
                 </div>
                 <input class="teacher-orders-search" id="teacher-orders-search" type="search" placeholder="Search dancer name" aria-label="Search orders by dancer name">
                 <div class="teacher-orders-filters">
-                  <select id="teacher-orders-day-filter" aria-label="Filter orders by dance day"><option value="all">All Dance Days</option></select>
-                  <select id="teacher-orders-school-filter" aria-label="Filter orders by partner school"><option value="all">All Partner Schools</option></select>
+                  <label>Dance Day<select id="teacher-orders-day-filter" aria-label="Filter orders by dance day"><option value="all">All</option></select></label>
+                  <label>School<select id="teacher-orders-school-filter" aria-label="Filter orders by partner school"><option value="all">All</option></select></label>
+                  <label>Gender<select id="teacher-orders-gender-filter" aria-label="Filter orders by gender"><option value="all">All</option><option value="female">Girl</option><option value="male">Boy</option></select></label>
+                  <label>Size<select id="teacher-orders-size-filter" aria-label="Filter orders by T-Shirt size"><option value="all">All</option></select></label>
                 </div>
                 <details class="panel teacher-order-fulfillment-group">
                   <summary><svg class="teacher-order-fulfillment-icon" aria-hidden="true"><use href="#icon-tshirt"></use></svg><strong>T-Shirts &amp; Dance Bags</strong></summary>
@@ -14635,7 +14662,7 @@
                 <details class="panel teacher-order-fulfillment-group">
                   <summary><svg class="teacher-order-fulfillment-icon" aria-hidden="true"><use href="#icon-boutique-backend"></use></svg><strong>Boutique Orders</strong></summary>
                   <div class="teacher-order-fulfillment-body">
-                    <details class="panel"><summary><strong>Fill Orders</strong></summary><p class="subtle">Pull each dancer’s items, then mark the order filled.</p><div class="teacher-orders-card-grid" id="teacher-boutique-fill-list"></div></details>
+                    <details class="panel" id="teacher-boutique-fill-panel"><summary><strong>Fill Orders</strong></summary><p class="subtle">Pull your boutique orders, then confirm everything you collected.</p><div class="teacher-orders-fill-actions"><button type="button" id="teacher-boutique-pull-items">Pull Sizes</button><button type="button" id="teacher-boutique-fill-button">Fill Orders</button></div><div class="teacher-orders-card-grid" id="teacher-boutique-fill-list"></div></details>
                     <details class="panel"><summary><strong>Pickup Orders</strong></summary><p class="subtle">Collect every completed order assigned to you.</p><div class="teacher-orders-card-grid" id="teacher-boutique-pickup-list"></div></details>
                     <details class="panel"><summary><strong>Deliver Orders</strong></summary><p class="subtle">Deliver these orders to their dancers on dance day.</p><div class="teacher-orders-card-grid" id="teacher-boutique-deliver-list"></div></details>
                   </div>
@@ -14675,9 +14702,8 @@
                     <div class="teacher-parent-preview-header">
                       <div>
                         <h3>Parent Messages</h3>
-                        <p class="subtle">Sample inbox layout</p>
+                        <p class="subtle">Family conversations for your assigned dancers</p>
                       </div>
-                      <span class="teacher-parent-preview-badge">Preview only</span>
                     </div>
                     <div class="teacher-parent-message-filters" aria-label="Filter parent message previews">
                       <label>School
@@ -14699,7 +14725,6 @@
                   <div class="teacher-parent-preview-thread" id="teacher-parent-preview-thread" hidden>
                     <div class="teacher-parent-thread-header">
                       <button class="teacher-parent-thread-back" type="button" data-parent-preview-back>← Parents</button>
-                      <span class="teacher-parent-preview-badge">Preview only</span>
                     </div>
                     <div id="teacher-parent-preview-thread-content"></div>
                   </div>
@@ -15963,6 +15988,27 @@
                 <div class="roster-detail" id="admin-roster-detail"></div>
               </div>
             </div>
+            <div class="confirm-overlay" id="roster-class-feed-overlay" aria-hidden="true">
+              <div class="confirm-dialog roster-class-feed-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-class-feed-title">
+                <div class="roster-class-feed-header">
+                  <div class="roster-class-feed-title">
+                    <img src="../../parent-portal/assets/badges/class-post.png" alt="">
+                    <div><h3 id="roster-class-feed-title">Class Feed</h3><p id="roster-class-feed-subtitle"></p></div>
+                  </div>
+                  <button class="roster-profile-close" type="button" data-close-roster-class-feed aria-label="Close Class Feed">×</button>
+                </div>
+                <div class="roster-class-feed-posts" id="roster-class-feed-posts"></div>
+              </div>
+            </div>
+            <div class="confirm-overlay" id="roster-personal-feed-overlay" aria-hidden="true">
+              <div class="confirm-dialog roster-personal-feed-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-personal-feed-title">
+                <div class="roster-class-feed-header">
+                  <div class="roster-class-feed-title"><img src="assets/parent-portal-private-profile.png" alt=""><div><h3 id="roster-personal-feed-title">Personal Feeds</h3><p id="roster-personal-feed-subtitle">Choose a dancer.</p></div></div>
+                  <button class="roster-profile-close" type="button" data-close-roster-personal-feed aria-label="Close Personal Feeds">×</button>
+                </div>
+                <div class="roster-personal-feed-grid" id="roster-personal-feed-grid"></div>
+              </div>
+            </div>
             <div class="confirm-overlay" id="roster-multi-class-overlay" aria-hidden="true">
               <div class="confirm-dialog roster-multi-class-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-multi-class-title">
                 <div class="roster-profile-header"><div><h3 id="roster-multi-class-title">Rearrange Classes</h3><p class="subtle" id="roster-multi-class-school"></p></div><button class="roster-profile-close" type="button" id="roster-multi-class-close" aria-label="Close Rearrange Classes">×</button></div>
@@ -16228,7 +16274,7 @@
             <section class="admin-message-audience-panel" id="admin-messages-parents-panel" role="tabpanel" aria-labelledby="admin-messages-parents-tab" hidden>
               <div class="admin-parent-message-preview">
                 <h3>Parent Messages</h3>
-                <p class="subtle">Preview only — these sample conversations demonstrate the intended Director inbox. No messages can be sent.</p>
+                <p class="subtle">Shared family conversations from Parent Portal and Teacher Tools.</p>
                 <div class="rc5-preinvite-toolbar">
                   <span><strong>RC5 Pre-Invite Setup</strong><small>Review every Primrose Rowlett Class 5 family and finish billing before sending Parent Portal invitations.</small></span>
                   <div class="rc5-preinvite-actions"><button class="secondary" type="button" data-open-rc5-messages>Show RC5 Families</button><button class="secondary" type="button" data-open-rc5-billing>Review RC5 Billing</button><button class="primary" type="button" data-assign-rc5-draft-plans>Assign Draft Plans</button></div>
@@ -19699,6 +19745,7 @@
       const raw = String(size || "").trim();
       const key = raw.toUpperCase().replace(/\s*\(.+?\)/g, "").replace(/[^A-Z0-9]/g, "");
       const isBoy = String(gender || "").trim().toLowerCase() === "male";
+      if (["M", "YM", "MC"].includes(key)) return "MC";
       if (isBoy && ["5T", "XS", "YXS", "S", "YS", "SC"].includes(key)) return "SC";
       if (!isBoy && ["XS", "YXS", "S", "YS", "SC"].includes(key)) return "SC";
       return raw;
@@ -25669,15 +25716,20 @@
         }, true);
       }
       const messages = thread.messages.slice().reverse();
-      const activeTeachers = teachers.filter((teacher) => teacher.status !== "inactive");
+      const activeTeachers = teachers.filter((teacher) => {
+        if (teacher.status === "inactive") return false;
+        const name = String(teacher.displayName || fullName(teacher) || "").trim().toLowerCase();
+        return name !== "dance techniques" && name !== "dance techniques admin";
+      });
+      const activeTeacherIds = new Set(activeTeachers.map((teacher) => String(teacher.id)));
       modal.querySelector("#announcement-history-list").innerHTML = messages.length ? messages.map((message) => {
         const receiptRows = activeTeachers.map((teacher) => {
           const receipt = (message.receipts || []).find((item) => item.teacher_id === teacher.id);
           const acknowledgement = receipt?.acknowledgement ? receipt.acknowledgement === "heart" ? "Heart" : receipt.acknowledgement === "up" ? "Thumbs up" : "Thumbs down" : "Not acknowledged";
           return `<div class="receipt-row ${receipt?.read_at ? "" : "not-read"}"><span>${escapeText(teacher.displayName || fullName(teacher))}</span><span>${receipt?.read_at ? "Read" : "Not read"} · ${escapeText(acknowledgement)}</span></div>`;
         }).join("");
-        const readCount = (message.receipts || []).filter((receipt) => receipt.read_at).length;
-        const acknowledgedCount = (message.receipts || []).filter((receipt) => receipt.acknowledgement).length;
+        const readCount = (message.receipts || []).filter((receipt) => activeTeacherIds.has(String(receipt.teacher_id)) && receipt.read_at).length;
+        const acknowledgedCount = (message.receipts || []).filter((receipt) => activeTeacherIds.has(String(receipt.teacher_id)) && receipt.acknowledgement).length;
         return `<details class="latest-announcement announcement-history-item" data-announcement-history-id="${escapeText(message.id || "")}">
           <summary><span><strong>${escapeText(message.notificationTitle || "Dance Techniques Announcement")}</strong><small>${escapeText(announcementDateTimeLabel(message))}</small></span><span class="status private">${readCount}/${activeTeachers.length} read · ${acknowledgedCount} acknowledged</span></summary>
           <div class="announcement-history-body">${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}${window.dtCurrentProfile?.role === "teacher" ? "" : `<h4>Teacher Activity</h4><div class="receipt-list">${receiptRows}</div>`}</div>
@@ -25855,11 +25907,11 @@
           `;
           }).join("")}
         </div>
-        <div class="teacher-parent-preview-compose" aria-label="Disabled preview composer">
-          <textarea disabled aria-label="Parent message reply preview" placeholder="Reply preview"></textarea>
-          <button class="primary" type="button" disabled>Send</button>
-          <p class="teacher-parent-preview-compose-note">Preview only — parent messaging is not connected and nothing can send.</p>
-        </div>
+        <form class="teacher-parent-preview-compose" id="teacher-parent-shared-compose" aria-label="Reply to family">
+          <textarea id="teacher-parent-shared-reply" aria-label="Reply to family" placeholder="Reply to the family"></textarea>
+          <button class="primary" type="submit">Send</button>
+          <p class="teacher-parent-preview-compose-note">Replies are shared with every linked guardian.</p>
+        </form>
       `;
     };
 
@@ -25891,7 +25943,7 @@
             ${conversation.unread ? `<span class="teacher-parent-unread" aria-label="${conversation.unread} unread message${conversation.unread === 1 ? "" : "s"}">${conversation.unread}</span>` : ""}
           </span>` : ""}
         </button>
-      `).join("") : `<p class="teacher-parent-preview-empty">No sample conversations match these filters.</p>`;
+      `).join("") : `<p class="teacher-parent-preview-empty">No family conversations match these filters.</p>`;
     };
 
     const renderTeacherMessages = () => {
@@ -29361,6 +29413,34 @@
     var pendingDirectorTaskRemoveId = "";
     var pendingTeacherEscalation = null;
     const saveDirectorParentTasks = () => localStorage.setItem("dt-director-parent-tasks", JSON.stringify(directorParentTasks));
+    const loadSharedFamilyConversations = async () => {
+      if (!window.dtSupabase || !window.dtCurrentProfile) return;
+      const { data, error } = await window.dtSupabase.from("parent_family_messages")
+        .select("id,student_id,channel,guardian_id,staff_profile_id,body,created_at,students(first_name,last_name,preferred_name),guardians(first_name,last_name,full_name),profiles(full_name)")
+        .order("created_at", { ascending:true });
+      if (error) return;
+      const grouped = new Map();
+      (data || []).forEach((row) => {
+        const student = Array.isArray(row.students) ? row.students[0] : row.students;
+        const guardian = Array.isArray(row.guardians) ? row.guardians[0] : row.guardians;
+        const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles;
+        const studentName = [student?.preferred_name || student?.first_name, student?.last_name].filter(Boolean).join(" ") || "Dancer";
+        if (!grouped.has(row.student_id)) grouped.set(row.student_id, { studentName, rows:[] });
+        grouped.get(row.student_id).rows.push({ id:row.id, channel:row.channel, author:row.guardian_id ? "parent" : row.channel === "admin" ? "admin" : "teacher", label:row.guardian_id ? (guardian?.full_name || [guardian?.first_name,guardian?.last_name].filter(Boolean).join(" ") || "Parent") : (profile?.full_name || (row.channel === "admin" ? "Dance Techniques Admin" : "Teacher")), time:new Date(row.created_at).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}), text:row.body, createdAt:row.created_at });
+      });
+      grouped.forEach((group, studentId) => {
+        let conversation = teacherParentPreviewConversations.find((item) => String(item.sharedStudentId || "") === String(studentId) || String(item.studentName || "").toLowerCase() === group.studentName.toLowerCase());
+        if (!conversation) { conversation = { id:`shared-family-${studentId}`, studentName:group.studentName, initials:group.studentName.split(/\s+/).map(part=>part[0]).slice(0,2).join(""), school:"", className:"", unread:0 }; teacherParentPreviewConversations.push(conversation); }
+        conversation.sharedStudentId = studentId;
+        conversation.messages = group.rows;
+        const latest = group.rows.at(-1);
+        conversation.newestPreview = latest?.text || "";
+        conversation.timestamp = latest ? new Date(latest.createdAt).toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}) : "";
+        conversation.order = latest ? new Date(latest.createdAt).getTime() : 0;
+      });
+      renderAdminParentMessagePreview();
+      renderTeacherParentPreview();
+    };
     const loadParentServiceRequestTasks = async () => {
       if (!window.dtSupabase || !["admin", "director"].includes(String(window.dtCurrentProfile?.role || "").toLowerCase())) return;
       const { data, error } = await window.dtSupabase
@@ -29381,6 +29461,19 @@
           : `Withdrawal Request · Last dance day ${request.requested_last_dance_day || "not provided"}${request.parent_note ? ` · ${request.parent_note}` : ""}`;
         const taskData = { id: `parent-request-${request.id}`, sourceRequestId: request.id, complete: request.status === "completed", priority: false, createdAtMs: new Date(request.created_at).getTime(), message, sender, studentName, teacherName: "", school: school?.nickname || school?.name || "", className: "", danceDay: "", assignee: "Ms. Lexi", notes: [] };
         if (existing) Object.assign(existing, taskData, { assignee: existing.assignee || taskData.assignee, priority: Boolean(existing.priority), notes: existing.notes || [] });
+        else directorParentTasks.push(taskData);
+      });
+      const { data: guardianRequests } = await window.dtSupabase
+        .from("parent_guardian_invitation_requests")
+        .select("id,adult_name,adult_email,relationship,permission_level,student_ids,status,created_at,guardians!parent_guardian_invitation_requests_requested_by_guardian_id_fkey(first_name,last_name,full_name)")
+        .in("status", ["open", "completed"])
+        .order("created_at", { ascending: false });
+      (guardianRequests || []).forEach((request) => {
+        const guardian = Array.isArray(request.guardians) ? request.guardians[0] : request.guardians;
+        const sender = guardian?.full_name || [guardian?.first_name, guardian?.last_name].filter(Boolean).join(" ") || "Parent";
+        const existing = directorParentTasks.find((task) => task.sourceGuardianInviteId === request.id);
+        const taskData = { id:`guardian-invite-${request.id}`, sourceGuardianInviteId:request.id, complete:request.status === "completed", priority:false, createdAtMs:new Date(request.created_at).getTime(), message:`Guardian Invitation · ${request.adult_name} · ${request.adult_email} · ${request.relationship} · ${request.permission_level === "view" ? "View only" : "Full parent access"}`, sender, studentName:"Family invitation", teacherName:"", school:"", className:"", danceDay:"", assignee:"Ms. Lexi", notes:[] };
+        if (existing) Object.assign(existing, taskData, { assignee:existing.assignee || taskData.assignee, priority:Boolean(existing.priority), notes:existing.notes || [] });
         else directorParentTasks.push(taskData);
       });
       saveDirectorParentTasks();
@@ -29635,7 +29728,7 @@
           && (adminParentMessageFilters.status === "all" || (adminParentMessageFilters.status === "unread" ? Number(conversation.unread) > 0 : adminParentConversationNotReplied(conversation)))
           && (!search || searchText.includes(search));
       }).sort((left, right) => Number(right.order || 0) - Number(left.order || 0));
-      setText("admin-parent-message-count", `Showing ${filtered.length} of ${teacherParentPreviewConversations.length} preview conversation${teacherParentPreviewConversations.length === 1 ? "" : "s"}`);
+      setText("admin-parent-message-count", `Showing ${filtered.length} of ${teacherParentPreviewConversations.length} family conversation${teacherParentPreviewConversations.length === 1 ? "" : "s"}`);
       list.innerHTML = filtered.length ? filtered.map((conversation) => {
         const metadata = adminParentConversationMetadata(conversation);
         const teacherColor = metadata.teacher ? teacherProfileColor(metadata.teacher) : adminMessageColor;
@@ -29649,7 +29742,7 @@
         const messagePreview = hasMessages ? `<span class="message-preview-${escapeText(latestSenderType)}">${escapeText(latestMessage)}</span>` : "";
         const messageMeta = hasMessages ? `<span class="admin-parent-message-preview-meta"><time>${escapeText(conversation.timestamp || "Time unavailable")}</time>${conversation.unread ? `<span class="admin-parent-message-unread" aria-label="${conversation.unread} unread">${conversation.unread} unread</span>` : ""}</span>` : "";
         return `<button class="admin-parent-message-preview-card ${parentConversationStatusClass(conversation)}" style="--admin-parent-teacher-color:${escapeText(teacherColor)}" type="button" data-admin-parent-preview="${escapeText(conversation.id)}" aria-label="Open family group conversation for ${escapeText(conversation.studentName)}"><span class="admin-parent-dance-badges"><span class="admin-parent-dance-badge">${escapeText(dayBadge)}</span><span class="admin-parent-dance-badge">${escapeText(metadata.timeBlock)}</span></span>${parentStudentBubbleMarkup(parentConversationStudent(conversation), conversation.initials)}<span class="admin-parent-message-preview-copy"><strong>${escapeText(conversation.studentName)}</strong><small>${escapeText(parentLine)}</small><small>${escapeText(`${metadata.teacherName || "Teacher not assigned"} · ${conversation.school || "School unavailable"}`)}</small>${messagePreview}</span>${messageMeta}${taskControl}</button>`;
-      }).join("") : '<p class="admin-parent-message-preview-empty">No preview conversations match these filters.</p>';
+      }).join("") : '<p class="admin-parent-message-preview-empty">No family conversations match these filters.</p>';
     };
 
     const renderAdminMessagesPage = () => {
@@ -30473,14 +30566,20 @@
       if (conversation) openAdminParentConversation(conversation);
     });
     document.querySelector("[data-close-admin-parent-thread]")?.addEventListener("click", () => document.getElementById("admin-parent-thread-dialog")?.close());
-    document.getElementById("admin-parent-thread-messages")?.addEventListener("click", (event) => {
+    document.getElementById("admin-parent-thread-messages")?.addEventListener("click", async (event) => {
       const dialog = document.getElementById("admin-parent-thread-dialog");
       const conversation = teacherParentPreviewConversations.find((item) => item.id === dialog?.dataset.conversationId);
       const reactionButton = event.target.closest("[data-admin-thread-react]");
       if (reactionButton && conversation) {
         const message = conversation.messages?.[Number(reactionButton.dataset.adminThreadReact)];
         if (message) {
+          if (message.id && window.dtSupabase) {
+            const { data, error } = await window.dtSupabase.rpc("toggle_parent_family_message_reaction", { target_message_id:message.id });
+            if (error) { window.alert(error.message || "The reaction could not be saved."); return; }
+            message.adminReaction = data ? "heart" : "";
+          } else {
           message.adminReaction = message.adminReaction ? "" : "heart";
+          }
           message.acknowledgedByTeacher = Boolean(message.adminReaction);
           conversation.unread = 0;
           openAdminParentConversation(conversation);
@@ -30494,13 +30593,25 @@
       const message = conversation?.messages?.[messageIndex];
       if (conversation && message) addParentMessageToTasks(conversation, message, messageIndex);
     });
-    document.getElementById("admin-parent-thread-compose")?.addEventListener("submit", (event) => {
+    document.getElementById("admin-parent-thread-compose")?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const dialog = document.getElementById("admin-parent-thread-dialog");
       const reply = document.getElementById("admin-parent-thread-reply");
       const conversation = teacherParentPreviewConversations.find((item) => item.id === dialog?.dataset.conversationId);
       const text = reply?.value.trim();
       if (!conversation || !text) return;
+      if (conversation.sharedStudentId && window.dtSupabase) {
+        const button = event.currentTarget.querySelector('button[type="submit"]');
+        if (button) { button.disabled = true; button.textContent = "Sending…"; }
+        const { error } = await window.dtSupabase.rpc("post_staff_family_message", { target_student_id:conversation.sharedStudentId, target_channel:"admin", message_body:text });
+        if (button) { button.disabled = false; button.textContent = "Send"; }
+        if (error) { window.alert(error.message || "The family message could not be sent."); return; }
+        reply.value = "";
+        await loadSharedFamilyConversations();
+        const refreshed = teacherParentPreviewConversations.find((item) => item.id === conversation.id);
+        if (refreshed) openAdminParentConversation(refreshed);
+        return;
+      }
       const now = new Date();
       conversation.messages = Array.isArray(conversation.messages) ? conversation.messages : [];
       conversation.messages.push({ author:"admin", label:"Dance Techniques Admin", time:now.toLocaleTimeString([], { hour:"numeric", minute:"2-digit" }), text, acknowledgedByTeacher:true });
@@ -30518,6 +30629,19 @@
       if (event.target.id === "teacher-parent-class-filter") teacherParentPreviewFilters.className = event.target.value || "all";
       if (event.target.id === "teacher-parent-status-filter") teacherParentPreviewFilters.status = event.target.value || "all";
       renderTeacherParentPreview();
+    });
+    document.getElementById("teacher-messages-parents-panel")?.addEventListener("submit", async (event) => {
+      if (event.target.id !== "teacher-parent-shared-compose") return;
+      event.preventDefault();
+      const conversation = teacherParentPreviewConversations.find((item) => item.id === selectedTeacherParentPreviewId);
+      const reply = document.getElementById("teacher-parent-shared-reply"), text = reply?.value.trim(), button = event.target.querySelector('button[type="submit"]');
+      if (!conversation?.sharedStudentId || !text || !window.dtSupabase) return;
+      button.disabled = true; button.textContent = "Sending…";
+      const { error } = await window.dtSupabase.rpc("post_staff_family_message", { target_student_id:conversation.sharedStudentId, target_channel:"teacher", message_body:text });
+      button.disabled = false; button.textContent = "Send";
+      if (error) { window.alert(error.message || "The family message could not be sent."); return; }
+      reply.value = "";
+      await loadSharedFamilyConversations();
     });
     document.getElementById("teacher-messages-parents-panel")?.addEventListener("click", (event) => {
       const taskButton = event.target.closest("[data-parent-message-task]");
@@ -30608,6 +30732,7 @@
         task.completedAt = new Date().toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
         saveDirectorParentTasks();
         if (task.sourceRequestId && window.dtSupabase) await window.dtSupabase.from("parent_service_requests").update({ status: "completed", completed_at: new Date().toISOString(), completed_by: window.dtCurrentProfile?.id || null }).eq("id", task.sourceRequestId);
+        if (task.sourceGuardianInviteId && window.dtSupabase) await window.dtSupabase.from("parent_guardian_invitation_requests").update({ status: "completed", completed_at: new Date().toISOString(), completed_by: window.dtCurrentProfile?.id || null }).eq("id", task.sourceGuardianInviteId);
       }
       pendingDirectorTaskCompleteId = "";
       document.getElementById("director-task-complete-dialog")?.close();
@@ -30654,6 +30779,7 @@
     });
     renderDirectorParentTasks();
     void loadParentServiceRequestTasks();
+    void loadSharedFamilyConversations();
 
     document.getElementById("admin-thread-list")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-admin-thread]");
@@ -32036,11 +32162,15 @@
     const pendingTeacherKitDeliveries = new Set();
     const pendingTeacherKitPickups = new Set();
     const pendingTeacherKitSelfFills = new Set();
+    const pendingTeacherBoutiqueFills = new Set();
     let teacherOrderPickupActive = false;
     let teacherOrderSelfFillActive = false;
+    let teacherBoutiqueFillActive = false;
     let teacherOrderSearchTerm = "";
     let teacherOrderDayFilter = "all";
     let teacherOrderSchoolFilter = "all";
+    let teacherOrderGenderFilter = "all";
+    let teacherOrderSizeFilter = "all";
     const boutiqueOrdersGoLiveAt = "2026-07-23T05:00:00.000Z";
     let boutiqueOrders = [];
     let wixOrderSyncPromise = null;
@@ -32418,7 +32548,9 @@
       if (!record) return "";
       const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[record.rosterClass.day] || "—";
       const nextStatus = order.status === "to_fill" ? "to_pick_up" : order.status === "to_pick_up" ? "to_deliver" : order.status === "to_deliver" ? "delivered" : "";
-      return `<div class="teacher-order-card"><span class="teacher-order-day-bubble">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(record.student)}">${record.student.photo ? `<img src="${rosterSafe(record.student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(record.student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(record.student))}</strong><small>${rosterSafe(rosterSchoolNickname(record.rosterClass.schoolName))}</small></span>${boutiqueOrderItemsMarkup(order)}${nextStatus ? `<button type="button" data-teacher-boutique-status="${rosterSafe(order.id)}" data-next-status="${nextStatus}">${rosterSafe(boutiqueStatusLabel(nextStatus))}</button>` : ""}</div>`;
+      const fillSelectable = order.status === "to_fill" && teacherBoutiqueFillActive;
+      const selected = fillSelectable && pendingTeacherBoutiqueFills.has(order.id);
+      return `<div class="teacher-order-card ${fillSelectable ? "is-pickup-active" : ""} ${selected ? "is-selected" : ""}" ${fillSelectable ? `data-teacher-boutique-fill="${rosterSafe(order.id)}"` : ""}><span class="teacher-order-day-bubble">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(record.student)}">${record.student.photo ? `<img src="${rosterSafe(record.student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(record.student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(record.student))}</strong><small>${rosterSafe(rosterSchoolNickname(record.rosterClass.schoolName))}</small></span>${boutiqueOrderItemsMarkup(order)}${nextStatus && !fillSelectable ? `<button type="button" data-teacher-boutique-status="${rosterSafe(order.id)}" data-next-status="${nextStatus}">${rosterSafe(boutiqueStatusLabel(nextStatus))}</button>` : ""}</div>`;
     };
 
     const saveBoutiqueOrderStatus = async (orderId, nextStatus) => {
@@ -32634,6 +32766,8 @@
       const haystack = [student.firstName, student.preferredName, student.lastName, student.parentName, student.parentFirstName, student.parentLastName, rosterClass.schoolName, rosterClass.name].filter(Boolean).join(" ").toLowerCase();
       return (teacherOrderDayFilter === "all" || rosterClass.day === teacherOrderDayFilter) &&
         (teacherOrderSchoolFilter === "all" || rosterClass.schoolName === teacherOrderSchoolFilter) &&
+        (teacherOrderGenderFilter === "all" || String(student.gender || "").toLowerCase() === teacherOrderGenderFilter) &&
+        (teacherOrderSizeFilter === "all" || normalizedEnrollmentShirtSize(student.tshirtSize, student.gender) === teacherOrderSizeFilter) &&
         (!teacherOrderSearchTerm || haystack.includes(teacherOrderSearchTerm));
     });
     const teacherOrderCardMarkup = ({ rosterClass, student }, status) => {
@@ -32654,7 +32788,7 @@
       const days = [...new Set(allRecords.map(({ rosterClass }) => rosterClass.day).filter(Boolean))].sort((left, right) => Object.values(weekdayNames).indexOf(left) - Object.values(weekdayNames).indexOf(right));
       const daySelect = document.getElementById("teacher-orders-day-filter");
       if (daySelect) {
-        daySelect.innerHTML = `<option value="all">All Dance Days</option>${days.map((day) => `<option value="${rosterSafe(day)}">${rosterSafe(day)}</option>`).join("")}`;
+        daySelect.innerHTML = `<option value="all">All</option>${days.map((day) => `<option value="${rosterSafe(day)}">${rosterSafe(day)}</option>`).join("")}`;
         daySelect.value = days.includes(teacherOrderDayFilter) ? teacherOrderDayFilter : "all";
         teacherOrderDayFilter = daySelect.value;
       }
@@ -32662,9 +32796,20 @@
       const schools = [...new Set(dayRecords.map(({ rosterClass }) => rosterClass.schoolName).filter(Boolean))].sort((left, right) => rosterSchoolNickname(left).localeCompare(rosterSchoolNickname(right)));
       const schoolSelect = document.getElementById("teacher-orders-school-filter");
       if (schoolSelect) {
-        schoolSelect.innerHTML = `<option value="all">All Partner Schools</option>${schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}`;
+        schoolSelect.innerHTML = `<option value="all">All</option>${schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}`;
         schoolSelect.value = schools.includes(teacherOrderSchoolFilter) ? teacherOrderSchoolFilter : "all";
         teacherOrderSchoolFilter = schoolSelect.value;
+      }
+      const scopedRecords = allRecords.filter(({ rosterClass, student }) =>
+        (teacherOrderDayFilter === "all" || rosterClass.day === teacherOrderDayFilter) &&
+        (teacherOrderSchoolFilter === "all" || rosterClass.schoolName === teacherOrderSchoolFilter) &&
+        (teacherOrderGenderFilter === "all" || String(student.gender || "").toLowerCase() === teacherOrderGenderFilter));
+      const sizeSelect = document.getElementById("teacher-orders-size-filter");
+      if (sizeSelect) {
+        const sizes = [...new Set(scopedRecords.map(({ student }) => normalizedEnrollmentShirtSize(student.tshirtSize, student.gender)).filter(Boolean))].sort(boutiqueShirtSizeSort);
+        sizeSelect.innerHTML = `<option value="all">All</option>${sizes.map((size) => `<option value="${rosterSafe(size)}">${rosterSafe(size)}</option>`).join("")}`;
+        sizeSelect.value = sizes.includes(teacherOrderSizeFilter) ? teacherOrderSizeFilter : "all";
+        teacherOrderSizeFilter = sizeSelect.value;
       }
       const records = filteredTeacherOrderRecords(allRecords);
       const ready = records.filter(({ student }) => student.kitReady && !student.kitPickedUp && !student.kitReceived);
@@ -32707,6 +32852,11 @@
       if (selfFillButton) {
         selfFillButton.disabled = !waiting.length;
         selfFillButton.textContent = teacherOrderSelfFillActive ? `Confirm Filled Orders${pendingTeacherKitSelfFills.size ? ` (${pendingTeacherKitSelfFills.size})` : ""}` : "Fill Orders";
+      }
+      const boutiqueFillButton = document.getElementById("teacher-boutique-fill-button");
+      if (boutiqueFillButton) {
+        boutiqueFillButton.disabled = !boutiqueFill.length;
+        boutiqueFillButton.textContent = teacherBoutiqueFillActive ? `Confirm Filled Orders${pendingTeacherBoutiqueFills.size ? ` (${pendingTeacherBoutiqueFills.size})` : ""}` : "Fill Orders";
       }
       const deliverButton = document.getElementById("teacher-orders-deliver-button");
       if (deliverButton) deliverButton.disabled = !possession.length;
@@ -32778,6 +32928,14 @@
       showToast(`${savedCount} boutique order${savedCount === 1 ? "" : "s"} moved to ${boutiqueStatusLabel(nextStatus).toLowerCase()}`);
     });
     document.querySelector("#orders-view")?.addEventListener("click", (event) => {
+      const fillCard = event.target.closest("[data-teacher-boutique-fill]");
+      if (fillCard && teacherBoutiqueFillActive) {
+        const orderId = fillCard.dataset.teacherBoutiqueFill;
+        if (pendingTeacherBoutiqueFills.has(orderId)) pendingTeacherBoutiqueFills.delete(orderId);
+        else pendingTeacherBoutiqueFills.add(orderId);
+        renderTeacherOrders();
+        return;
+      }
       const button = event.target.closest("[data-teacher-boutique-status]");
       if (button) saveBoutiqueOrderStatus(button.dataset.teacherBoutiqueStatus, button.dataset.nextStatus);
     });
@@ -32803,6 +32961,19 @@
     });
     document.getElementById("teacher-orders-school-filter")?.addEventListener("change", (event) => {
       teacherOrderSchoolFilter = event.target.value;
+      pendingTeacherKitPickups.clear();
+      pendingTeacherKitSelfFills.clear();
+      renderTeacherOrders();
+    });
+    document.getElementById("teacher-orders-gender-filter")?.addEventListener("change", (event) => {
+      teacherOrderGenderFilter = event.target.value;
+      teacherOrderSizeFilter = "all";
+      pendingTeacherKitPickups.clear();
+      pendingTeacherKitSelfFills.clear();
+      renderTeacherOrders();
+    });
+    document.getElementById("teacher-orders-size-filter")?.addEventListener("change", (event) => {
+      teacherOrderSizeFilter = event.target.value;
       pendingTeacherKitPickups.clear();
       pendingTeacherKitSelfFills.clear();
       renderTeacherOrders();
@@ -32884,6 +33055,50 @@
       renderStudentLibrary();
       renderMyDay();
       showToast(`${records.length} order${records.length === 1 ? "" : "s"} filled and picked up`);
+    });
+    document.getElementById("teacher-boutique-fill-button")?.addEventListener("click", async () => {
+      const panel = document.getElementById("teacher-boutique-fill-panel");
+      if (!teacherBoutiqueFillActive) {
+        teacherBoutiqueFillActive = true;
+        pendingTeacherBoutiqueFills.clear();
+        if (panel) panel.open = true;
+        renderTeacherOrders();
+        return;
+      }
+      if (!pendingTeacherBoutiqueFills.size) return showToast("Select every boutique order you filled and collected");
+      const orders = teacherBoutiqueOrders().filter((order) => order.status === "to_fill" && pendingTeacherBoutiqueFills.has(order.id));
+      const results = await Promise.all(orders.map((order) => saveBoutiqueOrderStatus(order.id, "to_pick_up")));
+      const savedCount = results.filter(Boolean).length;
+      pendingTeacherBoutiqueFills.clear();
+      teacherBoutiqueFillActive = false;
+      renderTeacherOrders();
+      showToast(`${savedCount} boutique order${savedCount === 1 ? "" : "s"} filled and collected`);
+    });
+    document.getElementById("teacher-boutique-pull-items")?.addEventListener("click", () => {
+      const orders = teacherBoutiqueOrders().filter((order) => order.status === "to_fill");
+      const quantities = new Map();
+      orders.forEach((order) => (order.boutique_order_items || []).forEach((item) => {
+        const name = String(item.name || "Boutique item").trim();
+        const size = boutiqueOrderItemSize(item);
+        const label = size ? `${name} · ${size}` : name;
+        quantities.set(label, (quantities.get(label) || 0) + Math.max(1, Number(item.quantity) || 1));
+      }));
+      const items = [...quantities.entries()].sort(([left], [right]) => left.localeCompare(right));
+      const list = document.getElementById("boutique-quantity-list");
+      const title = document.getElementById("boutique-quantity-title");
+      const summary = document.getElementById("boutique-quantity-summary");
+      const missing = document.getElementById("boutique-quantity-missing");
+      list?.classList.remove("is-shirt-columns");
+      if (title) title.textContent = "Pull Boutique Items";
+      if (summary) summary.textContent = `${orders.length} unfilled boutique order${orders.length === 1 ? "" : "s"}`;
+      if (list) list.innerHTML = items.length ? items.map(([label, count]) => `<label class="boutique-quantity-row"><input type="checkbox"><strong>${rosterSafe(label)}</strong><span>${count}</span></label>`).join("") : `<div class="boutique-kit-empty">No boutique items need to be pulled.</div>`;
+      if (missing) {
+        missing.hidden = true;
+        missing.textContent = "";
+      }
+      const overlay = document.getElementById("boutique-quantity-overlay");
+      overlay?.classList.add("active");
+      overlay?.setAttribute("aria-hidden", "false");
     });
     document.getElementById("teacher-orders-size-quantities")?.addEventListener("click", () => {
       const records = filteredTeacherOrderRecords(teacherOrderRecords()).filter(({ student }) => !student.kitReady && !student.kitPickedUp && !student.kitReceived);
@@ -33521,6 +33736,10 @@
     let teacherClassPostAudienceMode = "class";
     let teacherClassPostActiveTextFieldId = "teacher-class-post-caption";
     const teacherClassPostStudentIds = new Set();
+    const teacherPostRosterClass = (classId) => teacherRosterClasses().find((item) => String(item.id) === String(classId))
+      || (["director", "admin"].includes(String(window.dtCurrentProfile?.role || document.body.dataset.userRole || ""))
+        ? rosterClasses.find((item) => item.sourceActive !== false && String(item.id) === String(classId))
+        : null);
 
     const teacherClassPostInsertText = (text, selectionStartOffset = 0, selectionEndOffset = 0, forceCaption = false) => {
       const field = document.getElementById(forceCaption ? "teacher-class-post-caption" : teacherClassPostActiveTextFieldId) || document.getElementById("teacher-class-post-caption");
@@ -33558,7 +33777,7 @@
       if (publishButton && !teacherClassPostPublishing) publishButton.textContent = teacherClassPostAudienceMode === "private" ? "Publish to Private Feeds" : "Publish to Class Feed";
       const panel = document.getElementById("teacher-class-post-private-panel");
       if (panel) panel.hidden = teacherClassPostAudienceMode !== "private";
-      const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(teacherClassPostClassId));
+      const rosterClass = teacherPostRosterClass(teacherClassPostClassId);
       const dancers = rosterClass ? rosterEnrolled(rosterClass) : [];
       const grid = document.getElementById("teacher-class-post-dancers");
       if (grid) grid.innerHTML = dancers.map((student) => {
@@ -33592,7 +33811,7 @@
     const teacherActivityLabel = (value) => ({ photos:"Picture", videos:"Video", alert:"Alert", applause:"Applause", incident:"Incident", curriculum:"Curriculum", drafts:"Drafts" })[value] || "Activity";
     const teacherActivityBadge = (value) => ({ photos:"teacher-activity-picture.png", videos:"teacher-activity-video.png", alert:"teacher-activity-alert.png", applause:"teacher-activity-applause.png", incident:"teacher-activity-incident.png", curriculum:"teacher-activity-curriculum.png", drafts:"teacher-activity-drafts.png", gallery:"teacher-activity-gallery.png", class:"teacher-activity-class-feed.png", private:"teacher-activity-private-feed.png" })[value] || "";
     const teacherActivityTile = (value, label = teacherActivityLabel(value)) => `<img class="teacher-activity-badge" src="assets/${teacherActivityBadge(value)}" alt="" aria-hidden="true"><span class="teacher-activity-tile-title">${rosterSafe(label)}</span>`;
-    const teacherActivitiesClass = () => teacherRosterClasses().find((item) => String(item.id) === String(teacherActivitiesClassId));
+    const teacherActivitiesClass = () => teacherPostRosterClass(teacherActivitiesClassId);
     const teacherActivitiesMenuMarkup = () => `<div class="teacher-activities-grid" aria-label="Choose an activity">
       <button class="teacher-activities-choice" type="button" data-teacher-activity-type="photos">${teacherActivityTile("photos")}</button>
       <button class="teacher-activities-choice" type="button" data-teacher-activity-type="videos">${teacherActivityTile("videos")}</button>
@@ -33643,11 +33862,11 @@
       const privateNeedsSelection = teacherActivitiesAudience === "private" && !pictureAudienceOnly && !count;
       content.innerHTML = `<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-activities-back>← Activities</button><h4>${teacherActivityLabel(teacherActivitiesType)}</h4><p class="subtle">Who should receive this?</p><div class="teacher-activities-recipient-grid"><button type="button" data-teacher-activity-audience="class" aria-pressed="${teacherActivitiesAudience === "class"}">${teacherActivityTile("class", "Class Feed")}</button><button type="button" data-teacher-activity-audience="private" aria-pressed="${teacherActivitiesAudience === "private"}">${teacherActivityTile("private", "Private Feed")}</button></div>${privateSelection}${teacherActivitiesType === "alert" && teacherActivitiesAudience ? `<label class="teacher-alert-sms-option"><input type="checkbox" data-teacher-alert-sms ${teacherActivitiesSmsSelected ? "checked" : ""}><span><strong>Also send as SMS</strong><small>Text the same authorized families receiving this alert.</small></span></label>` : ""}${teacherActivitiesAudience ? `<div class="confirm-actions"><button class="primary" type="button" data-teacher-activity-continue ${privateNeedsSelection ? "disabled" : ""}>Continue to Draft</button></div>` : ""}</section>`;
     };
-    const openTeacherActivities = (classId) => { const rosterClass=teacherRosterClasses().find((item)=>String(item.id)===String(classId)); if(!rosterClass||!rosterEnrolled(rosterClass).length)return showToast("This class has no enrolled dancers to receive a post"); teacherActivitiesClassId=rosterClass.id; teacherActivitiesResetStep(); renderTeacherActivities(); setTeacherRosterOverlay("teacher-activities-overlay",true); };
+    const openTeacherActivities = (classId) => { const rosterClass=teacherPostRosterClass(classId); if(!rosterClass||!rosterEnrolled(rosterClass).length)return showToast("This class has no enrolled dancers to receive a post"); teacherActivitiesClassId=rosterClass.id; teacherActivitiesResetStep(); renderTeacherActivities(); setTeacherRosterOverlay("teacher-activities-overlay",true); };
     const closeTeacherActivities = () => { teacherActivitiesClassId=""; teacherActivitiesResetStep(); setTeacherRosterOverlay("teacher-activities-overlay",false); };
 
     const openTeacherClassPost = (classId) => {
-      const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(classId));
+      const rosterClass = teacherPostRosterClass(classId);
       const dancers = rosterClass ? rosterEnrolled(rosterClass) : [];
       if (!rosterClass || !dancers.length) return showToast("This class has no enrolled dancers to receive a post");
       resetTeacherClassPost();
@@ -33673,7 +33892,7 @@
     };
 
     const publishTeacherClassPost = async () => {
-      const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(teacherClassPostClassId));
+      const rosterClass = teacherPostRosterClass(teacherClassPostClassId);
       const publish = document.getElementById("teacher-class-post-publish");
       const status = document.getElementById("teacher-class-post-status");
       if (!rosterClass || !publish || !status || teacherClassPostPublishing) return;
@@ -36902,6 +37121,61 @@
       overlay.setAttribute("aria-hidden", "false");
     };
 
+    const closeRosterClassFeed = () => {
+      const overlay = document.getElementById("roster-class-feed-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+    };
+    const rosterClassFeedPostMarkup = (post) => {
+      const mediaUrl = post.mediaUrl || post.media_url || post.photoUrl || post.photo_url || "";
+      const publishedAt = post.publishedAt || post.published_at || post.createdAt || post.created_at || "";
+      const copy = String(post.caption || post.message || "").trim();
+      return `<article class="roster-class-feed-post">${mediaUrl ? `<img src="${rosterSafe(mediaUrl)}" alt="${rosterSafe(post.title || "Class post")}">` : ""}<h4>${rosterSafe(post.title || "Class Update")}</h4>${copy ? `<p>${rosterSafe(copy).replace(/\n/g, "<br>")}</p>` : ""}<time>${publishedAt ? rosterSafe(new Date(publishedAt).toLocaleString([], { month:"short", day:"numeric", year:"numeric", hour:"numeric", minute:"2-digit" })) : "Shared with this class"}</time></article>`;
+    };
+    const openRosterClassFeed = async (rosterClass) => {
+      const overlay = document.getElementById("roster-class-feed-overlay");
+      const posts = document.getElementById("roster-class-feed-posts");
+      if (!overlay || !posts || !rosterClass) return;
+      setText("roster-class-feed-title", `${rosterClass.name} Class Feed`);
+      setText("roster-class-feed-subtitle", `${rosterSchoolNickname(rosterClass.schoolName)} · ${rosterTeacherName(rosterClass.teacherId)}`);
+      posts.innerHTML = `<div class="teacher-roster-empty">Loading this class feed…</div>`;
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+      const enrolled = rosterEnrolled(rosterClass);
+      const localPosts = enrolled.flatMap((student) => [student?.privateFeed, student?.privateFeedPosts, student?.parentPortalPosts, student?.posts].find(Array.isArray) || [])
+        .filter((post, index, list) => !post.danceClassId || String(post.danceClassId) === String(rosterClass.id))
+        .filter((post, index, list) => list.findIndex((candidate) => String(candidate.id) === String(post.id)) === index);
+      const renderPosts = (items) => {
+        const visible = [...items].filter((post) => !post.deletedAt && !post.deleted_at).sort((left, right) => String(right.publishedAt || right.published_at || "").localeCompare(String(left.publishedAt || left.published_at || "")));
+        posts.innerHTML = visible.length ? visible.map(rosterClassFeedPostMarkup).join("") : `<div class="teacher-roster-empty">No posts have been shared with this class yet.</div>`;
+      };
+      renderPosts(localPosts);
+      const student = enrolled.find((item) => isUuid(item.id));
+      if (!window.dtSupabase || !isUuid(rosterClass.id) || !student) return;
+      try {
+        const { data, error } = await window.dtSupabase.functions.invoke("director-parent-portal-student-feed", { body: { studentId: student.id } });
+        if (error || !data?.ok) throw new Error(data?.message || "The class feed could not be loaded.");
+        renderPosts((data.posts || []).filter((post) => String(post.danceClassId || "") === String(rosterClass.id) && String(post.audienceMode || "class") === "class"));
+      } catch (error) {
+        posts.innerHTML = `<div class="teacher-roster-empty">${rosterSafe(error?.message || "The class feed could not be loaded.")}</div>`;
+      }
+    };
+    const closeRosterPersonalFeeds = () => {
+      const overlay = document.getElementById("roster-personal-feed-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+    };
+    const openRosterPersonalFeeds = (rosterClass) => {
+      const overlay = document.getElementById("roster-personal-feed-overlay");
+      const grid = document.getElementById("roster-personal-feed-grid");
+      if (!overlay || !grid) return;
+      const dancers = rosterEnrolled(rosterClass);
+      setText("roster-personal-feed-subtitle", `${rosterClass.name} · Choose the dancer whose personal feed you want to view.`);
+      grid.innerHTML = dancers.length ? dancers.map((student) => `<button class="roster-personal-feed-dancer" type="button" data-open-personal-feed="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong></button>`).join("") : `<div class="teacher-roster-empty">No enrolled dancers are in this class yet.</div>`;
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+    };
+
     function renderClassesAndRosters() {
       renderBoutiqueBackendSummary();
       const sharedState = document.body.dataset.sharedRosterState;
@@ -37054,7 +37328,7 @@
           <label>Level<select data-roster-class-setting="level">${optionMarkup(classLevelOptions, selected.level || "1")}</select></label>
           <label>Start Time<select data-roster-class-setting="time" aria-label="Class start time in 15-minute increments">${quarterHourOptions(selected.time || "")}</select></label>
         </div>
-        <div class="roster-section-heading"><div><h4>Class Roster</h4><small>Official class roster</small></div><span><button class="secondary" type="button" data-roster-print>Print Roster</button> <button class="secondary" type="button" data-roster-add="enrolled">Add a Dancer</button></span></div>
+        <div class="roster-section-heading"><div><h4>Class Roster</h4><small>Official class roster</small></div><div class="roster-class-action-row"><button class="secondary" type="button" data-roster-class-feed><img src="../../parent-portal/assets/badges/class-post.png" alt="">Class Feed</button><button class="secondary" type="button" data-roster-personal-feed><img src="assets/parent-portal-private-profile.png" alt="">Personal Feeds</button><button class="secondary roster-class-post-button" type="button" data-roster-post><img src="assets/parent-portal-post.png" alt="">Post</button><button class="secondary" type="button" data-roster-print>Print Roster</button><button class="secondary" type="button" data-roster-add="enrolled">Add a Dancer</button></div></div>
         <div class="roster-classroom-groups">${renderRosterStudentClassroomGroups(enrolled)}</div>
         <div class="roster-section-heading"><div><h4>Future Dancers</h4><small>Trials and friendly follow-up</small></div><button class="roster-add-future-button" type="button" data-roster-add="prospective">Add a Future Dancer</button></div>
         <div class="roster-student-list">${renderRosterStudentRows(prospects, true)}</div>
@@ -45401,6 +45675,18 @@
       }
       const rosterClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
       if (!rosterClass) return;
+      if (event.target.closest("[data-roster-class-feed]")) {
+        openRosterClassFeed(rosterClass);
+        return;
+      }
+      if (event.target.closest("[data-roster-personal-feed]")) {
+        openRosterPersonalFeeds(rosterClass);
+        return;
+      }
+      if (event.target.closest("[data-roster-post]")) {
+        openTeacherActivities(rosterClass.id);
+        return;
+      }
       if (event.target.closest("[data-roster-print]")) {
         openRosterPrintDialog(rosterClass);
         return;
@@ -45478,6 +45764,20 @@
         if (!student) return;
         openRosterStudentEditor(rosterClass, student);
       }
+    });
+    document.getElementById("roster-class-feed-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "roster-class-feed-overlay" || event.target.closest("[data-close-roster-class-feed]")) closeRosterClassFeed();
+    });
+    document.getElementById("roster-personal-feed-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "roster-personal-feed-overlay" || event.target.closest("[data-close-roster-personal-feed]")) return closeRosterPersonalFeeds();
+      const dancerButton = event.target.closest("[data-open-personal-feed]");
+      if (!dancerButton) return;
+      const rosterClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
+      const student = rosterClass?.students.find((item) => String(item.id) === String(dancerButton.dataset.openPersonalFeed));
+      if (!rosterClass || !student) return;
+      closeRosterPersonalFeeds();
+      openRosterStudentEditor(rosterClass, student);
+      setRosterProfileTab("parent-portal");
     });
     document.getElementById("roster-multi-class-close")?.addEventListener("click", closeRosterMultiClassEdit);
     document.getElementById("roster-multi-class-overlay")?.addEventListener("click", (event) => {
