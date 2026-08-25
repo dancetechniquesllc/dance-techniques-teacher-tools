@@ -32122,12 +32122,8 @@
         return;
       }
       if (!window.dtSupabase || !profile) return;
-      if (!["admin", "director"].includes(profile.role)) {
-        boutiqueOrders = [];
-        renderTeacherOrders();
-        return;
-      }
-      const { error: syncError } = sync ? await refreshWixOrders() : { error: null };
+      const isLeader = ["admin", "director"].includes(profile.role);
+      const { error: syncError } = isLeader && sync ? await refreshWixOrders() : { error: null };
       if (syncError) console.error("Wix orders could not refresh", syncError);
       const { data, error } = await window.dtSupabase.from("boutique_orders")
         .select("id,wix_order_number,status,buyer_first_name,buyer_last_name,buyer_email,total,currency,assigned_student_id,requested_dancer_name,requested_school,wix_created_at,filled_at,picked_up_at,delivered_at,raw_order,boutique_order_items(id,name,description,quantity,price,image_url,options)")
@@ -32142,11 +32138,14 @@
       boutiqueOrders = (data || []).filter((order) => (
         order.wix_created_at && new Date(order.wix_created_at).valueOf() >= new Date(boutiqueOrdersGoLiveAt).valueOf()
       ));
-      await autoAssignCertainBoutiqueOrders();
-      await loadBoutiqueStock(profile);
-      await loadBoutiquePreorders(profile);
-      renderDirectorBoutiqueOrders();
-      renderBoutiqueStock();
+      if (isLeader) {
+        await autoAssignCertainBoutiqueOrders();
+        await loadBoutiqueStock(profile);
+        await loadBoutiquePreorders(profile);
+        renderDirectorBoutiqueOrders();
+        renderBoutiqueStock();
+      }
+      renderTeacherOrders();
     };
     document.getElementById("wix-orders-refresh")?.addEventListener("click", async () => {
       const result = await refreshWixOrders();
