@@ -29342,6 +29342,31 @@
     var pendingDirectorTaskRemoveId = "";
     var pendingTeacherEscalation = null;
     const saveDirectorParentTasks = () => localStorage.setItem("dt-director-parent-tasks", JSON.stringify(directorParentTasks));
+    const loadParentServiceRequestTasks = async () => {
+      if (!window.dtSupabase || !["admin", "director"].includes(String(window.dtCurrentProfile?.role || "").toLowerCase())) return;
+      const { data, error } = await window.dtSupabase
+        .from("parent_service_requests")
+        .select("id,request_type,requested_last_dance_day,requested_school_first_day,parent_note,status,created_at,students(first_name,last_name,preferred_name),guardians(first_name,last_name,full_name),partner_schools(name,nickname)")
+        .in("status", ["open", "completed"])
+        .order("created_at", { ascending: false });
+      if (error) return;
+      (data || []).forEach((request) => {
+        const existing = directorParentTasks.find((task) => task.sourceRequestId === request.id || task.id === `parent-request-${request.id}`);
+        const student = Array.isArray(request.students) ? request.students[0] : request.students;
+        const guardian = Array.isArray(request.guardians) ? request.guardians[0] : request.guardians;
+        const school = Array.isArray(request.partner_schools) ? request.partner_schools[0] : request.partner_schools;
+        const studentName = [student?.preferred_name || student?.first_name, student?.last_name].filter(Boolean).join(" ") || "Dancer";
+        const sender = guardian?.full_name || [guardian?.first_name, guardian?.last_name].filter(Boolean).join(" ") || "Parent";
+        const message = request.request_type === "school_change"
+          ? `School Change Request · Move to ${school?.nickname || school?.name || "selected school"} · First day ${request.requested_school_first_day || "not provided"}${request.parent_note ? ` · ${request.parent_note}` : ""}`
+          : `Withdrawal Request · Last dance day ${request.requested_last_dance_day || "not provided"}${request.parent_note ? ` · ${request.parent_note}` : ""}`;
+        const taskData = { id: `parent-request-${request.id}`, sourceRequestId: request.id, complete: request.status === "completed", priority: false, createdAtMs: new Date(request.created_at).getTime(), message, sender, studentName, teacherName: "", school: school?.nickname || school?.name || "", className: "", danceDay: "", assignee: "Ms. Lexi", notes: [] };
+        if (existing) Object.assign(existing, taskData, { assignee: existing.assignee || taskData.assignee, priority: Boolean(existing.priority), notes: existing.notes || [] });
+        else directorParentTasks.push(taskData);
+      });
+      saveDirectorParentTasks();
+      renderDirectorParentTasks();
+    };
     const directorTaskAssigneeColor = (assignee) => messageAssignedColor(assignee === "Ms. Tiffany" ? "Tiffany" : "Lexi", "Teacher");
     const renderDirectorParentTasks = () => {
       const list = document.getElementById("director-task-list");
@@ -30557,12 +30582,13 @@
       document.getElementById("director-task-complete-dialog")?.showModal();
     });
     document.querySelector("[data-task-complete-cancel]")?.addEventListener("click", () => { pendingDirectorTaskCompleteId = ""; document.getElementById("director-task-complete-dialog")?.close(); });
-    document.querySelector("[data-task-complete-confirm]")?.addEventListener("click", () => {
+    document.querySelector("[data-task-complete-confirm]")?.addEventListener("click", async () => {
       const task = directorParentTasks.find((item) => item.id === pendingDirectorTaskCompleteId);
       if (task) {
         task.complete = true;
         task.completedAt = new Date().toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" });
         saveDirectorParentTasks();
+        if (task.sourceRequestId && window.dtSupabase) await window.dtSupabase.from("parent_service_requests").update({ status: "completed", completed_at: new Date().toISOString(), completed_by: window.dtCurrentProfile?.id || null }).eq("id", task.sourceRequestId);
       }
       pendingDirectorTaskCompleteId = "";
       document.getElementById("director-task-complete-dialog")?.close();
@@ -30608,6 +30634,7 @@
       saveDirectorParentTasks(); renderDirectorParentTasks();
     });
     renderDirectorParentTasks();
+    void loadParentServiceRequestTasks();
 
     document.getElementById("admin-thread-list")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-admin-thread]");

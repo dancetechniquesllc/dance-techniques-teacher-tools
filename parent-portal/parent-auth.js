@@ -108,6 +108,7 @@
     document.getElementById("dancer-photo-guidance").innerHTML = "Fill the frame with <strong>your face</strong>—nice and close!<br><br>Your photo helps your dancer’s teachers quickly recognize who they’re speaking with in the Parent Portal.<br><br><strong>One friendly face. One connected dance family.</strong> ✨";
     photoInput.click();
   };
+  window.dtChooseGuardianPhoto = chooseGuardianPhoto;
 
   const makeCroppedPhoto = () => new Promise((resolve, reject) => {
     if (!photoImage.naturalWidth || !photoImage.naturalHeight) return reject(new Error("Choose a photo first."));
@@ -561,17 +562,19 @@
 
     const profileCard = document.querySelector("#profile .profile-card");
     profileCard.innerHTML = `
-      <button class="avatar family-dancer-bubble" type="button" data-photo-guardian-id="${guardian.id}" aria-label="Add or change your profile photo">${guardian.photoUrl ? `<img src="${guardian.photoUrl}" alt="${guardian.full_name || "Parent profile"}">` : guardianInitials}</button>
-      <h2></h2>
+      <span class="avatar family-dancer-bubble parent-profile-avatar">${guardian.photoUrl ? `<img src="${guardian.photoUrl}" alt="${guardian.full_name || "Parent profile"}">` : guardianInitials}</span>
+      <div class="parent-profile-name-row"><h2></h2><button class="parent-profile-edit-pencil" type="button" data-family-preview="edit" aria-label="Edit parent profile" title="Edit Profile">✎</button></div>
       <p></p>
+      <div class="family-actions single-action">
+        <button class="family-action-card" type="button" data-family-preview="add"><strong>Add a Guardian or Family Member</strong><small>Invite another trusted adult and choose their access.</small></button>
+      </div>
       <section class="family-dancers" aria-labelledby="family-dancers-title">
         <h3 id="family-dancers-title">My Dancers</h3>
         <div class="family-dancer-grid"></div>
       </section>
-      <div class="profile-list"><button type="button" id="open-withdrawal-request">Request Withdrawal <span>›</span></button><button type="button" id="pp-sign-out">Sign Out <span>›</span></button></div>`;
+      <div class="profile-list"><button type="button" id="open-withdrawal-request">Request Withdrawal or School Change <span>›</span></button><button type="button" id="pp-sign-out">Sign Out <span>›</span></button></div>`;
     profileCard.querySelector("h2").textContent = guardian.full_name || [guardian.first_name, guardian.last_name].filter(Boolean).join(" ") || "Parent Portal Family";
     profileCard.querySelector("p").textContent = `Authorized family access for ${students.map(dancerName).join(" and ")}.`;
-    profileCard.querySelector("[data-photo-guardian-id]").addEventListener("click", () => chooseGuardianPhoto(guardian));
     const dancerGrid = profileCard.querySelector(".family-dancer-grid");
     students.forEach((student) => {
       const card = document.createElement("article");
@@ -744,7 +747,7 @@
     const month = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
     const dancer = String(student.preferred_name || student.first_name || "Your dancer").trim();
     document.getElementById("calendar-page-title").textContent = `${dancer}’s Upcoming Dance Days`;
-    calendar.innerHTML = months.filter(({ year, month: monthIndex }) => datesForMonth(year, monthIndex).length).map(({ year, month: monthIndex }, index) => { const cards = datesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const canceled = change?.status === "cancelled"; const reason = change?.reason; const curriculum = week % 2 === 0 ? "Ballet" : "Tap"; return `<article class="calendar-week-card ${canceled ? "holiday" : "scheduled"}"><time datetime="${iso(date)}">${ordinalDate(date.getDate())}<span class="calendar-date-sparkle" aria-hidden="true">✦</span><small>${day.format(date)}</small></time>${canceled ? `<strong>No Class${reason ? `: ${reason}` : ""}</strong>` : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day"><strong>${curriculum} Day</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
+    calendar.innerHTML = months.filter(({ year, month: monthIndex }) => datesForMonth(year, monthIndex).length).map(({ year, month: monthIndex }, index) => { const cards = datesForMonth(year, monthIndex).map((date, week) => { const change = changeByDate.get(iso(date)); const canceled = change?.status === "cancelled"; const reason = change?.reason; const curriculum = week % 2 === 0 ? "Ballet" : "Tap"; return `<article class="calendar-week-card ${canceled ? "holiday" : "scheduled"}"><time datetime="${iso(date)}"><span class="calendar-date-line"><span class="calendar-date-sparkle" aria-hidden="true">✦</span><span>${ordinalDate(date.getDate())}</span><span class="calendar-date-sparkle" aria-hidden="true">✦</span></span><small>${day.format(date)}</small></time><span class="calendar-icon-slot">${canceled ? "" : `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${curriculum.toLowerCase()}-day.png" alt="${curriculum} day">`}</span>${canceled ? `<strong>No Class${reason ? `: ${reason}` : ""}</strong>` : `<strong>${curriculum} Day</strong><button type="button" data-open-attendance="${iso(date)}">Can’t Make It?</button>`}</article>`; }).join(""); return `<details class="calendar-month"${index === 0 ? " open" : ""}><summary>${month.format(new Date(year, monthIndex, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`; }).join("");
   };
 
   const renderDirectorElenaPreview = ({ context, scheduleRows, classPosts }) => {
@@ -852,7 +855,7 @@
         const icon = entry.curriculum ? `<img class="calendar-curriculum-icon" src="assets/curriculum/upcoming-${entry.curriculum.toLowerCase()}-day.png" alt="${entry.curriculum} day">` : "";
         const attendance = entry.type === "scheduled" ? `<button type="button" data-open-attendance="${isoDate(entry.date)}">Can’t Make It?</button>` : "";
         const badge = entry.badge ? `<span class="calendar-state-badge" aria-hidden="true">${entry.badge}</span>` : "";
-        return `<article class="calendar-week-card ${entry.type}">${badge}<time datetime="${isoDate(entry.date)}">${ordinalDate(entry.date.getDate())}<span class="calendar-date-sparkle" aria-hidden="true">✦</span><small>${dayFormatter.format(entry.date)}</small></time>${icon}<strong>${entry.title}</strong>${attendance}</article>`;
+        return `<article class="calendar-week-card ${entry.type}">${badge}<time datetime="${isoDate(entry.date)}"><span class="calendar-date-line"><span class="calendar-date-sparkle" aria-hidden="true">✦</span><span>${ordinalDate(entry.date.getDate())}</span><span class="calendar-date-sparkle" aria-hidden="true">✦</span></span><small>${dayFormatter.format(entry.date)}</small></time><span class="calendar-icon-slot">${icon}</span><strong>${entry.title}</strong>${attendance}</article>`;
       }).join("");
       return `<details class="calendar-month"${open ? " open" : ""}><summary>${monthFormatter.format(new Date(year, month, 1))}</summary><div class="calendar-week-grid">${cards}</div></details>`;
     }).join("");
