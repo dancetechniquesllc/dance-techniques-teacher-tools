@@ -62,6 +62,7 @@
 
   const showView = (name) => {
     Object.entries(views).forEach(([key, view]) => { if (view) view.hidden = key !== name; });
+    if (name !== "stopped") document.querySelector(".pp-auth-card")?.classList.remove("is-unlinked-account");
     document.documentElement.classList.remove("pp-family-open");
     gate.style.removeProperty("display");
     gate.hidden = false;
@@ -79,7 +80,9 @@
   };
 
   const stopSession = async (message) => {
-    document.getElementById("pp-stopped-message").textContent = message || "This login is not linked to an active Parent Portal family.";
+    const copy = message || "This login is not linked to an active Parent Portal family.";
+    document.getElementById("pp-stopped-message").textContent = copy;
+    document.querySelector(".pp-auth-card")?.classList.toggle("is-unlinked-account", copy.includes("not linked to an active dancer and adult profile"));
     showView("stopped");
   };
 

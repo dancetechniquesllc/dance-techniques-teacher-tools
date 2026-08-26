@@ -216,7 +216,14 @@
     .pp-auth-logo{width:178px;height:112px;margin:0 auto -5px;object-fit:contain;filter:brightness(0) saturate(100%) invert(36%) sepia(22%) saturate(1430%) hue-rotate(303deg) brightness(91%) contrast(89%)}
     .pp-auth-card>h1{font-size:clamp(40px,7vw,54px);font-weight:400;letter-spacing:-1px}
     .pp-auth-tagline{margin:10px 0 14px;font-size:clamp(15px,4vw,20px);letter-spacing:.01em}
-    .pp-auth-divider{width:min(390px,78%);height:60px;margin:-4px auto 2px;background:url("assets/login-elements/heart-divider.png?v=2") center/contain no-repeat;font-size:0}
+    .pp-auth-divider{width:min(390px,78%);height:54px;margin:0 auto 10px;background:url("assets/login-elements/heart-divider.png?v=3") center/contain no-repeat;font-size:0;mix-blend-mode:multiply}
+    .pp-auth-card:has(#pp-auth-setup:not([hidden]))>.pp-auth-logo,.pp-auth-card:has(#pp-auth-stopped:not([hidden]))>.pp-auth-logo{width:142px;height:105px;margin:0 auto 12px}
+    .pp-auth-card:has(#pp-auth-setup:not([hidden]))>h1,.pp-auth-card:has(#pp-auth-stopped:not([hidden]))>h1{margin:0;font-size:clamp(43px,7vw,58px);line-height:1.05}
+    .pp-auth-card:has(#pp-auth-setup:not([hidden]))>.pp-auth-tagline,.pp-auth-card:has(#pp-auth-stopped:not([hidden]))>.pp-auth-tagline{margin:14px 0 8px}
+    #pp-auth-setup,#pp-auth-stopped{width:min(520px,100%);margin-inline:auto}
+    #pp-auth-setup>h2,#pp-auth-stopped>h2{margin:8px 0 18px;font-size:clamp(27px,5vw,36px);line-height:1.15}
+    #pp-auth-setup>.pp-auth-copy,#pp-auth-stopped>.pp-auth-copy{max-width:480px;margin:0 auto 24px;font-size:15px;line-height:1.55}
+    #pp-auth-stopped .soft-button{min-height:58px;padding-inline:30px;border:0;background:transparent url("assets/login-elements/login-button-background.png?v=20260826-auth-layout-v1") center/100% 100% no-repeat;color:#fff;font-weight:800}
     #pp-auth-login>h2{margin:3px 0 8px;color:#7e8968;font:clamp(36px,9vw,50px)/1 "Parisienne",cursive;font-weight:400}
     .pp-auth-bow{display:block;width:92px;height:62px;margin:-3px auto 15px;background:url("assets/login-elements/bow.png") center/contain no-repeat;font-size:0}
     #pp-auth-login{width:min(520px,100%);margin-inline:auto}.pp-auth-form{gap:16px}.pp-auth-form label{gap:8px;font-size:15px}.pp-input-wrap{position:relative;display:block}.pp-input-icon{position:absolute;left:20px;top:50%;width:24px;height:24px;transform:translateY(-50%);fill:none;stroke:#bd6d73;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
@@ -242,6 +249,14 @@
     .pp-auth-card:has(#pp-auth-login:not([hidden])) #pp-auth-login .pp-auth-copy{position:absolute;top:79%;left:19%;right:19%;max-width:none;margin:0;font-size:clamp(9px,1.35vw,13px);line-height:1.55}
     .pp-auth-card:has(#pp-auth-login:not([hidden]))>.pp-auth-back{position:absolute;top:89%;left:50%;margin:0;transform:translateX(-50%);white-space:nowrap;font-size:clamp(11px,1.6vw,15px)}
     @media(max-width:520px){.pp-auth-card:has(#pp-auth-login:not([hidden])){margin-block:0}.pp-auth-card:has(#pp-auth-login:not([hidden])) .pp-auth-form{top:42.8%;left:12.8%;right:12.8%;gap:8px}.pp-auth-card:has(#pp-auth-login:not([hidden])) .pp-auth-form label{font-size:11px}.pp-auth-card:has(#pp-auth-login:not([hidden])) .pp-auth-form .pp-input-wrap input{min-height:48px;padding:10px 43px 10px 45px;font-size:13px}.pp-auth-card:has(#pp-auth-login:not([hidden])) #pp-login-submit{min-height:49px;font-size:17px}.pp-auth-card:has(#pp-auth-login:not([hidden])) #pp-auth-login .pp-auth-copy{top:79%;left:15%;right:15%;font-size:9px}.pp-auth-card:has(#pp-auth-login:not([hidden]))>.pp-auth-back{top:89%;font-size:11px}}
+    .pp-auth-card.is-unlinked-account{width:min(760px,calc(100vw - 20px));min-height:0;aspect-ratio:1207/1303;margin-block:auto;padding:0;border:0;border-radius:0;background:transparent url("assets/login-elements/unlinked-family-account.png?v=20260826-unlinked-v1") center/100% 100% no-repeat;box-shadow:none}
+    .pp-auth-card.is-unlinked-account::before,.pp-auth-card.is-unlinked-account::after{content:none!important}
+    .pp-auth-card.is-unlinked-account>.pp-auth-logo,.pp-auth-card.is-unlinked-account>h1,.pp-auth-card.is-unlinked-account>.pp-auth-tagline,.pp-auth-card.is-unlinked-account>.pp-auth-divider,.pp-auth-card.is-unlinked-account #pp-auth-stopped>h2,.pp-auth-card.is-unlinked-account #pp-auth-stopped>.pp-auth-copy{display:none!important}
+    .pp-auth-card.is-unlinked-account #pp-auth-stopped{position:absolute;inset:0;width:auto;margin:0}
+    .pp-auth-card.is-unlinked-account #pp-stopped-signout{position:absolute;top:68.1%;left:37.3%;width:27.8%;height:7%;min-height:0;padding:0;border:0;border-radius:999px;background:transparent!important;color:transparent!important;box-shadow:none}
+    .pp-auth-card.is-unlinked-account #pp-stopped-signout:focus-visible{outline:4px solid #efc365;outline-offset:3px}
+    .pp-auth-card.is-unlinked-account>.pp-auth-back{position:absolute;top:79.1%;left:36%;width:28%;height:5%;margin:0;transform:none;color:transparent;text-decoration:none}
+    .pp-auth-card.is-unlinked-account>.pp-auth-back:focus-visible{outline:3px solid #efc365;outline-offset:2px;border-radius:12px}
     .install-guide-dialog{border:0;padding:0;background:transparent;width:min(520px,calc(100vw - 24px));max-width:none;color:var(--ink)}
     .install-guide-dialog::backdrop{background:rgba(36,25,24,.5);backdrop-filter:blur(3px)}
     .install-guide-card{max-height:min(90vh,720px);overflow:auto;border:1px solid var(--line);border-radius:28px;background:var(--ivory);padding:22px;box-shadow:0 24px 70px rgba(78,39,41,.24);text-align:center}

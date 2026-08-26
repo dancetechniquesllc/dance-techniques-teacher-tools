@@ -1,4 +1,4 @@
-const CACHE = "dt-parent-portal-secure-family-v38";
+const CACHE = "dt-parent-portal-secure-family-v40";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -8,7 +8,8 @@ const APP_SHELL = [
   "./assets/messages.png",
   "./assets/schedule.png",
   "./assets/boutique.png",
-  "./assets/payments.png"
+  "./assets/payments.png",
+  "./assets/login-elements/unlinked-family-account.png"
 ];
 
 self.addEventListener("install", (event) => {
