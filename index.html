@@ -1951,7 +1951,7 @@
     .teacher-order-summary-pickup { --order-status-color: #b18408; }
     .teacher-order-summary-deliver { --order-status-color: #668066; }
     .teacher-orders-search { width: 100%; }
-    .teacher-orders-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .teacher-orders-filters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
     .teacher-orders-filters label { display: grid; gap: 4px; color: var(--ink); font-family: var(--font-body); font-size: 10px; font-weight: 800; }
     .teacher-orders-filters select { width: 100%; padding-right: 34px; font-family: var(--font-body); font-size: 11px; font-weight: 400; }
     @media (max-width: 700px) { .teacher-orders-filters { grid-template-columns: 1fr 1fr; } }
@@ -8098,7 +8098,7 @@
     .boutique-summary-grid .stat small { display: block; margin-top: 3px; font-family: var(--font-body); font-size: 11px; font-weight: 400; }
     .boutique-summary-delivered { --order-status-color: #777a7a; border-color: #c9caca !important; background: #f1f1ef !important; }
     .boutique-summary-unassigned { --order-status-color: var(--berry); border-color: #d7a4bd !important; background: var(--blush) !important; }
-    .boutique-kit-toolbar { display: grid; grid-template-columns: repeat(5, minmax(120px, 1fr)); gap: 10px; align-items: end; }
+    .boutique-kit-toolbar { display: grid; grid-template-columns: repeat(6, minmax(120px, 1fr)); gap: 10px; align-items: end; }
     .boutique-kit-toolbar select { width: 100%; margin: 0; }
     .boutique-kit-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
     .boutique-kit-action-group { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -8157,6 +8157,17 @@
     .boutique-order-item.is-multiple { color: var(--fg); font-weight: 850; }
     .boutique-order-item-size { flex: 0 0 auto; color: var(--berry); font-size: 10px; font-weight: 950; }
     .boutique-order-item-quantity { flex: 0 0 auto; min-width: 25px; padding: 3px 6px; border-radius: 999px; background: var(--berry); color: white; font-size: 11px; font-weight: 950; line-height: 1; box-shadow: 0 2px 5px rgb(108 10 67 / .18); }
+    .boutique-order-item.is-partial { background: #fff3d9; color: #76500b; }
+    .boutique-order-item.is-filled { background: var(--sage); color: #28522e; }
+    .boutique-item-progress { font-weight: 950; white-space: nowrap; }
+    .boutique-partial-dialog { width: min(620px, 100%); }
+    .boutique-partial-list { display: grid; gap: 10px; margin: 16px 0; }
+    .boutique-partial-row { display: grid; grid-template-columns: minmax(0, 1fr) 130px; align-items: center; gap: 14px; padding: 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    .boutique-partial-row strong, .boutique-partial-row small { display: block; }
+    .boutique-partial-row small { margin-top: 3px; color: var(--muted); }
+    .boutique-partial-row label { display: grid; grid-template-columns: 48px auto; align-items: center; gap: 7px; font-size: 11px; font-weight: 900; }
+    .boutique-partial-row input { width: 48px; min-height: 40px; margin: 0; padding: 7px; text-align: center; }
+    @media (max-width: 520px) { .boutique-partial-row { grid-template-columns: 1fr; } }
     .teacher-order-card .boutique-order-items { grid-column: 1 / -1; }
     .boutique-order-card select { width: 100%; min-width: 0; min-height: 36px; margin: 2px 0 0; padding: 7px 28px 7px 9px; font-size: 11px; }
     .boutique-order-card > button { width: 100%; min-height: 34px; padding: 6px 9px; border-radius: 999px; font-size: 11px; }
@@ -14635,6 +14646,7 @@
                   <label>School<select id="teacher-orders-school-filter" aria-label="Filter orders by partner school"><option value="all">All</option></select></label>
                   <label>Gender<select id="teacher-orders-gender-filter" aria-label="Filter orders by gender"><option value="all">All</option><option value="female">Girl</option><option value="male">Boy</option></select></label>
                   <label>Size<select id="teacher-orders-size-filter" aria-label="Filter orders by T-Shirt size"><option value="all">All</option></select></label>
+                  <label>Sort By<select id="teacher-orders-sort"><option value="default">Default</option><option value="size">Size</option><option value="classroom">Classroom</option><option value="first-name">First Name</option><option value="last-name">Last Name</option></select></label>
                 </div>
                 <details class="panel teacher-order-fulfillment-group">
                   <summary><svg class="teacher-order-fulfillment-icon" aria-hidden="true"><use href="#icon-tshirt"></use></svg><strong>T-Shirts &amp; Dance Bags</strong></summary>
@@ -15731,8 +15743,9 @@
                     <select id="boutique-kit-school-filter" aria-label="Partner school"><option value="all">All schools</option></select>
                     <select id="boutique-kit-teacher-filter" aria-label="Teacher"><option value="all">All teachers</option></select>
                     <select id="boutique-kit-size-filter" aria-label="T-Shirt size"><option value="all">All sizes</option></select>
+                    <select id="boutique-kit-sort" aria-label="Sort T-Shirt and bag fulfillment"><option value="default">Sort: Default</option><option value="size">Sort: Size</option><option value="classroom">Sort: Classroom</option><option value="first-name">Sort: First Name</option><option value="last-name">Sort: Last Name</option></select>
                   </div>
-                  <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="boutique-kit-search,boutique-kit-status-filter,boutique-kit-day-filter,boutique-kit-school-filter,boutique-kit-teacher-filter,boutique-kit-size-filter">Reset Filter</button></div>
+                  <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="boutique-kit-search,boutique-kit-status-filter,boutique-kit-day-filter,boutique-kit-school-filter,boutique-kit-teacher-filter,boutique-kit-size-filter,boutique-kit-sort">Reset Filter</button></div>
                   <div class="boutique-kit-actions">
                     <strong id="boutique-kit-visible-count">0 dancers</strong>
                     <span class="boutique-kit-action-group"><button class="secondary boutique-quantity-button" type="button" id="boutique-kit-quantities">Pull Sizes</button><button class="secondary" type="button" id="boutique-kit-select-visible">Select All</button><button class="secondary" type="button" id="boutique-kit-clear-selection">Clear Selection</button><button type="button" id="boutique-kit-mark-ready">Mark Ready</button></span>
@@ -18099,6 +18112,14 @@
       <input class="boutique-assignment-search" id="boutique-assignment-search" type="search" placeholder="Search all dancers" aria-label="Search all dancers">
       <div class="boutique-assignment-suggestions" id="boutique-assignment-suggestions"></div>
       <div class="confirm-actions"><button class="secondary" type="button" id="boutique-assignment-remove">Remove Assignment</button><button class="primary" type="button" id="boutique-assignment-done">Done</button></div>
+    </div>
+  </div>
+  <div class="confirm-overlay" id="boutique-partial-overlay" aria-hidden="true">
+    <div class="confirm-dialog boutique-partial-dialog" role="dialog" aria-modal="true" aria-labelledby="boutique-partial-title">
+      <div class="boutique-quantity-header"><div><h3 id="boutique-partial-title">Fill Boutique Order</h3><p id="boutique-partial-summary">Record only the items you have in hand.</p></div><button class="boutique-quantity-close" type="button" id="boutique-partial-close" aria-label="Close partial fulfillment">×</button></div>
+      <div class="boutique-partial-list" id="boutique-partial-list"></div>
+      <p class="subtle">Anything not fully filled stays in Fill Orders as <strong>Still Needed</strong>.</p>
+      <div class="confirm-actions"><button class="secondary" type="button" id="boutique-partial-cancel">Cancel</button><button class="primary" type="button" id="boutique-partial-save">Save Filled Items</button></div>
     </div>
   </div>
   <div class="confirm-overlay" id="teacher-order-history-overlay" aria-hidden="true">
@@ -20905,6 +20926,26 @@
         if (photoUpdate.error) return sharedRosterError("The photo uploaded, but could not be attached to the dancer.", photoUpdate.error);
         student.photoPath = photoPath;
       }
+      return true;
+    };
+
+    const saveSharedKitStatus = async (student) => {
+      if (document.body.dataset.tourMode === "true" || !sharedRosterReady || !window.dtSupabase) return true;
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(student.id || "")) return true;
+      const actorId = window.dtCurrentProfile?.id || profileTeacher?.id || null;
+      const payload = {
+        kit_ready: Boolean(student.kitReady || student.kitPickedUp || student.kitReceived),
+        kit_ready_at: (student.kitReady || student.kitPickedUp || student.kitReceived) ? (student.kitReadyAt || student.kitPickedUpAt || student.kitDeliveredAt || new Date().toISOString()) : null,
+        kit_ready_by: (student.kitReady || student.kitPickedUp || student.kitReceived) ? (student.kitReadyBy || student.kitPickedUpBy || student.kitDeliveredBy || actorId) : null,
+        kit_picked_up: Boolean(student.kitPickedUp || student.kitReceived),
+        kit_picked_up_at: (student.kitPickedUp || student.kitReceived) ? (student.kitPickedUpAt || student.kitDeliveredAt || new Date().toISOString()) : null,
+        kit_picked_up_by: (student.kitPickedUp || student.kitReceived) ? (student.kitPickedUpBy || student.kitDeliveredBy || actorId) : null,
+        kit_received: Boolean(student.kitReceived),
+        kit_delivered_at: student.kitReceived ? (student.kitDeliveredAt || new Date().toISOString()) : null,
+        kit_delivered_by: student.kitReceived ? (student.kitDeliveredBy || actorId) : null
+      };
+      const { error } = await window.dtSupabase.from("students").update(payload).eq("id", student.id);
+      if (error) throw error;
       return true;
     };
 
@@ -32165,12 +32206,15 @@
     const pendingTeacherBoutiqueFills = new Set();
     let teacherOrderPickupActive = false;
     let teacherOrderSelfFillActive = false;
+    let teacherOrderSelfFillSaving = false;
     let teacherBoutiqueFillActive = false;
+    let activeBoutiquePartialOrderId = "";
     let teacherOrderSearchTerm = "";
     let teacherOrderDayFilter = "all";
     let teacherOrderSchoolFilter = "all";
     let teacherOrderGenderFilter = "all";
     let teacherOrderSizeFilter = "all";
+    let teacherOrderSort = "default";
     const boutiqueOrdersGoLiveAt = "2026-07-23T05:00:00.000Z";
     let boutiqueOrders = [];
     let wixOrderSyncPromise = null;
@@ -32199,7 +32243,7 @@
     };
     const boutiqueOrderItemsMarkup = (order) => {
       const items = order.boutique_order_items || [];
-      return items.length ? `<span class="boutique-order-items">${items.map((item) => { const size = boutiqueOrderItemSize(item); return `<span class="boutique-order-item ${Number(item.quantity) > 1 ? "is-multiple" : ""}">${size ? `<span class="boutique-order-item-size">${rosterSafe(size)}</span><span aria-hidden="true">-</span>` : ""}<span>${rosterSafe(item.name || "Boutique item")}</span>${Number(item.quantity) > 1 ? `<span class="boutique-order-item-quantity" aria-label="Quantity ${Number(item.quantity)}">${Number(item.quantity)}</span>` : ""}</span>`; }).join("")}</span>` : `<span class="boutique-order-items"><span class="boutique-order-item">Items unavailable</span></span>`;
+      return items.length ? `<span class="boutique-order-items">${items.map((item) => { const size = boutiqueOrderItemSize(item); const ordered = Math.max(1, Number(item.quantity) || 1); const filled = Math.min(ordered, Math.max(0, Number(item.fulfilled_quantity) || 0)); const state = filled >= ordered ? "is-filled" : filled > 0 ? "is-partial" : ""; return `<span class="boutique-order-item ${ordered > 1 ? "is-multiple" : ""} ${state}">${size ? `<span class="boutique-order-item-size">${rosterSafe(size)}</span><span aria-hidden="true">-</span>` : ""}<span>${rosterSafe(item.name || "Boutique item")}</span>${filled > 0 ? `<span class="boutique-item-progress">${filled}/${ordered} filled</span>` : ordered > 1 ? `<span class="boutique-order-item-quantity" aria-label="Quantity ${ordered}">${ordered}</span>` : ""}</span>`; }).join("")}</span>` : `<span class="boutique-order-items"><span class="boutique-order-item">Items unavailable</span></span>`;
     };
     const boutiqueOrderBuyerName = (order) => [order.buyer_first_name, order.buyer_last_name].filter(Boolean).join(" ") || "Wix customer";
     const boutiqueOrderNumber = (order) => order.wix_order_number ? `#${order.wix_order_number}` : "Wix order";
@@ -32257,9 +32301,19 @@
       return result;
     };
     const loadBoutiqueOrders = async (profile = window.dtCurrentProfile, { sync = true } = {}) => {
+      if (location.protocol === "file:") {
+        boutiqueOrders = [];
+        setWixSyncStatus("Connected preview required", "Open the http://127.0.0.1 preview to load Wix orders.", true);
+        renderDirectorBoutiqueOrders();
+        renderTeacherOrders();
+        return;
+      }
       if (document.body.dataset.tourMode === "true") {
+        const previewTeacherClassIds = new Set(teacherRosterClasses().map((rosterClass) => rosterClass.id));
+        const previewStudents = boutiqueKitRecords().filter((record) => previewTeacherClassIds.has(record.rosterClass.id));
+        const previewStudentId = previewStudents[0]?.student?.id || boutiqueKitRecords()[0]?.student?.id || null;
         boutiqueOrders = [
-          { id: "sample-wix-1", wix_order_number: "SAMPLE-103", status: "to_fill", buyer_first_name: "Taylor", buyer_last_name: "Davis", buyer_email: "taylor.davis@example.com", requested_dancer_name: "Sophie Davis", requested_school: "Primrose Rockwall", test_scenario: "Wix: Dancer's Name: Sophie Davis · School: Primrose Rockwall", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-1", name: "Pink Tutu", quantity: 1, options: { Size: "4T" } }] },
+          { id: "sample-wix-1", wix_order_number: "SAMPLE-103", status: "to_fill", buyer_first_name: "Taylor", buyer_last_name: "Davis", buyer_email: "taylor.davis@example.com", requested_dancer_name: "Sophie Davis", requested_school: "Primrose Rockwall", test_scenario: "Wix: Dancer's Name: Sophie Davis · School: Primrose Rockwall", assigned_student_id: previewStudentId, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-1", name: "Pink Tutu", quantity: 2, fulfilled_quantity: 0, options: { Size: "4T" } }, { id: "sample-item-1b", name: "Dance Bow", quantity: 1, fulfilled_quantity: 0, options: { Color: "Blush" } }, { id: "sample-item-1c", name: "Ballerina Leggings", quantity: 2, fulfilled_quantity: 0, options: { Size: "4T" } }, { id: "sample-item-1d", name: "Custom DT Water Cup", quantity: 1, fulfilled_quantity: 0, options: {} }] },
           { id: "sample-wix-2", wix_order_number: "SAMPLE-102", status: "to_fill", buyer_first_name: "Jordan", buyer_last_name: "Sample", buyer_email: "jordan.sample@example.com", requested_dancer_name: "Jordan Sample", requested_school: "", test_scenario: "Wix: parent entered Jordan Sample as Dancer's Name", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-2", name: "Dance Bow", quantity: 2, options: {} }] },
           { id: "sample-wix-3", wix_order_number: "SAMPLE-101", status: "to_fill", buyer_first_name: "Casey", buyer_last_name: "Carter", buyer_email: "casey.carter@example.com", requested_dancer_name: "Miles Carter", requested_school: "Primrose", test_scenario: "Wix: Dancer's Name: Miles Carter · School: Primrose", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-3", name: "Ballet Skirt", quantity: 1, options: { Size: "5T" } }] }
         ];
@@ -32274,7 +32328,7 @@
       const { error: syncError } = isLeader && sync ? await refreshWixOrders() : { error: null };
       if (syncError) console.error("Wix orders could not refresh", syncError);
       const { data, error } = await window.dtSupabase.from("boutique_orders")
-        .select("id,wix_order_number,status,buyer_first_name,buyer_last_name,buyer_email,total,currency,assigned_student_id,requested_dancer_name,requested_school,wix_created_at,filled_at,picked_up_at,delivered_at,raw_order,boutique_order_items(id,name,description,quantity,price,image_url,options)")
+        .select("id,wix_order_number,status,buyer_first_name,buyer_last_name,buyer_email,total,currency,assigned_student_id,requested_dancer_name,requested_school,wix_created_at,filled_at,picked_up_at,delivered_at,raw_order,boutique_order_items(id,name,description,quantity,fulfilled_quantity,price,image_url,options)")
         .neq("status", "cancelled")
         .gte("wix_created_at", boutiqueOrdersGoLiveAt)
         .order("wix_created_at", { ascending: false });
@@ -32550,7 +32604,53 @@
       const nextStatus = order.status === "to_fill" ? "to_pick_up" : order.status === "to_pick_up" ? "to_deliver" : order.status === "to_deliver" ? "delivered" : "";
       const fillSelectable = order.status === "to_fill" && teacherBoutiqueFillActive;
       const selected = fillSelectable && pendingTeacherBoutiqueFills.has(order.id);
-      return `<div class="teacher-order-card ${fillSelectable ? "is-pickup-active" : ""} ${selected ? "is-selected" : ""}" ${fillSelectable ? `data-teacher-boutique-fill="${rosterSafe(order.id)}"` : ""}><span class="teacher-order-day-bubble">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(record.student)}">${record.student.photo ? `<img src="${rosterSafe(record.student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(record.student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(record.student))}</strong><small>${rosterSafe(rosterSchoolNickname(record.rosterClass.schoolName))}</small></span>${boutiqueOrderItemsMarkup(order)}${nextStatus && !fillSelectable ? `<button type="button" data-teacher-boutique-status="${rosterSafe(order.id)}" data-next-status="${nextStatus}">${rosterSafe(boutiqueStatusLabel(nextStatus))}</button>` : ""}</div>`;
+      return `<div class="teacher-order-card ${fillSelectable ? "is-pickup-active" : ""} ${selected ? "is-selected" : ""}"><span class="teacher-order-day-bubble">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(record.student)}">${record.student.photo ? `<img src="${rosterSafe(record.student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(record.student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(rosterStudentFullName(record.student))}</strong><small>${rosterSafe(rosterSchoolNickname(record.rosterClass.schoolName))}</small></span>${boutiqueOrderItemsMarkup(order)}${fillSelectable ? `<button type="button" data-boutique-partial-open="${rosterSafe(order.id)}">Fill Items</button>` : nextStatus ? `<button type="button" data-teacher-boutique-status="${rosterSafe(order.id)}" data-next-status="${nextStatus}">${rosterSafe(boutiqueStatusLabel(nextStatus))}</button>` : ""}</div>`;
+    };
+
+    const closeBoutiquePartial = () => {
+      activeBoutiquePartialOrderId = "";
+      document.getElementById("boutique-partial-overlay")?.classList.remove("active");
+      document.getElementById("boutique-partial-overlay")?.setAttribute("aria-hidden", "true");
+    };
+    const openBoutiquePartial = (orderId) => {
+      const order = boutiqueOrders.find((item) => String(item.id) === String(orderId));
+      if (!order) return;
+      activeBoutiquePartialOrderId = order.id;
+      const record = boutiqueOrderStudentRecord(order.assigned_student_id);
+      setText("boutique-partial-title", `Fill ${record ? rosterStudentFullName(record.student) : "Boutique Order"}`);
+      setText("boutique-partial-summary", "Enter the total quantity currently filled for each item.");
+      const list = document.getElementById("boutique-partial-list");
+      if (list) list.innerHTML = (order.boutique_order_items || []).map((item) => {
+        const ordered = Math.max(1, Number(item.quantity) || 1);
+        const filled = Math.min(ordered, Math.max(0, Number(item.fulfilled_quantity) || 0));
+        const size = boutiqueOrderItemSize(item);
+        return `<div class="boutique-partial-row"><span><strong>${rosterSafe(item.name || "Boutique item")}</strong><small>${size ? `Size ${rosterSafe(size)} · ` : ""}${ordered} ordered</small></span><label><input type="number" min="0" max="${ordered}" step="1" value="${filled}" data-boutique-partial-item="${rosterSafe(item.id)}"> of ${ordered} filled</label></div>`;
+      }).join("");
+      document.getElementById("boutique-partial-overlay")?.classList.add("active");
+      document.getElementById("boutique-partial-overlay")?.setAttribute("aria-hidden", "false");
+    };
+    const saveBoutiquePartial = async () => {
+      const order = boutiqueOrders.find((item) => String(item.id) === String(activeBoutiquePartialOrderId));
+      if (!order) return closeBoutiquePartial();
+      const quantities = {};
+      document.querySelectorAll("[data-boutique-partial-item]").forEach((input) => {
+        const maximum = Math.max(1, Number(input.max) || 1);
+        quantities[input.dataset.boutiquePartialItem] = Math.min(maximum, Math.max(0, Number(input.value) || 0));
+      });
+      if (document.body.dataset.tourMode === "true") {
+        (order.boutique_order_items || []).forEach((item) => { item.fulfilled_quantity = quantities[item.id] || 0; });
+        order.status = (order.boutique_order_items || []).every((item) => Number(item.fulfilled_quantity) >= Number(item.quantity)) ? "to_pick_up" : "to_fill";
+      } else {
+        const { data, error } = await window.dtSupabase.rpc("save_boutique_item_fulfillment", { target_order_id: order.id, item_quantities: quantities });
+        if (error) return showToast(error.message || "Those filled items could not be saved.");
+        Object.assign(order, data);
+        (order.boutique_order_items || []).forEach((item) => { item.fulfilled_quantity = quantities[item.id] || 0; });
+      }
+      const complete = order.status === "to_pick_up";
+      closeBoutiquePartial();
+      renderTeacherOrders();
+      renderDirectorBoutiqueOrders();
+      showToast(complete ? "Order fully filled and moved to pickup" : "Partial fill saved · missing items remain in Fill Orders");
     };
 
     const saveBoutiqueOrderStatus = async (orderId, nextStatus) => {
@@ -32811,7 +32911,30 @@
         sizeSelect.value = sizes.includes(teacherOrderSizeFilter) ? teacherOrderSizeFilter : "all";
         teacherOrderSizeFilter = sizeSelect.value;
       }
-      const records = filteredTeacherOrderRecords(allRecords);
+      const records = filteredTeacherOrderRecords(allRecords).slice().sort((left, right) => {
+        if (teacherOrderSort === "size") {
+          const sizeDifference = boutiqueShirtSizeSort(
+            normalizedEnrollmentShirtSize(left.student.tshirtSize, left.student.gender),
+            normalizedEnrollmentShirtSize(right.student.tshirtSize, right.student.gender)
+          );
+          if (sizeDifference) return sizeDifference;
+        }
+        if (teacherOrderSort === "classroom") {
+          return String(left.rosterClass.name || "").localeCompare(String(right.rosterClass.name || ""), undefined, { numeric: true })
+            || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student));
+        }
+        if (teacherOrderSort === "first-name") {
+          return String(left.student.preferredName || left.student.firstName || "").localeCompare(String(right.student.preferredName || right.student.firstName || ""), undefined, { sensitivity: "base" })
+            || String(left.student.lastName || "").localeCompare(String(right.student.lastName || ""), undefined, { sensitivity: "base" });
+        }
+        if (teacherOrderSort === "last-name") {
+          return String(left.student.lastName || "").localeCompare(String(right.student.lastName || ""), undefined, { sensitivity: "base" })
+            || String(left.student.preferredName || left.student.firstName || "").localeCompare(String(right.student.preferredName || right.student.firstName || ""), undefined, { sensitivity: "base" });
+        }
+        return (left.rosterClass.day || "").localeCompare(right.rosterClass.day || "")
+          || teacherRosterTimeValue(left.rosterClass.time) - teacherRosterTimeValue(right.rosterClass.time)
+          || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student));
+      });
       const ready = records.filter(({ student }) => student.kitReady && !student.kitPickedUp && !student.kitReceived);
       const waiting = records.filter(({ student }) => !student.kitReady && !student.kitPickedUp && !student.kitReceived);
       const possession = records.filter(({ student }) => student.kitPickedUp && !student.kitReceived);
@@ -32850,8 +32973,10 @@
       }
       const selfFillButton = document.getElementById("teacher-orders-self-fill-button");
       if (selfFillButton) {
-        selfFillButton.disabled = !waiting.length;
-        selfFillButton.textContent = teacherOrderSelfFillActive ? `Confirm Filled Orders${pendingTeacherKitSelfFills.size ? ` (${pendingTeacherKitSelfFills.size})` : ""}` : "Fill Orders";
+        selfFillButton.disabled = teacherOrderSelfFillSaving || !waiting.length;
+        selfFillButton.textContent = teacherOrderSelfFillSaving
+          ? `Saving ${pendingTeacherKitSelfFills.size} Order${pendingTeacherKitSelfFills.size === 1 ? "" : "s"}…`
+          : teacherOrderSelfFillActive ? `Confirm Filled Orders${pendingTeacherKitSelfFills.size ? ` (${pendingTeacherKitSelfFills.size})` : ""}` : "Fill Orders";
       }
       const boutiqueFillButton = document.getElementById("teacher-boutique-fill-button");
       if (boutiqueFillButton) {
@@ -32928,6 +33053,11 @@
       showToast(`${savedCount} boutique order${savedCount === 1 ? "" : "s"} moved to ${boutiqueStatusLabel(nextStatus).toLowerCase()}`);
     });
     document.querySelector("#orders-view")?.addEventListener("click", (event) => {
+      const partialButton = event.target.closest("[data-boutique-partial-open]");
+      if (partialButton) {
+        openBoutiquePartial(partialButton.dataset.boutiquePartialOpen);
+        return;
+      }
       const fillCard = event.target.closest("[data-teacher-boutique-fill]");
       if (fillCard && teacherBoutiqueFillActive) {
         const orderId = fillCard.dataset.teacherBoutiqueFill;
@@ -32939,6 +33069,10 @@
       const button = event.target.closest("[data-teacher-boutique-status]");
       if (button) saveBoutiqueOrderStatus(button.dataset.teacherBoutiqueStatus, button.dataset.nextStatus);
     });
+    document.getElementById("boutique-partial-close")?.addEventListener("click", closeBoutiquePartial);
+    document.getElementById("boutique-partial-cancel")?.addEventListener("click", closeBoutiquePartial);
+    document.getElementById("boutique-partial-save")?.addEventListener("click", saveBoutiquePartial);
+    document.getElementById("boutique-partial-overlay")?.addEventListener("click", (event) => { if (event.target.id === "boutique-partial-overlay") closeBoutiquePartial(); });
 
     const teacherOrderRecordForKey = (key) => {
       const [classId, studentId] = String(key || "").split(":");
@@ -32978,6 +33112,10 @@
       pendingTeacherKitSelfFills.clear();
       renderTeacherOrders();
     });
+    document.getElementById("teacher-orders-sort")?.addEventListener("change", (event) => {
+      teacherOrderSort = event.target.value;
+      renderTeacherOrders();
+    });
     document.getElementById("teacher-orders-pickup-list")?.addEventListener("click", (event) => {
       const row = event.target.closest("[data-teacher-order-pickup]");
       if (!row || !teacherOrderPickupActive) return;
@@ -33013,7 +33151,7 @@
         student.kitPickedUpAt = pickedUpAt;
         student.kitPickedUpBy = pickedUpBy;
       });
-      await Promise.all(records.map(({ rosterClass, student }) => saveSharedStudent(student, rosterClass)));
+      await Promise.all(records.map(({ student }) => saveSharedKitStatus(student)));
       pendingTeacherKitPickups.clear();
       teacherOrderPickupActive = false;
       scheduleAppDataSave();
@@ -33025,6 +33163,7 @@
     });
     document.getElementById("teacher-orders-self-fill-button")?.addEventListener("click", async () => {
       const panel = document.getElementById("teacher-orders-self-fill-panel");
+      if (teacherOrderSelfFillSaving) return;
       if (!teacherOrderSelfFillActive) {
         teacherOrderSelfFillActive = true;
         teacherOrderPickupActive = false;
@@ -33038,6 +33177,7 @@
       const filledAt = new Date().toISOString();
       const filledBy = window.dtCurrentProfile?.id || profileTeacher?.id || "";
       const records = [...pendingTeacherKitSelfFills].map(teacherOrderRecordForKey).filter(Boolean);
+      teacherOrderSelfFillSaving = true;
       records.forEach(({ student }) => {
         student.kitReady = true;
         student.kitReadyAt = filledAt;
@@ -33046,15 +33186,35 @@
         student.kitPickedUpAt = filledAt;
         student.kitPickedUpBy = filledBy;
       });
-      await Promise.all(records.map(({ rosterClass, student }) => saveSharedStudent(student, rosterClass)));
+      renderTeacherOrders();
+      const failedRecords = [];
+      for (let index = 0; index < records.length; index += 6) {
+        const batch = records.slice(index, index + 6);
+        const results = await Promise.allSettled(batch.map(({ student }) => Promise.resolve().then(() => saveSharedKitStatus(student))));
+        results.forEach((result, resultIndex) => {
+          if (result.status === "rejected") failedRecords.push(batch[resultIndex]);
+        });
+      }
+      failedRecords.forEach(({ student }) => {
+        student.kitReady = false;
+        student.kitReadyAt = "";
+        student.kitReadyBy = "";
+        student.kitPickedUp = false;
+        student.kitPickedUpAt = "";
+        student.kitPickedUpBy = "";
+      });
       pendingTeacherKitSelfFills.clear();
       teacherOrderSelfFillActive = false;
+      teacherOrderSelfFillSaving = false;
       scheduleAppDataSave();
       renderTeacherOrders();
       renderTeacherRosters();
       renderStudentLibrary();
       renderMyDay();
-      showToast(`${records.length} order${records.length === 1 ? "" : "s"} filled and picked up`);
+      const savedCount = records.length - failedRecords.length;
+      showToast(failedRecords.length
+        ? `${savedCount} saved · ${failedRecords.length} still need confirmation`
+        : `${savedCount} order${savedCount === 1 ? "" : "s"} filled and picked up`);
     });
     document.getElementById("teacher-boutique-fill-button")?.addEventListener("click", async () => {
       const panel = document.getElementById("teacher-boutique-fill-panel");
@@ -33065,14 +33225,9 @@
         renderTeacherOrders();
         return;
       }
-      if (!pendingTeacherBoutiqueFills.size) return showToast("Select every boutique order you filled and collected");
-      const orders = teacherBoutiqueOrders().filter((order) => order.status === "to_fill" && pendingTeacherBoutiqueFills.has(order.id));
-      const results = await Promise.all(orders.map((order) => saveBoutiqueOrderStatus(order.id, "to_pick_up")));
-      const savedCount = results.filter(Boolean).length;
-      pendingTeacherBoutiqueFills.clear();
       teacherBoutiqueFillActive = false;
+      pendingTeacherBoutiqueFills.clear();
       renderTeacherOrders();
-      showToast(`${savedCount} boutique order${savedCount === 1 ? "" : "s"} filled and collected`);
     });
     document.getElementById("teacher-boutique-pull-items")?.addEventListener("click", () => {
       const orders = teacherBoutiqueOrders().filter((order) => order.status === "to_fill");
@@ -34475,7 +34630,7 @@
         selectedKeys.forEach((key) => pendingTeacherKitDeliveries.delete(key));
         activeTeacherKitDeliveryClassIds.delete(rosterClass.id);
         scheduleAppDataSave();
-        Promise.all(selectedStudents.map((student) => saveSharedStudent(student, rosterClass))).catch((error) => sharedRosterError("The T-Shirt and bag delivery could not be saved.", error, { reload: false }));
+        Promise.all(selectedStudents.map((student) => saveSharedKitStatus(student))).catch((error) => sharedRosterError("The T-Shirt and bag delivery could not be saved.", error, { reload: false }));
         renderTeacherRosters();
         renderStudentLibrary();
         renderClassesAndRosters();
@@ -36196,6 +36351,7 @@
       const school = document.getElementById("boutique-kit-school-filter")?.value || "all";
       const teacher = document.getElementById("boutique-kit-teacher-filter")?.value || "all";
       const size = document.getElementById("boutique-kit-size-filter")?.value || "all";
+      const sortBy = document.getElementById("boutique-kit-sort")?.value || "default";
       return boutiqueKitRecords().filter(({ rosterClass, student }) => {
         if (status !== "all" && boutiqueKitStatus(student) !== status) return false;
         if (day !== "all" && rosterClass.day !== day) return false;
@@ -36206,7 +36362,29 @@
         if (!search) return true;
         const searchable = [student.firstName, student.preferredName, student.lastName, student.parentName, student.parentFirstName, student.parentLastName, student.parentEmail, student.parentPhone, rosterClass.schoolName, rosterClass.name].filter(Boolean).join(" ").toLowerCase();
         return searchable.includes(search);
-      }).sort((left, right) => left.rosterClass.schoolName.localeCompare(right.rosterClass.schoolName) || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
+      }).sort((left, right) => {
+        if (sortBy === "size") {
+          const sizeDifference = boutiqueShirtSizeSort(
+            normalizedEnrollmentShirtSize(left.student.tshirtSize || left.student.tshirt_size, left.student.gender),
+            normalizedEnrollmentShirtSize(right.student.tshirtSize || right.student.tshirt_size, right.student.gender)
+          );
+          if (sizeDifference) return sizeDifference;
+        }
+        if (sortBy === "classroom") {
+          return String(left.rosterClass.name || "").localeCompare(String(right.rosterClass.name || ""), undefined, { numeric: true })
+            || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student));
+        }
+        if (sortBy === "first-name") {
+          return String(left.student.preferredName || left.student.firstName || "").localeCompare(String(right.student.preferredName || right.student.firstName || ""), undefined, { sensitivity: "base" })
+            || String(left.student.lastName || "").localeCompare(String(right.student.lastName || ""), undefined, { sensitivity: "base" });
+        }
+        if (sortBy === "last-name") {
+          return String(left.student.lastName || "").localeCompare(String(right.student.lastName || ""), undefined, { sensitivity: "base" })
+            || String(left.student.preferredName || left.student.firstName || "").localeCompare(String(right.student.preferredName || right.student.firstName || ""), undefined, { sensitivity: "base" });
+        }
+        return left.rosterClass.schoolName.localeCompare(right.rosterClass.schoolName)
+          || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student));
+      });
     };
 
     function renderBoutiqueBackendSummary() {
@@ -36279,13 +36457,13 @@
       renderTeacherRosters();
       renderStudentLibrary();
       try {
-        await Promise.all(records.map(({ rosterClass, student }) => saveSharedStudent(student, rosterClass)));
+        await Promise.all(records.map(({ student }) => saveSharedKitStatus(student)));
       } catch (error) {
         sharedRosterError("The T-Shirt and bag updates could not be saved.", error, { reload: false });
       }
     };
 
-    ["boutique-kit-search", "boutique-kit-status-filter", "boutique-kit-day-filter", "boutique-kit-school-filter", "boutique-kit-teacher-filter", "boutique-kit-size-filter"].forEach((id) => {
+    ["boutique-kit-search", "boutique-kit-status-filter", "boutique-kit-day-filter", "boutique-kit-school-filter", "boutique-kit-teacher-filter", "boutique-kit-size-filter", "boutique-kit-sort"].forEach((id) => {
       document.getElementById(id)?.addEventListener(id === "boutique-kit-search" ? "input" : "change", renderBoutiqueBackendSummary);
     });
     const attachBoutiqueCollapse = (buttonId, bodyId, title) => document.getElementById(buttonId)?.addEventListener("click", () => {
@@ -46962,9 +47140,9 @@
 
     const loadSharedPortalData = async (profile) => {
       if (profile?.role === "teacher") {
-        // Open the verified teacher into a privacy-safe loading shell right
-        // away. Roster, messages, orders, and attendance continue syncing in
-        // the background instead of holding the sign-in screen open.
+        // Authentication already resolved this exact profile in supabase-auth.js.
+        // Open a privacy-safe shell immediately instead of holding the login
+        // screen while every roster, message, order, and attendance query runs.
         document.body.dataset.currentTeacherId = profile.id;
         sharedRosterReady = false;
         replaceCollection(rosterClasses, []);
@@ -47163,7 +47341,10 @@
     if (document.body.dataset.tourMode === "true") openDashboardDeepLink();
     if (document.body.dataset.tourMode === "true"
       && new URLSearchParams(location.search).get("teacher-preview") === "1") {
-      window.setTimeout(() => document.querySelector('[data-mode-btn="teacher"]')?.click(), 0);
+      window.setTimeout(async () => {
+        document.querySelector('[data-mode-btn="teacher"]')?.click();
+        await loadBoutiqueOrders(profileTeacher, { sync: false });
+      }, 0);
     }
     if (document.body.dataset.tourMode === "true"
       && ["127.0.0.1", "localhost"].includes(location.hostname)
