@@ -1,9 +1,9 @@
-const CACHE_NAME = "my-dance-techniques-v214-shared-signin-clock-skew";
+const CACHE_NAME = "my-dance-techniques-v215-shared-signin-incident-recovery";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260826-shared-signin-clock-skew-v5",
+  "./supabase-auth.js?v=20260826-shared-signin-incident-recovery-v6",
   "./data/partner-schools.js",
   "./dt-touch/dt-touch.js?v=20260722c",
   "./config/dt-touch-voice.json",

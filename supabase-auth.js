@@ -103,6 +103,7 @@
   });
   window.dtSupabase = client;
   let teacherProfileResolutionTimer = 0;
+  let profileRecoveryRefreshing = false;
 
   const waitForProfileRetry = (delay) => new Promise((resolve) => window.setTimeout(resolve, delay));
   const loadSignedInProfile = async (userId) => {
@@ -121,7 +122,15 @@
         && /JWT issued at future/i.test(result.error?.message || "");
       if (futureJwt) {
         message.textContent = "Finishing secure sign-in…";
-        await waitForProfileRetry(5000);
+        profileRecoveryRefreshing = true;
+        try {
+          await client.auth.refreshSession();
+        } catch (refreshError) {
+          console.warn("Secure sign-in token refresh will retry.");
+        } finally {
+          profileRecoveryRefreshing = false;
+        }
+        await waitForProfileRetry(3000);
         continue;
       }
       ordinaryAttempts += 1;
@@ -358,6 +367,7 @@
 
   client.auth.onAuthStateChange((event, session) => {
     if (authCallbackInitializing) return;
+    if (profileRecoveryRefreshing && event === "TOKEN_REFRESHED") return;
     if (event === "PASSWORD_RECOVERY") {
       passwordRecoveryMode = true;
       setGateState("setup");
