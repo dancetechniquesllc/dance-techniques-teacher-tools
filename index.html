@@ -46961,6 +46961,19 @@
     };
 
     const loadSharedPortalData = async (profile) => {
+      if (profile?.role === "teacher") {
+        // Open the verified teacher into a privacy-safe loading shell right
+        // away. Roster, messages, orders, and attendance continue syncing in
+        // the background instead of holding the sign-in screen open.
+        document.body.dataset.currentTeacherId = profile.id;
+        sharedRosterReady = false;
+        replaceCollection(rosterClasses, []);
+        replaceCollection(messageThreads, []);
+        setSharedRosterState("loading", "Opening your shared roster…", "Your classes and messages are syncing securely.");
+        renderClassesAndRosters();
+        renderTeacherMessages();
+        await window.dtCompleteTeacherProfileResolution?.({ profileId: profile.id, ready: true });
+      }
       const exactProfileReady = await loadSharedClassesAndRosters(profile);
       if (profile?.role === "teacher" && !exactProfileReady) return false;
       await loadTeacherRosterNewEnrollments(profile);

@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v211-resilient-notification-worker";
+const CACHE_NAME = "my-dance-techniques-v212-fast-teacher-login";
 const CORE_ASSETS = [
   "./",
   "./index.html",
