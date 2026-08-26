@@ -165,6 +165,14 @@
     const { data: profile, error } = await loadSignedInProfile(session.user.id);
 
     if (error || !profile) {
+      if (error) {
+        console.error("Shared profile lookup failed.", {
+          code: error.code || "profile_lookup_failed",
+          message: error.message || "Profile lookup failed.",
+          details: error.details || "",
+          hint: error.hint || ""
+        });
+      }
       message.textContent = error
         ? "You’re still signed in, but we couldn’t load this account. Check your connection and try again."
         : "This signed-in account does not have an active Dance Techniques profile. Please contact Dance Techniques.";
