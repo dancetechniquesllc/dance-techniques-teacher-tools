@@ -107,7 +107,9 @@
   const waitForProfileRetry = (delay) => new Promise((resolve) => window.setTimeout(resolve, delay));
   const loadSignedInProfile = async (userId) => {
     let lastError = null;
-    for (let attempt = 0; attempt < 4; attempt += 1) {
+    let ordinaryAttempts = 0;
+    const deadline = Date.now() + 65000;
+    while (Date.now() < deadline) {
       const result = await client
         .from("profiles")
         .select("id, full_name, role, active")
@@ -115,7 +117,16 @@
         .maybeSingle();
       if (!result.error || result.data) return result;
       lastError = result.error;
-      if (attempt < 3) await waitForProfileRetry(500 * (attempt + 1));
+      const futureJwt = result.error?.code === "PGRST303"
+        && /JWT issued at future/i.test(result.error?.message || "");
+      if (futureJwt) {
+        message.textContent = "Finishing secure sign-in…";
+        await waitForProfileRetry(5000);
+        continue;
+      }
+      ordinaryAttempts += 1;
+      if (ordinaryAttempts >= 4) break;
+      await waitForProfileRetry(500 * ordinaryAttempts);
     }
     return { data: null, error: lastError };
   };
