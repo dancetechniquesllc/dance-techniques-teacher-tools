@@ -166,12 +166,12 @@
 
     if (error || !profile) {
       if (error) {
-        console.error("Shared profile lookup failed.", {
+        console.error("Shared profile lookup failed: " + JSON.stringify({
           code: error.code || "profile_lookup_failed",
           message: error.message || "Profile lookup failed.",
           details: error.details || "",
           hint: error.hint || ""
-        });
+        }));
       }
       message.textContent = error
         ? "You’re still signed in, but we couldn’t load this account. Check your connection and try again."
