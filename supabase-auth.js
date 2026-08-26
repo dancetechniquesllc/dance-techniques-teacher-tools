@@ -80,6 +80,24 @@
     return;
   }
 
+  // Teacher Tools keeps a recoverable local history of dashboard snapshots.
+  // On long-running installed PWAs that history can fill the browser's storage
+  // and prevent Supabase from persisting a freshly refreshed sign-in session.
+  // Remove only that disposable history when storage is full; current app data
+  // and all authentication data remain untouched.
+  try {
+    const storageProbeKey = "dt-auth-storage-probe";
+    window.localStorage?.setItem(storageProbeKey, "1");
+    window.localStorage?.removeItem(storageProbeKey);
+  } catch (error) {
+    try {
+      window.localStorage?.removeItem("dt-teacher-tools-prototype-v1:history");
+      console.info("Cleared the recoverable Teacher Tools history so sign-in can finish.");
+    } catch (cleanupError) {
+      console.warn("Teacher Tools could not free storage for sign-in.", cleanupError);
+    }
+  }
+
   const client = window.supabase.createClient(projectUrl, publishableKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });

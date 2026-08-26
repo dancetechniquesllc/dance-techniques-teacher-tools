@@ -18184,7 +18184,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20260826-shared-signin-retry"></script>
+  <script src="supabase-auth.js?v=20260826-shared-signin-storage-repair"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <script>
     const modalScrollLockSelector = [
@@ -47219,7 +47219,10 @@
       loadSharedPortalData(startupProfile);
     }
     else if (document.body.dataset.tourMode !== "true") setSharedRosterState("loading", "Opening your shared roster…", "Only records available to this account will appear.");
-    saveAppData();
+    // Do not write the large dashboard snapshot while the authentication gate
+    // is still opening. On installed PWAs this could crowd out the refreshed
+    // secure session and leave teachers or directors stuck on sign-in.
+    if (window.dtCurrentProfile || document.body.dataset.tourMode === "true") saveAppData();
 
     const ttFeedbackDialog = document.getElementById("tt-feedback-dialog");
     const ttFeedbackLauncher = document.getElementById("tt-feedback-launcher");
