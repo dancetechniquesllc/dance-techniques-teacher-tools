@@ -79,6 +79,28 @@
     app.setAttribute("aria-hidden", "false");
   };
 
+  const invokeParentSquare = async (body) => {
+    if (!client) return { data: null, error: new Error("Your secure Parent Portal connection is still opening.") };
+    const current = await client.auth.getSession();
+    if (!current.data?.session?.access_token) return { data: null, error: new Error("Please sign in again.") };
+    const refreshed = await client.auth.refreshSession();
+    const accessToken = refreshed.data?.session?.access_token || current.data.session.access_token;
+    const response = await fetch(`${projectUrl}/functions/v1/square-sandbox-card-on-file`, {
+      method: "POST",
+      headers: {
+        apikey: publishableKey,
+        authorization: `Bearer ${accessToken}`,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify(body || {})
+    });
+    const payload = await response.json().catch(() => ({}));
+    return response.ok
+      ? { data: payload, error: null }
+      : { data: payload, error: new Error(payload?.message || "Secure Square billing is unavailable.") };
+  };
+  window.dtInvokeParentSquare = invokeParentSquare;
+
   const stopSession = async (message) => {
     const copy = message || "This login is not linked to an active Parent Portal family.";
     document.getElementById("pp-stopped-message").textContent = copy;
