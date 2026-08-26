@@ -211,6 +211,7 @@
     .pp-auth-gate::before,.pp-auth-gate::after{content:none}
     .pp-auth-card{position:relative;overflow:hidden;width:min(660px,100%);margin-block:auto;padding:clamp(44px,6vw,70px) clamp(38px,7vw,68px) clamp(40px,6vw,58px);border:1px solid rgba(229,176,170,.9);border-radius:42px;background-color:#fffaf4;background-image:url("assets/login-elements/top-right-floral.png"),url("assets/login-elements/bottom-left-floral.png"),url("assets/login-elements/panel-background.png");background-repeat:no-repeat,no-repeat,no-repeat;background-position:right top,left bottom,center;background-size:42% auto,42% auto,108% 108%;box-shadow:0 24px 70px rgba(78,39,41,.14)}
     .pp-auth-card::after{content:none}
+    .pp-auth-card:has(#pp-auth-setup:not([hidden]))::before,.pp-auth-card:has(#pp-auth-stopped:not([hidden]))::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:url("assets/login-elements/top-right-floral.png?v=20260825-auth-floral-v2") right top/42% auto no-repeat,url("assets/login-elements/bottom-left-floral.png?v=20260825-auth-floral-v2") left bottom/42% auto no-repeat}
     .pp-auth-card>*{position:relative;z-index:1}
     .pp-auth-logo{width:178px;height:112px;margin:0 auto -5px;object-fit:contain;filter:none}
     .pp-auth-card>h1{font-size:clamp(40px,7vw,54px);font-weight:400;letter-spacing:-1px}
@@ -278,7 +279,7 @@
 <body>
   <section class="pp-auth-gate" id="pp-auth-gate" aria-live="polite">
     <div class="pp-auth-card">
-      <img class="pp-auth-logo" src="assets/brand/dance-techniques-logo-alpha.png" alt="Dance Techniques">
+      <img class="pp-auth-logo" src="assets/brand/dance-techniques-logo.png?v=20260825-auth-floral-v2" alt="Dance Techniques">
       <h1>Parent Portal</h1>
       <p class="pp-auth-tagline">Stay in Step with Your Dancer’s Day.</p>
       <div class="pp-auth-divider" aria-hidden="true">— ♡ —</div>
