@@ -211,9 +211,9 @@
     .pp-auth-gate::before,.pp-auth-gate::after{content:none}
     .pp-auth-card{position:relative;overflow:hidden;width:min(660px,100%);margin-block:auto;padding:clamp(44px,6vw,70px) clamp(38px,7vw,68px) clamp(40px,6vw,58px);border:1px solid rgba(229,176,170,.9);border-radius:42px;background-color:#fffaf4;background-image:url("assets/login-elements/top-right-floral.png"),url("assets/login-elements/bottom-left-floral.png"),url("assets/login-elements/panel-background.png");background-repeat:no-repeat,no-repeat,no-repeat;background-position:right top,left bottom,center;background-size:42% auto,42% auto,108% 108%;box-shadow:0 24px 70px rgba(78,39,41,.14)}
     .pp-auth-card::after{content:none}
-    .pp-auth-card:has(#pp-auth-setup:not([hidden]))::before,.pp-auth-card:has(#pp-auth-stopped:not([hidden]))::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:url("assets/login-elements/top-right-floral.png?v=20260825-auth-floral-v2") right top/42% auto no-repeat,url("assets/login-elements/bottom-left-floral.png?v=20260825-auth-floral-v2") left bottom/42% auto no-repeat}
+    .pp-auth-card:has(#pp-auth-setup:not([hidden]))::before,.pp-auth-card:has(#pp-auth-stopped:not([hidden]))::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:url("assets/login-elements/top-right-floral.png?v=20260825-auth-floral-v3") right top/39% auto no-repeat,url("assets/login-elements/ballet-shoes.png?v=20260825-auth-floral-v3") right bottom/34% auto no-repeat,url("assets/login-elements/bottom-left-floral.png?v=20260825-auth-floral-v3") left bottom/40% auto no-repeat,url("assets/login-elements/sparkles.png?v=20260825-auth-floral-v3") left 12%/23% auto no-repeat}
     .pp-auth-card>*{position:relative;z-index:1}
-    .pp-auth-logo{width:178px;height:112px;margin:0 auto -5px;object-fit:contain;filter:none}
+    .pp-auth-logo{width:178px;height:112px;margin:0 auto -5px;object-fit:contain;filter:brightness(0) saturate(100%) invert(36%) sepia(22%) saturate(1430%) hue-rotate(303deg) brightness(91%) contrast(89%)}
     .pp-auth-card>h1{font-size:clamp(40px,7vw,54px);font-weight:400;letter-spacing:-1px}
     .pp-auth-tagline{margin:10px 0 14px;font-size:clamp(15px,4vw,20px);letter-spacing:.01em}
     .pp-auth-divider{width:min(390px,78%);height:60px;margin:-4px auto 2px;background:url("assets/login-elements/heart-divider.png?v=2") center/contain no-repeat;font-size:0}
@@ -224,6 +224,7 @@
     .pp-password-toggle{position:absolute;right:10px;top:50%;width:44px!important;min-height:44px!important;transform:translateY(-50%);display:grid;place-items:center;border:0;background:transparent;color:#bd6d73;cursor:pointer}.pp-password-toggle svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8}.pp-password-toggle:focus-visible{outline:3px solid var(--gold);border-radius:50%}
     #pp-login-submit{min-height:62px;margin-top:3px;border-radius:22px;background:linear-gradient(135deg,#a94f5d,#944a53);font-size:21px;font-weight:750;box-shadow:0 12px 24px rgba(148,74,83,.22)}
     #pp-login-submit::before,#pp-login-submit::after{content:"✦";color:#efc365;margin:0 28px;font-size:16px}
+    #pp-auth-setup .berry-button{border:0;background:transparent url("assets/login-elements/login-button-background.png?v=20260825-auth-floral-v3") center/100% 100% no-repeat;box-shadow:none}
     #pp-auth-login .pp-auth-copy{max-width:410px;margin:22px auto 0;color:#473c3b;font-size:14px;line-height:1.65}
     .pp-auth-back{position:relative;z-index:1;margin-top:25px;font-size:15px;text-decoration:underline;text-underline-offset:4px}
     @media(min-width:700px){.pp-auth-card{min-height:min(900px,calc(100svh - 46px));display:flex;flex-direction:column;justify-content:center}.pp-auth-logo{margin-top:-24px}.pp-auth-divider{margin-top:3px;margin-bottom:8px}.pp-auth-bow{margin-bottom:24px}#pp-auth-login .pp-auth-copy{margin-top:28px}.pp-auth-back{margin-top:30px}}
@@ -279,7 +280,7 @@
 <body>
   <section class="pp-auth-gate" id="pp-auth-gate" aria-live="polite">
     <div class="pp-auth-card">
-      <img class="pp-auth-logo" src="assets/brand/dance-techniques-logo.png?v=20260825-auth-floral-v2" alt="Dance Techniques">
+      <img class="pp-auth-logo" src="assets/brand/dance-techniques-logo-alpha.png?v=20260825-auth-floral-v3" alt="Dance Techniques">
       <h1>Parent Portal</h1>
       <p class="pp-auth-tagline">Stay in Step with Your Dancer’s Day.</p>
       <div class="pp-auth-divider" aria-hidden="true">— ♡ —</div>
