@@ -4121,18 +4121,53 @@
       font-size: 12px;
     }
 
-    .search {
-      width: 100%;
-      min-height: 40px;
+      .search {
+        width: 100%;
+        min-height: 40px;
       padding: 0 12px;
       border: 1px solid var(--border);
       border-radius: 8px;
       background: var(--surface);
       color: var(--fg);
-      margin-bottom: 10px;
-    }
+        margin-bottom: 10px;
+      }
 
-    .playlist-grid {
+      .music-library-controls {
+        display: grid;
+        grid-template-columns: max-content minmax(0, 1fr) 118px;
+        gap: 9px;
+        align-items: end;
+        margin-bottom: 10px;
+      }
+
+      .music-library-controls .search {
+        margin-bottom: 0;
+      }
+
+      .music-type-filter {
+        display: grid;
+        gap: 4px;
+      }
+
+      .music-type-filter span {
+        color: var(--berry);
+        font-size: 11px;
+        font-weight: 800;
+      }
+
+      .music-type-filter select {
+        width: 100%;
+        min-height: 40px;
+        padding: 0 11px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--fg);
+        font: inherit;
+        font-weight: 750;
+      }
+
+      .playlist-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 9px;
@@ -4830,6 +4865,10 @@
       gap: 12px;
       padding: 16px;
       margin-bottom: 12px;
+      position: sticky;
+      top: 8px;
+      z-index: 18;
+      box-shadow: 0 10px 24px rgb(69 58 54 / 0.12);
     }
 
     .player-bars {
@@ -4850,11 +4889,88 @@
     .player-bars span:nth-child(3n + 1) { height: 22px; }
     .player-bars span:nth-child(3n + 2) { height: 46px; }
 
-    .dt-tunes-audio {
+    .dt-tunes-audio { display: none; }
+
+    .music-player-copy {
+      align-self: start;
+      display: grid;
+      justify-items: center;
+      gap: 14px;
+      text-align: center;
+    }
+
+    .music-player-copy .class-title {
+      margin: 0;
+      color: var(--fg);
+      font-size: clamp(22px, 3vw, 31px);
+      line-height: 1.05;
+    }
+
+    .music-main-toggle {
+      width: 76px;
+      height: 76px;
+      position: relative;
+      display: inline-grid;
+      place-items: center;
+      padding: 0;
+      border: 2px solid color-mix(in oklch, var(--blush), var(--rose) 25%);
+      border-radius: 50%;
+      background: var(--blush);
+      color: var(--fg);
+      font: inherit;
+      font-size: 30px;
+      font-weight: 850;
+      line-height: 1;
+      box-shadow: 0 9px 20px rgb(143 79 85 / 0.18);
+    }
+
+    .music-main-toggle:hover,
+    .music-main-toggle:focus-visible {
+      background: color-mix(in oklch, var(--blush), white 15%);
+      transform: translateY(-1px);
+    }
+
+    .music-main-toggle[aria-label^="Pause"] {
+      font-size: 0;
+    }
+
+    .music-main-toggle[aria-label^="Pause"]::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      display: block;
+      width: 18px;
+      height: 27px;
+      background: linear-gradient(90deg, currentColor 0 4px, transparent 4px 14px, currentColor 14px 18px);
+      transform: translate(-50%, -50%);
+    }
+
+    .music-timeline {
+      display: grid;
+      grid-template-columns: auto minmax(100px, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.62);
+      color: #52604d;
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    .music-timeline progress {
       width: 100%;
-      margin-top: 4px;
+      height: 8px;
+      border: 0;
+      border-radius: 999px;
+      overflow: hidden;
       accent-color: #77886d;
     }
+
+    .music-timeline progress::-webkit-progress-bar { background: #d6ddd1; }
+    .music-timeline progress::-webkit-progress-value { background: #77886d; }
+    .music-timeline progress::-moz-progress-bar { background: #77886d; }
 
     .dt-tunes-controls {
       display: grid;
@@ -4891,7 +5007,7 @@
     .music-now-playing {
       display: grid;
       grid-template-columns: minmax(88px, 132px) 1fr;
-      align-items: center;
+      align-items: start;
       gap: 15px;
     }
 
@@ -4920,6 +5036,12 @@
       flex: 0 0 auto;
     }
 
+    .music-track-button.is-playing {
+      border-color: color-mix(in oklch, var(--blush), var(--rose) 32%);
+      background: var(--blush);
+      color: var(--fg);
+    }
+
     .music-track-panel-header {
       display: grid;
       gap: 12px;
@@ -4937,6 +5059,20 @@
       font: inherit;
       font-size: 13px;
       font-weight: 720;
+    }
+
+    .music-all-playlists-nav {
+      min-height: 40px;
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .music-all-playlists-nav[hidden] {
+      display: none;
+    }
+
+    .music-all-playlists-nav[hidden] + .search {
+      grid-column: 1 / 3;
     }
 
     .music-track-heading {
@@ -15004,23 +15140,24 @@
                 <button class="back-btn" data-tab-jump="today" aria-label="Back to Today">&larr;</button>
                 <div class="mobile-title">
                   <h2>Music</h2>
-                  <p class="subtle" id="music-profile-label">Shared teacher library</p>
                 </div>
                 <button class="avatar" data-tab-jump="profile" data-profile-avatar aria-label="Open profile">T</button>
               </div>
 
-              <input class="search" id="music-library-search" type="search" placeholder="Search playlists or songs" aria-label="Search playlists or songs">
-
               <div class="player-slot">
                 <div class="music-now-playing">
                   <img class="music-now-playing-art" id="music-now-playing-art" alt="" hidden>
-                  <div>
-                    <span class="mini-label">DT Tunes</span>
-                    <p class="class-title" id="music-now-playing-title" style="color:var(--fg);font-size:21px;margin-top:8px;">Choose a song</p>
-                    <p class="subtle" id="music-now-playing-artist">Your shared Dance Techniques music library is ready.</p>
+                  <div class="music-player-copy">
+                    <p class="class-title" id="music-now-playing-title">Choose a song</p>
+                    <button class="music-main-toggle" type="button" data-my-day-music-toggle aria-label="Play or pause song">▶</button>
                   </div>
                 </div>
-                <audio class="dt-tunes-audio" id="dt-tunes-audio" controls preload="none"></audio>
+                <audio class="dt-tunes-audio" id="dt-tunes-audio" preload="none"></audio>
+                <div class="music-timeline" aria-label="Song progress">
+                  <span data-music-current-time>0:00</span>
+                  <progress data-music-progress max="100" value="0">0%</progress>
+                  <span data-music-duration>0:00</span>
+                </div>
                 <div class="dt-tunes-controls" aria-label="Playlist controls">
                   <button class="dt-tunes-control" type="button" data-music-control="previous" aria-label="Play previous song">⏮ Previous</button>
                   <button class="dt-tunes-control" id="dt-tunes-repeat" type="button" data-music-control="repeat" aria-label="Repeat current song" aria-pressed="false">↻ Repeat</button>
@@ -15028,11 +15165,16 @@
                 </div>
               </div>
 
+              <div class="music-library-controls">
+                <button class="music-playlist-back music-all-playlists-nav" id="music-back-to-playlists" type="button" aria-label="Back to playlists" hidden>&larr; Playlists</button>
+                <input class="search" id="music-library-search" type="search" placeholder="Search" aria-label="Search playlists or songs">
+                <label class="music-type-filter"><span>Sort by</span><select id="music-type-filter" aria-label="Sort playlists by dance type"><option value="all">All</option><option value="ballet">Ballet</option><option value="tap">Tap</option><option value="tot">Tot</option></select></label>
+              </div>
+
               <div class="playlist-grid" id="music-playlist-grid" aria-live="polite"></div>
 
               <div class="panel" id="music-track-panel" style="margin-top:12px;" hidden>
                 <div class="music-track-panel-header">
-                  <button class="music-playlist-back" id="music-back-to-playlists" type="button" aria-label="Back to all playlists">&larr; All Playlists</button>
                   <div class="music-track-heading">
                     <h3 id="music-track-list-title">Songs</h3>
                     <span class="status ok" id="music-track-count">Loading</span>
@@ -18186,6 +18328,7 @@
   <script src="data/partner-schools.js"></script>
   <script src="supabase-auth.js?v=20260826-shared-signin-incident-recovery-v6"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
+  <script src="/teacher-music-data.js?v=20260826-playlist-workshop"></script>
   <script>
     const modalScrollLockSelector = [
       ".confirm-overlay.active",
@@ -21340,6 +21483,7 @@
       }
       if (tab === "dancers") renderTeacherDancers();
       if (tab === "orders") renderTeacherOrders();
+      if (tab === "music" && (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1")) loadSharedMusicLibrary(window.dtCurrentProfile);
       if (tab === "pay") {
         document.getElementById("pay-home-badge")?.classList.add("cleared");
         const payAlert = document.getElementById("pay-home-alert");
@@ -46597,8 +46741,49 @@
       playlists: [],
       selectedPlaylistId: "",
       search: "",
+      typeFilter: "all",
       currentTrackId: "",
-      repeatCurrentTrack: false
+      repeatCurrentTrack: false,
+      previewPlaying: false
+    };
+
+    const workshopMusicFallback = [
+      ["DT Ballet — September", "dt-ballet-september.webp", [["Let's Go Get Our Friends",155],["Ballet Day",158],["Ballet Pizza Treat",135],["Ruffy and Lucy Right and Left",117],["Butterfly, Fly Away",138],["Princess Toes, Troll Toes",110],["Straddle Stretch",109],["Pizza Feet",137],["Tippy Toes Circle",169],["Go To The Wall",122],["Grand Battements Kicks",167],["Hide & Seek Across the Floor",204],["Ballerina, Turn Around",81],["Au Revoir, Little Dancers",104],["Bye Bye, Ruffy & Lucy",91],["Merci-Happy Chappies",102],["Finger on the Wall",183]]],
+      ["DT Tap — September", "dt-tap-september.webp", [["Let's Go Get Our Friends",155],["Tap Day",140],["Tap Pizza Treat",163],["Ruffy and Lucy Right and Left",117],["Troll Toes Tap",147],["Dance Hand Jam",160],["My Tap Shoes Talk",191],["Dance Around the World-Circle",130],["Tapping Train",125],["Squishing Bugs",97],["Hopscotch Hops",83],["Marches & Gallop Across",155],["Tap Center Floor",180],["Taps, Heels & Bounces",83],["Tap Shoes to School Shoes",87],["Bye Bye, Ruffy & Lucy",91],["Freeze! End of Day",142],["Happy Chappies-Tap",71],["Finger on the Wall",184]]],
+      ["DT Demo Day", "dt-demo-day.webp", [["Pizza Feet",137],["Slumber Party Stretch",162],["Princess Toes, Troll Toes",110],["Dance Hand Jam",160],["Marches & Gallop Across",155],["Hopscotch Hops",83],["Happy Chappies-Tap",71]]],
+      ["DT Celebrations & Sing Alongs", "dt-celebrations-sing-alongs.webp", [["Birthday Ballerina",49],["Birthday Boy!",55],["Tip Toe To the Beat-Dance Party",188]]],
+      ["Tots Tap", "tots-tap-class-a.webp", [["Open And Shut",129],["Warm-Up Time",140],["I Like to Move It",141],["Apple Tree",65],["I Must Practice-Tap",73],["Round And Round We Go",116],["Move!",202],["This Is My Right Foot",66],["Point Together",21],["Heel Together",20],["Jazzy Rock n Roll",41],["Jazzy Jump Out & In",39],["Jazzy Boogie Woogie",49],["Knee Bounce",28],["Jumps Backward & Forward",27],["Tick Tock Dance Clock",197],["Choo Choo",78],["Happy Toes Parade",212],["Gallops Fun",82],["Supercalifragilistic",50],["Baby Bop's Favorites",147],["Do the Mermaid",156],["Hokey Pokey",120],["Tiny Twinkle Shuffle",183],["Tap Day",140],["Go To The Wall",122],["Tap Shoes to School Shoes",87]]],
+      ["Tots Ballet", "tots-ballet-class-a.webp", [["Open And Shut",129],["Warm-Up Time",140],["Warm Up-Butterflies",106],["Toes Up, Toes Down",85],["Teddy Bear",47],["Let's Join Hands",45],["Round And Round We Go",116],["Ms. Puffie Flower Ballet Warm Up",603],["Ballerina Dance",173],["See Me Jump",65],["Watch Me Kick",67],["Gallops Fun",82],["Chasses, Skips",85],["Move!",202],["What Is It Called",138],["Baby Ballet Song",134],["Ballet Day",158],["Pizza Feet",137],["Go To The Wall",122],["Au Revoir, Little Dancers",104],["Princess Toes, Troll Toes",110]]]
+    ].map(([name, cover, tracks]) => ({ name, cover, readiness: "ready", bucket: "Curriculum Playlists", tracks: tracks.map(([title, seconds]) => ({ title, seconds, artist: "Dance Techniques" })) }));
+
+    const workshopMusicPlaylists = () => {
+      const sourcePlaylists = window.DT_TEACHER_MUSIC_DATA?.playlists?.length
+        ? [...window.DT_TEACHER_MUSIC_DATA.playlists]
+        : [...workshopMusicFallback];
+      workshopMusicFallback.forEach((fallbackPlaylist) => {
+        if (!sourcePlaylists.some((playlist) => playlist.name === fallbackPlaylist.name)) sourcePlaylists.push(fallbackPlaylist);
+      });
+      return sourcePlaylists
+      .filter((playlist) => playlist.readiness === "ready")
+      .map((playlist, playlistIndex) => ({
+        id: `workshop-playlist-${playlistIndex}`,
+        name: String(playlist.name || "").replace(/^DT\s+/, ""),
+        category: playlist.bucket || "Curriculum Playlists",
+        sort_order: playlistIndex,
+        cover_path: playlist.cover?.split("/").pop() || "",
+        music_playlist_tracks: (playlist.tracks || []).map((track, trackIndex) => ({
+          position: trackIndex,
+          music_tracks: {
+            id: `workshop-track-${playlistIndex}-${trackIndex}`,
+            title: track.title || "Dance Techniques Song",
+            artist: track.artist || "Dance Techniques",
+            duration_seconds: Number(track.seconds || 0),
+            storage_path: "",
+            cover_path: track.cover?.split("/").pop() || "",
+            workshop_preview: true
+          }
+        }))
+      }));
     };
 
     const musicDurationLabel = (seconds = 0) => {
@@ -46639,8 +46824,17 @@
       const count = document.getElementById("music-track-count");
       if (!list || !title || !count) return;
       const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
+      if (!selected || !musicPlaylistTracks(selected).length) {
+        const grid = document.getElementById("music-playlist-grid");
+        const trackPanel = document.getElementById("music-track-panel");
+        const backButton = document.getElementById("music-back-to-playlists");
+        if (grid) grid.hidden = false;
+        if (trackPanel) trackPanel.hidden = true;
+        if (backButton) backButton.hidden = true;
+        return;
+      }
       const query = musicLibraryState.search.trim().toLowerCase();
-      const tracks = selected ? musicPlaylistTracks(selected) : [];
+      const tracks = musicPlaylistTracks(selected);
       const visibleTracks = tracks.filter((track) => !query || `${track.title} ${track.artist}`.toLowerCase().includes(query));
       title.textContent = selected?.name || "Songs";
       count.textContent = `${visibleTracks.length} Song${visibleTracks.length === 1 ? "" : "s"}`;
@@ -46648,10 +46842,12 @@
         list.innerHTML = `<div class="row"><div><strong>${query ? "No matching songs" : "No songs available"}</strong><small>${query ? "Try another search." : "Choose another playlist."}</small></div></div>`;
         return;
       }
+      const audio = document.getElementById("dt-tunes-audio");
+      const currentlyPlaying = Boolean(selected && (audio?.src ? !audio.paused && !audio.ended : musicLibraryState.previewPlaying));
       list.innerHTML = visibleTracks.map((track) => `
         <div class="row">
           <div><strong>${escapeText(track.title)}</strong><small>${escapeText(musicArtistLabel(track.artist))} • ${musicDurationLabel(track.duration_seconds)}</small></div>
-          <button class="icon-btn music-track-button" type="button" data-music-track="${escapeText(track.id)}" aria-label="Play ${escapeText(track.title)}">▶</button>
+          <button class="icon-btn music-track-button ${track.id === musicLibraryState.currentTrackId && currentlyPlaying ? "is-playing" : ""}" type="button" data-music-track="${escapeText(track.id)}" aria-label="${track.id === musicLibraryState.currentTrackId && currentlyPlaying ? "Pause" : "Play"} ${escapeText(track.title)}">${track.id === musicLibraryState.currentTrackId && currentlyPlaying ? "❚❚" : "▶"}</button>
         </div>
       `).join("");
     };
@@ -46663,7 +46859,7 @@
       const cover = coverUrl
         ? `<img class="playlist-cover" src="${escapeText(coverUrl)}" alt="" onerror="this.hidden = true">`
         : "";
-      return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}">${cover}<strong>${escapeText(playlist.name)}</strong><small>${escapeText(playlist.category)} • ${songCount} song${songCount === 1 ? "" : "s"}</small></button>`;
+      return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}">${cover}<strong>${escapeText(playlist.name)}</strong><small>${songCount} song${songCount === 1 ? "" : "s"}</small></button>`;
     }).join("");
 
     const renderMusicPlaylists = () => {
@@ -46671,47 +46867,33 @@
       if (!grid) return;
       const query = musicLibraryState.search.trim().toLowerCase();
       const visible = musicLibraryState.playlists.filter((playlist) => {
-        if (!query) return true;
-        return playlist.name.toLowerCase().includes(query)
+        const title = playlist.name.toLowerCase();
+        const matchesType = musicLibraryState.typeFilter === "all" || title.includes(musicLibraryState.typeFilter);
+        const matchesSearch = !query || title.includes(query)
           || musicPlaylistTracks(playlist).some((track) => `${track.title} ${track.artist}`.toLowerCase().includes(query));
+        return matchesType && matchesSearch;
       });
       if (!visible.length) {
         grid.innerHTML = `<p class="subtle">No playlists or songs match that search.</p>`;
         renderMusicTrackList();
         return;
       }
-      const recitalPlaylists = visible.filter((playlist) => playlist.name.toLowerCase().includes("recital"));
-      const balletPlaylists = visible.filter((playlist) => {
-        const title = playlist.name.toLowerCase();
-        return title.includes("ballet") && !title.includes("recital");
-      });
-      const tapPlaylists = visible.filter((playlist) => {
-        const title = playlist.name.toLowerCase();
-        return title.includes("tap") && !title.includes("ballet") && !title.includes("recital");
-      });
-      const otherPlaylists = visible.filter((playlist) => {
-        const title = playlist.name.toLowerCase();
-        return !title.includes("ballet") && !title.includes("tap") && !title.includes("recital");
-      });
-      const sectionMarkup = (label, playlists) => playlists.length ? `
-        <details class="music-playlist-section" ${query ? "open" : ""}>
-          <summary><span>${escapeText(label)}</span><small>${playlists.length} playlist${playlists.length === 1 ? "" : "s"}</small></summary>
-          <div class="playlist-grid-inner">${musicPlaylistMarkup(playlists)}</div>
-        </details>
-      ` : "";
-      grid.innerHTML = `
-        ${sectionMarkup("Ballet", balletPlaylists)}
-        ${sectionMarkup("Tap", tapPlaylists)}
-        ${sectionMarkup("Recital", recitalPlaylists)}
-        ${sectionMarkup("Other", otherPlaylists)}
-      `;
+      grid.innerHTML = musicPlaylistMarkup(visible);
       renderMusicTrackList();
     };
 
     const loadSharedMusicLibrary = async (profile = window.dtCurrentProfile) => {
       const client = window.dtSupabase;
       const grid = document.getElementById("music-playlist-grid");
-      if (!client || !profile || document.body.dataset.tourMode === "true") return;
+      if (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1") {
+        musicLibraryState.playlists = workshopMusicPlaylists();
+        musicLibraryState.selectedPlaylistId = "";
+        setText("music-profile-label", `${profile?.full_name || "Ms. Lexi"} • Dance Techniques teacher library`);
+        renderMusicPlaylists();
+        updateMyDayMusicPlayer();
+        return;
+      }
+      if (!client || !profile) return;
       setText("music-profile-label", `${profile.full_name} • shared teacher library`);
       if (grid) grid.innerHTML = `<p class="subtle">Opening your shared playlists…</p>`;
       const { data, error } = await client
@@ -46732,12 +46914,29 @@
       updateMyDayMusicPlayer();
     };
 
+    if (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1") {
+      window.setTimeout(() => loadSharedMusicLibrary(window.dtCurrentProfile), 0);
+    }
+
     const playMusicTrack = async (trackId) => {
       const client = window.dtSupabase;
       const audio = document.getElementById("dt-tunes-audio");
       const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === trackId);
-      if (!client || !audio || !track) return;
+      if (!audio || !track) return;
+      const isSameTrack = musicLibraryState.currentTrackId === track.id;
+      if (isSameTrack && track.workshop_preview) {
+        musicLibraryState.previewPlaying = !musicLibraryState.previewPlaying;
+        updateMyDayMusicPlayer();
+        renderMusicTrackList();
+        return;
+      }
+      if (isSameTrack && audio.src) {
+        if (audio.paused) await audio.play().catch(() => showToast("Press play again to begin."));
+        else audio.pause();
+        return;
+      }
       musicLibraryState.currentTrackId = track.id;
+      musicLibraryState.previewPlaying = Boolean(track.workshop_preview);
       audio.loop = musicLibraryState.repeatCurrentTrack;
       const artist = musicArtistLabel(track.artist);
       setText("music-now-playing-title", track.title);
@@ -46752,6 +46951,13 @@
         artwork.alt = coverUrl ? `${track.title} album art` : "";
         artwork.onerror = () => { artwork.hidden = true; };
       }
+      if (track.workshop_preview) {
+        showToast(`${track.title} is selected for this preview.`);
+        renderMusicTrackList();
+        updateMyDayMusicPlayer();
+        return;
+      }
+      if (!client) return;
       const { data, error } = await client.storage.from("teacher-music").createSignedUrl(track.storage_path, 3600);
       if (error || !data?.signedUrl) {
         console.error("DT Tunes song could not open", error);
@@ -46812,7 +47018,7 @@
       const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
       const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === musicLibraryState.currentTrackId);
       const title = track?.title || (playlist ? `${musicPlaylistTracks(playlist).length} songs ready` : "Ready when you are");
-      const isPlaying = Boolean(audio && !audio.paused && !audio.ended && audio.src);
+      const isPlaying = Boolean(track?.workshop_preview ? musicLibraryState.previewPlaying : (audio && !audio.paused && !audio.ended && audio.src));
       const duration = Number.isFinite(audio?.duration) ? audio.duration : Number(track?.duration_seconds || 0);
       const progress = duration > 0 ? Math.min(100, (Number(audio?.currentTime || 0) / duration) * 100) : 0;
       document.querySelectorAll("[data-my-day-music-title]").forEach((element) => { element.textContent = title; });
@@ -46831,6 +47037,9 @@
         button.textContent = isPlaying ? "❚❚" : "▶";
         button.setAttribute("aria-label", isPlaying ? "Pause DT Tunes" : "Play DT Tunes");
       });
+      document.querySelectorAll("[data-music-progress]").forEach((element) => { element.value = progress; });
+      document.querySelectorAll("[data-music-current-time]").forEach((element) => { element.textContent = musicDurationLabel(audio?.currentTime || 0); });
+      document.querySelectorAll("[data-music-duration]").forEach((element) => { element.textContent = musicDurationLabel(duration); });
       document.querySelectorAll("[data-my-day-music-progress]").forEach((element) => { element.style.width = `${progress}%`; });
       document.querySelectorAll("[data-my-day-music-time]").forEach((element) => {
         element.textContent = `${musicDurationLabel(audio?.currentTime || 0)} / ${musicDurationLabel(duration)}`;
@@ -46882,12 +47091,14 @@
       if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
       updateMusicMediaPosition();
       updateMyDayMusicPlayer();
+      renderMusicTrackList();
     });
 
     dtTunesAudio?.addEventListener("pause", () => {
       if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
       updateMusicMediaPosition();
       updateMyDayMusicPlayer();
+      renderMusicTrackList();
     });
 
     dtTunesAudio?.addEventListener("timeupdate", () => {
@@ -46908,15 +47119,29 @@
       renderMusicPlaylists();
     });
 
+    document.getElementById("music-type-filter")?.addEventListener("change", (event) => {
+      musicLibraryState.typeFilter = event.target.value;
+      renderMusicPlaylists();
+    });
+
     document.getElementById("music-view")?.addEventListener("click", (event) => {
       const playlistButton = event.target.closest("[data-music-playlist]");
       if (playlistButton) {
-        musicLibraryState.selectedPlaylistId = playlistButton.dataset.musicPlaylist;
+        const playlist = musicLibraryState.playlists.find((item) => item.id === playlistButton.dataset.musicPlaylist);
+        if (!playlist || !musicPlaylistTracks(playlist).length) {
+          musicLibraryState.selectedPlaylistId = "";
+          renderMusicPlaylists();
+          showToast("That playlist does not have songs yet.");
+          return;
+        }
+        musicLibraryState.selectedPlaylistId = playlist.id;
         renderMusicPlaylists();
         updateMyDayMusicPlayer();
         document.getElementById("music-playlist-grid")?.setAttribute("hidden", "");
         const trackPanel = document.getElementById("music-track-panel");
+        const backButton = document.getElementById("music-back-to-playlists");
         if (trackPanel) trackPanel.hidden = false;
+        if (backButton) backButton.hidden = false;
         trackPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
         return;
       }
@@ -46936,6 +47161,13 @@
       const toggle = event.target.closest("[data-my-day-music-toggle]");
       if (toggle) {
         const audio = document.getElementById("dt-tunes-audio");
+        const selectedTrack = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((track) => track.id === musicLibraryState.currentTrackId);
+        if (selectedTrack?.workshop_preview) {
+          musicLibraryState.previewPlaying = !musicLibraryState.previewPlaying;
+          updateMyDayMusicPlayer();
+          renderMusicTrackList();
+          return;
+        }
         if (audio?.src) {
           if (audio.paused) audio.play().catch(() => showToast("Open DT Tunes and press play to begin."));
           else audio.pause();
@@ -46963,6 +47195,7 @@
       const audio = document.getElementById("dt-tunes-audio");
       musicLibraryState.selectedPlaylistId = playlistSelect.value;
       musicLibraryState.currentTrackId = "";
+      musicLibraryState.previewPlaying = false;
       if (audio) {
         audio.pause();
         audio.removeAttribute("src");
@@ -46980,8 +47213,10 @@
       musicLibraryState.selectedPlaylistId = "";
       const grid = document.getElementById("music-playlist-grid");
       const trackPanel = document.getElementById("music-track-panel");
+      const backButton = document.getElementById("music-back-to-playlists");
       if (grid) grid.hidden = false;
       if (trackPanel) trackPanel.hidden = true;
+      if (backButton) backButton.hidden = true;
       grid?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
 
