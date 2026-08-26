@@ -86,6 +86,22 @@
   window.dtSupabase = client;
   let teacherProfileResolutionTimer = 0;
 
+  const waitForProfileRetry = (delay) => new Promise((resolve) => window.setTimeout(resolve, delay));
+  const loadSignedInProfile = async (userId) => {
+    let lastError = null;
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const result = await client
+        .from("profiles")
+        .select("id, full_name, role, active")
+        .eq("id", userId)
+        .maybeSingle();
+      if (!result.error || result.data) return result;
+      lastError = result.error;
+      if (attempt < 3) await waitForProfileRetry(500 * (attempt + 1));
+    }
+    return { data: null, error: lastError };
+  };
+
   const stopUnresolvedTeacherSession = async (copy) => {
     window.clearTimeout(teacherProfileResolutionTimer);
     teacherProfileResolutionTimer = 0;
@@ -128,11 +144,7 @@
     }
 
     setGateState("checking");
-    const { data: profile, error } = await client
-      .from("profiles")
-      .select("id, full_name, role, active")
-      .eq("id", session.user.id)
-      .maybeSingle();
+    const { data: profile, error } = await loadSignedInProfile(session.user.id);
 
     if (error || !profile) {
       message.textContent = error
