@@ -700,6 +700,17 @@
       transform: translateY(1px);
     }
 
+    .back-btn[aria-label="Home"]::before {
+      display: none;
+    }
+
+    .back-btn[aria-label="Home"] svg {
+      display: block;
+      width: 26px;
+      height: 26px;
+      margin: 0;
+    }
+
     .view { display: none; }
     .view.active { display: block; }
 
@@ -5033,12 +5044,64 @@
     }
 
     .music-track-button {
+      width: 42px;
+      height: 42px;
       flex: 0 0 auto;
+      display: inline-grid;
+      place-items: center;
+      padding: 0;
+      border-radius: 50%;
+      line-height: 1;
     }
 
-    .music-track-button.is-playing {
+    .music-track-button.is-current {
       border-color: color-mix(in oklch, var(--blush), var(--rose) 32%);
       background: var(--blush);
+      color: var(--fg);
+    }
+
+    .music-track-button[aria-label^="Pause"] {
+      position: relative;
+      font-size: 0;
+    }
+
+    .music-track-button[aria-label^="Pause"]::before {
+      content: "";
+      width: 12px;
+      height: 17px;
+      background: linear-gradient(90deg, currentColor 0 3px, transparent 3px 9px, currentColor 9px 12px);
+    }
+
+    #music-track-list .music-track-row.is-completed {
+      border-color: #e0e1df;
+      background: #f3f3f1;
+      color: #686b68;
+    }
+
+    #music-track-list .music-track-row.is-completed strong,
+    #music-track-list .music-track-row.is-completed small {
+      color: #737673;
+    }
+
+    #music-track-list .music-track-row.is-completed .music-track-button {
+      border-color: #d5d7d4;
+      background: #fafafa;
+      color: #858985;
+    }
+
+    #music-track-list .music-track-row.is-current {
+      border-color: #d7dfd1;
+      background: #f0f4ed;
+    }
+
+    #music-track-list .music-track-row.is-upcoming {
+      border-color: #eee4c9;
+      background: #fcf8ee;
+    }
+
+    #music-track-list .music-track-row.is-upcoming .music-track-button {
+      border-color: #e5d9bb;
+      background: #fffdf8;
       color: var(--fg);
     }
 
@@ -15137,7 +15200,13 @@
 
             <section class="view" id="music-view">
               <div class="mobile-head page-head">
-                <button class="back-btn" data-tab-jump="today" aria-label="Back to Today">&larr;</button>
+                <button class="back-btn" data-tab-jump="today" aria-label="Home">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 11.5 12 4l9 7.5"></path>
+                    <path d="M5.5 10.5V20h13v-9.5"></path>
+                    <path d="M9.5 20v-6h5v6"></path>
+                  </svg>
+                </button>
                 <div class="mobile-title">
                   <h2>Music</h2>
                 </div>
@@ -46844,12 +46913,22 @@
       }
       const audio = document.getElementById("dt-tunes-audio");
       const currentlyPlaying = Boolean(selected && (audio?.src ? !audio.paused && !audio.ended : musicLibraryState.previewPlaying));
-      list.innerHTML = visibleTracks.map((track) => `
-        <div class="row">
+      const currentTrackIndex = tracks.findIndex((track) => track.id === musicLibraryState.currentTrackId);
+      const trackPositions = new Map(tracks.map((track, index) => [track.id, index]));
+      list.innerHTML = visibleTracks.map((track) => {
+        const trackIndex = trackPositions.get(track.id) ?? -1;
+        const progressionState = currentTrackIndex < 0 || trackIndex > currentTrackIndex
+          ? "upcoming"
+          : (trackIndex < currentTrackIndex ? "completed" : "current");
+        const isCurrentTrack = progressionState === "current";
+        const isCurrentTrackPlaying = isCurrentTrack && currentlyPlaying;
+        return `
+        <div class="row music-track-row is-${progressionState}" data-music-track-state="${progressionState}">
           <div><strong>${escapeText(track.title)}</strong><small>${escapeText(musicArtistLabel(track.artist))} • ${musicDurationLabel(track.duration_seconds)}</small></div>
-          <button class="icon-btn music-track-button ${track.id === musicLibraryState.currentTrackId && currentlyPlaying ? "is-playing" : ""}" type="button" data-music-track="${escapeText(track.id)}" aria-label="${track.id === musicLibraryState.currentTrackId && currentlyPlaying ? "Pause" : "Play"} ${escapeText(track.title)}">${track.id === musicLibraryState.currentTrackId && currentlyPlaying ? "❚❚" : "▶"}</button>
+          <button class="icon-btn music-track-button ${isCurrentTrack ? "is-current" : ""} ${isCurrentTrackPlaying ? "is-playing" : ""}" type="button" data-music-track="${escapeText(track.id)}" aria-label="${isCurrentTrackPlaying ? "Pause" : "Play"} ${escapeText(track.title)}">${isCurrentTrackPlaying ? "❚❚" : "▶"}</button>
         </div>
-      `).join("");
+      `;
+      }).join("");
     };
 
     const musicPlaylistMarkup = (playlists) => playlists.map((playlist) => {
