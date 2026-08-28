@@ -133,7 +133,7 @@
   const wait = (milliseconds) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
   const directorBillingTestEmails = new Set([
     "dancetechniquesllc@gmail.com",
-    "dancetechniquesllc+square-test@gmail.com"
+    "dancetechniquesllc+squaretest@gmail.com"
   ]);
   const directorBillingTestContext = async (error) => {
     if (String(error?.code || "") !== "42501" || !client) return null;
