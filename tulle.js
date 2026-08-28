@@ -337,6 +337,20 @@
     choices.hidden = false;
   };
 
+  const showBirthdayCards = (records) => {
+    const { choices } = elements();
+    if (!choices) return;
+    state.choices.clear();
+    choices.classList.add("is-birthday-cards");
+    choices.innerHTML = records.map((record, index) => {
+      const key = `birthday-${Date.now()}-${index}`;
+      const photo = String(record.student?.photo || "").trim();
+      state.choices.set(key, record);
+      return `<button class="tulle-birthday-card" type="button" data-tulle-choice="${key}" aria-label="Open ${safe(record.title)}'s profile"><span class="tulle-birthday-photo">${photo ? `<img src="${safe(photo)}" alt="">` : safe(record.title.split(/\s+/).map((part) => part[0]).join("").slice(0, 2))}</span><span><strong>${safe(record.title)}</strong><small>${safe(record.subtitle)}</small></span></button>`;
+    }).join("");
+    choices.hidden = false;
+  };
+
   const showReview = (title, copy, actionLabel, action) => {
     const { review } = elements();
     if (!review) return;
@@ -460,10 +474,10 @@
     const records = currentRecords().studentRecords.filter(({ student }) => (
       typeof birthdayFallsThisWeek === "function" && birthdayFallsThisWeek(student.birthdate)
     ));
-    routeTo("student-library", "Dancer Directory");
+    clearOutput();
     if (!records.length) return respond("I checked the dancers currently loaded.", ["No dancer birthdays are listed for this week."]);
-    const names = records.slice(0, 8).map((record) => record.title);
-    respond("I found this week’s birthdays.", [`${records.length} dancer${records.length === 1 ? "" : "s"}`, names.join(" · ")]);
+    respond("I found this week’s birthday dancers.", [`${records.length} dancer${records.length === 1 ? "" : "s"}`], "Choose a dancer card to open their profile.");
+    showBirthdayCards(records);
   };
 
   const localDateKey = (date = new Date()) => {
@@ -541,6 +555,54 @@
       ...todayClasses.map((item) => `${item.time || "Time not set"} · ${typeof rosterSchoolNickname === "function" ? rosterSchoolNickname(item.schoolName) : item.schoolName} · ${item.name}`),
       ...makeups.map(({ item }) => `Make-up · ${item.schoolName || "School not listed"}`)
     ], removed.length ? `${removed.length} regular schedule exception${removed.length === 1 ? " is" : "s are"} already accounted for.` : "");
+  };
+
+  const teacherSchoolsToday = (query) => {
+    const matches = resolve(currentRecords().teacherRecords, query);
+    if (!matches.length) return respond("I didn’t find a clear teacher match in the records currently loaded.", [], "Try the teacher’s full name.");
+    const strongest = matches[0].score;
+    const closeMatches = matches.filter((item) => item.score >= Math.max(45, strongest - 15)).map((item) => item.record);
+    if (closeMatches.length > 1 || strongest < 65) {
+      return showChoices("I found a few teachers who may match.", closeMatches.slice(0, 8).map((record) => ({
+        ...record,
+        run: () => teacherSchoolsToday(record.title)
+      })));
+    }
+    const record = matches[0].record;
+    const { day, regular, makeups } = scheduleSnapshotForToday(record.id);
+    const schools = [...new Set([
+      ...regular.map((item) => item.schoolName),
+      ...makeups.map(({ item }) => item.schoolName)
+    ].filter(Boolean).map((name) => typeof rosterSchoolNickname === "function" ? rosterSchoolNickname(name) : name))];
+    if (!schools.length) return respond(personality.found, [record.title, `No active schools are listed for ${day}.`]);
+    respond(personality.found, [
+      record.title,
+      `${schools.length} school${schools.length === 1 ? "" : "s"} today`,
+      schools.join(" · ")
+    ]);
+  };
+
+  const enrollmentShirtStockQuestion = (size, question) => {
+    const normalizedSize = normalize(size).replace(/\s+/g, "");
+    const item = (Array.isArray(boutiqueEnrollmentShirtStock) ? boutiqueEnrollmentShirtStock : []).find((stock) => (
+      normalize(stock.product) === "blush signature t"
+      && normalize(stock.size).replace(/\s+/g, "") === normalizedSize
+    ));
+    if (!item) return respond("I couldn’t find that enrollment-shirt size in the stock currently loaded.", [], "Try a size like 2T, 4T, SC, or MC.");
+    const claimState = typeof boutiqueStockClaimState === "function"
+      ? boutiqueStockClaimState(item)
+      : { claimed: 0, needsPrinting: 0 };
+    const amount = question === "printed"
+      ? Math.max(0, Number(item.needsPrinting || 0) + Number(claimState.needsPrinting || 0))
+      : Math.max(0, Number(claimState.claimed || 0));
+    if (typeof openAdminSection === "function") openAdminSection("boutique-backend");
+    if (typeof openBoutiqueBackstageTab === "function") openBoutiqueBackstageTab("stock");
+    if (typeof boutiqueStockFilter !== "undefined") boutiqueStockFilter = "enrollment";
+    if (typeof renderBoutiqueStock === "function") renderBoutiqueStock();
+    const action = question === "printed" ? "need printing" : "need to be filled";
+    respond("Here’s the current enrollment-shirt count.", [
+      `${amount} ${item.size} shirt${amount === 1 ? "" : "s"} ${action}`
+    ], "Enrollment Kit stock is open for review.");
   };
 
   const classFacts = (record) => {
@@ -706,6 +768,10 @@
     if (/\b(create|add|new)\b.*\bclass\b/.test(normalized)) return { kind: "create-class", risk: "review" };
     if (/\b(unpaid|outstanding|tuition balance|balances)\b/.test(normalized)) return { kind: "unpaid" };
     if (/\bbirthday/.test(normalized)) return { kind: "birthdays" };
+    const shirtStock = text.match(/(?:how\s+many\s+)?([a-z0-9]+(?:\s*\([^)]*\))?)\s+(?:enrollment\s+)?(?:t[\s-]?shirts?|shirts?)\s+need(?:\s+to)?\s+(?:be\s+)?(filled|printed)\b/i);
+    if (shirtStock) return { kind: "enrollment-shirt-stock", size: shirtStock[1], question: shirtStock[2].toLowerCase() };
+    const teacherSchools = text.match(/(?:what|which)\s+schools?\s+(?:does|do)\s+(.+?)\s+(?:have|teach(?:\s+at)?)\s+(?:today|right now|now)\??$/i);
+    if (teacherSchools?.[1]) return { kind: "teacher-schools-today", query: teacherSchools[1] };
     if (/\b(today|todays)\b.*\b(schedule|classes|class)\b|\bopen today/.test(normalized)) return { kind: "today" };
     const filterMatch = text.match(/(?:show|view|filter)\s+(dancers|students|classes|enrollments|schools|balances)\s+(?:at|for|by)\s+(.+)/i);
     if (filterMatch) {
@@ -758,6 +824,10 @@
         return outstandingBalances();
       case "birthdays":
         return birthdaysThisWeek();
+      case "enrollment-shirt-stock":
+        return enrollmentShirtStockQuestion(intent.size, intent.question);
+      case "teacher-schools-today":
+        return teacherSchoolsToday(intent.query);
       case "today":
         return todaySchedule();
       case "filter":
@@ -930,6 +1000,7 @@
       if (choiceButton) {
         const record = state.choices.get(choiceButton.dataset.tulleChoice);
         if (record?.kind === "parent-group") respond(personality.found, [record.title, record.children.map((item) => item.title).join(" · ")]);
+        else if (typeof record?.run === "function") record.run();
         else openRecord(record);
         elements().choices.hidden = true;
       }

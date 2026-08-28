@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DT Tunes Music Center</title>
+  <style>
+    :root {
+      --ink: #482e3c;
+      --muted: #765f6c;
+      --burgundy: #8f244c;
+      --burgundy-dark: #6f1739;
+      --rose: #e9a3b4;
+      --blush: #fff4f5;
+      --cream: #fffbf6;
+      --line: #ead8dc;
+      --green: #35705b;
+      --shadow: 0 12px 34px rgba(79, 35, 55, .09);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; overflow-x: hidden; background: var(--cream); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    body { padding: 10px 4px 48px; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: wait; opacity: .58; }
+    [hidden] { display: none !important; }
+    .shell { width: min(1180px, 100%); margin: 0 auto; }
+    .hero { display: flex; justify-content: space-between; gap: 22px; align-items: end; padding: 22px 24px; border: 1px solid #f0d9df; border-radius: 22px; background: linear-gradient(135deg, #fff 0%, #fff5f6 70%, #f8e4e9 100%); box-shadow: var(--shadow); }
+    .eyebrow { margin: 0 0 6px; color: var(--burgundy); font-size: .76rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3.1rem); line-height: .96; color: var(--burgundy-dark); }
+    .hero p:last-child { margin: 10px 0 0; max-width: 690px; color: var(--muted); }
+    .sync-badge { flex: none; padding: 10px 14px; border-radius: 999px; background: #eaf5f0; color: var(--green); font-size: .84rem; font-weight: 800; }
+    .tabs { display: flex; gap: 8px; margin: 16px 0; overflow-x: auto; scrollbar-width: none; }
+    .tab { min-height: 44px; padding: 0 18px; border: 1px solid var(--line); border-radius: 999px; background: white; color: var(--ink); font-weight: 800; white-space: nowrap; }
+    .tab[aria-selected="true"] { border-color: var(--burgundy); background: var(--burgundy); color: white; }
+    .panel { display: grid; gap: 16px; }
+    .card { border: 1px solid var(--line); border-radius: 20px; background: white; box-shadow: var(--shadow); padding: 20px; }
+    .card-head { display: flex; justify-content: space-between; align-items: start; gap: 18px; margin-bottom: 16px; }
+    .card h2, .card h3 { margin: 0; color: var(--burgundy-dark); }
+    .card h2 { font: 700 1.55rem/1.1 Georgia, serif; }
+    .card h3 { font-size: 1rem; }
+    .card-head p, .help, .empty { margin: 5px 0 0; color: var(--muted); font-size: .9rem; }
+    .playlist-layout { display: grid; grid-template-columns: minmax(235px, .72fr) minmax(0, 1.55fr); gap: 16px; }
+    .playlist-list { display: grid; gap: 8px; align-content: start; }
+    .playlist-choice { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; text-align: left; padding: 13px 14px; border: 1px solid var(--line); border-radius: 14px; background: #fffafa; color: var(--ink); }
+    .playlist-choice strong { overflow-wrap: anywhere; }
+    .playlist-choice small { grid-column: 1 / -1; color: var(--muted); }
+    .playlist-choice.selected { border-color: var(--burgundy); background: var(--blush); box-shadow: inset 4px 0 var(--burgundy); }
+    .teacher-dot { align-self: center; width: 9px; height: 9px; border-radius: 50%; background: #4b9b78; }
+    .track-list { display: grid; gap: 8px; }
+    .track-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px; border: 1px solid #f0e1e4; border-radius: 14px; background: #fff; }
+    .cover { width: 52px; aspect-ratio: 1; object-fit: cover; border-radius: 11px; background: linear-gradient(135deg, #f6dce2, #fff7f1); }
+    .track-row strong, .catalog-song strong { display: block; }
+    .track-row small, .catalog-song small { color: var(--muted); }
+    .secondary, .danger, .primary { min-height: 42px; border-radius: 11px; padding: 0 15px; font-weight: 800; }
+    .primary { border: 1px solid var(--burgundy); background: var(--burgundy); color: white; }
+    .primary:hover { background: var(--burgundy-dark); }
+    .secondary { border: 1px solid var(--line); background: white; color: var(--ink); }
+    .danger { border: 1px solid #edc8d2; background: #fff7f8; color: var(--burgundy-dark); }
+    .small-button { min-height: 34px; padding: 0 11px; font-size: .82rem; }
+    .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    label { display: grid; gap: 6px; color: var(--ink); font-size: .86rem; font-weight: 800; }
+    input, select { width: 100%; min-height: 44px; border: 1px solid #d9c7cc; border-radius: 11px; background: white; padding: 9px 11px; color: var(--ink); }
+    input:focus, select:focus { outline: 3px solid rgba(143, 36, 76, .14); border-color: var(--burgundy); }
+    .full { grid-column: 1 / -1; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 16px; }
+    .status { min-height: 22px; color: var(--green); font-size: .88rem; font-weight: 700; }
+    .status.error { color: #9b233f; }
+    .catalog-toolbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+    .section-pills { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+    .section-pill { border: 1px solid var(--line); border-radius: 999px; background: white; min-height: 38px; padding: 0 13px; color: var(--ink); font-weight: 750; }
+    .section-pill.active { border-color: var(--rose); background: #fae7ec; color: var(--burgundy-dark); }
+    .catalog-groups { display: grid; gap: 18px; }
+    .catalog-group { border-top: 1px solid var(--line); padding-top: 15px; }
+    .catalog-group-title { display: flex; justify-content: space-between; margin-bottom: 9px; }
+    .catalog-song-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .catalog-song { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 10px; align-items: center; padding: 9px; border-radius: 12px; background: #fff9fa; border: 1px solid #f2e4e7; }
+    .catalog-song .cover { width: 44px; }
+    .playlist-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .playlist-check { display: flex; grid-template-columns: none; flex-direction: row; align-items: center; gap: 9px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 11px; background: #fffafa; font-weight: 700; }
+    .playlist-check input { width: 18px; min-height: 18px; margin: 0; }
+    .step-note { padding: 12px 14px; border-left: 4px solid var(--rose); background: var(--blush); border-radius: 10px; color: var(--muted); font-size: .9rem; }
+    .loading { padding: 35px; text-align: center; color: var(--muted); }
+    .hidden-summary { margin-top: 12px; font-size: .84rem; color: var(--muted); }
+    @media (max-width: 760px) {
+      body { padding: 4px 0 30px; }
+      .hero { display: block; padding: 18px; border-radius: 16px; }
+      .hero p:last-child { overflow-wrap: anywhere; }
+      .sync-badge { display: none; }
+      .tabs { display: grid; grid-template-columns: 1fr; overflow: visible; }
+      .tab { width: 100%; }
+      .playlist-layout, .form-grid, .catalog-toolbar { grid-template-columns: 1fr; }
+      .card { padding: 15px; border-radius: 16px; }
+      .card-head { flex-direction: column; align-items: stretch; }
+      .card-head > button, .card-head > .danger { width: 100%; }
+      .catalog-song-grid, .playlist-checks { grid-template-columns: 1fr; }
+      .track-row { grid-template-columns: 44px minmax(0, 1fr); }
+      .track-row .cover { width: 44px; }
+      .track-row .danger { grid-column: 1 / -1; width: 100%; }
+      .full { grid-column: auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Director Music Center</p>
+        <h1>DT Tunes</h1>
+        <p>One clean home for Dance Techniques originals. Add each song once, then place it in any teacher playlist you need.</p>
+      </div>
+      <span class="sync-badge" id="sync-badge">Connecting to Supabase…</span>
+    </header>
+
+    <nav class="tabs" aria-label="DT Tunes sections">
+      <button class="tab" type="button" data-tab="playlists" aria-selected="true">Teacher Playlists</button>
+      <button class="tab" type="button" data-tab="catalog" aria-selected="false">DT Song Catalog</button>
+      <button class="tab" type="button" data-tab="add-song" aria-selected="false">Add a DT Original</button>
+    </nav>
+
+    <div class="loading" id="loading">Opening your DT music…</div>
+
+    <section class="panel" id="panel-playlists" data-panel="playlists" hidden>
+      <div class="card">
+        <div class="card-head">
+          <div><h2>Teacher Playlists</h2><p>Everything shown here appears for teachers automatically.</p></div>
+          <button class="secondary" type="button" id="open-create-playlist">+ New Playlist</button>
+        </div>
+        <div class="playlist-layout">
+          <div>
+            <div class="playlist-list" id="playlist-list"></div>
+            <p class="hidden-summary" id="hidden-summary"></p>
+          </div>
+          <div>
+            <div class="card-head">
+              <div><h3 id="selected-playlist-name">Choose a playlist</h3><p id="selected-playlist-count">Select a playlist to see its songs.</p></div>
+              <button class="danger small-button" type="button" id="hide-playlist" hidden>Hide from Teachers</button>
+            </div>
+            <div class="track-list" id="playlist-track-list"><p class="empty">Choose a playlist on the left.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <form class="card" id="create-playlist-form" hidden>
+        <div class="card-head"><div><h2>Create a Playlist</h2><p>The new playlist will appear for teachers as soon as you save it.</p></div><button class="secondary small-button" type="button" id="cancel-create-playlist">Cancel</button></div>
+        <div class="form-grid">
+          <label>Playlist name<input id="new-playlist-name" required maxlength="80" placeholder="Example: October Ballet"></label>
+          <label>Square playlist cover (optional)<input id="new-playlist-cover" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        </div>
+        <div class="actions"><button class="primary" type="submit">Create Teacher Playlist</button><span class="status" id="playlist-form-status"></span></div>
+      </form>
+    </section>
+
+    <section class="panel" id="panel-catalog" data-panel="catalog" hidden>
+      <div class="card">
+        <div class="card-head"><div><h2>DT Song Catalog</h2><p>Your complete originals library, divided into easy sections for building future playlists.</p></div><button class="primary" type="button" data-jump-add>Add a Song</button></div>
+        <div class="catalog-toolbar">
+          <label>Find a song<input id="catalog-search" type="search" placeholder="Song title"></label>
+          <strong id="catalog-count"></strong>
+        </div>
+        <div class="section-pills" id="section-pills"></div>
+        <div class="catalog-groups" id="catalog-groups"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-add-song" data-panel="add-song" hidden>
+      <form class="card" id="add-song-form">
+        <div class="card-head"><div><h2>Add a DT Original</h2><p>Upload the song and its cover once. Choose every playlist that should receive it.</p></div></div>
+        <p class="step-note">Teachers see the song only through the playlist boxes you check below. Your ORICO backup is separate and is never changed by this screen.</p>
+        <div class="form-grid">
+          <label>Song title<input id="song-title" required maxlength="120" placeholder="Song title"></label>
+          <label>Song Catalog section
+            <select id="song-section" required>
+              <option>Ballet</option>
+              <option>Tap</option>
+              <option>Tots</option>
+              <option>Transitions</option>
+              <option>Openers &amp; Closers</option>
+              <option>Celebrations</option>
+              <option>Other DT Originals</option>
+            </select>
+          </label>
+          <label>Song file<input id="song-file" type="file" required accept=".mp3,.m4a,.aac,.wav,.aiff,audio/*"><span class="help">MP3, M4A, AAC, WAV, or AIFF · up to 25 MB</span></label>
+          <label>Square song cover<input id="song-cover" type="file" required accept="image/png,image/jpeg,image/webp"><span class="help">JPG, PNG, or WebP · up to 10 MB</span></label>
+          <div class="full">
+            <label>Send this song to these teacher playlists</label>
+            <div class="playlist-checks" id="song-playlist-checks"></div>
+          </div>
+        </div>
+        <div class="actions"><button class="primary" type="submit" id="upload-song-button">Upload Song &amp; Send to Playlists</button><span class="status" id="song-form-status" role="status"></span></div>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    const CATALOG_SECTIONS = ["Ballet", "Tap", "Tots", "Transitions", "Openers & Closers", "Celebrations", "Other DT Originals"];
+    const state = { client: null, playlists: [], tracks: [], links: [], selectedPlaylistId: "", catalogSection: "All", catalogSearch: "" };
+    const $ = (selector) => document.querySelector(selector);
+    const escapeText = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
+    const safeExtension = (file) => String(file?.name || "").split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
+    const slug = (value) => String(value).toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "other";
+    const durationLabel = (seconds = 0) => `${Math.floor((Number(seconds) || 0) / 60)}:${String(Math.floor(Number(seconds) || 0) % 60).padStart(2, "0")}`;
+    const setStatus = (selector, message, isError = false) => { const node = $(selector); if (!node) return; node.textContent = message; node.classList.toggle("error", isError); };
+    const selectedPlaylist = () => state.playlists.find((playlist) => playlist.id === state.selectedPlaylistId && playlist.active);
+    const tracksForPlaylist = (playlistId) => state.links.filter((link) => link.playlist_id === playlistId).sort((a, b) => a.position - b.position).map((link) => state.tracks.find((track) => track.id === link.track_id)).filter(Boolean);
+    const coverMarkup = (item, label) => item.cover_url ? `<img class="cover" src="${escapeText(item.cover_url)}" alt="${escapeText(label)} cover">` : `<span class="cover" aria-hidden="true"></span>`;
+
+    function showTab(name) {
+      document.querySelectorAll("[data-tab]").forEach((button) => button.setAttribute("aria-selected", button.dataset.tab === name ? "true" : "false"));
+      document.querySelectorAll("[data-panel]").forEach((panel) => { panel.hidden = panel.dataset.panel !== name; });
+      if (name === "catalog") renderCatalog();
+    }
+
+    async function signedCover(path) {
+      if (!path) return "";
+      const { data, error } = await state.client.storage.from("teacher-music-covers").createSignedUrl(path, 3600);
+      return error ? "" : (data?.signedUrl || "");
+    }
+
+    async function addCoverUrls(items) {
+      await Promise.all(items.map(async (item) => { item.cover_url = await signedCover(item.cover_storage_path); }));
+    }
+
+    async function loadData(preferredPlaylistId = state.selectedPlaylistId) {
+      const [playlistResult, trackResult, linkResult] = await Promise.all([
+        state.client.from("music_playlists").select("id,name,category,cover_path,cover_storage_path,sort_order,active").order("sort_order"),
+        state.client.from("music_tracks").select("id,title,artist,duration_seconds,filename,storage_path,cover_path,cover_storage_path,catalog_section,active").eq("active", true).order("title"),
+        state.client.from("music_playlist_tracks").select("playlist_id,track_id,position")
+      ]);
+      const failure = playlistResult.error || trackResult.error || linkResult.error;
+      if (failure) throw failure;
+      state.playlists = playlistResult.data || [];
+      state.tracks = trackResult.data || [];
+      state.links = linkResult.data || [];
+      await Promise.all([addCoverUrls(state.playlists), addCoverUrls(state.tracks)]);
+      const active = state.playlists.filter((playlist) => playlist.active);
+      state.selectedPlaylistId = active.some((playlist) => playlist.id === preferredPlaylistId) ? preferredPlaylistId : (active[0]?.id || "");
+      renderAll();
+    }
+
+    function renderAll() {
+      renderPlaylists();
+      renderCatalog();
+      renderPlaylistChecks();
+    }
+
+    function renderPlaylists() {
+      const active = state.playlists.filter((playlist) => playlist.active);
+      $("#playlist-list").innerHTML = active.length ? active.map((playlist) => {
+        const count = tracksForPlaylist(playlist.id).length;
+        return `<button class="playlist-choice ${playlist.id === state.selectedPlaylistId ? "selected" : ""}" type="button" data-playlist-id="${escapeText(playlist.id)}"><strong>${escapeText(playlist.name)}</strong><span class="teacher-dot" title="Visible to teachers"></span><small>${count} song${count === 1 ? "" : "s"} · Visible to teachers</small></button>`;
+      }).join("") : `<p class="empty">No teacher playlists yet.</p>`;
+      const hiddenCount = state.playlists.length - active.length;
+      $("#hidden-summary").textContent = hiddenCount ? `${hiddenCount} older playlist${hiddenCount === 1 ? " is" : "s are"} safely hidden from teachers.` : "";
+      const playlist = selectedPlaylist();
+      $("#selected-playlist-name").textContent = playlist?.name || "Choose a playlist";
+      const tracks = playlist ? tracksForPlaylist(playlist.id) : [];
+      $("#selected-playlist-count").textContent = playlist ? `${tracks.length} song${tracks.length === 1 ? "" : "s"} · Teachers receive changes automatically.` : "Select a playlist to see its songs.";
+      $("#hide-playlist").hidden = !playlist;
+      $("#playlist-track-list").innerHTML = !playlist ? `<p class="empty">Choose a playlist on the left.</p>` : !tracks.length ? `<p class="empty">This playlist is ready. Add songs from the “Add a DT Original” screen.</p>` : tracks.map((track) => `
+        <div class="track-row">
+          ${coverMarkup(track, track.title)}
+          <div><strong>${escapeText(track.title)}</strong><small>${escapeText(track.catalog_section || "Other DT Originals")} · ${durationLabel(track.duration_seconds)}</small></div>
+          <button class="danger small-button" type="button" data-remove-track="${escapeText(track.id)}">Remove</button>
+        </div>`).join("");
+    }
+
+    function renderPlaylistChecks() {
+      const active = state.playlists.filter((playlist) => playlist.active);
+      $("#song-playlist-checks").innerHTML = active.length ? active.map((playlist) => `<label class="playlist-check"><input type="checkbox" value="${escapeText(playlist.id)}">${escapeText(playlist.name)}</label>`).join("") : `<p class="empty">Create a teacher playlist first.</p>`;
+    }
+
+    function renderCatalog() {
+      if (!state.client) return;
+      const search = state.catalogSearch.trim().toLowerCase();
+      const visible = state.tracks.filter((track) => {
+        const section = track.catalog_section || "Other DT Originals";
+        return (state.catalogSection === "All" || section === state.catalogSection) && (!search || `${track.title} ${track.artist}`.toLowerCase().includes(search));
+      });
+      $("#catalog-count").textContent = `${visible.length} of ${state.tracks.length} songs`;
+      $("#section-pills").innerHTML = ["All", ...CATALOG_SECTIONS].map((section) => {
+        const count = section === "All" ? state.tracks.length : state.tracks.filter((track) => (track.catalog_section || "Other DT Originals") === section).length;
+        return `<button class="section-pill ${state.catalogSection === section ? "active" : ""}" type="button" data-catalog-section="${escapeText(section)}">${escapeText(section)} · ${count}</button>`;
+      }).join("");
+      const sections = CATALOG_SECTIONS.filter((section) => state.catalogSection === "All" || state.catalogSection === section);
+      $("#catalog-groups").innerHTML = sections.map((section) => {
+        const songs = visible.filter((track) => (track.catalog_section || "Other DT Originals") === section);
+        if (!songs.length) return "";
+        return `<section class="catalog-group"><div class="catalog-group-title"><h3>${escapeText(section)}</h3><span>${songs.length} song${songs.length === 1 ? "" : "s"}</span></div><div class="catalog-song-grid">${songs.map((track) => `<article class="catalog-song">${coverMarkup(track, track.title)}<div><strong>${escapeText(track.title)}</strong><small>${durationLabel(track.duration_seconds)} · Used in ${state.links.filter((link) => link.track_id === track.id && state.playlists.some((playlist) => playlist.id === link.playlist_id && playlist.active)).length} teacher playlist(s)</small></div></article>`).join("")}</div></section>`;
+      }).join("") || `<p class="empty">No songs match that search.</p>`;
+    }
+
+    async function imageDimensions(file) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        const url = URL.createObjectURL(file);
+        image.onload = () => { URL.revokeObjectURL(url); resolve({ width: image.naturalWidth, height: image.naturalHeight }); };
+        image.onerror = () => { URL.revokeObjectURL(url); reject(new Error("That cover image could not be opened.")); };
+        image.src = url;
+      });
+    }
+
+    async function requireSquareCover(file) {
+      if (!file) throw new Error("Please choose a square cover image.");
+      if (file.size > 10 * 1024 * 1024) throw new Error("The cover is larger than 10 MB.");
+      const { width, height } = await imageDimensions(file);
+      if (Math.abs(width - height) > 2) throw new Error("Please choose a square cover image.");
+    }
+
+    function audioDuration(file) {
+      return new Promise((resolve) => {
+        const audio = document.createElement("audio");
+        const url = URL.createObjectURL(file);
+        audio.preload = "metadata";
+        audio.onloadedmetadata = () => { const seconds = Number.isFinite(audio.duration) ? Math.round(audio.duration) : 0; URL.revokeObjectURL(url); resolve(seconds); };
+        audio.onerror = () => { URL.revokeObjectURL(url); resolve(0); };
+        audio.src = url;
+      });
+    }
+
+    const audioMime = (file) => file.type || ({ mp3: "audio/mpeg", m4a: "audio/x-m4a", aac: "audio/aac", wav: "audio/wav", aiff: "audio/aiff" }[safeExtension(file)] || "application/octet-stream");
+    const imageMime = (file) => file.type || ({ jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp" }[safeExtension(file)] || "application/octet-stream");
+
+    async function uploadCover(file, path) {
+      await requireSquareCover(file);
+      const { error } = await state.client.storage.from("teacher-music-covers").upload(path, file, { contentType: imageMime(file), upsert: false });
+      if (error) throw error;
+    }
+
+    document.addEventListener("click", async (event) => {
+      const tab = event.target.closest("[data-tab]");
+      if (tab) showTab(tab.dataset.tab);
+      if (event.target.closest("[data-jump-add]")) showTab("add-song");
+      const playlistButton = event.target.closest("[data-playlist-id]");
+      if (playlistButton) { state.selectedPlaylistId = playlistButton.dataset.playlistId; renderPlaylists(); }
+      const sectionButton = event.target.closest("[data-catalog-section]");
+      if (sectionButton) { state.catalogSection = sectionButton.dataset.catalogSection; renderCatalog(); }
+      const removeButton = event.target.closest("[data-remove-track]");
+      if (removeButton && selectedPlaylist()) {
+        const track = state.tracks.find((item) => item.id === removeButton.dataset.removeTrack);
+        if (!confirm(`Remove “${track?.title || "this song"}” from ${selectedPlaylist().name}? The song will stay in your DT Song Catalog.`)) return;
+        removeButton.disabled = true;
+        const { error } = await state.client.from("music_playlist_tracks").delete().eq("playlist_id", state.selectedPlaylistId).eq("track_id", removeButton.dataset.removeTrack);
+        if (error) { alert("That song could not be removed. Please try again."); removeButton.disabled = false; return; }
+        await loadData(state.selectedPlaylistId);
+      }
+    });
+
+    $("#catalog-search").addEventListener("input", (event) => { state.catalogSearch = event.target.value; renderCatalog(); });
+    $("#open-create-playlist").addEventListener("click", () => { $("#create-playlist-form").hidden = false; $("#new-playlist-name").focus(); });
+    $("#cancel-create-playlist").addEventListener("click", () => { $("#create-playlist-form").hidden = true; $("#create-playlist-form").reset(); setStatus("#playlist-form-status", ""); });
+
+    $("#hide-playlist").addEventListener("click", async () => {
+      const playlist = selectedPlaylist();
+      if (!playlist || !confirm(`Hide “${playlist.name}” from teachers? Its songs and cover will stay safely saved.`)) return;
+      $("#hide-playlist").disabled = true;
+      const { error } = await state.client.from("music_playlists").update({ active: false, updated_at: new Date().toISOString() }).eq("id", playlist.id);
+      $("#hide-playlist").disabled = false;
+      if (error) return alert("That playlist could not be hidden. Please try again.");
+      await loadData("");
+    });
+
+    $("#create-playlist-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const submit = form.querySelector('[type="submit"]');
+      const name = $("#new-playlist-name").value.trim();
+      const cover = $("#new-playlist-cover").files[0];
+      const id = crypto.randomUUID();
+      const coverPath = cover ? `playlist-covers/${id}.${safeExtension(cover)}` : null;
+      submit.disabled = true;
+      setStatus("#playlist-form-status", "Creating your playlist…");
+      try {
+        if (cover) await uploadCover(cover, coverPath);
+        const sortOrder = Math.max(-1, ...state.playlists.map((playlist) => Number(playlist.sort_order) || 0)) + 1;
+        const { data, error } = await state.client.from("music_playlists").insert({ id, name, category: "Curriculum Playlists", cover_storage_path: coverPath, readiness: "ready", readiness_notes: "", sort_order: sortOrder, active: true }).select("id").single();
+        if (error) throw error;
+        form.reset();
+        form.hidden = true;
+        await loadData(data.id);
+      } catch (error) {
+        if (coverPath) await state.client.storage.from("teacher-music-covers").remove([coverPath]);
+        setStatus("#playlist-form-status", error.code === "23505" ? "A playlist with that name already exists." : "That playlist could not be created. Please try again.", true);
+      } finally { submit.disabled = false; }
+    });
+
+    $("#add-song-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const button = $("#upload-song-button");
+      const title = $("#song-title").value.trim();
+      const section = $("#song-section").value;
+      const song = $("#song-file").files[0];
+      const cover = $("#song-cover").files[0];
+      const playlistIds = [...document.querySelectorAll("#song-playlist-checks input:checked")].map((input) => input.value);
+      if (!playlistIds.length) return setStatus("#song-form-status", "Choose at least one teacher playlist.", true);
+      if (!song || song.size > 25 * 1024 * 1024) return setStatus("#song-form-status", "Choose a song file smaller than 25 MB.", true);
+      const id = crypto.randomUUID();
+      const songPath = `dt-originals/${slug(section)}/${id}.${safeExtension(song)}`;
+      const coverPath = `song-covers/${id}.${safeExtension(cover)}`;
+      button.disabled = true;
+      setStatus("#song-form-status", "Checking the files…");
+      let songUploaded = false;
+      let coverUploaded = false;
+      try {
+        await requireSquareCover(cover);
+        const seconds = await audioDuration(song);
+        setStatus("#song-form-status", "Uploading the song…");
+        const songUpload = await state.client.storage.from("teacher-music").upload(songPath, song, { contentType: audioMime(song), upsert: false });
+        if (songUpload.error) throw songUpload.error;
+        songUploaded = true;
+        setStatus("#song-form-status", "Uploading the cover…");
+        const coverUpload = await state.client.storage.from("teacher-music-covers").upload(coverPath, cover, { contentType: imageMime(cover), upsert: false });
+        if (coverUpload.error) throw coverUpload.error;
+        coverUploaded = true;
+        const trackInsert = await state.client.from("music_tracks").insert({ id, source_key: `director-upload/${id}`, title, artist: "Dance Techniques", duration_seconds: seconds, filename: song.name, storage_path: songPath, cover_storage_path: coverPath, catalog_section: section, active: true }).select("id").single();
+        if (trackInsert.error) throw trackInsert.error;
+        const positions = new Map(playlistIds.map((playlistId) => [playlistId, Math.max(-1, ...state.links.filter((link) => link.playlist_id === playlistId).map((link) => Number(link.position) || 0)) + 1]));
+        const linkInsert = await state.client.from("music_playlist_tracks").insert(playlistIds.map((playlistId) => ({ playlist_id: playlistId, track_id: id, position: positions.get(playlistId) })));
+        if (linkInsert.error) throw linkInsert.error;
+        form.reset();
+        setStatus("#song-form-status", `Done — “${title}” is in your catalog and ${playlistIds.length} teacher playlist${playlistIds.length === 1 ? "" : "s"}.`);
+        await loadData(state.selectedPlaylistId);
+      } catch (error) {
+        await state.client.from("music_tracks").delete().eq("id", id);
+        if (songUploaded) await state.client.storage.from("teacher-music").remove([songPath]);
+        if (coverUploaded) await state.client.storage.from("teacher-music-covers").remove([coverPath]);
+        setStatus("#song-form-status", `The upload did not finish: ${error.message || "Please try again."}`, true);
+      } finally { button.disabled = false; }
+    });
+
+    async function start() {
+      try {
+        for (let attempt = 0; attempt < 80 && (!window.parent.dtSupabase || !window.parent.dtCurrentProfile); attempt += 1) await new Promise((resolve) => setTimeout(resolve, 100));
+        const profile = window.parent.dtCurrentProfile;
+        if (!window.parent.dtSupabase || !profile) throw new Error("Open DT Tunes from your signed-in Director Dashboard.");
+        if (!["admin", "director"].includes(String(profile.role || "").toLowerCase())) throw new Error("Only a director or administrator can open this Music Center.");
+        state.client = window.parent.dtSupabase;
+        await loadData();
+        $("#loading").hidden = true;
+        $("#panel-playlists").hidden = false;
+        $("#sync-badge").textContent = "Live with Teacher Tools";
+      } catch (error) {
+        $("#loading").innerHTML = `<strong>DT Tunes could not open.</strong><br>${escapeText(error.message || "Refresh and try again.")}`;
+        $("#sync-badge").textContent = "Not connected";
+      }
+    }
+
+    start();
+  </script>
+</body>
+</html>

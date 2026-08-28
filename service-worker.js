@@ -1,9 +1,9 @@
-const CACHE_NAME = "my-dance-techniques-v189-enrollment-editor-redesign";
+const CACHE_NAME = "my-dance-techniques-v215-shared-signin-incident-recovery";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260723-auto-update",
+  "./supabase-auth.js?v=20260826-shared-signin-incident-recovery-v6",
   "./data/partner-schools.js",
   "./dt-touch/dt-touch.js?v=20260722c",
   "./config/dt-touch-voice.json",
@@ -42,7 +42,21 @@ const CORE_ASSETS = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS)));
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(async (cache) => {
+      await Promise.allSettled(
+        CORE_ASSETS
+          .filter((asset) => asset !== "./" && asset !== "./index.html")
+          .map((asset) => cache.add(asset))
+      );
+      try {
+        const response = await fetch("./index.html", { cache: "no-store" });
+        if (response.ok) await cache.put("./index.html", response);
+      } catch (error) {
+        console.warn("Dashboard navigation shell will be cached after the next successful load.", error);
+      }
+    })
+  );
   self.skipWaiting();
 });
 
@@ -61,10 +75,12 @@ self.addEventListener("fetch", (event) => {
 
   if (event.request.mode === "navigate") {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request, { cache: "no-store" })
         .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+          if (response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+          }
           return response;
         })
         .catch(() => caches.match("./index.html"))

@@ -44,6 +44,28 @@
     return error?.message || "Sign-in didn’t finish. Please try again.";
   };
 
+  // Keep the teaching screen awake while Teacher Tools / Director Dashboard
+  // remains visible. Browsers automatically release this when the phone locks
+  // or the user navigates away; request it again when the app becomes visible.
+  let screenWakeLock = null;
+  const requestScreenWakeLock = async () => {
+    if (!navigator.wakeLock?.request || document.visibilityState !== "visible" || screenWakeLock) return;
+    try {
+      screenWakeLock = await navigator.wakeLock.request("screen");
+      screenWakeLock.addEventListener("release", () => { screenWakeLock = null; }, { once: true });
+    } catch (error) {
+      // Some browsers require the first tap before granting a wake lock. The
+      // pointer handler below retries without interrupting the teacher.
+      screenWakeLock = null;
+    }
+  };
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") requestScreenWakeLock();
+  });
+  document.addEventListener("pointerdown", requestScreenWakeLock, { passive: true });
+  window.addEventListener("pageshow", requestScreenWakeLock);
+  requestScreenWakeLock();
+
   if (isLocalTour) {
     sessionName.textContent = "Sample App Tour";
     document.body.dataset.userRole = "admin";
@@ -58,10 +80,90 @@
     return;
   }
 
+  // Teacher Tools keeps a recoverable local history of dashboard snapshots.
+  // On long-running installed PWAs that history can fill the browser's storage
+  // and prevent Supabase from persisting a freshly refreshed sign-in session.
+  // Remove only that disposable history when storage is full; current app data
+  // and all authentication data remain untouched.
+  try {
+    const storageProbeKey = "dt-auth-storage-probe";
+    window.localStorage?.setItem(storageProbeKey, "1");
+    window.localStorage?.removeItem(storageProbeKey);
+  } catch (error) {
+    try {
+      window.localStorage?.removeItem("dt-teacher-tools-prototype-v1:history");
+      console.info("Cleared the recoverable Teacher Tools history so sign-in can finish.");
+    } catch (cleanupError) {
+      console.warn("Teacher Tools could not free storage for sign-in.", cleanupError);
+    }
+  }
+
   const client = window.supabase.createClient(projectUrl, publishableKey, {
     auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
   });
   window.dtSupabase = client;
+  let teacherProfileResolutionTimer = 0;
+  let profileRecoveryRefreshing = false;
+
+  const waitForProfileRetry = (delay) => new Promise((resolve) => window.setTimeout(resolve, delay));
+  const loadSignedInProfile = async (userId) => {
+    let lastError = null;
+    let ordinaryAttempts = 0;
+    const deadline = Date.now() + 65000;
+    while (Date.now() < deadline) {
+      const result = await client
+        .from("profiles")
+        .select("id, full_name, role, active")
+        .eq("id", userId)
+        .maybeSingle();
+      if (!result.error || result.data) return result;
+      lastError = result.error;
+      const futureJwt = result.error?.code === "PGRST303"
+        && /JWT issued at future/i.test(result.error?.message || "");
+      if (futureJwt) {
+        message.textContent = "Finishing secure sign-in…";
+        profileRecoveryRefreshing = true;
+        try {
+          await client.auth.refreshSession();
+        } catch (refreshError) {
+          console.warn("Secure sign-in token refresh will retry.");
+        } finally {
+          profileRecoveryRefreshing = false;
+        }
+        await waitForProfileRetry(3000);
+        continue;
+      }
+      ordinaryAttempts += 1;
+      if (ordinaryAttempts >= 4) break;
+      await waitForProfileRetry(500 * ordinaryAttempts);
+    }
+    return { data: null, error: lastError };
+  };
+
+  const stopUnresolvedTeacherSession = async (copy) => {
+    window.clearTimeout(teacherProfileResolutionTimer);
+    teacherProfileResolutionTimer = 0;
+    window.dtCurrentProfile = null;
+    delete document.body.dataset.currentTeacherId;
+    await client.auth.signOut();
+    message.textContent = copy || "We couldn’t open the Teacher Tools profile linked to this account. No sample or another teacher’s profile was opened. Please contact Dance Techniques.";
+    setGateState("login");
+  };
+
+  window.dtCompleteTeacherProfileResolution = async ({ profileId = "", ready = false } = {}) => {
+    const expectedProfile = window.dtCurrentProfile;
+    if (expectedProfile?.role !== "teacher" || expectedProfile.id !== profileId) return false;
+    const { data: { session } = {} } = await client.auth.getSession();
+    if (!session?.user || session.user.id !== profileId || !ready) {
+      await stopUnresolvedTeacherSession();
+      return false;
+    }
+    window.clearTimeout(teacherProfileResolutionTimer);
+    teacherProfileResolutionTimer = 0;
+    document.body.dataset.currentTeacherId = profileId;
+    setGateState("ready");
+    return true;
+  };
 
   const showSession = async (session) => {
     if (passwordRecoveryMode && session?.user) {
@@ -80,15 +182,20 @@
     }
 
     setGateState("checking");
-    const { data: profile, error } = await client
-      .from("profiles")
-      .select("id, full_name, role, active")
-      .eq("id", session.user.id)
-      .maybeSingle();
+    const { data: profile, error } = await loadSignedInProfile(session.user.id);
 
     if (error || !profile) {
-      await client.auth.signOut();
-      message.textContent = "We couldn’t verify this account. Please contact Dance Techniques.";
+      if (error) {
+        console.error("Shared profile lookup failed: " + JSON.stringify({
+          code: error.code || "profile_lookup_failed",
+          message: error.message || "Profile lookup failed.",
+          details: error.details || "",
+          hint: error.hint || ""
+        }));
+      }
+      message.textContent = error
+        ? "You’re still signed in, but we couldn’t load this account. Check your connection and try again."
+        : "This signed-in account does not have an active Dance Techniques profile. Please contact Dance Techniques.";
       setGateState("login");
       return;
     }
@@ -107,7 +214,15 @@
       button.classList.toggle("active", button.dataset.modeBtn === landingMode);
     });
     window.dtCurrentProfile = profile;
-    setGateState("ready");
+    if (profile.role === "teacher") {
+      setGateState("checking");
+      window.clearTimeout(teacherProfileResolutionTimer);
+      teacherProfileResolutionTimer = window.setTimeout(() => {
+        stopUnresolvedTeacherSession("Teacher Tools could not finish opening this profile. No sample or another teacher’s profile was opened. Please sign in again or contact Dance Techniques.");
+      }, 90000);
+    } else {
+      setGateState("ready");
+    }
     window.dispatchEvent(new CustomEvent("dt-auth-ready", { detail: { profile } }));
   };
 
@@ -127,7 +242,7 @@
       message.textContent = friendlyAuthError(error);
       return;
     }
-    await showSession(data.session);
+    message.textContent = "Opening your Teacher Tools profile…";
   });
 
   const signOut = async (event) => {
@@ -149,6 +264,15 @@
   document.getElementById("auth-back-home")?.addEventListener("click", () => {
     message.textContent = "";
     setGateState("landing");
+  });
+
+  document.getElementById("auth-password-toggle")?.addEventListener("click", (event) => {
+    const button = event.currentTarget;
+    const showing = passwordInput.type === "text";
+    passwordInput.type = showing ? "password" : "text";
+    button.setAttribute("aria-pressed", showing ? "false" : "true");
+    button.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+    passwordInput.focus({ preventScroll: true });
   });
 
   document.getElementById("auth-forgot")?.addEventListener("click", () => {
@@ -243,6 +367,7 @@
 
   client.auth.onAuthStateChange((event, session) => {
     if (authCallbackInitializing) return;
+    if (profileRecoveryRefreshing && event === "TOKEN_REFRESHED") return;
     if (event === "PASSWORD_RECOVERY") {
       passwordRecoveryMode = true;
       setGateState("setup");
@@ -252,10 +377,6 @@
   });
 
   const establishCallbackSession = async () => {
-    let { data: current, error: currentError } = await client.auth.getSession();
-    if (currentError) throw currentError;
-    if (current.session?.user) return current.session;
-
     const code = authQuery.get("code");
     if (code) {
       const { data, error } = await client.auth.exchangeCodeForSession(code);
@@ -278,6 +399,10 @@
       if (error) throw error;
       return data.session;
     }
+
+    const { data: current, error: currentError } = await client.auth.getSession();
+    if (currentError) throw currentError;
+    if (current.session?.user) return current.session;
     return null;
   };
 
@@ -313,12 +438,24 @@
     };
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (refreshingForAppUpdate) return;
+      // Do not reload while iOS is creating and saving a PushManager
+      // subscription. Interrupting that flow leaves permission granted but no
+      // phone attached to the signed-in teacher.
+      if (window.dtPushSetupInProgress) return;
       refreshingForAppUpdate = true;
       window.location.reload();
     });
     window.addEventListener("load", async () => {
-      const registration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
-      registration.update().catch((error) => console.warn("App update check did not finish", error));
+      let registration = await navigator.serviceWorker.getRegistration("./");
+      if (!registration) registration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
+      // A forced update on every launch can continuously replace the worker on
+      // iPhone. Limit explicit checks; normal service-worker registration still
+      // handles published updates.
+      const lastWorkerCheck = Number(window.localStorage?.getItem("dt-worker-update-check-at") || 0);
+      if (Date.now() - lastWorkerCheck > 6 * 60 * 60 * 1000) {
+        window.localStorage?.setItem("dt-worker-update-check-at", String(Date.now()));
+        registration.update().catch((error) => console.warn("App update check did not finish", error));
+      }
       checkForPublishedAppUpdate();
     });
   }
