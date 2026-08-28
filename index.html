@@ -19263,7 +19263,8 @@
         pushDeviceSubscriptionReady = Boolean(browserSubscription);
         const profile = window.dtCurrentProfile;
         if (pushDeviceSubscriptionReady && window.dtSupabase && profile?.id) {
-          const endpoint = browserSubscription.toJSON()?.endpoint || browserSubscription.endpoint;
+          const details = browserSubscription.toJSON();
+          const endpoint = details?.endpoint || browserSubscription.endpoint;
           const { data, error } = await notificationTimeout(
             window.dtSupabase.from("push_subscriptions").select("id, active").eq("user_id", profile.id).eq("endpoint", endpoint).eq("active", true).maybeSingle(),
             8000,
@@ -19272,7 +19273,15 @@
           if (error) throw error;
           pushDeviceSubscriptionReady = Boolean(data?.id);
           if (!pushDeviceSubscriptionReady) {
-            pushDeviceSetupIssue = "This phone has notification permission, but it still needs to be linked to your Teacher Tools account.";
+            if (!details?.keys?.p256dh || !details?.keys?.auth) throw new Error("The device returned an incomplete push subscription");
+            const { error: repairError } = await notificationTimeout(
+              window.dtSupabase.from("push_subscriptions").upsert({ user_id: profile.id, endpoint, p256dh: details.keys.p256dh, auth: details.keys.auth, user_agent: navigator.userAgent, active: true, last_used_at: new Date().toISOString() }, { onConflict: "endpoint" }),
+              10000,
+              "The secure server did not finish repairing this device’s notification registration."
+            );
+            if (repairError) throw repairError;
+            pushDeviceSubscriptionReady = true;
+            pushDeviceSetupIssue = "";
           }
         }
         if (pushDeviceSubscriptionReady) pushDeviceSetupIssue = "";
@@ -19615,14 +19624,7 @@
         if (!publicKey) { pushDeviceSubscriptionReady = false; renderNotificationPreferences(); return showToast("Phone push will be ready after the secure push key is published"); }
         const registration = await getPushServiceWorkerRegistration();
         const existingSubscription = await notificationTimeout(registration.pushManager.getSubscription(), 5000, "The app could not check this device’s existing notification registration.");
-        if (existingSubscription) {
-          await notificationTimeout(
-            existingSubscription.unsubscribe(),
-            8000,
-            "The old notification registration could not be replaced. Restart the app and try Repair Notifications again."
-          );
-        }
-        const subscription = await notificationTimeout(
+        const subscription = existingSubscription || await notificationTimeout(
           registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(publicKey) }),
           12000,
           "This browser did not finish registering for push notifications. Close and reopen the installed app, then try again."
@@ -48550,6 +48552,7 @@
       subscribeSharedStaffAnnouncements();
       await loadEnrollmentIntakeQueue(profile);
       await loadNotificationSystem(profile);
+      refreshPushDeviceReadiness().catch(() => false);
       await loadStaffFeedbackInbox();
       await ensureEmailPlanUpgradeNotification(profile);
       subscribeEnrollmentIntakeQueue(profile);
