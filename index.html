@@ -8039,6 +8039,11 @@
     .roster-attendance-helper-sparkle { margin-left: 4px; color: #d3a51e; font-size: 12px; }
     .roster-profile-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .roster-profile-header h3 { margin: 0; }
+    .roster-profile-student-navigation { min-width: 0; flex: 1 1 auto; display: grid; grid-template-columns: 46px minmax(0, 1fr) 46px; align-items: center; gap: 12px; }
+    .roster-profile-student-navigation h3 { min-width: 0; text-align: center; overflow-wrap: anywhere; }
+    .roster-profile-student-nav-button { width: 46px; height: 46px; display: grid; place-items: center; padding: 0; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--berry); font-family: var(--font-body); font-size: 30px; font-weight: 700; line-height: 1; cursor: pointer; }
+    .roster-profile-student-nav-button:hover:not(:disabled) { background: var(--blush); }
+    .roster-profile-student-nav-button:disabled { opacity: .28; cursor: default; }
     .roster-edit-dialog > .roster-profile-header { position: sticky; top: 0; z-index: 12; min-height: 76px; padding: 18px 24px; border-bottom: 1px solid #eadbd5; background: rgb(251 250 247 / .97); backdrop-filter: blur(10px); }
     .roster-edit-dialog > .roster-profile-header h3 { font-family: var(--font-heading); font-size: clamp(28px, 3vw, 42px); font-weight: 500; letter-spacing: -.025em; }
     .roster-profile-close { width: 32px; height: 32px; flex: 0 0 32px; display: grid; place-items: center; border: 1px solid var(--border); border-radius: 999px; background: var(--blush); color: var(--fg); font-size: 20px; font-weight: 850; line-height: 1; }
@@ -8151,6 +8156,8 @@
       .roster-edit-form { padding: 0 12px 16px; }
       .roster-edit-dialog > .roster-profile-header { padding: 14px 12px; }
       .roster-edit-dialog > .roster-profile-header h3 { font-size: 25px; }
+      .roster-profile-student-navigation { grid-template-columns: 38px minmax(0, 1fr) 38px; gap: 7px; }
+      .roster-profile-student-nav-button { width: 38px; height: 38px; font-size: 25px; }
       .roster-edit-dialog > .roster-profile-header .roster-profile-close { min-width: 76px; padding: 0 13px; }
       .roster-profile-identity { grid-template-columns: 78px minmax(0, 1fr); gap: 12px; padding: 16px; }
       .roster-profile-identity .roster-photo-preview { width: 70px; height: 70px; }
@@ -18022,7 +18029,14 @@
   </div>
   <div class="confirm-overlay" id="roster-student-edit-overlay" aria-hidden="true">
     <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-student-edit-title">
-      <div class="roster-profile-header"><h3 id="roster-student-edit-title">Dancer Profile</h3><button class="roster-profile-close" type="button" id="roster-profile-close" aria-label="Cancel editing dancer">Cancel</button></div>
+      <div class="roster-profile-header">
+        <div class="roster-profile-student-navigation">
+          <button class="roster-profile-student-nav-button" type="button" id="roster-profile-previous-student" aria-label="Previous dancer">‹</button>
+          <h3 id="roster-student-edit-title">Dancer Profile</h3>
+          <button class="roster-profile-student-nav-button" type="button" id="roster-profile-next-student" aria-label="Next dancer">›</button>
+        </div>
+        <button class="roster-profile-close" type="button" id="roster-profile-close" aria-label="Cancel editing dancer">Cancel</button>
+      </div>
       <form class="roster-edit-form" id="roster-student-edit-form">
         <div class="roster-profile-identity">
           <label class="roster-photo-editor" aria-label="Add or change student photo">
@@ -36737,6 +36751,37 @@
         panel.hidden = panel.dataset.rosterProfilePanel !== activeTab;
       });
     };
+    const activeRosterProfileTab = () => document.querySelector('[data-roster-profile-tab][aria-selected="true"]')?.dataset.rosterProfileTab || "profile";
+    const rosterProfileNavigationRecords = () => {
+      const visibleDirectoryCards = [...document.querySelectorAll("#admin-student-library-list [data-student-library-open]")]
+        .filter((button) => button.getClientRects().length)
+        .map((button) => {
+          const [classId, studentId] = String(button.dataset.studentLibraryOpen || "").split("::");
+          const rosterClass = rosterClasses.find((item) => String(item.id) === String(classId));
+          const student = rosterClass?.students.find((item) => String(item.id) === String(studentId));
+          return rosterClass && student ? { rosterClass, student } : null;
+        }).filter(Boolean);
+      if (visibleDirectoryCards.length) return visibleDirectoryCards;
+      return rosterClasses.filter((item) => item.sourceActive !== false).flatMap((rosterClass) => (rosterClass.students || [])
+        .filter((student) => student.status === "enrolled")
+        .map((student) => ({ rosterClass, student })))
+        .sort((left, right) => rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student), undefined, { sensitivity: "base" }));
+    };
+    const updateRosterProfileStudentNavigation = () => {
+      const records = rosterProfileNavigationRecords();
+      const currentIndex = records.findIndex(({ rosterClass, student }) => String(rosterClass.id) === String(editingRosterClassId) && String(student.id) === String(editingRosterStudentId));
+      const previous = document.getElementById("roster-profile-previous-student");
+      const next = document.getElementById("roster-profile-next-student");
+      if (previous) {
+        previous.disabled = currentIndex <= 0;
+        previous.title = currentIndex > 0 ? `Previous dancer: ${rosterStudentFullName(records[currentIndex - 1].student)}` : "This is the first dancer";
+      }
+      if (next) {
+        next.disabled = currentIndex < 0 || currentIndex >= records.length - 1;
+        next.title = currentIndex >= 0 && currentIndex < records.length - 1 ? `Next dancer: ${rosterStudentFullName(records[currentIndex + 1].student)}` : "This is the last dancer";
+      }
+      return { records, currentIndex };
+    };
     let rosterPrivateFeedPosts = [];
     let rosterPrivateFeedStudent = null;
     const rosterPrivateFeedPostDate = (post) => {
@@ -36845,7 +36890,8 @@
       if (date) date.value = "";
       if (rosterPrivateFeedStudent) rosterProfilePrivateFeedMarkup(rosterPrivateFeedStudent, rosterPrivateFeedPosts);
     });
-    const openRosterStudentEditor = (rosterClass, student) => {
+    const openRosterStudentEditor = (rosterClass, student, options = {}) => {
+      const requestedTab = options.tab || "profile";
       editingRosterClassId = rosterClass.id;
       editingRosterStudentId = student.id;
       const isFutureDancer = student.status !== "enrolled" && Boolean(student.additionalInformation?.trial_completed);
@@ -36856,7 +36902,8 @@
       const privateFeedDate = document.getElementById("roster-private-feed-date");
       if (privateFeedSearch) privateFeedSearch.value = "";
       if (privateFeedDate) privateFeedDate.value = "";
-      setRosterProfileTab("profile");
+      setRosterProfileTab(requestedTab);
+      updateRosterProfileStudentNavigation();
       void renderRosterProfilePrivateFeed(rosterClass, student);
       document.getElementById("roster-contact-future-parent").hidden = !isFutureDancer;
       document.getElementById("roster-delete-student").textContent = "Delete Dancer";
@@ -37048,8 +37095,21 @@
       overlay?.classList.add("active");
       overlay?.setAttribute("aria-hidden", "false");
       refreshEnteredContentCues(overlay);
-      window.setTimeout(() => document.getElementById("roster-edit-first-name")?.focus(), 50);
+      if (!options.preserveView) window.setTimeout(() => document.getElementById("roster-edit-first-name")?.focus(), 50);
     };
+    const navigateRosterStudentProfile = (direction) => {
+      const { records, currentIndex } = updateRosterProfileStudentNavigation();
+      const target = records[currentIndex + direction];
+      if (!target) return;
+      if (rosterStudentProfileDirty && !window.confirm("Switch dancers without saving these changes?")) return;
+      const activeTab = activeRosterProfileTab();
+      const dialog = document.querySelector("#roster-student-edit-overlay .roster-edit-dialog");
+      const scrollTop = dialog?.scrollTop || 0;
+      openRosterStudentEditor(target.rosterClass, target.student, { tab: activeTab, preserveView: true });
+      if (dialog) dialog.scrollTop = scrollTop;
+    };
+    document.getElementById("roster-profile-previous-student")?.addEventListener("click", () => navigateRosterStudentProfile(-1));
+    document.getElementById("roster-profile-next-student")?.addEventListener("click", () => navigateRosterStudentProfile(1));
 
     let printingRosterClassId = "";
     let rosterPrintColumnOrder = [];
