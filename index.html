@@ -18147,7 +18147,7 @@
         <div class="roster-profile-tab-panel" id="roster-profile-panel-histories" role="tabpanel" aria-labelledby="roster-profile-tab-histories" data-roster-profile-panel="histories" hidden>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m8 15 2 2 5-5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Attendance</strong><small>Review attendance history and class helper records.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-attendance"></section></details>
         <details class="roster-profile-raw" id="roster-profile-tuition-plan"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M15.5 8.5H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8.5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Tuition Plan</strong><small>Open this dancer’s complete financial hub.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-billing-history"></section></details>
-        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Email History</strong><small>See welcome emails, newsletters, deliveries, and detected opens.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
+        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Email &amp; Newsletter History</strong><small>See sent, delivered, read, link-clicked, and Parent Portal setup activity.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M8 9V6a4 4 0 0 1 8 0v3"></path></svg></span><span class="roster-profile-tool-copy"><strong>Boutique Orders</strong><small>Track T-shirt, bag, pickup, and delivery status.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-shirt-field"><label>T-Shirt &amp; Bag Status<select id="roster-edit-kit-status"><option value="not_ready">To Fill</option><option value="ready">To Pick Up</option><option value="picked_up">To Deliver</option><option value="delivered">Delivered</option></select></label><div class="roster-profile-delivery-date"><span>T-Shirt &amp; Bag Delivery Date</span><strong id="roster-edit-kit-delivered-date">Not delivered</strong></div></div><div class="roster-profile-placeholder" id="roster-edit-boutique-orders">No boutique orders are assigned to this dancer.</div></details>
         </div>
       </form>
@@ -20897,7 +20897,7 @@
         ? client.from("partner_schools").select("*").eq("active", true)
         : client.from("partner_schools").select("*");
       const emailHistoryQuery = ["admin", "director"].includes(profile.role)
-        ? client.from("student_email_deliveries").select("id,student_id,enrollment_id,recipient_email,email_kind,title,subject,gender,send_id,status,sent_at,delivered_at,first_opened_at,last_opened_at,clicked_at").order("sent_at", { ascending: false })
+        ? client.from("student_email_deliveries").select("id,student_id,enrollment_id,recipient_email,email_kind,title,subject,gender,send_id,status,sent_at,delivered_at,first_opened_at,last_opened_at,clicked_at,accepted_at").order("sent_at", { ascending: false })
         : Promise.resolve({ data: [], error: null });
       const familyLinksQuery = ["admin", "director"].includes(profile.role)
         ? client.from("student_guardians").select("student_id,guardian_id,is_primary,guardians(id,full_name,email)")
@@ -21075,7 +21075,8 @@
           deliveredAt: entry.delivered_at || "",
           openedAt: entry.first_opened_at || "",
           lastOpenedAt: entry.last_opened_at || "",
-          clickedAt: entry.clicked_at || ""
+          clickedAt: entry.clicked_at || "",
+          acceptedAt: entry.accepted_at || ""
         });
       });
       const familyLinksByStudent = new Map();
@@ -37007,7 +37008,7 @@
         const contactSummary = savedFamilyEmails.length
           ? `<div class="teacher-roster-empty">Saved family email: ${savedFamilyEmails.map((email) => rosterSafe(email)).join(", ")}</div>`
           : `<div class="teacher-roster-empty" style="border-color:#a14b55;background:#f8e4e1;color:#7f3440;"><strong>No family email is saved for this dancer.</strong><br>Email delivery cannot occur or be verified until a parent/guardian email is added and saved.</div>`;
-        newsletterHistoryPanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Email History</strong><span>${providerHistoryCount} emailed · ${archiveHistoryCount} portal ${archiveHistoryCount === 1 ? "copy" : "copies"}</span></div>${contactSummary}${history.length ? history.map((entry) => {
+        newsletterHistoryPanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Email &amp; Newsletter History</strong><span>${providerHistoryCount} emailed · ${archiveHistoryCount} portal ${archiveHistoryCount === 1 ? "copy" : "copies"}</span></div>${contactSummary}${history.length ? history.map((entry) => {
           if (entry.archiveOnly) {
             const readLabel = entry.openedAt ? `Read in Parent Portal on ${emailDate(entry.openedAt)} at ${emailTime(entry.openedAt)}` : "Not read in Parent Portal";
             return `<div class="teacher-student-attendance-entry student-email-history-entry"><strong class="student-email-history-title">${rosterSafe(entry.title || "Parent Portal Newsletter")}</strong><small class="student-email-history-sent">Portal copy added on ${rosterSafe(emailDate(entry.sentAt))} at ${rosterSafe(emailTime(entry.sentAt))}</small><div class="student-email-history-statuses"><span class="student-email-history-status is-complete">Parent Portal Archive</span><span class="student-email-history-status ${entry.openedAt ? "is-complete" : ""}">${rosterSafe(readLabel)}</span></div><small>This confirms the newsletter appeared in the portal. It does not prove that an email was delivered.</small></div>`;
@@ -37020,8 +37021,17 @@
           const openedLabel = entry.openedAt
             ? `Viewed on ${emailDate(entry.openedAt)} at ${emailTime(entry.openedAt)}`
             : deliveryFailed ? "Unable to View" : "Not Viewed Yet";
+          const clickedLabel = entry.clickedAt
+            ? `Link clicked on ${emailDate(entry.clickedAt)} at ${emailTime(entry.clickedAt)}`
+            : "Link Not Clicked Yet";
+          const setupLabel = entry.acceptedAt
+            ? `Portal setup completed on ${emailDate(entry.acceptedAt)} at ${emailTime(entry.acceptedAt)}`
+            : "Portal Setup Not Completed";
+          const invitationStatuses = entry.kind === "parent_portal_invite"
+            ? `<span class="student-email-history-status ${entry.clickedAt ? "is-complete" : ""}">${rosterSafe(clickedLabel)}</span><span class="student-email-history-status ${entry.acceptedAt ? "is-complete" : ""}">${rosterSafe(setupLabel)}</span>`
+            : entry.clickedAt ? `<span class="student-email-history-status is-complete">${rosterSafe(clickedLabel)}</span>` : "";
           const canResend = entry.kind === "welcome" && ["admin", "director"].includes(document.body.dataset.userRole || "");
-          return `<div class="teacher-student-attendance-entry student-email-history-entry"><strong class="student-email-history-title">${rosterSafe(entry.title || "Family Email")}</strong><small class="student-email-history-sent">Sent to ${rosterSafe(entry.email || "Parent email not recorded")} on ${rosterSafe(emailDate(entry.sentAt))} at ${rosterSafe(emailTime(entry.sentAt))}</small><div class="student-email-history-statuses"><span class="student-email-history-status ${deliveryComplete ? "is-complete" : deliveryFailed ? "is-failed" : ""}">${rosterSafe(deliveredLabel)}</span><span class="student-email-history-status ${entry.openedAt ? "is-complete" : deliveryFailed ? "is-failed" : ""}">${rosterSafe(openedLabel)}</span></div>${canResend ? `<button class="secondary student-email-history-resend" type="button" data-resend-student-welcome="${rosterSafe(student.id)}">Resend</button>` : ""}</div>`;
+          return `<div class="teacher-student-attendance-entry student-email-history-entry"><strong class="student-email-history-title">${rosterSafe(entry.title || "Family Email")}</strong><small class="student-email-history-sent">Sent to ${rosterSafe(entry.email || "Parent email not recorded")} on ${rosterSafe(emailDate(entry.sentAt))} at ${rosterSafe(emailTime(entry.sentAt))}</small><div class="student-email-history-statuses"><span class="student-email-history-status is-complete">Sent</span><span class="student-email-history-status ${deliveryComplete ? "is-complete" : deliveryFailed ? "is-failed" : ""}">${rosterSafe(deliveredLabel)}</span><span class="student-email-history-status ${entry.openedAt ? "is-complete" : deliveryFailed ? "is-failed" : ""}">${rosterSafe(openedLabel)}</span>${invitationStatuses}</div>${canResend ? `<button class="secondary student-email-history-resend" type="button" data-resend-student-welcome="${rosterSafe(student.id)}">Resend</button>` : ""}</div>`;
         }).join("") : `<div class="teacher-roster-empty">No email delivery or Parent Portal newsletter records exist for this dancer.</div>`}`;
       }
       pendingRosterStudentPhoto = student.photo || "";
