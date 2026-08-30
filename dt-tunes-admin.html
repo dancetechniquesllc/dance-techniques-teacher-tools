@@ -307,6 +307,30 @@
         : `<p class="empty">${search ? "No catalog songs match that search." : "Every catalog song is already in this playlist."}</p>`;
     }
 
+    // (playlist_id, position) is the primary key, so two rows can never hold the
+    // same position even for an instant. Park one row on a free slot, move the
+    // other into place, then bring the parked row down.
+    async function swapTrackPositions(playlistId, trackA, trackB) {
+      const links = state.links.filter((link) => link.playlist_id === playlistId);
+      const rowA = links.find((link) => link.track_id === trackA);
+      const rowB = links.find((link) => link.track_id === trackB);
+      if (!rowA || !rowB) return new Error("Those songs are no longer in this playlist.");
+      const parking = Math.max(0, ...links.map((link) => Number(link.position) || 0)) + 1;
+      const steps = [
+        { track: trackA, position: parking },
+        { track: trackB, position: rowA.position },
+        { track: trackA, position: rowB.position }
+      ];
+      for (const step of steps) {
+        const { error } = await state.client.from("music_playlist_tracks")
+          .update({ position: step.position })
+          .eq("playlist_id", playlistId)
+          .eq("track_id", step.track);
+        if (error) return error;
+      }
+      return null;
+    }
+
     async function renumberPlaylist(playlistId, orderedTrackIds) {
       for (let i = 0; i < orderedTrackIds.length; i += 1) {
         const { error } = await state.client.from("music_playlist_tracks")
@@ -396,8 +420,7 @@
         const to = moveButton.dataset.dir === "up" ? from - 1 : from + 1;
         if (from < 0 || to < 0 || to >= ordered.length) return;
         document.querySelectorAll("[data-move-track]").forEach((button) => { button.disabled = true; });
-        ordered.splice(to, 0, ordered.splice(from, 1)[0]);
-        const error = await renumberPlaylist(playlistId, ordered);
+        const error = await swapTrackPositions(playlistId, ordered[from], ordered[to]);
         if (error) { alert("That song could not be moved. Please try again."); }
         await loadData(playlistId);
         return;
