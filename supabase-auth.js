@@ -214,15 +214,15 @@
       button.classList.toggle("active", button.dataset.modeBtn === landingMode);
     });
     window.dtCurrentProfile = profile;
-    if (profile.role === "teacher") {
-      setGateState("checking");
-      window.clearTimeout(teacherProfileResolutionTimer);
-      teacherProfileResolutionTimer = window.setTimeout(() => {
-        stopUnresolvedTeacherSession("Teacher Tools could not finish opening this profile. No sample or another teacher’s profile was opened. Please sign in again or contact Dance Techniques.");
-      }, 90000);
-    } else {
-      setGateState("ready");
-    }
+    // The authenticated, active profile above is the authorization boundary.
+    // Open Teacher Tools immediately after that exact profile is verified.
+    // Roster, message, attendance, and order queries are supplemental app data
+    // and must never hold the teacher behind the sign-in screen or sign them
+    // back out when one of those services is slow.
+    if (profile.role === "teacher") document.body.dataset.currentTeacherId = profile.id;
+    window.clearTimeout(teacherProfileResolutionTimer);
+    teacherProfileResolutionTimer = 0;
+    setGateState("ready");
     window.dispatchEvent(new CustomEvent("dt-auth-ready", { detail: { profile } }));
   };
 
