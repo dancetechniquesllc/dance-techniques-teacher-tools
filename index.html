@@ -19854,28 +19854,44 @@
     };
 
     const isMeadowOaksSchoolName = (value = "") => /\bmeadow\s+oaks\b/i.test(String(value).replace(/[^a-z0-9]+/gi, " ").trim());
-    const enrollmentUsesMeadowOaksRate = (item, suggestion) => {
+    const schoolHasHalfOffStaffTuition = (school) => /50\s*%\s*off\s*staff\s*tuition/i.test(String(school?.partnershipBenefit || ""));
+    const enrollmentPartnerSchool = (item, suggestion) => {
       const rosterClass = rosterClasses.find((entry) => entry.id === (item?.matched_dance_class_id || suggestion?.classId));
-      const school = schoolLibrary.find((entry) => entry.id === item?.matched_partner_school_id
+      return schoolLibrary.find((entry) => (item?.matched_partner_school_id && entry.id === item.matched_partner_school_id)
+        || enrollmentSchoolNameMatches(entry.name, rosterClass?.schoolName)
+        || enrollmentSchoolNameMatches(entry.nickname, rosterClass?.schoolName)
         || enrollmentSchoolNameMatches(entry.name, item?.requested_school_name)
         || enrollmentSchoolNameMatches(entry.nickname, item?.requested_school_name));
+    };
+    const enrollmentUsesMeadowOaksRate = (item, suggestion) => {
+      const rosterClass = rosterClasses.find((entry) => entry.id === (item?.matched_dance_class_id || suggestion?.classId));
+      const school = enrollmentPartnerSchool(item, suggestion);
       return [item?.requested_school_name, rosterClass?.schoolName, school?.name, school?.nickname].some(isMeadowOaksSchoolName);
     };
     const effectiveEnrollmentTuitionType = (item, suggestion) => {
+      const explicitType = String(item?.tuition_discount || "").trim().toLowerCase();
+      if (["staff", "sibling", "director", "meadow_oaks"].includes(explicitType)) return explicitType;
       if (enrollmentUsesMeadowOaksRate(item, suggestion)) return "meadow_oaks";
       const discountText = [item?.discount_code, item?.discount_details].filter(Boolean).join(" ").toLowerCase();
-      return item?.tuition_discount || (/additional dancer|sibling/.test(discountText) ? "sibling" : /staff|employee/.test(discountText) ? "staff" : "none");
+      return explicitType || (/additional dancer|sibling/.test(discountText) ? "sibling" : /staff|employee/.test(discountText) ? "staff" : "none");
+    };
+    const monthlyTuitionForCircumstance = (discountType, school) => {
+      if (discountType === "director") return 0;
+      if (discountType === "meadow_oaks") return 65;
+      if (discountType === "staff" && schoolHasHalfOffStaffTuition(school)) return 27.5;
+      if (["sibling", "staff"].includes(discountType)) return 45;
+      return 55;
     };
 
     const suggestedEnrollmentTuition = (item, suggestion) => {
       const discountType = effectiveEnrollmentTuitionType(item, suggestion);
       const discounted = ["sibling", "staff", "director"].includes(discountType);
-      const monthlyTuition = discountType === "director" ? 0 : discountType === "meadow_oaks" ? 65 : discounted ? 45 : 55;
+      const school = enrollmentPartnerSchool(item, suggestion);
+      const monthlyTuition = monthlyTuitionForCircumstance(discountType, school);
       const start = new Date(item.submitted_at || item.created_at || Date.now());
       if (Number.isNaN(start.valueOf())) return { classCount: 0, amount: 0, monthlyTuition, discounted, nextMonth: true };
       const rosterClass = rosterClasses.find((entry) => entry.id === (item.matched_dance_class_id || suggestion?.classId))
         || rosterClasses.find((entry) => enrollmentSchoolNameMatches(entry.schoolName, item.requested_school_name));
-      const school = schoolLibrary.find((entry) => enrollmentSchoolNameMatches(entry.name, item.requested_school_name) || enrollmentSchoolNameMatches(entry.nickname, item.requested_school_name));
       const seasonStart = school?.seasonStartDate ? new Date(`${school.seasonStartDate}T12:00:00`) : null;
       if (seasonStart && !Number.isNaN(seasonStart.valueOf()) && start < seasonStart) {
         return {
@@ -19952,10 +19968,11 @@
     const enrollmentLeaderAuthorized = () => document.body.dataset.tourMode === "true"
       || ["admin", "director"].includes(window.dtCurrentProfile?.role || profile?.role);
     const enrollmentTuitionDiscountLabel = (item) => {
-      if (enrollmentUsesMeadowOaksRate(item, suggestEnrollmentClass(item))) return "Meadow Oaks Rate · $65";
-      const discount = String(item?.tuition_discount || "").trim().toLowerCase();
-      if (!discount || discount === "none") return "";
+      const suggestion = suggestEnrollmentClass(item);
+      const discount = effectiveEnrollmentTuitionType(item, suggestion);
+      if (discount === "staff" && schoolHasHalfOffStaffTuition(enrollmentPartnerSchool(item, suggestion))) return "Staff · $27.50";
       if (discount === "meadow_oaks") return "Meadow Oaks Rate · $65";
+      if (!discount || discount === "none") return "";
       return discount.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
     };
     const enrollmentNextChecklistStep = (item) => {
@@ -40997,7 +41014,7 @@
         (rosterClass.students || []).forEach((student) => {
           if (!["enrolled", "active"].includes(String(student.status || "").toLowerCase()) || records.has(student.id)) return;
           const discount = payrollDiscountFor(student);
-          const tuition = discount === "director" ? 0 : (["sibling", "staff"].includes(discount) ? 45 : 55);
+          const tuition = monthlyTuitionForCircumstance(discount, school);
           const balanceRecord = payrollState.outstandingStudents?.[student.id];
           const held = Boolean(balanceRecord?.selected && !payrollState.clearedBalances?.[student.id]);
           records.set(student.id, { student, rosterClass, discount, tuition, payment: tuition * .1, held });
@@ -41497,10 +41514,14 @@
       ? invoicePreviewDancers()
       : rowlettClass5InvoiceDancers();
     let selectedTuitionPlan = "tuition";
-    const tuitionPlanForStudent = (student) => {
+    const tuitionPlanForStudent = (student, schoolName = "") => {
       const discount = String(student?.tuitionDiscount || student?.tuition_discount || "none").trim().toLowerCase();
+      const school = schoolLibrary.find((entry) => enrollmentSchoolNameMatches(entry.name, schoolName) || enrollmentSchoolNameMatches(entry.nickname, schoolName));
       if (discount === "sibling") return { key: "sibling", label: "Sibling", price: 45, detail: "Sibling discount" };
-      if (discount === "staff") return { key: "school-staff", label: "School Staff", price: 45, detail: "Staff discount" };
+      if (discount === "staff") {
+        const price = monthlyTuitionForCircumstance("staff", school);
+        return { key: "school-staff", label: "School Staff", price, detail: price === 27.5 ? "50% staff partnership benefit" : "Staff discount" };
+      }
       if (discount === "director") return { key: "other", label: "Director", price: 0, detail: "Free tuition" };
       if (discount === "meadow_oaks") return { key: "other", label: "Meadow Oaks", price: 65, detail: "Meadow Oaks rate" };
       return { key: "tuition", label: "Tuition", price: 55, detail: "Standard tuition" };
@@ -41524,7 +41545,7 @@
       const grid = document.getElementById("tuition-plan-grid");
       if (!grid) return;
       const month = document.getElementById("tuition-plan-month")?.value || "2026-09";
-      const dancers = activeInvoiceDancers().map((entry, index) => ({ ...entry, plan: tuitionPlanForStudent(entry.student), payment: tuitionMonthStatus(entry.student, month, index) }));
+      const dancers = activeInvoiceDancers().map((entry, index) => ({ ...entry, plan: tuitionPlanForStudent(entry.student, entry.schoolName), payment: tuitionMonthStatus(entry.student, month, index) }));
       ["tuition", "sibling", "school-staff", "other"].forEach(key => {
         const count = dancers.filter(entry => entry.plan.key === key).length;
         const node = document.querySelector(`[data-tuition-count="${key}"]`);
@@ -41589,8 +41610,8 @@
       if (!entry) return;
       currentTuitionInvoiceEntry = entry;
       const month = document.getElementById("tuition-plan-month")?.value || "2026-09";
-      const plan = tuitionPlanForStudent(entry.student);
-      const allInPlan = invoicePreviewDancers().filter(({ student }) => tuitionPlanForStudent(student).key === plan.key);
+      const plan = tuitionPlanForStudent(entry.student, entry.schoolName);
+      const allInPlan = invoicePreviewDancers().filter((candidate) => tuitionPlanForStudent(candidate.student, candidate.schoolName).key === plan.key);
       const payment = tuitionMonthStatus(entry.student, month, Math.max(0, allInPlan.findIndex(({ student }) => student.id === studentId)));
       const monthRecord = entry.student?.tuitionPayments?.[month] || entry.student?.tuition_payments?.[month] || {};
       const monthDate = new Date(`${month}-01T12:00:00`);
@@ -41637,7 +41658,7 @@
       const first = student.firstName || student.first_name || "Dancer";
       const last = student.lastName || student.last_name || "";
       const dancerName = `${first} ${last}`.trim();
-      const plan = tuitionPlanForStudent(student);
+      const plan = tuitionPlanForStudent(student, entry.schoolName);
       const credits = financialHubCreditEntries(studentId);
       const activeCredits = credits.filter(credit => !credit.status || credit.status === "available");
       const creditTotal = activeCredits.reduce((sum, credit) => sum + credit.amount, 0);
