@@ -58,6 +58,13 @@
     .secondary { border: 1px solid var(--line); background: white; color: var(--ink); }
     .danger { border: 1px solid #edc8d2; background: #fff7f8; color: var(--burgundy-dark); }
     .small-button { min-height: 34px; padding: 0 11px; font-size: .82rem; }
+    .track-actions { display: flex; gap: 6px; align-items: center; }
+    .move-button { min-height: 34px; width: 34px; padding: 0; border: 1px solid var(--line); background: white; color: var(--ink); border-radius: 11px; font-weight: 800; }
+    .move-button[disabled] { opacity: .35; cursor: not-allowed; }
+    .add-tracks { margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: #fffdfd; }
+    .add-tracks .pick-list { max-height: 260px; overflow-y: auto; display: grid; gap: 6px; margin: 10px 0; }
+    .add-tracks label { display: flex; gap: 9px; align-items: center; padding: 7px 9px; border: 1px solid #f0e1e4; border-radius: 11px; background: white; }
+    .add-tracks label small { color: var(--muted); }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     label { display: grid; gap: 6px; color: var(--ink); font-size: .86rem; font-weight: 800; }
     input, select { width: 100%; min-height: 44px; border: 1px solid #d9c7cc; border-radius: 11px; background: white; padding: 9px 11px; color: var(--ink); }
@@ -96,7 +103,8 @@
       .catalog-song-grid, .playlist-checks { grid-template-columns: 1fr; }
       .track-row { grid-template-columns: 44px minmax(0, 1fr); }
       .track-row .cover { width: 44px; }
-      .track-row .danger { grid-column: 1 / -1; width: 100%; }
+      .track-row .track-actions { grid-column: 1 / -1; width: 100%; }
+      .track-row .track-actions .danger { flex: 1; }
       .full { grid-column: auto; }
     }
   </style>
@@ -134,9 +142,22 @@
           <div>
             <div class="card-head">
               <div><h3 id="selected-playlist-name">Choose a playlist</h3><p id="selected-playlist-count">Select a playlist to see its songs.</p></div>
-              <button class="danger small-button" type="button" id="hide-playlist" hidden>Hide from Teachers</button>
+              <div class="track-actions">
+                <button class="secondary small-button" type="button" id="open-add-tracks" hidden>+ Add Songs</button>
+                <button class="danger small-button" type="button" id="hide-playlist" hidden>Hide from Teachers</button>
+              </div>
             </div>
             <div class="track-list" id="playlist-track-list"><p class="empty">Choose a playlist on the left.</p></div>
+            <div class="add-tracks" id="add-tracks-panel" hidden>
+              <strong>Add songs already in your catalog</strong>
+              <label class="full">Find a song<input type="search" id="add-tracks-search" placeholder="Search by title or section"></label>
+              <div class="pick-list" id="add-tracks-list"></div>
+              <div class="track-actions">
+                <button class="primary small-button" type="button" id="confirm-add-tracks">Add to Playlist</button>
+                <button class="secondary small-button" type="button" id="cancel-add-tracks">Cancel</button>
+              </div>
+              <p class="status" id="add-tracks-status"></p>
+            </div>
           </div>
         </div>
       </div>
@@ -257,12 +278,44 @@
       const tracks = playlist ? tracksForPlaylist(playlist.id) : [];
       $("#selected-playlist-count").textContent = playlist ? `${tracks.length} song${tracks.length === 1 ? "" : "s"} · Teachers receive changes automatically.` : "Select a playlist to see its songs.";
       $("#hide-playlist").hidden = !playlist;
-      $("#playlist-track-list").innerHTML = !playlist ? `<p class="empty">Choose a playlist on the left.</p>` : !tracks.length ? `<p class="empty">This playlist is ready. Add songs from the “Add a DT Original” screen.</p>` : tracks.map((track) => `
+      $("#open-add-tracks").hidden = !playlist;
+      if (!playlist) { $("#add-tracks-panel").hidden = true; }
+      if (!$("#add-tracks-panel").hidden) renderAddTracks();
+      $("#playlist-track-list").innerHTML = !playlist ? `<p class="empty">Choose a playlist on the left.</p>` : !tracks.length ? `<p class="empty">No songs yet. Tap “+ Add Songs” to pull them from your catalog.</p>` : tracks.map((track, index) => `
         <div class="track-row">
           ${coverMarkup(track, track.title)}
           <div><strong>${escapeText(track.title)}</strong><small>${escapeText(track.catalog_section || "Other DT Originals")} · ${durationLabel(track.duration_seconds)}</small></div>
-          <button class="danger small-button" type="button" data-remove-track="${escapeText(track.id)}">Remove</button>
+          <div class="track-actions">
+            <button class="move-button" type="button" data-move-track="${escapeText(track.id)}" data-dir="up" ${index === 0 ? "disabled" : ""} aria-label="Move ${escapeText(track.title)} up">&uarr;</button>
+            <button class="move-button" type="button" data-move-track="${escapeText(track.id)}" data-dir="down" ${index === tracks.length - 1 ? "disabled" : ""} aria-label="Move ${escapeText(track.title)} down">&darr;</button>
+            <button class="danger small-button" type="button" data-remove-track="${escapeText(track.id)}">Remove</button>
+          </div>
         </div>`).join("");
+    }
+
+    function renderAddTracks() {
+      const playlist = selectedPlaylist();
+      if (!playlist) return;
+      const already = new Set(state.links.filter((link) => link.playlist_id === playlist.id).map((link) => link.track_id));
+      const search = ($("#add-tracks-search").value || "").trim().toLowerCase();
+      const available = state.tracks
+        .filter((track) => !already.has(track.id))
+        .filter((track) => !search || `${track.title} ${track.catalog_section || ""}`.toLowerCase().includes(search))
+        .sort((a, b) => String(a.title).localeCompare(String(b.title)));
+      $("#add-tracks-list").innerHTML = available.length
+        ? available.map((track) => `<label><input type="checkbox" value="${escapeText(track.id)}"><span>${escapeText(track.title)} <small>${escapeText(track.catalog_section || "Other DT Originals")}</small></span></label>`).join("")
+        : `<p class="empty">${search ? "No catalog songs match that search." : "Every catalog song is already in this playlist."}</p>`;
+    }
+
+    async function renumberPlaylist(playlistId, orderedTrackIds) {
+      for (let i = 0; i < orderedTrackIds.length; i += 1) {
+        const { error } = await state.client.from("music_playlist_tracks")
+          .update({ position: i })
+          .eq("playlist_id", playlistId)
+          .eq("track_id", orderedTrackIds[i]);
+        if (error) return error;
+      }
+      return null;
     }
 
     function renderPlaylistChecks() {
@@ -335,6 +388,21 @@
       if (playlistButton) { state.selectedPlaylistId = playlistButton.dataset.playlistId; renderPlaylists(); }
       const sectionButton = event.target.closest("[data-catalog-section]");
       if (sectionButton) { state.catalogSection = sectionButton.dataset.catalogSection; renderCatalog(); }
+      const moveButton = event.target.closest("[data-move-track]");
+      if (moveButton && selectedPlaylist()) {
+        const playlistId = state.selectedPlaylistId;
+        const ordered = tracksForPlaylist(playlistId).map((track) => track.id);
+        const from = ordered.indexOf(moveButton.dataset.moveTrack);
+        const to = moveButton.dataset.dir === "up" ? from - 1 : from + 1;
+        if (from < 0 || to < 0 || to >= ordered.length) return;
+        document.querySelectorAll("[data-move-track]").forEach((button) => { button.disabled = true; });
+        ordered.splice(to, 0, ordered.splice(from, 1)[0]);
+        const error = await renumberPlaylist(playlistId, ordered);
+        if (error) { alert("That song could not be moved. Please try again."); }
+        await loadData(playlistId);
+        return;
+      }
+
       const removeButton = event.target.closest("[data-remove-track]");
       if (removeButton && selectedPlaylist()) {
         const track = state.tracks.find((item) => item.id === removeButton.dataset.removeTrack);
@@ -342,8 +410,39 @@
         removeButton.disabled = true;
         const { error } = await state.client.from("music_playlist_tracks").delete().eq("playlist_id", state.selectedPlaylistId).eq("track_id", removeButton.dataset.removeTrack);
         if (error) { alert("That song could not be removed. Please try again."); removeButton.disabled = false; return; }
+        const remaining = tracksForPlaylist(state.selectedPlaylistId).map((track) => track.id).filter((id) => id !== removeButton.dataset.removeTrack);
+        await renumberPlaylist(state.selectedPlaylistId, remaining);
         await loadData(state.selectedPlaylistId);
       }
+    });
+
+    $("#open-add-tracks").addEventListener("click", () => {
+      const panel = $("#add-tracks-panel");
+      panel.hidden = !panel.hidden;
+      $("#open-add-tracks").textContent = panel.hidden ? "+ Add Songs" : "Close";
+      if (!panel.hidden) { $("#add-tracks-search").value = ""; setStatus("#add-tracks-status", ""); renderAddTracks(); $("#add-tracks-search").focus(); }
+    });
+    $("#cancel-add-tracks").addEventListener("click", () => {
+      $("#add-tracks-panel").hidden = true;
+      $("#open-add-tracks").textContent = "+ Add Songs";
+    });
+    $("#add-tracks-search").addEventListener("input", renderAddTracks);
+
+    $("#confirm-add-tracks").addEventListener("click", async () => {
+      const playlist = selectedPlaylist();
+      if (!playlist) return;
+      const chosen = Array.from($("#add-tracks-list").querySelectorAll("input:checked")).map((input) => input.value);
+      if (!chosen.length) { setStatus("#add-tracks-status", "Tick at least one song first.", true); return; }
+      $("#confirm-add-tracks").disabled = true;
+      setStatus("#add-tracks-status", `Adding ${chosen.length} song${chosen.length === 1 ? "" : "s"}…`);
+      let next = Math.max(-1, ...state.links.filter((link) => link.playlist_id === playlist.id).map((link) => Number(link.position) || 0)) + 1;
+      const rows = chosen.map((trackId) => ({ playlist_id: playlist.id, track_id: trackId, position: next++ }));
+      const { error } = await state.client.from("music_playlist_tracks").insert(rows);
+      $("#confirm-add-tracks").disabled = false;
+      if (error) { setStatus("#add-tracks-status", "Those songs could not be added. Please try again.", true); return; }
+      setStatus("#add-tracks-status", `Added ${rows.length} song${rows.length === 1 ? "" : "s"}.`);
+      await loadData(playlist.id);
+      renderAddTracks();
     });
 
     $("#catalog-search").addEventListener("input", (event) => { state.catalogSearch = event.target.value; renderCatalog(); });
