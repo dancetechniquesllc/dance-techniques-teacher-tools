@@ -18906,7 +18906,7 @@
       copy.tshirtSize = "";
       copy.birthday = "";
       copy.teacherType = "Teacher";
-      copy.payTier = "tier_b_teacher";
+      copy.payTier = profile.payTier || "tier_b_teacher";
       copy.loginEmail = copy.email;
       copy.accessLevel = "Teacher app only";
       copy.inviteStatus = "Not invited";
@@ -18980,13 +18980,23 @@
 
     const teachingTeamDirectorySeeds = [
       { id: "tiffany", firstName: "Tiffany", lastName: "Edwards" },
-      { id: "judy", firstName: "Judy", lastName: "Coulter", email: "Sotdance@gmail.com" },
-      { id: "erika", firstName: "Erika", lastName: "Webb", email: "dancewitherika13@gmail.com" },
+      { id: "judy", firstName: "Judy", lastName: "Coulter", email: "Sotdance@gmail.com", payTier: "tier_a_founding_teacher" },
+      { id: "erika", firstName: "Erika", lastName: "Webb", email: "dancewitherika13@gmail.com", payTier: "tier_a_founding_teacher" },
       { id: "makayla", firstName: "Makayla", lastName: "Sifuentes", email: "makaylaksifuentes@gmail.com" },
       { id: "kara", firstName: "Kara", lastName: "Rogers" }
     ];
     const requiredActiveStaffNames = new Set(["tiffany edwards"]);
     teachers.push(...teachingTeamDirectorySeeds.map((profile) => duplicateTeacherProfile(teachers[0], profile)));
+
+    const knownFoundingTeacherNames = new Set(["erika webb", "judy coulter"]);
+    const applyKnownPayrollTiers = () => {
+      teachers.forEach((teacher) => {
+        if (knownFoundingTeacherNames.has(fullName(teacher).trim().toLowerCase())) {
+          teacher.payTier = "tier_a_founding_teacher";
+        }
+      });
+    };
+    applyKnownPayrollTiers();
 
     const tiffanyProfile = teachers.find((teacher) => teacher.id === "tiffany");
     if (tiffanyProfile) {
@@ -49412,6 +49422,7 @@
         await reconcileTeachingTeamWithLiveProfiles(client);
         repairCrossedProfilePhotos();
         teachers.forEach((teacher) => { if (currentTierByTeacher.has(teacher.id)) teacher.payTier = currentTierByTeacher.get(teacher.id); });
+        applyKnownPayrollTiers();
         if (recoveredTeachers.length) {
           const teacherRecoveryResults = await Promise.all(recoveredTeachers.map((teacher) => saveTeacherRecordToCloud(teacher)));
           recoveredTeachers.forEach((teacher) => { delete teacher.recoveredFromInactive; });
