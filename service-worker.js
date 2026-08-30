@@ -1,9 +1,9 @@
-const CACHE_NAME = "my-dance-techniques-v215-shared-signin-incident-recovery";
+const CACHE_NAME = "my-dance-techniques-v216-desktop-navigation-recovery";
 const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260826-shared-signin-incident-recovery-v6",
+  "./supabase-auth.js?v=20260830-teacher-open-after-profile-v7",
   "./data/partner-schools.js",
   "./dt-touch/dt-touch.js?v=20260722c",
   "./config/dt-touch-voice.json",
@@ -88,14 +88,26 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  const mustBeFresh = ["script", "style", "document"].includes(event.request.destination)
+    || /\.(?:js|css|html)$/i.test(requestUrl.pathname);
+
+  if (mustBeFresh) {
+    event.respondWith(
+      fetch(event.request, { cache: "no-store" })
+        .then((response) => {
+          if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request).then((response) => {
-        if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
-        return response;
-      });
-      return cached || network;
-    })
+    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
+      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, response.clone()));
+      return response;
+    }))
   );
 });
 

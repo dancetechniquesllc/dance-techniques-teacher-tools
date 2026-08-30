@@ -18991,7 +18991,8 @@
     const knownFoundingTeacherNames = new Set(["erika webb", "judy coulter"]);
     const applyKnownPayrollTiers = () => {
       teachers.forEach((teacher) => {
-        if (knownFoundingTeacherNames.has(fullName(teacher).trim().toLowerCase())) {
+        const teacherName = `${teacher?.firstName || ""} ${teacher?.lastName || ""}`.trim().toLowerCase();
+        if (knownFoundingTeacherNames.has(teacherName)) {
           teacher.payTier = "tier_a_founding_teacher";
         }
       });
@@ -22114,7 +22115,7 @@
     let enrollmentTempoRosterVisit = 0;
     let enrollmentTempoCelebrationKey = "";
 
-    const setTab = (tab) => {
+    function setTab(tab) {
       if (!navigationGuardBypass && currentViewTab !== tab && hasUnsavedEdits) {
         runGuardedNavigation(() => setTab(tab));
         return;
@@ -22144,7 +22145,57 @@
         const payAlert = document.getElementById("pay-home-alert");
         if (payAlert) payAlert.style.display = "none";
       }
-    };
+    }
+
+    // Keep the installed DD and TT shells navigable even if a later feature
+    // initialization fails. Core navigation must be wired before the heavier
+    // dashboard renderers and live-data loaders run.
+    document.addEventListener("click", (event) => {
+      const navToggle = event.target.closest("#teacher-nav-button");
+      if (navToggle) {
+        const menu = document.getElementById("teacher-nav-menu");
+        const open = !menu?.classList.contains("open");
+        menu?.classList.toggle("open", open);
+        navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        return;
+      }
+
+      const tabButton = event.target.closest("[data-tab], [data-tab-jump], [data-nav-target]");
+      if (tabButton) {
+        event.preventDefault();
+        const rosterSchoolTarget = tabButton.dataset.rosterSchoolTarget || "";
+        if (rosterSchoolTarget) {
+          teacherRosterSchoolFilter = rosterSchoolTarget;
+          document.getElementById("rosters-view")?.setAttribute("data-requested-school", rosterSchoolTarget);
+        }
+        const tab = tabButton.dataset.tab || tabButton.dataset.tabJump || tabButton.dataset.navTarget;
+        if (tab) setTab(tab);
+        if (tabButton.dataset.navTarget) {
+          document.getElementById("teacher-nav-menu")?.classList.remove("open");
+          document.getElementById("teacher-nav-button")?.setAttribute("aria-expanded", "false");
+        }
+        if (rosterSchoolTarget) {
+          window.setTimeout(() => {
+            teacherRosterSchoolFilter = rosterSchoolTarget;
+            renderTeacherRosters();
+          }, 0);
+        }
+        return;
+      }
+
+      const sectionButton = event.target.closest("[data-admin-open-section]");
+      if (sectionButton) {
+        event.preventDefault();
+        openAdminSection(sectionButton.dataset.adminOpenSection);
+        return;
+      }
+
+      const homeButton = event.target.closest("[data-admin-tools-home]");
+      if (homeButton) {
+        event.preventDefault();
+        openAdminToolsHome();
+      }
+    });
 
     const curriculumDatabase = {
       schemaVersion: 1,
@@ -24527,7 +24578,6 @@
           : (audience === "all" ? `${title} added to ${recipients.length} teacher schedules` : `${title} added to ${schoolNicknameByName(schoolName)}`)));
     }
 
-    document.querySelectorAll("[data-tab]").forEach((button) => button.addEventListener("click", () => setTab(button.dataset.tab)));
     document.addEventListener("click", (event) => {
       const ordersButton = event.target.closest("[data-my-day-orders]");
       if (!ordersButton) return;
@@ -24535,38 +24585,14 @@
       teacherOrderSchoolFilter = "all";
       setTab("orders");
     });
-    document.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-tab-jump]");
-      if (!button) return;
-      event.preventDefault();
-      const rosterSchoolTarget = button.dataset.rosterSchoolTarget || "";
-      if (rosterSchoolTarget) {
-        teacherRosterSchoolFilter = rosterSchoolTarget;
-        document.getElementById("rosters-view")?.setAttribute("data-requested-school", rosterSchoolTarget);
-      }
-      setTab(button.dataset.tabJump);
-      if (rosterSchoolTarget) {
-        window.setTimeout(() => {
-          teacherRosterSchoolFilter = rosterSchoolTarget;
-          renderTeacherRosters();
-        }, 0);
-      }
-    });
     const navMenu = document.getElementById("teacher-nav-menu");
     const navButton = document.getElementById("teacher-nav-button");
     const setNavOpen = (open) => {
       navMenu?.classList.toggle("open", open);
       navButton?.setAttribute("aria-expanded", open ? "true" : "false");
     };
-    navButton?.addEventListener("click", () => setNavOpen(!navMenu?.classList.contains("open")));
-    document.querySelectorAll("[data-nav-target]").forEach((button) => {
-      button.addEventListener("click", () => {
-        setTab(button.dataset.navTarget);
-        setNavOpen(false);
-      });
-    });
     document.addEventListener("click", (event) => {
-      if (navMenu && !navMenu.contains(event.target)) setNavOpen(false);
+      if (navMenu && !navMenu.contains(event.target) && !navButton?.contains(event.target)) setNavOpen(false);
     });
     document.getElementById("curriculum-detail-back")?.addEventListener("click", () => setTab(curriculumReturnTab || "curriculum"));
     document.getElementById("curriculum-week-select")?.addEventListener("change", (event) => {
@@ -45496,18 +45522,6 @@
     document.getElementById("director-future-dancer-day")?.addEventListener("change", (event) => {
       directorFutureDancerDay = event.target.value || "all";
       renderDirectorFutureDancers();
-    });
-
-    document.addEventListener("click", (event) => {
-      const sectionButton = event.target.closest("[data-admin-open-section]");
-      if (!sectionButton) return;
-      openAdminSection(sectionButton.dataset.adminOpenSection);
-    });
-
-    document.addEventListener("click", (event) => {
-      const homeButton = event.target.closest("[data-admin-tools-home]");
-      if (!homeButton) return;
-      openAdminToolsHome();
     });
 
     document.addEventListener("change", (event) => {
