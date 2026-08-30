@@ -64,7 +64,11 @@
     .add-tracks { margin-top: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: #fffdfd; }
     .add-tracks .pick-list { max-height: 260px; overflow-y: auto; display: grid; gap: 6px; margin: 10px 0; }
     .add-tracks label { display: flex; gap: 9px; align-items: center; padding: 7px 9px; border: 1px solid #f0e1e4; border-radius: 11px; background: white; }
-    .add-tracks label small { color: var(--muted); }
+    .add-tracks label small { color: var(--muted); font-weight: 600; }
+    /* The page-wide input rule stretches every input to full width, which would
+       hide the song title behind the checkbox. Size the checkbox explicitly. */
+    .add-tracks label input[type="checkbox"] { width: 20px; min-width: 20px; height: 20px; min-height: 20px; flex: none; margin: 0; padding: 0; accent-color: var(--burgundy); }
+    .add-tracks label span { flex: 1; min-width: 0; font-weight: 700; }
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     label { display: grid; gap: 6px; color: var(--ink); font-size: .86rem; font-weight: 800; }
     input, select { width: 100%; min-height: 44px; border: 1px solid #d9c7cc; border-radius: 11px; background: white; padding: 9px 11px; color: var(--ink); }
