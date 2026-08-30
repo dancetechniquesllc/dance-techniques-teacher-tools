@@ -7124,13 +7124,21 @@
     .payroll-summary-card small { color: var(--muted); font-family: "Avenir Next", sans-serif; font-size: 11px; font-weight: 500; }
     .payroll-summary-card.is-issue strong { color: var(--berry); }
     .payroll-stub-library { display: grid; gap: 14px; }
-    .payroll-stub-teacher-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-    .payroll-stub-teacher-card { display: grid; gap: 12px; align-content: start; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
-    .payroll-stub-teacher-heading { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; }
-    .payroll-stub-teacher-heading .roster-student-photo { width: 48px; height: 48px; }
+    .payroll-stub-teacher-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .payroll-stub-teacher-card { width: 100%; min-height: 142px; display: grid; gap: 16px; align-content: space-between; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); color: inherit; font: inherit; text-align: left; cursor: pointer; }
+    .payroll-stub-teacher-card:hover, .payroll-stub-teacher-card:focus-visible { border-color: var(--berry); background: var(--blush-soft); transform: translateY(-1px); }
+    .payroll-stub-teacher-heading { display: grid; grid-template-columns: 56px 1fr; align-items: center; gap: 10px; }
+    .payroll-stub-teacher-heading .roster-student-photo { width: 56px; height: 56px; aspect-ratio: 1; overflow: hidden; border-radius: 50%; }
+    .payroll-stub-teacher-heading .roster-student-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 24%; }
+    .payroll-stub-teacher-heading strong { display: block; }
     .payroll-stub-teacher-heading small, .payroll-stub-record small { display: block; color: var(--muted); font-family: "Avenir Next", sans-serif; font-weight: 500; }
+    .payroll-stub-teacher-hint { color: var(--berry); font-family: "Avenir Next", sans-serif; font-size: 11px; font-weight: 700; }
     .payroll-stub-records { display: grid; gap: 8px; }
     .payroll-stub-record { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+    .payroll-stub-dialog { width: min(620px, calc(100vw - 36px)); max-height: min(720px, calc(100vh - 36px)); overflow: auto; padding: 22px; border-radius: 16px; }
+    .payroll-stub-dialog-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+    .payroll-stub-dialog-header h3, .payroll-stub-dialog-header p { margin: 0; }
+    .payroll-stub-dialog-header p { margin-top: 4px; color: var(--muted); font-family: "Avenir Next", sans-serif; }
     .partnership-payment-workspace { display: grid; gap: 14px; }
     .partnership-payment-workspace[hidden] { display: none; }
     .partnership-payment-toolbar { display: grid; grid-template-columns: minmax(180px, .8fr) minmax(220px, 1.4fr) repeat(3, minmax(140px, .8fr)); gap: 8px; align-items: end; }
@@ -7202,6 +7210,7 @@
       .partnership-payment-toolbar { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .recital-payment-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .tuition-plan-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .payroll-stub-teacher-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 720px) {
       .finance-folio-cards, .payroll-landing-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -7209,7 +7218,6 @@
       .recital-payment-list { grid-template-columns: 1fr; }
       .tuition-plan-grid { grid-template-columns: 1fr; }
       .tuition-roster-tools { grid-template-columns: 1fr; }
-      .payroll-stub-teacher-grid { grid-template-columns: 1fr; }
       .payroll-wizard { grid-template-columns: 1fr; }
       .payroll-step-list { grid-template-columns: repeat(5, minmax(0, 1fr)); }
       .payroll-step-button { grid-template-columns: 1fr; justify-items: center; text-align: center; }
@@ -7218,6 +7226,9 @@
       .payroll-filter-row { grid-template-columns: 1fr 1fr; }
       .payroll-student-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .partnership-payment-grid, .partnership-payment-toolbar { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .payroll-stub-teacher-grid { grid-template-columns: 1fr; }
     }
 
     .enrollment-queue-state {
@@ -15730,6 +15741,15 @@
                 <div class="admin-card-header"><div><h3>Teacher Pay Stub Library</h3><p>Every finalized payday, organized by teacher.</p></div><button class="roster-profile-close" type="button" id="close-payroll-stub-library" aria-label="Close Teacher Pay Stub Library and return to Payroll Summary" title="Return to Payroll Summary">×</button></div>
                 <div class="payroll-stub-teacher-grid" id="payroll-stub-teacher-grid"></div>
               </section>
+              <div class="confirm-overlay" id="teacher-pay-stubs-overlay" aria-hidden="true">
+                <div class="confirm-dialog payroll-stub-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-pay-stubs-title">
+                  <div class="payroll-stub-dialog-header">
+                    <div><h3 id="teacher-pay-stubs-title">Pay Stubs</h3><p id="teacher-pay-stubs-subtitle">Finalized payroll records</p></div>
+                    <button class="roster-profile-close" type="button" id="teacher-pay-stubs-close" aria-label="Close pay stubs">×</button>
+                  </div>
+                  <div class="payroll-stub-records" id="teacher-pay-stubs-body"></div>
+                </div>
+              </div>
               <div class="admin-card payroll-period-toolbar">
                 <label>Payroll month<input type="month" id="payroll-month"></label>
                 <label>Payment<select id="payroll-sequence"><option value="1">1st · Estimated Half</option><option value="2">15th · True-Up</option></select></label>
@@ -41288,12 +41308,13 @@
     };
 
     const payrollStubLibraryMarkup = () => teachers
-      .filter((teacher) => teacher.status !== "inactive")
+      .filter((teacher) => teacher.status !== "inactive" && String(teacher.id || "") !== "dance-techniques" && fullName(teacher).trim().toLowerCase() !== "dance techniques")
       .sort((a, b) => fullName(a).localeCompare(fullName(b)))
       .map((teacher) => {
         const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
         const initials = `${teacher.firstName?.[0] || ""}${teacher.lastName?.[0] || ""}`.toUpperCase();
-        return `<article class="payroll-stub-teacher-card"><div class="payroll-stub-teacher-heading"><span class="roster-student-photo teacher-identity-bubble ${teacherProfileColorClass(teacher)}">${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(initials)}</span><span><strong>${escapeText(fullName(teacher))}</strong><small>${escapeText(payrollTierLabels[teacher.payTier] || "Payment tier not assigned")}</small></span></div><div class="payroll-stub-records">${stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`}</div></article>`;
+        const stubLabel = stubs.length ? `${stubs.length} finalized pay stub${stubs.length === 1 ? "" : "s"}` : "No finalized pay stubs yet";
+        return `<button class="payroll-stub-teacher-card" type="button" data-open-teacher-pay-stubs="${escapeText(teacher.id)}"><span class="payroll-stub-teacher-heading"><span class="roster-student-photo teacher-identity-bubble ${teacherProfileColorClass(teacher)}">${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(initials)}</span><span><strong>${escapeText(fullName(teacher))}</strong><small>${escapeText(payrollTierLabels[teacher.payTier] || "Payment tier not assigned")}</small></span></span><span class="payroll-stub-teacher-hint">${escapeText(stubLabel)} · Open</span></button>`;
       }).join("");
 
     const renderPayrollStubLibrary = () => {
@@ -41309,6 +41330,25 @@
       if (toolbar) toolbar.hidden = open;
       if (wizard) wizard.hidden = open || payrollState.status === "not_started";
       if (open) renderPayrollStubLibrary();
+    };
+
+    const setTeacherPayStubsOpen = (teacherId = "") => {
+      const overlay = document.getElementById("teacher-pay-stubs-overlay");
+      const title = document.getElementById("teacher-pay-stubs-title");
+      const subtitle = document.getElementById("teacher-pay-stubs-subtitle");
+      const body = document.getElementById("teacher-pay-stubs-body");
+      const teacher = teachers.find((item) => String(item.id) === String(teacherId));
+      const open = Boolean(overlay && teacher);
+      if (!overlay) return;
+      overlay.classList.toggle("active", open);
+      overlay.setAttribute("aria-hidden", open ? "false" : "true");
+      if (!open || !teacher) { if (body) body.innerHTML = ""; return; }
+      const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
+      if (title) title.textContent = `${fullName(teacher)} Pay Stubs`;
+      if (subtitle) subtitle.textContent = payrollTierLabels[teacher.payTier] || "Finalized payroll records";
+      if (body) body.innerHTML = stubs.length
+        ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button></div>`).join("")
+        : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`;
     };
 
     const finalizePayrollPayStubs = async () => {
@@ -41418,8 +41458,12 @@
     document.getElementById("payroll-month")?.addEventListener("change", (event) => { payrollState.month = event.target.value; renderPayrollLanding(); scheduleAppDataSave(); });
     document.getElementById("payroll-sequence")?.addEventListener("change", (event) => { payrollState.sequence = event.target.value; renderPayrollLanding(); scheduleAppDataSave(); });
     document.getElementById("close-payroll-stub-library")?.addEventListener("click", () => setPayrollStubLibraryOpen(false));
+    document.getElementById("teacher-pay-stubs-close")?.addEventListener("click", () => setTeacherPayStubsOpen(""));
+    document.getElementById("teacher-pay-stubs-overlay")?.addEventListener("click", (event) => { if (event.target === event.currentTarget) setTeacherPayStubsOpen(""); });
     document.getElementById("payroll-workspace")?.addEventListener("click", async (event) => {
       if (event.target.closest("[data-open-payroll-stub-library]")) { setPayrollStubLibraryOpen(true); return; }
+      const teacherPayStubs = event.target.closest("[data-open-teacher-pay-stubs]");
+      if (teacherPayStubs) { setTeacherPayStubsOpen(teacherPayStubs.dataset.openTeacherPayStubs); return; }
       const directorStub = event.target.closest("[data-director-download-stub]");
       if (directorStub) { showToast(`Pay stub ready for ${formatPayDate(directorStub.dataset.directorStubDate)}`); return; }
       const clearFilters = event.target.closest("[data-clear-payroll-filters]");
