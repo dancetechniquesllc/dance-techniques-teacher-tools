@@ -41,6 +41,26 @@
     updateLaunchChecklistProgress();
   };
 
+  const syncExistingParentPush = async () => {
+    if (!client || typeof Notification === "undefined" || Notification.permission !== "granted" || !("serviceWorker" in navigator) || !("PushManager" in window)) return false;
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.getSubscription();
+    if (!subscription) return false;
+    const json = subscription.toJSON();
+    const { data: { user } } = await client.auth.getUser();
+    if (!user?.id || !json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false;
+    const { error } = await client.from("parent_push_subscriptions").upsert({
+      user_id: user.id,
+      endpoint: json.endpoint,
+      p256dh: json.keys.p256dh,
+      auth: json.keys.auth,
+      active: true,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "endpoint" });
+    if (error) throw error;
+    return true;
+  };
+
   const enableParentPush = async (trigger) => {
     if (!client || !("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined") return;
     const original = trigger.querySelector("small")?.textContent || "";
@@ -58,20 +78,6 @@
     } catch (error) {
       trigger.querySelector("small").textContent = error?.message || original || "Notifications could not be enabled.";
     }
-  };
-
-  const syncExistingParentPush = async () => {
-    if (!client || !("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined" || Notification.permission !== "granted") return false;
-    const registration = await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription();
-    if (!subscription) return false;
-    const json = subscription.toJSON();
-    if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) return false;
-    const { data: { user } } = await client.auth.getUser();
-    if (!user?.id) return false;
-    const { error } = await client.from("parent_push_subscriptions").upsert({ user_id: user.id, endpoint: json.endpoint, p256dh: json.keys.p256dh, auth: json.keys.auth, active: true, updated_at: new Date().toISOString() }, { onConflict: "endpoint" });
-    if (error) throw error;
-    return true;
   };
 
   const showView = (name) => {
@@ -1129,6 +1135,9 @@
     renderTruthfulEmptyStates(context, [], []);
     history.replaceState({}, "", "/parent-portal/");
     revealFamilyPortal();
+    // If this phone already allowed notifications, quietly restore its server
+    // registration without interrupting or delaying the family portal.
+    syncExistingParentPush().catch(() => false);
     if (context.guardian?.id) {
       client.from("family_billing_accounts").select("id,card_brand,card_last_four,payment_method_status").eq("guardian_id", context.guardian.id).limit(1).maybeSingle().then(async ({ data }) => {
         if (data?.payment_method_status === "verified" && data.card_brand && data.card_last_four) window.renderParentAutomaticPayments?.(data.card_brand, data.card_last_four);

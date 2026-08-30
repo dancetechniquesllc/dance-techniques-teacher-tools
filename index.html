@@ -4267,7 +4267,7 @@
       text-align: left;
     }
 
-    .playlist strong { display: block; font-size: 14px; }
+    .playlist strong { display: block; color: var(--brick); font-size: 14px; }
     .playlist small { color: var(--muted); font-size: 12px; }
     .playlist-cover {
       width: 100%;
@@ -5328,13 +5328,33 @@
     .admin-message-audience-panel[hidden] { display: none; }
 
     .admin-message-audience-toggle { margin-top: 14px; }
-    .communication-studio-toggle { width: min(780px, 100%); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin: 4px auto 18px; padding: 5px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+    .communication-studio-toggle { width: min(1040px, 100%); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin: 4px auto 18px; padding: 5px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
     .communication-studio-toggle button { min-height: 46px; border: 0; border-radius: 999px; background: transparent; color: var(--fg); font-weight: 850; }
     .communication-studio-toggle button[aria-selected="true"] { background: var(--blush); color: var(--brick); box-shadow: 0 5px 13px rgb(93 52 54 / .12); }
     .communication-studio-toggle button:focus-visible { outline: 3px solid color-mix(in srgb, var(--brick) 34%, transparent); outline-offset: 2px; }
     #admin-home-messages > .admin-message-audience-toggle { display: none; }
     body[data-communication-view="parents"] #admin-home-messages .admin-announcement-box { display: none; }
-    @media (max-width: 560px) { .communication-studio-toggle { border-radius: 18px; } .communication-studio-toggle button { min-height: 42px; padding: 7px 5px; border-radius: 14px; font-size: 11px; } }
+    body[data-communication-view="automated"] #admin-home-messages .admin-announcement-box,
+    body[data-communication-view="automated"] #admin-home-messages .admin-message-audience-toggle,
+    body[data-communication-view="automated"] #admin-home-messages .admin-message-audience-panel { display: none; }
+    #admin-automated-posts-panel[hidden] { display: none; }
+    .automated-posts-panel { display: grid; gap: 18px; }
+    .automated-posts-summary { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 20px; background: color-mix(in srgb, var(--surface) 92%, var(--sage)); }
+    .automated-posts-summary h3, .automated-posts-summary p { margin: 0; }
+    .automated-posts-summary p { margin-top: 5px; color: var(--muted); }
+    .automated-post-library, .automated-post-history { display: grid; gap: 10px; }
+    .automated-post-library-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .automated-post-rule, .automated-post-event { padding: 16px; border: 1px solid var(--border); border-radius: 17px; background: var(--surface); }
+    .automated-post-rule { display: grid; gap: 7px; align-content: start; }
+    .automated-post-rule strong, .automated-post-event strong { color: var(--brick); }
+    .automated-post-rule small, .automated-post-event small { color: var(--muted); line-height: 1.4; }
+    .automated-post-rule-status { justify-self: start; padding: 5px 10px; border-radius: 999px; background: color-mix(in srgb, var(--sage) 64%, white); color: #36583d; font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+    .automated-post-history-list { display: grid; gap: 9px; }
+    .automated-post-event { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; }
+    .automated-post-event p { grid-column: 1 / -1; margin: 0; }
+    .automated-post-empty { padding: 24px; border: 1px dashed var(--border); border-radius: 17px; color: var(--muted); text-align: center; }
+    @media (max-width: 760px) { .automated-post-library-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .communication-studio-toggle { grid-template-columns: 1fr 1fr; border-radius: 18px; } .communication-studio-toggle button { min-height: 42px; padding: 7px 5px; border-radius: 14px; font-size: 11px; } .automated-post-library-grid { grid-template-columns: 1fr; } .automated-posts-summary { align-items: stretch; flex-direction: column; } }
 
     .admin-parent-message-preview {
       margin-top: 12px;
@@ -7199,6 +7219,8 @@
     .payroll-table-row span > small { margin-top: 3px; color: var(--muted); font-family: "Avenir Next", sans-serif; font-size: 10px; font-weight: 400; }
     .payroll-table-row.is-header { background: var(--surface-soft); color: var(--muted); font-size: 10px; font-weight: 800; }
     .payroll-table-row input { min-height: 36px; }
+    .payroll-commission-control { display: grid; gap: 4px; color: var(--muted); font: 600 10px/1.2 "Avenir Next", sans-serif; }
+    .payroll-commission-control select { width: 100%; min-height: 36px; padding: 7px 28px 7px 9px; font: 600 11px/1.2 "Avenir Next", sans-serif; }
     .payroll-explanation { padding: 11px 12px; border-left: 4px solid var(--berry); border-radius: 8px; background: var(--blush); font-family: "Avenir Next", sans-serif; font-size: 12px; }
     .payroll-step-actions { display: flex; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 8px; }
     .payroll-placeholder { padding: 24px; border: 1px dashed var(--border); border-radius: 11px; color: var(--muted); text-align: center; }
@@ -7774,6 +7796,23 @@
 
     .roster-toolbar label { min-width: 170px; flex: 1; }
 
+    .class-parent-portal-status { display: grid; gap: 10px; margin: 14px 0; }
+    .class-parent-portal-status-bar { position: relative; min-height: 54px; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 0 18px; border: 1px solid #92a48a; border-radius: 999px; background: #f5f7f2; color: var(--berry); font-weight: 900; text-align: left; }
+    .class-parent-portal-status-bar::before { content: ""; position: absolute; inset: 0 auto 0 0; width: var(--portal-progress, 0%); background: #dbe5d6; transition: width .2s ease; }
+    .class-parent-portal-status-bar > * { position: relative; z-index: 1; }
+    .class-parent-portal-status-bar strong { font-size: 16px; }
+    .class-parent-portal-status-bar span:last-child { font-size: 20px; }
+    .class-parent-portal-details { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
+    .class-parent-portal-family { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface); }
+    .class-parent-portal-family > span:first-child { display: grid; gap: 2px; min-width: 0; }
+    .class-parent-portal-family small { color: var(--muted); }
+    .class-parent-portal-family button { min-height: 38px; padding: 8px 14px; border-radius: 999px; }
+
+    @media (max-width: 620px) {
+      .class-parent-portal-family { grid-template-columns: minmax(0, 1fr) auto; }
+      .class-parent-portal-family button { grid-column: 1 / -1; width: 100%; }
+    }
+
     .roster-workspace {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
@@ -8142,6 +8181,23 @@
     .roster-parent-portal-actions button:hover,
     .roster-parent-portal-actions button:focus-visible { background: color-mix(in srgb, #c8d3c0 84%, white); outline: 2px solid #68775f; outline-offset: 2px; }
     .roster-parent-portal-status { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 12px; text-align: right; }
+    .parent-portal-access-summary { grid-column: 1 / -1; display: grid; grid-template-columns: auto repeat(2, minmax(0, 1fr)); gap: 10px; align-items: center; padding: 13px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface-soft); }
+    .parent-portal-access-summary > span:not(.parent-portal-status-bubble) { display: grid; gap: 2px; color: var(--muted); font-size: 11px; }
+    .parent-portal-access-summary strong { color: var(--fg); font-size: 13px; }
+    .parent-portal-status-bubble { width: max-content; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 900; }
+    .parent-portal-status-bubble.is-not-invited { background: #eee7e1; color: #665b55; }
+    .parent-portal-status-bubble.is-invite-sent { background: #f7e6ad; color: #735b09; }
+    .parent-portal-status-bubble.is-accepted { background: #c8d9bd; color: #30472d; }
+    .parent-portal-status-bubble.is-failed { background: #f2c5c1; color: #7d2725; }
+    .parent-portal-invite-workspace { display: grid; gap: 14px; }
+    .parent-portal-invite-toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .parent-portal-invite-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(245px, 1fr)); gap: 12px; }
+    .parent-portal-invite-card { display: grid; grid-template-columns: auto 1fr; gap: 8px 11px; align-items: start; padding: 15px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+    .parent-portal-invite-card input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--berry); }
+    .parent-portal-invite-card > span { display: grid; gap: 4px; }
+    .parent-portal-invite-card small { color: var(--muted); }
+    .parent-portal-invite-card .parent-portal-status-bubble { grid-column: 2; }
+    .parent-portal-invite-result { margin: 0; color: var(--muted); font-weight: 700; }
     .roster-profile-section-card .roster-profile-divider-before { margin-top: 0; padding-top: 0; border-top: 0; }
     .roster-profile-tools-heading { display: grid; gap: 3px; padding: 8px 4px 0; }
     .roster-profile-tools-heading strong { font-size: 20px; }
@@ -8544,7 +8600,21 @@
     .newsletter-auto-send-entry { background: linear-gradient(135deg, #fffdfa, #f7f9f1); }
     .newsletter-auto-send-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 2px; }
     .newsletter-auto-send-actions button { min-height: 42px; }
+    .newsletter-auto-send-actions .newsletter-directory-resend-button { grid-column: 1 / -1; background: #dfe8d8; border-color: #9caf91; color: #38513b; }
     .newsletter-auto-send-status { width: fit-content; color: #68775f; font-size: 11px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
+    .newsletter-directory-review-dialog { width: min(880px, calc(100vw - 28px)); max-height: min(820px, calc(100vh - 28px)); overflow: auto; }
+    .newsletter-directory-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin: 14px 0; }
+    .newsletter-directory-summary span { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); }
+    .newsletter-directory-summary strong { color: var(--berry); font-size: 24px; }
+    .newsletter-directory-summary small { color: var(--muted); font-size: 11px; font-weight: 800; }
+    .newsletter-directory-review-section { margin-top: 14px; padding: 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    .newsletter-directory-review-section h4 { margin: 0 0 8px; }
+    .newsletter-directory-review-list { display: grid; gap: 6px; max-height: 190px; overflow: auto; }
+    .newsletter-directory-review-row { display: grid; grid-template-columns: minmax(150px, .8fr) minmax(190px, 1fr) minmax(160px, .8fr); gap: 10px; padding: 8px 10px; border-radius: 9px; background: var(--surface-soft); font-size: 12px; }
+    .newsletter-directory-review-row.is-excluded { background: #f6eeee; color: #833d49; }
+    .newsletter-directory-confirm { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; margin-top: 16px; padding: 13px; border: 1px solid #9caf91; border-radius: 12px; background: #f4f8f1; }
+    .newsletter-directory-progress { min-height: 20px; margin: 10px 0 0; color: var(--berry); font-weight: 800; }
+    @media (max-width: 700px) { .newsletter-directory-summary { grid-template-columns: repeat(2, 1fr); } .newsletter-directory-review-row { grid-template-columns: 1fr; gap: 2px; } }
     .newsletter-welcome-transfer-options { display: grid; gap: 10px; margin: 14px 0; }
     .newsletter-welcome-transfer-option { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; padding: 12px 14px; border: 1px solid #e5cbc5; border-radius: 14px; background: #fffdfa; cursor: pointer; }
     .newsletter-welcome-transfer-option:has(input:checked) { border-color: #68775f; box-shadow: 0 0 0 2px rgba(104, 119, 95, .14); background: #f7f9f1; }
@@ -13556,6 +13626,49 @@
       line-height: 1.35;
     }
 
+    .confirm-dialog.payroll-promotion-dialog {
+      width: min(620px, 100%);
+      max-height: calc(100dvh - 36px);
+      overflow-y: auto;
+      border-radius: 18px;
+      padding: 22px;
+    }
+
+    .payroll-promotion-list {
+      display: grid;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .payroll-promotion-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 13px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface-soft, #fff9f7);
+    }
+
+    .payroll-promotion-row input {
+      width: 22px;
+      height: 22px;
+      margin: 0;
+      accent-color: var(--berry);
+    }
+
+    .payroll-promotion-row strong,
+    .payroll-promotion-row small { display: block; }
+    .payroll-promotion-row small { margin-top: 3px; color: var(--muted); }
+    .payroll-promotion-rate { color: var(--berry); font-weight: 900; white-space: nowrap; }
+
+    @media (max-width: 520px) {
+      .confirm-dialog.payroll-promotion-dialog { padding: 17px; }
+      .payroll-promotion-row { grid-template-columns: auto minmax(0, 1fr); }
+      .payroll-promotion-rate { grid-column: 2; }
+    }
+
     .reschedule-alert-warning {
       display: grid;
       grid-template-columns: 28px 1fr;
@@ -14525,14 +14638,20 @@
     .tt-feedback-field { display: grid; gap: 6px; }
     .tt-feedback-field textarea { min-height: 120px; resize: vertical; }
     .tt-feedback-actions { display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
-    .shape-magic-toolbar { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
+    .shape-magic-view-controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+    .shape-magic-toggle { display: inline-grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 1fr); gap: 4px; padding: 4px; border: 1px solid var(--border); border-radius: 999px; background: #fff; }
+    .shape-magic-toggle button { min-height: 46px; border: 0; border-radius: 999px; background: transparent; color: var(--fg); font-weight: 800; cursor: pointer; }
+    .shape-magic-toggle button[aria-selected="true"] { background: var(--blush); color: var(--berry); }
+    .shape-magic-archive-toggle { min-height: 46px; border-radius: 999px; }
+    .shape-magic-archive-toggle[aria-pressed="true"] { background: var(--berry); color: #fff; }
+    .shape-magic-toolbar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 14px 0; }
     .shape-magic-inbox { display: grid; gap: 12px; }
     .shape-magic-item { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--border); border-radius: 18px; background: #fff; }
     .shape-magic-item-head, .shape-magic-item-actions { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
     .shape-magic-item p { margin: 0; white-space: pre-wrap; }
     .shape-magic-attachment { display: block; width: min(100%, 720px); max-height: 520px; border-radius: 14px; object-fit: contain; background: #f8efec; }
     .shape-magic-empty { padding: 28px; border: 1px dashed var(--border); border-radius: 18px; text-align: center; color: var(--muted); }
-    @media (max-width: 700px) { .shape-magic-toolbar { grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .shape-magic-view-controls { align-items: stretch; } .shape-magic-toggle { width: 100%; grid-auto-columns: 1fr; } .shape-magic-archive-toggle { width: 100%; } .shape-magic-toolbar { grid-template-columns: 1fr; } }
     @media (max-width: 390px) { .tt-feedback-dialog-inner { padding: 16px; } .tt-feedback-grid { gap: 9px; } .tt-feedback-card { min-height: 166px; padding: 9px 5px; } .tt-feedback-card img { width: min(88px, 72%); } .tt-feedback-card strong { font-size: 12px; } .tt-feedback-card small { font-size: 10px; } }
     @media (prefers-reduced-motion: reduce) { .tt-feedback-card { transition: none; } }
   </style>
@@ -15698,12 +15817,18 @@
               <div><h3>Shape the Magic</h3><p><em>Listen to the teaching team and turn their feedback into thoughtful improvements.</em></p></div>
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
-            <div class="shape-magic-toolbar">
-              <label>Status<select id="shape-magic-status-filter"><option value="all">All Statuses</option><option value="new">New</option><option value="reviewed">Reviewed</option><option value="resolved">Resolved</option></select></label>
-              <label>Category<select id="shape-magic-category-filter"><option value="all">All Categories</option><option>Share What You’re Loving</option><option>Share an Idea</option><option>Something Isn’t Working</option><option>Ask a Question</option></select></label>
-              <label>Search<input id="shape-magic-search" type="search" placeholder="Teacher or feedback"></label>
+            <div class="shape-magic-view-controls">
+              <div class="shape-magic-toggle" role="tablist" aria-label="Feedback source">
+                <button type="button" role="tab" aria-selected="true" data-feedback-source="teacher">From Teachers</button>
+                <button type="button" role="tab" aria-selected="false" data-feedback-source="parent">From Parents</button>
+              </div>
+              <button class="secondary shape-magic-archive-toggle" id="shape-magic-archive-toggle" type="button" aria-pressed="false">View Archive</button>
             </div>
-            <p class="subtle" id="shape-magic-results-count" role="status" aria-live="polite">Loading teacher feedback…</p>
+            <div class="shape-magic-toolbar">
+              <label>Category<select id="shape-magic-category-filter"><option value="all">All Categories</option><option>Share What You’re Loving</option><option>Share an Idea</option><option>Something Isn’t Working</option><option>Ask a Question</option></select></label>
+              <label>Search<input id="shape-magic-search" type="search" placeholder="Name or feedback"></label>
+            </div>
+            <p class="subtle" id="shape-magic-results-count" role="status" aria-live="polite">Loading feedback…</p>
             <div class="shape-magic-inbox" id="shape-magic-inbox" aria-live="polite"></div>
           </section>
 
@@ -15751,7 +15876,7 @@
                 </div>
               </div>
               <div class="admin-card payroll-period-toolbar">
-                <label>Payroll month<input type="month" id="payroll-month"></label>
+                <label>Payroll month<select id="payroll-month" aria-label="Payroll month"></select></label>
                 <label>Payment<select id="payroll-sequence"><option value="1">1st · Estimated Half</option><option value="2">15th · True-Up</option></select></label>
                 <button class="primary" type="button" id="begin-payroll">Begin Payroll</button>
               </div>
@@ -15893,6 +16018,7 @@
               <button type="button" role="tab" aria-selected="false" data-communication-studio-view="parents">Parent Messages</button>
               <button type="button" role="tab" aria-selected="false" data-communication-studio-view="team">Team Talk</button>
               <button type="button" role="tab" aria-selected="true" data-communication-studio-view="newsletter">Newsletter Wizard</button>
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="automated">Automated Posts</button>
             </div>
             <div class="newsletter-workflow-entry-grid" aria-label="Newsletter Studio workflows">
               <section class="newsletter-workflow-entry">
@@ -15908,10 +16034,24 @@
                   <button class="secondary" type="button" data-newsletter-edit-auto-welcome="female" aria-label="Edit Girl Welcome Newsletter auto-send template">Edit Girl Welcome</button>
                   <button class="secondary" type="button" data-newsletter-edit-auto-welcome="male" aria-label="Edit Boy Welcome Newsletter auto-send template">Edit Boy Welcome</button>
                   <button class="secondary" type="button" id="newsletter-review-welcome-publish">Transfer Saved Welcome Backup</button>
+                  <button class="secondary newsletter-directory-resend-button" type="button" id="newsletter-review-directory-welcome-resend">Review Directory Welcome Resend</button>
                   <input id="newsletter-welcome-backup-file" type="file" accept="application/json,.json" hidden>
                 </div>
                 <small id="newsletter-canonical-welcome-status" role="status">No published Welcome template pair is loaded yet.</small>
               </section>
+            </div>
+            <div class="confirm-overlay" id="newsletter-directory-resend-overlay" aria-hidden="true">
+              <div class="confirm-dialog newsletter-directory-review-dialog" role="dialog" aria-modal="true" aria-labelledby="newsletter-directory-resend-title">
+                <h3 id="newsletter-directory-resend-title">Resend Welcome Email to Dancer Directory</h3>
+                <p>This sends the personalized <strong>Welcome to Dance Techniques</strong> newsletter. It does not send or replace Parent Portal invitations.</p>
+                <div id="newsletter-directory-resend-review"><p>Preparing a fresh directory audit…</p></div>
+                <label class="newsletter-directory-confirm" id="newsletter-directory-resend-confirm-row" hidden><input id="newsletter-directory-resend-confirm" type="checkbox"><span id="newsletter-directory-resend-confirm-copy">I reviewed the recipients and exclusions.</span></label>
+                <p class="newsletter-directory-progress" id="newsletter-directory-resend-progress" role="status" aria-live="polite"></p>
+                <div class="confirm-actions">
+                  <button class="secondary" type="button" id="newsletter-directory-resend-cancel">Cancel</button>
+                  <button class="primary" type="button" id="newsletter-directory-resend-submit" disabled>Resend Welcome Emails</button>
+                </div>
+              </div>
             </div>
             <div class="confirm-overlay" id="newsletter-welcome-publish-overlay" aria-hidden="true">
               <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="newsletter-welcome-publish-title">
@@ -16414,6 +16554,7 @@
               <button class="is-selected" type="button" role="tab" aria-selected="true" data-enrollment-student-view="enrollments">New Enrollments</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="directory">Dancer Directory</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="future-dancers">Future Dancers</button>
+              <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="rowlett-5-invites">Rowlett 5 Invites</button>
             </div>
             <div class="enrollment-checklist-summary" id="enrollment-checklist-summary" aria-label="New Enrollment next-step summary"></div>
             <div class="enrollment-student-view-panel" id="enrollment-student-intake-slot" data-enrollment-student-panel="enrollments"></div>
@@ -16453,6 +16594,14 @@
               </div>
               <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="director-future-dancer-search,director-future-dancer-school,director-future-dancer-day">Reset Filter</button></div>
               <div class="teacher-future-prospect-grid" id="director-future-dancer-list"></div>
+            </div>
+            <div class="enrollment-student-view-panel" id="rowlett-5-invites-panel" data-enrollment-student-panel="rowlett-5-invites" hidden>
+              <div class="parent-portal-invite-workspace">
+                <div class="section-title" style="margin-top:8px"><div><h3>Rowlett 5 Invitations</h3><p>Only families who still need a Parent Portal invitation appear here.</p></div></div>
+                <div class="parent-portal-invite-toolbar"><label><input type="checkbox" id="rowlett-5-invite-select-all"> Select all ready families</label><button class="primary" type="button" id="rowlett-5-invite-selected" disabled>Invite Selected</button></div>
+                <p class="parent-portal-invite-result" id="rowlett-5-invite-result" role="status" aria-live="polite"></p>
+                <div class="parent-portal-invite-grid" id="rowlett-5-invite-list"><div class="roster-empty">Loading invitation readiness…</div></div>
+              </div>
             </div>
           </section>
 
@@ -16599,7 +16748,25 @@
               <button type="button" role="tab" aria-selected="false" data-communication-studio-view="parents">Parent Messages</button>
               <button type="button" role="tab" aria-selected="true" data-communication-studio-view="team">Team Talk</button>
               <button type="button" role="tab" aria-selected="false" data-communication-studio-view="newsletter">Newsletter Wizard</button>
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="automated">Automated Posts</button>
             </div>
+            <section class="automated-posts-panel" id="admin-automated-posts-panel" hidden aria-labelledby="admin-automated-posts-title">
+              <div class="automated-posts-summary">
+                <div>
+                  <h3 id="admin-automated-posts-title">Automated Posts</h3>
+                  <p>A running home for every automatic parent post, reminder, and team summary.</p>
+                </div>
+                <button class="secondary" type="button" id="admin-refresh-automated-posts">Refresh Activity</button>
+              </div>
+              <section class="automated-post-library" aria-labelledby="automated-post-library-title">
+                <div class="section-title"><h3 id="automated-post-library-title">Active Automations</h3><span class="status complete">Configured</span></div>
+                <div class="automated-post-library-grid" id="automated-post-library-grid"></div>
+              </section>
+              <section class="automated-post-history" aria-labelledby="automated-post-history-title">
+                <div class="section-title"><h3 id="automated-post-history-title">Activity History</h3><span id="automated-post-history-count" class="status pending">0 posts</span></div>
+                <div class="automated-post-history-list" id="automated-post-history-list" aria-live="polite"></div>
+              </section>
+            </section>
             <div class="admin-announcement-box">
               <div class="section-title">
                 <h3>Announcement</h3>
@@ -17576,6 +17743,22 @@
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div class="confirm-overlay" id="payroll-promotion-overlay" aria-hidden="true">
+    <div class="confirm-dialog payroll-promotion-dialog" role="dialog" aria-modal="true" aria-labelledby="payroll-promotion-title" aria-describedby="payroll-promotion-copy">
+      <div class="profile-login-setup-header">
+        <div>
+          <h3 id="payroll-promotion-title">Celebrate a Successful Year</h3>
+          <p id="payroll-promotion-copy">The June 1 payroll is complete. Choose which eligible teachers should receive a $0.50 commission-rate promotion for next season.</p>
+        </div>
+        <button class="profile-login-close" type="button" id="payroll-promotion-close" aria-label="Close promotion review">&times;</button>
+      </div>
+      <div class="payroll-promotion-list" id="payroll-promotion-list"></div>
+      <div class="confirm-actions">
+        <button class="secondary" type="button" id="payroll-promotion-skip">Not This Year</button>
+        <button class="primary" type="button" id="payroll-promotion-apply">Apply Selected Raises</button>
+      </div>
+    </div>
+  </div>
   <div class="confirm-overlay" id="master-event-delete-overlay" aria-hidden="true">
     <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="master-event-delete-title" aria-describedby="master-event-delete-copy">
       <div class="profile-login-setup-header">
@@ -18168,6 +18351,11 @@
                 <button class="secondary" type="button" id="roster-parent-portal-text-invite">Text Invite</button>
               </div>
               <p class="roster-parent-portal-status" id="roster-parent-portal-status" role="status" aria-live="polite">Invitations use the dancer’s securely linked primary adult profile.</p>
+            </div>
+            <div class="parent-portal-access-summary" id="roster-parent-portal-access-summary">
+              <span class="parent-portal-status-bubble is-not-invited">Not Invited</span>
+              <span>Invited<strong>—</strong></span>
+              <span>Accepted<strong>—</strong></span>
             </div>
             <div class="roster-private-feed-filters" aria-label="Filter Parent Portal posts">
               <label class="roster-private-feed-filter">Search posts<input id="roster-private-feed-search" type="search" placeholder="Search title or post text" autocomplete="off"></label>
@@ -18922,6 +19110,7 @@
     let rosterSearchTerm = "";
     let editingRosterStudentId = "";
     let editingRosterClassId = "";
+    let rosterProfileNavigationClassId = "";
     let archivedRosterStudents = [];
     let pendingRosterStudentPhoto = "";
     let rosterStudentProfileDirty = false;
@@ -18939,6 +19128,10 @@
     let enrollmentReviewOpen = false;
     let enrollmentClassPreviewId = "";
     let enrollmentStudentsView = "enrollments";
+    let parentPortalInvitationReadiness = [];
+    let parentPortalInvitationLoaded = false;
+    let parentPortalInvitationLoading = false;
+    const rowlettInviteSelectedStudents = new Set();
     let directorFutureDancerSearch = "";
     let directorFutureDancerSchool = "all";
     let directorFutureDancerDay = "all";
@@ -19405,7 +19598,7 @@
         )) || rosterClasses.find((entry) => (entry.students || []).some((student) => student.id === target.studentId));
         const student = rosterClass?.students.find((entry) => entry.id === target.studentId);
         openAdminSection("student-library");
-        if (rosterClass && student) openRosterStudentEditor(rosterClass, student);
+        if (rosterClass && student) openRosterStudentEditor(rosterClass, student, { navigationScope: "directory" });
         else showToast("The dancer record may have been moved or archived");
         return;
       }
@@ -23016,7 +23209,7 @@
         ? null
         : assignedTeacherSchools().find((school) => enrollmentSchoolNameMatches(school.name, teacherRosterSchoolFilter)
           || enrollmentSchoolNameMatches(school.nickname, teacherRosterSchoolFilter));
-      if (document.body.dataset.tourMode === "true") {
+      if (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1") {
         const previewClasses = teacherRosterClasses().filter((rosterClass) => !selectedSchool
           || enrollmentSchoolNameMatches(rosterClass.schoolName, selectedSchool.name)
           || enrollmentSchoolNameMatches(rosterClass.schoolName, selectedSchool.nickname));
@@ -24571,11 +24764,14 @@
     let cloudPersistencePending = false;
     let newsletterCanonicalWelcome = null;
     let newsletterCanonicalBackups = [];
+    let newsletterDirectoryResendAudit = null;
+    let newsletterDirectoryResendSending = false;
     const defaultPayrollMonth = () => {
       const date = new Date();
       return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
     };
     let payrollState = {
+      workflowVersion: 2,
       month: defaultPayrollMonth(),
       sequence: "1",
       status: "not_started",
@@ -24588,6 +24784,8 @@
       },
       outstandingStudents: {},
       clearedBalances: {},
+      teacherCommissionRates: {},
+      yearEndPromotionReviews: {},
       workingHours: [],
       adjustments: [],
       approvedAt: "",
@@ -25217,7 +25415,16 @@
       });
       safeReplaceCollection(tempoEncouragementLibrary, persisted.tempoEncouragementLibrary || []);
       if (persisted.payrollState && typeof persisted.payrollState === "object") {
-        payrollState = { ...payrollState, ...JSON.parse(JSON.stringify(persisted.payrollState)) };
+        const restoredPayrollState = JSON.parse(JSON.stringify(persisted.payrollState));
+        if (Number(restoredPayrollState.workflowVersion || 1) < 2) {
+          restoredPayrollState.currentStep = Number(restoredPayrollState.currentStep || 0) > 1
+            ? Number(restoredPayrollState.currentStep) - 1
+            : Math.min(1, Number(restoredPayrollState.currentStep || 0));
+          restoredPayrollState.completedSteps = [...new Set((restoredPayrollState.completedSteps || [])
+            .filter((step) => Number(step) !== 1)
+            .map((step) => Number(step) > 1 ? Number(step) - 1 : Number(step)))];
+        }
+        payrollState = { ...payrollState, ...restoredPayrollState, workflowVersion: 2 };
       }
       if (persisted.schoolPartnershipPaymentState && typeof persisted.schoolPartnershipPaymentState === "object") {
         schoolPartnershipPaymentState = { ...schoolPartnershipPaymentState, ...JSON.parse(JSON.stringify(persisted.schoolPartnershipPaymentState)) };
@@ -25399,6 +25606,7 @@
     let selectedTeacherMessageThreadId = "";
     let openMessageReactionKey = "";
     let selectedAdminMessageThreadId = "team-meeting";
+    let selectedCommunicationStudioView = "team";
     let notificationShowcaseMessagesSeeded = false;
     let messageActivitySequence = Math.max(...messageThreads.map((thread) => thread.activityOrder || 0));
     let curriculumStyleFilter = "all";
@@ -31094,6 +31302,8 @@
       const button = event.target.closest("[data-admin-message-audience]");
       if (!button) return;
       selectedAdminMessageAudience = button.dataset.adminMessageAudience === "parents" ? "parents" : "staff";
+      selectedCommunicationStudioView = selectedAdminMessageAudience === "parents" ? "parents" : "team";
+      document.getElementById("admin-automated-posts-panel")?.setAttribute("hidden", "");
       renderAdminMessageAudience();
       updateCommunicationStudioToggles();
     });
@@ -36509,6 +36719,143 @@
       }).join("") : `<div class="roster-empty" style="grid-column:1/-1">No enrollments have completed every checklist step yet.</div>`;
     };
 
+    const parentPortalStatusDetails = (record = {}) => ({
+      not_invited: ["Not Invited", "is-not-invited"],
+      invite_sent: ["Invite Sent", "is-invite-sent"],
+      accepted: ["Accepted", "is-accepted"],
+      failed: ["Failed", "is-failed"]
+    })[record.invitation_status] || ["Not Invited", "is-not-invited"];
+    const parentPortalDateTime = (value) => value ? new Date(value).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "—";
+    const renderParentPortalProfileStatus = (studentId) => {
+      const container = document.getElementById("roster-parent-portal-access-summary");
+      if (!container) return;
+      const record = parentPortalInvitationReadiness.find((item) => String(item.student_id) === String(studentId));
+      if (!record) {
+        container.innerHTML = `<span class="parent-portal-status-bubble is-not-invited">Not Invited</span><span>Invited<strong>—</strong></span><span>Accepted<strong>—</strong></span>`;
+        return;
+      }
+      const [label, className] = parentPortalStatusDetails(record);
+      container.innerHTML = `<span class="parent-portal-status-bubble ${className}">${rosterSafe(label)}</span><span>Invited<strong>${rosterSafe(parentPortalDateTime(record.invited_at))}</strong></span><span>Accepted<strong>${rosterSafe(parentPortalDateTime(record.accepted_at))}</strong></span>${record.validation_message ? `<small style="grid-column:1/-1;color:#8a3532">${rosterSafe(record.validation_message)}</small>` : ""}`;
+    };
+    const loadParentPortalInvitationReadiness = async () => {
+      if (!window.dtSupabase || parentPortalInvitationLoading || document.body.dataset.tourMode === "true") return;
+      parentPortalInvitationLoading = true;
+      try {
+        const { data, error } = await window.dtSupabase.rpc("parent_portal_invitation_readiness");
+        if (error) throw error;
+        parentPortalInvitationReadiness = data || [];
+        parentPortalInvitationLoaded = true;
+      } catch (error) {
+        console.error("Parent Portal invitation readiness could not load", error);
+      } finally {
+        parentPortalInvitationLoading = false;
+      }
+    };
+    const classParentPortalEntries = (rosterClass) => rosterEnrolled(rosterClass).map((student) => ({
+      student,
+      record: parentPortalInvitationReadiness.find((item) => String(item.student_id) === String(student.id)) || null
+    }));
+    const renderClassParentPortalStatus = (rosterClass) => {
+      const container = document.getElementById("class-parent-portal-status");
+      if (!container || !rosterClass) return;
+      const entries = classParentPortalEntries(rosterClass);
+      const activeCount = entries.filter(({ record }) => record?.invitation_status === "accepted").length;
+      const totalCount = entries.length;
+      const progress = totalCount ? Math.round((activeCount / totalCount) * 100) : 0;
+      const expanded = container.dataset.expanded === "true";
+      container.innerHTML = `
+        <button class="class-parent-portal-status-bar" type="button" data-class-parent-portal-toggle aria-expanded="${expanded}" style="--portal-progress:${progress}%">
+          <strong>${activeCount}/${totalCount} Parent Portals Active</strong><span aria-hidden="true">${expanded ? "−" : "+"}</span>
+        </button>
+        <div class="class-parent-portal-details" ${expanded ? "" : "hidden"}>
+          ${entries.length ? entries.map(({ student, record }) => {
+            const [statusLabel, statusClass] = parentPortalStatusDetails(record || {});
+            const canRemind = Boolean(record?.guardian_id && record?.guardian_email && record?.invitation_status !== "accepted");
+            const detail = record?.guardian_email || record?.validation_message || "A guardian email is needed before an invitation can be sent.";
+            return `<div class="class-parent-portal-family">
+              <span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(detail)}</small></span>
+              <span class="parent-portal-status-bubble ${statusClass}">${rosterSafe(statusLabel)}</span>
+              ${record?.invitation_status === "accepted" ? "" : `<button class="secondary" type="button" data-class-parent-portal-remind="${rosterSafe(student.id)}" ${canRemind ? "" : "disabled"}>Remind</button>`}
+            </div>`;
+          }).join("") : `<div class="roster-empty">No enrolled dancers are in this class yet.</div>`}
+        </div>`;
+    };
+    const hydrateClassParentPortalStatus = async (rosterClass) => {
+      renderClassParentPortalStatus(rosterClass);
+      if (!parentPortalInvitationLoaded && !parentPortalInvitationLoading) await loadParentPortalInvitationReadiness();
+      if (selectedRosterClassId === rosterClass.id) renderClassParentPortalStatus(rosterClass);
+    };
+    const remindClassParentPortalFamily = async (button, rosterClass, studentId) => {
+      const entry = classParentPortalEntries(rosterClass).find(({ student }) => String(student.id) === String(studentId));
+      if (!entry?.record?.guardian_id || !entry.record.guardian_email || !window.dtSupabase) return;
+      button.disabled = true;
+      button.textContent = "Sending…";
+      try {
+        const { error } = await window.dtSupabase.functions.invoke("send-parent-portal-invite", { body: { guardianId: entry.record.guardian_id } });
+        if (error) throw error;
+        parentPortalInvitationLoaded = false;
+        await loadParentPortalInvitationReadiness();
+        renderClassParentPortalStatus(rosterClass);
+        showToast(`Invitation reminder sent for ${rosterStudentFullName(entry.student)}`);
+      } catch (error) {
+        console.error("Parent Portal reminder could not be sent", error);
+        button.disabled = false;
+        button.textContent = "Remind";
+        showToast("The invitation reminder could not be sent. Please try again.");
+      }
+    };
+    const rowlettInvitationRecords = () => parentPortalInvitationReadiness.filter((record) => {
+      const school = `${record.school_name || ""} ${record.school_nickname || ""}`.toLowerCase();
+      return school.includes("rowlett") && ["not_invited", "failed"].includes(record.invitation_status);
+    });
+    const renderRowlettParentPortalInvites = async () => {
+      const list = document.getElementById("rowlett-5-invite-list");
+      if (!list) return;
+      if (!parentPortalInvitationReadiness.length) {
+        list.innerHTML = `<div class="roster-empty">Loading invitation readiness…</div>`;
+        await loadParentPortalInvitationReadiness();
+      }
+      const records = rowlettInvitationRecords();
+      const activeIds = new Set(records.map((record) => String(record.student_id)));
+      [...rowlettInviteSelectedStudents].forEach((id) => { if (!activeIds.has(id)) rowlettInviteSelectedStudents.delete(id); });
+      list.innerHTML = records.length ? records.map((record) => {
+        const ready = Boolean(record.guardian_id && !record.validation_message);
+        const [label, className] = parentPortalStatusDetails(record);
+        return `<label class="parent-portal-invite-card"><input type="checkbox" data-rowlett-invite-student="${rosterSafe(record.student_id)}" ${rowlettInviteSelectedStudents.has(String(record.student_id)) ? "checked" : ""} ${ready ? "" : "disabled"}><span><strong>${rosterSafe(record.dancer_name)}</strong><small>${rosterSafe(record.guardian_name || "Primary adult needed")}${record.guardian_email ? ` · ${rosterSafe(record.guardian_email)}` : ""}</small>${record.validation_message ? `<small>${rosterSafe(record.validation_message)}</small>` : ""}</span><span class="parent-portal-status-bubble ${className}">${rosterSafe(label)}</span></label>`;
+      }).join("") : `<div class="roster-empty" style="grid-column:1/-1">Every Rowlett family has already been invited or accepted.</div>`;
+      const selectedButton = document.getElementById("rowlett-5-invite-selected");
+      if (selectedButton) selectedButton.disabled = !rowlettInviteSelectedStudents.size;
+      const selectAll = document.getElementById("rowlett-5-invite-select-all");
+      const readyRecords = records.filter((record) => record.guardian_id && !record.validation_message);
+      if (selectAll) selectAll.checked = Boolean(readyRecords.length && readyRecords.every((record) => rowlettInviteSelectedStudents.has(String(record.student_id))));
+    };
+    const inviteSelectedRowlettFamilies = async () => {
+      const button = document.getElementById("rowlett-5-invite-selected");
+      const result = document.getElementById("rowlett-5-invite-result");
+      const selected = rowlettInvitationRecords().filter((record) => rowlettInviteSelectedStudents.has(String(record.student_id)));
+      const families = [...new Map(selected.filter((record) => record.guardian_id && !record.validation_message).map((record) => [record.guardian_id, record])).values()];
+      if (!button || !result || !families.length) return;
+      if (!window.confirm(`Send Parent Portal invitations to ${families.length} ready Rowlett ${families.length === 1 ? "family" : "families"}? Previously invited families will be skipped.`)) return;
+      button.disabled = true;
+      button.textContent = "Inviting…";
+      let sent = 0, skipped = 0;
+      const failures = [];
+      for (const family of families) {
+        try {
+          const { data, error } = await window.dtSupabase.functions.invoke("send-parent-portal-invite", { body: { guardianId: family.guardian_id, skipPreviouslyInvited: true } });
+          if (error || !data?.ok) throw new Error(data?.message || error?.message || "Invitation failed");
+          if (data.skipped) skipped += 1; else sent += 1;
+        } catch (error) {
+          failures.push(`${family.guardian_name || family.dancer_name}: ${error?.message || "Invitation failed"}`);
+        }
+      }
+      result.textContent = `${sent} sent · ${skipped} skipped · ${failures.length} failed${failures.length ? `. ${failures.join(" ")}` : ""}`;
+      rowlettInviteSelectedStudents.clear();
+      parentPortalInvitationReadiness = [];
+      await renderRowlettParentPortalInvites();
+      button.textContent = "Invite Selected";
+    };
+
     const renderEnrollmentStudentsView = () => {
       renderEnrollmentStudentSummary();
       renderDashboardEntitySummaries();
@@ -36524,6 +36871,7 @@
       if (enrollmentStudentsView === "enrollments") renderEnrollmentQueue();
       else if (enrollmentStudentsView === "active-enrollments") renderActiveEnrollments();
       else if (enrollmentStudentsView === "future-dancers") renderDirectorFutureDancers();
+      else if (enrollmentStudentsView === "rowlett-5-invites") void renderRowlettParentPortalInvites();
       else renderStudentLibrary();
     };
 
@@ -36647,6 +36995,9 @@
         });
         if (error || !data?.ok) throw new Error(data?.message || error?.message || "Invitation failed");
         status.textContent = `${data.message} It was sent to ${adult.full_name || "the linked adult"} at the saved adult-profile email and applies only to ${data.linkedStudentCount} linked dancer${data.linkedStudentCount === 1 ? "" : "s"}.`;
+        parentPortalInvitationReadiness = [];
+        await loadParentPortalInvitationReadiness();
+        renderParentPortalProfileStatus(student.id);
         button.textContent = "Email Invite";
       } catch (error) {
         console.error("Parent Portal invitation could not be sent", error);
@@ -36942,6 +37293,8 @@
       setRosterProfileTab(requestedTab);
       updateRosterProfileStudentNavigation();
       void renderRosterProfilePrivateFeed(rosterClass, student);
+      renderParentPortalProfileStatus(student.id);
+      void loadParentPortalInvitationReadiness().then(() => renderParentPortalProfileStatus(student.id));
       document.getElementById("roster-contact-future-parent").hidden = !isFutureDancer;
       document.getElementById("roster-delete-student").textContent = "Delete Dancer";
       const intakeRecord = isFutureDancer ? null : enrollmentIntakeQueue.find((item) => item.placed_student_id === student.id || item.placed_class_enrollment_id === student.enrollmentId);
@@ -38627,7 +38980,9 @@
       }
       setText("roster-multi-change-count", `${rosterMultiClassMovedIds.size} dancer${rosterMultiClassMovedIds.size === 1 ? "" : "s"} moved`);
       document.getElementById("roster-multi-class-undo").disabled = !rosterMultiHasUnsavedChanges();
-      document.getElementById("roster-multi-class-save").disabled = !rosterMultiHasUnsavedChanges();
+      const multiClassSaveButton = document.getElementById("roster-multi-class-save");
+      multiClassSaveButton.disabled = !rosterMultiHasUnsavedChanges();
+      multiClassSaveButton.textContent = "Save Changes";
       const selectedRecord = [...rosterMultiClassSelected.values()][0];
       const suggestedClassId = selectedRecord ? suggestEnrollmentClass({
         requested_school_name: rosterMultiClassSchoolName,
@@ -38871,6 +39226,7 @@
           <button class="danger-btn" type="button" data-roster-delete-class="${rosterSafe(selected.id)}" ${classCanBeDeleted ? "" : "disabled"}>Delete Class</button>
         </div>
       `;
+      void hydrateClassParentPortalStatus(selected);
     }
 
     const openProspectiveFollowup = () => {
@@ -41036,7 +41392,7 @@
           const discount = payrollDiscountFor(student);
           const tuition = monthlyTuitionForCircumstance(discount, school);
           const balanceRecord = payrollState.outstandingStudents?.[student.id];
-          const held = Boolean(balanceRecord?.selected && !payrollState.clearedBalances?.[student.id]);
+          const held = payrollBalanceIsUnresolved(balanceRecord);
           records.set(student.id, { student, rosterClass, discount, tuition, payment: tuition * .1, held });
         });
       });
@@ -41097,7 +41453,6 @@
 
     const payrollSteps = [
       ["Confirm Payroll", "Choose the month and payment."],
-      ["Teaching Team", "Confirm payroll eligibility and payment tiers."],
       ["Payable Classes", "Review every included and excluded class date."],
       ["Current Payment Status", "Review every student and select those who have not paid."],
       ["Outstanding Balances", "Track unpaid accounts, release holds, and record paid late fees."],
@@ -41114,15 +41469,49 @@
       tier_d_director: "Director"
     };
     const payrollTierIsAssigned = (tier) => Boolean(payrollTierLabels[tier]);
+    const payrollTeachers = () => teachers.filter((teacher) => {
+      if (teacher.status === "inactive") return false;
+      return fullName(teacher).trim().toLowerCase() !== "dance techniques";
+    });
     const payrollCurrency = (amount) => Number(amount || 0).toLocaleString("en-US", { style: "currency", currency: "USD" });
     const payrollMonthDate = () => new Date(`${payrollState.month || defaultPayrollMonth()}-01T12:00:00`);
     const payrollMonthLabel = () => payrollMonthDate().toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const payrollBalanceMonthLabel = (month) => /^\d{4}-\d{2}$/.test(String(month || ""))
+      ? new Date(`${month}-01T12:00:00`).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+      : payrollMonthLabel();
+    const payrollBalanceIsUnresolved = (record) => Boolean(record?.selected && !["paid", "paid_late_fee"].includes(record.status));
+    const payrollBalanceResolvedThisRun = (record) => Boolean(record?.selected
+      && ["paid", "paid_late_fee"].includes(record.status)
+      && record.resolvedPayrollMonth === payrollState.month
+      && String(record.resolvedSequence) === String(payrollState.sequence));
     const payrollPayday = () => {
       const date = payrollMonthDate();
       date.setDate(payrollState.sequence === "2" ? 15 : 1);
       return date;
     };
     const payrollDateKey = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const payrollPayPeriodRange = () => {
+      const month = payrollMonthDate();
+      return payrollState.sequence === "2"
+        ? {
+            start: new Date(month.getFullYear(), month.getMonth(), 2, 12),
+            end: new Date(month.getFullYear(), month.getMonth(), 15, 12)
+          }
+        : {
+            start: new Date(month.getFullYear(), month.getMonth() - 1, 16, 12),
+            end: new Date(month.getFullYear(), month.getMonth(), 1, 12)
+          };
+    };
+    const payrollDateIsInRange = (dateKey, range = payrollPayPeriodRange()) => {
+      const date = new Date(`${dateKey}T12:00:00`);
+      return !Number.isNaN(date.getTime()) && date >= range.start && date <= range.end;
+    };
+    const payrollPayPeriodLabel = () => {
+      const { start, end } = payrollPayPeriodRange();
+      const startLabel = start.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      const endLabel = end.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      return `${startLabel}–${endLabel}`;
+    };
     const payrollAllStudents = () => {
       const records = new Map();
       rosterClasses.forEach((rosterClass) => (rosterClass.students || []).forEach((student) => {
@@ -41144,9 +41533,10 @@
     const payrollFilterOptions = (values, selected, labelFor = (value) => value) => [...new Set(values.filter(Boolean))].sort((a, b) => labelFor(a).localeCompare(labelFor(b))).map((value) => `<option value="${escapeText(value)}" ${selected === value ? "selected" : ""}>${escapeText(labelFor(value))}</option>`).join("");
     const payrollFilterRowMarkup = (type, { includeStatus = false } = {}) => {
       const filters = payrollFilterState(type);
-      const teacherIds = [...new Set(rosterClasses.map((item) => item.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))];
-      const schoolNames = rosterClasses.map((item) => item.schoolName);
-      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].filter((day) => rosterClasses.some((item) => item.day === day));
+      const sourceClasses = type === "classes" ? payrollTeacherTierClasses() : rosterClasses;
+      const teacherIds = [...new Set(sourceClasses.map((item) => item.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))];
+      const schoolNames = sourceClasses.map((item) => item.schoolName);
+      const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].filter((day) => sourceClasses.some((item) => item.day === day));
       return `<div class="payroll-filter-row">
         <input type="search" data-payroll-filter-type="${type}" data-payroll-filter-field="search" value="${escapeText(filters.search)}" placeholder="Search student or class" aria-label="Search payroll records">
         <select data-payroll-filter-type="${type}" data-payroll-filter-field="teacher"><option value="all">All Teachers</option>${payrollFilterOptions(teacherIds, filters.teacher, (id) => rosterTeacherName(id))}</select>
@@ -41157,8 +41547,9 @@
     };
     const payrollFilteredClasses = () => {
       const filters = payrollFilterState("classes");
-      return rosterClasses.filter((rosterClass) => {
-        const dates = payrollClassDates(rosterClass);
+      return payrollTeacherTierClasses().filter((rosterClass) => {
+        const dates = payrollTeacherClassDates(rosterClass);
+        if (!dates.length) return false;
         if (filters.teacher !== "all" && rosterClass.teacherId !== filters.teacher) return false;
         if (filters.school !== "all" && rosterClass.schoolName !== filters.school) return false;
         if (filters.day !== "all" && rosterClass.day !== filters.day) return false;
@@ -41179,14 +41570,15 @@
     };
     const payrollDiscountFor = (student) => ["sibling", "staff", "director"].includes(student.tuitionDiscount) ? student.tuitionDiscount : "none";
     const payrollSchoolVendor = (schoolName) => String(schoolProfileByName(schoolName)?.partnershipBenefit || "").toLowerCase() === "10% tuition";
-    const payrollClassDates = (rosterClass) => {
+    const payrollClassDatesBetween = (rosterClass, start, end, scheduledReason) => {
       const dayIndex = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].indexOf(rosterClass.day);
       if (dayIndex < 0) return [];
-      const start = payrollMonthDate();
+      const school = schoolProfileByName(rosterClass.schoolName);
+      const seasonStart = school?.seasonStartDate ? new Date(`${school.seasonStartDate}T12:00:00`) : null;
       const dates = [];
-      for (let day = 1; day <= new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate(); day += 1) {
-        const date = new Date(start.getFullYear(), start.getMonth(), day, 12);
-        if (date.getDay() === dayIndex) dates.push({ date: payrollDateKey(date), type: "scheduled", status: "payable", reason: "Scheduled class in this pay month" });
+      for (const date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+        if (seasonStart && !Number.isNaN(seasonStart.getTime()) && date < seasonStart) continue;
+        if (date.getDay() === dayIndex) dates.push({ date: payrollDateKey(date), type: "scheduled", status: "payable", reason: scheduledReason });
       }
       const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
       const changes = (teacher?.reschedules || []).filter((item) => !item.schoolName || schoolNameMatches(item.schoolName, rosterClass.schoolName));
@@ -41196,17 +41588,45 @@
         entry.status = "excluded";
         entry.reason = change.status === "cancelled" ? `Cancelled${change.reason ? ` — ${change.reason}` : ""}` : change.status === "rescheduled" ? `Rescheduled to ${change.newDate || "a date to be determined"}` : "New date still needed";
       });
-      changes.filter((item) => item.status === "rescheduled" && item.newDate?.startsWith(`${payrollState.month}-`)).forEach((item) => {
+      changes.filter((item) => item.status === "rescheduled" && payrollDateIsInRange(item.newDate, { start, end })).forEach((item) => {
         dates.push({ date: item.newDate, type: "makeup", status: "payable", reason: `Makeup for ${item.originalDate || "rescheduled class"}` });
       });
       return dates.sort((a, b) => a.date.localeCompare(b.date));
     };
-    const payrollTierBClassRate = (count) => count <= 6 ? 20 : count === 7 ? 30 : Math.min(45, 30 + ((count - 7) * 3));
+    const payrollClassDates = (rosterClass) => {
+      const start = payrollMonthDate();
+      const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 12);
+      return payrollClassDatesBetween(rosterClass, start, end, "Scheduled class in this pay month");
+    };
+    const payrollTeacherTierClasses = () => rosterClasses.filter((rosterClass) => {
+      const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
+      return teacher?.payTier === "tier_b_teacher";
+    });
+    const payrollTeacherClassDates = (rosterClass) => {
+      const { start, end } = payrollPayPeriodRange();
+      return payrollClassDatesBetween(rosterClass, start, end, "Scheduled class in this pay period");
+    };
+    const payrollTeacherCommissionOptions = [2, 2.5, 3, 3.5, 4, 4.5, 5];
+    const payrollTeacherCommissionRate = (teacherId) => {
+      const configured = Number(payrollState.teacherCommissionRates?.[teacherId]);
+      return payrollTeacherCommissionOptions.includes(configured) ? configured : 2;
+    };
+    const payrollTeacherCommissionOptionsMarkup = (teacherId) => {
+      const selected = payrollTeacherCommissionRate(teacherId);
+      return payrollTeacherCommissionOptions.map((rate) => `<option value="${rate}" ${rate === selected ? "selected" : ""}>${payrollCurrency(rate)} per student</option>`).join("");
+    };
+    const payrollTierBClassRate = (count, teacherId) => {
+      const enrolled = Math.max(0, Number(count) || 0);
+      if (enrolled <= 6) return 20;
+      if (enrolled === 7) return 30;
+      const commissionStudents = Math.min(5, enrolled - 7);
+      return 30 + (commissionStudents * payrollTeacherCommissionRate(teacherId));
+    };
     const paidIndividualEventTeacherFirstNames = new Set(["makayla", "taylor", "kara"]);
     const teacherReceivesEventHourlyPay = (teacher, event) => event?.audience === "all"
       ? teacher?.payTier === "tier_b_teacher"
       : paidIndividualEventTeacherFirstNames.has(String(teacher?.firstName || fullName(teacher).split(/\s+/)[0] || "").trim().toLowerCase());
-    const payrollScheduledEventLines = () => teachers.flatMap((teacher) => {
+    const payrollScheduledEventLines = () => payrollTeachers().flatMap((teacher) => {
       return (teacher.scheduleEvents || [])
         .filter((event) => teacherReceivesEventHourlyPay(teacher, event) && event.paidEvent !== false && String(event.date || "").slice(0, 7) === payrollState.month && Number(event.paidHours) > 0)
         .map((event) => ({
@@ -41224,13 +41644,14 @@
 
     const calculatePayrollPreview = () => {
       const lines = [];
-      const teachersByTier = Object.fromEntries(teachers.map((teacher) => [teacher.id, payrollTierIsAssigned(teacher.payTier) ? teacher.payTier : ""]));
-      const outstanding = new Set(Object.keys(payrollState.outstandingStudents || {}).filter((id) => payrollState.outstandingStudents[id]?.selected));
+      const teachersByTier = Object.fromEntries(payrollTeachers().map((teacher) => [teacher.id, payrollTierIsAssigned(teacher.payTier) ? teacher.payTier : ""]));
+      const outstanding = new Set(Object.keys(payrollState.outstandingStudents || {}).filter((id) => payrollBalanceIsUnresolved(payrollState.outstandingStudents[id])));
       rosterClasses.forEach((rosterClass) => {
         const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
         const tier = teachersByTier[rosterClass.teacherId];
         if (!teacher || !tier) return;
-        const payableDates = payrollClassDates(rosterClass).filter((entry) => entry.status === "payable");
+        const payableDates = (tier === "tier_b_teacher" ? payrollTeacherClassDates(rosterClass) : payrollClassDates(rosterClass))
+          .filter((entry) => entry.status === "payable");
         const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()));
         if (tier === "tier_a_founding_teacher") {
           students.forEach((student) => {
@@ -41245,11 +41666,13 @@
         if (tier === "tier_b_teacher") {
           payableDates.forEach((occurrence) => {
             const count = students.filter((student) => payrollDiscountFor(student) !== "director").length;
-            lines.push({ teacherId: teacher.id, type: occurrence.type === "makeup" ? "Makeup Class" : "Class Pay", description: `${rosterClass.name} · ${occurrence.date} · ${count} active students`, amount: payrollTierBClassRate(count), held: false });
+            const commissionRate = payrollTeacherCommissionRate(teacher.id);
+            const commissionDetail = count >= 8 ? ` · ${payrollCurrency(commissionRate)} commission for students 8–12` : "";
+            lines.push({ teacherId: teacher.id, type: occurrence.type === "makeup" ? "Makeup Class" : "Class Pay", description: `${rosterClass.name} · ${occurrence.date} · ${count} enrolled students${commissionDetail}`, amount: payrollTierBClassRate(count, teacher.id), held: false });
           });
         }
       });
-      teachers.filter((teacher) => ["tier_c_administrator", "tier_d_director"].includes(teacher.payTier)).forEach((leader) => {
+      payrollTeachers().filter((teacher) => ["tier_c_administrator", "tier_d_director"].includes(teacher.payTier)).forEach((leader) => {
         rosterClasses.forEach((rosterClass) => {
           const sourceTier = teachersByTier[rosterClass.teacherId];
           const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()));
@@ -41269,8 +41692,19 @@
           });
         });
         if (leader.payTier === "tier_c_administrator") lines.push({ teacherId: leader.id, type: "Active Student Bonus", description: `${payrollAllStudents().length} active students`, amount: payrollAllStudents().length, held: false });
-        const lateFees = Object.values(payrollState.clearedBalances || {}).filter((item) => item.lateFeePaid).length;
-        if (lateFees) lines.push({ teacherId: leader.id, type: "Late Fee Bonus", description: `${lateFees} paid late fee${lateFees === 1 ? "" : "s"}`, amount: lateFees * 2, held: false });
+        const lateFees = leader.payTier === "tier_c_administrator"
+          ? Object.values(payrollState.outstandingStudents || {}).filter((item) => item.status === "paid_late_fee" && payrollBalanceResolvedThisRun(item)).length
+          : 0;
+        if (lateFees) lines.push({ teacherId: leader.id, type: "Late Fee Bonus", description: `${lateFees} paid late fee${lateFees === 1 ? "" : "s"} · $4 each`, amount: lateFees * 4, held: false });
+      });
+      Object.values(payrollState.outstandingStudents || {}).forEach((record) => {
+        if (!payrollBalanceResolvedThisRun(record) || record.month === payrollState.month || !Array.isArray(record.heldPayLines)) return;
+        record.heldPayLines.forEach((heldLine) => lines.push({
+          ...heldLine,
+          type: "Past-Due Pay Release",
+          description: `${heldLine.description} · ${payrollBalanceMonthLabel(record.month)} balance paid`,
+          held: false
+        }));
       });
       (payrollState.workingHours || []).forEach((entry) => {
         if (!entry.teacherId || !Number(entry.hours)) return;
@@ -41280,13 +41714,21 @@
         if (!entry.teacherId || !Number(entry.amount)) return;
         lines.push({ teacherId: entry.teacherId, type: "Adjustment", description: entry.reason || "Manual adjustment", amount: Number(entry.amount), held: false });
       });
-      const summaries = teachers.filter((teacher) => teacher.status !== "inactive").map((teacher) => {
+      const summaries = payrollTeachers().map((teacher) => {
         const teacherLines = lines.filter((line) => line.teacherId === teacher.id);
         const gross = teacherLines.reduce((sum, line) => sum + Number(line.amount || 0), 0);
         const held = teacherLines.filter((line) => line.held).reduce((sum, line) => sum + Number(line.amount || 0), 0);
         const final = Math.max(0, gross - held);
-        const estimatedHalf = final / 2;
-        const payment = payrollState.sequence === "1" ? estimatedHalf : Math.max(0, final - estimatedHalf);
+        const releasedPastDuePay = teacherLines
+          .filter((line) => line.type === "Past-Due Pay Release")
+          .reduce((sum, line) => sum + Number(line.amount || 0), 0);
+        const currentPeriodPay = Math.max(0, final - releasedPastDuePay);
+        const estimatedHalf = currentPeriodPay / 2;
+        const payment = teacher.payTier === "tier_b_teacher"
+          ? final
+          : payrollState.sequence === "1"
+            ? estimatedHalf + releasedPastDuePay
+            : Math.max(0, currentPeriodPay - estimatedHalf) + releasedPastDuePay;
         return { teacher, lines: teacherLines, gross, held, final, payment, issues: payrollTierIsAssigned(teacher.payTier) ? 0 : 1 };
       });
       return { lines, summaries, total: summaries.reduce((sum, item) => sum + item.payment, 0), issues: summaries.reduce((sum, item) => sum + item.issues, 0) };
@@ -41300,7 +41742,7 @@
         [payday.toLocaleDateString("en-US", { month: "short", day: "numeric" }), "Next Payroll Date", ""],
         [statusLabel, "Payroll Status", ""],
         [payrollCurrency(preview.total), payrollState.sequence === "1" ? "Estimated Total" : "True-Up Total", ""],
-        [String(teachers.filter((teacher) => teacher.status !== "inactive").length), "Teachers", ""],
+        [String(payrollTeachers().length), "Teachers", ""],
         [String(preview.issues), "Unresolved Issues", preview.issues ? "is-issue" : ""]
       ].map(([value, label, className]) => label === "Teachers"
         ? `<button class="payroll-summary-card ${className}" type="button" data-open-payroll-stub-library aria-label="Open teacher pay stub library"><strong>${escapeText(value)}</strong><small>${escapeText(label)} · View Pay Stubs</small></button>`
@@ -41322,6 +41764,23 @@
       if (grid) grid.innerHTML = payrollStubLibraryMarkup();
     };
 
+    const setTeacherPayStubsOpen = (teacherId = "") => {
+      const overlay = document.getElementById("teacher-pay-stubs-overlay");
+      const title = document.getElementById("teacher-pay-stubs-title");
+      const subtitle = document.getElementById("teacher-pay-stubs-subtitle");
+      const body = document.getElementById("teacher-pay-stubs-body");
+      if (!overlay || !body) return;
+      const teacher = payrollTeachers().find((item) => String(item.id) === String(teacherId));
+      const open = Boolean(teacher);
+      overlay.classList.toggle("active", open);
+      overlay.setAttribute("aria-hidden", open ? "false" : "true");
+      if (!teacher) { body.innerHTML = ""; return; }
+      const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
+      if (title) title.textContent = `${fullName(teacher)} Pay Stubs`;
+      if (subtitle) subtitle.textContent = payrollTierLabels[teacher.payTier] || "Finalized payroll records";
+      body.innerHTML = stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`;
+    };
+
     const setPayrollStubLibraryOpen = (open) => {
       const library = document.getElementById("payroll-stub-library");
       const toolbar = document.querySelector("#payroll-workspace .payroll-period-toolbar");
@@ -41330,25 +41789,6 @@
       if (toolbar) toolbar.hidden = open;
       if (wizard) wizard.hidden = open || payrollState.status === "not_started";
       if (open) renderPayrollStubLibrary();
-    };
-
-    const setTeacherPayStubsOpen = (teacherId = "") => {
-      const overlay = document.getElementById("teacher-pay-stubs-overlay");
-      const title = document.getElementById("teacher-pay-stubs-title");
-      const subtitle = document.getElementById("teacher-pay-stubs-subtitle");
-      const body = document.getElementById("teacher-pay-stubs-body");
-      const teacher = teachers.find((item) => String(item.id) === String(teacherId));
-      const open = Boolean(overlay && teacher);
-      if (!overlay) return;
-      overlay.classList.toggle("active", open);
-      overlay.setAttribute("aria-hidden", open ? "false" : "true");
-      if (!open || !teacher) { if (body) body.innerHTML = ""; return; }
-      const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
-      if (title) title.textContent = `${fullName(teacher)} Pay Stubs`;
-      if (subtitle) subtitle.textContent = payrollTierLabels[teacher.payTier] || "Finalized payroll records";
-      if (body) body.innerHTML = stubs.length
-        ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button></div>`).join("")
-        : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`;
     };
 
     const finalizePayrollPayStubs = async () => {
@@ -41378,17 +41818,33 @@
     };
 
     const payrollStudentCardsMarkup = (mode = "outstanding", records = payrollAllStudents()) => records.map(({ student, rosterClass }) => {
-      const selected = mode === "outstanding" ? payrollState.outstandingStudents?.[student.id]?.selected : Boolean(payrollState.clearedBalances?.[student.id]);
+      const selected = mode === "outstanding" ? payrollBalanceIsUnresolved(payrollState.outstandingStudents?.[student.id]) : Boolean(payrollState.clearedBalances?.[student.id]);
       const discount = payrollDiscountFor(student);
       return `<button class="payroll-student-card ${selected ? "is-selected" : ""}" type="button" data-payroll-student="${escapeText(student.id)}" data-payroll-student-mode="${mode}">${discount !== "none" ? `<span class="payroll-discount-chip">${escapeText(discount === "director" ? "FREE" : discount.toUpperCase())}</span>` : ""}<span class="roster-student-photo">${escapeText(rosterStudentInitials(student))}</span><strong>${escapeText(rosterStudentFullName(student))}</strong><small>${escapeText(rosterClass.schoolName)}</small><small>${escapeText(rosterClass.name)}</small></button>`;
     }).join("");
+
+    const payrollMonthOptionsMarkup = (selectedMonth = defaultPayrollMonth()) => {
+      const selected = /^\d{4}-\d{2}$/.test(String(selectedMonth || "")) ? String(selectedMonth) : defaultPayrollMonth();
+      const selectedDate = new Date(`${selected}-01T12:00:00`);
+      const firstYear = selectedDate.getFullYear() - 1;
+      const lastYear = selectedDate.getFullYear() + 1;
+      const options = [];
+      for (let year = firstYear; year <= lastYear; year += 1) {
+        for (let monthIndex = 0; monthIndex < 12; monthIndex += 1) {
+          const value = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
+          const label = new Date(year, monthIndex, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+          options.push(`<option value="${value}" ${value === selected ? "selected" : ""}>${escapeText(label)}</option>`);
+        }
+      }
+      return options.join("");
+    };
 
     const renderPayrollLanding = () => {
       const summary = document.getElementById("payroll-landing-summary");
       if (summary) summary.innerHTML = payrollSummaryMarkup();
       const month = document.getElementById("payroll-month");
       const sequence = document.getElementById("payroll-sequence");
-      if (month) month.value = payrollState.month || defaultPayrollMonth();
+      if (month) month.innerHTML = payrollMonthOptionsMarkup(payrollState.month || defaultPayrollMonth());
       if (sequence) sequence.value = payrollState.sequence || "1";
       renderPayrollStubLibrary();
     };
@@ -41410,32 +41866,88 @@
       const preview = calculatePayrollPreview();
       let body = "";
       if (step === 0) body = `<div class="payroll-choice-grid"><button class="payroll-choice-card ${payrollState.sequence === "1" ? "is-selected" : ""}" type="button" data-payroll-sequence-choice="1"><strong>1st · Estimated Half</strong><small>Exactly half of expected ${payrollMonthLabel()} payroll.</small></button><button class="payroll-choice-card ${payrollState.sequence === "2" ? "is-selected" : ""}" type="button" data-payroll-sequence-choice="2"><strong>15th · True-Up</strong><small>The accurate remaining amount after holds, releases, changes, and the first payment.</small></button></div><div class="payroll-explanation"><strong>${payrollMonthLabel()}</strong> · Payday ${payrollPayday().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} · Preparation deadline ${new Date(payrollPayday().getTime() - 5 * 86400000).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>`;
-      if (step === 1) body = `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Teacher Type</span><span>Payment Tier</span><span>Payroll</span></div>${teachers.filter((teacher) => teacher.status !== "inactive").map((teacher) => { const assigned = payrollTierIsAssigned(teacher.payTier); return `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(teacher.teacherType || "Teacher")}</span><span>${escapeText(payrollTierLabels[teacher.payTier] || "Not Assigned")}</span><span class="status ${assigned ? "ok" : "pending"}">${assigned ? "Ready" : "Needs Tier"}</span></div>`; }).join("")}</div><div class="payroll-explanation">Payment Tier and Teacher Type are separate. Assign tiers inside each official Teaching Team profile; the builder intentionally does not assign them.</div>`;
-      if (step === 2) { const visibleClasses = payrollFilteredClasses(); body = `${payrollFilterRowMarkup("classes", { includeStatus: true })}<div class="payroll-table"><div class="payroll-table-row is-header"><span>School</span><span>Payable</span><span>Excluded</span><span>Reason Recorded</span></div>${visibleClasses.map((rosterClass) => { const dates = payrollClassDates(rosterClass); const payable = dates.filter((item) => item.status === "payable"); const excluded = dates.filter((item) => item.status === "excluded"); return `<div class="payroll-table-row"><span><strong>${escapeText(rosterClass.schoolName)}</strong><small>${escapeText(rosterClass.name)} · ${escapeText(rosterTeacherName(rosterClass.teacherId))}</small></span><span>${payable.length}</span><span>${excluded.length}</span><span>${escapeText(excluded[0]?.reason || payable[0]?.reason || "Schedule needed")}</span></div>`; }).join("") || `<div class="payroll-placeholder">No classes match these filters.</div>`}</div><div class="payroll-explanation">Canceled and original rescheduled dates are excluded with a reason. Makeup dates are paid in the month they occur and remain linked to the original class change.</div>`; }
-      if (step === 3) { const visibleStudents = payrollFilteredStudents("outstanding"); const visibleIds = new Set(visibleStudents.map(({ student }) => student.id)); body = `<div class="payroll-explanation">Everyone defaults to paid. Select only students whose current payment status is outstanding, then record the amount below.</div>${payrollFilterRowMarkup("outstanding")}<div class="payroll-student-grid">${payrollStudentCardsMarkup("outstanding", visibleStudents) || `<div class="payroll-placeholder">No students match these filters.</div>`}</div>${Object.entries(payrollState.outstandingStudents || {}).filter(([id, item]) => item.selected && visibleIds.has(id)).map(([id, item]) => { const record = payrollAllStudents().find(({ student }) => student.id === id); return `<label>${escapeText(record ? rosterStudentFullName(record.student) : id)} · Outstanding amount<input type="number" min="0" step="0.01" value="${escapeText(item.amount || "")}" data-payroll-outstanding-amount="${escapeText(id)}" placeholder="0.00"></label>`; }).join("")}`; }
-      if (step === 4) { const visibleIds = new Set(payrollFilteredStudents("cleared").map(({ student }) => student.id)); const outstanding = Object.entries(payrollState.outstandingStudents || {}).filter(([id, item]) => item.selected && visibleIds.has(id)); body = `${payrollFilterRowMarkup("cleared")}${outstanding.length ? `<div class="payroll-explanation">These are the students marked outstanding in Current Payment Status. Click a card when payment arrives to record the payment date and whether the late fee was paid.</div><div class="payroll-student-grid">${outstanding.map(([id]) => { const record = payrollAllStudents().find(({ student }) => student.id === id); if (!record) return ""; const cleared = payrollState.clearedBalances?.[id]; return `<button class="payroll-student-card ${cleared ? "is-selected" : ""}" type="button" data-payroll-clear-balance="${escapeText(id)}"><span class="roster-student-photo">${escapeText(rosterStudentInitials(record.student))}</span><strong>${escapeText(rosterStudentFullName(record.student))}</strong><small>${escapeText(record.rosterClass.schoolName)} · ${escapeText(rosterTeacherName(record.rosterClass.teacherId))}</small><small>${cleared ? `Paid ${cleared.date}${cleared.lateFeePaid ? " · Late fee paid" : ""}` : `Balance ${payrollCurrency(payrollState.outstandingStudents[id].amount)}`}</small></button>`; }).join("")}</div>` : `<div class="payroll-placeholder">No outstanding balances match these filters.</div>`}`; }
-      if (step === 5) { const tierBTeachers = teachers.filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `<div class="payroll-explanation">Working hours are entered by an authorized DD user. Decimals are accepted and paid at $20 per hour.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
-      if (step === 6) body = `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`;
-      if (step === 7) body = `<div class="payroll-explanation">Every manual adjustment requires a teacher, amount, and reason and will appear on the pay stub and audit history.</div><div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${teachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`;
-      if (step === 8) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
-      if (step === 9) body = payrollState.status === "approved" || payrollState.status === "paid" ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment</span><span>Pay Stub</span><span>Status</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><strong>${escapeText(fullName(item.teacher))}</strong><span>${payrollCurrency(item.payment)}</span><span>Detailed PDF ready</span><span class="status ${payrollState.status === "paid" ? "ok" : "pending"}">${payrollState.status === "paid" ? "Paid" : "Approved"}</span></div>`).join("")}</div><button class="primary" type="button" id="mark-payroll-paid" ${payrollState.status === "paid" ? "disabled" : ""}>${payrollState.status === "paid" ? "Payroll Paid" : "Mark Payroll Paid"}</button>` : `<div class="payroll-placeholder">Approve payroll before recording payments or finalizing pay stubs.</div>`;
+      if (step === 1) { const visibleClasses = payrollFilteredClasses(); body = `<div class="payroll-explanation"><strong>Teacher tier · ${escapeText(payrollPayPeriodLabel())}</strong><br>Only Teacher-tier classes occurring inside this pay period are shown. This will usually be two payable occurrences for each weekly dance class.</div>${payrollFilterRowMarkup("classes", { includeStatus: true })}<div class="payroll-table"><div class="payroll-table-row is-header"><span>School</span><span>Payable</span><span>Excluded</span><span>Reason Recorded</span></div>${visibleClasses.map((rosterClass) => { const dates = payrollTeacherClassDates(rosterClass); const payable = dates.filter((item) => item.status === "payable"); const excluded = dates.filter((item) => item.status === "excluded"); return `<div class="payroll-table-row"><span><strong>${escapeText(rosterClass.schoolName)}</strong><small>${escapeText(rosterClass.name)} · ${escapeText(rosterTeacherName(rosterClass.teacherId))}</small></span><span>${payable.length}</span><span>${excluded.length}</span><span>${escapeText(excluded[0]?.reason || payable[0]?.reason || "Schedule needed")}</span></div>`; }).join("") || `<div class="payroll-placeholder">No Teacher-tier classes occur in this pay period.</div>`}</div><div class="payroll-explanation">Canceled and original rescheduled dates are excluded with a reason. Makeup dates are paid in the pay period when they actually occur and remain linked to the original class change.</div>`; }
+      if (step === 2) {
+        if (payrollState.sequence === "2") body = `<div class="payroll-placeholder">Current payment status was recorded during the 1st payroll. Continue to Outstanding Balances to mark each carried balance as still unpaid, unpaid with a late fee, paid, or paid with a late fee.</div>`;
+        else { const visibleStudents = payrollFilteredStudents("outstanding"); body = `<div class="payroll-explanation">Everyone defaults to paid. Select a student only when their entire current balance is unpaid. No amount entry is needed.</div>${payrollFilterRowMarkup("outstanding")}<div class="payroll-student-grid">${payrollStudentCardsMarkup("outstanding", visibleStudents) || `<div class="payroll-placeholder">No students match these filters.</div>`}</div>`; }
+      }
+      if (step === 3) {
+        const visibleIds = new Set(payrollFilteredStudents("cleared").map(({ student }) => student.id));
+        const outstanding = Object.entries(payrollState.outstandingStudents || {}).filter(([id, item]) => item.selected && visibleIds.has(id) && (payrollBalanceIsUnresolved(item) || payrollBalanceResolvedThisRun(item)));
+        body = `${payrollFilterRowMarkup("cleared")}${outstanding.length ? `<div class="payroll-explanation">Review each outstanding balance. Unpaid balances carry forward to the next 1st payroll with their original month. A paid late fee adds $4 to the Admin-tier paycheck.</div><div class="payroll-student-grid">${outstanding.map(([id, item]) => { const record = payrollAllStudents().find(({ student }) => student.id === id); if (!record) return ""; const status = item.status || "still_unpaid"; return `<article class="payroll-student-card ${["paid", "paid_late_fee"].includes(status) ? "is-selected" : ""}"><span class="roster-student-photo">${escapeText(rosterStudentInitials(record.student))}</span><strong>${escapeText(rosterStudentFullName(record.student))}</strong><small>${escapeText(record.rosterClass.schoolName)} · ${escapeText(rosterTeacherName(record.rosterClass.teacherId))}</small><small>Past due: ${escapeText(payrollBalanceMonthLabel(item.month))}</small><label>Status<select data-payroll-balance-status="${escapeText(id)}"><option value="still_unpaid" ${status === "still_unpaid" ? "selected" : ""}>Still unpaid</option><option value="unpaid_late_fee" ${status === "unpaid_late_fee" ? "selected" : ""}>Unpaid with late fee</option><option value="paid" ${status === "paid" ? "selected" : ""}>Paid</option><option value="paid_late_fee" ${status === "paid_late_fee" ? "selected" : ""}>Paid with late fee</option></select></label></article>`; }).join("")}</div>` : `<div class="payroll-placeholder">No outstanding balances match these filters.</div>`}`;
+      }
+      if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `<div class="payroll-explanation">Working hours are entered by an authorized DD user. Decimals are accepted and paid at $20 per hour.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
+      if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[teacher.payTier])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
+      if (step === 6) body = `<div class="payroll-explanation">Every manual adjustment requires a teacher, amount, and reason and will appear on the pay stub and audit history.</div><div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`;
+      if (step === 7) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
+      if (step === 8) body = payrollState.status === "approved" || payrollState.status === "paid" ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment</span><span>Pay Stub</span><span>Status</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><strong>${escapeText(fullName(item.teacher))}</strong><span>${payrollCurrency(item.payment)}</span><span>Detailed PDF ready</span><span class="status ${payrollState.status === "paid" ? "ok" : "pending"}">${payrollState.status === "paid" ? "Paid" : "Approved"}</span></div>`).join("")}</div><button class="primary" type="button" id="mark-payroll-paid" ${payrollState.status === "paid" ? "disabled" : ""}>${payrollState.status === "paid" ? "Payroll Paid" : "Mark Payroll Paid"}</button>${payrollState.status === "paid" && String(payrollState.month || "").slice(5, 7) === "06" && String(payrollState.sequence) === "1" && !payrollState.yearEndPromotionReviews?.[String(payrollState.month || "").slice(0, 4)] ? `<button class="secondary" type="button" id="review-payroll-promotions">Review Year-End Raises</button>` : ""}` : `<div class="payroll-placeholder">Approve payroll before recording payments or finalizing pay stubs.</div>`;
       const previous = step > 0 ? `<button class="secondary" type="button" data-payroll-nav="${step - 1}">Back</button>` : `<span></span>`;
       const next = step < payrollSteps.length - 1 ? `<button class="primary" type="button" data-payroll-nav="${step + 1}">Save &amp; Continue</button>` : `<button class="secondary" type="button" id="finish-payroll-review">Done</button>`;
       return `<div class="payroll-step-heading"><div><h4>${escapeText(title)}</h4><p>${escapeText(subtitle)}</p></div><span class="status ${payrollState.status === "approved" || payrollState.status === "paid" ? "ok" : "pending"}">${escapeText(payrollState.status.replaceAll("_", " "))}</span></div>${body}<div class="payroll-step-actions">${previous}${next}</div>`;
     };
 
-    const openPayrollBalanceDialog = (studentId) => {
-      const record = payrollAllStudents().find(({ student }) => student.id === studentId);
-      if (!record) return;
-      const existing = payrollState.clearedBalances?.[studentId] || {};
-      const date = window.prompt(`Date payment was received for ${rosterStudentFullName(record.student)} (YYYY-MM-DD)`, existing.date || payrollDateKey(new Date()));
-      if (!date) return;
-      const lateFeePaid = window.confirm("Was the $10 late fee paid? This creates the $2 Admin and Director bonuses.");
-      payrollState.clearedBalances ||= {};
-      payrollState.clearedBalances[studentId] = { date, lateFeePaid, recordedAt: new Date().toISOString() };
-      scheduleAppDataSave();
-      renderPayrollWizard();
+    const payrollPromotionReviewKey = () => String(payrollState.month || defaultPayrollMonth()).slice(0, 4);
+    const payrollIsJuneFirstPayroll = () => String(payrollState.month || "").slice(5, 7) === "06" && String(payrollState.sequence) === "1";
+    const payrollPromotionTeachers = () => payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher");
+    const setPayrollPromotionReviewOpen = (open) => {
+      const overlay = document.getElementById("payroll-promotion-overlay");
+      if (!overlay) return;
+      overlay.classList.toggle("active", Boolean(open));
+      overlay.setAttribute("aria-hidden", open ? "false" : "true");
     };
+    const recordPayrollPromotionReview = (changes = [], result = "reviewed") => {
+      payrollState.yearEndPromotionReviews ||= {};
+      payrollState.yearEndPromotionReviews[payrollPromotionReviewKey()] = {
+        result,
+        reviewedAt: new Date().toISOString(),
+        payrollMonth: payrollState.month,
+        changes
+      };
+      scheduleAppDataSave();
+    };
+    const openPayrollPromotionReview = () => {
+      if (!payrollIsJuneFirstPayroll()) return;
+      payrollState.yearEndPromotionReviews ||= {};
+      if (payrollState.yearEndPromotionReviews[payrollPromotionReviewKey()]) return;
+      const list = document.getElementById("payroll-promotion-list");
+      const apply = document.getElementById("payroll-promotion-apply");
+      if (!list || !apply) return;
+      const teachers = payrollPromotionTeachers();
+      const eligible = teachers.filter((teacher) => payrollTeacherCommissionRate(teacher.id) < 5);
+      list.innerHTML = teachers.length ? teachers.map((teacher) => {
+        const current = payrollTeacherCommissionRate(teacher.id);
+        const proposed = Math.min(5, current + 0.5);
+        const atMaximum = current >= 5;
+        return `<label class="payroll-promotion-row"><input type="checkbox" data-payroll-promotion-teacher="${escapeText(teacher.id)}" ${atMaximum ? "disabled" : "checked"}><span><strong>${escapeText(fullName(teacher))}</strong><small>${atMaximum ? "Already at the maximum commission rate" : "Promote for the next successful season"}</small></span><span class="payroll-promotion-rate">${atMaximum ? `${payrollCurrency(current)} max` : `${payrollCurrency(current)} → ${payrollCurrency(proposed)}`}</span></label>`;
+      }).join("") : `<div class="payroll-placeholder">No commission-based teachers are eligible for this review.</div>`;
+      apply.disabled = eligible.length === 0;
+      setPayrollPromotionReviewOpen(true);
+    };
+
+    document.getElementById("payroll-promotion-close")?.addEventListener("click", () => setPayrollPromotionReviewOpen(false));
+    document.getElementById("payroll-promotion-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "payroll-promotion-overlay") setPayrollPromotionReviewOpen(false);
+    });
+    document.getElementById("payroll-promotion-skip")?.addEventListener("click", () => {
+      recordPayrollPromotionReview([], "declined");
+      setPayrollPromotionReviewOpen(false);
+      showToast("Year-end commission rates left unchanged");
+    });
+    document.getElementById("payroll-promotion-apply")?.addEventListener("click", () => {
+      const selected = [...document.querySelectorAll("[data-payroll-promotion-teacher]:checked")];
+      const changes = selected.map((input) => {
+        const teacherId = input.dataset.payrollPromotionTeacher;
+        const previousRate = payrollTeacherCommissionRate(teacherId);
+        const newRate = Math.min(5, previousRate + 0.5);
+        payrollState.teacherCommissionRates ||= {};
+        payrollState.teacherCommissionRates[teacherId] = newRate;
+        return { teacherId, previousRate, newRate };
+      });
+      recordPayrollPromotionReview(changes, "applied");
+      setPayrollPromotionReviewOpen(false);
+      renderPayrollWizard();
+      showToast(changes.length ? `${changes.length} teacher promotion${changes.length === 1 ? "" : "s"} applied` : "No teacher promotions selected");
+    });
 
     document.getElementById("open-payroll-workspace")?.addEventListener("click", () => {
       document.getElementById("finance-folio-cards").hidden = true;
@@ -41485,31 +41997,67 @@
       if (studentCard) {
         const id = studentCard.dataset.payrollStudent;
         payrollState.outstandingStudents ||= {};
-        const selected = !payrollState.outstandingStudents[id]?.selected;
-        payrollState.outstandingStudents[id] = { ...(payrollState.outstandingStudents[id] || {}), selected, markedAt: selected ? new Date().toISOString() : "" };
+        const existing = payrollState.outstandingStudents[id];
+        if (payrollBalanceIsUnresolved(existing) && existing.month && existing.month !== payrollState.month) {
+          showToast(`${payrollBalanceMonthLabel(existing.month)} is already carried forward for this student`);
+          return;
+        }
+        const selected = !payrollBalanceIsUnresolved(existing);
+        const heldPayLines = selected ? calculatePayrollPreview().lines.filter((line) => line.studentId === id && !line.held && Number(line.amount) > 0).map((line) => ({ teacherId: line.teacherId, studentId: line.studentId, type: line.type, description: line.description, amount: Number(line.amount) })) : [];
+        payrollState.outstandingStudents[id] = selected
+          ? { selected: true, month: payrollState.month, status: "still_unpaid", markedAt: new Date().toISOString(), heldPayLines }
+          : { ...(existing || {}), selected: false, status: "", markedAt: "", heldPayLines: [] };
         renderPayrollWizard(); scheduleAppDataSave(); return;
       }
-      const clear = event.target.closest("[data-payroll-clear-balance]");
-      if (clear) { openPayrollBalanceDialog(clear.dataset.payrollClearBalance); return; }
-      if (event.target.closest("#add-payroll-hours")) { const teacher = teachers.find((item) => item.payTier === "tier_b_teacher"); payrollState.workingHours.push({ teacherId: teacher?.id || "", date: payrollDateKey(new Date()), hours: "", description: "" }); renderPayrollWizard(); return; }
-      if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: teachers[0]?.id || "", amount: "", reason: "" }); renderPayrollWizard(); return; }
+      if (event.target.closest("#add-payroll-hours")) { const teacher = payrollTeachers().find((item) => item.payTier === "tier_b_teacher"); payrollState.workingHours.push({ teacherId: teacher?.id || "", date: payrollDateKey(new Date()), hours: "", description: "" }); renderPayrollWizard(); return; }
+      if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
-      if (event.target.closest("#approve-payroll")) { payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 9; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
-      if (event.target.closest("#mark-payroll-paid")) { payrollState.status = "paid"; payrollState.paidAt = new Date().toISOString(); await finalizePayrollPayStubs(); renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll marked paid · pay stubs published to Teacher Tools"); return; }
+      if (event.target.closest("#approve-payroll")) { payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
+      if (event.target.closest("#mark-payroll-paid")) { payrollState.status = "paid"; payrollState.paidAt = new Date().toISOString(); await finalizePayrollPayStubs(); renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll marked paid · pay stubs published to Teacher Tools"); openPayrollPromotionReview(); return; }
+      if (event.target.closest("#review-payroll-promotions")) { openPayrollPromotionReview(); return; }
       if (event.target.closest("#finish-payroll-review")) document.getElementById("close-payroll-workspace")?.click();
     });
     document.getElementById("payroll-workspace")?.addEventListener("input", (event) => {
       const filter = event.target.closest("[data-payroll-filter-type][data-payroll-filter-field]");
       if (filter) { payrollFilterState(filter.dataset.payrollFilterType)[filter.dataset.payrollFilterField] = filter.value; scheduleAppDataSave(); return; }
-      const outstanding = event.target.closest("[data-payroll-outstanding-amount]");
-      if (outstanding) { payrollState.outstandingStudents[outstanding.dataset.payrollOutstandingAmount].amount = outstanding.value; scheduleAppDataSave(); return; }
       const hours = event.target.closest("[data-payroll-hours-field]");
       if (hours) { payrollState.workingHours[Number(hours.dataset.payrollHoursIndex)][hours.dataset.payrollHoursField] = hours.value; scheduleAppDataSave(); return; }
       const adjustment = event.target.closest("[data-payroll-adjustment-field]");
       if (adjustment) { payrollState.adjustments[Number(adjustment.dataset.payrollAdjustmentIndex)][adjustment.dataset.payrollAdjustmentField] = adjustment.value; scheduleAppDataSave(); }
     });
     document.getElementById("payroll-workspace")?.addEventListener("change", (event) => {
+      const balanceStatus = event.target.closest("[data-payroll-balance-status]");
+      if (balanceStatus) {
+        const id = balanceStatus.dataset.payrollBalanceStatus;
+        const record = payrollState.outstandingStudents?.[id];
+        if (!record) return;
+        if (!record.month) record.month = payrollState.month;
+        record.status = balanceStatus.value;
+        if (["paid", "paid_late_fee"].includes(record.status)) {
+          record.resolvedPayrollMonth = payrollState.month;
+          record.resolvedSequence = payrollState.sequence;
+          record.resolvedAt = new Date().toISOString();
+          payrollState.clearedBalances ||= {};
+          payrollState.clearedBalances[id] = { date: payrollDateKey(new Date()), lateFeePaid: record.status === "paid_late_fee", recordedAt: record.resolvedAt };
+        } else {
+          delete record.resolvedPayrollMonth;
+          delete record.resolvedSequence;
+          delete record.resolvedAt;
+          if (payrollState.clearedBalances) delete payrollState.clearedBalances[id];
+        }
+        renderPayrollWizard();
+        scheduleAppDataSave();
+        return;
+      }
+      const commission = event.target.closest("[data-payroll-commission-teacher]");
+      if (commission) {
+        payrollState.teacherCommissionRates ||= {};
+        payrollState.teacherCommissionRates[commission.dataset.payrollCommissionTeacher] = Number(commission.value);
+        renderPayrollWizard();
+        scheduleAppDataSave();
+        return;
+      }
       const filter = event.target.closest("[data-payroll-filter-type][data-payroll-filter-field]");
       if (!filter) return;
       payrollFilterState(filter.dataset.payrollFilterType)[filter.dataset.payrollFilterField] = filter.value;
@@ -42066,18 +42614,22 @@
 
     let staffFeedbackSubmissions = [];
     let staffFeedbackSubscription = null;
+    let shapeMagicSource = "teacher";
+    let shapeMagicArchiveOpen = false;
     const renderStaffFeedbackInbox = () => {
       const list = document.getElementById("shape-magic-inbox");
       if (!list) return;
-      const status = document.getElementById("shape-magic-status-filter")?.value || "all";
       const category = document.getElementById("shape-magic-category-filter")?.value || "all";
       const search = (document.getElementById("shape-magic-search")?.value || "").trim().toLowerCase();
       const filtered = staffFeedbackSubmissions.filter((item) => (
-        (status === "all" || item.status === status)
+        (item.source || "teacher") === shapeMagicSource
+        && (shapeMagicArchiveOpen ? item.status === "resolved" : item.status !== "resolved")
         && (category === "all" || item.category === category)
         && (!search || `${item.submitter_name} ${item.category} ${item.message}`.toLowerCase().includes(search))
       ));
-      setText("shape-magic-results-count", `${filtered.length} of ${staffFeedbackSubmissions.length} feedback item${staffFeedbackSubmissions.length === 1 ? "" : "s"}`);
+      const sourceItems = staffFeedbackSubmissions.filter((item) => (item.source || "teacher") === shapeMagicSource && (shapeMagicArchiveOpen ? item.status === "resolved" : item.status !== "resolved"));
+      const sourceLabel = shapeMagicSource === "parent" ? "parent" : "teacher";
+      setText("shape-magic-results-count", `${filtered.length} of ${sourceItems.length} ${sourceLabel} feedback item${sourceItems.length === 1 ? "" : "s"}${shapeMagicArchiveOpen ? " in the archive" : ""}`);
       setText("admin-shape-magic-count", `${staffFeedbackSubmissions.filter((item) => item.status === "new").length} New`);
       list.innerHTML = filtered.length ? filtered.map((item) => `
         <article class="shape-magic-item">
@@ -42090,7 +42642,7 @@
             ${item.status !== "resolved" ? `<button class="primary" type="button" data-feedback-status="resolved" data-feedback-id="${escapeText(item.id)}">Resolve</button>` : `<button class="secondary" type="button" data-feedback-status="reviewed" data-feedback-id="${escapeText(item.id)}">Reopen</button>`}
           </div>
         </article>
-      `).join("") : '<div class="shape-magic-empty">No teacher feedback matches these filters.</div>';
+      `).join("") : `<div class="shape-magic-empty">No ${sourceLabel} feedback ${shapeMagicArchiveOpen ? "is in the archive" : "matches these filters"}.</div>`;
     };
     const loadStaffFeedbackInbox = async () => {
       const profile = window.dtCurrentProfile;
@@ -42099,7 +42651,12 @@
         renderStaffFeedbackInbox();
         return false;
       }
-      const { data, error } = await window.dtSupabase.from("staff_feedback_submissions").select("id, submitter_name, category, message, attachment_path, attachment_type, attachment_name, status, created_at").order("created_at", { ascending: false });
+      let { data, error } = await window.dtSupabase.from("staff_feedback_submissions").select("id, submitter_name, category, message, attachment_path, attachment_type, attachment_name, status, source, created_at").order("created_at", { ascending: false });
+      if (error && /source/i.test(error.message || "")) {
+        const fallback = await window.dtSupabase.from("staff_feedback_submissions").select("id, submitter_name, category, message, attachment_path, attachment_type, attachment_name, status, created_at").order("created_at", { ascending: false });
+        data = (fallback.data || []).map((item) => ({ ...item, source: "teacher" }));
+        error = fallback.error;
+      }
       if (error) {
         console.error("Shape the Magic feedback could not load", error);
         document.getElementById("shape-magic-inbox").innerHTML = '<div class="shape-magic-empty">Feedback could not be opened. Refresh and try again.</div>';
@@ -42149,7 +42706,7 @@
     const updateCommunicationStudioToggles = () => {
       const view = document.body.dataset.adminSection === "newsletter-studio"
         ? "newsletter"
-        : selectedAdminMessageAudience === "parents" ? "parents" : "team";
+        : selectedCommunicationStudioView;
       document.body.dataset.communicationView = view;
       document.querySelectorAll("[data-communication-studio-view]").forEach((button) => {
         const active = button.dataset.communicationStudioView === view;
@@ -42159,9 +42716,19 @@
     };
     const openCommunicationStudioView = (view) => {
       if (view === "newsletter") {
+        selectedCommunicationStudioView = "newsletter";
         openAdminSection("newsletter-studio");
         return;
       }
+      selectedCommunicationStudioView = view === "automated" ? "automated" : view === "parents" ? "parents" : "team";
+      if (view === "automated") {
+        openAdminSection("messages");
+        document.getElementById("admin-automated-posts-panel")?.removeAttribute("hidden");
+        loadAutomatedPostHistory();
+        updateCommunicationStudioToggles();
+        return;
+      }
+      document.getElementById("admin-automated-posts-panel")?.setAttribute("hidden", "");
       selectedAdminMessageAudience = view === "parents" ? "parents" : "staff";
       if (view === "team") selectedAdminMessageThreadId = pinnedMessageThreadId;
       openAdminSection("messages");
@@ -42228,7 +42795,13 @@
         if (newsletterSetupComplete) renderNewsletterStudio();
       }
       if (section === "curriculum-progress") renderAdminCurriculumProgress();
-      if (section === "messages") renderAdminMessagesPage();
+      if (section === "messages") {
+        renderAdminMessagesPage();
+        if (selectedCommunicationStudioView !== "automated") {
+          document.getElementById("admin-automated-posts-panel")?.setAttribute("hidden", "");
+        }
+      }
+      updateCommunicationStudioToggles();
       if (section === "shape-the-magic") loadStaffFeedbackInbox();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
@@ -42526,6 +43099,13 @@
     });
     document.querySelectorAll("[data-newsletter-edit-auto-welcome]").forEach((button) => {
       button.addEventListener("click", () => openNewsletterAutoSendWelcome(button.dataset.newsletterEditAutoWelcome));
+    });
+    document.getElementById("newsletter-review-directory-welcome-resend")?.addEventListener("click", () => openDirectoryWelcomeResendReview());
+    document.getElementById("newsletter-directory-resend-confirm")?.addEventListener("change", () => updateDirectoryWelcomeResendSubmit());
+    document.getElementById("newsletter-directory-resend-submit")?.addEventListener("click", () => sendDirectoryWelcomeResend());
+    document.getElementById("newsletter-directory-resend-cancel")?.addEventListener("click", () => closeDirectoryWelcomeResendReview());
+    document.getElementById("newsletter-directory-resend-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "newsletter-directory-resend-overlay") closeDirectoryWelcomeResendReview();
     });
     document.getElementById("newsletter-review-welcome-publish")?.addEventListener("click", () => {
       const profile = window.dtCurrentProfile;
@@ -44848,14 +45428,14 @@
       const [classId, studentId] = button.dataset.studentLibraryOpen.split("::");
       const rosterClass = rosterClasses.find((item) => item.id === classId);
       const student = rosterClass?.students.find((item) => item.id === studentId);
-      if (rosterClass && student) openRosterStudentEditor(rosterClass, student);
+      if (rosterClass && student) openRosterStudentEditor(rosterClass, student, { navigationScope: "directory" });
     });
     document.getElementById("director-future-dancer-list")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-director-future-student]");
       if (!button) return;
       const rosterClass = rosterClasses.find((item) => item.id === button.dataset.directorFutureClass);
       const student = rosterClass?.students.find((item) => item.id === button.dataset.directorFutureStudent);
-      if (rosterClass && student) openRosterStudentEditor(rosterClass, student);
+      if (rosterClass && student) openRosterStudentEditor(rosterClass, student, { navigationScope: "directory" });
     });
     document.getElementById("director-add-trial")?.addEventListener("click", () => {
       openTeacherFutureDancerCreator("", null, { directorMode: true });
@@ -44893,7 +45473,7 @@
       const [classId, studentId] = button.dataset.activeEnrollmentOpen.split("::");
       const rosterClass = rosterClasses.find((item) => item.id === classId);
       const student = rosterClass?.students.find((item) => item.id === studentId);
-      if (rosterClass && student) openRosterStudentEditor(rosterClass, student);
+      if (rosterClass && student) openRosterStudentEditor(rosterClass, student, { navigationScope: "directory" });
     });
     document.getElementById("director-future-dancer-search")?.addEventListener("input", (event) => {
       directorFutureDancerSearch = event.target.value;
@@ -44941,7 +45521,8 @@
       }
       const savedWelcome = newsletterCanonicalWelcome?.female && newsletterCanonicalWelcome?.male
         ? newsletterCanonicalWelcome
-        : newsletterDraft.autoSendTemplates?.welcome;
+        : newsletterDraft.autoSendTemplates?.welcome
+          || (document.body.dataset.tourMode === "true" ? newsletterBuiltInWelcomeVersions() : null);
       const girlTemplate = savedWelcome?.female;
       const boyTemplate = savedWelcome?.male;
       if (girlTemplate?.template !== "welcome" || boyTemplate?.template !== "welcome") {
@@ -44993,6 +45574,210 @@
           gender
         }
       };
+    };
+    const directoryWelcomeItemForRecord = ({ student }) => ({
+      id: student.enrollmentId || "",
+      student_gender: student.gender || "",
+      parent_email: student.parentEmail || "",
+      parent_first_name: student.parentFirstName || "",
+      parent_last_name: student.parentLastName || "",
+      parent_name: student.parentName || "",
+      placed_student_id: student.id,
+      placed_class_enrollment_id: student.enrollmentId || ""
+    });
+    const directoryWelcomeDisplayName = ({ student }) => (
+      [student.firstName, student.lastName].filter(Boolean).join(" ")
+      || student.name
+      || "Unnamed dancer"
+    );
+    const buildDirectoryWelcomeAudit = async () => {
+      const role = document.body.dataset.userRole || window.dtCurrentProfile?.role || "";
+      if (document.body.dataset.tourMode !== "true" && !["admin", "director"].includes(role)) {
+        throw new Error("Only a director or administrator can review a directory resend.");
+      }
+      const templates = await enrollmentWelcomeTemplates();
+      const records = boutiqueKitRecords().slice().sort((a, b) => (
+        directoryWelcomeDisplayName(a).localeCompare(directoryWelcomeDisplayName(b), undefined, { sensitivity: "base" })
+        || String(a.rosterClass?.schoolName || a.rosterClass?.school || "").localeCompare(String(b.rosterClass?.schoolName || b.rosterClass?.school || ""), undefined, { sensitivity: "base" })
+      ));
+      const ready = [];
+      const excluded = [];
+      records.forEach((record) => {
+        const item = directoryWelcomeItemForRecord(record);
+        const delivery = prepareEnrollmentWelcomeDelivery(item, templates);
+        const name = directoryWelcomeDisplayName(record);
+        const school = record.rosterClass?.schoolName || record.rosterClass?.school || "School not assigned";
+        if (delivery.error) {
+          excluded.push({
+            name,
+            school,
+            email: String(record.student.parentEmail || "").trim().toLowerCase() || "No parent email",
+            reason: delivery.error
+          });
+          return;
+        }
+        ready.push({ record, item, delivery, name, school });
+      });
+      const byEmail = new Map();
+      ready.forEach((entry) => {
+        const email = entry.delivery.recipient;
+        if (!byEmail.has(email)) byEmail.set(email, []);
+        byEmail.get(email).push(entry);
+      });
+      const repeatedEmails = [...byEmail.entries()]
+        .filter(([, entries]) => entries.length > 1)
+        .map(([email, entries]) => ({ email, entries }))
+        .sort((a, b) => a.email.localeCompare(b.email));
+      return {
+        templates,
+        total: records.length,
+        ready,
+        excluded,
+        uniqueEmails: byEmail.size,
+        repeatedEmails
+      };
+    };
+    const directoryWelcomeReviewRow = ({ name, email, school, detail = "", excluded = false }) => `
+      <div class="newsletter-directory-review-row${excluded ? " is-excluded" : ""}">
+        <strong>${escapeText(name)}</strong>
+        <span>${escapeText(email)}</span>
+        <span>${escapeText(detail || school)}</span>
+      </div>`;
+    const renderDirectoryWelcomeAudit = (audit) => {
+      const review = document.getElementById("newsletter-directory-resend-review");
+      const confirmRow = document.getElementById("newsletter-directory-resend-confirm-row");
+      const confirmCopy = document.getElementById("newsletter-directory-resend-confirm-copy");
+      const confirm = document.getElementById("newsletter-directory-resend-confirm");
+      if (!review || !confirmRow || !confirmCopy || !confirm) return;
+      const repeatedCount = audit.repeatedEmails.length;
+      const femaleExample = audit.ready.find(({ delivery }) => delivery.gender === "female")?.delivery.message.subject || "No eligible girl recipient";
+      const maleExample = audit.ready.find(({ delivery }) => delivery.gender === "male")?.delivery.message.subject || "No eligible boy recipient";
+      review.innerHTML = `
+        <div class="newsletter-directory-summary" aria-label="Directory resend totals">
+          <span><strong>${audit.total}</strong><small>Active dancers reviewed</small></span>
+          <span><strong>${audit.ready.length}</strong><small>Personalized emails ready</small></span>
+          <span><strong>${audit.uniqueEmails}</strong><small>Unique parent addresses</small></span>
+          <span><strong>${audit.excluded.length}</strong><small>Excluded — nothing sent</small></span>
+        </div>
+        <section class="newsletter-directory-review-section">
+          <h4>Exact saved welcome versions</h4>
+          <p><strong>Girl subject:</strong> ${escapeText(femaleExample)}</p>
+          <p><strong>Boy subject:</strong> ${escapeText(maleExample)}</p>
+          <small>Each email is personalized from the dancer’s current profile and class placement.</small>
+        </section>
+        <section class="newsletter-directory-review-section">
+          <h4>Repeated household addresses (${repeatedCount})</h4>
+          ${repeatedCount ? `<div class="newsletter-directory-review-list">${audit.repeatedEmails.map(({ email, entries }) => directoryWelcomeReviewRow({
+            name: entries.map(({ name }) => name).join(" & "),
+            email,
+            school: entries.map(({ school }) => school).filter((value, index, list) => list.indexOf(value) === index).join(" · "),
+            detail: `${entries.length} personalized dancer emails · ${entries.map(({ school }) => school).filter((value, index, list) => list.indexOf(value) === index).join(" · ")}`
+          })).join("")}</div>` : "<p>No parent address will receive more than one dancer email.</p>"}
+        </section>
+        <section class="newsletter-directory-review-section">
+          <h4>Excluded dancers (${audit.excluded.length})</h4>
+          ${audit.excluded.length ? `<div class="newsletter-directory-review-list">${audit.excluded.map((entry) => directoryWelcomeReviewRow({ ...entry, detail: entry.reason, excluded: true })).join("")}</div>` : "<p>Every active dancer has a valid email, supported gender, and current class placement.</p>"}
+        </section>
+        <section class="newsletter-directory-review-section">
+          <h4>Ready recipients (${audit.ready.length})</h4>
+          <div class="newsletter-directory-review-list">${audit.ready.map(({ name, school, delivery }) => directoryWelcomeReviewRow({ name, email: delivery.recipient, school })).join("") || "<p>No eligible recipients are ready.</p>"}</div>
+        </section>`;
+      confirm.checked = false;
+      confirmCopy.textContent = `I reviewed ${audit.ready.length} personalized emails to ${audit.uniqueEmails} unique parent addresses, including ${repeatedCount} repeated household address${repeatedCount === 1 ? "" : "es"} and ${audit.excluded.length} exclusion${audit.excluded.length === 1 ? "" : "s"}.`;
+      confirmRow.hidden = !audit.ready.length;
+      updateDirectoryWelcomeResendSubmit();
+    };
+    const updateDirectoryWelcomeResendSubmit = () => {
+      const submit = document.getElementById("newsletter-directory-resend-submit");
+      const confirm = document.getElementById("newsletter-directory-resend-confirm");
+      if (!submit) return;
+      const role = document.body.dataset.userRole || window.dtCurrentProfile?.role || "";
+      const liveAuthorized = ["admin", "director"].includes(role) && document.body.dataset.tourMode !== "true";
+      submit.disabled = !liveAuthorized || newsletterDirectoryResendSending || !newsletterDirectoryResendAudit?.ready.length || !confirm?.checked;
+      submit.textContent = newsletterDirectoryResendSending ? "Sending…" : "Resend Welcome Emails";
+    };
+    const openDirectoryWelcomeResendReview = async () => {
+      const role = document.body.dataset.userRole || window.dtCurrentProfile?.role || "";
+      if (document.body.dataset.tourMode !== "true" && !["admin", "director"].includes(role)) {
+        showToast("Only a director or administrator can review a directory resend.");
+        return;
+      }
+      const overlay = document.getElementById("newsletter-directory-resend-overlay");
+      const review = document.getElementById("newsletter-directory-resend-review");
+      const confirmRow = document.getElementById("newsletter-directory-resend-confirm-row");
+      const progress = document.getElementById("newsletter-directory-resend-progress");
+      if (!overlay || !review || !confirmRow || !progress) return;
+      newsletterDirectoryResendAudit = null;
+      review.innerHTML = "<p>Preparing a fresh directory audit…</p>";
+      confirmRow.hidden = true;
+      progress.textContent = "Nothing has been sent.";
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+      updateDirectoryWelcomeResendSubmit();
+      try {
+        newsletterDirectoryResendAudit = await buildDirectoryWelcomeAudit();
+        renderDirectoryWelcomeAudit(newsletterDirectoryResendAudit);
+        if (document.body.dataset.tourMode === "true") {
+          progress.textContent = "Preview mode: this is a recipient audit only. Sending is disabled.";
+        }
+      } catch (error) {
+        console.error("Directory welcome resend audit failed", error);
+        review.innerHTML = `<section class="newsletter-directory-review-section"><h4>The directory could not be reviewed</h4><p>${escapeText(error.message || "The welcome templates or active dancer directory could not be opened.")}</p></section>`;
+        progress.textContent = "Nothing has been sent.";
+      }
+    };
+    const closeDirectoryWelcomeResendReview = () => {
+      if (newsletterDirectoryResendSending) return;
+      const overlay = document.getElementById("newsletter-directory-resend-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+      newsletterDirectoryResendAudit = null;
+      const confirm = document.getElementById("newsletter-directory-resend-confirm");
+      if (confirm) confirm.checked = false;
+      updateDirectoryWelcomeResendSubmit();
+    };
+    const sendDirectoryWelcomeResend = async () => {
+      const audit = newsletterDirectoryResendAudit;
+      const confirm = document.getElementById("newsletter-directory-resend-confirm");
+      const progress = document.getElementById("newsletter-directory-resend-progress");
+      if (!audit?.ready.length || !confirm?.checked || newsletterDirectoryResendSending) return;
+      const role = document.body.dataset.userRole || window.dtCurrentProfile?.role || "";
+      if (!["admin", "director"].includes(role) || document.body.dataset.tourMode === "true") {
+        if (progress) progress.textContent = "Live director access is required. Nothing was sent.";
+        return;
+      }
+      const accepted = window.confirm(`Send ${audit.ready.length} personalized Welcome to Dance Techniques emails now?\n\nThey will go to ${audit.uniqueEmails} unique parent addresses. ${audit.repeatedEmails.length} address${audit.repeatedEmails.length === 1 ? "" : "es"} will receive more than one dancer email. ${audit.excluded.length} dancer${audit.excluded.length === 1 ? " is" : "s are"} excluded.`);
+      if (!accepted) return;
+      newsletterDirectoryResendSending = true;
+      updateDirectoryWelcomeResendSubmit();
+      const campaignId = crypto.randomUUID();
+      let sent = 0;
+      let failure = null;
+      for (const entry of audit.ready) {
+        if (progress) progress.textContent = `Sending ${sent + 1} of ${audit.ready.length}: ${entry.name}…`;
+        try {
+          await sendNewsletterMessages({
+            mode: "send",
+            confirmed: true,
+            sendId: `welcome-directory-resend-${campaignId}-${entry.record.student.id}`,
+            messages: [entry.delivery.message]
+          });
+          sent += 1;
+        } catch (error) {
+          console.error("Directory welcome resend stopped", entry.record.student.id, error);
+          failure = { entry, error };
+          break;
+        }
+      }
+      newsletterDirectoryResendSending = false;
+      confirm.checked = false;
+      confirm.disabled = true;
+      updateDirectoryWelcomeResendSubmit();
+      if (progress) {
+        progress.textContent = failure
+          ? `${sent} of ${audit.ready.length} emails were accepted before the service stopped at ${failure.entry.name}. ${audit.ready.length - sent} were not sent. Do not retry the whole directory until delivery history is reviewed.`
+          : `${sent} personalized welcome emails were accepted by the email service. ${audit.excluded.length} excluded dancer${audit.excluded.length === 1 ? " was" : "s were"} not sent.`;
+      }
     };
     const sendEnrollmentWelcomeEmail = async (item, { resend = false, recipientOverride = "" } = {}) => {
       if (!item || enrollmentWelcomeSending.has(item.id) || (!resend && item.parent_invited_at)) return;
@@ -47043,6 +47828,7 @@
         renderClassesAndRosters();
         return;
       }
+      const wasTotsClass = setting === "ageGroup" && isTotsAgeClass(rosterClass);
       rosterClass[setting] = field.value;
       if (setting === "ageGroup") {
         rosterClass.classroom = field.value;
@@ -47329,7 +48115,7 @@
       if (editStudentButton) {
         const student = rosterClass.students.find((item) => item.id === editStudentButton.dataset.rosterEditStudent);
         if (!student) return;
-        openRosterStudentEditor(rosterClass, student);
+        openRosterStudentEditor(rosterClass, student, { navigationScope: "class" });
       }
     });
     document.getElementById("roster-class-feed-overlay")?.addEventListener("click", (event) => {
@@ -47857,6 +48643,22 @@
     });
     document.getElementById("roster-parent-portal-invite")?.addEventListener("click", sendEditingStudentParentPortalInvite);
     document.getElementById("roster-parent-portal-text-invite")?.addEventListener("click", copyEditingStudentParentPortalTextInvite);
+    document.getElementById("rowlett-5-invite-list")?.addEventListener("change", (event) => {
+      const checkbox = event.target.closest("[data-rowlett-invite-student]");
+      if (!checkbox) return;
+      if (checkbox.checked) rowlettInviteSelectedStudents.add(String(checkbox.dataset.rowlettInviteStudent));
+      else rowlettInviteSelectedStudents.delete(String(checkbox.dataset.rowlettInviteStudent));
+      void renderRowlettParentPortalInvites();
+    });
+    document.getElementById("rowlett-5-invite-select-all")?.addEventListener("change", (event) => {
+      const checked = event.target.checked;
+      rowlettInvitationRecords().filter((record) => record.guardian_id && !record.validation_message).forEach((record) => {
+        if (checked) rowlettInviteSelectedStudents.add(String(record.student_id));
+        else rowlettInviteSelectedStudents.delete(String(record.student_id));
+      });
+      void renderRowlettParentPortalInvites();
+    });
+    document.getElementById("rowlett-5-invite-selected")?.addEventListener("click", inviteSelectedRowlettFamilies);
     document.getElementById("roster-student-edit-form")?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const saveButton = document.getElementById("roster-student-edit-submit");
@@ -48010,7 +48812,7 @@
       closeProspectiveFollowup();
       selectedRosterClassId = rosterClass.id;
       renderClassesAndRosters();
-      openRosterStudentEditor(rosterClass, student);
+      openRosterStudentEditor(rosterClass, student, { navigationScope: "directory" });
     });
 
     const musicLibraryState = {
@@ -48844,8 +49646,19 @@
     });
     ttFeedbackDialog?.addEventListener("close", () => ttFeedbackLauncher?.focus());
 
-    ["shape-magic-status-filter", "shape-magic-category-filter", "shape-magic-search"].forEach((id) => {
+    ["shape-magic-category-filter", "shape-magic-search"].forEach((id) => {
       document.getElementById(id)?.addEventListener(id === "shape-magic-search" ? "input" : "change", renderStaffFeedbackInbox);
+    });
+    document.querySelectorAll("[data-feedback-source]").forEach((button) => button.addEventListener("click", () => {
+      shapeMagicSource = button.dataset.feedbackSource;
+      document.querySelectorAll("[data-feedback-source]").forEach((item) => item.setAttribute("aria-selected", String(item === button)));
+      renderStaffFeedbackInbox();
+    }));
+    document.getElementById("shape-magic-archive-toggle")?.addEventListener("click", (event) => {
+      shapeMagicArchiveOpen = !shapeMagicArchiveOpen;
+      event.currentTarget.setAttribute("aria-pressed", String(shapeMagicArchiveOpen));
+      event.currentTarget.textContent = shapeMagicArchiveOpen ? "Back to Active" : "View Archive";
+      renderStaffFeedbackInbox();
     });
     document.getElementById("shape-magic-inbox")?.addEventListener("click", (event) => {
       const button = event.target.closest("[data-feedback-status][data-feedback-id]");
