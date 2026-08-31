@@ -228,7 +228,7 @@
     const setStatus = (selector, message, isError = false) => { const node = $(selector); if (!node) return; node.textContent = message; node.classList.toggle("error", isError); };
     const selectedPlaylist = () => state.playlists.find((playlist) => playlist.id === state.selectedPlaylistId && playlist.active);
     const tracksForPlaylist = (playlistId) => state.links.filter((link) => link.playlist_id === playlistId).sort((a, b) => a.position - b.position).map((link) => state.tracks.find((track) => track.id === link.track_id)).filter(Boolean);
-    const coverMarkup = (item, label) => item.cover_url ? `<img class="cover" src="${escapeText(item.cover_url)}" alt="${escapeText(label)} cover">` : `<span class="cover" aria-hidden="true"></span>`;
+    const coverMarkup = (item, label) => item.cover_url ? `<img class="cover" src="${escapeText(item.cover_url)}" alt="${escapeText(label)} cover" onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'cover' }))">` : `<span class="cover" aria-hidden="true"></span>`;
 
     function showTab(name) {
       document.querySelectorAll("[data-tab]").forEach((button) => button.setAttribute("aria-selected", button.dataset.tab === name ? "true" : "false"));
@@ -242,8 +242,19 @@
       return error ? "" : (data?.signedUrl || "");
     }
 
-    async function addCoverUrls(items) {
-      await Promise.all(items.map(async (item) => { item.cover_url = await signedCover(item.cover_storage_path); }));
+    // Covers come from two eras: newer ones live in the private Supabase bucket
+    // (cover_storage_path), older ones are bundled image files named by
+    // cover_path. The teacher player falls back to the bundled file, so the
+    // admin must too or older songs look coverless here.
+    function bundledCover(item, folder) {
+      const file = item.cover_path?.split("/").pop();
+      return file ? `assets/dt-tunes/${folder}/${encodeURIComponent(file)}` : "";
+    }
+
+    async function addCoverUrls(items, folder) {
+      await Promise.all(items.map(async (item) => {
+        item.cover_url = await signedCover(item.cover_storage_path) || bundledCover(item, folder);
+      }));
     }
 
     async function loadData(preferredPlaylistId = state.selectedPlaylistId) {
@@ -257,7 +268,7 @@
       state.playlists = playlistResult.data || [];
       state.tracks = trackResult.data || [];
       state.links = linkResult.data || [];
-      await Promise.all([addCoverUrls(state.playlists), addCoverUrls(state.tracks)]);
+      await Promise.all([addCoverUrls(state.playlists, "playlist-covers"), addCoverUrls(state.tracks, "song-covers")]);
       const active = state.playlists.filter((playlist) => playlist.active);
       state.selectedPlaylistId = active.some((playlist) => playlist.id === preferredPlaylistId) ? preferredPlaylistId : (active[0]?.id || "");
       renderAll();
