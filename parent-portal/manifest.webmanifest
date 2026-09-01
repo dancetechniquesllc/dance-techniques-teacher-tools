@@ -1,0 +1,17 @@
+{
+  "name": "Dance Techniques Parent Portal",
+  "short_name": "My Dance Techniques",
+  "description": "Stay in Step with Your Dancer’s Day.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fffaf6",
+  "theme_color": "#711245",
+  "icons": [
+    {
+      "src": "../teacher-portal/director-dashboard/assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
