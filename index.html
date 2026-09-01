@@ -3262,6 +3262,7 @@
     .teacher-future-prospect-card:hover { border-color: color-mix(in srgb, var(--berry) 35%, var(--border)); background: color-mix(in srgb, var(--blush) 38%, var(--surface)); }
     .teacher-future-prospect-card .roster-student-photo { width: 58px; height: 58px; flex-basis: 58px; }
     .teacher-future-prospect-card strong { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+    .teacher-future-prospect-card small { color: var(--muted); font-size: 10px; font-weight: 800; }
 
     @media (max-width: 460px) {
       .teacher-roster-form { grid-template-columns: 1fr; }
@@ -21757,7 +21758,11 @@
     };
 
     const moveSharedStudentEnrollment = async (student, targetClass) => {
-      if (!sharedRosterReady || !window.dtSupabase) return true;
+      if (document.body.dataset.tourMode === "true") return true;
+      if (!sharedRosterReady || !window.dtSupabase) {
+        showToast("Open the connected Director Dashboard to save school changes.");
+        return false;
+      }
       if (!student.enrollmentId || !student.id) {
         showToast("This dancer is missing a linked class enrollment. Nothing was changed.");
         return false;
@@ -22782,7 +22787,7 @@
         effectiveDate: scheduleDateForSchool(date, profileSchool)
       }));
       const overrides = closureClassOverridesForTeacher()
-        .filter((override) => enrollmentSchoolNameMatches(override.schoolName, school.school))
+        .filter((override) => enrollmentSchoolKey(override.schoolName) === enrollmentSchoolKey(school.school))
         .sort((a, b) => a.date.localeCompare(b.date));
       overrides.forEach((override) => {
         const curriculumAlreadyOnDate = entries.some((entry) => (
@@ -22821,7 +22826,16 @@
     };
 
     const scheduleSourcesForTeacher = () => (profileTeacher.schools || []).map((profileSchool) => {
-      const established = lexiSchedule.find((school) => enrollmentSchoolNameMatches(school.school, profileSchool.name));
+      const profileSchoolKeys = new Set([
+        profileSchool.name,
+        profileSchool.nickname,
+        ...(Array.isArray(profileSchool.aliases) ? profileSchool.aliases : []),
+        ...(Array.isArray(profileSchool.alternateNames) ? profileSchool.alternateNames : [])
+      ].filter(Boolean).map(enrollmentSchoolKey));
+      const established = lexiSchedule.find((school) => (
+        profileSchoolKeys.has(enrollmentSchoolKey(school.school)) ||
+        profileSchoolKeys.has(enrollmentSchoolKey(school.nickname))
+      ));
       return { school: established || generatedScheduleSourceForSchool(profileSchool), profileSchool };
     });
 
@@ -25967,11 +25981,16 @@
       openNewIsdDialog(field);
       return true;
     };
-    const schoolProfileByName = (schoolName) => profileTeacher.schools.find((school) => (
-      school.name === schoolName ||
-      enrollmentSchoolNameMatches(school.name, schoolName) ||
-      enrollmentSchoolNameMatches(school.nickname, schoolName)
-    ));
+    const schoolProfileByName = (schoolName) => {
+      const targetKey = enrollmentSchoolKey(schoolName);
+      if (!targetKey) return null;
+      return profileTeacher.schools.find((school) => [
+        school.name,
+        school.nickname,
+        ...(Array.isArray(school.aliases) ? school.aliases : []),
+        ...(Array.isArray(school.alternateNames) ? school.alternateNames : [])
+      ].filter(Boolean).some((name) => enrollmentSchoolKey(name) === targetKey)) || null;
+    };
     const rescheduleDateLabel = (dateString) => dateString ? new Date(`${dateString}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "";
     const setRescheduleAlertOpen = (open) => {
       const overlay = document.getElementById("reschedule-alert-confirm");
@@ -27700,7 +27719,7 @@
       const matchingRosterClasses = rosterClasses.filter((rosterClass) => (
         rosterClass.sourceActive !== false &&
         rosterClass.teacherId === profileTeacher.id &&
-        enrollmentSchoolNameMatches(rosterClass.schoolName, event.school)
+        enrollmentOfficialSchoolMatchesClass(school, rosterClass)
       )).sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time)
         || left.name.localeCompare(right.name, undefined, { numeric: true }));
       if (!classes.length) return "";
@@ -27906,9 +27925,11 @@
     };
 
     const myDayOrdersMarkup = (dayEvents) => {
-      const schoolNames = new Set((dayEvents || []).map((event) => event.school).filter(Boolean));
-      if (!schoolNames.size) return "";
-      const records = teacherOrderRecords().filter(({ rosterClass }) => [...schoolNames].some((schoolName) => enrollmentSchoolNameMatches(schoolName, rosterClass.schoolName)));
+      const schools = (dayEvents || []).map((event) => schoolProfileByName(event.school)).filter(Boolean);
+      if (!schools.length) return "";
+      const records = teacherOrderRecords().filter(({ rosterClass }) => (
+        schools.some((school) => enrollmentOfficialSchoolMatchesClass(school, rosterClass))
+      ));
       const ready = records.filter(({ student }) => student.kitReady && !student.kitPickedUp && !student.kitReceived).length;
       const possession = records.filter(({ student }) => student.kitPickedUp && !student.kitReceived).length;
       if (!ready && !possession) return "";
@@ -27923,7 +27944,7 @@
       const matchingClasses = rosterClasses.filter((rosterClass) => (
         rosterClass.sourceActive !== false &&
         rosterClass.teacherId === profileTeacher.id &&
-        enrollmentSchoolNameMatches(rosterClass.schoolName, school.name)
+        enrollmentOfficialSchoolMatchesClass(school, rosterClass)
       ));
       return {
         school: school.name,
@@ -27956,10 +27977,11 @@
       const dateLabel = todayDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
       const scheduledDayEvents = eventsForTeachingDate(todayKey).map((scheduledEvent) => {
         if (document.body.dataset.tourMode !== "true") return scheduledEvent;
+        const scheduledSchool = schoolProfileByName(scheduledEvent.school);
         const matchingClassCount = rosterClasses.filter((rosterClass) => (
           rosterClass.sourceActive !== false &&
           rosterClass.teacherId === profileTeacher.id &&
-          enrollmentSchoolNameMatches(rosterClass.schoolName, scheduledEvent.school)
+          scheduledSchool && enrollmentOfficialSchoolMatchesClass(scheduledSchool, rosterClass)
         )).length;
         return {
           ...scheduledEvent,
@@ -34856,7 +34878,7 @@
           : `<button class="teacher-attendance-button" type="button" data-teacher-attendance-status="present" data-teacher-attendance-student="${rosterSafe(student.id)}" data-teacher-attendance-class="${rosterSafe(rosterClass.id)}">${attendanceStatus === "present" ? "✓ Checked In" : attendanceStatus === "tardy" ? "Tardy" : attendanceStatus === "absent" ? "Absent" : "Check In"}</button>`)}
       </div>`;
     };
-    const teacherFutureProspectCardMarkup = (student, rosterClass) => `<button class="teacher-future-prospect-card" type="button" data-teacher-edit-prospect="${rosterSafe(student.id)}" data-teacher-prospect-class="${rosterSafe(rosterClass.id)}" aria-label="Edit ${rosterSafe(rosterStudentFullName(student))}"><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong></button>`;
+    const teacherFutureProspectCardMarkup = (student, rosterClass) => `<button class="teacher-future-prospect-card" type="button" data-teacher-edit-prospect="${rosterSafe(student.id)}" data-teacher-prospect-class="${rosterSafe(rosterClass.id)}" aria-label="Edit ${rosterSafe(rosterStudentFullName(student))}"><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong>${rosterTrialAttendancePending(student) ? `<small>Trial in progress</small>` : ""}</button>`;
 
     const teacherRosterClassroomMarkup = (students, rosterClass) => {
       const attendance = teacherAttendanceForClass(rosterClass);
@@ -34994,8 +35016,13 @@
     const teacherRosterClassMatchesSchool = (rosterClass, school) => {
       if (!rosterClass || !school) return false;
       if (rosterClass.partnerSchoolId && school.id) return String(rosterClass.partnerSchoolId) === String(school.id);
-      const exact = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
-      return exact(rosterClass.schoolName) === exact(school.name);
+      return enrollmentOfficialSchoolMatchesClass(school, rosterClass);
+    };
+
+    const teacherRosterSelectedSchool = (schools = assignedTeacherSchools()) => {
+      if (teacherRosterSchoolFilter === "all") return null;
+      const selectedKey = enrollmentSchoolKey(teacherRosterSchoolFilter);
+      return schools.find((school) => enrollmentSchoolKey(school.name) === selectedKey) || null;
     };
 
     const teacherNewEnrollmentAlertMarkup = () => {
@@ -35148,30 +35175,28 @@
       const schools = assignedTeacherSchools();
       const allClasses = teacherRosterClasses();
       const requestedSchool = document.getElementById("rosters-view")?.dataset.requestedSchool || "";
-      const requestedSchoolMatch = requestedSchool && schools.find((school) =>
-        enrollmentSchoolNameMatches(school.name, requestedSchool)
-        || enrollmentSchoolNameMatches(school.nickname, requestedSchool));
+      const requestedSchoolKey = enrollmentSchoolKey(requestedSchool);
+      const requestedSchoolMatch = requestedSchool && schools.find((school) => [school.name, school.nickname, ...(school.aliases || []), ...(school.alternateNames || [])]
+        .some((name) => enrollmentSchoolKey(name) === requestedSchoolKey));
       if (requestedSchoolMatch) teacherRosterSchoolFilter = requestedSchoolMatch.name;
       document.getElementById("rosters-view")?.removeAttribute("data-requested-school");
-      const schoolHasClasses = (school) => allClasses.some((rosterClass) => enrollmentSchoolNameMatches(school.name, rosterClass.schoolName)
-        || enrollmentSchoolNameMatches(school.nickname, rosterClass.schoolName));
+      const schoolHasClasses = (school) => allClasses.some((rosterClass) => teacherRosterClassMatchesSchool(rosterClass, school));
       const schoolHasNewEnrollments = (school) => teacherRosterNewEnrollments.some((item) =>
         String(item?.matched_partner_school_id || "") === String(school.id || ""));
-      const selectedSchool = schools.find((school) => enrollmentSchoolNameMatches(school.name, teacherRosterSchoolFilter)
-        || enrollmentSchoolNameMatches(school.nickname, teacherRosterSchoolFilter));
+      const selectedSchool = teacherRosterSelectedSchool(schools);
       if (teacherRosterSchoolFilter !== "all" && !selectedSchool) teacherRosterSchoolFilter = "all";
       filter.innerHTML = `<option value="all">All Schools</option>${schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("")}`;
       filter.value = teacherRosterSchoolFilter;
       const multiClassEditButton = document.getElementById("teacher-roster-multi-class-edit");
       const printRostersButton = document.getElementById("teacher-roster-print");
       if (multiClassEditButton) {
-        const selectedSchoolClassCount = allClasses.filter((rosterClass) => enrollmentSchoolNameMatches(rosterClass.schoolName, teacherRosterSchoolFilter)).length;
+        const selectedSchoolClassCount = allClasses.filter((rosterClass) => selectedSchool && teacherRosterClassMatchesSchool(rosterClass, selectedSchool)).length;
         multiClassEditButton.disabled = selectedSchoolClassCount < 2;
         multiClassEditButton.title = selectedSchoolClassCount < 2 ? "At least two classes are needed to move dancers" : "";
         if (printRostersButton) { printRostersButton.disabled = selectedSchoolClassCount === 0; printRostersButton.title = selectedSchoolClassCount === 0 ? "No rosters are available for this school" : ""; }
       }
       const visibleClasses = allClasses.filter((rosterClass) => teacherRosterSchoolFilter === "all"
-        || enrollmentSchoolNameMatches(rosterClass.schoolName, teacherRosterSchoolFilter))
+        || (selectedSchool && teacherRosterClassMatchesSchool(rosterClass, selectedSchool)))
         .sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time)
           || left.name.localeCompare(right.name, undefined, { numeric: true }));
       document.getElementById("teacher-roster-add-future")?.toggleAttribute("disabled", allClasses.length === 0);
@@ -35184,7 +35209,7 @@
         const enrolled = rosterEnrolled(rosterClass);
         if (enrolled.length) assignTeacherRosterHelper(rosterClass);
         const attendanceStudents = teacherRosterAttendanceStudents(rosterClass);
-        const prospects = rosterProspects(rosterClass).filter((student) => !rosterTrialAttendancePending(student) && !student.additionalInformation?.trial_completed);
+        const prospects = rosterProspects(rosterClass).filter((student) => !student.additionalInformation?.trial_completed);
         const attendance = teacherAttendanceForClass(rosterClass);
         const unresolved = attendanceStudents.filter((student) => !teacherAttendanceStatus(attendance[student.id]));
         const attendanceComplete = attendanceStudents.length > 0 && unresolved.length === 0;
@@ -35814,7 +35839,8 @@
     });
     document.getElementById("teacher-roster-print")?.addEventListener("click", () => {
       if (!teacherRosterSchoolFilter || teacherRosterSchoolFilter === "all") return showToast("Choose a school first");
-      const schoolClasses = teacherRosterClasses().filter((rosterClass) => enrollmentSchoolNameMatches(rosterClass.schoolName, teacherRosterSchoolFilter)).sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time) || left.name.localeCompare(right.name, undefined, { numeric: true }));
+      const selectedSchool = teacherRosterSelectedSchool();
+      const schoolClasses = teacherRosterClasses().filter((rosterClass) => selectedSchool && teacherRosterClassMatchesSchool(rosterClass, selectedSchool)).sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time) || left.name.localeCompare(right.name, undefined, { numeric: true }));
       if (!schoolClasses.length) return showToast("No rosters are available for this school");
       const selectedClass = schoolClasses.find((rosterClass) => rosterClass.id === selectedTeacherRosterClassId) || schoolClasses[0];
       openRosterPrintDialog(selectedClass, schoolClasses);
@@ -36050,7 +36076,12 @@
         });
         completedProspects.forEach((student) => {
           student.trialAttendancePending = false;
-          student.additionalInformation = { ...(student.additionalInformation || {}), trial_attendance_pending: false };
+          student.additionalInformation = {
+            ...(student.additionalInformation || {}),
+            trial_attendance_pending: false,
+            trial_completed: true,
+            trial_completed_at: checkedOutAt
+          };
           student.status = "trial-attended";
         });
         if (completedProspects.length) {
