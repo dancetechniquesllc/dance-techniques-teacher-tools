@@ -22728,7 +22728,7 @@
     };
 
     const rescheduleOverrideFor = (schoolName, originalDate, week, curriculum) => rescheduleOverridesForTeacher().find((item) => (
-      item.schoolName === schoolName &&
+      enrollmentSchoolNameMatches(item.schoolName, schoolName) &&
       item.originalDate === originalDate &&
       item.week === week &&
       item.curriculum === curriculum
@@ -34949,6 +34949,19 @@
     };
 
     const teacherRosterClassIsToday = (rosterClass) => {
+      const todayKey = isoDate(homeWidgetDate);
+      const matchingOverrides = rescheduleOverridesForTeacher().filter((item) => (
+        enrollmentSchoolNameMatches(item.schoolName, rosterClass?.schoolName)
+      ));
+      const movedToToday = matchingOverrides.some((item) => (
+        rescheduleActionFor(item) === "reschedule_now" && item.newDate === todayKey
+      ));
+      if (movedToToday) return true;
+      const movedAwayFromToday = matchingOverrides.some((item) => (
+        item.originalDate === todayKey &&
+        (rescheduleActionFor(item) !== "reschedule_now" || item.newDate !== todayKey)
+      ));
+      if (movedAwayFromToday) return false;
       const today = homeWidgetDate.toLocaleDateString("en-US", { weekday: "long" });
       return Boolean(rosterClass?.day) && teacherRosterDayKey(rosterClass.day) === teacherRosterDayKey(today);
     };
