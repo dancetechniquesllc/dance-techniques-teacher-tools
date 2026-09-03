@@ -2483,7 +2483,7 @@
     .my-day-roster-popup-body { min-height: 0; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
     .my-day-roster-popup-body > .teacher-roster-card { margin: 0; }
     .my-day-roster-popup .teacher-roster-class-actions {
-      grid-template-columns: repeat(4, minmax(0, 86px));
+      grid-template-columns: repeat(5, minmax(0, 86px));
       justify-content: center;
     }
     @media (max-width: 900px) {
@@ -2497,7 +2497,7 @@
       .my-day-roster-popup-header h3 { font-size: 19px; }
       .my-day-roster-popup-close { width: 44px; min-height: 44px; flex: 0 0 44px; }
       .my-day-roster-popup .teacher-roster-class-actions {
-        grid-template-columns: repeat(4, minmax(0, 76px));
+        grid-template-columns: repeat(5, minmax(0, 76px));
         gap: 6px;
       }
       .my-day-roster-popup .teacher-roster-class-actions button { min-height: 92px; font-size: 9px; }
@@ -2517,7 +2517,7 @@
       .my-day-roster-popup .teacher-roster-active-card > summary::before { left: 11px; }
       .my-day-roster-popup .teacher-roster-duration { font-size: 10px; }
       .my-day-roster-popup .teacher-roster-class-actions {
-        grid-template-columns: repeat(4, minmax(0, 68px));
+        grid-template-columns: repeat(5, minmax(0, 68px));
         gap: 4px;
       }
       .my-day-roster-popup .teacher-roster-class-actions button { min-height: 82px; padding-inline: 0; }
@@ -2856,7 +2856,7 @@
     .teacher-class-session-timing.is-complete strong { color: #a01e2d; }
     .teacher-roster-start-button { min-height: 30px; padding: 0 10px; border: 1px solid var(--fg); border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 10px; font-weight: 800; }
     .teacher-roster-start-button.is-active { border-color: var(--brick); background: var(--blush); color: var(--brick); }
-    .teacher-roster-class-actions { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 13px; align-items: start; }
+    .teacher-roster-class-actions { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 13px; align-items: start; }
     .teacher-roster-class-actions button { display: grid; justify-items: center; align-content: start; gap: 6px; width: 100%; min-width: 0; min-height: 92px; padding: 2px; border: 0; border-radius: 12px; background: transparent; color: var(--fg); font-size: 9px; font-weight: 800; line-height: 1.15; text-align: center; }
     .teacher-class-action-badge { display: block; width: min(70px, 100%); aspect-ratio: 1; object-fit: contain; pointer-events: none; }
     .teacher-class-action-title { display: block; min-height: 20px; line-height: 1.15; }
@@ -2866,6 +2866,27 @@
     .teacher-class-action-kit.is-active { box-shadow: inset 0 0 0 2px var(--sage); }
     .teacher-roster-class-actions button:disabled { cursor: default; opacity: .46; }
     .teacher-roster-class-actions .teacher-class-action-boutique:disabled { opacity: 1; }
+    .photo-frame-modal { position: fixed; inset: 0; z-index: 12000; display: grid; place-items: center; padding: 14px; background: rgb(35 25 24 / .72); }
+    .photo-frame-modal[hidden] { display: none; }
+    .photo-frame-dialog { width: min(520px, 100%); max-height: calc(100dvh - 28px); overflow: auto; border: 1px solid var(--line); border-radius: 28px; background: var(--paper, #fffaf7); box-shadow: 0 20px 60px rgb(35 25 24 / .28); }
+    .photo-frame-header { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 18px 12px; background: var(--paper, #fffaf7); }
+    .photo-frame-header h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: 28px; }
+    .photo-frame-close { width: 42px; height: 42px; border: 0; border-radius: 50%; background: var(--blush); font-size: 24px; font-weight: 800; }
+    .photo-frame-body { display: grid; gap: 16px; padding: 6px 18px 20px; }
+    .photo-frame-gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+    .photo-frame-choice { display: grid; gap: 6px; padding: 5px; border: 2px solid transparent; border-radius: 16px; background: transparent; color: var(--fg); font-size: 11px; font-weight: 800; }
+    .photo-frame-choice img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 11px; }
+    .photo-frame-choice.is-selected { border-color: var(--brick); background: color-mix(in srgb, var(--blush) 28%, white); }
+    .photo-frame-stage { position: relative; width: min(100%, 360px); aspect-ratio: 2 / 3; margin-inline: auto; overflow: hidden; border-radius: 20px; background: #181515; }
+    .photo-frame-stage video, .photo-frame-stage > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .photo-frame-stage video { object-fit: cover; }
+    .photo-frame-stage > img { z-index: 1; object-fit: fill; pointer-events: none; }
+    .photo-frame-stage .photo-frame-result { z-index: 2; object-fit: cover; }
+    .photo-frame-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .photo-frame-actions button { min-height: 46px; padding: 10px 18px; border: 1px solid var(--brick); border-radius: 999px; background: white; color: var(--brick); font-weight: 800; }
+    .photo-frame-actions .is-primary { background: var(--brick); color: white; }
+    .photo-frame-note { margin: 0; color: var(--muted); font-size: 12px; text-align: center; }
+    @media (max-width: 430px) { .photo-frame-dialog { border-radius: 22px; } .photo-frame-gallery { grid-template-columns: repeat(3, 1fr); } }
     .teacher-class-post-launch {
       grid-area: post; position: static; justify-self: end; width: 104px; height: 36px; padding: 0;
       overflow: hidden; border: 0; border-radius: 999px; background: transparent; cursor: pointer;
@@ -35261,8 +35282,10 @@
         const classDisplayTitle = teacherRosterSchoolFilter === "all"
           ? `${rosterSchoolNickname(rosterClass.schoolName)} • ${rosterClass.name}`
           : rosterClass.name;
+        const classCanPostToParentPortal = enrollmentSchoolKey(rosterSchoolNickname(rosterClass.schoolName)) === enrollmentSchoolKey("Primrose Rowlett")
+          && /^class\s*5$/i.test(String(rosterClass.name || "").trim());
         return `<details class="teacher-roster-card teacher-roster-active-card" data-teacher-roster-details="${rosterSafe(rosterClass.id)}" ${classIsOpen ? "open" : ""}>
-          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(classDisplayTitle)} class roster"><div class="teacher-roster-active-heading"><div><h3 class="${teacherRosterSchoolFilter === "all" ? "is-all-schools-title" : ""}">${rosterSafe(classDisplayTitle)}</h3><p><span>${rosterSafe(rosterClass.day || "Day not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span>${rosterSafe(rosterClass.time || "Time not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span class="teacher-roster-duration ${durationClass}"><strong>${attendanceStudents.length} dancers</strong><span class="teacher-roster-heading-dot" aria-hidden="true"> • </span>${rosterSafe(duration).replace(" minutes", " min")}</span></p>${classTimingMarkup}</div><button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button></div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" ${readyBoutiqueOrders.length ? "" : "disabled"}>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}" aria-label="Class Star">${classActionContent("teacher-class-action-star.png", "Class Star")}</button></div></summary>
+          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(classDisplayTitle)} class roster"><div class="teacher-roster-active-heading"><div><h3 class="${teacherRosterSchoolFilter === "all" ? "is-all-schools-title" : ""}">${rosterSafe(classDisplayTitle)}</h3><p><span>${rosterSafe(rosterClass.day || "Day not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span>${rosterSafe(rosterClass.time || "Time not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span class="teacher-roster-duration ${durationClass}"><strong>${attendanceStudents.length} dancers</strong><span class="teacher-roster-heading-dot" aria-hidden="true"> • </span>${rosterSafe(duration).replace(" minutes", " min")}</span></p>${classTimingMarkup}</div>${classCanPostToParentPortal ? `<button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button>` : ""}</div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" ${readyBoutiqueOrders.length ? "" : "disabled"}>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}" aria-label="Class Star">${classActionContent("teacher-class-action-star.png", "Class Star")}</button><button class="teacher-class-action-photo-frames" type="button" data-teacher-photo-frames="${rosterSafe(rosterClass.id)}" aria-label="Photo Frames">${classActionContent("teacher-class-action-photo-frames.png", "Photo Frames")}</button></div></summary>
           <div class="teacher-roster-card-body">
             ${classComplete ? `<div class="teacher-attendance-complete">✓ Class attendance complete for today</div>` : checkInSubmitted ? `<div class="teacher-attendance-complete">✓ Check-in recorded</div>` : ""}
             <div>${attendanceStudents.length ? teacherRosterClassroomMarkup(attendanceStudents, rosterClass) : `<div class="teacher-roster-empty">No dancers attending this class yet.</div>`}</div>
@@ -49888,6 +49911,185 @@
           setEnrollmentQueueState("error", "Preview data could not be opened", "Refresh this local preview and try again.");
         });
     }
+  </script>
+  <script>
+    (() => {
+      const frames = [
+        ["Birthday Ballerina", "assets/photo-frames/birthday-ballerina.png"],
+        ["Birthday Boy", "assets/photo-frames/birthday-boy.png"],
+        ["Class Star", "assets/photo-frames/class-star.png"],
+        ["First Day of Dance", "assets/photo-frames/first-day-of-dance.png"],
+        ["Ballet Skill of the Week", "assets/photo-frames/ballet-skill-of-the-week.png"],
+        ["Tap Skill of the Week", "assets/photo-frames/tap-skill-of-the-week.png"]
+      ];
+      let stream = null;
+      let selectedFrame = frames[0];
+      let resultUrl = "";
+      let resultFile = null;
+      let facingMode = "environment";
+
+      const modal = document.createElement("div");
+      modal.className = "photo-frame-modal";
+      modal.hidden = true;
+      modal.innerHTML = `
+        <section class="photo-frame-dialog" role="dialog" aria-modal="true" aria-labelledby="photo-frame-title">
+          <header class="photo-frame-header">
+            <h2 id="photo-frame-title">Photo Frames</h2>
+            <button class="photo-frame-close" type="button" aria-label="Close photo frames">×</button>
+          </header>
+          <div class="photo-frame-body">
+            <div class="photo-frame-gallery" aria-label="Choose a photo frame">
+              ${frames.map(([label, src], index) => `<button class="photo-frame-choice${index === 0 ? " is-selected" : ""}" type="button" data-frame-index="${index}"><img src="${src}" alt=""><span>${label}</span></button>`).join("")}
+            </div>
+            <div class="photo-frame-stage">
+              <video playsinline muted></video>
+              <img class="photo-frame-overlay" src="${frames[0][1]}" alt="">
+              <img class="photo-frame-result" alt="Finished framed photo" hidden>
+            </div>
+            <p class="photo-frame-note">Your photo stays on this device. Nothing is uploaded to Dance Techniques.</p>
+            <p class="photo-frame-note photo-frame-status" role="status"></p>
+            <div class="photo-frame-actions">
+              <button class="photo-frame-start is-primary" type="button">Open Camera</button>
+              <button class="photo-frame-flip" type="button" hidden>Flip Camera</button>
+              <button class="photo-frame-capture is-primary" type="button" hidden>Take Photo</button>
+              <button class="photo-frame-retake" type="button" hidden>Retake</button>
+              <button class="photo-frame-save is-primary" type="button" hidden>Save Photo</button>
+            </div>
+          </div>
+        </section>`;
+      document.body.appendChild(modal);
+
+      const video = modal.querySelector("video");
+      const overlay = modal.querySelector(".photo-frame-overlay");
+      const result = modal.querySelector(".photo-frame-result");
+      const status = modal.querySelector(".photo-frame-status");
+      const startButton = modal.querySelector(".photo-frame-start");
+      const flipButton = modal.querySelector(".photo-frame-flip");
+      const captureButton = modal.querySelector(".photo-frame-capture");
+      const retakeButton = modal.querySelector(".photo-frame-retake");
+      const saveButton = modal.querySelector(".photo-frame-save");
+
+      const stopCamera = () => {
+        stream?.getTracks().forEach((track) => track.stop());
+        stream = null;
+        video.srcObject = null;
+      };
+      const resetResult = () => {
+        if (resultUrl) URL.revokeObjectURL(resultUrl);
+        resultUrl = "";
+        resultFile = null;
+        result.hidden = true;
+        result.removeAttribute("src");
+        retakeButton.hidden = true;
+        saveButton.hidden = true;
+      };
+      const closeModal = () => {
+        stopCamera();
+        resetResult();
+        modal.hidden = true;
+        document.body.style.overflow = "";
+        status.textContent = "";
+        startButton.hidden = false;
+        flipButton.hidden = true;
+        captureButton.hidden = true;
+      };
+      const startCamera = async () => {
+        stopCamera();
+        resetResult();
+        status.textContent = "Opening camera…";
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: false,
+            video: { facingMode: { ideal: facingMode } }
+          });
+          video.srcObject = stream;
+          await video.play();
+          status.textContent = "Line up the dancer inside the frame.";
+          startButton.hidden = true;
+          captureButton.hidden = false;
+          flipButton.hidden = false;
+        } catch (error) {
+          console.error("Photo Frames camera could not open", error);
+          status.textContent = "Camera access is needed. Allow camera access, then try again.";
+          startButton.textContent = "Try Camera Again";
+        }
+      };
+      const loadImage = (src) => new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+      const capturePhoto = async () => {
+        if (!video.videoWidth || !video.videoHeight) return;
+        const canvas = document.createElement("canvas");
+        canvas.width = 1024;
+        canvas.height = 1536;
+        const context = canvas.getContext("2d");
+        const scale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
+        const sourceWidth = canvas.width / scale;
+        const sourceHeight = canvas.height / scale;
+        const sourceX = (video.videoWidth - sourceWidth) / 2;
+        const sourceY = (video.videoHeight - sourceHeight) / 2;
+        context.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+        context.drawImage(await loadImage(selectedFrame[1]), 0, 0, canvas.width, canvas.height);
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.94));
+        if (!blob) return;
+        stopCamera();
+        resultFile = new File([blob], `dance-techniques-${Date.now()}.jpg`, { type: "image/jpeg" });
+        resultUrl = URL.createObjectURL(blob);
+        result.src = resultUrl;
+        result.hidden = false;
+        captureButton.hidden = true;
+        flipButton.hidden = true;
+        retakeButton.hidden = false;
+        saveButton.hidden = false;
+        status.textContent = "Photo ready. Save it to this phone or retake it.";
+      };
+      const savePhoto = async () => {
+        if (!resultFile) return;
+        try {
+          if (navigator.canShare?.({ files: [resultFile] })) {
+            await navigator.share({ files: [resultFile], title: "Dance Techniques Photo" });
+            status.textContent = "Use Save Image in the phone’s share menu to add it to Photos.";
+            return;
+          }
+          const link = document.createElement("a");
+          link.href = resultUrl;
+          link.download = resultFile.name;
+          link.click();
+          status.textContent = "Photo saved to this device.";
+        } catch (error) {
+          if (error?.name !== "AbortError") status.textContent = "The photo could not be saved. Please try again.";
+        }
+      };
+
+      document.addEventListener("click", (event) => {
+        if (event.target.closest("[data-teacher-photo-frames]")) {
+          modal.hidden = false;
+          document.body.style.overflow = "hidden";
+        }
+        const choice = event.target.closest("[data-frame-index]");
+        if (choice) {
+          selectedFrame = frames[Number(choice.dataset.frameIndex)] || frames[0];
+          modal.querySelectorAll(".photo-frame-choice").forEach((button) => button.classList.toggle("is-selected", button === choice));
+          overlay.src = selectedFrame[1];
+          resetResult();
+          if (!stream) startButton.hidden = false;
+        }
+      });
+      modal.querySelector(".photo-frame-close").addEventListener("click", closeModal);
+      modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
+      document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !modal.hidden) closeModal(); });
+      startButton.addEventListener("click", startCamera);
+      captureButton.addEventListener("click", capturePhoto);
+      retakeButton.addEventListener("click", startCamera);
+      saveButton.addEventListener("click", savePhoto);
+      flipButton.addEventListener("click", async () => {
+        facingMode = facingMode === "environment" ? "user" : "environment";
+        await startCamera();
+      });
+    })();
   </script>
   <script src="tulle.js?v=20260729-questions"></script>
 </body>
