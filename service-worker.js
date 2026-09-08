@@ -1,5 +1,10 @@
-const CACHE_NAME = "my-dance-techniques-v218-my-dancers-shoe-indicators";
+const CACHE_NAME = "my-dance-techniques-v219-four-new-photo-frames";
 const CORE_ASSETS = [
+  "./assets/photo-frames/butterflies.png",
+  "./assets/photo-frames/boutique-delivery.png",
+  "./assets/photo-frames/dance-besties.png",
+  "./assets/photo-frames/first-position.png",
+
   "./roster-care.js?v=20260908",
   "./roster-care.css?v=20260908",
   "./",
