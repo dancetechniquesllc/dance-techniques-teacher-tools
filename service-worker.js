@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v219-four-new-photo-frames";
+const CACHE_NAME = "my-dance-techniques-v220-photo-frame-dropdown";
 const CORE_ASSETS = [
   "./assets/photo-frames/butterflies.png",
   "./assets/photo-frames/boutique-delivery.png",
