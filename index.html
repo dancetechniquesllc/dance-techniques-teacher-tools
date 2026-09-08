@@ -14841,7 +14841,7 @@
         </details>
         <button class="director-message-shortcut" type="button" data-admin-open-section="messages" aria-label="Open Messages" title="Messages"><svg viewBox="0 0 32 32" aria-hidden="true"><use href="#icon-messages"></use></svg><span class="notification-unread-count" id="admin-messages-shortcut-bubble" aria-hidden="true"></span></button>
         <button class="director-task-shortcut" type="button" data-open-director-tasks aria-label="Open Tasks" title="Tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="m8 12 2.5 2.5L16 9"></path></svg><span class="notification-unread-count" id="director-task-count" aria-label="0 open tasks">0</span></button>
-        <dialog class="director-task-dialog" id="director-task-dialog" aria-labelledby="director-task-title"><div class="director-task-head"><div><h2 id="director-task-title">0 Tasks</h2><p id="director-task-subtitle">Parent messages and follow-ups</p></div><div class="director-task-head-actions"><select class="director-task-sort" id="director-task-sort" aria-label="Sort tasks"><option value="priority">Top Priority</option><option value="recent">Most Recent</option><option value="lexi">Ms. Lexi</option><option value="tiffany">Ms. Tiffany</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select><button class="director-task-history-button" type="button" data-director-task-history>Task History</button><button class="director-task-add" type="button" data-director-task-add aria-label="Add a task" title="Add Task"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button><button class="director-task-close" type="button" data-close-director-tasks aria-label="Close Tasks"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"></path></svg></button></div></div><div class="director-task-list" id="director-task-list"></div></dialog>
+        <dialog class="director-task-dialog" id="director-task-dialog" aria-labelledby="director-task-title"><div class="director-task-head"><div><h2 id="director-task-title">0 Tasks</h2><p id="director-task-subtitle">Parent messages and follow-ups</p></div><div class="director-task-head-actions"><select class="director-task-sort" id="director-task-sort" aria-label="Sort tasks"><option value="priority">Top Priority</option><option value="recent">Most Recent</option><option value="lexi">Ms. Lexi</option><option value="tiffany">Ms. Tiffany</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select><button class="director-task-history-button" type="button" data-director-task-history>Task History</button><button class="director-task-add" type="button" data-director-task-add aria-label="Add a task" title="Add Task"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button><button class="director-task-close" type="button" data-close-director-tasks aria-label="Close Tasks"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"></path></svg></button></div></div><div style="padding:8px 20px"><p id="director-task-sync-status" role="status">Opening tasks…</p><button type="button" data-director-task-retry>Retry</button> <button type="button" data-director-task-review>Review shared tasks</button></div><div class="director-task-list" id="director-task-list"></div></dialog>
         <dialog class="director-task-complete-dialog" id="director-task-complete-dialog" aria-labelledby="director-task-complete-title"><div class="director-task-complete-card"><h2 id="director-task-complete-title">Mark as Complete?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-task-complete-cancel>Cancel</button><button class="director-task-complete-yes" type="button" data-task-complete-confirm>Yes</button></div></div></dialog>
         <dialog class="director-task-complete-dialog" id="director-task-remove-dialog" aria-labelledby="director-task-remove-title"><div class="director-task-complete-card"><h2 id="director-task-remove-title">Remove Task?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-task-remove-cancel>Cancel</button><button class="director-task-remove-confirm" type="button" data-task-remove-confirm>Remove</button></div></div></dialog>
         <dialog class="admin-parent-thread-dialog" id="admin-parent-thread-dialog" aria-labelledby="admin-parent-thread-title"><div class="admin-parent-thread-head"><div><h2 id="admin-parent-thread-title">Family Conversation</h2><p id="admin-parent-thread-subtitle"></p></div><div class="admin-parent-thread-head-actions"><button class="admin-parent-dancer-details" type="button" aria-label="Dancer Details coming soon" title="Personalized fields will be added here later">Dancer Details</button><button class="admin-parent-thread-close" type="button" data-close-admin-parent-thread aria-label="Close family conversation">×</button></div></div><div class="admin-parent-thread-messages" id="admin-parent-thread-messages"></div><form class="admin-parent-thread-compose" id="admin-parent-thread-compose"><textarea id="admin-parent-thread-reply" aria-label="Reply to family conversation" placeholder="Reply to the family"></textarea><button type="submit">Send</button></form></dialog>
@@ -30387,7 +30387,7 @@
     var pendingDirectorTaskCompleteId = "";
     var pendingDirectorTaskRemoveId = "";
     var pendingTeacherEscalation = null;
-    const saveDirectorParentTasks = () => localStorage.setItem("dt-director-parent-tasks", JSON.stringify(directorParentTasks));
+    const saveDirectorParentTasks = () => window.dtSaveDirectorTasks ? window.dtSaveDirectorTasks() : localStorage.setItem("dt-director-parent-tasks", JSON.stringify(directorParentTasks));
     const loadSharedFamilyConversations = async () => {
       if (!window.dtSupabase || !window.dtCurrentProfile) return;
       const { data, error } = await window.dtSupabase.from("parent_family_messages")
@@ -30418,6 +30418,7 @@
     };
     const loadParentServiceRequestTasks = async () => {
       if (!window.dtSupabase || !["admin", "director"].includes(String(window.dtCurrentProfile?.role || "").toLowerCase())) return;
+      if (window.dtEnsureDirectorTasks) await window.dtEnsureDirectorTasks();
       const { data, error } = await window.dtSupabase
         .from("parent_service_requests")
         .select("id,request_type,requested_last_dance_day,requested_school_first_day,parent_note,status,created_at,students(first_name,last_name,preferred_name),guardians(first_name,last_name,full_name),partner_schools(name,nickname)")
@@ -30425,6 +30426,7 @@
         .order("created_at", { ascending: false });
       if (error) return;
       (data || []).forEach((request) => {
+        if (window.dtDirectorTaskDeleted?.has(`parent-request-${request.id}`)) return;
         const existing = directorParentTasks.find((task) => task.sourceRequestId === request.id || task.id === `parent-request-${request.id}`);
         const student = Array.isArray(request.students) ? request.students[0] : request.students;
         const guardian = Array.isArray(request.guardians) ? request.guardians[0] : request.guardians;
@@ -30435,7 +30437,7 @@
           ? `School Change Request · Move to ${school?.nickname || school?.name || "selected school"} · First day ${request.requested_school_first_day || "not provided"}${request.parent_note ? ` · ${request.parent_note}` : ""}`
           : `Withdrawal Request · Last dance day ${request.requested_last_dance_day || "not provided"}${request.parent_note ? ` · ${request.parent_note}` : ""}`;
         const taskData = { id: `parent-request-${request.id}`, sourceRequestId: request.id, complete: request.status === "completed", priority: false, createdAtMs: new Date(request.created_at).getTime(), message, sender, studentName, teacherName: "", school: school?.nickname || school?.name || "", className: "", danceDay: "", assignee: "Ms. Lexi", notes: [] };
-        if (existing) Object.assign(existing, taskData, { assignee: existing.assignee || taskData.assignee, priority: Boolean(existing.priority), notes: existing.notes || [] });
+        if (existing) Object.assign(existing, taskData, { complete: Boolean(existing.complete) || taskData.complete, assignee: existing.assignee || taskData.assignee, priority: Boolean(existing.priority), notes: existing.notes || [] });
         else directorParentTasks.push(taskData);
       });
       const { data: guardianRequests } = await window.dtSupabase
@@ -30444,11 +30446,12 @@
         .in("status", ["open", "completed"])
         .order("created_at", { ascending: false });
       (guardianRequests || []).forEach((request) => {
+        if (window.dtDirectorTaskDeleted?.has(`guardian-invite-${request.id}`)) return;
         const guardian = Array.isArray(request.guardians) ? request.guardians[0] : request.guardians;
         const sender = guardian?.full_name || [guardian?.first_name, guardian?.last_name].filter(Boolean).join(" ") || "Parent";
         const existing = directorParentTasks.find((task) => task.sourceGuardianInviteId === request.id);
         const taskData = { id:`guardian-invite-${request.id}`, sourceGuardianInviteId:request.id, complete:request.status === "completed", priority:false, createdAtMs:new Date(request.created_at).getTime(), message:`Guardian Invitation · ${request.adult_name} · ${request.adult_email} · ${request.relationship} · ${request.permission_level === "view" ? "View only" : "Full parent access"}`, sender, studentName:"Family invitation", teacherName:"", school:"", className:"", danceDay:"", assignee:"Ms. Lexi", notes:[] };
-        if (existing) Object.assign(existing, taskData, { assignee:existing.assignee || taskData.assignee, priority:Boolean(existing.priority), notes:existing.notes || [] });
+        if (existing) Object.assign(existing, taskData, { complete: Boolean(existing.complete) || taskData.complete, assignee:existing.assignee || taskData.assignee, priority:Boolean(existing.priority), notes:existing.notes || [] });
         else directorParentTasks.push(taskData);
       });
       saveDirectorParentTasks();
@@ -31688,7 +31691,7 @@
     document.querySelector("[data-director-task-add]")?.addEventListener("click", () => {
       const message = window.prompt("What needs to be done?")?.trim();
       if (!message) return;
-      directorParentTasks.unshift({ id: `manual-${Date.now()}`, complete: false, priority: false, createdAtMs: Date.now(), message, sender: "", studentName: "", teacherName: "", school: "", className: "", danceDay: "", assignee: "Ms. Lexi", notes: [] });
+      directorParentTasks.unshift({ id: `manual-${crypto.randomUUID()}`, complete: false, priority: false, createdAtMs: Date.now(), message, sender: "", studentName: "", teacherName: "", school: "", className: "", danceDay: "", assignee: "Ms. Lexi", notes: [] });
       saveDirectorParentTasks(); renderDirectorParentTasks();
     });
     document.getElementById("director-task-list")?.addEventListener("change", (event) => {
@@ -31756,11 +31759,10 @@
       const task = directorParentTasks.find((item) => item.id === noteButton.dataset.directorTaskNote);
       if (!task) return;
       task.notes = Array.isArray(task.notes) ? task.notes : [];
-      task.notes.push({ text: note, createdAt: new Date().toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) });
+      task.notes.push({ id: crypto.randomUUID(), text: note, createdAt: new Date().toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) });
       saveDirectorParentTasks(); renderDirectorParentTasks();
     });
     renderDirectorParentTasks();
-    void loadParentServiceRequestTasks();
     void loadSharedFamilyConversations();
 
     document.getElementById("admin-thread-list")?.addEventListener("click", (event) => {
@@ -50099,6 +50101,7 @@
       });
     })();
   </script>
+  <script src="director-task-sync.js?v=20260908"></script>
   <script src="tulle.js?v=20260729-questions"></script>
 </body>
 </html>

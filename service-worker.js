@@ -1,5 +1,6 @@
-const CACHE_NAME = "my-dance-techniques-v220-photo-frame-dropdown";
+const CACHE_NAME = "my-dance-techniques-v221-shared-director-tasks";
 const CORE_ASSETS = [
+  "./director-task-sync.js?v=20260908",
   "./assets/photo-frames/butterflies.png",
   "./assets/photo-frames/boutique-delivery.png",
   "./assets/photo-frames/dance-besties.png",
