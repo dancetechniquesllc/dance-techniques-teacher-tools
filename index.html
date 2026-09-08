@@ -18554,7 +18554,7 @@
           <summary>Fields to Include</summary>
           <div class="roster-print-options">
             <label><input type="checkbox" value="name" checked disabled> Dancer Name</label>
-            <label><input type="checkbox" value="classroom" checked> Classroom</label>
+            <label><input type="checkbox" value="classroom" checked> Official Classroom</label>
             <label><input type="checkbox" value="age" checked> Age</label>
             <label><input type="checkbox" value="birthdate"> Birthdate</label>
             <label><input type="checkbox" value="gender"> Gender</label>
@@ -37727,7 +37727,7 @@
       const fields = selectedRosterPrintFields();
       const choices = [["none", "No Additional Sort"], ["last", "Last Name A–Z"], ["first", "First Name A–Z"]];
       const optional = [
-        ["classroom", "Classroom"],
+        ["classroom", "Official Classroom"],
         ["oldest", "Age · Oldest First"],
         ["youngest", "Age · Youngest First"],
         ["birthdate", "Birthdate"],
@@ -37759,7 +37759,7 @@
     const rosterPrintSortValue = (student, sortBy) => {
       if (sortBy === "first") return rosterStudentFullName(student);
       if (sortBy === "last") return `${student.lastName || ""} ${rosterStudentFirstName(student)}`;
-      if (sortBy === "classroom") return student.classroom || "";
+      if (sortBy === "classroom") return student.officialClassroom || "";
       if (["oldest", "youngest", "birthdate"].includes(sortBy)) return student.birthdate || (sortBy === "oldest" ? "9999" : "");
       if (sortBy === "tshirt") return normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender);
       if (sortBy === "parent") return student.parentName || "";
@@ -37792,7 +37792,7 @@
         ["check", "✓", () => `<span class="roster-print-check"></span>`],
         ["number", "#", (_student, index) => String(index + 1)],
         ["name", "Dancer Name", (student) => `${rosterSafe(rosterStudentFullName(student))}${showBoyBadge && String(student.gender || "").toLowerCase() === "male" ? `<span class="roster-print-boy-badge" title="Boy">B</span>` : ""}`, "roster-print-name-cell"],
-        ["classroom", "Classroom", (student) => rosterSafe(student.classroom || "—")],
+        ["classroom", "Official Classroom", (student) => rosterSafe(student.officialClassroom || "—")],
         ["age", "Age", (student) => rosterAge(student.birthdate)],
         ["birthdate", "Birthdate", (student) => rosterSafe(student.birthdate || "—")],
         ["gender", "Gender", (student) => rosterSafe(student.gender || "—")],
