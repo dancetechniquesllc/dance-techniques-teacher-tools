@@ -14726,6 +14726,7 @@
     @media (prefers-reduced-motion: reduce) { .tt-feedback-card { transition: none; } }
   </style>
   <link rel="stylesheet" href="tulle.css?v=20260729-questions">
+  <link rel="stylesheet" href="roster-care.css?v=20260908">
 </head>
 <body class="auth-checking" data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="today">
   <button class="teacher-tools-viewer-return" id="teacher-tools-viewer-return" type="button">← Back to Teaching Team</button>
@@ -15139,6 +15140,7 @@
                 <select id="teacher-roster-school-filter" aria-label="Filter rosters by assigned school"></select>
               </label>
               <div class="teacher-roster-management-row"><button class="teacher-roster-multi-class-edit" type="button" id="teacher-roster-multi-class-edit">Rearrange Classes</button><button class="teacher-roster-print-button" type="button" id="teacher-roster-print">Print Rosters</button></div>
+              <div class="teacher-roster-management-row"><button class="care-brick" type="button" id="teacher-roster-shoe-check">Shoe Check</button><button class="care-gold" type="button" id="teacher-roster-move-ups">Move Ups</button></div>
               <div class="teacher-roster-list" id="teacher-roster-list"></div>
             </section>
 
@@ -18850,6 +18852,7 @@
   <script src="supabase-auth.js?v=20260830-teacher-open-after-profile-v7"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <script src="/teacher-music-data.js?v=20260826-playlist-workshop"></script>
+  <script src="roster-care.js?v=20260908"></script>
   <script>
     const modalScrollLockSelector = [
       ".confirm-overlay.active",
@@ -21464,6 +21467,7 @@
             const note = notesByStudent.get(student.id);
             return { id: student.id, enrollmentId: enrollment.id, noteId: note?.id || "", firstName: student.first_name, lastName: student.last_name,
               preferredName: student.preferred_name || "", birthdate: student.birth_date, gender: student.gender === "male" ? "male" : "female",
+              shoeStatus: { tap: student.tap_shoes_status || "unknown", ballet: student.ballet_shoes_status || "unknown" },
               classroom: student.classroom || item.classroom || "", officialClassroom: student.official_classroom || "", tshirtSize: normalizedEnrollmentShirtSize(student.tshirt_size, student.gender), kitReceived: Boolean(student.kit_received),
               kitReady: Boolean(student.kit_ready), kitReadyAt: student.kit_ready_at || "", kitReadyBy: student.kit_ready_by || "",
               kitPickedUp: Boolean(student.kit_picked_up), kitPickedUpAt: student.kit_picked_up_at || "", kitPickedUpBy: student.kit_picked_up_by || "",
@@ -34939,6 +34943,7 @@
                   ${attendanceFinalized && status === "absent" ? `<span class="teacher-roster-check is-absent" aria-label="Absent" title="Absent">×</span>` : ""}
                 </button>
                 <strong class="${weeklyHelperId === student.id ? "teacher-helper-name" : ""}">${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
+                ${window.dtShoeIndicators?.(student) || ""}
               </div>`;
             }).join("");
         const selectedCount = classroomStudents.filter((student) => {

@@ -1,5 +1,7 @@
-const CACHE_NAME = "my-dance-techniques-v216-desktop-navigation-recovery";
+const CACHE_NAME = "my-dance-techniques-v217-shoe-check-move-ups";
 const CORE_ASSETS = [
+  "./roster-care.js?v=20260908",
+  "./roster-care.css?v=20260908",
   "./",
   "./index.html",
   "./manifest.webmanifest",

@@ -1,0 +1,48 @@
+.teacher-roster-management-row .care-brick, .care-brick { background:#a64f43; color:#fff; border:1px solid #8c4037; border-radius:999px; min-height:42px; padding:8px 18px; font-weight:850; }
+.teacher-roster-management-row .care-gold, .care-gold { background:#e5bd65; color:#422e09; border:1px solid #ba8f34; border-radius:999px; min-height:42px; padding:8px 18px; font-weight:850; }
+.shoe-indicators { display:flex; justify-content:center; gap:5px; margin-top:5px; }
+.shoe-dot { display:inline-grid; place-items:center; width:20px; height:20px; padding:0; border-radius:50%; border:1px solid #b6b6b6; background:#dedede; color:#414141; font:800 11px/1 'Avenir Next',sans-serif; flex:none; }
+.shoe-dot.is-has { background:#bcd5ae; border-color:#5b7c4e; color:#25451c; }
+.shoe-dot.is-too_small { background:#a64f43; border-color:#8c4037; color:#fff; }
+#roster-care-dialog { box-sizing:border-box; width:calc(100vw - 28px); max-width:1500px; height:calc(100dvh - 32px); max-height:960px; padding:0; margin:auto; overflow:hidden; border:1px solid #e4c3bd; border-radius:20px; background:#fff8f3; color:#2b211d; font-family:'Avenir Next',sans-serif; }
+#roster-care-dialog[open] { display:flex; flex-direction:column; }
+#roster-care-dialog::backdrop { background:rgb(45 31 27 / .45); }
+#roster-care-dialog * { box-sizing:border-box; }
+.care-header { display:flex; align-items:center; justify-content:space-between; padding:18px 22px 10px; flex:none; }
+.care-header h2 { margin:0; color:#591b36; font-size:25px; }
+.care-header p { margin:4px 0 0; }
+.care-close { border:0; border-radius:50%; width:40px; height:40px; background:#e9ccc4; color:#392a25; font-size:26px; }
+.care-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; padding:8px 22px; border-bottom:1px solid #e4c3bd; flex:none; }
+.care-toolbar p { flex:1 1 240px; margin:0; font-size:13px; }
+.care-toolbar .care-legend { display:flex; flex-wrap:wrap; gap:6px; flex-basis:100%; }
+.care-legend-pill { display:inline-flex; align-items:center; justify-content:center; padding:6px 11px; border:1px solid #b6b6b6; border-radius:999px; background:#dedede; color:#414141; font-size:11px; font-weight:850; line-height:1.2; white-space:nowrap; }
+.care-legend-pill.is-has { background:#bcd5ae; border-color:#5b7c4e; color:#25451c; }
+.care-legend-pill.is-too_small { background:#a64f43; border-color:#8c4037; color:#fff; }
+.care-header-actions .is-active { outline:3px solid #59251d; outline-offset:2px; }
+.care-message { margin:0; padding:8px 22px; min-height:30px; font-size:13px; color:#692e24; flex:none; }
+.care-content { min-height:0; overflow:auto; overscroll-behavior:contain; padding:0 22px 22px; }
+.care-school h3 { font-size:21px; color:#591b36; margin:18px 0 12px; }
+.care-group-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.care-group { min-width:0; border:1px solid #e4c3bd; border-radius:14px; padding:14px 10px; background:#fffdfa; }
+.care-group h4 { margin:0; font-size:18px; color:#591b36; text-align:center; }
+.care-room-heading { display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between; border-bottom:2px solid #eed4cd; padding-bottom:10px; }
+.care-room-heading button, [data-care-reset] { background:#f8eee4; color:#4f3830; border:1px solid #cda895; padding:8px 10px; border-radius:12px; min-height:40px; }
+.care-dancers { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px 6px; margin-top:16px; }
+.care-dancer { display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; padding:8px 3px; text-align:center; border:1px solid transparent; border-radius:12px; background:transparent; color:inherit; }
+.care-dancer .roster-student-photo { width:64px; height:64px; flex:none; }
+.care-dancer strong { font-size:12px; line-height:1.2; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.care-dancer small { font-size:11px; }
+.shoe-controls { display:flex; gap:6px; }
+.shoe-controls .shoe-dot { width:38px; height:38px; font-size:15px; cursor:pointer; }
+.care-move-card { cursor:grab; touch-action:none; width:100%; }
+.care-move-card.is-moved { border-color:#c5962f; background:#fff2cf; }
+.care-move-card.is-selected { outline:2px solid #6a2945; background:#f3d9df; }
+.care-group.is-drop-target { outline:3px solid #c5962f; }
+.care-empty { grid-column:1/-1; min-height:80px; text-align:center; color:#746157; }
+#roster-care-dialog button:focus-visible { outline:3px solid #6a2945; outline-offset:2px; }
+#roster-care-dialog button:disabled { opacity:.5; cursor:default; }
+@media(max-width:900px) { .care-group-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { #roster-care-dialog { width:calc(100vw - 12px); height:calc(100dvh - 12px); max-height:none; border-radius:14px; } .care-group-grid { grid-template-columns:1fr; } .care-header { padding:12px; } .care-toolbar { padding:8px 12px; gap:8px; } .care-content { padding:0 12px 16px; } .care-message { padding:6px 12px; } .care-dancer .roster-student-photo { width:60px; height:60px; } .care-toolbar p { font-size:12px; } }
+
+.care-header-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+@media(max-width:600px) { .care-header-actions { gap:6px; } .care-header-actions .care-brick { padding:8px 12px; font-size:12px; } }
