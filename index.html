@@ -2401,7 +2401,7 @@
     .teacher-roster-list { display: grid; gap: 10px; }
     .teacher-dancer-directory {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
     .teacher-dancer-filter-row {
@@ -35203,6 +35203,7 @@
           <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
           <strong>${rosterSafe(name)}</strong>
           <small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small>
+          ${window.dtShoeIndicators?.(student) || ""}
         </button>`;
       }).join("") : `<div class="teacher-roster-empty">${records.length ? "No dancers match these filters." : "No enrolled dancers are assigned to your classes yet."}</div>`;
     }
@@ -36817,7 +36818,7 @@
       document.getElementById("admin-student-library-count").textContent = `${newEnrollmentCount} New · ${records.length} Student${records.length === 1 ? "" : "s"}`;
       const cardMarkup = ({ rosterClass, student }, { includeTeacher = true, includeSchoolClass = true } = {}) => {
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
-        return `<button class="student-library-card" type="button" data-student-library-open="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong>${includeTeacher ? `<small class="student-library-teacher">${rosterSafe(rosterTeacherName(rosterClass.teacherId))}</small>` : ""}${includeSchoolClass ? `<small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small>` : ""}<small class="student-library-age">${rosterSafe(rosterAge(student.birthdate))}</small></button>`;
+        return `<button class="student-library-card" type="button" data-student-library-open="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong>${includeTeacher ? `<small class="student-library-teacher">${rosterSafe(rosterTeacherName(rosterClass.teacherId))}</small>` : ""}${includeSchoolClass ? `<small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small>` : ""}<small class="student-library-age">${rosterSafe(rosterAge(student.birthdate))}</small>${window.dtShoeIndicators?.(student) || ""}</button>`;
       };
       const groupedByTeacher = teacherFilter.value !== "all";
       list.classList.toggle("is-grouped", groupedByTeacher);
@@ -36935,7 +36936,7 @@
       }).filter(({ rosterClass, student }) => rosterClass && student);
       list.innerHTML = records.length ? records.map(({ rosterClass, student }) => {
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
-        return `<button class="student-library-card" type="button" data-active-enrollment-open="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>Checklist Complete</small></button>`;
+        return `<button class="student-library-card" type="button" data-active-enrollment-open="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>Checklist Complete</small>${window.dtShoeIndicators?.(student) || ""}</button>`;
       }).join("") : `<div class="roster-empty" style="grid-column:1/-1">No enrollments have completed every checklist step yet.</div>`;
     };
 

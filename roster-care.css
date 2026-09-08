@@ -46,3 +46,7 @@
 
 .care-header-actions { display:flex; align-items:center; gap:10px; flex-shrink:0; }
 @media(max-width:600px) { .care-header-actions { gap:6px; } .care-header-actions .care-brick { padding:8px 12px; font-size:12px; } }
+
+.teacher-dancer-card, .student-library-card { position:relative; padding-bottom:36px; }
+.teacher-dancer-card .shoe-indicators, .student-library-card .shoe-indicators { position:absolute; right:9px; bottom:8px; margin:0; gap:4px; }
+.teacher-dancer-card .shoe-dot, .student-library-card .shoe-dot { width:17px; height:17px; font-size:10px; }
