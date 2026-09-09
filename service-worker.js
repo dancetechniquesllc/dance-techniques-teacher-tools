@@ -1,5 +1,8 @@
-const CACHE_NAME = "my-dance-techniques-v221-shared-director-tasks";
+const CACHE_NAME = "my-dance-techniques-v222-director-corner-status";
 const CORE_ASSETS = [
+  "./assets/director-open-shape-magic.png",
+  "./director-corner.js?v=20260908",
+  "./director-corner.css?v=20260908",
   "./director-task-sync.js?v=20260908",
   "./assets/photo-frames/butterflies.png",
   "./assets/photo-frames/boutique-delivery.png",

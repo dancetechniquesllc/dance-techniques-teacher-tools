@@ -14725,6 +14725,7 @@
   </style>
   <link rel="stylesheet" href="tulle.css?v=20260729-questions">
   <link rel="stylesheet" href="roster-care.css?v=20260908">
+  <link rel="stylesheet" href="director-corner.css?v=20260908">
 </head>
 <body class="auth-checking" data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="today">
   <button class="teacher-tools-viewer-return" id="teacher-tools-viewer-return" type="button">← Back to Teaching Team</button>
@@ -19386,12 +19387,16 @@
       ));
       const unread = visibleItems.filter((item) => !item.read_at).length;
       document.querySelectorAll("[data-notification-unread]").forEach((badge) => {
-        badge.textContent = unread > 99 ? "99+" : String(unread);
-        badge.classList.toggle("active", unread > 0);
-        badge.setAttribute("aria-label", `${unread} unread notification${unread === 1 ? "" : "s"}`);
+        const category = badge.closest("[data-director-category]")?.dataset.directorCategory;
+        const count = category ? visibleItems.filter(item => !item.read_at && window.dtNotificationCategory?.(item) === category).length : unread;
+        badge.textContent = count > 99 ? "99+" : String(count);
+        badge.classList.toggle("active", count > 0);
+        badge.setAttribute("aria-label", `${count} unread notification${count === 1 ? "" : "s"}`);
       });
       document.querySelectorAll("[data-notification-list]").forEach((list) => {
-        list.innerHTML = visibleItems.length ? visibleItems.map((item) => {
+        const category = list.closest("[data-director-category]")?.dataset.directorCategory;
+        const categoryItems = category ? visibleItems.filter(item => window.dtNotificationCategory?.(item) === category) : visibleItems;
+        list.innerHTML = categoryItems.length ? categoryItems.map((item) => {
           const enrollment = item.metadata?.enrollment_id
             ? (enrollmentIntakeQueue.find((entry) => entry.id === item.metadata.enrollment_id) || { id: item.metadata.enrollment_id, ...item.metadata })
             : null;
@@ -19428,6 +19433,8 @@
         }).join("") : `<div class="notification-empty">You’re all caught up.</div>`;
       });
       updateNotificationMiniAppBadges();
+      window.dtRenderMagicCorner?.();
+      window.dtRenderBoutiqueCorner?.();
     };
 
     const loadNotificationSystem = async (profile = window.dtCurrentProfile) => {
@@ -19781,12 +19788,14 @@
       window.history.replaceState({}, "", `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ""}${window.location.hash}`);
     };
 
-    const markAllNotificationsRead = async () => {
+    const markAllNotificationsRead = async (category) => {
       const readAt = new Date().toISOString();
-      notificationCenterItems.forEach((item) => { if (!item.read_at) item.read_at = readAt; });
+      const items = notificationCenterItems.filter(item => !category || window.dtNotificationCategory?.(item) === category);
+      if (!items.length) return;
+      items.forEach((item) => { if (!item.read_at) item.read_at = readAt; });
       renderNotificationCenter();
       if (document.body.dataset.tourMode !== "true" && window.dtSupabase && window.dtCurrentProfile?.id) {
-        const { error } = await window.dtSupabase.from("teacher_notifications").update({ read_at: readAt }).eq("teacher_id", window.dtCurrentProfile.id).is("read_at", null);
+        const { error } = await window.dtSupabase.from("teacher_notifications").update({ read_at: readAt }).eq("teacher_id", window.dtCurrentProfile.id).in("id", items.map(item => item.id)).is("read_at", null);
         if (error) console.error("Notifications could not all be marked read", error);
       }
     };
@@ -19987,7 +19996,7 @@
       }
       if (event.target.closest("[data-notification-mark-all]")) {
         event.preventDefault();
-        markAllNotificationsRead();
+        markAllNotificationsRead(event.target.closest("[data-director-category]")?.dataset.directorCategory);
         return;
       }
       const notification = event.target.closest("[data-notification-id]");
@@ -42851,6 +42860,7 @@
       const sourceItems = staffFeedbackSubmissions.filter((item) => (item.source || "teacher") === shapeMagicSource && (shapeMagicArchiveOpen ? item.status === "resolved" : item.status !== "resolved"));
       const sourceLabel = shapeMagicSource === "parent" ? "parent" : "teacher";
       setText("shape-magic-results-count", `${filtered.length} of ${sourceItems.length} ${sourceLabel} feedback item${sourceItems.length === 1 ? "" : "s"}${shapeMagicArchiveOpen ? " in the archive" : ""}`);
+      window.dtRenderMagicCorner?.();
       setText("admin-shape-magic-count", `${staffFeedbackSubmissions.filter((item) => item.status === "new").length} New`);
       list.innerHTML = filtered.length ? filtered.map((item) => `
         <article class="shape-magic-item">
@@ -50102,6 +50112,7 @@
     })();
   </script>
   <script src="director-task-sync.js?v=20260908"></script>
+  <script src="director-corner.js?v=20260908"></script>
   <script src="tulle.js?v=20260729-questions"></script>
 </body>
 </html>
