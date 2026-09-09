@@ -40,6 +40,11 @@
   panel.addEventListener('toggle',()=>{if(panel.open){top.querySelectorAll('details').forEach(p=>{if(p!==panel)p.open=false;});if(category==='magic')void loadStaffFeedbackInbox();}});
   top.append(panel);
  }
+ [...document.querySelectorAll('.teacher-notification-panel'),...top.querySelectorAll('.teacher-notification-panel')].forEach(popup=>{
+  const close=document.createElement('button');close.type='button';close.className='notification-popup-close';close.textContent='×';close.setAttribute('aria-label','Close notifications');
+  close.addEventListener('click',()=>{const details=popup.closest('details');details.open=false;details.querySelector('summary')?.focus();});
+  popup.querySelector('.notification-panel-head').append(close);
+ });
  middle.append(actions.querySelector('.director-task-shortcut'),actions.querySelector('.director-message-shortcut'),actions.querySelector('.director-settings-shortcut'));
  let rows={},editing='',busy=false,unavailable=false,channel,profileId='',request=0;
  const dialog=document.createElement('dialog');dialog.className='director-status-dialog';dialog.setAttribute('aria-labelledby','director-presence-title');

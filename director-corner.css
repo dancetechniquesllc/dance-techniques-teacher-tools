@@ -55,3 +55,8 @@
 .director-corner .director-corner-middle > .director-settings-shortcut { background:#000; color:#fff; border-color:#000; }
 
 .director-corner .director-corner-middle > .director-message-shortcut { background:#f7e5ca; color:var(--gold); border-color:var(--gold); }
+
+.teacher-notification-panel .notification-panel-head { display:grid; grid-template-columns:minmax(0,1fr) 32px; align-items:start; gap:8px; }
+.teacher-notification-panel .notification-panel-head strong { grid-column:1; grid-row:1; align-self:center; }
+.teacher-notification-panel .notification-mark-all { grid-column:1; grid-row:2; justify-self:start; padding:8px 12px; min-height:36px; border:1px solid var(--berry); border-radius:10px; background:var(--blush); color:var(--berry); font-weight:700; }
+.teacher-notification-panel .notification-popup-close { grid-column:2; grid-row:1; display:grid; place-items:center; width:32px; height:32px; padding:0; border:0; border-radius:50%; background:var(--blush); color:var(--berry); font-size:24px; line-height:1; cursor:pointer; }

@@ -49947,6 +49947,7 @@
       let resultUrl = "";
       let resultFile = null;
       let facingMode = "environment";
+      let libraryPhoto = null;
 
       const modal = document.createElement("div");
       modal.className = "photo-frame-modal";
@@ -49969,6 +49970,8 @@
             <p class="photo-frame-note">Your photo stays on this device. Nothing is uploaded to Dance Techniques.</p>
             <p class="photo-frame-note photo-frame-status" role="status"></p>
             <div class="photo-frame-actions">
+              <button class="photo-frame-library is-primary" type="button">Choose from Camera Roll</button>
+              <input class="photo-frame-file" type="file" accept="image/*" hidden>
               <button class="photo-frame-start is-primary" type="button">Open Camera</button>
               <button class="photo-frame-flip" type="button" hidden>Flip Camera</button>
               <button class="photo-frame-capture is-primary" type="button" hidden>Take Photo</button>
@@ -50004,6 +50007,7 @@
         saveButton.hidden = true;
       };
       const closeModal = () => {
+        libraryPhoto = null;
         stopCamera();
         resetResult();
         modal.hidden = true;
@@ -50014,6 +50018,7 @@
         captureButton.hidden = true;
       };
       const startCamera = async () => {
+        libraryPhoto = null;
         stopCamera();
         resetResult();
         status.textContent = "Opening camera…";
@@ -50040,18 +50045,19 @@
         image.onerror = reject;
         image.src = src;
       });
-      const capturePhoto = async () => {
-        if (!video.videoWidth || !video.videoHeight) return;
+      const composePhoto = async (source, width, height) => {
+        if (!width || !height) return;
+        resetResult();
         const canvas = document.createElement("canvas");
         canvas.width = 1024;
         canvas.height = 1536;
         const context = canvas.getContext("2d");
-        const scale = Math.max(canvas.width / video.videoWidth, canvas.height / video.videoHeight);
+        const scale = Math.max(canvas.width / width, canvas.height / height);
         const sourceWidth = canvas.width / scale;
         const sourceHeight = canvas.height / scale;
-        const sourceX = (video.videoWidth - sourceWidth) / 2;
-        const sourceY = (video.videoHeight - sourceHeight) / 2;
-        context.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+        const sourceX = (width - sourceWidth) / 2;
+        const sourceY = (height - sourceHeight) / 2;
+        context.drawImage(source, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
         context.drawImage(await loadImage(selectedFrame[1]), 0, 0, canvas.width, canvas.height);
         const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.94));
         if (!blob) return;
@@ -50062,10 +50068,29 @@
         result.hidden = false;
         captureButton.hidden = true;
         flipButton.hidden = true;
-        retakeButton.hidden = false;
+        retakeButton.hidden = Boolean(libraryPhoto);
+        startButton.hidden = false;
         saveButton.hidden = false;
-        status.textContent = "Photo ready. Save it to this phone or retake it.";
+        status.textContent = "Photo ready. Save it to your device, choose another photo, or open the camera.";
       };
+      const capturePhoto = () => composePhoto(video, video.videoWidth, video.videoHeight);
+      const fileInput = modal.querySelector(".photo-frame-file");
+      modal.querySelector(".photo-frame-library").addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        fileInput.value = "";
+        const url = URL.createObjectURL(file);
+        status.textContent = "Preparing your photo…";
+        try {
+          const photo = await loadImage(url);
+          stopCamera();
+          libraryPhoto = photo;
+          await composePhoto(photo, photo.naturalWidth, photo.naturalHeight);
+        } catch (error) {
+          status.textContent = "This photo could not be opened. Try a JPEG or PNG photo.";
+        } finally { URL.revokeObjectURL(url); }
+      });
       const savePhoto = async () => {
         if (!resultFile) return;
         try {
@@ -50097,6 +50122,7 @@
         resetResult();
         status.textContent = "";
         if (!stream) startButton.hidden = false;
+        if (libraryPhoto) composePhoto(libraryPhoto, libraryPhoto.naturalWidth, libraryPhoto.naturalHeight).catch(() => { status.textContent = "Could not prepare this frame. Please try again."; });
       });
       modal.querySelector(".photo-frame-close").addEventListener("click", closeModal);
       modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
