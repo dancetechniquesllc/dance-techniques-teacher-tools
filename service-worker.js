@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v222-director-corner-status";
+const CACHE_NAME = "my-dance-techniques-v223-notification-card-layout";
 const CORE_ASSETS = [
   "./assets/director-open-shape-magic.png",
   "./director-corner.js?v=20260908",

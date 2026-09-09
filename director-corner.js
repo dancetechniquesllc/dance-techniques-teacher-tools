@@ -40,7 +40,7 @@
   panel.addEventListener('toggle',()=>{if(panel.open){top.querySelectorAll('details').forEach(p=>{if(p!==panel)p.open=false;});if(category==='magic')void loadStaffFeedbackInbox();}});
   top.append(panel);
  }
- middle.append(actions.querySelector('.director-message-shortcut'),actions.querySelector('.director-task-shortcut'),actions.querySelector('.director-settings-shortcut'));
+ middle.append(actions.querySelector('.director-task-shortcut'),actions.querySelector('.director-message-shortcut'),actions.querySelector('.director-settings-shortcut'));
  let rows={},editing='',busy=false,unavailable=false,channel,profileId='',request=0;
  const dialog=document.createElement('dialog');dialog.className='director-status-dialog';dialog.setAttribute('aria-labelledby','director-presence-title');
  dialog.innerHTML='<h2 id="director-presence-title">Availability</h2><div class="director-status-options">'+Object.entries(labels).map(([value,label])=>`<button type="button" data-availability="${value}" aria-pressed="false"><i aria-hidden="true" style="--dot:${value==='busy'?'#d6a11a':value==='open'?'#4b9a51':'#c34548'}"></i>${label}</button>`).join('')+'</div><p class="director-status-note" role="status"></p><button type="button" data-presence-close>Close</button>';
