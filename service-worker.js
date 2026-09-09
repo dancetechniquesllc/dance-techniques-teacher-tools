@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v225-student-medical-pill";
+const CACHE_NAME = "my-dance-techniques-v226-music-seeking";
 const CORE_ASSETS = [
   "./assets/director-open-shape-magic.png",
   "./director-corner.js?v=20260908",

@@ -1316,6 +1316,10 @@
       height: 34px;
     }
 
+    .music-seek-slider { width:100%; min-width:0; accent-color:var(--sage); cursor:pointer; height:24px; margin:0; }
+    .dt-tunes-controls > [data-music-skip] { grid-column:span 3; }
+    .dt-tunes-controls > .dt-tunes-control { grid-column:span 2; }
+    .dt-tunes-controls > .dt-tunes-control[data-music-skip] { grid-column:span 3; }
     .my-day-music-progress {
       height: 6px;
       overflow: hidden;
@@ -1334,7 +1338,7 @@
 
     .my-day-music-controls {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 6px;
     }
 
@@ -5088,7 +5092,7 @@
 
     .dt-tunes-controls {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 8px;
     }
 
@@ -15062,9 +15066,9 @@
 	                        </span>
 	                        <button class="my-day-music-button" type="button" data-my-day-music-toggle aria-label="Play or pause DT Tunes">▶</button>
 	                      </div>
-	                      <div class="my-day-music-progress" aria-hidden="true"><span data-my-day-music-progress></span></div>
+	                      <input class="music-seek-slider" type="range" data-music-progress min="0" max="100" step="0.1" value="0" aria-label="Song position" disabled>
 	                      <div class="my-day-music-controls" aria-label="My Day music controls">
-	                        <button class="my-day-music-control" type="button" data-my-day-music-previous aria-label="Previous song">⏮ Prev</button>
+	                        <button class="my-day-music-control" type="button" data-music-skip="-15" aria-label="Rewind 15 seconds">↶ 15s</button><button class="my-day-music-control" type="button" data-music-skip="15" aria-label="Forward 15 seconds">15s ↷</button><button class="my-day-music-control" type="button" data-my-day-music-previous aria-label="Previous song">⏮ Prev</button>
 	                        <button class="my-day-music-control" type="button" data-my-day-music-repeat aria-label="Repeat current song" aria-pressed="false">↻ Repeat</button>
 	                        <button class="my-day-music-control" type="button" data-my-day-music-next aria-label="Next song">Next ⏭</button>
 	                        <button class="my-day-music-control" type="button" data-tab-jump="music">Library</button>
@@ -15549,11 +15553,11 @@
                 <audio class="dt-tunes-audio" id="dt-tunes-audio" preload="none"></audio>
                 <div class="music-timeline" aria-label="Song progress">
                   <span data-music-current-time>0:00</span>
-                  <progress data-music-progress max="100" value="0">0%</progress>
+                  <input class="music-seek-slider" type="range" data-music-progress min="0" max="100" step="0.1" value="0" aria-label="Song position" disabled>
                   <span data-music-duration>0:00</span>
                 </div>
                 <div class="dt-tunes-controls" aria-label="Playlist controls">
-                  <button class="dt-tunes-control" type="button" data-music-control="previous" aria-label="Play previous song">⏮ Previous</button>
+                  <button class="dt-tunes-control" type="button" data-music-skip="-15" aria-label="Rewind 15 seconds">↶ 15s</button><button class="dt-tunes-control" type="button" data-music-skip="15" aria-label="Forward 15 seconds">15s ↷</button><button class="dt-tunes-control" type="button" data-music-control="previous" aria-label="Play previous song">⏮ Previous</button>
                   <button class="dt-tunes-control" id="dt-tunes-repeat" type="button" data-music-control="repeat" aria-label="Repeat current song" aria-pressed="false">↻ Repeat</button>
                   <button class="dt-tunes-control" type="button" data-music-control="next" aria-label="Play next song">Next ⏭</button>
                 </div>
@@ -27660,9 +27664,9 @@
           </span>
           <button class="my-day-music-button" type="button" data-my-day-music-toggle aria-label="Play or pause DT Tunes">▶</button>
         </div>
-        <div class="my-day-music-progress" aria-hidden="true"><span data-my-day-music-progress></span></div>
+        <input class="music-seek-slider" type="range" data-music-progress min="0" max="100" step="0.1" value="0" aria-label="Song position" disabled>
         <div class="my-day-music-controls" aria-label="My Day music controls">
-          <button class="my-day-music-control" type="button" data-my-day-music-previous aria-label="Previous song">⏮ Prev</button>
+          <button class="my-day-music-control" type="button" data-music-skip="-15" aria-label="Rewind 15 seconds">↶ 15s</button><button class="my-day-music-control" type="button" data-music-skip="15" aria-label="Forward 15 seconds">15s ↷</button><button class="my-day-music-control" type="button" data-my-day-music-previous aria-label="Previous song">⏮ Prev</button>
           <button class="my-day-music-control" type="button" data-my-day-music-repeat aria-label="Repeat current song" aria-pressed="false">↻ Repeat</button>
           <button class="my-day-music-control" type="button" data-my-day-music-next aria-label="Next song">Next ⏭</button>
           <button class="my-day-music-control" type="button" data-tab-jump="music">Library</button>
@@ -32058,20 +32062,39 @@
       editButton?.setAttribute("aria-expanded", "true");
       if (isEditing) form.elements.directorName?.focus();
     });
-    document.getElementById("school-directory-list")?.addEventListener("submit", (event) => {
+    document.getElementById("school-directory-list")?.addEventListener("submit", async (event) => {
       const form = event.target.closest("[data-partner-school-contact-form]");
       if (!form) return;
       event.preventDefault();
+      if (form.dataset.saving === "true") return;
       const school = profileTeacher.schools[Number(form.dataset.partnerSchoolContactForm)];
       if (!school) return;
       const values = new FormData(form);
-      school.directorName = String(values.get("directorName") || "").trim();
-      school.phone = String(values.get("phone") || "").trim();
-      school.email = String(values.get("email") || "").trim();
-      markAdminDashboardReview("schoolLibrary");
-      scheduleAppDataSave();
-      renderContactSchools();
-      showToast(`${school.name} contact information updated`);
+      const changes = { directorName:String(values.get("directorName") || "").trim(), phone:String(values.get("phone") || "").trim(), email:String(values.get("email") || "").trim() };
+      form.dataset.saving = "true";
+      const controls = [...form.querySelectorAll("button,input")];
+      controls.forEach(control => control.disabled = true);
+      try {
+        if (document.body.dataset.tourMode !== "true") {
+          if (!window.dtSupabase || !isUuid(school.id) || !school.updatedAt) throw new Error("Reopen this school while signed in, then try saving again.");
+          const {data,error} = await window.dtSupabase.rpc("update_own_partner_school_contact", {target_school_id:school.id,target_director_name:changes.directorName,target_phone:changes.phone,target_email:changes.email,expected_updated_at:school.updatedAt});
+          if (error) throw error;
+          const saved = Array.isArray(data) ? data[0] : data;
+          if (!saved?.id) throw new Error("The school did not confirm the save. Please try again.");
+          Object.assign(changes,{directorName:saved.director_name || "",phone:saved.director_phone || "",email:saved.director_email || "",updatedAt:saved.updated_at});
+        }
+        Object.assign(school,changes);
+        for (const record of [...schoolLibrary,...teachers.flatMap(teacher=>teacher.schools || [])]) if (record.id===school.id) Object.assign(record,changes);
+        markAdminDashboardReview("schoolLibrary");
+        scheduleAppDataSave();
+        renderContactSchools();
+        showToast(document.body.dataset.tourMode === "true" ? "Preview contact information updated" : `${school.name} contact information saved`);
+      } catch (error) {
+        showToast(`Not saved. ${error.message || "Please try again."}`);
+      } finally {
+        delete form.dataset.saving;
+        controls.forEach(control => control.disabled = false);
+      }
     });
     const updateClassCurriculumField = (classField) => {
       const school = profileTeacher.schools[Number(classField.dataset.teacherSchoolIndex)];
@@ -49319,6 +49342,21 @@
       playMusicTrack(trackId);
     });
 
+    const seekMusicPosition = (seconds) => {
+      const audio = document.getElementById("dt-tunes-audio");
+      if (!Number.isFinite(audio?.duration) || audio.duration <= 0 || !Number.isFinite(seconds)) return;
+      audio.currentTime = Math.max(0, Math.min(audio.duration, seconds));
+      updateMyDayMusicPlayer();
+    };
+    document.addEventListener("input", (event) => {
+      if (!event.target.matches("input[data-music-progress]")) return;
+      const audio = document.getElementById("dt-tunes-audio");
+      seekMusicPosition(Number(event.target.value) / 100 * audio.duration);
+    });
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-music-skip]");
+      if (button) seekMusicPosition(document.getElementById("dt-tunes-audio").currentTime + Number(button.dataset.musicSkip));
+    });
     const currentMusicPlaylistTracks = () => {
       const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
       return musicPlaylistTracks(playlist);
@@ -49348,7 +49386,11 @@
         button.textContent = isPlaying ? "❚❚" : "▶";
         button.setAttribute("aria-label", isPlaying ? "Pause DT Tunes" : "Play DT Tunes");
       });
-      document.querySelectorAll("[data-music-progress]").forEach((element) => { element.value = progress; });
+      document.querySelectorAll("[data-music-progress]").forEach((element) => {
+        element.disabled = !Number.isFinite(audio?.duration) || audio.duration <= 0;
+        element.value = progress;
+        element.setAttribute("aria-valuetext", `${musicDurationLabel(audio?.currentTime || 0)} of ${musicDurationLabel(duration)}`);
+      });
       document.querySelectorAll("[data-music-current-time]").forEach((element) => { element.textContent = musicDurationLabel(audio?.currentTime || 0); });
       document.querySelectorAll("[data-music-duration]").forEach((element) => { element.textContent = musicDurationLabel(duration); });
       document.querySelectorAll("[data-my-day-music-progress]").forEach((element) => { element.style.width = `${progress}%`; });
