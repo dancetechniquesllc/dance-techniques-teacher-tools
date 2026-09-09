@@ -3096,6 +3096,9 @@
     .teacher-student-profile-photo-editor .roster-student-photo { border: 0; }
     .teacher-student-profile-photo-editor small { color: var(--berry); font-size: 10px; font-weight: 800; }
     .teacher-student-profile h3 { margin: 0; font-family: inherit; }
+    .teacher-student-medical-alert { display:flex; align-items:center; gap:8px; box-sizing:border-box; max-width:100%; margin:0; padding:9px 14px; border:1px solid #e8b5b5; border-radius:22px; background:#fbe9e9; color:#932d36; font-size:13px; font-weight:650; line-height:1.4; text-align:left; }
+    .teacher-student-medical-alert > span:first-child { flex:none; display:grid; place-items:center; width:20px; height:20px; border-radius:50%; background:#b53636; color:white; font-weight:800; }
+    .teacher-student-medical-alert-copy { min-width:0; overflow-wrap:anywhere; white-space:pre-wrap; }
     .teacher-student-profile-details { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; }
     .teacher-student-profile-details span { padding: 10px; border-radius: 9px; background: var(--surface-soft); }
     .teacher-student-profile-details small, .teacher-student-profile-details strong { display: block; }
@@ -35757,6 +35760,7 @@
           <input type="file" accept="image/*" hidden data-teacher-student-photo="${rosterSafe(student.id)}" data-teacher-student-photo-class="${rosterSafe(rosterClass.id)}">
         </label>
         <h3 id="teacher-student-profile-title">${rosterSafe(rosterStudentFullName(student))}</h3>
+        ${String(student.medicalNotes || "").trim() ? `<p class="teacher-student-medical-alert"><span aria-hidden="true">+</span><span class="teacher-student-medical-alert-copy">${rosterSafe(String(student.medicalNotes).trim())}</span></p>` : ""}
         <div class="teacher-student-profile-details">
           <span><small>Official Classroom</small><strong>${rosterSafe(student.officialClassroom || student.classroom || "Not entered")}</strong></span>
           <span><small>Age</small><strong>${rosterSafe(rosterAge(student.birthdate))}</strong></span>
