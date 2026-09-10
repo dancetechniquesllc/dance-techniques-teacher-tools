@@ -16658,11 +16658,14 @@
                 <label>Dance Day
                   <select id="student-library-day"><option value="all">All dance days</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option></select>
                 </label>
+                <label>Gender
+                  <select id="student-library-gender"><option value="all">All Genders</option><option value="female">Female</option><option value="male">Male</option><option value="unknown">Not Entered</option></select>
+                </label>
                 <label>Student Status
                   <select id="student-library-status"><option value="all">All enrolled dancers</option><option value="enrolled">Enrolled</option></select>
                 </label>
               </div>
-              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="student-library-search,student-library-school,student-library-teacher,student-library-day,student-library-status">Reset Filter</button></div>
+              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="student-library-search,student-library-school,student-library-teacher,student-library-day,student-library-status,student-library-gender">Reset Filter</button></div>
               <div class="student-library-grid" id="admin-student-library-list"></div>
             </div>
             <div class="enrollment-student-view-panel" id="director-future-dancers-panel" data-enrollment-student-panel="future-dancers" hidden>
@@ -36846,6 +36849,7 @@
       const teacherFilter = document.getElementById("student-library-teacher");
       const dayFilter = document.getElementById("student-library-day");
       const statusFilter = document.getElementById("student-library-status");
+      const genderFilter = document.getElementById("student-library-gender");
       const search = document.getElementById("student-library-search");
       if (!list || !schoolFilter || !teacherFilter || !dayFilter || !statusFilter || !search) return;
       const currentSchool = schoolFilter.value || "all";
@@ -36863,6 +36867,7 @@
         if (schoolFilter.value !== "all" && rosterClass.schoolName !== schoolFilter.value) return false;
         if (teacherFilter.value !== "all" && rosterClass.teacherId !== teacherFilter.value) return false;
         if (dayFilter.value !== "all" && rosterClass.day !== dayFilter.value) return false;
+        if (genderFilter && genderFilter.value !== "all" && teacherDancerGenderCategory(student) !== genderFilter.value) return false;
         const haystack = `${student.firstName} ${student.preferredName || ""} ${student.lastName} ${student.parentFirstName || ""} ${student.parentLastName || ""} ${student.parentEmail || ""} ${rosterClass.schoolName} ${rosterClass.name}`.toLowerCase();
         return !term || haystack.includes(term);
       }).sort((left, right) => `${left.student.lastName} ${rosterStudentFirstName(left.student)}`.localeCompare(`${right.student.lastName} ${rosterStudentFirstName(right.student)}`));
@@ -45693,7 +45698,7 @@
       if (!button) return;
       openTeacherDashboardRecord(button.dataset.teacherDdJump, profileTeacher.id);
     });
-    ["student-library-search", "student-library-school", "student-library-teacher", "student-library-day", "student-library-status"].forEach((id) => {
+    ["student-library-search", "student-library-school", "student-library-teacher", "student-library-day", "student-library-status", "student-library-gender"].forEach((id) => {
       document.getElementById(id)?.addEventListener(id === "student-library-search" ? "input" : "change", renderStudentLibrary);
     });
     document.getElementById("admin-student-library-list")?.addEventListener("click", (event) => {
