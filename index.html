@@ -3206,6 +3206,11 @@
     .teacher-attendance-review-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-soft); }
     .teacher-attendance-review-row .roster-student-photo { width: 42px; height: 42px; font-size: 12px; }
     .teacher-attendance-review-row strong { font-size: 13px; }
+    @media (max-width: 600px) {
+      #teacher-attendance-review-list .teacher-attendance-review-row { grid-template-columns: auto minmax(0, 1fr); }
+      #teacher-attendance-review-list .teacher-attendance-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+      #teacher-attendance-review-list .teacher-attendance-actions button { flex: 1; }
+    }
 
     .teacher-roster-section-title {
       display: flex;
@@ -18530,7 +18535,7 @@
   <div class="confirm-overlay" id="teacher-attendance-review-overlay" aria-hidden="true">
     <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-attendance-review-title">
       <h3 id="teacher-attendance-review-title">Complete Check-In</h3>
-      <p>These students were not selected. Mark each one tardy or absent.</p>
+      <p>These students were not selected. Mark each one Here, Tardy, or Absent.</p>
       <div class="teacher-attendance-review-list" id="teacher-attendance-review-list"></div>
     </div>
   </div>
@@ -34810,6 +34815,17 @@
     const teacherClassCheckedInEntries = (rosterClass, attendance = teacherAttendanceForClass(rosterClass)) => teacherRosterAttendanceStudents(rosterClass)
       .map((student) => attendance[student.id])
       .filter((entry) => ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && typeof entry === "object" && entry.checkInAt);
+    const teacherAttendanceHereCorrection = (rosterClass, attendance = teacherAttendanceForClass(rosterClass)) => {
+      const firstCheckIn = teacherClassCheckedInEntries(rosterClass, attendance)
+        .map((entry) => entry.checkInAt)
+        .filter((value) => Number.isFinite(Date.parse(value)))
+        .sort((left, right) => Date.parse(left) - Date.parse(right))[0];
+      return {
+        status: "present",
+        checkInAt: firstCheckIn || teacherClassStartTime(rosterClass, attendance) || new Date().toISOString(),
+        checkOutAt: teacherClassEndTime(rosterClass, attendance) || ""
+      };
+    };
     const teacherClassStartTime = (rosterClass, attendance = teacherAttendanceForClass(rosterClass)) => {
       if (attendance.__classStartedAt) return attendance.__classStartedAt;
       const firstCheckIn = teacherClassCheckedInEntries(rosterClass, attendance).map((entry) => entry.checkInAt).filter(Boolean).sort()[0] || "";
@@ -35840,7 +35856,7 @@
         showToast(checkoutCompleted ? "Class attendance complete" : "Check-in complete — ready to end class");
         return;
       }
-      list.innerHTML = unresolved.map((student) => `<div class="teacher-attendance-review-row"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><span class="teacher-attendance-actions"><button class="secondary" type="button" data-review-attendance-status="tardy" data-review-student="${rosterSafe(student.id)}">Tardy</button><button class="secondary" type="button" data-review-attendance-status="absent" data-review-student="${rosterSafe(student.id)}">Absent</button></span></div>`).join("");
+      list.innerHTML = unresolved.map((student) => `<div class="teacher-attendance-review-row"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><span class="teacher-attendance-actions"><button class="secondary" type="button" data-review-attendance-status="present" data-review-student="${rosterSafe(student.id)}">Here</button><button class="secondary" type="button" data-review-attendance-status="tardy" data-review-student="${rosterSafe(student.id)}">Tardy</button><button class="secondary" type="button" data-review-attendance-status="absent" data-review-student="${rosterSafe(student.id)}">Absent</button></span></div>`).join("");
       teacherRosterAttendanceReviewClassId = rosterClass.id;
       setTeacherRosterOverlay("teacher-attendance-review-overlay", true);
     };
@@ -36517,11 +36533,11 @@
       const rosterClass = teacherRosterClasses().find((item) => item.id === teacherRosterAttendanceReviewClassId);
       if (!rosterClass) return;
       const status = button.dataset.reviewAttendanceStatus;
-      teacherAttendanceForClass(rosterClass)[button.dataset.reviewStudent] = {
-        status,
-        checkInAt: "",
-        checkOutAt: ""
-      };
+      if (!["present", "tardy", "absent"].includes(status)) return;
+      const attendance = teacherAttendanceForClass(rosterClass);
+      attendance[button.dataset.reviewStudent] = status === "present"
+        ? teacherAttendanceHereCorrection(rosterClass, attendance)
+        : { status, checkInAt: "", checkOutAt: "" };
       scheduleAppDataSave();
       void persistTeacherAttendanceBatch(rosterClass, [button.dataset.reviewStudent]);
       renderTeacherAttendanceReview(rosterClass);
@@ -45365,7 +45381,7 @@
       try {
         const { data: { session } = {}, error: sessionError } = await window.dtSupabase.auth.getSession();
         if (sessionError || !session?.access_token) throw new Error("Your Director session could not be verified. Sign in again and retry.");
-        const response = await fetch("https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/square-sandbox-foundation", {
+        const response = await fetch("https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/square-isolated-sandbox", {
           method: "GET",
           headers: { authorization: `Bearer ${session.access_token}`, accept: "application/json" }
         });
@@ -45378,7 +45394,7 @@
         }
         if (status) status.textContent = ready
           ? "Square Sandbox configuration is present. Checkout is disabled, and no payment was attempted."
-          : "One or more required Sandbox setup values are missing or malformed. Checkout remains disabled.";
+          : (result.message || "The separate Sandbox connection needs setup. Live payments are unchanged.");
       } catch (error) {
         if (badge) {
           badge.textContent = "Check Failed";
@@ -45468,7 +45484,7 @@
         const { data: { session } = {}, error: sessionError } = await window.dtSupabase.auth.getSession();
         if (sessionError || !session?.access_token) throw new Error("Your Director session could not be verified. No test was issued.");
         const requestKey = squareSandboxRandomKey("dti");
-        const response = await fetch("https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/square-sandbox-test-issuance", {
+        const response = await fetch("https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/square-isolated-sandbox", {
           method: "POST",
           headers: { authorization: `Bearer ${session.access_token}`, "content-type": "application/json", "idempotency-key": requestKey },
           body: JSON.stringify({ action: "issue_isolated_test_charge", requestKey })
@@ -45559,7 +45575,7 @@
       try {
         const { data: { session } = {}, error: sessionError } = await window.dtSupabase.auth.getSession();
         if (sessionError || !session?.access_token) throw new Error("Your Director session could not be verified. Sign in again before testing.");
-        const readinessResponse = await fetch("https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/square-sandbox-foundation", {
+        const readinessResponse = await fetch("https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/square-isolated-sandbox", {
           method: "GET",
           headers: { authorization: `Bearer ${session.access_token}`, accept: "application/json" }
         });
@@ -45616,7 +45632,7 @@
         const { data: { session } = {}, error: sessionError } = await window.dtSupabase.auth.getSession();
         if (sessionError || !session?.access_token) throw new Error("Please sign in again. No payment was attempted.");
         const idempotencyKey = squareSandboxRandomKey("dtp");
-        const response = await fetch("https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/square-sandbox-payment", {
+        const response = await fetch("https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/square-isolated-sandbox", {
           method: "POST",
           headers: { authorization: `Bearer ${session.access_token}`, "content-type": "application/json", "idempotency-key": idempotencyKey },
           body: JSON.stringify({ testChargeId: squareSandboxTestContract.testChargeId, sourceToken: tokenResult.token, idempotencyKey })
