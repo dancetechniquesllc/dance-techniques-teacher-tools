@@ -41854,7 +41854,7 @@
         if (date.getDay() === dayIndex) dates.push({ date: payrollDateKey(date), type: "scheduled", status: "payable", reason: scheduledReason });
       }
       const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
-      const changes = (teacher?.reschedules || []).filter((item) => !item.schoolName || schoolNameMatches(item.schoolName, rosterClass.schoolName));
+      const changes = (teacher?.reschedules || []).filter((item) => !item.schoolName || enrollmentSchoolNameMatches(item.schoolName, rosterClass.schoolName));
       dates.forEach((entry) => {
         const change = changes.find((item) => item.originalDate === entry.date);
         if (!change) return;
@@ -42097,7 +42097,7 @@
     }).join("");
 
     const payrollMonthOptionsMarkup = (selectedMonth = defaultPayrollMonth()) => {
-      const selected = /^\d{4}-\d{2}$/.test(String(selectedMonth || "")) ? String(selectedMonth) : defaultPayrollMonth();
+      const selected = /^\d{4}-(0[1-9]|1[0-2])$/.test(String(selectedMonth || "")) ? String(selectedMonth) : defaultPayrollMonth();
       const selectedDate = new Date(`${selected}-01T12:00:00`);
       const firstYear = selectedDate.getFullYear() - 1;
       const lastYear = selectedDate.getFullYear() + 1;
@@ -42114,11 +42114,11 @@
 
     const renderPayrollLanding = () => {
       const summary = document.getElementById("payroll-landing-summary");
-      if (summary) summary.innerHTML = payrollSummaryMarkup();
       const month = document.getElementById("payroll-month");
       const sequence = document.getElementById("payroll-sequence");
       if (month) month.innerHTML = payrollMonthOptionsMarkup(payrollState.month || defaultPayrollMonth());
       if (sequence) sequence.value = payrollState.sequence || "1";
+      if (summary) summary.innerHTML = payrollSummaryMarkup();
       renderPayrollStubLibrary();
     };
 
