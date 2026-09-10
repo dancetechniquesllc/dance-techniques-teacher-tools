@@ -16661,11 +16661,14 @@
                 <label>Gender
                   <select id="student-library-gender"><option value="all">All Genders</option><option value="female">Female</option><option value="male">Male</option><option value="unknown">Not Entered</option></select>
                 </label>
+                <label>Shoe Status
+                  <select id="student-library-shoes"><option value="all">All Shoe Statuses</option><option value="has">Has Shoes</option><option value="needs-tap">Needs Tap</option><option value="needs-ballet">Needs Ballet</option><option value="needs-both">Needs Both</option><option value="small-tap">Too Small Tap</option><option value="small-ballet">Too Small Ballet</option></select>
+                </label>
                 <label>Student Status
                   <select id="student-library-status"><option value="all">All enrolled dancers</option><option value="enrolled">Enrolled</option></select>
                 </label>
               </div>
-              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="student-library-search,student-library-school,student-library-teacher,student-library-day,student-library-status,student-library-gender">Reset Filter</button></div>
+              <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="student-library-search,student-library-school,student-library-teacher,student-library-day,student-library-status,student-library-gender,student-library-shoes">Reset Filter</button></div>
               <div class="student-library-grid" id="admin-student-library-list"></div>
             </div>
             <div class="enrollment-student-view-panel" id="director-future-dancers-panel" data-enrollment-student-panel="future-dancers" hidden>
@@ -36850,6 +36853,7 @@
       const dayFilter = document.getElementById("student-library-day");
       const statusFilter = document.getElementById("student-library-status");
       const genderFilter = document.getElementById("student-library-gender");
+      const shoeFilter = document.getElementById("student-library-shoes");
       const search = document.getElementById("student-library-search");
       if (!list || !schoolFilter || !teacherFilter || !dayFilter || !statusFilter || !search) return;
       const currentSchool = schoolFilter.value || "all";
@@ -36868,6 +36872,7 @@
         if (teacherFilter.value !== "all" && rosterClass.teacherId !== teacherFilter.value) return false;
         if (dayFilter.value !== "all" && rosterClass.day !== dayFilter.value) return false;
         if (genderFilter && genderFilter.value !== "all" && teacherDancerGenderCategory(student) !== genderFilter.value) return false;
+        if (shoeFilter && !window.dtMatchesShoeFilter(student, shoeFilter.value)) return false;
         const haystack = `${student.firstName} ${student.preferredName || ""} ${student.lastName} ${student.parentFirstName || ""} ${student.parentLastName || ""} ${student.parentEmail || ""} ${rosterClass.schoolName} ${rosterClass.name}`.toLowerCase();
         return !term || haystack.includes(term);
       }).sort((left, right) => `${left.student.lastName} ${rosterStudentFirstName(left.student)}`.localeCompare(`${right.student.lastName} ${rosterStudentFirstName(right.student)}`));
@@ -42146,7 +42151,7 @@
       if (step === 0) body = `<div class="payroll-choice-grid"><button class="payroll-choice-card ${payrollState.sequence === "1" ? "is-selected" : ""}" type="button" data-payroll-sequence-choice="1"><strong>1st · Estimated Half</strong><small>Exactly half of expected ${payrollMonthLabel()} payroll.</small></button><button class="payroll-choice-card ${payrollState.sequence === "2" ? "is-selected" : ""}" type="button" data-payroll-sequence-choice="2"><strong>15th · True-Up</strong><small>The accurate remaining amount after holds, releases, changes, and the first payment.</small></button></div><div class="payroll-explanation"><strong>${payrollMonthLabel()}</strong> · Payday ${payrollPayday().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} · Preparation deadline ${new Date(payrollPayday().getTime() - 5 * 86400000).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>`;
       if (step === 1) { const visibleClasses = payrollFilteredClasses(); body = `<div class="payroll-explanation"><strong>Teacher tier · ${escapeText(payrollPayPeriodLabel())}</strong><br>Only Teacher-tier classes occurring inside this pay period are shown. This will usually be two payable occurrences for each weekly dance class.</div>${payrollFilterRowMarkup("classes", { includeStatus: true })}<div class="payroll-table"><div class="payroll-table-row is-header"><span>School</span><span>Payable</span><span>Excluded</span><span>Reason Recorded</span></div>${visibleClasses.map((rosterClass) => { const dates = payrollTeacherClassDates(rosterClass); const payable = dates.filter((item) => item.status === "payable"); const excluded = dates.filter((item) => item.status === "excluded"); return `<div class="payroll-table-row"><span><strong>${escapeText(rosterClass.schoolName)}</strong><small>${escapeText(rosterClass.name)} · ${escapeText(rosterTeacherName(rosterClass.teacherId))}</small></span><span>${payable.length}</span><span>${excluded.length}</span><span>${escapeText(excluded[0]?.reason || payable[0]?.reason || "Schedule needed")}</span></div>`; }).join("") || `<div class="payroll-placeholder">No Teacher-tier classes occur in this pay period.</div>`}</div><div class="payroll-explanation">Canceled and original rescheduled dates are excluded with a reason. Makeup dates are paid in the pay period when they actually occur and remain linked to the original class change.</div>`; }
       if (step === 2) {
-        if (payrollState.sequence === "2") body = `<div class="payroll-placeholder">Current payment status was recorded during the 1st payroll. Continue to Outstanding Balances to mark each carried balance as still unpaid, unpaid with a late fee, paid, or paid with a late fee.</div>`;
+        if (payrollState.sequence !== "2") body = `<div class="payroll-placeholder">Review current payment status during the 15th · True-Up payroll. Continue to Outstanding Balances to review any carried balances.</div>`;
         else { const visibleStudents = payrollFilteredStudents("outstanding"); body = `<div class="payroll-explanation">Everyone defaults to paid. Select a student only when their entire current balance is unpaid. No amount entry is needed.</div>${payrollFilterRowMarkup("outstanding")}<div class="payroll-student-grid">${payrollStudentCardsMarkup("outstanding", visibleStudents) || `<div class="payroll-placeholder">No students match these filters.</div>`}</div>`; }
       }
       if (step === 3) {
@@ -42246,7 +42251,7 @@
       scheduleAppDataSave();
     });
     document.getElementById("payroll-month")?.addEventListener("change", (event) => { payrollState.month = event.target.value; renderPayrollLanding(); scheduleAppDataSave(); });
-    document.getElementById("payroll-sequence")?.addEventListener("change", (event) => { payrollState.sequence = event.target.value; renderPayrollLanding(); scheduleAppDataSave(); });
+    document.getElementById("payroll-sequence")?.addEventListener("change", (event) => { payrollState.sequence = event.target.value; if (!document.getElementById("payroll-wizard")?.hidden) renderPayrollWizard(); else renderPayrollLanding(); scheduleAppDataSave(); });
     document.getElementById("close-payroll-stub-library")?.addEventListener("click", () => setPayrollStubLibraryOpen(false));
     document.getElementById("teacher-pay-stubs-close")?.addEventListener("click", () => setTeacherPayStubsOpen(""));
     document.getElementById("teacher-pay-stubs-overlay")?.addEventListener("click", (event) => { if (event.target === event.currentTarget) setTeacherPayStubsOpen(""); });
@@ -42273,6 +42278,7 @@
       if (sequence) { payrollState.sequence = sequence.dataset.payrollSequenceChoice; renderPayrollWizard(); scheduleAppDataSave(); return; }
       const studentCard = event.target.closest("[data-payroll-student]");
       if (studentCard) {
+        if (payrollState.sequence !== "2") return;
         const id = studentCard.dataset.payrollStudent;
         payrollState.outstandingStudents ||= {};
         const existing = payrollState.outstandingStudents[id];
@@ -45698,7 +45704,7 @@
       if (!button) return;
       openTeacherDashboardRecord(button.dataset.teacherDdJump, profileTeacher.id);
     });
-    ["student-library-search", "student-library-school", "student-library-teacher", "student-library-day", "student-library-status", "student-library-gender"].forEach((id) => {
+    ["student-library-search", "student-library-school", "student-library-teacher", "student-library-day", "student-library-status", "student-library-gender", "student-library-shoes"].forEach((id) => {
       document.getElementById(id)?.addEventListener(id === "student-library-search" ? "input" : "change", renderStudentLibrary);
     });
     document.getElementById("admin-student-library-list")?.addEventListener("click", (event) => {

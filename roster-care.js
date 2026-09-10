@@ -3,6 +3,18 @@
 (() => {
   const states = ['unknown', 'has', 'too_small'];
   const status = (student, shoe) => states.includes(student.shoeStatus?.[shoe]) ? student.shoeStatus[shoe] : 'unknown';
+  window.dtMatchesShoeFilter = (student, filter) => {
+    const tap = status(student, 'tap'), ballet = status(student, 'ballet');
+    switch (filter) {
+      case 'has': return tap === 'has' && ballet === 'has';
+      case 'needs-tap': return tap === 'unknown';
+      case 'needs-ballet': return ballet === 'unknown';
+      case 'needs-both': return tap === 'unknown' && ballet === 'unknown';
+      case 'small-tap': return tap === 'too_small';
+      case 'small-ballet': return ballet === 'too_small';
+      default: return true;
+    }
+  };
   const label = (value) => ({unknown: 'No shoes', has: 'Has shoes', too_small: 'Too small'})[value];
   const nextStatus = (current, tooSmall) => tooSmall ? 'too_small' : current === 'has' ? 'unknown' : 'has';
   window.dtShoeIndicators = (student) => `<span class="shoe-indicators">${['tap', 'ballet'].map(shoe => `<span class="shoe-dot is-${status(student, shoe)}" role="img" aria-label="${shoe === 'tap' ? 'Tap' : 'Ballet'}: ${label(status(student, shoe))}" title="${shoe === 'tap' ? 'Tap' : 'Ballet'}: ${label(status(student, shoe))}">${shoe === 'tap' ? 'T' : 'B'}</span>`).join('')}</span>`;
