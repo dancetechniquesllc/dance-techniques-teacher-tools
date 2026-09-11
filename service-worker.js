@@ -1,5 +1,8 @@
-const CACHE_NAME = "my-dance-techniques-v231-official-payroll";
+const CACHE_NAME = "my-dance-techniques-v232-issued-pay-statements";
 const CORE_ASSETS = [
+  "./payroll-statements.js",
+  "./enrollment-tuition-confirmation.js",
+  "./vendor/pdf-lib-1.17.1.min.js",
   "./assets/director-open-shape-magic.png",
   "./director-corner.js?v=20260908",
   "./director-corner.css?v=20260908",

@@ -7,7 +7,10 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>My Dance Techniques</title>
-  <script>
+  <script src="vendor/pdf-lib-1.17.1.min.js"></script>
+<script src="payroll-statements.js"></script>
+<script src="enrollment-tuition-confirmation.js"></script>
+<script>
     document.documentElement.dataset.localPreview = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname) ? "true" : "false";
   </script>
   <link rel="manifest" href="manifest.webmanifest" />
@@ -21498,7 +21501,7 @@
               kitPickedUp: Boolean(student.kit_picked_up), kitPickedUpAt: student.kit_picked_up_at || "", kitPickedUpBy: student.kit_picked_up_by || "",
               kitDeliveredAt: student.kit_delivered_at || "", kitDeliveredBy: student.kit_delivered_by || "",
               kitDeliveryNote: student.kit_delivery_note || "",
-              status: uiStudentStatus(enrollment.status), trialDate: enrollment.trial_date || "", parentName: student.parent_name || "",
+              enrolledDate: enrollment.enrolled_date || "", status: uiStudentStatus(enrollment.status), trialDate: enrollment.trial_date || "", parentName: student.parent_name || "",
               systemEntryDate: student.created_at || "", createdAt: student.created_at || "", enrolledAt: student.created_at || "",
               parentFirstName: student.parent_first_name || "", parentLastName: student.parent_last_name || "", parentPhone: student.parent_phone || "",
               parentEmail: student.parent_email || "", tuitionDiscount: student.tuition_discount || "none", medicalNotes: student.medical_notes || "", registrationNotes: student.registration_notes || "",
@@ -22219,6 +22222,7 @@
     let enrollmentTempoCelebrationKey = "";
 
     function setTab(tab) {
+      if(tab === "pay") setTimeout(() => loadIssuedPayrollStatements().then(() => { renderPaydaySummary();renderPayArchive(); }).catch(error => showToast(error.message)),0);
       if (!navigationGuardBypass && currentViewTab !== tab && hasUnsavedEdits) {
         runGuardedNavigation(() => setTab(tab));
         return;
@@ -23245,7 +23249,7 @@
         stubList.innerHTML = payStubs.length ? payStubs.map((stub, index) => `
           <div class="stub">
             <div><strong>${index === 0 ? "Most Recent Payday" : "Previous Payday"}</strong><small>${escapeText(formatPayDate(stub.payDate))}</small><small>Payday record</small></div>
-            <div class="stub-actions"><button class="secondary" type="button" data-download-stub="${escapeText(stub.payDate)}">Download</button></div>
+            <div class="stub-actions"><button class="secondary" type="button" data-view-stub="${escapeText(stub.payDate)}">View</button><button class="secondary" type="button" data-download-stub="${escapeText(stub.payDate)}">Download</button></div>
           </div>
         `).join("") : `<div class="stub"><div><strong>No paydays available yet</strong><small>Your payday records will appear here when they are added.</small></div></div>`;
       }
@@ -23849,6 +23853,7 @@
 
     const openPaydayStub = (payDate) => {
       const stub = profileTeacher.payStubs.find((item) => item.payDate === payDate);
+      if (stub?.statement) { openIssuedPayStatement(profileTeacher.id, payDate); return; }
       if (stub?.fileUrl && stub.fileUrl !== "#") {
         window.open(stub.fileUrl, "_blank", "noopener");
         return;
@@ -30856,7 +30861,7 @@
                 <small>${escapeText(stub.filename)}</small>
               </div>
               <div class="stub-actions">
-                <button class="secondary" type="button" data-download-stub="${escapeText(stub.payDate)}">Download</button>
+                <button class="secondary" type="button" data-view-stub="${escapeText(stub.payDate)}">View</button><button class="secondary" type="button" data-download-stub="${escapeText(stub.payDate)}">Download</button>
                 <button class="danger-btn" type="button" data-delete-stub="${escapeText(stub.payDate)}">Delete</button>
               </div>
             </div>
@@ -32430,16 +32435,23 @@
       showToast(`Reminder queued for ${adminSchoolDisplayName(profileTeacher, item.schoolName)}`);
     });
 
+    document.getElementById("stub-list")?.addEventListener("click", event => {
+      const button=event.target.closest("[data-view-stub],[data-download-stub]");
+      if(button)openIssuedPayStatement(profileTeacher.id,button.dataset.viewStub||button.dataset.downloadStub,Boolean(button.dataset.downloadStub));
+    });
     document.getElementById("pay-archive-list")?.addEventListener("click", (event) => {
       const deleteButton = event.target.closest("[data-delete-stub]");
       const downloadButton = event.target.closest("[data-download-stub]");
       if (deleteButton) {
+        if(profileTeacher.payStubs.some(s=>s.payDate===deleteButton.dataset.deleteStub&&s.statementId)){showToast("Issued pay statements stay in your payment history.");return;}
         profileTeacher.payStubs = profileTeacher.payStubs.filter((stub) => stub.payDate !== deleteButton.dataset.deleteStub);
         renderPayArchive();
         renderLexiSchedule();
         showToast("Payday removed");
       }
-      if (downloadButton) showToast(`Download ready for ${formatPayDate(downloadButton.dataset.downloadStub)}`);
+      if (downloadButton) openIssuedPayStatement(profileTeacher.id, downloadButton.dataset.downloadStub, true);
+      const viewButton=event.target.closest("[data-view-stub]");
+      if(viewButton) openIssuedPayStatement(profileTeacher.id,viewButton.dataset.viewStub);
     });
 
     document.getElementById("stub-month")?.addEventListener("change", renderPayDateOptions);
@@ -41952,39 +41964,48 @@
       const lines = [];
       const teachersByTier = Object.fromEntries(payrollTeachers().map((teacher) => [teacher.id, payrollTierIsAssigned(teacher.payTier) ? teacher.payTier : ""]));
       const outstanding = new Set(Object.keys(payrollState.outstandingStudents || {}).filter((id) => payrollBalanceIsUnresolved(payrollState.outstandingStudents[id])));
+      const foundingSeen = new Set();
       rosterClasses.forEach((rosterClass) => {
         const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
         const tier = teachersByTier[rosterClass.teacherId];
         if (!teacher || !tier) return;
         const payableDates = (tier === "tier_b_teacher" ? payrollTeacherClassDates(rosterClass) : payrollClassDates(rosterClass))
           .filter((entry) => entry.status === "payable");
-        const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()));
+        const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()) && (!student.enrolledDate || !payrollState.month || student.enrolledDate.slice(0,7) <= payrollState.month));
         if (tier === "tier_a_founding_teacher") {
           students.forEach((student) => {
             const discount = payrollDiscountFor(student);
-            if (discount === "director") return;
-            const count = Math.min(4, payableDates.length);
-            const rate = discount === "none" ? 10 : 7.5;
-            const amount = count * rate;
-            lines.push({ teacherId: teacher.id, studentId: student.id, type: "Student Pay", description: `${rosterStudentFullName(student)} · ${rosterClass.schoolName} · ${count} classes`, amount, held: outstanding.has(student.id) });
+            const studentKey = `${teacher.id}:${student.id}`;
+            if (foundingSeen.has(studentKey)) return;
+            foundingSeen.add(studentKey);
+            const count = 1;
+            const fraction = payrollProrationFraction(student.id);
+            const rate = (discount === "director" ? 0 : discount === "none" ? 40 : 30) * fraction;
+            const amount = Math.round(rate * 100) / 100;
+            lines.push({ teacherId: teacher.id, studentId: student.id, type: "Student Pay", studentName: rosterStudentFullName(student), school: rosterClass.schoolName, category: discount, fraction, rate, vendor: false, description: `${rosterStudentFullName(student)} · ${rosterClass.schoolName} · ${count} classes`, amount, held: outstanding.has(student.id) });
           });
         }
         if (tier === "tier_b_teacher") {
           payableDates.forEach((occurrence) => {
-            const count = students.filter((student) => payrollDiscountFor(student) !== "director").length;
+            const count = students.filter((student) => payrollDiscountFor(student) !== "director" && (!student.enrolledDate || student.enrolledDate <= occurrence.date)).length;
+            if (!count) return;
             const commissionRate = payrollTeacherCommissionRate(teacher.id);
             const commissionDetail = count >= 8 ? ` · ${payrollCurrency(commissionRate)} commission for students 8–12` : "";
-            lines.push({ teacherId: teacher.id, type: occurrence.type === "makeup" ? "Makeup Class" : "Class Pay", description: `${rosterClass.name} · ${occurrence.date} · ${count} enrolled students${commissionDetail}`, amount: payrollTierBClassRate(count, teacher.id), held: false });
+            lines.push({ teacherId: teacher.id, date: occurrence.date, school: rosterClass.schoolName, className: rosterClass.name, enrolledCount: count, base: count <= 6 ? 20 : 30, commission: payrollTierBClassRate(count, teacher.id) - (count <= 6 ? 20 : 30), type: occurrence.type === "makeup" ? "Makeup Class" : "Class Pay", description: `${rosterClass.name} · ${occurrence.date} · ${count} enrolled students${commissionDetail}`, amount: payrollTierBClassRate(count, teacher.id), held: false });
           });
         }
       });
       payrollTeachers().filter((teacher) => ["tier_c_administrator", "tier_d_director"].includes(teacher.payTier)).forEach((leader) => {
+        const leaderSeen = new Set();
         rosterClasses.forEach((rosterClass) => {
           const sourceTier = teachersByTier[rosterClass.teacherId];
-          const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()));
+          const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()) && (!student.enrolledDate || !payrollState.month || student.enrolledDate.slice(0,7) <= payrollState.month));
           students.forEach((student) => {
             const discount = payrollDiscountFor(student);
-            if (discount === "director") return;
+            if (discount === "director" && rosterClass.teacherId !== leader.id) return;
+            if (leaderSeen.has(student.id)) return;
+            leaderSeen.add(student.id);
+            const fraction = payrollProrationFraction(student.id);
             let amount = 0;
             let type = "Commission";
             if (rosterClass.teacherId === leader.id) {
@@ -41994,10 +42015,13 @@
             } else if (sourceTier === "tier_a_founding_teacher") amount = discount === "none" ? 5 : 4;
             // Monthly commission per eligible dancer, independent of class occurrences.
             else if (sourceTier === "tier_b_teacher") amount = 15;
-            if (amount) lines.push({ teacherId: leader.id, studentId: student.id, type, description: `${rosterStudentFullName(student)} · ${rosterClass.schoolName}`, amount, held: outstanding.has(student.id) });
+            if (discount === "director") amount = 0;
+            const rate = Math.round(amount * fraction * 100) / 100;
+            amount = rate;
+            if (amount || type === "Own Student Pay") lines.push({ teacherId: leader.id, studentId: student.id, type, studentName: rosterStudentFullName(student), school: rosterClass.schoolName, category: discount, fraction, rate, vendor: payrollSchoolVendor(rosterClass.schoolName), sourceTier, sourceTeacherName: fullName(teachers.find(t => t.id === rosterClass.teacherId)), description: `${rosterStudentFullName(student)} · ${rosterClass.schoolName}`, amount, held: outstanding.has(student.id) });
           });
         });
-        if (leader.payTier === "tier_c_administrator") lines.push({ teacherId: leader.id, type: "Active Student Bonus", description: `${payrollAllStudents().length} active students`, amount: payrollAllStudents().length, held: false });
+        if (leader.payTier === "tier_c_administrator") lines.push({ teacherId: leader.id, type: "Enrollment Fee Bonus", description: `${payrollAllStudents().length} active students`, amount: payrollAllStudents().filter(({student}) => !student?.enrolledDate || !payrollState.month || student.enrolledDate.slice(0,7) <= payrollState.month).length, held: false });
         const lateFees = leader.payTier === "tier_c_administrator"
           ? Object.values(payrollState.outstandingStudents || {}).filter((item) => item.status === "paid_late_fee" && payrollBalanceResolvedThisRun(item)).length
           : 0;
@@ -42014,7 +42038,7 @@
       });
       (payrollState.workingHours || []).forEach((entry) => {
         if (!entry.teacherId || !Number(entry.hours)) return;
-        lines.push({ teacherId: entry.teacherId, type: "Working Hours", description: entry.description || "Admin/preparation time", amount: Number(entry.hours) * 20, held: false });
+        lines.push({ teacherId: entry.teacherId, hours: Number(entry.hours), type: "Working Hours", description: entry.description || "Admin/preparation time", amount: Number(entry.hours) * 20, held: false });
       });
       (payrollState.adjustments || []).forEach((entry) => {
         if (!entry.teacherId || !Number(entry.amount)) return;
@@ -42087,7 +42111,7 @@
       const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
       if (title) title.textContent = `${fullName(teacher)} Pay Stubs`;
       if (subtitle) subtitle.textContent = payrollTierLabels[teacher.payTier] || "Finalized payroll records";
-      body.innerHTML = stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`;
+      body.innerHTML = stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}" data-save-pdf="true">Download</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`;
     };
 
     const setPayrollStubLibraryOpen = (open) => {
@@ -42100,30 +42124,81 @@
       if (open) renderPayrollStubLibrary();
     };
 
-    const finalizePayrollPayStubs = async () => {
+    let payrollConfirmedTuition = {};
+    const loadConfirmedEnrollmentTuition = async () => {
+      if(!window.dtSupabase || document.body.dataset.tourMode === "true") return;
+      const {data,error}=await window.dtSupabase.from("enrollment_tuition_confirmations").select("student_id,billing_month,full_tuition,recorded_tuition,confirmed_at").eq("billing_month",payrollState.month+"-01");
+      if(error)throw new Error("Confirmed enrollment tuition could not load. Please retry before approving payroll.");
+      payrollConfirmedTuition=Object.fromEntries((data||[]).map(row=>[`${row.billing_month.slice(0,7)}:${row.student_id}`,row]));
+    };
+    const payrollProrationFraction = (studentId) => {
+      const confirmed=payrollConfirmedTuition[`${payrollState.month}:${studentId}`];
+      if(confirmed)return DTEnrollmentTuition.percentage(Number(confirmed.full_tuition),Number(confirmed.recorded_tuition))/100;
+      const value = Number(payrollState.prorations?.[payrollState.month]?.[studentId] ?? 100);
+      if (!Number.isFinite(value) || value<0 || value>100) throw new Error("Choose a valid tuition percentage.");
+      return value / 100;
+    };
+    const payrollStatementBatch = () => {
       const preview = calculatePayrollPreview();
-      const payDate = payrollDateKey(payrollPayday());
-      preview.summaries.forEach((item) => {
-        const teacher = item.teacher;
-        teacher.payStubs ||= [];
-        const generated = {
-          payDate,
-          filename: `${teacher.id}-${payDate}-pay-stub.pdf`,
-          fileUrl: "#",
-          amount: Number(item.payment || 0),
-          payrollMonth: payrollState.month,
-          payrollSequence: payrollState.sequence,
-          finalized: true,
-          source: "finance-folio",
-          uploadedAt: new Date().toISOString()
-        };
-        const existingIndex = teacher.payStubs.findIndex((stub) => stub.payDate === payDate);
-        if (existingIndex >= 0) teacher.payStubs[existingIndex] = { ...teacher.payStubs[existingIndex], ...generated };
-        else teacher.payStubs.push(generated);
+      if (preview.issues) throw new Error("Resolve payroll issues before finalizing statements.");
+      return preview.summaries.map(item => {
+        const studentLines = item.lines.filter(line => ["Own Student Pay", "Student Pay"].includes(line.type));
+        return DTPayrollStatements.snapshot({
+          teacher: { id: item.teacher.id, name: fullName(item.teacher), tier: item.teacher.payTier },
+          month: payrollState.month, payDate: payrollDateKey(payrollPayday()), sequence: payrollState.sequence,
+          advanceCredit: officialPayrollPayments.filter(r => r.payroll_teacher_summaries?.teacher_id===item.teacher.id && String(r.payroll_teacher_summaries?.payroll_periods?.period_month||" ").slice(0,7)===payrollState.month).reduce((n,r)=>n+Number(r.payroll_teacher_summaries?.calculation_snapshot?.advance_credit||0),0),
+          lines: item.lines, payment: item.payment, firstPayment: item.recordedFirstPayment || 0, paidToDate: 0,
+          ownStudents: studentLines.map(line => ({ name: line.studentName, school: line.school, category: line.category,
+            rate: line.rate, amount: line.amount, held: line.held, vendor: line.vendor, fraction: line.fraction }))
+        });
       });
-      await Promise.all(preview.summaries.map((item) => saveTeacherRecordToCloud(item.teacher)));
-      renderPaydaySummary();
-      renderPayArchive();
+    };
+    const applyIssuedPayrollStatements = (records) => {
+      teachers.forEach(teacher => {
+        const issued = records.filter(record => record.teacher_id === teacher.id);
+        teacher.payStubs = (teacher.payStubs || []).filter(stub => !issued.some(record => record.payday === stub.payDate));
+        issued.forEach(record => teacher.payStubs.push({ statementId: record.id, payDate: record.payday,
+          filename: `${teacher.id}-${record.payday}-pay-stub.pdf`, amount: record.snapshot.payment,
+          finalized: true, statement: record.snapshot }));
+      });
+    };
+    const loadIssuedPayrollStatements = async () => {
+      if (!window.dtSupabase || document.body.dataset.tourMode === "true") return;
+      const { data, error } = await window.dtSupabase.from("payroll_statement_documents").select("id,teacher_id,payday,snapshot").order("payday", { ascending: false });
+      if (error) throw new Error("Pay statements could not load. Please try again.");
+      applyIssuedPayrollStatements(data || []);
+    };
+    const openIssuedPayStatement = async (teacherId, payDate, download = false) => {
+      try {
+        const teacher = teachers.find(t => t.id === teacherId);
+        const stub = teacher?.payStubs?.find(s => s.payDate === payDate);
+        if (!stub?.statement) { showToast("This older entry has no issued PDF. Please ask the director."); return; }
+        const logo = await fetch("assets/dance-techniques-logo-only.png").then(r => { if (!r.ok) throw new Error("Logo could not load"); return r.arrayBuffer(); });
+        const bytes = await DTPayrollStatements.pdf(stub.statement, logo);
+        const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+        if (download) { const a = document.createElement("a"); a.href=url; a.download=stub.filename; a.click(); }
+        else {
+          let dialog=document.getElementById("issued-statement-view");
+          if (!dialog) { dialog=document.createElement("dialog"); dialog.id="issued-statement-view"; dialog.style.cssText="width:95vw;max-width:1000px;height:90vh;padding:12px";
+            dialog.innerHTML='<button type="button" aria-label="Close pay statement">× Close</button><iframe title="Pay statement" style="width:100%;height:90%;border:0"></iframe>';
+            dialog.querySelector("button").onclick=()=>dialog.close(); document.body.append(dialog); }
+          dialog.querySelector("iframe").src=url;dialog.showModal();dialog.addEventListener("close",()=>URL.revokeObjectURL(url),{once:true});
+        }
+        if(download)setTimeout(()=>URL.revokeObjectURL(url),60000);
+      } catch(error) { showToast(error.message || "The statement could not open."); }
+    };
+    const finalizePayrollPayStubs = async () => {
+      if (!window.dtSupabase || document.body.dataset.tourMode === "true") throw new Error("Sign in to finalize payroll. Tour mode cannot issue pay statements.");
+      const batch = payrollState.approvedStatements;
+      if (!batch?.length || batch.some(s => s.month !== payrollState.month || s.sequence !== Number(payrollState.sequence))) throw new Error("Review and approve payroll before issuing statements.");
+      // Generate all PDFs before committing; layout failures cannot leave a half-issued run.
+      const logo = await fetch("assets/dance-techniques-logo-only.png").then(r=>r.arrayBuffer());
+      for (const statement of batch) await DTPayrollStatements.pdf(statement, logo);
+      const { data, error } = await window.dtSupabase.rpc("issue_payroll_statements", { statements: batch });
+      if (error) throw new Error(error.message || "Payroll could not be finalized. No statements were issued.");
+      applyIssuedPayrollStatements(data || []);
+      await loadOfficialPayrollPayments();
+      renderPaydaySummary(); renderPayArchive();
     };
 
     const payrollStudentCardsMarkup = (mode = "outstanding", records = payrollAllStudents()) => records.map(({ student, rosterClass }) => {
@@ -42189,6 +42264,11 @@
       if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[teacher.payTier])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
       if (step === 6) body = `<div class="payroll-explanation">Every manual adjustment requires a teacher, amount, and reason and will appear on the pay stub and audit history.</div><div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`;
       if (step === 7) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
+      if (step === 6) {
+        const confirmedRows=Object.entries(payrollConfirmedTuition).filter(([key])=>key.startsWith(payrollState.month+":"));
+        const prorations = {...(payrollState.prorations?.[payrollState.month] || {}),...Object.fromEntries(confirmedRows.map(([key,row])=>[key.slice(8),DTEnrollmentTuition.percentage(Number(row.full_tuition),Number(row.recorded_tuition))]))};
+        body += `<h3>Prorated Tuition</h3><p>Choose the percentage of monthly tuition charged. Student pay and commissions use the same percentage.</p><div>${payrollAllStudents().filter(({student})=>prorations[student.id]!=null).map(({student,rosterClass})=>`<label>${escapeText(rosterStudentFullName(student))} · ${escapeText(rosterClass.schoolName)} <select data-payroll-proration="${escapeText(student.id)}" ${payrollConfirmedTuition[`${payrollState.month}:${student.id}`]?'disabled title="Confirmed during enrollment"':""}>${[...new Set([0,25,50,75,100,Number(prorations[student.id])])].sort((a,b)=>a-b).map(n=>`<option value="${n}" ${Number(prorations[student.id])===n?'selected':''}>${n}%</option>`).join('')}</select></label>`).join('')}</div><select id="payroll-proration-student"><option value="">Choose student to prorate</option>${payrollAllStudents().map(({student})=>`<option value="${escapeText(student.id)}">${escapeText(rosterStudentFullName(student))}</option>`).join('')}</select><button type="button" class="secondary" id="add-payroll-proration">Add Prorated Tuition</button>`;
+      }
       if (step === 8) body = payrollState.status === "approved" || payrollState.status === "paid" ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment</span><span>Pay Stub</span><span>Status</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><strong>${escapeText(fullName(item.teacher))}</strong><span>${payrollCurrency(item.payment)}</span><span>Detailed PDF ready</span><span class="status ${payrollState.status === "paid" ? "ok" : "pending"}">${payrollState.status === "paid" ? "Paid" : "Approved"}</span></div>`).join("")}</div><button class="primary" type="button" id="mark-payroll-paid" ${payrollState.status === "paid" ? "disabled" : ""}>${payrollState.status === "paid" ? "Payroll Paid" : "Mark Payroll Paid"}</button>${payrollState.status === "paid" && String(payrollState.month || "").slice(5, 7) === "06" && String(payrollState.sequence) === "1" && !payrollState.yearEndPromotionReviews?.[String(payrollState.month || "").slice(0, 4)] ? `<button class="secondary" type="button" id="review-payroll-promotions">Review Year-End Raises</button>` : ""}` : `<div class="payroll-placeholder">Approve payroll before recording payments or finalizing pay stubs.</div>`;
       if ([0, 5, 7, 8].includes(step)) {
         const recorded = preview.summaries.filter((item) => item.recordedFirstPayment !== null);
@@ -42275,6 +42355,7 @@
     document.getElementById("begin-payroll")?.addEventListener("click", async () => {
       if (!await loadOfficialPayrollPayments()) return;
       payrollState.month = document.getElementById("payroll-month")?.value || defaultPayrollMonth();
+      try { await loadConfirmedEnrollmentTuition(); } catch(error) { showToast(error.message); return; }
       payrollState.sequence = document.getElementById("payroll-sequence")?.value || "1";
       payrollState.status = "in_progress";
       payrollState.currentStep = 0;
@@ -42291,7 +42372,7 @@
       const teacherPayStubs = event.target.closest("[data-open-teacher-pay-stubs]");
       if (teacherPayStubs) { setTeacherPayStubsOpen(teacherPayStubs.dataset.openTeacherPayStubs); return; }
       const directorStub = event.target.closest("[data-director-download-stub]");
-      if (directorStub) { showToast(`Pay stub ready for ${formatPayDate(directorStub.dataset.directorStubDate)}`); return; }
+      if (directorStub) { openIssuedPayStatement(directorStub.dataset.directorDownloadStub, directorStub.dataset.directorStubDate, Boolean(directorStub.dataset.savePdf)); return; }
       const clearFilters = event.target.closest("[data-clear-payroll-filters]");
       if (clearFilters) {
         payrollState.filters[clearFilters.dataset.clearPayrollFilters] = { ...payrollFilterDefaults[clearFilters.dataset.clearPayrollFilters] };
@@ -42324,16 +42405,29 @@
           : { ...(existing || {}), selected: false, status: "", markedAt: "", heldPayLines: [] };
         renderPayrollWizard(); scheduleAppDataSave(); return;
       }
+      if (event.target.closest("#add-payroll-proration")) {
+        const id=document.getElementById("payroll-proration-student")?.value;if(!id)return;
+        payrollState.prorations ||= {};payrollState.prorations[payrollState.month] ||= {};payrollState.prorations[payrollState.month][id]=100;
+        renderPayrollWizard();scheduleAppDataSave();return;
+      }
       if (event.target.closest("#add-payroll-hours")) { const teacher = payrollTeachers().find((item) => item.payTier === "tier_b_teacher"); payrollState.workingHours.push({ teacherId: teacher?.id || "", date: payrollDateKey(new Date()), hours: "", description: "" }); renderPayrollWizard(); return; }
       if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
-      if (event.target.closest("#approve-payroll")) { payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
-      if (event.target.closest("#mark-payroll-paid")) { payrollState.status = "paid"; payrollState.paidAt = new Date().toISOString(); await finalizePayrollPayStubs(); renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll marked paid · pay stubs published to Teacher Tools"); openPayrollPromotionReview(); return; }
+      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); await loadConfirmedEnrollmentTuition(); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Confirmed tuition changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
+      if (event.target.closest("#mark-payroll-paid")) {
+        const button=event.target.closest("#mark-payroll-paid");button.disabled=true;
+        try { await finalizePayrollPayStubs(); payrollState.status="paid";payrollState.paidAt=new Date().toISOString();renderPayrollWizard();scheduleAppDataSave();showToast("Payroll marked paid - statements posted to Teacher Tools"); }
+        catch(error){button.disabled=false;showToast(error.message || "Payroll could not be finalized. Please retry.");}
+        return;
+      }
       if (event.target.closest("#review-payroll-promotions")) { openPayrollPromotionReview(); return; }
       if (event.target.closest("#finish-payroll-review")) document.getElementById("close-payroll-workspace")?.click();
     });
     document.getElementById("payroll-workspace")?.addEventListener("input", (event) => {
+      const proration=event.target.closest("[data-payroll-proration]");
+      if(proration){payrollState.prorations[payrollState.month][proration.dataset.payrollProration]=Number(proration.value);scheduleAppDataSave();return;}
+
       const filter = event.target.closest("[data-payroll-filter-type][data-payroll-filter-field]");
       if (filter) { payrollFilterState(filter.dataset.payrollFilterType)[filter.dataset.payrollFilterField] = filter.value; scheduleAppDataSave(); return; }
       const hours = event.target.closest("[data-payroll-hours-field]");
@@ -46219,6 +46313,30 @@
       return { succeeded, failed: [...new Set(failed)], sentButUnmarked, failureMessage: failureMessage || validationSummary };
     };
 
+    const confirmEnrollmentRecordedTuition = async (item) => {
+      const tuition=suggestedEnrollmentTuition(item,suggestEnrollmentClass(item));
+      if(!Number.isFinite(tuition.amount)||!Number.isFinite(tuition.monthlyTuition)||tuition.monthlyTuition<0)throw new Error("Check the student’s suggested tuition before completing the billing plan.");
+      if(!DTEnrollmentTuition.needsConfirmation(tuition))return {handled:false};
+      const start=new Date(item.submitted_at || item.created_at || Date.now());
+      if(Number.isNaN(start.valueOf()))throw new Error("Check the enrollment date before confirming tuition.");
+      const month=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,"0")}`;
+      const confirmation=await DTEnrollmentTuition.ask({name:[item.student_first_name,item.student_last_name].filter(Boolean).join(" "),month,full:tuition.monthlyTuition,suggested:tuition.amount});
+      if(!confirmation)return {handled:true,cancelled:true};
+      if(document.body.dataset.tourMode === "true") {
+        item.enrollment_active_at=new Date().toISOString();
+        if(item.placed_student_id)payrollConfirmedTuition[`${confirmation.month}:${item.placed_student_id}`]={full_tuition:confirmation.full,recorded_tuition:confirmation.recorded};
+        return {handled:true};
+      }
+      if(!window.dtSupabase)throw new Error("Enrollment service is unavailable.");
+      const {data,error}=await window.dtSupabase.rpc("confirm_enrollment_billing_tuition",{target_enrollment:item.id,target_month:confirmation.month+"-01",full_amount:confirmation.full,recorded_amount:confirmation.recorded,suggested_amount:confirmation.suggested});
+      if(error)throw new Error(error.message || "Recorded tuition could not be saved. Billing plan is still incomplete.");
+      const saved=Array.isArray(data)?data[0]:data;
+      if(!saved?.student_id)throw new Error("Tuition confirmation was not returned. Refresh before retrying.");
+      payrollConfirmedTuition[`${saved.billing_month.slice(0,7)}:${saved.student_id}`]=saved;
+      item.enrollment_active_at=saved.confirmed_at;
+      return {handled:true};
+    };
+
     const completeEnrollmentBatch = async () => {
       const config = enrollmentBatchConfig();
       if (!config || enrollmentBatchCompleting || !enrollmentBatchSelected.size) return;
@@ -46252,6 +46370,11 @@
       }
       const value = Object.hasOwn(config, "value") ? config.value : new Date().toISOString();
       const completeOne = async (item) => {
+        if(config.field === "enrollment_active_at") {
+          const result=await confirmEnrollmentRecordedTuition(item);
+          if(result.cancelled){failed.push(item.id);return;}
+          if(result.handled){succeeded.push(item.id);return;}
+        }
         const update = config.nestedField
           ? { [config.field]: { ...(item[config.field] || {}), [config.nestedField]: value } }
           : { [config.field]: value };
@@ -46263,10 +46386,10 @@
         Object.assign(item, update);
         succeeded.push(item.id);
       };
-      // Plain checklist timestamps (including Billing Plan) are saved in small
+      // Other checklist timestamps are saved in small
       // groups. This keeps a large selected set from stopping partway through
       // a long one-by-one browser request chain.
-      if (!config.nestedField && eligibleItems.length) {
+      if (!config.nestedField && config.field !== "enrollment_active_at" && eligibleItems.length) {
         const update = { [config.field]: value };
         const chunks = Array.from({ length: Math.ceil(eligibleItems.length / 25) }, (_, index) => eligibleItems.slice(index * 25, index * 25 + 25));
         for (const chunk of chunks) {
@@ -46473,6 +46596,13 @@
       if (!item) return;
       const field = checklistButton.dataset.enrollmentChecklist;
       const nextValue = item[field] ? null : new Date().toISOString();
+      if(field === "enrollment_active_at" && nextValue) {
+        if(!enrollmentLeaderAuthorized()){showToast("Only a director or administrator can confirm billing tuition.");return;}
+        checklistButton.disabled=true;
+        try {const result=await confirmEnrollmentRecordedTuition(item);if(result.handled){if(!result.cancelled)renderEnrollmentQueue();return;}}
+        catch(error){showToast(error.message);return;}
+        finally {checklistButton.disabled=false;}
+      }
       if (document.body.dataset.tourMode !== "true") {
         const { error } = await window.dtSupabase.from("enrollments").update({ [field]: nextValue }).eq("id", item.id);
         if (error) { console.error("Enrollment checklist update failed", error); showToast("That checklist item could not be saved."); return; }
@@ -49781,6 +49911,7 @@
         document.documentElement.dataset.cloudLoadedAt = data?.updated_at || "";
         showToast(isLeader ? "Director Dashboard synced from the cloud" : "Teacher Tools synced from the cloud");
       }
+      try { await loadIssuedPayrollStatements(); renderPaydaySummary(); renderPayArchive(); } catch(error) { showToast(error.message); }
       cloudPersistenceReady = true;
       if (isLeader && (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length || recoveredMissingSchoolData.length)) await saveCloudAppData();
       if (removedDemoContent) await saveCloudAppData();
