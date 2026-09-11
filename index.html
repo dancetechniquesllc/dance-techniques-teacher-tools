@@ -41925,6 +41925,29 @@
         }));
     });
 
+    let officialPayrollPayments = [];
+    let officialPayrollPaymentsError = false;
+    const loadOfficialPayrollPayments = async () => {
+      if (document.body.dataset.tourMode === "true") return true;
+      const client = window.dtSupabase;
+      if (!client) { officialPayrollPaymentsError = true; return false; }
+      const { data, error } = await client.from("payroll_payment_records")
+        .select("amount,paid_date,payroll_teacher_summaries!inner(teacher_id,calculation_snapshot,payroll_periods!inner(period_month,payment_sequence))");
+      officialPayrollPaymentsError = Boolean(error);
+      if (error) { showToast("Official payment history could not load. Payroll approval is paused."); return false; }
+      officialPayrollPayments = data || [];
+      return true;
+    };
+    const payrollRecordedFirstPayment = (teacherId) => {
+      const matches = officialPayrollPayments.filter((record) => {
+        const summary = record.payroll_teacher_summaries;
+        return summary?.teacher_id === teacherId
+          && String(summary.payroll_periods?.period_month || "").slice(0, 7) === payrollState.month
+          && Number(summary.payroll_periods?.payment_sequence) === 1;
+      });
+      return matches.length ? matches.reduce((sum, record) => sum + Number(record.amount || 0), 0) : null;
+    };
+
     const calculatePayrollPreview = () => {
       const lines = [];
       const teachersByTier = Object.fromEntries(payrollTeachers().map((teacher) => [teacher.id, payrollTierIsAssigned(teacher.payTier) ? teacher.payTier : ""]));
@@ -41959,7 +41982,6 @@
         rosterClasses.forEach((rosterClass) => {
           const sourceTier = teachersByTier[rosterClass.teacherId];
           const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()));
-          const payableCount = payrollClassDates(rosterClass).filter((entry) => entry.status === "payable").length;
           students.forEach((student) => {
             const discount = payrollDiscountFor(student);
             if (discount === "director") return;
@@ -41970,7 +41992,8 @@
               const vendor = payrollSchoolVendor(rosterClass.schoolName);
               amount = vendor ? (discount === "none" ? 46.8 : 37.8) : (discount === "none" ? 52 : 42);
             } else if (sourceTier === "tier_a_founding_teacher") amount = discount === "none" ? 5 : 4;
-            else if (sourceTier === "tier_b_teacher") amount = 15 * payableCount;
+            // Monthly commission per eligible dancer, independent of class occurrences.
+            else if (sourceTier === "tier_b_teacher") amount = 15;
             if (amount) lines.push({ teacherId: leader.id, studentId: student.id, type, description: `${rosterStudentFullName(student)} · ${rosterClass.schoolName}`, amount, held: outstanding.has(student.id) });
           });
         });
@@ -42007,12 +42030,15 @@
           .reduce((sum, line) => sum + Number(line.amount || 0), 0);
         const currentPeriodPay = Math.max(0, final - releasedPastDuePay);
         const estimatedHalf = currentPeriodPay / 2;
-        const payment = teacher.payTier === "tier_b_teacher"
+        const recordedFirstPayment = payrollRecordedFirstPayment(teacher.id);
+        const payment = recordedFirstPayment !== null
+          ? (payrollState.sequence === "1" ? recordedFirstPayment : Math.max(0, final - recordedFirstPayment))
+          : teacher.payTier === "tier_b_teacher"
           ? final
           : payrollState.sequence === "1"
             ? estimatedHalf + releasedPastDuePay
             : Math.max(0, currentPeriodPay - estimatedHalf) + releasedPastDuePay;
-        return { teacher, lines: teacherLines, gross, held, final, payment, issues: payrollTierIsAssigned(teacher.payTier) ? 0 : 1 };
+        return { teacher, lines: teacherLines, gross, held, final, payment, recordedFirstPayment, issues: officialPayrollPaymentsError ? 1 : payrollTierIsAssigned(teacher.payTier) ? 0 : 1 };
       });
       return { lines, summaries, total: summaries.reduce((sum, item) => sum + item.payment, 0), issues: summaries.reduce((sum, item) => sum + item.issues, 0) };
     };
@@ -42164,6 +42190,10 @@
       if (step === 6) body = `<div class="payroll-explanation">Every manual adjustment requires a teacher, amount, and reason and will appear on the pay stub and audit history.</div><div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`;
       if (step === 7) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
       if (step === 8) body = payrollState.status === "approved" || payrollState.status === "paid" ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment</span><span>Pay Stub</span><span>Status</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><strong>${escapeText(fullName(item.teacher))}</strong><span>${payrollCurrency(item.payment)}</span><span>Detailed PDF ready</span><span class="status ${payrollState.status === "paid" ? "ok" : "pending"}">${payrollState.status === "paid" ? "Paid" : "Approved"}</span></div>`).join("")}</div><button class="primary" type="button" id="mark-payroll-paid" ${payrollState.status === "paid" ? "disabled" : ""}>${payrollState.status === "paid" ? "Payroll Paid" : "Mark Payroll Paid"}</button>${payrollState.status === "paid" && String(payrollState.month || "").slice(5, 7) === "06" && String(payrollState.sequence) === "1" && !payrollState.yearEndPromotionReviews?.[String(payrollState.month || "").slice(0, 4)] ? `<button class="secondary" type="button" id="review-payroll-promotions">Review Year-End Raises</button>` : ""}` : `<div class="payroll-placeholder">Approve payroll before recording payments or finalizing pay stubs.</div>`;
+      if ([0, 5, 7, 8].includes(step)) {
+        const recorded = preview.summaries.filter((item) => item.recordedFirstPayment !== null);
+        if (recorded.length) body = `<div class="payroll-explanation"><strong>Official 1st payments recorded</strong><br>${recorded.map((item) => `${escapeText(fullName(item.teacher))}: ${payrollCurrency(item.recordedFirstPayment)}`).join("<br>")}<br>Includes any recorded advance credit. The 15th subtracts these payments from updated earnings after holds.</div>` + body;
+      }
       const previous = step > 0 ? `<button class="secondary" type="button" data-payroll-nav="${step - 1}">Back</button>` : `<span></span>`;
       const next = step < payrollSteps.length - 1 ? `<button class="primary" type="button" data-payroll-nav="${step + 1}">Save &amp; Continue</button>` : `<button class="secondary" type="button" id="finish-payroll-review">Done</button>`;
       return `<div class="payroll-step-heading"><div><h4>${escapeText(title)}</h4><p>${escapeText(subtitle)}</p></div><span class="status ${payrollState.status === "approved" || payrollState.status === "paid" ? "ok" : "pending"}">${escapeText(payrollState.status.replaceAll("_", " "))}</span></div>${body}<div class="payroll-step-actions">${previous}${next}</div>`;
@@ -42242,7 +42272,8 @@
       document.getElementById("payroll-workspace").hidden = true;
       document.getElementById("finance-folio-cards").hidden = false;
     });
-    document.getElementById("begin-payroll")?.addEventListener("click", () => {
+    document.getElementById("begin-payroll")?.addEventListener("click", async () => {
+      if (!await loadOfficialPayrollPayments()) return;
       payrollState.month = document.getElementById("payroll-month")?.value || defaultPayrollMonth();
       payrollState.sequence = document.getElementById("payroll-sequence")?.value || "1";
       payrollState.status = "in_progress";
@@ -49630,6 +49661,7 @@
       if (!client || !profile || document.body.dataset.tourMode === "true") return;
       cloudPersistenceReady = false;
       const isLeader = ["admin", "director"].includes(profile.role);
+      if (isLeader) await loadOfficialPayrollPayments();
       const { data, error } = isLeader
         ? await client.from("portal_app_state").select("payload, updated_at").eq("id", cloudStateRecordId).maybeSingle()
         : await client.from("teacher_portal_state").select("payload, updated_at").eq("teacher_id", profile.id).maybeSingle();

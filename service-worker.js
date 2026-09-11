@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v230-shoes-payroll";
+const CACHE_NAME = "my-dance-techniques-v231-official-payroll";
 const CORE_ASSETS = [
   "./assets/director-open-shape-magic.png",
   "./director-corner.js?v=20260908",
