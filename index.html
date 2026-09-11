@@ -14757,6 +14757,45 @@
     .work-clock-status { line-height:1.6; font-size:14px; }
     .work-clock-review { margin-bottom:20px; }
     .work-clock-notes { white-space:pre-wrap; }
+    .work-review-card { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(210px,1fr); gap:24px; padding:26px; margin:18px 0; border:1px solid var(--border); border-radius:20px; background:#fffdfb; }
+    .work-review-heading { display:flex; align-items:center; gap:18px; margin-bottom:22px; }
+    .work-review-heading > div { min-width:0; }
+    .work-review-avatar { width:76px; height:76px; flex:0 0 76px; border:4px solid; border-radius:50%; overflow:hidden; display:grid; place-items:center; background:#fff; font-size:24px; font-weight:700; }
+    .work-review-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+    .work-review-heading h4 { margin:0; font-size:28px; line-height:1.2; }
+    .work-review-title { margin:6px 0; font-size:21px; line-height:1.3; overflow-wrap:anywhere; }
+    .work-review-date { margin:8px 0 0; font-size:13px; letter-spacing:.12em; }
+    .work-review-school { margin:5px 0 0; font-size:13px; color:#666; }
+    .work-review-times { display:grid; grid-template-columns:1fr 48px 1fr; align-items:center; gap:12px; padding:20px; border-radius:18px; background:#fbf3f0; }
+    .work-review-times > div { display:grid; gap:5px; }
+    .work-review-times > div > span, .work-review-label { font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#666; }
+    .work-review-times strong { font-size:24px; font-weight:500; white-space:nowrap; }
+    .work-review-arrow { text-align:center; color:#c99898; font-size:32px; }
+    .work-review-duration { margin-top:22px; }
+    .work-review-duration > div { display:flex; align-items:center; flex-wrap:wrap; gap:16px; margin-top:8px; }
+    .work-review-duration [data-work-elapsed] { font-size:42px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1.2; }
+    .work-review-badge { display:inline-flex; padding:10px 16px; border-radius:22px; background:#fff0d9; color:#805411; font-size:15px; }
+    .work-review-badge.is-approved { background:#eef0e8; color:#627258; }
+    .work-review-badge.is-denied { background:#f8e7e5; color:#934952; }
+    .work-review-badge.is-running { background:#f1f1f1; color:#555; }
+    .work-review-actions { border-left:1px solid var(--border); padding-left:24px; display:flex; flex-direction:column; justify-content:center; gap:18px; }
+    .work-review-actions button { width:100%; min-height:60px; padding:14px; border-radius:14px; font-size:17px; font-weight:700; }
+    .work-review-actions button:disabled { background:#a3a19e; border-color:#a3a19e; color:white; cursor:default; opacity:1; }
+    .work-review-notes { grid-column:1/-1; border-top:1px solid var(--border); padding-top:20px; }
+    .work-review-notes p { margin:10px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; }
+    @media(max-width:900px) {
+      .work-review-card { grid-template-columns:minmax(0,1fr); padding:18px; gap:20px; }
+      .work-review-actions { border-left:0; border-top:1px solid var(--border); padding:18px 0 0; }
+      .work-review-avatar { width:60px; height:60px; flex-basis:60px; }
+      .work-review-heading { gap:12px; }
+      .work-review-heading h4 { font-size:24px; }
+      .work-review-title { font-size:18px; }
+      .work-review-times { padding:15px 12px; grid-template-columns:1fr 24px 1fr; gap:5px; }
+      .work-review-times strong { font-size:21px; }
+      .work-review-times > div > span { font-size:10px; letter-spacing:.08em; }
+      .work-review-duration [data-work-elapsed] { font-size:36px; }
+    }
+
     .work-clock-status [data-work-elapsed] { font-variant-numeric:tabular-nums; font-size:24px; font-weight:800; }
     .work-checkout-dialog { width:min(92vw,440px); max-height:90vh; overflow:auto; border:1px solid var(--border); border-radius:18px; padding:22px; background:var(--surface); color:var(--fg); }
     .work-checkout-dialog::backdrop { background:rgb(0 0 0 / .35); }
@@ -42328,27 +42367,26 @@
       return `<button class="payroll-student-card ${selected ? "is-selected" : ""}" type="button" data-payroll-student="${escapeText(student.id)}" data-payroll-student-mode="${mode}">${discount !== "none" ? `<span class="payroll-discount-chip">${escapeText(discount === "director" ? "FREE" : discount.toUpperCase())}</span>` : ""}<span class="roster-student-photo">${escapeText(rosterStudentInitials(student))}</span><strong>${escapeText(rosterStudentFullName(student))}</strong><small>${escapeText(rosterClass.schoolName)}</small><small>${escapeText(rosterClass.name)}</small></button>`;
     }).join("");
 
+    const payrollSeasonMonths = Array.from({ length: 10 }, (_, index) => {
+      const date = new Date(2026, 8 + index, 1);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+    });
+    const payrollSeasonMonth = value => payrollSeasonMonths.includes(value) ? value
+      : payrollSeasonMonths.includes(defaultPayrollMonth()) ? defaultPayrollMonth() : payrollSeasonMonths[0];
     const payrollMonthOptionsMarkup = (selectedMonth = defaultPayrollMonth()) => {
-      const selected = /^\d{4}-(0[1-9]|1[0-2])$/.test(String(selectedMonth || "")) ? String(selectedMonth) : defaultPayrollMonth();
-      const selectedDate = new Date(`${selected}-01T12:00:00`);
-      const firstYear = selectedDate.getFullYear() - 1;
-      const lastYear = selectedDate.getFullYear() + 1;
-      const options = [];
-      for (let year = firstYear; year <= lastYear; year += 1) {
-        for (let monthIndex = 0; monthIndex < 12; monthIndex += 1) {
-          const value = `${year}-${String(monthIndex + 1).padStart(2, "0")}`;
-          const label = new Date(year, monthIndex, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
-          options.push(`<option value="${value}" ${value === selected ? "selected" : ""}>${escapeText(label)}</option>`);
-        }
-      }
-      return options.join("");
+      const selected = payrollSeasonMonth(selectedMonth);
+      return payrollSeasonMonths.map(value => {
+        const label = new Date(`${value}-01T12:00:00`).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+        return `<option value="${value}" ${value === selected ? "selected" : ""}>${escapeText(label)}</option>`;
+      }).join("");
     };
 
     const renderPayrollLanding = () => {
       const summary = document.getElementById("payroll-landing-summary");
       const month = document.getElementById("payroll-month");
       const sequence = document.getElementById("payroll-sequence");
-      if (month) month.innerHTML = payrollMonthOptionsMarkup(payrollState.month || defaultPayrollMonth());
+      payrollState.month = payrollSeasonMonth(payrollState.month);
+      if (month) month.innerHTML = payrollMonthOptionsMarkup(payrollState.month);
       if (sequence) sequence.value = payrollState.sequence || "1";
       if (summary) summary.innerHTML = payrollSummaryMarkup();
       renderPayrollStubLibrary();

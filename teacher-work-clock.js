@@ -58,9 +58,29 @@
     }
     return `<section class="panel work-clock-panel"><img class="work-clock-badge" src="assets/event-check-in-out.png" alt="Event Check In / Out"><h3>Check In</h3><label>What are you working on?<input id="work-clock-description" maxlength="500" placeholder="Registration, demo preparation, etc." ${running ? 'disabled' : ''}></label>${buttons('',null)}${running ? '<small>An event is already running.</small>' : '<small>Check in when you begin. At checkout, confirm your time and add notes.</small>'}</section>`;
   };
+  const reviewCard = row => {
+    const teacher=teachers.find(t=>t.id===row.teacher_id) || {};
+    const name=fullName(teacher) || 'Teacher';
+    const color=teacherProfileColor(teacher);
+    const date=new Date(`${row.work_date}T12:00:00`).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+    const status=!row.ended_at ? 'running' : row.status==='approved' ? 'approved' : row.status==='denied' ? 'denied' : 'pending';
+    const labels={running:'In progress',approved:'✓ Approved',denied:'Not included',pending:'Awaiting review'};
+    return `<article class="work-review-card">
+      <div class="work-review-details">
+        <header class="work-review-heading">
+          <span class="work-review-avatar" style="border-color:${esc(color)}">${teacher.photo ? `<img src="${esc(teacher.photo)}" alt="${esc(name)}">` : esc(initialsFor(teacher) || 'T')}</span>
+          <div><h4>${esc(name)}</h4><p class="work-review-title">${esc(row.description)}</p><p class="work-review-date">${esc(date)}</p>${row.school_name ? `<p class="work-review-school">${esc(row.school_name)}</p>` : ''}</div>
+        </header>
+        <div class="work-review-times"><div><span>Clocked In</span><strong>${esc(clockTime(row.started_at))}</strong></div><span class="work-review-arrow" aria-hidden="true">→</span><div><span>Clocked Out</span><strong>${row.ended_at ? esc(clockTime(row.ended_at)) : '—'}</strong></div></div>
+        <div class="work-review-duration"><span class="work-review-label">Working Time</span><div><strong data-work-elapsed="${esc(row.id)}">${durationLabel(row)}</strong><span class="work-review-badge is-${status}">${labels[status]}</span></div></div>
+      </div>
+      <div class="work-review-actions">${row.ended_at ? `<button type="button" class="primary" data-work-review="${esc(row.id)}" data-work-approve="true" ${row.status==='approved' ? 'disabled' : ''}>Approve Working Hours</button><button type="button" class="secondary" data-work-review="${esc(row.id)}" data-work-approve="false" ${row.status==='denied' ? 'disabled' : ''}>Do Not Include</button>` : '<p>Still running — not included in payroll.</p>'}</div>
+      <div class="work-review-notes"><span class="work-review-label">Work Notes</span><p>${row.notes ? esc(row.notes) : 'No notes added.'}</p></div>
+    </article>`;
+  };
   api.reviewMarkup = () => {
     const rows=api.entries.filter(row=>payrollDateIsInRange(row.work_date)).sort((a,b)=>b.started_at.localeCompare(a.started_at));
-    return `<section class="work-clock-review"><h3>Recorded Working Hours</h3><p>$20 per hour · Approve completed time for this pay period.</p>${!api.ready && !preview() ? '<p>Working hours could not load. Refresh before reviewing payroll.</p>' : !rows.length ? '<p>No recorded working hours yet.</p>' : rows.map(row=>`<article class="reschedule-record-card"><div><strong>${esc(fullName(teachers.find(t=>t.id===row.teacher_id) || {}) || 'Teacher')} · ${esc(row.description)}</strong><small>${esc(row.work_date)} · ${esc(row.school_name)}</small>${summary(row)}${row.notes ? `<small class="work-clock-notes">${esc(row.notes)}</small>` : ''}</div>${row.ended_at ? `<div class="work-clock-actions"><button class="primary" data-work-review="${esc(row.id)}" data-work-approve="true" ${row.status==='approved' ? 'disabled' : ''}>Approve Working Hours</button><button class="secondary" data-work-review="${esc(row.id)}" data-work-approve="false" ${row.status==='denied' ? 'disabled' : ''}>Do Not Include</button></div>` : '<small>Still running — not included in payroll.</small>'}</article>`).join('')}</section>`;
+    return `<section class="work-clock-review"><h3>Recorded Working Hours</h3><p>$20 per hour · Approve completed time for this pay period.</p>${!api.ready && !preview() ? '<p>Working hours could not load. Refresh before reviewing payroll.</p>' : !rows.length ? '<p>No recorded working hours yet.</p>' : rows.map(reviewCard).join('')}</section>`;
   };
   const put = row => { api.entries=api.entries.filter(entry=>entry.id!==row.id);api.entries.push(row); };
   let checkoutDraft=null;
