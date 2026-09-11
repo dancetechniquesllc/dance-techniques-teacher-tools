@@ -949,7 +949,9 @@
     const datesForMonth = (year, month) => year === 2026 && month === 7 ? (danceDay === 1 ? [new Date(2026, 7, 31, 12)] : []) : scheduledWeekdays(year, month);
     const normalize = (value) => String(value || "").trim().toLowerCase();
     const schoolNames = [first.school.name, first.school.nickname].map(normalize).filter(Boolean);
-    const changes = (first.teacherState?.teacher?.reschedules || first.teacherState?.reschedules || []).filter((change) => !change?.schoolName || schoolNames.includes(normalize(change.schoolName)));
+    const changes = (first.teacherState?.teacher?.reschedules || first.teacherState?.reschedules || []).filter((change) => (!change?.schoolName || schoolNames.includes(normalize(change.schoolName))) && (!change.classId || String(change.classId) === String(first.danceClass?.id)));
+    const effectiveChanges = changes.filter((change) => change.classId || !changes.some((other) => other.classId && other.originalDate === change.originalDate));
+    changes.splice(0, changes.length, ...effectiveChanges);
     const changeByDate = new Map(changes.filter((change) => change.originalDate).map((change) => [String(change.originalDate).slice(0, 10), change]));
     const movedByDate = new Map(changes.filter((change) => change.status === "rescheduled" && change.newDate).map((change) => [String(change.newDate).slice(0, 10), change]));
     const visibleDatesForMonth = (year, monthIndex) => {
@@ -1038,7 +1040,7 @@
     const schoolAliases = [first?.school?.name, first?.school?.nickname, schoolName].map(normalize).filter(Boolean);
     const savedReschedules = (first?.teacherState?.teacher?.reschedules || first?.teacherState?.reschedules || []).filter((change) => {
       const changedSchool = normalize(change?.schoolName);
-      return !changedSchool || schoolAliases.includes(changedSchool);
+      return (!changedSchool || schoolAliases.includes(changedSchool)) && (!change.classId || String(change.classId) === String(first?.danceClass?.id));
     });
     const changesByOriginalDate = new Map(savedReschedules.filter((change) => change?.originalDate).map((change) => [String(change.originalDate).slice(0, 10), change]));
     const danceDay = Number.isInteger(first?.school?.dance_day) ? first.school.dance_day : 4;

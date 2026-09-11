@@ -9,6 +9,7 @@
   <title>My Dance Techniques</title>
   <script src="vendor/pdf-lib-1.17.1.min.js"></script>
 <script src="payroll-statements.js"></script>
+<script src="teacher-work-clock.js"></script>
 <script src="enrollment-tuition-confirmation.js"></script>
 <script>
     document.documentElement.dataset.localPreview = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname) ? "true" : "false";
@@ -14737,7 +14738,33 @@
     @media (max-width: 700px) { .shape-magic-view-controls { align-items: stretch; } .shape-magic-toggle { width: 100%; grid-auto-columns: 1fr; } .shape-magic-archive-toggle { width: 100%; } .shape-magic-toolbar { grid-template-columns: 1fr; } }
     @media (max-width: 390px) { .tt-feedback-dialog-inner { padding: 16px; } .tt-feedback-grid { gap: 9px; } .tt-feedback-card { min-height: 166px; padding: 9px 5px; } .tt-feedback-card img { width: min(88px, 72%); } .tt-feedback-card strong { font-size: 12px; } .tt-feedback-card small { font-size: 10px; } }
     @media (prefers-reduced-motion: reduce) { .tt-feedback-card { transition: none; } }
-  </style>
+      .reschedule-class-choices { border: 1px solid var(--line, #efc8c3); border-radius: 14px; padding: 14px; min-width: 0; }
+    .reschedule-class-choices legend { font-weight: 700; }
+    .reschedule-class-choices > small { display: block; margin-bottom: 10px; }
+    .reschedule-class-choices .future-class-option { display: flex; align-items: center; gap: 12px; padding: 10px; }
+    .reschedule-class-choices input[role="switch"] { appearance: none; -webkit-appearance: none; box-sizing: border-box; width: 44px; min-width: 44px; max-width: 44px; height: 26px; min-height: 26px; max-height: 26px; flex: 0 0 44px; border: 0; border-radius: 999px; background: #d7d4d1; margin: 0; padding: 4px; box-shadow: none; cursor: pointer; }
+    .reschedule-class-choices input[role="switch"]::before { content: ""; display: block; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform .15s; }
+    .reschedule-class-choices input[role="switch"]:checked { background: var(--brick, #984b57); }
+    .reschedule-class-choices input[role="switch"]:checked::before { transform: translateX(18px); }
+    .reschedule-class-choices input[role="switch"]:focus-visible { outline: 3px solid #7f2354; outline-offset: 3px; }
+    #teacher-work-launcher[hidden] { display:none; }
+    .work-clock-badge { width:82px; height:82px; object-fit:contain; border-radius:50%; float:right; margin:0 0 10px 12px; }
+    .work-clock-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+    .work-clock-actions button { flex:1; min-height:44px; border-radius:12px; padding:10px 14px; }
+    .work-clock-actions button:disabled { opacity:.45; cursor:default; }
+    .work-clock-panel h3 { margin:0 0 12px; }
+    .work-clock-panel label { display:grid; gap:8px; }
+    .work-clock-status { line-height:1.6; font-size:14px; }
+    .work-clock-review { margin-bottom:20px; }
+    .work-clock-notes { white-space:pre-wrap; }
+    .work-clock-status [data-work-elapsed] { font-variant-numeric:tabular-nums; font-size:24px; font-weight:800; }
+    .work-checkout-dialog { width:min(92vw,440px); max-height:90vh; overflow:auto; border:1px solid var(--border); border-radius:18px; padding:22px; background:var(--surface); color:var(--fg); }
+    .work-checkout-dialog::backdrop { background:rgb(0 0 0 / .35); }
+    .work-checkout-dialog label { display:grid; gap:8px; }
+    .work-checkout-dialog textarea { width:100%; min-height:90px; }
+    .work-checkout-total { display:flex; justify-content:space-between; padding:12px 0; border-block:1px solid var(--border); }
+    .work-checkout-total strong { font-variant-numeric:tabular-nums; }
+</style>
   <link rel="stylesheet" href="tulle.css?v=20260729-questions">
   <link rel="stylesheet" href="roster-care.css?v=20260908">
   <link rel="stylesheet" href="director-corner.css?v=20260908">
@@ -15013,6 +15040,10 @@
                     <img src="assets/app-icon-partner-schools.png" alt="">
                   </span>
                   <span class="app-label">My Schools</span>
+                </button>
+                <button class="app-tile" id="teacher-work-launcher" data-tab-jump="my-day" aria-label="Open Check In" hidden>
+                  <span class="app-icon image-icon" aria-hidden="true"><img src="assets/event-check-in-out.png" alt=""></span>
+                  <span class="app-label">Check In</span>
                 </button>
                 <button class="app-tile" data-tab-jump="pay" aria-label="Open Payday">
                   <span class="app-icon image-icon pay" aria-hidden="true">
@@ -20243,7 +20274,7 @@
           cursor.setDate(cursor.getDate() + 1);
         }
       }
-      const allReschedules = teachers.flatMap((teacher) => teacher.reschedules || []).filter((change) => enrollmentSchoolNameMatches(change.schoolName, rosterClass?.schoolName || item.requested_school_name));
+      const allReschedules = rescheduleChangesForClass(teachers.filter((teacher) => !rosterClass?.teacherId || teacher.id === rosterClass.teacherId).flatMap((teacher) => teacher.reschedules || []), rosterClass || { schoolName: item.requested_school_name });
       classDates = classDates.filter((date) => !allReschedules.some((change) => change.originalDate === isoDate(date) && ["cancelled", "rescheduled"].includes(change.status)));
       allReschedules.filter((change) => change.status === "rescheduled" && change.newDate).forEach((change) => {
         const moved = new Date(`${change.newDate}T12:00:00`);
@@ -22781,12 +22812,41 @@
       return `${rescheduleDateLabel(item.originalDate)} to ${rescheduleDateLabel(item.newDate)} • ${item.timeBlock || "AM"}`;
     };
 
-    const rescheduleOverrideFor = (schoolName, originalDate, week, curriculum) => rescheduleOverridesForTeacher().find((item) => (
-      enrollmentSchoolNameMatches(item.schoolName, schoolName) &&
-      item.originalDate === originalDate &&
-      item.week === week &&
-      item.curriculum === curriculum
-    ));
+    // A missing classId is a legacy whole-school change. A class-specific change
+    // supersedes that legacy change only for its original occurrence.
+    const rescheduleChangesForClass = (changes, rosterClass) => {
+      const matching = (changes || []).filter((item) => (
+        (!item.schoolName || enrollmentSchoolNameMatches(item.schoolName, rosterClass?.schoolName)) &&
+        (!item.classId || String(item.classId) === String(rosterClass?.id))
+      ));
+      return matching.filter((item) => item.classId || !matching.some((other) => other.classId && other.originalDate === item.originalDate));
+    };
+    const rescheduleRosterClassesForEvent = (event) => rosterClasses.filter((item) => (
+      item.sourceActive !== false && item.teacherId === profileTeacher.id &&
+      enrollmentSchoolNameMatches(item.schoolName, event.school) &&
+      (!event.classIds || event.classIds.includes(String(item.id)))
+    )).sort((a, b) => teacherRosterTimeValue(a.time) - teacherRosterTimeValue(b.time) || a.name.localeCompare(b.name, undefined, { numeric: true }));
+    const rescheduleOverrideFor = (schoolName, originalDate, week, curriculum, classId = "") => {
+      const matches = rescheduleChangesForClass(rescheduleOverridesForTeacher(), { schoolName, id: classId });
+      return matches.find((item) => item.originalDate === originalDate && item.week === week && item.curriculum === curriculum);
+    };
+    const storeClassReschedule = (override) => {
+      profileTeacher.reschedules ||= [];
+      const index = profileTeacher.reschedules.findIndex((item) => (
+        enrollmentSchoolNameMatches(item.schoolName, override.schoolName) &&
+        item.originalDate === override.originalDate && item.week === override.week &&
+        item.curriculum === override.curriculum && String(item.classId || "") === String(override.classId || "")
+      ));
+      if (index < 0) profileTeacher.reschedules.push(override);
+      else profileTeacher.reschedules[index] = override;
+    };
+    const rescheduleClassTogglesMarkup = (event) => {
+      const classes = rescheduleRosterClassesForEvent(event);
+      return `<fieldset class="reschedule-class-choices"><legend>Choose classes to change</legend>
+        <small>Turn on only the classes you want to move for this date.</small>
+        ${classes.map((item) => `<label class="future-class-option"><input type="checkbox" role="switch" data-reschedule-class value="${escapeText(item.id)}"><span><strong>${escapeText(item.name)}</strong><small>${escapeText(friendlyScheduleTime(item.time, item.ageGroup || ""))}</small></span></label>`).join("") || '<p>No classes are loaded for this school. Refresh before rescheduling.</p>'}
+      </fieldset>`;
+    };
 
     const schoolOnlyEventsAfterCurriculum = (school, profileSchool, lastDateString) => {
       const events = [];
@@ -22900,20 +22960,36 @@
         ...curriculumEvents,
         ...schoolOnlyEventsAfterCurriculum(school, profileSchool, lastCurriculumDate)
       ];
-      return adjustedSchoolEventsForOverrides(school, profileSchool, schoolEvents).map(({ week, curriculum, date, scheduledDate, effectiveDate }) => {
+      return adjustedSchoolEventsForOverrides(school, profileSchool, schoolEvents).flatMap(({ week, curriculum, date, scheduledDate, effectiveDate }) => {
         const hasCurriculum = Boolean(week && curriculum);
-        const override = rescheduleOverrideFor(school.school, scheduledDate, week, curriculum);
-        if (override && rescheduleActionFor(override) !== "reschedule_now") return null;
+        const schoolClasses = rescheduleRosterClassesForEvent({ school: school.school });
+        const hasClassChanges = rescheduleOverridesForTeacher().some((item) => item.classId &&
+          enrollmentSchoolNameMatches(item.schoolName, school.school) && item.originalDate === scheduledDate);
+        const groups = new Map();
+        const occurrences = hasClassChanges && schoolClasses.length ? schoolClasses : [null];
+        occurrences.forEach((rosterClass) => {
+        const override = rescheduleOverrideFor(school.school, scheduledDate, week, curriculum, rosterClass?.id || "");
+        if (override && rescheduleActionFor(override) !== "reschedule_now") return;
         const eventDate = override?.newDate || effectiveDate;
         const eventTimeBlock = override?.timeBlock || profileSchool?.timeBlock || school.timeBlock || "AM";
-        return ({
+        const key = JSON.stringify([eventDate, eventTimeBlock, override?.originalDate || "", override?.reason || ""]);
+        if (groups.has(key)) {
+          const group = groups.get(key);
+          group.classIds.push(String(rosterClass.id));
+          group.classNames.push(rosterClass.name);
+          group.classCount += 1;
+          return;
+        }
+        groups.set(key, {
+        classIds: rosterClass ? [String(rosterClass.id)] : undefined,
+        classNames: rosterClass ? [rosterClass.name] : undefined,
         school: school.school,
         displaySchool: profileSchool?.nickname?.trim() || school.nickname || school.school,
         day: override ? weekdayLabelFromDate(eventDate) : dayLabelForSchool(profileSchool, school.day),
         isd: profileSchool?.isd || school.isd,
         address: profileSchool?.address || school.school,
         teacher: profileTeacher.firstName || teacherNickname(profileTeacher),
-        classCount: classCountForSchool(school.school, profileSchool),
+        classCount: rosterClass ? 1 : classCountForSchool(school.school, profileSchool),
         timeBlock: eventTimeBlock,
         week,
         curriculum,
@@ -22927,6 +23003,8 @@
         curriculumTitle: hasCurriculum ? curriculumTitleForWeek(week, curriculum) : "School visit",
         hasCurriculum
         });
+        });
+        return [...groups.values()];
       }).filter(Boolean);
     }).concat((profileTeacher.scheduleEvents || []).map((item) => {
       const school = schoolProfileByName(item.schoolName);
@@ -23256,6 +23334,7 @@
     };
 
     const renderHomeWidget = () => {
+      document.getElementById("teacher-work-launcher")?.toggleAttribute("hidden", !DTWorkClock.canClock());
       const allEvents = flattenLexiSchedule();
       const todayKey = isoDate(homeWidgetDate);
       const nextClass = allEvents.find((event) => event.date > todayKey);
@@ -23594,7 +23673,7 @@
     ];
 
     const monthName = (date) => date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-    const schoolDisplayName = (event) => event.displaySchool || event.nickname || event.school;
+    const schoolDisplayName = (event) => `${event.displaySchool || event.nickname || event.school}${event.classNames?.length ? ` — ${event.classNames.join(", ")}` : ""}`;
     const closureDisplayName = (closure) => closure.reason || closure.nickname || closure.school || "No Class";
     const navigationUrlFor = (event) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.address || event.school)}`;
     const stackedSchoolName = (school) => school.split(" ").join("<br>");
@@ -23827,7 +23906,7 @@
         <small>
           <span class="calendar-time-block">NC</span>
           <span class="calendar-rescheduled-school">${stackedSchoolName(escapeText(schoolName))}</span>
-          <span class="calendar-rescheduled-note">${escapeText(movedTo)}</span>
+          <span class="calendar-rescheduled-note">${item.className ? `${escapeText(item.className)} • ` : ""}${escapeText(movedTo)}</span>
         </small>
       `;
     }).join("");
@@ -24115,6 +24194,8 @@
 
     const futureRescheduleEventValue = (event) => encodeURIComponent(JSON.stringify({
       schoolName: event.school,
+      classId: event.classId || "",
+      className: event.className || "",
       originalDate: event.originalDate || event.date,
       week: event.week || "",
       curriculum: event.curriculum || "",
@@ -24154,7 +24235,9 @@
         dateInput.value = allEvents.find((event) => event.date >= todayKey)?.date || "";
       }
       if (!newDateInput?.value) newDateInput.value = dateInput.value || "";
-      const dayEvents = allEvents.filter((event) => event.date === dateInput.value);
+      const dayEvents = allEvents.filter((event) => event.date === dateInput.value && !event.isCustomEvent).flatMap((event) =>
+        rescheduleRosterClassesForEvent(event).map((item) => ({ ...event, classId: String(item.id), className: item.name }))
+      );
       if (!dayEvents.length) {
         list.innerHTML = `
           <div class="reschedule-date-preview">
@@ -24170,9 +24253,9 @@
         .sort((a, b) => timeBlockRank(a.timeBlock) - timeBlockRank(b.timeBlock))
         .map((event, index) => `
           <label class="future-class-option">
-            <input type="checkbox" value="${futureRescheduleEventValue(event)}" ${index === 0 ? "checked" : ""}>
+            <input type="checkbox" value="${futureRescheduleEventValue(event)}">
             <span>
-              <strong>${escapeText(event.timeBlock || "AM")} ${escapeText(schoolDisplayName(event))}</strong>
+              <strong>${escapeText(event.className)} · ${escapeText(schoolDisplayName(event))}</strong>
               <small>${escapeText(event.hasCurriculum ? `${event.week} ${event.curriculum}: ${event.curriculumTitle}` : "School visit")}</small>
             </span>
           </label>
@@ -24181,7 +24264,7 @@
       syncRescheduleActionPanel(document.getElementById("schedule-tool-reschedule"));
     };
 
-    const saveFutureReschedules = () => {
+    const saveFutureReschedules = async () => {
       const selectedEvents = selectedFutureRescheduleEvents();
       const action = document.getElementById("future-reschedule-action")?.value || "";
       const newDate = document.getElementById("future-reschedule-new-date")?.value || "";
@@ -24216,6 +24299,8 @@
       selectedEvents.forEach((item) => {
         const override = {
           schoolName: item.schoolName,
+          classId: item.classId,
+          className: item.className,
           originalDate: item.originalDate,
           week: item.week,
           curriculum: item.curriculum,
@@ -24228,19 +24313,13 @@
           timeBlock: action === "reschedule_now" ? timeBlock : "",
           updatedAt: new Date().toISOString()
         };
-        const existingIndex = profileTeacher.reschedules.findIndex((entry) => (
-          entry.schoolName === override.schoolName &&
-          entry.originalDate === override.originalDate &&
-          entry.week === override.week &&
-          entry.curriculum === override.curriculum
-        ));
-        if (existingIndex >= 0) {
-          profileTeacher.reschedules[existingIndex] = override;
-        } else {
-          profileTeacher.reschedules.push(override);
-        }
         savedOverrides.push(override);
       });
+      const saveButton = document.getElementById("future-reschedule-save");
+      if (saveButton) saveButton.disabled = true;
+      const saved = await persistClassReschedules(savedOverrides);
+      if (saveButton) saveButton.disabled = false;
+      if (!saved) { showToast("Could not save the class change. Please try again."); return; }
       renderHomeWidget();
       renderLexiSchedule();
       renderMyDay();
@@ -25309,6 +25388,34 @@
       return true;
     };
 
+    const persistClassReschedules = async (overrides) => {
+      const teacher = profileTeacher;
+      const client = window.dtSupabase;
+      const profile = window.dtCurrentProfile;
+      const preview = document.body.dataset.tourMode === "true" || isTeacherToolsPreviewSandbox();
+      if (!preview) {
+        if (!client || !profile || !isUuid(teacher?.id)) return false;
+        if (teacher.id !== profile.id && !["admin", "director"].includes(profile.role)) return false;
+        try {
+          const { data, error } = await client.from("teacher_portal_state").select("payload").eq("teacher_id", teacher.id).maybeSingle();
+          if (error) return false;
+          const payload = JSON.parse(JSON.stringify(data?.payload || {}));
+          const changes = [...(payload.teacher?.reschedules || payload.reschedules || [])];
+          overrides.forEach((override) => {
+            const index = changes.findIndex((item) => item.schoolName === override.schoolName && item.originalDate === override.originalDate && item.week === override.week && item.curriculum === override.curriculum && String(item.classId || "") === String(override.classId || ""));
+            if (index < 0) changes.push(override); else changes[index] = override;
+          });
+          payload.teacher = { ...(payload.teacher || {}), id: teacher.id, reschedules: changes };
+          payload.savedAt = new Date().toISOString();
+          const result = await client.from("teacher_portal_state").upsert({ teacher_id: teacher.id, payload }, { onConflict: "teacher_id" });
+          if (result.error) return false;
+          teacher.reschedules = changes;
+        } catch (error) { console.error("Class change could not be saved", error); return false; }
+      } else overrides.forEach(storeClassReschedule);
+      saveAppData();
+      return true;
+    };
+
     const saveTeacherScheduleEventsToCloud = async (teacher) => {
       const client = window.dtSupabase;
       const profile = window.dtCurrentProfile;
@@ -26078,7 +26185,7 @@
           const requestLabel = item.requestedBy ? ` • Requested by ${item.requestedBy}` : (item.schoolRequested ? ` • Requested by ${schoolRequestedByName(item.schoolName)}` : "");
           return `
             <div class="row">
-              <div><strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong><small>${escapeText(rescheduleTimingLabel(item))}${escapeText(requestLabel)}</small></div>
+              <div><strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong><small>${item.className ? `${escapeText(item.className)} • ` : ""}${escapeText(rescheduleTimingLabel(item))}${escapeText(requestLabel)}</small></div>
               <span class="status pending">${escapeText(rescheduleActionLabel(item))}</span>
             </div>
           `;
@@ -26101,7 +26208,7 @@
         const requestLabel = item.requestedBy ? ` • Requested by ${item.requestedBy}` : (item.schoolRequested ? ` • Requested by ${schoolRequestedByName(item.schoolName)}` : "");
         return `
           <div class="row">
-            <div><strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong><small>${escapeText(rescheduleTimingLabel(item))} • ${escapeText(item.week || "School visit")} ${escapeText(item.curriculum || "")}${item.reason ? ` • ${escapeText(item.reason)}` : ""}${escapeText(requestLabel)}</small></div>
+            <div><strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong><small>${item.className ? `${escapeText(item.className)} • ` : ""}${escapeText(rescheduleTimingLabel(item))} • ${escapeText(item.week || "School visit")} ${escapeText(item.curriculum || "")}${item.reason ? ` • ${escapeText(item.reason)}` : ""}${escapeText(requestLabel)}</small></div>
             <span class="status pending">${escapeText(rescheduleActionLabel(item))}</span>
           </div>
         `;
@@ -27756,6 +27863,13 @@
     };
 
     const myDayClassRowsForEvent = (school, event) => {
+      if (event?.classIds) {
+        const rows = normalizeClassCurriculumRows(school);
+        return rescheduleRosterClassesForEvent(event).map((item) => {
+          const row = rows.find((row) => row.title === item.name) || rows[item.sourceRowIndex] || {};
+          return { ...row, title: item.name, age: item.ageGroup || row.age || "", level: item.level || row.level || "1", students: item.students?.length || row.students || "" };
+        });
+      }
       if (!event?.isPreviewOnly) return normalizeClassCurriculumRows(school);
       const previewSchool = {
         ...school,
@@ -27774,7 +27888,8 @@
       const matchingRosterClasses = rosterClasses.filter((rosterClass) => (
         rosterClass.sourceActive !== false &&
         rosterClass.teacherId === profileTeacher.id &&
-        enrollmentOfficialSchoolMatchesClass(school, rosterClass)
+        enrollmentOfficialSchoolMatchesClass(school, rosterClass) &&
+        (!event.classIds || event.classIds.includes(String(rosterClass.id)))
       )).sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time)
         || left.name.localeCompare(right.name, undefined, { numeric: true }));
       if (!classes.length) return "";
@@ -27851,6 +27966,7 @@
               <span>${escapeText(event.eventTime ? `Scheduled for ${event.eventTime}` : "Added to this school's calendar.")}</span>
             </div>
             ${importantNotesMarkup}
+            ${DTWorkClock.eventMarkup(event)}
           </section>
         `;
       }
@@ -27892,7 +28008,7 @@
             <button class="reschedule-toggle" type="button" data-reschedule-toggle>Reschedule</button>
           </div>
           <button class="my-day-school-name" type="button" data-directions-url="${escapeText(directionsUrlForEvent(event))}" aria-label="Get directions to ${escapeText(schoolTitle)}">${escapeText(schoolTitle)}</button>
-          <span class="my-day-school-detail">${escapeText(event.isd)}</span>
+          <span class="my-day-school-detail">${escapeText(event.isd)}${event.classNames ? ` • ${escapeText(event.classNames.join(", "))}` : ""}</span>
           ${importantNotesMarkup}
           ${recitalCountdownMarkup(event)}
 
@@ -27927,6 +28043,7 @@
             data-original-date="${escapeText(originalDate)}"
             data-week="${escapeText(event.week)}"
             data-curriculum="${escapeText(event.curriculum)}">
+            ${rescheduleClassTogglesMarkup(event)}
             <label>
               <small>Class change *</small>
               <select data-reschedule-action required>
@@ -27942,7 +28059,7 @@
             </label>
             <div class="reschedule-now-fields" data-reschedule-now-fields hidden>
               <label>
-                <small>Move this school to</small>
+                <small>Move selected classes to</small>
                 <input type="date" data-reschedule-date value="${escapeText(event.date)}">
               </label>
               <div class="reschedule-date-preview" data-reschedule-preview></div>
@@ -28040,18 +28157,19 @@
         )).length;
         return {
           ...scheduledEvent,
-          classCount: Math.max(1, matchingClassCount || Number(scheduledEvent.classCount) || 1),
+          classCount: scheduledEvent.classIds ? scheduledEvent.classIds.length : Math.max(1, matchingClassCount || Number(scheduledEvent.classCount) || 1),
           isPreviewOnly: true
         };
       });
       const dayEvents = scheduledDayEvents.length || document.body.dataset.tourMode !== "true"
         ? scheduledDayEvents
         : teacherToolsPreviewMyDayEvents(todayKey);
+      const workClockMarkup = DTWorkClock.otherMarkup(dayEvents);
       const stack = document.getElementById("my-day-stack");
       setText("my-day-subtitle", dateLabel);
       if (!stack) return;
       if (!dayEvents.length) {
-        stack.innerHTML = `
+        stack.innerHTML = `${workClockMarkup}
           <section class="my-day-empty">
             <strong>No classes scheduled for today!</strong>
             <small>${escapeText(dateLabel)} is clear. Rescheduled classes will appear here only when they land on today.</small>
@@ -28066,18 +28184,18 @@
           if (!blockEvents.length) return "";
           return `
             <details class="my-day-period">
-              <summary>${block === "AM" ? "Morning Classes" : "Afternoon Classes"}</summary>
+              <summary>${block === "AM" ? "Morning" : "Afternoon"}</summary>
               <div class="my-day-stack">
                 ${blockEvents.map((item) => myDayEventMarkup(item, dateLabel, true, false)).join("")}
               </div>
             </details>
           `;
         }).join("");
-        stack.innerHTML = `${groupedMarkup}${myDayOrdersMarkup(dayEvents)}`;
+        stack.innerHTML = `${groupedMarkup}${workClockMarkup}${myDayOrdersMarkup(dayEvents)}`;
         window.setTimeout(updateMyDayMusicPlayer, 0);
         return;
       }
-      stack.innerHTML = `${myDayEventMarkup(dayEvents[0], dateLabel, true)}${myDayOrdersMarkup(dayEvents)}`;
+      stack.innerHTML = `${myDayEventMarkup(dayEvents[0], dateLabel, true)}${workClockMarkup}${myDayOrdersMarkup(dayEvents)}`;
       window.setTimeout(updateMyDayMusicPlayer, 0);
     };
 
@@ -30073,12 +30191,19 @@
         if (weekday === 0 || weekday === 6) continue;
         const dateKey = isoDate(date);
         const scheduledSchoolKeys = new Set();
-        const classEntries = rosterClasses.filter((rosterClass) => String(rosterClass.day || "").trim().toLowerCase() === String(weekdayNames[weekday]).toLowerCase()).map((rosterClass) => {
+        const classEntries = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).flatMap((rosterClass) => {
+          const teacher = teachers.find((candidate) => candidate.id === rosterClass.teacherId);
+          const changes = rescheduleChangesForClass(teacher?.reschedules, rosterClass);
+          const occurrences = [];
+          if (String(rosterClass.day || "").trim().toLowerCase() === String(weekdayNames[weekday]).toLowerCase() && !changes.some((item) => item.originalDate === dateKey)) occurrences.push(rosterClass);
+          changes.filter((item) => rescheduleActionFor(item) === "reschedule_now" && item.newDate === dateKey).forEach((change) => occurrences.push({ ...rosterClass, scheduleChange: change }));
+          return occurrences;
+        }).map((rosterClass) => {
           const teacher = teachers.find((candidate) => candidate.id === rosterClass.teacherId);
           if (!teacher || teacher.status === "inactive" || isCompanyTeacherProfile(teacher)) return null;
           const school = schoolLibrary.find((candidate) => enrollmentSchoolNameMatches(candidate.name, rosterClass.schoolName) || enrollmentSchoolNameMatches(candidate.nickname, rosterClass.schoolName))
             || (teacher.schools || []).find((candidate) => enrollmentSchoolNameMatches(candidate.name, rosterClass.schoolName) || enrollmentSchoolNameMatches(candidate.nickname, rosterClass.schoolName));
-          const schoolKey = `${teacher.id}::${String(school?.id || school?.name || school?.nickname || rosterClass.schoolName || "").trim().toLowerCase()}`;
+          const schoolKey = `${teacher.id}::${String(school?.id || school?.name || school?.nickname || rosterClass.schoolName || "").trim().toLowerCase()}::${rosterClass.scheduleChange ? rosterClass.id : "regular"}`;
           if (scheduledSchoolKeys.has(schoolKey)) return null;
           scheduledSchoolKeys.add(schoolKey);
           if (school?.seasonStartDate && school.seasonStartDate > dateKey) return null;
@@ -30087,8 +30212,8 @@
             teacher,
             school: school?.nickname || school?.name || rosterClass.schoolName || rosterClass.name || "Scheduled Class",
             time: rosterClass.time || "",
-            timeBlock: school?.timeBlock || "AM",
-            detail: closure ? `No Class · ${closure.reason || "District closure"}` : "",
+            timeBlock: rosterClass.scheduleChange?.timeBlock || school?.timeBlock || "AM",
+            detail: closure ? `No Class · ${closure.reason || "District closure"}` : (rosterClass.scheduleChange ? `${rosterClass.name} · Makeup for ${rescheduleDateLabel(rosterClass.scheduleChange.originalDate)}` : ""),
             closed: Boolean(closure)
           };
         }).filter(Boolean);
@@ -30143,7 +30268,7 @@
     const teacherEventApprovalRecords = () => teachers
       .filter((teacher) => teacher.status !== "inactive" && teacher.payTier === "tier_b_teacher")
       .flatMap((teacher) => (teacher.scheduleEvents || [])
-        .filter((item) => item.audience !== "all")
+        .filter((item) => item.audience !== "all" && !DTWorkClock.hasEventRecord(item, teacher.id))
         .map((item) => ({ teacher, item })))
       .sort((left, right) => String(right.item.date || "").localeCompare(String(left.item.date || "")));
 
@@ -30156,7 +30281,7 @@
       count.textContent = `${pending} Pending`;
       count.className = `status ${pending ? "pending" : "ok"}`;
       if (!records.length) {
-        list.innerHTML = '<div class="teacher-class-empty">No personal events from Teacher pay-scale profiles are waiting for review.</div>';
+        list.innerHTML = '<div class="teacher-class-empty">No personal events waiting for review. Recorded Working Hours are reviewed during payroll.</div>';
         return;
       }
       list.innerHTML = records.map(({ teacher, item }) => {
@@ -30294,7 +30419,7 @@
                   <article class="reschedule-record-card">
                     <div>
                       <strong>${escapeText(school?.nickname || school?.name || item.schoolName)}</strong>
-                      <small>${escapeText(rescheduleTimingLabel(item))} • ${escapeText(item.week || "School visit")} ${escapeText(item.curriculum || "")}${item.reason ? ` • ${escapeText(item.reason)}` : ""}</small>
+                      <small>${item.className ? `${escapeText(item.className)} • ` : ""}${escapeText(rescheduleTimingLabel(item))} • ${escapeText(item.week || "School visit")} ${escapeText(item.curriculum || "")}${item.reason ? ` • ${escapeText(item.reason)}` : ""}</small>
                       <span class="tempo-tag-row">
                         <span class="tempo-tag-pill">Requested by: ${escapeText(requestedBy)}</span>
                       </span>
@@ -32900,11 +33025,14 @@
       renderRescheduleDatePreview(field.closest("[data-reschedule-panel]"));
     });
 
-    document.addEventListener("click", (event) => {
+    document.addEventListener("click", async (event) => {
       const saveButton = event.target.closest("[data-save-reschedule]");
       if (!saveButton) return;
       const panel = saveButton.closest("[data-reschedule-panel]");
       if (!panel) return;
+      const selectedIds = [...panel.querySelectorAll("[data-reschedule-class]:checked")].map((input) => input.value);
+      const selectedClasses = rescheduleRosterClassesForEvent({ school: panel.dataset.school }).filter((item) => selectedIds.includes(String(item.id)));
+      if (!selectedClasses.length) { showToast("Turn on at least one class to change"); return; }
       const action = panel.querySelector("[data-reschedule-action]")?.value || "";
       const reason = panel.querySelector("[data-reschedule-reason]")?.value.trim() || "";
       const newDate = panel.querySelector("[data-reschedule-date]")?.value || "";
@@ -32930,7 +33058,9 @@
         return;
       }
       profileTeacher.reschedules ||= [];
-      const override = {
+      const savedOverrides = selectedClasses.map((selectedClass) => ({
+        classId: String(selectedClass.id),
+        className: selectedClass.name,
         schoolName: panel.dataset.school,
         originalDate: panel.dataset.originalDate,
         week: panel.dataset.week || "",
@@ -32943,33 +33073,28 @@
         newDate: action === "reschedule_now" ? newDate : "",
         timeBlock: action === "reschedule_now" ? timeBlock : "",
         updatedAt: new Date().toISOString()
-      };
-      const existingIndex = profileTeacher.reschedules.findIndex((item) => (
-        item.schoolName === override.schoolName &&
-        item.originalDate === override.originalDate &&
-        item.week === override.week &&
-        item.curriculum === override.curriculum
-      ));
-      if (existingIndex >= 0) {
-        profileTeacher.reschedules[existingIndex] = override;
-      } else {
-        profileTeacher.reschedules.push(override);
-      }
+      }));
+      saveButton.disabled = true;
+      const saved = await persistClassReschedules(savedOverrides);
+      saveButton.disabled = false;
+      if (!saved) { showToast("Could not save the class change. Please try again."); return; }
       renderHomeWidget();
       renderLexiSchedule();
       renderMyDay();
       renderAdminRescheduleLog();
       renderAdminRescheduleTracker();
-      showRescheduleReminder(override);
+      showRescheduleReminder(savedOverrides);
       clearUnsavedEdits();
       showToast(action === "date_tbd" ? "Class saved with Date TBD" : (action === "cancel" ? "Class cancelled with no make-up" : "Class moved on the calendar"));
+      const override = savedOverrides[0];
+      const classLabel = selectedClasses.map((item) => item.name).join(", ");
       const signedInRole = window.dtCurrentProfile?.role;
-      const scheduleSchool = schoolNicknameByName(override.schoolName);
+      const scheduleSchool = `${schoolNicknameByName(override.schoolName)} — ${classLabel}`;
       const originalClassDate = notificationClassDateLabel(override.originalDate);
       const rescheduledClassDate = notificationClassDateLabel(override.newDate);
       if (signedInRole === "teacher") {
         window.dtSupabase?.rpc("queue_teacher_schedule_change_notifications", {
-          school_name: override.schoolName,
+          school_name: scheduleSchool,
           original_date: override.originalDate,
           new_date: override.newDate || null,
           change_status: override.status
@@ -35045,9 +35170,7 @@
 
     const teacherRosterClassIsToday = (rosterClass) => {
       const todayKey = isoDate(homeWidgetDate);
-      const matchingOverrides = rescheduleOverridesForTeacher().filter((item) => (
-        enrollmentSchoolNameMatches(item.schoolName, rosterClass?.schoolName)
-      ));
+      const matchingOverrides = rescheduleChangesForClass(rescheduleOverridesForTeacher(), rosterClass);
       const movedToToday = matchingOverrides.some((item) => (
         rescheduleActionFor(item) === "reschedule_now" && item.newDate === todayKey
       ));
@@ -41751,7 +41874,7 @@
       ["Payable Classes", "Review every included and excluded class date."],
       ["Current Payment Status", "Review every student and select those who have not paid."],
       ["Outstanding Balances", "Track unpaid accounts, release holds, and record paid late fees."],
-      ["Working Hours", "Enter Tier B admin and preparation hours."],
+      ["Working Hours", "Review recorded time and add other working hours."],
       ["Calculate Pay", "Apply the effective tier rules."],
       ["Adjustments", "Add documented manual corrections."],
       ["Review & Approve", "Lock an auditable payroll snapshot."],
@@ -41876,7 +41999,7 @@
         if (date.getDay() === dayIndex) dates.push({ date: payrollDateKey(date), type: "scheduled", status: "payable", reason: scheduledReason });
       }
       const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
-      const changes = (teacher?.reschedules || []).filter((item) => !item.schoolName || enrollmentSchoolNameMatches(item.schoolName, rosterClass.schoolName));
+      const changes = rescheduleChangesForClass(teacher?.reschedules, rosterClass);
       dates.forEach((entry) => {
         const change = changes.find((item) => item.originalDate === entry.date);
         if (!change) return;
@@ -41917,13 +42040,10 @@
       const commissionStudents = Math.min(5, enrolled - 7);
       return 30 + (commissionStudents * payrollTeacherCommissionRate(teacherId));
     };
-    const paidIndividualEventTeacherFirstNames = new Set(["makayla", "taylor", "kara"]);
-    const teacherReceivesEventHourlyPay = (teacher, event) => event?.audience === "all"
-      ? teacher?.payTier === "tier_b_teacher"
-      : paidIndividualEventTeacherFirstNames.has(String(teacher?.firstName || fullName(teacher).split(/\s+/)[0] || "").trim().toLowerCase());
+    const teacherReceivesEventHourlyPay = (teacher) => teacher?.payTier === "tier_b_teacher";
     const payrollScheduledEventLines = () => payrollTeachers().flatMap((teacher) => {
       return (teacher.scheduleEvents || [])
-        .filter((event) => teacherReceivesEventHourlyPay(teacher, event) && event.paidEvent !== false && String(event.date || "").slice(0, 7) === payrollState.month && Number(event.paidHours) > 0)
+        .filter((event) => teacherReceivesEventHourlyPay(teacher, event) && !DTWorkClock.hasEventRecord(event, teacher.id) && event.paidEvent !== false && String(event.date || "").slice(0, 7) === payrollState.month && Number(event.paidHours) > 0)
         .map((event) => ({
           teacherId: teacher.id,
           eventId: event.sharedEventId || event.id,
@@ -42036,6 +42156,7 @@
           held: false
         }));
       });
+      lines.push(...DTWorkClock.payrollLines(DTWorkClock.entries, date => payrollDateIsInRange(date)));
       (payrollState.workingHours || []).forEach((entry) => {
         if (!entry.teacherId || !Number(entry.hours)) return;
         lines.push({ teacherId: entry.teacherId, hours: Number(entry.hours), type: "Working Hours", description: entry.description || "Admin/preparation time", amount: Number(entry.hours) * 20, held: false });
@@ -42260,7 +42381,7 @@
         const outstanding = Object.entries(payrollState.outstandingStudents || {}).filter(([id, item]) => item.selected && visibleIds.has(id) && (payrollBalanceIsUnresolved(item) || payrollBalanceResolvedThisRun(item)));
         body = `${payrollFilterRowMarkup("cleared")}${outstanding.length ? `<div class="payroll-explanation">Review each outstanding balance. Unpaid balances carry forward to the next 1st payroll with their original month. A paid late fee adds $4 to the Admin-tier paycheck.</div><div class="payroll-student-grid">${outstanding.map(([id, item]) => { const record = payrollAllStudents().find(({ student }) => student.id === id); if (!record) return ""; const status = item.status || "still_unpaid"; return `<article class="payroll-student-card ${["paid", "paid_late_fee"].includes(status) ? "is-selected" : ""}"><span class="roster-student-photo">${escapeText(rosterStudentInitials(record.student))}</span><strong>${escapeText(rosterStudentFullName(record.student))}</strong><small>${escapeText(record.rosterClass.schoolName)} · ${escapeText(rosterTeacherName(record.rosterClass.teacherId))}</small><small>Past due: ${escapeText(payrollBalanceMonthLabel(item.month))}</small><label>Status<select data-payroll-balance-status="${escapeText(id)}"><option value="still_unpaid" ${status === "still_unpaid" ? "selected" : ""}>Still unpaid</option><option value="unpaid_late_fee" ${status === "unpaid_late_fee" ? "selected" : ""}>Unpaid with late fee</option><option value="paid" ${status === "paid" ? "selected" : ""}>Paid</option><option value="paid_late_fee" ${status === "paid_late_fee" ? "selected" : ""}>Paid with late fee</option></select></label></article>`; }).join("")}</div>` : `<div class="payroll-placeholder">No outstanding balances match these filters.</div>`}`;
       }
-      if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `<div class="payroll-explanation">Working hours are entered by an authorized DD user. Decimals are accepted and paid at $20 per hour.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
+      if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${DTWorkClock.reviewMarkup()}<div class="payroll-explanation">Approved recorded hours are included automatically at $20 per hour. Use manual hours only for work not already recorded.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
       if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[teacher.payTier])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
       if (step === 6) body = `<div class="payroll-explanation">Every manual adjustment requires a teacher, amount, and reason and will appear on the pay stub and audit history.</div><div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`;
       if (step === 7) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
@@ -42354,6 +42475,7 @@
     });
     document.getElementById("begin-payroll")?.addEventListener("click", async () => {
       if (!await loadOfficialPayrollPayments()) return;
+      if (!await DTWorkClock.load()) { showToast("Working hours could not load. Try again before starting payroll."); return; }
       payrollState.month = document.getElementById("payroll-month")?.value || defaultPayrollMonth();
       try { await loadConfirmedEnrollmentTuition(); } catch(error) { showToast(error.message); return; }
       payrollState.sequence = document.getElementById("payroll-sequence")?.value || "1";
@@ -42414,7 +42536,7 @@
       if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
-      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); await loadConfirmedEnrollmentTuition(); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Confirmed tuition changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
+      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
       if (event.target.closest("#mark-payroll-paid")) {
         const button=event.target.closest("#mark-payroll-paid");button.disabled=true;
         try { await finalizePayrollPayStubs(); payrollState.status="paid";payrollState.paidAt=new Date().toISOString();renderPayrollWizard();scheduleAppDataSave();showToast("Payroll marked paid - statements posted to Teacher Tools"); }
@@ -49905,6 +50027,7 @@
           try { window.localStorage?.setItem(operationalRecoveryCompletedKey, new Date().toISOString()); } catch (error) {}
         }
       }
+      await DTWorkClock.load();
       const removedDemoContent = stripLegacyProductionDemoContent();
       if (data?.payload || isLeader || removedDemoContent || durableIsdLoaded) {
         renderCloudSyncedAppData();

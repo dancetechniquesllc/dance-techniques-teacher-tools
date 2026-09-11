@@ -1,5 +1,7 @@
-const CACHE_NAME = "my-dance-techniques-v232-issued-pay-statements";
+const CACHE_NAME = "my-dance-techniques-v234-teacher-work-clock";
 const CORE_ASSETS = [
+  "./teacher-work-clock.js",
+  "./assets/event-check-in-out.png",
   "./payroll-statements.js",
   "./enrollment-tuition-confirmation.js",
   "./vendor/pdf-lib-1.17.1.min.js",

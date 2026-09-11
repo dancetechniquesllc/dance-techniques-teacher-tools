@@ -498,8 +498,9 @@
     const regular = records.classRecords.filter((item) => (
       item.day === day
       && (!teacherId || item.teacherId === teacherId)
-      && !changes.some(({ item: change }) => (
-        change.originalDate === dateKey
+      && !changes.some(({ teacher, item: change }) => (
+        teacher.id === item.teacherId && change.originalDate === dateKey
+        && (!change.classId || String(change.classId) === String(item.id))
         && ["cancelled", "rescheduled", "date_tbd"].includes(change.status)
         && (!change.schoolName || normalize(change.schoolName) === normalize(item.schoolName)
           || normalize(change.schoolName) === normalize(typeof rosterSchoolNickname === "function" ? rosterSchoolNickname(item.schoolName) : item.schoolName))
