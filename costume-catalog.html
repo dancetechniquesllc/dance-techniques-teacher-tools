@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dance Techniques LLC — Costume System</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f4f8; color: #222; }
+  header { background: linear-gradient(135deg,#1F4E79,#2e75b6); color: white; padding: 18px 28px; display:flex; align-items:center; gap:16px; }
+  header h1 { font-size: 1.4rem; }
+  header p { font-size: 0.85rem; opacity: 0.85; }
+  .tabs { display:flex; gap:4px; padding: 12px 20px 0; background:#1F4E79; }
+  .tab { padding: 8px 20px; border-radius: 8px 8px 0 0; cursor:pointer; font-weight:bold; font-size:0.9rem; background:#2e75b6; color:white; border:none; }
+  .tab.active { background:white; color:#1F4E79; }
+  .panel { display:none; padding:20px; } .panel.active { display:block; }
+
+  /* INVENTORY */
+  .filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
+  .filters input, .filters select { padding:7px 12px; border:1.5px solid #ccc; border-radius:6px; font-size:0.9rem; }
+  .filters input { width:220px; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:12px; font-size:0.82rem; }
+  .legend-item { display:flex; align-items:center; gap:5px; }
+  .dot { width:13px; height:13px; border-radius:50%; display:inline-block; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:14px; }
+  .card { background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); transition:transform 0.15s; cursor:pointer; }
+  .card:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,0.15); }
+  .card-img { width:100%; height:160px; object-fit:cover; background:#e8eef4; display:flex; align-items:center; justify-content:center; color:#888; font-size:0.8rem; }
+  .card-img img { width:100%; height:100%; object-fit:cover; }
+  .card-body { padding:10px; }
+  .card-name { font-weight:bold; font-size:0.88rem; margin-bottom:3px; }
+  .card-company { font-size:0.75rem; color:#555; margin-bottom:6px; }
+  .card-sizes { font-size:0.75rem; display:flex; gap:4px; flex-wrap:wrap; }
+  .size-chip { background:#e8eef4; border-radius:4px; padding:2px 6px; font-weight:bold; }
+  .status-bar { height:5px; }
+  .s-inventoried { background:#70ad47; }
+  .s-low { background:#ffc000; }
+  .s-unknown { background:#f4b942; }
+  .card-location { font-size:0.72rem; color:#777; margin-top:5px; }
+  .total-badge { float:right; background:#1F4E79; color:white; border-radius:10px; padding:2px 8px; font-size:0.75rem; font-weight:bold; }
+
+  /* MODAL */
+  .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; }
+  .modal-overlay.open { display:flex; }
+  .modal { background:white; border-radius:14px; max-width:560px; width:95%; max-height:85vh; overflow-y:auto; padding:24px; position:relative; }
+  .modal-close { position:absolute; top:12px; right:16px; font-size:1.4rem; cursor:pointer; color:#666; background:none; border:none; }
+  .modal img { width:100%; max-height:300px; object-fit:contain; border-radius:8px; margin-bottom:14px; background:#f0f4f8; padding:8px; }
+  .modal h2 { font-size:1.2rem; color:#1F4E79; margin-bottom:4px; }
+  .modal .company-tag { display:inline-block; background:#e8eef4; border-radius:6px; padding:3px 10px; font-size:0.8rem; margin-bottom:12px; }
+  .size-table { width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:8px; }
+  .size-table th { background:#1F4E79; color:white; padding:6px 10px; }
+  .size-table td { padding:5px 10px; border-bottom:1px solid #eee; text-align:center; }
+  .size-table tr:nth-child(even) td { background:#f5f8fc; }
+
+  /* PRINT */
+  @media print {
+    header, .tabs, .filters, .legend, #panel-matcher, #panel-charts, .modal-overlay { display:none !important; }
+    #panel-inventory { display:block !important; padding:0; }
+    body { background:white; }
+    .print-header { display:block !important; }
+    .print-table { display:table !important; width:100%; border-collapse:collapse; font-size:9pt; }
+    .print-table th { background:#1F4E79 !important; color:white !important; padding:5px 7px; text-align:left; font-size:8pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .print-table td { padding:4px 7px; border-bottom:1px solid #ddd; vertical-align:middle; }
+    .print-table tr.row-inventoried td:first-child { border-left:4px solid #70ad47; }
+    .print-table tr.row-low td:first-child { border-left:4px solid #ffc000; }
+    .print-table tr.row-unknown td:first-child { border-left:4px solid #bbb; }
+    .print-table tr:nth-child(even) td { background:#f5f8fc !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .print-thumb { width:50px; height:50px; object-fit:cover; border-radius:4px; }
+    .grid, .card { display:none !important; }
+  }
+  .print-header { display:none; }
+  .print-table { display:none; }
+
+  /* SIZE MATCHER */
+  .matcher-wrap { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  @media(max-width:700px){ .matcher-wrap { grid-template-columns:1fr; } }
+  .matcher-panel { background:white; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+  .matcher-panel h3 { color:#1F4E79; font-size:1rem; margin-bottom:14px; border-bottom:2px solid #e8eef4; padding-bottom:8px; }
+  label { font-size:0.85rem; font-weight:bold; display:block; margin-bottom:4px; margin-top:10px; color:#444; }
+  input[type=number], select, textarea { width:100%; padding:8px 10px; border:1.5px solid #ccc; border-radius:6px; font-size:0.9rem; }
+  textarea { height:120px; resize:vertical; font-family:Arial; }
+  .btn { background:#1F4E79; color:white; border:none; padding:10px 22px; border-radius:8px; font-size:0.95rem; font-weight:bold; cursor:pointer; margin-top:12px; width:100%; }
+  .btn:hover { background:#2e75b6; }
+  .result-card { background:#f0f8ff; border-left:4px solid #1F4E79; border-radius:6px; padding:12px; margin-bottom:10px; }
+  .result-card h4 { font-size:0.95rem; color:#1F4E79; margin-bottom:4px; }
+  .result-card p { font-size:0.82rem; color:#444; }
+  .size-result-chip { display:inline-block; background:#1F4E79; color:white; border-radius:12px; padding:3px 10px; font-size:0.8rem; font-weight:bold; margin:2px; }
+  .no-results { color:#888; font-style:italic; font-size:0.9rem; text-align:center; padding:20px; }
+  .company-filter-wrap { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+  .company-pill { padding:5px 12px; border-radius:16px; border:2px solid #ccc; background:white; cursor:pointer; font-size:0.8rem; font-weight:bold; transition:all 0.15s; }
+  .company-pill.active { border-color:#1F4E79; background:#1F4E79; color:white; }
+  .instr { font-size:0.82rem; color:#666; margin-bottom:8px; line-height:1.5; }
+
+  /* SIZING CHARTS TAB */
+  .chart-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
+  .chart-box { background:white; border-radius:10px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+  .chart-box h3 { font-size:1rem; margin-bottom:10px; padding:6px 10px; border-radius:6px; color:white; }
+  .chart-box table { width:100%; border-collapse:collapse; font-size:0.75rem; }
+  .chart-box th { padding:4px 6px; text-align:center; color:white; }
+  .chart-box td { padding:4px 6px; text-align:center; border-bottom:1px solid #eee; }
+  .chart-box tr:nth-child(even) td { background:#f5f8fc; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🎭 Dance Techniques LLC — Costume System</h1>
+    <p>79 costumes · Browse inventory · Match student sizes</p>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('inventory')">📦 Inventory</button>
+  <button class="tab" onclick="switchTab('matcher')">📏 Size Matcher</button>
+  <button class="tab" onclick="switchTab('charts')">📊 Sizing Charts</button>
+</div>
+
+<!-- INVENTORY PANEL -->
+<div id="panel-inventory" class="panel active">
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="background:#70ad47"></span> Inventoried</div>
+    <div class="legend-item"><span class="dot" style="background:#ffc000"></span> Low Inventory (can't fill a class)</div>
+    <div class="legend-item"><span class="dot" style="background:#f4b942"></span> Not Yet Inventoried</div>
+  </div>
+  <div class="filters">
+    <input type="text" id="search" placeholder="🔍 Search costume name..." oninput="renderGrid()">
+    <select id="filterCompany" onchange="renderGrid()">
+      <option value="">All Companies</option>
+    </select>
+    <select id="filterStatus" onchange="renderGrid()">
+      <option value="">All Statuses</option>
+      <option value="inventoried">✅ Inventoried</option>
+      <option value="low">⚠️ Low Inventory</option>
+      <option value="unknown">❓ Not Inventoried</option>
+    </select>
+    <select id="filterSize" onchange="renderGrid()">
+      <option value="">Any Size Available</option>
+      <option value="XXSC">XXSC</option>
+      <option value="XSC">XSC</option>
+      <option value="SC">SC</option>
+      <option value="IC">IC</option>
+      <option value="MC">MC</option>
+      <option value="LC">LC</option>
+    </select>
+    <span id="count-label" style="font-size:0.85rem;color:#666;margin-left:auto;"></span>
+    <button onclick="printInventory()" style="padding:7px 16px;background:#1F4E79;color:white;border:none;border-radius:7px;font-size:0.88rem;font-weight:bold;cursor:pointer;">🖨️ Print / PDF</button>
+  </div>
+  <div class="grid" id="costume-grid"></div>
+
+  <!-- PRINT VIEW (hidden on screen, shown when printing) -->
+  <div class="print-header" style="margin-bottom:12px;">
+    <h2 style="color:#1F4E79;font-size:14pt;">Dance Techniques LLC — Costume Inventory</h2>
+    <p style="font-size:9pt;color:#555;" id="print-date"></p>
+    <div style="font-size:8pt;margin-top:6px;">
+      <span style="border-left:4px solid #70ad47;padding-left:6px;margin-right:14px;">✅ Inventoried</span>
+      <span style="border-left:4px solid #ffc000;padding-left:6px;margin-right:14px;">⚠️ Low Inventory</span>
+      <span style="border-left:4px solid #bbb;padding-left:6px;">❓ Not Inventoried</span>
+    </div>
+  </div>
+  <table class="print-table" id="print-table">
+    <thead>
+      <tr>
+        <th style="width:55px;">Photo</th>
+        <th>Costume Name</th>
+        <th>Company</th>
+        <th>XXSC</th><th>XSC</th><th>SC</th><th>IC</th><th>MC</th><th>LC</th>
+        <th>Total</th>
+        <th>Location</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="print-tbody"></tbody>
+  </table>
+</div>
+
+<!-- SIZE MATCHER PANEL -->
+<div id="panel-matcher" class="panel">
+  <div class="matcher-wrap">
+    <div class="matcher-panel">
+      <h3>👧 Enter Student Measurements</h3>
+      <p class="instr">Enter one student at a time, or paste a whole roster below.<br>
+      Use format: <strong>Name, Girth, Chest, Waist, Hips</strong> (one per line)</p>
+      <label>Student Name</label>
+      <input type="text" id="s-name" placeholder="e.g. Emma">
+      <label>Girth (inches) — most important!</label>
+      <input type="number" id="s-girth" placeholder="e.g. 42" step="0.5">
+      <label>Chest / Bust (inches)</label>
+      <input type="number" id="s-chest" placeholder="e.g. 24" step="0.5">
+      <label>Waist (inches)</label>
+      <input type="number" id="s-waist" placeholder="e.g. 22" step="0.5">
+      <label>Hips (inches)</label>
+      <input type="number" id="s-hips" placeholder="e.g. 25" step="0.5">
+      <label>Company to check (optional)</label>
+      <select id="s-company">
+        <option value="">All companies</option>
+        <option>Weissman</option>
+        <option>A WISH COME TRUE</option>
+        <option>Discount Dance (Toddler)</option>
+        <option>Discount Dance (No Toddler)</option>
+        <option>Revolution</option>
+        <option>Glamour</option>
+        <option>Costume Gallery</option>
+        <option>Layla's</option>
+      </select>
+      <button class="btn" onclick="matchSingle()">Find My Size →</button>
+      <hr style="margin:18px 0; border-color:#eee;">
+      <h3 style="color:#1F4E79;font-size:1rem;margin-bottom:8px;">📋 Paste Full Class Roster</h3>
+      <p class="instr">Format: Name, Girth, Chest, Waist, Hips (one student per line)</p>
+      <textarea id="roster-text" placeholder="Emma, 42, 24, 22, 25&#10;Sophia, 45, 26, 23, 27&#10;Olivia, 38, 21, 20, 22"></textarea>
+      <button class="btn" onclick="matchRoster()">Match Entire Class →</button>
+    </div>
+    <div class="matcher-panel">
+      <h3>📐 Size Results</h3>
+      <div id="match-results"><p class="no-results">Enter measurements and click "Find My Size" to see results.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHARTS PANEL -->
+<div id="panel-charts" class="panel">
+  <div class="chart-grid" id="charts-grid"></div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────
+const IMAGE_BASE = "Costume%20Images/";
+
+const COSTUMES = [
+  {name:"Boy-Fringe Pants",company:"Discount Dance",status:"unknown",XXSC:null,XSC:null,SC:11,IC:10,MC:1,LC:null,total:22,location:null,img:"Screenshot 2025-06-01 at 8.56.28 PM-458.png"},
+  {name:"BLOOM",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:10,SC:10,IC:1,MC:null,LC:null,total:21,location:"Forward BIG BOX",img:"Screenshot 2026-01-13 at 6.43.12 PM-461.png"},
+  {name:"GRA320C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:12,SC:9,IC:null,MC:null,LC:null,total:21,location:"Hanging Right Entry",img:"pasted-image-12.jpeg"},
+  {name:"Blue Jay",company:"Weissman",status:"inventoried",XXSC:null,XSC:20,SC:null,IC:null,MC:null,LC:null,total:20,location:"Right Box Corner",img:"Screenshot 2025-06-01 at 11.42.01 AM-294.png"},
+  {name:"Close To You",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:10,SC:10,IC:null,MC:null,LC:null,total:20,location:"Forward BIG BOX",img:"Screenshot 2025-06-01 at 12.12.57 PM-373.png"},
+  {name:"Twelve Waltzes",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:10,SC:10,IC:null,MC:null,LC:null,total:20,location:"Forward BIG BOX",img:"Screenshot 2025-06-01 at 12.29.49 PM-428.png"},
+  {name:"GRA272C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:4,SC:14,IC:1,MC:null,LC:null,total:19,location:"Hanging Left",img:"pasted-image-28.jpeg"},
+  {name:"Moon Fairies",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:4,SC:14,IC:1,MC:null,LC:null,total:19,location:"Forward BIG BOX",img:"Screenshot 2025-06-01 at 12.29.30 PM-402.png"},
+  {name:"2 Piece",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:null,SC:19,IC:null,MC:null,LC:null,total:19,location:"Hanging Bk Wall",img:"Screenshot 2025-06-01 at 8.53.48 PM-456.png"},
+  {name:"EL678C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:18,SC:null,IC:null,MC:null,LC:null,total:18,location:"Hanging Left",img:"pasted-image-26.jpeg"},
+  {name:"BEAUTIFUL LIGHT 22975",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:8,SC:4,IC:5,MC:null,LC:null,total:16,location:null,img:"Screenshot 2025-01-27 at 1.12.58 PM-184.png",notes:"Mixed colors"},
+  {name:"EL523C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:null,SC:12,IC:null,MC:2,LC:null,total:14,location:"Hanging Bk Wall",img:"pasted-image-10.jpeg"},
+  {name:"Fancy Feet",company:"Weissman",status:"inventoried",XXSC:null,XSC:6,SC:7,IC:null,MC:null,LC:null,total:13,location:"Right Wall Tower",img:"Screenshot 2025-06-01 at 11.16.49 AM-263.png"},
+  {name:"GRA276C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:3,SC:2,IC:null,MC:7,LC:1,total:13,location:"Hanging Right Entry",img:"pasted-image-34.jpeg"},
+  {name:"You Make Me Feel So Young",company:"Weissman",status:"inventoried",XXSC:null,XSC:5,SC:3,IC:5,MC:null,LC:null,total:13,location:"Forward BOX",img:"Screenshot 2026-06-04 at 8.04.50 PM-633.png"},
+  {name:"Wiggle Giggle",company:"Weissman",status:"inventoried",XXSC:null,XSC:null,SC:12,IC:null,MC:null,LC:null,total:12,location:"Right Box Corner",img:"Screenshot 2025-06-01 at 11.28.23 AM-266.png"},
+  {name:"Dig A Little Deeper",company:"Weissman",status:"inventoried",XXSC:null,XSC:12,SC:null,IC:null,MC:null,LC:null,total:12,location:"Right Box Corner",img:"Dig A Little Deeper-297.png"},
+  {name:"IT'S PARTY TIME",company:"Revolution",status:"inventoried",XXSC:null,XSC:5,SC:7,IC:null,MC:null,LC:null,total:12,location:"Hanging Left",img:"pasted-image-46.jpeg"},
+  {name:"La Vie En Rose",company:"Weissman",status:"inventoried",XXSC:null,XSC:10,SC:2,IC:null,MC:null,LC:null,total:12,location:"Forward BOX",img:"La Vie En Rose-268.png"},
+  {name:"Night Night Song",company:"Weissman",status:"inventoried",XXSC:null,XSC:2,SC:10,IC:null,MC:null,LC:1,total:12,location:"Forward BOX",img:"Screenshot 2026-06-04 at 6.07.11 PM-584.png"},
+  {name:"What Are Words",company:"Weissman",status:"unknown",XXSC:null,XSC:null,SC:9,IC:null,MC:3,LC:null,total:12,location:null,img:"Screenshot 2026-06-04 at 6.06.43 PM-560.png"},
+  {name:"Girls Just Wanna Have Fun",company:"Revolution",status:"inventoried",XXSC:null,XSC:2,SC:9,IC:null,MC:null,LC:null,total:11,location:"Hanging Bk Wall",img:"Screen Shot 2024-05-03 at 5.07.47 PM-99.png"},
+  {name:"All Shook Up",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:null,SC:9,IC:2,MC:null,LC:null,total:11,location:"Forward Tower I-3",img:"Screenshot 2025-06-01 at 12.06.50 PM-348.png"},
+  {name:"GRA178C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:11,SC:null,IC:null,MC:null,LC:null,total:11,location:"Forward Tower",img:"pasted-image-40.jpeg"},
+  {name:"GRA326C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:11,SC:null,IC:null,MC:null,LC:null,total:11,location:"Hanging Bk Wall",img:"Screenshot 2024-11-21 at 3.38.50 PM-117.png"},
+  {name:"Just One Person",company:"Weissman",status:"inventoried",XXSC:null,XSC:5,SC:6,IC:null,MC:null,LC:null,total:11,location:"Right Box Corner",img:"Screenshot 2025-06-01 at 11.17.59 AM-265.png"},
+  {name:"One Summer's Day",company:"Weissman",status:"inventoried",XXSC:null,XSC:5,SC:6,IC:null,MC:null,LC:null,total:11,location:"Forward BOX",img:"Screenshot 2025-06-01 at 11.18.34 AM-264.png"},
+  {name:"Over the Rainbow",company:"Weissman",status:"inventoried",XXSC:null,XSC:7,SC:4,IC:null,MC:null,LC:null,total:11,location:"Forward BOX",img:"Screenshot 2026-06-04 at 6.11.58 PM-610.png"},
+  {name:"PIECE OF THE SKY",company:"Glamour",status:"inventoried",XXSC:null,XSC:null,SC:7,IC:4,MC:null,LC:null,total:11,location:"Forward BOX G-5",img:"Screen Shot 2014-10-19 at 7.36.49 PM-87.jpg"},
+  {name:"Say Hello To The Sun",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:null,SC:10,IC:1,MC:null,LC:null,total:11,location:"Forward BIG BOX",img:"Screenshot 2025-06-01 at 12.31.07 PM-427.png"},
+  {name:"Take A Breath",company:"Weissman",status:"inventoried",XXSC:null,XSC:4,SC:5,IC:2,MC:null,LC:null,total:11,location:"Forward BOX",img:"Screenshot 2026-06-04 at 8.04.00 PM-632.png"},
+  {name:"Ballerina, Ballerina, BLUE",company:"Weissman",status:"inventoried",XXSC:null,XSC:8,SC:2,IC:null,MC:null,LC:null,total:10,location:"Forward BOX",img:"Screenshot 2026-06-04 at 6.04.46 PM-559.png"},
+  {name:"BUTTERFLY 19097",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:10,SC:null,IC:null,MC:null,LC:null,total:10,location:"Forward Tower Orange 819EOD",img:"pasted-image-74.jpeg"},
+  {name:"I Need To Know (Spearmint)",company:"Weissman",status:"inventoried",XXSC:null,XSC:10,SC:null,IC:null,MC:null,LC:null,total:10,location:"Forward Tower",img:"Screenshot 2025-06-01 at 11.11.59 AM-260.png"},
+  {name:"Me Too",company:"Weissman",status:"inventoried",XXSC:null,XSC:5,SC:5,IC:null,MC:null,LC:null,total:10,location:null,img:"Screenshot 2026-06-04 at 6.11.27 PM-608.png"},
+  {name:"Reet Petite",company:"Weissman",status:"inventoried",XXSC:null,XSC:10,SC:null,IC:null,MC:null,LC:null,total:10,location:"Right Box Corner",img:"Screenshot 2025-06-01 at 11.51.29 AM-322.png"},
+  {name:"Rise and Shine",company:"Weissman",status:"inventoried",XXSC:null,XSC:7,SC:4,IC:null,MC:null,LC:null,total:10,location:"Right Box Corner",img:"Screenshot 2026-06-04 at 5.53.47 PM-511.png"},
+  {name:"Rockin' Robin",company:"Weissman",status:"inventoried",XXSC:null,XSC:null,SC:10,IC:null,MC:null,LC:null,total:10,location:"Forward Tower",img:"Screenshot 2025-06-01 at 11.29.02 AM-267.png"},
+  {name:"Standing There",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:null,SC:10,IC:null,MC:null,LC:null,total:10,location:"Forward Tower BIG BAG ST",img:"Screenshot 2025-06-01 at 12.30.33 PM-430.png"},
+  {name:"TAKE A BOW 22995",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:9,SC:1,IC:null,MC:null,LC:null,total:10,location:"Forward Tower Long Tub",img:"Screen Shot 2024-05-11 at 10.20.53 AM-114.png"},
+  {name:"Baby Love",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:9,SC:null,IC:null,MC:null,LC:null,total:9,location:"Forward Tower BIG BAG",img:"Screen Shot 2024-05-03 at 3.54.18 PM-106.png"},
+  {name:"Girls Flutter Sleeve Bat Tutu",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:null,SC:1,IC:4,MC:4,LC:null,total:9,location:"Hanging Right Entry",img:"Screen Shot 2024-02-03 at 8.32.56 PM-111.png"},
+  {name:"I Need To Know (Sherbet)",company:"Weissman",status:"inventoried",XXSC:9,XSC:null,SC:null,IC:null,MC:null,LC:null,total:9,location:"Right Box Corner",img:"Screenshot 2025-02-14 at 9.52.58 AM-209.png"},
+  {name:"Precious",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:6,SC:3,IC:null,MC:null,LC:null,total:9,location:"Forward BIG BOX",img:"Screenshot 2026-06-04 at 5.56.04 PM-510.png"},
+  {name:"Whatever Will Be",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:null,SC:8,IC:1,MC:null,LC:null,total:9,location:"Forward BOX G-5",img:"Screenshot 2025-06-01 at 12.30.50 PM-429.png"},
+  {name:"BOP",company:"A WISH COME TRUE",status:"low",XXSC:null,XSC:1,SC:7,IC:null,MC:1,LC:null,total:9,location:"Forward Tower green lid",img:"Bop-401.png"},
+
+  {name:"THE Ballerina",company:"Weissman",status:"unknown",XXSC:9,XSC:null,SC:null,IC:null,MC:null,LC:null,total:9,location:"Right Box Corner",img:"Screenshot 2025-06-01 at 11.49.46 AM-321.png",notes:"Check inventory"},
+  {name:"Alibaba Red/White Stripes",company:"Wuhan Missyuan",status:"inventoried",XXSC:null,XSC:3,SC:5,IC:null,MC:null,LC:null,total:8,location:"Right Box Corner",img:"Screenshot 2026-01-11 at 4.02.43 PM-460.png"},
+  {name:"Baby Face",company:"Weissman",status:"inventoried",XXSC:2,XSC:6,SC:null,IC:null,MC:null,LC:null,total:8,location:null,img:"Screenshot 2026-06-04 at 6.10.53 PM-609.png"},
+  {name:"Ballerina, Ballerina",company:"Weissman",status:"inventoried",XXSC:null,XSC:8,SC:null,IC:null,MC:null,LC:null,total:8,location:"Forward BOX",img:"Ballerina, Ballerina-347.png"},
+  {name:"11805 CAN CAN",company:"Weissman",status:"inventoried",XXSC:null,XSC:5,SC:2,IC:null,MC:null,LC:null,total:7,location:"Right Wall Tower D-1",img:"pasted-image-50.jpeg",notes:"Teal & Pink colors"},
+  {name:"Hip Kid Blues",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:4,SC:3,IC:null,MC:null,LC:null,total:7,location:"Forward Tower I-3",img:"Hip Kid Blues-374.png"},
+  {name:"LIFE IS A HAPPY SONG TH2054C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:6,SC:1,IC:null,MC:null,LC:null,total:7,location:"Right Wall Tower D-1",img:"pasted-image-56.jpeg"},
+  {name:"Under The Sea",company:"Dansco",status:"inventoried",XXSC:null,XSC:null,SC:3,IC:null,MC:4,LC:null,total:7,location:"Forward Tower",img:"Screenshot 2024-11-21 at 5.22.30 PM-120.png"},
+  {name:"Boy Ballet",company:"Discount Dance",status:"unknown",XXSC:null,XSC:3,SC:4,IC:null,MC:null,LC:null,total:7,location:null,img:"Screenshot 2025-06-01 at 8.53.10 PM-455.png"},
+  {name:"11220 PEACH SHERBET",company:"Weissman",status:"inventoried",XXSC:null,XSC:null,SC:6,IC:null,MC:null,LC:null,total:6,location:"Right Tower A-4",img:"IMG_6065-82.jpg"},
+  {name:"A You're Adorable",company:"Weissman",status:"inventoried",XXSC:null,XSC:6,SC:null,IC:null,MC:null,LC:null,total:6,location:"Forward BOX",img:"Screenshot 2025-06-01 at 11.56.38 AM-323.png"},
+  {name:"E2287",company:"Curtain Call",status:"inventoried",XXSC:null,XSC:2,SC:null,IC:null,MC:4,LC:null,total:6,location:"Right Wall Tower D-1",img:"pasted-image-64.jpeg"},
+  {name:"EL519C",company:"Discount Dance",status:"inventoried",XXSC:null,XSC:1,SC:1,IC:4,MC:null,LC:null,total:6,location:"Hanging Bk Wall",img:"pasted-image-22.jpeg"},
+  {name:"TOTS BOP",company:"Revolution",status:"inventoried",XXSC:null,XSC:null,SC:6,IC:null,MC:null,LC:null,total:6,location:null,img:"12-84.png"},
+  {name:"TUX",company:"A WISH COME TRUE",status:"inventoried",XXSC:null,XSC:1,SC:5,IC:null,MC:null,LC:null,total:6,location:"Forward BOX G-5",img:"IMG_3037-91.jpg"},
+  {name:"Go Your Way",company:"A WISH COME TRUE",status:"low",XXSC:null,XSC:1,SC:5,IC:null,MC:null,LC:null,total:6,location:null,img:"Go Your Way-400.png",notes:"Runs small"},
+  {name:"Boy Vest",company:"Discount Dance",status:"unknown",XXSC:null,XSC:2,SC:2,IC:2,MC:null,LC:null,total:6,location:null,img:"Screenshot 2025-06-01 at 8.55.58 PM-457.png"},
+  {name:"GRA324C",company:"Discount Dance",status:"low",XXSC:null,XSC:3,SC:2,IC:null,MC:null,LC:null,total:5,location:"Right Tower A-4",img:"pasted-image-14.jpeg"},
+  {name:"Looby Lou",company:"A WISH COME TRUE",status:"low",XXSC:null,XSC:5,SC:null,IC:null,MC:null,LC:null,total:5,location:"Forward Tower Orange 819EOD",img:"17-431.png"},
+  {name:"Twist and Shout",company:"Revolution",status:"low",XXSC:null,XSC:1,SC:3,IC:null,MC:1,LC:null,total:5,location:"Hanging Right Entry",img:"Screen Shot 2024-05-03 at 5.07.39 PM-100.png"},
+  {name:"EL665C",company:"Discount Dance",status:"low",XXSC:null,XSC:null,SC:5,IC:null,MC:null,LC:null,total:5,location:null,img:"Screen Shot 2023-01-09 at 3.05.06 PM-81.png"},
+  {name:"I'm A Wild One",company:"A WISH COME TRUE",status:"low",XXSC:null,XSC:3,SC:2,IC:null,MC:null,LC:null,total:5,location:null,img:"Screenshot 2026-01-13 at 6.50.15 PM-485.png"},
+  {name:"Party In USA",company:"A WISH COME TRUE",status:"low",XXSC:null,XSC:null,SC:2,IC:2,MC:1,LC:null,total:5,location:null,img:"Screenshot 2025-06-01 at 12.30.10 PM-426.png"},
+  {name:"18103",company:"Costume Gallery",status:"low",XXSC:null,XSC:null,SC:4,IC:1,MC:null,LC:null,total:5,location:null,img:"pasted-image-52.jpeg"},
+  {name:"FROZEN",company:"Artstone",status:"low",XXSC:null,XSC:null,SC:4,IC:null,MC:1,LC:null,total:5,location:null,img:"pasted-image-72.jpeg"},
+  {name:"SUNSHINE KISSES",company:"Glamour",status:"low",XXSC:null,XSC:5,SC:null,IC:null,MC:null,LC:null,total:5,location:null,img:"21-78.jpg"},
+  {name:"WHISTLE LEOTARD",company:"A WISH COME TRUE",status:"low",XXSC:null,XSC:null,SC:null,IC:3,MC:1,LC:null,total:4,location:"Forward Tower Bag",img:"Screen Shot 2024-05-03 at 4.12.49 PM-97.png"},
+  {name:"GRA260C",company:"Discount Dance",status:"low",XXSC:null,XSC:1,SC:3,IC:null,MC:null,LC:null,total:4,location:"Right Tower D-1",img:"pasted-image-32.jpeg"},
+  {name:"Pinkie",company:"A WISH COME TRUE",status:"low",XXSC:null,XSC:4,SC:null,IC:null,MC:null,LC:null,total:4,location:null,img:"Screen Shot 2024-05-03 at 3.52.14 PM-108.png"},
+  {name:"POLKA DOT PARTY",company:"Revolution",status:"low",XXSC:null,XSC:4,SC:null,IC:null,MC:null,LC:null,total:4,location:null,img:"pasted-image-48.jpeg"},
+  {name:"Boy Animal",company:"Discount Dance",status:"unknown",XXSC:null,XSC:2,SC:1,IC:null,MC:null,LC:null,total:3,location:null,img:"pasted-image-18.jpeg"},
+  {name:"Elemental",company:"Weissman",status:"inventoried",XXSC:null,XSC:null,SC:7,IC:2,MC:1,LC:null,total:10,location:"Forward BOX",img:"Screenshot 2026-06-04 at 5.55.01 PM-535.png"},
+  {name:"Turquoise Cupcake Tutus",company:"Unknown",status:"inventoried",XXSC:null,XSC:null,SC:11,IC:null,MC:null,LC:null,total:11,location:"Forward Tower SM BOX",img:"Screenshot 2026-06-04 at 8.08.44 PM-634.png"},
+];
+
+const SIZING = {
+  "Weissman": {
+    color:"#1F4E79",
+    sizes:["T","XXSC","XSC","SC","IC","MC","LC","XLC","XXLC"],
+    sizeLabels:["2T/3T","3T","4/5","6/6X","7/8","10/12","14","16/18","20"],
+    Girth:[[32,35],[35,38],[38,41],[41,44],[44,47],[47,51],[51,54],[54,57],[57,60]],
+    Chest:[[19,21],[21,24],[22,24],[24,26],[26,28],[28,31],[31,33],[33,36],[36,40]],
+    Waist:[[19,21],[21,22],[22,23],[23,24],[24,25],[25,27],[27,29],[29,32],[32,35]],
+    Hips: [[20,22],[22,23],[23,25],[25,27],[27,29],[29,32],[32,36],[36,39],[39,41]]
+  },
+  "A WISH COME TRUE": {
+    color:"#C55A11",
+    sizes:["2T","XXSC","XSC","SC","ISC","MC","IMC","LC","XLC","XXLC"],
+    sizeLabels:["Toddler","XX-Small","X-Small","Small","Int. Small","Medium","Int. Med","Large","X-Large","XX-Large"],
+    Girth:[[34,36],[36,38],[38,40],[40,44],[44,46],[46,48],[48,51],[51,54],[54,56],[56,59]],
+    Chest:[[18,20],[19,21],[21,23],[23,26],[25,27],[27,29],[28,30],[29,32],[34,36],[36,38]],
+    Waist:[[18,20],[19,21],[20,22],[22,24],[22,24],[23,24],[24,25],[25,26],[30,34],[34,37]],
+    Hips: [[18,20],[19,21],[21,23],[23,27],[26,29],[28,30],[30,32],[32,34],[36,38],[38,40]]
+  },
+  "Discount Dance (Toddler)": {
+    color:"#375623",
+    sizes:["T/XS","S","I","M","L","XL"],
+    sizeLabels:["Toddler/XS","Small","Interm.","Medium","Large","X-Large"],
+    Girth:[[38,41],[41,44],[44,47],[47,50],[50,53],[53,56]],
+    Chest:[[19,21],[21,23],[23,25],[25,27],[27,29],[29,31]],
+    Waist:[[15,17],[17,19],[19,21],[21,23],[23,25],[25,27]],
+    Hips: [[20,22],[22,24],[24,26],[26,28],[28,30],[30,32]]
+  },
+  "Discount Dance (No Toddler)": {
+    color:"#538135",
+    sizes:["S","I","M","L"],
+    sizeLabels:["Small","Interm.","Medium","Large"],
+    Girth:[[41,44],[45,47],[48,50],[51,53]],
+    Chest:[[23,25],[24,26],[25,27],[28,30]],
+    Waist:[[21,23],[22,24],[22,25],[27,29]],
+    Hips: [[23,26],[24,27],[27,29],[30,32]]
+  },
+  "Revolution": {
+    color:"#7030A0",
+    sizes:["XSC","SC","MC","LC","XLC","XXLC","PA"],
+    sizeLabels:["X-Small","Small","Medium","Large","X-Large","XX-Large","Petite Adult"],
+    Girth:[[37,39],[40,43],[44,48],[49,52],[53,55],[56,58],[53,57]],
+    Chest:[[21,23],[24,26],[27,29],[30,32],[33,35],[35,37],[31,33]],
+    Waist:[[18,20],[21,22],[23,24],[25,26],[27,30],[31,34],[24,26]],
+    Hips: [[22,24],[25,27],[28,30],[31,33],[34,37],[38,40],[32,34]]
+  },
+  "Glamour": {
+    color:"#BF9000",
+    sizes:["XSC","SC","MC"],
+    sizeLabels:["X-Small","Small","Medium"],
+    Girth:[[36,40],[41,44],[45,47]],
+    Chest:[[20,22],[23,25],[25,27]],
+    Waist:[[18,20],[20,21],[21,22]],
+    Hips: [[20,22],[23,25],[25,27]]
+  },
+  "Costume Gallery": {
+    color:"#00B0F0",
+    sizes:["XSC","SC","IC","MC","LC","XLC","XXLC"],
+    sizeLabels:["2C-3C","4C-6C","6X-7","8-10","12-14","16-18","20-22"],
+    Girth:[[34,37],[38,42],[43,45],[46,49],[50,54],[55,58],[56,59]],
+    Chest:[[20,21],[22,24],[25,26],[27,29],[30,32],[33,35],[35,37]],
+    Waist:[[20,21],[22,23],[23.5,24],[24.5,25],[26,28],[29,31],[32,34]],
+    Hips: [[21,22],[23,25],[26,27],[28,31],[32,34],[36,38],[39,41]]
+  },
+  "Layla's": {
+    color:"#FF0066",
+    sizes:["XXSC","XSC","SC","MC","LC","XLC"],
+    sizeLabels:["XX-Small","X-Small","Small","Medium","Large","X-Large"],
+    Girth:[[34,37],[38,41],[42,44],[45,49],[50,54],[54,57]],
+    Chest:[[20,22],[21,23],[24,26],[27,29],[30,32],[33,35]],
+    Waist:[[19,22],[21,23],[23,24],[24,26],[26,28],[29,31]],
+    Hips: [[20,22],[22,24],[25,27],[28,30],[31,34],[35,37]]
+  }
+};
+
+const STATUS_COLOR = { inventoried:"#70ad47", low:"#ffc000", unknown:"#f4b942" };
+const SIZE_KEYS = ["XXSC","XSC","SC","IC","MC","LC"];
+
+// Populate company filter
+const companies = [...new Set(COSTUMES.map(c=>c.company))].sort();
+const sel = document.getElementById("filterCompany");
+companies.forEach(c => { const o=document.createElement("option"); o.value=c; o.textContent=c; sel.appendChild(o); });
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-'+tab).classList.add('active');
+  if(tab==='charts') renderCharts();
+}
+
+function renderGrid() {
+  const q = document.getElementById("search").value.toLowerCase();
+  const co = document.getElementById("filterCompany").value;
+  const st = document.getElementById("filterStatus").value;
+  const sz = document.getElementById("filterSize").value;
+  const grid = document.getElementById("costume-grid");
+  let filtered = COSTUMES.filter(c => {
+    if(q && !c.name.toLowerCase().includes(q) && !c.company.toLowerCase().includes(q)) return false;
+    if(co && c.company !== co) return false;
+    if(st && c.status !== st) return false;
+    if(sz && !c[sz]) return false;
+    return true;
+  });
+  document.getElementById("count-label").textContent = `Showing ${filtered.length} of ${COSTUMES.length} costumes`;
+  grid.innerHTML = filtered.map(c => cardHTML(c)).join('');
+}
+
+function cardHTML(c) {
+  const sColor = STATUS_COLOR[c.status];
+  const imgHTML = c.img
+    ? `<img src="${IMAGE_BASE}${encodeURIComponent(c.img)}" alt="${c.name}" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#aaa;font-size:0.8rem;\\'>No Image</div>'">`
+    : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#aaa;font-size:0.78rem;text-align:center;padding:8px;">📷 Tap to assign image</div>`;
+  const sizes = SIZE_KEYS.filter(s=>c[s]).map(s=>`<span class="size-chip">${s}:${c[s]}</span>`).join('');
+  return `<div class="card" onclick="openModal(${COSTUMES.indexOf(c)})">
+    <div class="status-bar" style="background:${sColor}"></div>
+    <div class="card-img">${imgHTML}</div>
+    <div class="card-body">
+      <div class="card-name"><span class="total-badge">${c.total}</span>${c.name}</div>
+      <div class="card-company">${c.company}</div>
+      <div class="card-sizes">${sizes}</div>
+      ${c.location ? `<div class="card-location">📍 ${c.location}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function openModal(idx) {
+  const c = COSTUMES[idx];
+  const imgHTML = c.img
+    ? `<img src="${IMAGE_BASE}${encodeURIComponent(c.img)}" alt="${c.name}" onerror="this.style.display='none'">`
+    : '';
+  const sizeRows = SIZE_KEYS.filter(s=>c[s]).map(s=>`<tr><td><b>${s}</b></td><td>${c[s]}</td></tr>`).join('');
+  const statusLabel = {inventoried:"✅ Inventoried",low:"⚠️ Low Inventory",unknown:"❓ Not Inventoried"}[c.status];
+  document.getElementById("modal-content").innerHTML = `
+    ${imgHTML}
+    <h2>${c.name}</h2>
+    <span class="company-tag">🏢 ${c.company}</span>
+    <p style="font-size:0.85rem;margin:8px 0;">${statusLabel} &nbsp;|&nbsp; Total: <b>${c.total}</b></p>
+    ${c.location ? `<p style="font-size:0.82rem;color:#666;margin-bottom:10px;">📍 ${c.location}</p>` : ''}
+    ${c.notes ? `<p style="font-size:0.82rem;color:#c55a11;margin-bottom:10px;">⚠️ ${c.notes}</p>` : ''}
+    <table class="size-table"><thead><tr><th>Size</th><th>Qty</th></tr></thead><tbody>${sizeRows}</tbody></table>`;
+  document.getElementById("modal").classList.add("open");
+}
+
+function closeModal(e) {
+  if(!e || e.target.id==="modal" || e.target.classList.contains("modal-close"))
+    document.getElementById("modal").classList.remove("open");
+}
+
+function findSize(company, girth, chest, waist, hips) {
+  const chart = SIZING[company];
+  if(!chart) return null;
+  let best = null; let bestScore = 999;
+  chart.sizes.forEach((sz,i) => {
+    let score = 0; let checks = 0;
+    const check = (val, range) => { if(val && range) { checks++; const mid=(range[0]+range[1])/2; score+=Math.abs(val-mid); } };
+    check(girth, chart.Girth?.[i]);
+    check(chest, chart.Chest?.[i]);
+    check(waist, chart.Waist?.[i]);
+    check(hips,  chart.Hips?.[i]);
+    // Also check if measurements fit within range
+    const inRange = (val, range) => !val || !range || (val >= range[0]-1 && val <= range[1]+1);
+    const girthOk = inRange(girth, chart.Girth?.[i]);
+    const chestOk = inRange(chest, chart.Chest?.[i]);
+    const waistOk = inRange(waist, chart.Waist?.[i]);
+    const hipsOk  = inRange(hips,  chart.Hips?.[i]);
+    if(girthOk && chestOk && waistOk && hipsOk && checks>0 && score<bestScore) {
+      best=sz; bestScore=score;
+    }
+  });
+  return best;
+}
+
+function matchSingle() {
+  const name  = document.getElementById("s-name").value || "Student";
+  const girth = parseFloat(document.getElementById("s-girth").value)||null;
+  const chest = parseFloat(document.getElementById("s-chest").value)||null;
+  const waist = parseFloat(document.getElementById("s-waist").value)||null;
+  const hips  = parseFloat(document.getElementById("s-hips").value)||null;
+  const co    = document.getElementById("s-company").value;
+  showResults([{name,girth,chest,waist,hips}], co);
+}
+
+function matchRoster() {
+  const text = document.getElementById("roster-text").value;
+  const co   = document.getElementById("s-company").value;
+  const students = text.trim().split('\n').map(line => {
+    const parts = line.split(',').map(s=>s.trim());
+    return { name: parts[0]||"Student", girth:parseFloat(parts[1])||null,
+             chest:parseFloat(parts[2])||null, waist:parseFloat(parts[3])||null, hips:parseFloat(parts[4])||null };
+  }).filter(s=>s.name);
+  showResults(students, co);
+}
+
+function showResults(students, filterCompany) {
+  const div = document.getElementById("match-results");
+  if(!students.length) { div.innerHTML='<p class="no-results">No students found.</p>'; return; }
+  const companies = filterCompany ? [filterCompany] : Object.keys(SIZING);
+  let html = '';
+  students.forEach(s => {
+    html += `<div class="result-card"><h4>👧 ${s.name}</h4>`;
+    html += `<p style="font-size:0.78rem;color:#666;margin-bottom:6px;">Girth:${s.girth||'?'}" · Chest:${s.chest||'?'}" · Waist:${s.waist||'?'}" · Hips:${s.hips||'?'}"</p>`;
+    companies.forEach(co => {
+      const sz = findSize(co, s.girth, s.chest, s.waist, s.hips);
+      if(sz) {
+        // Find matching costumes
+        const matches = COSTUMES.filter(c => {
+          if(c.status==='low') return false;
+          const companyMatch = c.company===co || (co.includes('Discount Dance') && c.company==='Discount Dance');
+          return companyMatch && c[sz] && c[sz]>0;
+        });
+        html += `<div style="margin-bottom:6px;"><span class="size-result-chip">${co}: ${sz}</span>`;
+        if(matches.length) html += ` <span style="font-size:0.75rem;color:#444;">→ ${matches.map(m=>m.name).join(', ')}</span>`;
+        else html += ` <span style="font-size:0.75rem;color:#999;">No available costumes in this size</span>`;
+        html += '</div>';
+      }
+    });
+    html += '</div>';
+  });
+  div.innerHTML = html || '<p class="no-results">Could not determine sizes — check measurements.</p>';
+}
+
+function renderCharts() {
+  const g = document.getElementById("charts-grid");
+  if(g.innerHTML) return;
+  let html='';
+  Object.entries(SIZING).forEach(([co,data]) => {
+    const rows = ["Girth","Chest","Waist","Hips"].map(m => {
+      if(!data[m]) return '';
+      return `<tr><td><b>${m}</b></td>${data[m].map(r=>`<td>${r[0]}-${r[1]}"</td>`).join('')}</tr>`;
+    }).join('');
+    html+=`<div class="chart-box">
+      <h3 style="background:${data.color}">${co}</h3>
+      <table><thead><tr><th>Meas.</th>${data.sizes.map((s,i)=>`<th>${s}<br><small>${data.sizeLabels[i]}</small></th>`).join('')}</tr></thead>
+      <tbody>${rows}</tbody></table></div>`;
+  });
+  g.innerHTML=html;
+}
+
+renderGrid();
+
+function printInventory() {
+  // Build print table from current filtered view
+  const q = document.getElementById("search").value.toLowerCase();
+  const co = document.getElementById("filterCompany").value;
+  const st = document.getElementById("filterStatus").value;
+  const sz = document.getElementById("filterSize").value;
+  let filtered = COSTUMES.filter(c => {
+    if(q && !c.name.toLowerCase().includes(q) && !c.company.toLowerCase().includes(q)) return false;
+    if(co && c.company !== co) return false;
+    if(st && c.status !== st) return false;
+    if(sz && !c[sz]) return false;
+    return true;
+  });
+
+  const tbody = document.getElementById("print-tbody");
+  tbody.innerHTML = filtered.map(c => {
+    const thumb = c.img
+      ? `<img class="print-thumb" src="${IMAGE_BASE}${encodeURIComponent(c.img)}" alt="${c.name}">`
+      : `<div style="width:50px;height:50px;background:#e8eef4;border-radius:4px;display:inline-block;"></div>`;
+    const s = v => v != null ? v : '—';
+    return `<tr class="row-${c.status||'unknown'}">
+      <td>${thumb}</td>
+      <td><strong>${c.name}</strong></td>
+      <td style="font-size:8pt;color:#555;">${c.company}</td>
+      <td style="text-align:center;">${s(c.XXSC)}</td>
+      <td style="text-align:center;">${s(c.XSC)}</td>
+      <td style="text-align:center;">${s(c.SC)}</td>
+      <td style="text-align:center;">${s(c.IC)}</td>
+      <td style="text-align:center;">${s(c.MC)}</td>
+      <td style="text-align:center;">${s(c.LC)}</td>
+      <td style="text-align:center;font-weight:bold;">${c.total}</td>
+      <td style="font-size:8pt;">${c.location||'—'}</td>
+      <td style="font-size:8pt;color:#888;">${c.notes||''}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById("print-date").textContent =
+    `Printed: ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · ${filtered.length} costumes`;
+
+  window.print();
+}
+</script>
+</body>
+</html>
