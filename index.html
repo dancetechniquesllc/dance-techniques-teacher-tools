@@ -9344,6 +9344,15 @@
     .archived-student-row small { color: var(--muted); }
     .archived-students-footer { display: flex; justify-content: center; padding: 24px 0 4px; border-top: 1px solid var(--border); margin-top: 22px; }
     .archived-students-footer button { min-width: min(320px, 100%); }
+    .refund-review-form { display: grid; gap: 14px; margin-top: 14px; }
+    .refund-review-form label { display: grid; gap: 6px; color: var(--fg); font-size: 12px; font-weight: 800; }
+    .refund-review-form :is(input, select, textarea) { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--fg); font: inherit; }
+    .refund-review-form textarea { min-height: 78px; resize: vertical; }
+    .refund-review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .refund-review-section { display: grid; gap: 12px; padding: 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); }
+    .refund-review-section[hidden] { display: none; }
+    .refund-review-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    @media (max-width: 520px) { .refund-review-grid { grid-template-columns: 1fr; } }
     .confirm-dialog.roster-class-create-dialog { width: min(660px, 100%); max-height: calc(100vh - 36px); overflow: auto; }
     .roster-class-create-intro { display: flex; gap: 11px; align-items: flex-start; }
     .roster-class-create-mark {
@@ -18778,6 +18787,44 @@
       <div class="confirm-actions"><button class="secondary" type="button" id="archived-students-close">Close</button></div>
     </div>
   </div>
+  <div class="confirm-overlay" id="refund-review-overlay" aria-hidden="true">
+    <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="refund-review-title">
+      <h3 id="refund-review-title">Review Refund</h3>
+      <p id="refund-review-copy">Record the family refund before continuing.</p>
+      <form class="refund-review-form" id="refund-review-form">
+        <label>Was a refund issued?
+          <select id="refund-review-issued" required><option value="no">No</option><option value="yes">Yes</option></select>
+        </label>
+        <section class="refund-review-section" id="refund-review-details" hidden>
+          <div class="refund-review-grid">
+            <label>Family refund amount
+              <input id="refund-review-amount" type="number" min="0.01" step="0.01" inputmode="decimal">
+            </label>
+            <label>Refund date
+              <input id="refund-review-date" type="date">
+            </label>
+          </div>
+          <label>Refund reason or note
+            <textarea id="refund-review-reason" placeholder="Why was the refund issued?"></textarea>
+          </label>
+          <label>Was the teacher already paid for this dancer?
+            <select id="refund-review-teacher-paid"><option value="no">No</option><option value="yes">Yes</option></select>
+          </label>
+          <section class="refund-review-section" id="refund-review-payroll" hidden>
+            <label>Teacher
+              <select id="refund-review-teacher"></select>
+            </label>
+            <label>Payroll deduction amount
+              <input id="refund-review-deduction" type="number" min="0.01" step="0.01" inputmode="decimal">
+            </label>
+            <p class="refund-review-note">Enter the teacher earnings to recover, which may be different from the family’s refund. This deduction will appear once in the next payroll review.</p>
+          </section>
+        </section>
+        <p class="refund-review-note" id="refund-review-action-note"></p>
+        <div class="confirm-actions"><button class="secondary" type="button" id="refund-review-cancel">Cancel</button><button class="danger-btn" type="submit" id="refund-review-continue">Continue</button></div>
+      </form>
+    </div>
+  </div>
   <div class="confirm-overlay" id="roster-print-overlay" aria-hidden="true">
     <div class="confirm-dialog roster-print-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-print-title">
       <button class="roster-profile-close roster-print-close" type="button" id="roster-print-close" aria-label="Close Print Roster">×</button>
@@ -20816,7 +20863,9 @@
       const seen = new Set();
       return rosterClasses.flatMap((rosterClass) => rosterEnrolled(rosterClass).map((student) => ({ rosterClass, student }))).filter(({ student }) => {
         const name = rosterStudentFullName(student);
-        if (!name || name.toLowerCase() === enrollmentName || seen.has(name.toLowerCase())) return false;
+        const isCurrentStudent = (item?.placed_student_id && student.id === item.placed_student_id)
+          || (item?.placed_class_enrollment_id && student.enrollmentId === item.placed_class_enrollment_id);
+        if (!name || isCurrentStudent || name.toLowerCase() === enrollmentName || seen.has(name.toLowerCase())) return false;
         seen.add(name.toLowerCase());
         return true;
       }).sort((left, right) => rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
@@ -20868,6 +20917,19 @@
       scheduleAppDataSave();
       renderStudentLibrary();
       await syncStudentToEnrollmentIntake(target.student, target.rosterClass);
+    };
+    const persistEnrollmentRelatedDancers = async (item) => {
+      scheduleAppDataSave();
+      await syncEnrollmentIntakeToStudent(item);
+      if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !item?.id) return true;
+      const { error } = await window.dtSupabase.from("enrollments").update({
+        related_dancer_name: item.related_dancer_name || null,
+        tuition_discount: item.tuition_discount || "none"
+      }).eq("id", item.id);
+      if (!error) return true;
+      console.error("The sibling relationship could not be saved.", error);
+      showToast("The sibling could not be saved. Please try again.");
+      return false;
     };
 
     const renderEnrollmentQueue = () => {
@@ -21887,7 +21949,8 @@
 
     const syncStudentToEnrollmentIntake = async (student, rosterClass) => {
       const payload = enrollmentFieldsFromStudent(student, rosterClass);
-      enrollmentIntakeQueue.filter((item) => item.placed_student_id === student.id || item.placed_class_enrollment_id === student.enrollmentId).forEach((item) => Object.assign(item, payload));
+      enrollmentIntakeQueue.filter((item) => (item.placed_student_id && item.placed_student_id === student.id)
+        || (item.placed_class_enrollment_id && student.enrollmentId && item.placed_class_enrollment_id === student.enrollmentId)).forEach((item) => Object.assign(item, payload));
       if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !student.id) return;
       const { error } = await window.dtSupabase.from("enrollments").update(payload).eq("placed_student_id", student.id);
       if (error) sharedRosterError("The enrollment record could not be synchronized.", error, { reload: false });
@@ -25202,6 +25265,7 @@
       yearEndPromotionReviews: {},
       workingHours: [],
       adjustments: [],
+      refundRecords: [],
       approvedAt: "",
       paidAt: ""
     };
@@ -37642,6 +37706,90 @@
       }
     };
 
+    let refundReviewResolver = null;
+    let refundReviewContext = null;
+    const closeRefundReview = (result = null) => {
+      const overlay = document.getElementById("refund-review-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+      const resolver = refundReviewResolver;
+      refundReviewResolver = null;
+      refundReviewContext = null;
+      resolver?.(result);
+    };
+    const updateRefundReviewFields = () => {
+      const issued = document.getElementById("refund-review-issued")?.value === "yes";
+      const teacherPaid = issued && document.getElementById("refund-review-teacher-paid")?.value === "yes";
+      document.getElementById("refund-review-details")?.toggleAttribute("hidden", !issued);
+      document.getElementById("refund-review-payroll")?.toggleAttribute("hidden", !teacherPaid);
+      ["refund-review-amount", "refund-review-date", "refund-review-reason"].forEach((id) => document.getElementById(id)?.toggleAttribute("required", issued));
+      ["refund-review-teacher", "refund-review-deduction"].forEach((id) => document.getElementById(id)?.toggleAttribute("required", teacherPaid));
+    };
+    const requestRefundReview = ({ dancerName, actionLabel, teacherId = "" }) => {
+      if (refundReviewResolver) closeRefundReview(null);
+      refundReviewContext = { dancerName, actionLabel, teacherId };
+      const teacherSelect = document.getElementById("refund-review-teacher");
+      teacherSelect.innerHTML = `<option value="">Choose teacher</option>${teachers.map((teacher) => `<option value="${rosterSafe(teacher.id)}" ${teacher.id === teacherId ? "selected" : ""}>${rosterSafe(fullName(teacher))}</option>`).join("")}`;
+      document.getElementById("refund-review-issued").value = "no";
+      document.getElementById("refund-review-amount").value = "";
+      document.getElementById("refund-review-date").value = payrollDateKey(new Date());
+      document.getElementById("refund-review-reason").value = "";
+      document.getElementById("refund-review-teacher-paid").value = "no";
+      document.getElementById("refund-review-deduction").value = "";
+      document.getElementById("refund-review-title").textContent = `${actionLabel} · Refund Review`;
+      document.getElementById("refund-review-copy").textContent = `Was a refund issued for ${dancerName}? Record it before continuing.`;
+      document.getElementById("refund-review-action-note").textContent = `Continuing will ${actionLabel.toLowerCase()} ${dancerName}. The refund answer will be kept for the financial audit history.`;
+      document.getElementById("refund-review-continue").textContent = actionLabel;
+      updateRefundReviewFields();
+      const overlay = document.getElementById("refund-review-overlay");
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+      window.setTimeout(() => document.getElementById("refund-review-issued")?.focus(), 40);
+      return new Promise((resolve) => { refundReviewResolver = resolve; });
+    };
+    const saveRefundReview = (review, context = {}) => {
+      payrollState.refundRecords ||= [];
+      const record = {
+        id: `refund-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        actionType: context.actionType || "archive_student",
+        enrollmentId: context.enrollmentId || "",
+        studentId: context.studentId || "",
+        dancerName: context.dancerName || "Dancer",
+        refundIssued: Boolean(review.refundIssued),
+        refundAmount: Number(review.refundAmount || 0),
+        refundDate: review.refundDate || "",
+        refundReason: review.refundReason || "No refund issued",
+        teacherAlreadyPaid: Boolean(review.teacherAlreadyPaid),
+        teacherId: review.teacherId || context.teacherId || "",
+        payrollDeductionAmount: Number(review.payrollDeductionAmount || 0),
+        createdAt: new Date().toISOString(),
+        appliedPayrollMonth: "",
+        appliedPayrollSequence: ""
+      };
+      payrollState.refundRecords.unshift(record);
+      scheduleAppDataSave();
+      return record;
+    };
+
+    document.getElementById("refund-review-issued")?.addEventListener("change", updateRefundReviewFields);
+    document.getElementById("refund-review-teacher-paid")?.addEventListener("change", updateRefundReviewFields);
+    document.getElementById("refund-review-cancel")?.addEventListener("click", () => closeRefundReview(null));
+    document.getElementById("refund-review-overlay")?.addEventListener("click", (event) => { if (event.target.id === "refund-review-overlay") closeRefundReview(null); });
+    document.getElementById("refund-review-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const refundIssued = document.getElementById("refund-review-issued").value === "yes";
+      const teacherAlreadyPaid = refundIssued && document.getElementById("refund-review-teacher-paid").value === "yes";
+      closeRefundReview({
+        refundIssued,
+        refundAmount: refundIssued ? Number(document.getElementById("refund-review-amount").value) : 0,
+        refundDate: refundIssued ? document.getElementById("refund-review-date").value : "",
+        refundReason: refundIssued ? document.getElementById("refund-review-reason").value.trim() : "No refund issued",
+        teacherAlreadyPaid,
+        teacherId: teacherAlreadyPaid ? document.getElementById("refund-review-teacher").value : "",
+        payrollDeductionAmount: teacherAlreadyPaid ? Number(document.getElementById("refund-review-deduction").value) : 0
+      });
+    });
+
     const renderArchivedStudents = () => {
       const list = document.getElementById("archived-student-list");
       if (!list) return;
@@ -37667,13 +37815,16 @@
     const archiveEditingRosterStudent = async () => {
       const { rosterClass, student } = currentEditingRosterStudent();
       if (!rosterClass || !student) return;
-      if (!window.confirm(`Mark ${rosterStudentFullName(student)} inactive and remove them from the active roster? Their record will remain archived.`)) return;
+      const dancerName = rosterStudentFullName(student);
+      const refundReview = await requestRefundReview({ dancerName, actionLabel: "Archive Student", teacherId: rosterClass.teacherId });
+      if (!refundReview) return;
       const archivedAt = new Date().toISOString().slice(0, 10);
       if (student.enrollmentId && window.dtSupabase && document.body.dataset.tourMode !== "true") {
         const result = await window.dtSupabase.from("class_enrollments").update({ status: "withdrawn", ended_date: archivedAt }).eq("id", student.enrollmentId);
         if (result.error) return sharedRosterError("The student could not be archived.", result.error, { reload: false });
       }
       archivedRosterStudents.unshift({ id: student.id, enrollmentId: student.enrollmentId || "", classId: rosterClass.id, firstName: student.firstName, preferredName: student.preferredName || "", lastName: student.lastName, archivedAt });
+      saveRefundReview(refundReview, { actionType: "archive_student", enrollmentId: student.enrollmentId || "", studentId: student.id, dancerName, teacherId: rosterClass.teacherId });
       rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
       closeRosterStudentEditor();
       renderClassesAndRosters();
@@ -37685,7 +37836,9 @@
     const deleteEditingRosterStudent = async () => {
       const { rosterClass, student } = currentEditingRosterStudent();
       if (!rosterClass || !student) return;
-      if (!window.confirm(`Archive ${rosterStudentFullName(student)}? Their roster history and notes will remain recoverable.`)) return;
+      const dancerName = rosterStudentFullName(student);
+      const refundReview = await requestRefundReview({ dancerName, actionLabel: "Archive Student", teacherId: rosterClass.teacherId });
+      if (!refundReview) return;
       if (student.enrollmentId && window.dtSupabase && document.body.dataset.tourMode !== "true") {
         const archivedAt = new Date().toISOString().slice(0, 10);
         const [enrollmentResult, studentResult] = await Promise.all([
@@ -37696,6 +37849,7 @@
           return sharedRosterError("The student could not be archived.", enrollmentResult.error || studentResult.error, { reload: false });
         }
       }
+      saveRefundReview(refundReview, { actionType: "archive_student", enrollmentId: student.enrollmentId || "", studentId: student.id, dancerName, teacherId: rosterClass.teacherId });
       rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
       closeRosterStudentEditor();
       renderClassesAndRosters();
@@ -42343,6 +42497,19 @@
         if (!entry.teacherId || !Number(entry.hours)) return;
         lines.push({ teacherId: entry.teacherId, hours: Number(entry.hours), type: "Working Hours", description: entry.description || "Admin/preparation time", amount: Number(entry.hours) * 20, held: false });
       });
+      (payrollState.refundRecords || []).forEach((entry) => {
+        const appliedToCurrentRun = entry.appliedPayrollMonth === payrollState.month && String(entry.appliedPayrollSequence) === String(payrollState.sequence);
+        if (!entry.teacherAlreadyPaid || !entry.teacherId || !Number(entry.payrollDeductionAmount) || (entry.appliedPayrollMonth && !appliedToCurrentRun)) return;
+        lines.push({
+          teacherId: entry.teacherId,
+          studentId: entry.studentId || "",
+          type: "Refund Deduction",
+          description: `${entry.dancerName || "Dancer"} · ${entry.refundReason || "Family refund"} · family refund ${payrollCurrency(entry.refundAmount)}`,
+          amount: -Math.abs(Number(entry.payrollDeductionAmount)),
+          held: false,
+          refundRecordId: entry.id
+        });
+      });
       (payrollState.adjustments || []).forEach((entry) => {
         if (!entry.teacherId || !Number(entry.amount)) return;
         lines.push({ teacherId: entry.teacherId, type: "Adjustment", description: entry.reason || "Manual adjustment", amount: Number(entry.amount), held: false });
@@ -42564,7 +42731,7 @@
       }
       if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${DTWorkClock.reviewMarkup()}<div class="payroll-explanation">Approved recorded hours are included automatically at $20 per hour. Use manual hours only for work not already recorded.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
       if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[teacher.payTier])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
-      if (step === 6) body = `<div class="payroll-explanation">Every manual adjustment requires a teacher, amount, and reason and will appear on the pay stub and audit history.</div><div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`;
+      if (step === 6) { const refundDeductions = (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth); body = `<div class="payroll-explanation">Refund deductions are added automatically when a family refund records that the teacher was already paid. Every manual adjustment also requires a teacher, amount, and reason.</div>${refundDeductions.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Deduction</span><span>Refund</span><span>Reason</span></div>${refundDeductions.map((entry) => `<div class="payroll-table-row"><strong>${escapeText(fullName(payrollTeachers().find((teacher) => teacher.id === entry.teacherId)))}</strong><strong>−${payrollCurrency(entry.payrollDeductionAmount)}</strong><span>${escapeText(entry.dancerName)} · ${payrollCurrency(entry.refundAmount)}</span><span>${escapeText(entry.refundReason || "Family refund")}</span></div>`).join("")}</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`; }
       if (step === 7) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
       if (step === 6) {
         const confirmedRows=Object.entries(payrollConfirmedTuition).filter(([key])=>key.startsWith(payrollState.month+":"));
@@ -42717,7 +42884,7 @@
       if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
-      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
+      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
       if (event.target.closest("#mark-payroll-paid")) {
         const button=event.target.closest("#mark-payroll-paid");button.disabled=true;
         try { await finalizePayrollPayStubs(); payrollState.status="paid";payrollState.paidAt=new Date().toISOString();renderPayrollWizard();scheduleAppDataSave();showToast("Payroll marked paid - statements posted to Teacher Tools"); }
@@ -46774,10 +46941,20 @@
       if (relatedResult) {
         const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
         if (!item) return;
+        const previousRelatedDancerName = item.related_dancer_name || "";
+        const previousTuitionDiscount = item.tuition_discount || "none";
         const selectedNames = enrollmentRelatedDancerNames(item);
         const name = relatedResult.dataset.enrollmentRelatedSelect;
         if (name && !selectedNames.some((selected) => selected.toLowerCase() === name.toLowerCase())) selectedNames.push(name);
         item.related_dancer_name = selectedNames.join(" • ");
+        const currentTuitionType = effectiveEnrollmentTuitionType(item, suggestEnrollmentClass(item));
+        if (["none", "sibling"].includes(currentTuitionType)) item.tuition_discount = "sibling";
+        if (!await persistEnrollmentRelatedDancers(item)) {
+          item.related_dancer_name = previousRelatedDancerName;
+          item.tuition_discount = previousTuitionDiscount;
+          renderEnrollmentQueue();
+          return;
+        }
         await syncReciprocalRelatedDancer([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" "), name, true);
         renderEnrollmentQueue();
         return;
@@ -46786,9 +46963,18 @@
       if (relatedRemove) {
         const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
         if (!item) return;
+        const previousRelatedDancerName = item.related_dancer_name || "";
+        const previousTuitionDiscount = item.tuition_discount || "none";
         const removedSiblingName = relatedRemove.dataset.enrollmentRelatedRemove;
         const removedName = removedSiblingName.toLowerCase();
         item.related_dancer_name = enrollmentRelatedDancerNames(item).filter((name) => name.toLowerCase() !== removedName).join(" • ");
+        if (!enrollmentRelatedDancerNames(item).length && item.tuition_discount === "sibling") item.tuition_discount = "none";
+        if (!await persistEnrollmentRelatedDancers(item)) {
+          item.related_dancer_name = previousRelatedDancerName;
+          item.tuition_discount = previousTuitionDiscount;
+          renderEnrollmentQueue();
+          return;
+        }
         await syncReciprocalRelatedDancer([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" "), removedSiblingName, false);
         renderEnrollmentQueue();
         return;
@@ -46869,10 +47055,10 @@
           return;
         }
         const dancerName = [item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "this enrollment";
-        const paidWarning = String(item.payment_status || "").toLowerCase() === "paid"
-          ? "\n\nThe enrollment fee is marked paid. Voiding preserves that payment evidence and does not issue a refund."
-          : "";
-        if (!window.confirm(`Void the duplicate enrollment for ${dancerName}?\n\nThe submission will be removed from the active enrollment queue but kept for audit history.${paidWarning}`)) return;
+        const suggestedClass = suggestEnrollmentClass(item);
+        const suggestedRosterClass = rosterClasses.find((rosterClass) => rosterClass.id === (item.matched_dance_class_id || suggestedClass?.classId));
+        const refundReview = await requestRefundReview({ dancerName, actionLabel: "Void Enrollment", teacherId: suggestedRosterClass?.teacherId || "" });
+        if (!refundReview) return;
         const voidedAt = new Date().toISOString();
         const voidedBy = window.dtCurrentProfile?.full_name || window.dtCurrentProfile?.email || "Director/Admin";
         const auditNote = `VOIDED — Duplicate enrollment — ${new Date(voidedAt).toLocaleString()} — ${voidedBy}`;
@@ -46902,12 +47088,13 @@
         item.registration_notes = registrationNotes;
         item.reviewed_by = window.dtCurrentProfile?.id || null;
         item.reviewed_at = voidedAt;
+        saveRefundReview(refundReview, { actionType: "void_enrollment", enrollmentId: item.id, studentId: item.placed_student_id || "", dancerName, teacherId: suggestedRosterClass?.teacherId || "" });
         enrollmentBatchSelected.delete(item.id);
         selectedEnrollmentIntakeId = "";
         enrollmentReviewOpen = false;
         renderEnrollmentQueue();
         renderEnrollmentStudentSummary();
-        showToast("Duplicate enrollment voided. Payment evidence was preserved.");
+        showToast(refundReview.refundIssued ? "Enrollment voided and refund details recorded." : "Enrollment voided. No refund was recorded.");
         return;
       }
       const checklistButton = event.target.closest("[data-enrollment-checklist]");
@@ -49188,12 +49375,16 @@
       if (select) {
         const name = select.dataset.rosterRelatedSelect;
         if (name && !names.some((selected) => selected.toLowerCase() === name.toLowerCase())) names.push(name);
+        const tuitionSelect = document.getElementById("roster-edit-tuition-discount");
+        if (tuitionSelect && ["none", "sibling"].includes(tuitionSelect.value)) tuitionSelect.value = "sibling";
         await syncReciprocalRelatedDancer(sourceName, name, true);
       }
       if (remove) {
         const removedSiblingName = remove.dataset.rosterRelatedRemove;
         const removedName = removedSiblingName.toLowerCase();
         names.splice(0, names.length, ...names.filter((name) => name.toLowerCase() !== removedName));
+        const tuitionSelect = document.getElementById("roster-edit-tuition-discount");
+        if (!names.length && tuitionSelect?.value === "sibling") tuitionSelect.value = "none";
         await syncReciprocalRelatedDancer(sourceName, removedSiblingName, false);
       }
       hidden.value = names.join(" • ");
