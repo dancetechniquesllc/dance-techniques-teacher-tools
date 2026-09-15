@@ -5131,97 +5131,6 @@
       border-color: #b3c2aa;
     }
 
-    .my-playlists-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 14px 0 10px;
-    }
-
-    .my-playlists-toolbar p { margin: 0; }
-
-    .my-playlist-form {
-      margin-bottom: 14px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .my-playlist-form .actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    #my-playlist-owner-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    #my-playlist-owner-actions button {
-      min-height: 34px;
-      padding: 0 12px;
-      font-size: 12.5px;
-    }
-
-    .music-track-row-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .music-track-row-actions button {
-      min-height: 30px;
-      padding: 0 8px;
-      font-size: 13px;
-    }
-
-    .add-my-tracks-panel {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-      display: grid;
-      gap: 10px;
-    }
-
-    .add-my-tracks-list {
-      max-height: 260px;
-      overflow-y: auto;
-      display: grid;
-      gap: 6px;
-    }
-
-    .add-my-tracks-list label {
-      flex-direction: row;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 620;
-      color: var(--fg);
-    }
-
-    .add-my-tracks-list input[type="checkbox"] {
-      width: 18px;
-      min-height: 18px;
-    }
-
-    .playlist.owned-by-me {
-      box-shadow: inset 0 0 0 2px var(--fg);
-    }
-
-    .playlist-owner-tag {
-      display: inline-block;
-      margin-top: 2px;
-      font-size: 10.5px;
-      font-weight: 720;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--muted);
-    }
-
     .music-now-playing {
       display: grid;
       grid-template-columns: minmax(88px, 132px) 1fr;
@@ -9344,6 +9253,15 @@
     .archived-student-row small { color: var(--muted); }
     .archived-students-footer { display: flex; justify-content: center; padding: 24px 0 4px; border-top: 1px solid var(--border); margin-top: 22px; }
     .archived-students-footer button { min-width: min(320px, 100%); }
+    .refund-review-form { display: grid; gap: 14px; margin-top: 14px; }
+    .refund-review-form label { display: grid; gap: 6px; color: var(--fg); font-size: 12px; font-weight: 800; }
+    .refund-review-form :is(input, select, textarea) { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--fg); font: inherit; }
+    .refund-review-form textarea { min-height: 78px; resize: vertical; }
+    .refund-review-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .refund-review-section { display: grid; gap: 12px; padding: 13px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); }
+    .refund-review-section[hidden] { display: none; }
+    .refund-review-note { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    @media (max-width: 520px) { .refund-review-grid { grid-template-columns: 1fr; } }
     .confirm-dialog.roster-class-create-dialog { width: min(660px, 100%); max-height: calc(100vh - 36px); overflow: auto; }
     .roster-class-create-intro { display: flex; gap: 11px; align-items: flex-start; }
     .roster-class-create-mark {
@@ -15740,19 +15658,6 @@
                 <label class="music-type-filter"><span>Sort by</span><select id="music-type-filter" aria-label="Sort playlists by dance type"><option value="all">All</option><option value="ballet">Ballet</option><option value="tap">Tap</option><option value="tot">Tot</option></select></label>
               </div>
 
-              <div class="my-playlists-toolbar">
-                <p class="subtle">Build your own playlists from DT Tunes songs.</p>
-                <button class="secondary" type="button" id="open-create-my-playlist">+ New Playlist</button>
-              </div>
-              <form class="panel my-playlist-form" id="create-my-playlist-form" hidden>
-                <label>Playlist name<input id="new-my-playlist-name" required maxlength="80" placeholder="Example: Miss Lexi's Ballet Mix"></label>
-                <div class="actions">
-                  <button class="primary" type="submit">Create Playlist</button>
-                  <button class="secondary" type="button" id="cancel-create-my-playlist">Cancel</button>
-                  <span class="status" id="my-playlist-form-status"></span>
-                </div>
-              </form>
-
               <div class="playlist-grid" id="music-playlist-grid" aria-live="polite"></div>
 
               <div class="panel" id="music-track-panel" style="margin-top:12px;" hidden>
@@ -15761,24 +15666,9 @@
                     <h3 id="music-track-list-title">Songs</h3>
                     <span class="status ok" id="music-track-count">Loading</span>
                   </div>
-                  <div id="my-playlist-owner-actions" hidden>
-                    <button class="secondary" type="button" id="open-add-my-tracks">+ Add Songs</button>
-                    <button class="secondary" type="button" id="rename-my-playlist">Rename</button>
-                    <button class="danger-btn" type="button" id="delete-my-playlist">Delete Playlist</button>
-                  </div>
                 </div>
                 <div class="list" id="music-track-list">
                   <div class="row"><div><strong>Opening DT Tunes…</strong><small>Your private teacher library is loading.</small></div></div>
-                </div>
-                <div class="add-my-tracks-panel" id="add-my-tracks-panel" hidden>
-                  <strong>Add songs from the DT Song Catalog</strong>
-                  <label>Find a song<input type="search" id="add-my-tracks-search" placeholder="Search by title or artist"></label>
-                  <div class="add-my-tracks-list" id="add-my-tracks-list"></div>
-                  <div class="actions">
-                    <button class="primary" type="button" id="confirm-add-my-tracks">Add to Playlist</button>
-                    <button class="secondary" type="button" id="cancel-add-my-tracks">Cancel</button>
-                    <span class="status" id="add-my-tracks-status"></span>
-                  </div>
                 </div>
               </div>
             </section>
@@ -18778,6 +18668,44 @@
       <div class="confirm-actions"><button class="secondary" type="button" id="archived-students-close">Close</button></div>
     </div>
   </div>
+  <div class="confirm-overlay" id="refund-review-overlay" aria-hidden="true">
+    <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="refund-review-title">
+      <h3 id="refund-review-title">Review Refund</h3>
+      <p id="refund-review-copy">Record the family refund before continuing.</p>
+      <form class="refund-review-form" id="refund-review-form">
+        <label>Was a refund issued?
+          <select id="refund-review-issued" required><option value="no">No</option><option value="yes">Yes</option></select>
+        </label>
+        <section class="refund-review-section" id="refund-review-details" hidden>
+          <div class="refund-review-grid">
+            <label>Family refund amount
+              <input id="refund-review-amount" type="number" min="0.01" step="0.01" inputmode="decimal">
+            </label>
+            <label>Refund date
+              <input id="refund-review-date" type="date">
+            </label>
+          </div>
+          <label>Refund reason or note
+            <textarea id="refund-review-reason" placeholder="Why was the refund issued?"></textarea>
+          </label>
+          <label>Was the teacher already paid for this dancer?
+            <select id="refund-review-teacher-paid"><option value="no">No</option><option value="yes">Yes</option></select>
+          </label>
+          <section class="refund-review-section" id="refund-review-payroll" hidden>
+            <label>Teacher
+              <select id="refund-review-teacher"></select>
+            </label>
+            <label>Payroll deduction amount
+              <input id="refund-review-deduction" type="number" min="0.01" step="0.01" inputmode="decimal">
+            </label>
+            <p class="refund-review-note">Enter the teacher earnings to recover, which may be different from the family’s refund. This deduction will appear once in the next payroll review.</p>
+          </section>
+        </section>
+        <p class="refund-review-note" id="refund-review-action-note"></p>
+        <div class="confirm-actions"><button class="secondary" type="button" id="refund-review-cancel">Cancel</button><button class="danger-btn" type="submit" id="refund-review-continue">Continue</button></div>
+      </form>
+    </div>
+  </div>
   <div class="confirm-overlay" id="roster-print-overlay" aria-hidden="true">
     <div class="confirm-dialog roster-print-dialog" role="dialog" aria-modal="true" aria-labelledby="roster-print-title">
       <button class="roster-profile-close roster-print-close" type="button" id="roster-print-close" aria-label="Close Print Roster">×</button>
@@ -20816,7 +20744,9 @@
       const seen = new Set();
       return rosterClasses.flatMap((rosterClass) => rosterEnrolled(rosterClass).map((student) => ({ rosterClass, student }))).filter(({ student }) => {
         const name = rosterStudentFullName(student);
-        if (!name || name.toLowerCase() === enrollmentName || seen.has(name.toLowerCase())) return false;
+        const isCurrentStudent = (item?.placed_student_id && student.id === item.placed_student_id)
+          || (item?.placed_class_enrollment_id && student.enrollmentId === item.placed_class_enrollment_id);
+        if (!name || isCurrentStudent || name.toLowerCase() === enrollmentName || seen.has(name.toLowerCase())) return false;
         seen.add(name.toLowerCase());
         return true;
       }).sort((left, right) => rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
@@ -21887,7 +21817,8 @@
 
     const syncStudentToEnrollmentIntake = async (student, rosterClass) => {
       const payload = enrollmentFieldsFromStudent(student, rosterClass);
-      enrollmentIntakeQueue.filter((item) => item.placed_student_id === student.id || item.placed_class_enrollment_id === student.enrollmentId).forEach((item) => Object.assign(item, payload));
+      enrollmentIntakeQueue.filter((item) => (item.placed_student_id && item.placed_student_id === student.id)
+        || (item.placed_class_enrollment_id && student.enrollmentId && item.placed_class_enrollment_id === student.enrollmentId)).forEach((item) => Object.assign(item, payload));
       if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !student.id) return;
       const { error } = await window.dtSupabase.from("enrollments").update(payload).eq("placed_student_id", student.id);
       if (error) sharedRosterError("The enrollment record could not be synchronized.", error, { reload: false });
@@ -25202,6 +25133,7 @@
       yearEndPromotionReviews: {},
       workingHours: [],
       adjustments: [],
+      refundRecords: [],
       approvedAt: "",
       paidAt: ""
     };
@@ -37642,6 +37574,90 @@
       }
     };
 
+    let refundReviewResolver = null;
+    let refundReviewContext = null;
+    const closeRefundReview = (result = null) => {
+      const overlay = document.getElementById("refund-review-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+      const resolver = refundReviewResolver;
+      refundReviewResolver = null;
+      refundReviewContext = null;
+      resolver?.(result);
+    };
+    const updateRefundReviewFields = () => {
+      const issued = document.getElementById("refund-review-issued")?.value === "yes";
+      const teacherPaid = issued && document.getElementById("refund-review-teacher-paid")?.value === "yes";
+      document.getElementById("refund-review-details")?.toggleAttribute("hidden", !issued);
+      document.getElementById("refund-review-payroll")?.toggleAttribute("hidden", !teacherPaid);
+      ["refund-review-amount", "refund-review-date", "refund-review-reason"].forEach((id) => document.getElementById(id)?.toggleAttribute("required", issued));
+      ["refund-review-teacher", "refund-review-deduction"].forEach((id) => document.getElementById(id)?.toggleAttribute("required", teacherPaid));
+    };
+    const requestRefundReview = ({ dancerName, actionLabel, teacherId = "" }) => {
+      if (refundReviewResolver) closeRefundReview(null);
+      refundReviewContext = { dancerName, actionLabel, teacherId };
+      const teacherSelect = document.getElementById("refund-review-teacher");
+      teacherSelect.innerHTML = `<option value="">Choose teacher</option>${teachers.map((teacher) => `<option value="${rosterSafe(teacher.id)}" ${teacher.id === teacherId ? "selected" : ""}>${rosterSafe(fullName(teacher))}</option>`).join("")}`;
+      document.getElementById("refund-review-issued").value = "no";
+      document.getElementById("refund-review-amount").value = "";
+      document.getElementById("refund-review-date").value = payrollDateKey(new Date());
+      document.getElementById("refund-review-reason").value = "";
+      document.getElementById("refund-review-teacher-paid").value = "no";
+      document.getElementById("refund-review-deduction").value = "";
+      document.getElementById("refund-review-title").textContent = `${actionLabel} · Refund Review`;
+      document.getElementById("refund-review-copy").textContent = `Was a refund issued for ${dancerName}? Record it before continuing.`;
+      document.getElementById("refund-review-action-note").textContent = `Continuing will ${actionLabel.toLowerCase()} ${dancerName}. The refund answer will be kept for the financial audit history.`;
+      document.getElementById("refund-review-continue").textContent = actionLabel;
+      updateRefundReviewFields();
+      const overlay = document.getElementById("refund-review-overlay");
+      overlay.classList.add("active");
+      overlay.setAttribute("aria-hidden", "false");
+      window.setTimeout(() => document.getElementById("refund-review-issued")?.focus(), 40);
+      return new Promise((resolve) => { refundReviewResolver = resolve; });
+    };
+    const saveRefundReview = (review, context = {}) => {
+      payrollState.refundRecords ||= [];
+      const record = {
+        id: `refund-${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        actionType: context.actionType || "archive_student",
+        enrollmentId: context.enrollmentId || "",
+        studentId: context.studentId || "",
+        dancerName: context.dancerName || "Dancer",
+        refundIssued: Boolean(review.refundIssued),
+        refundAmount: Number(review.refundAmount || 0),
+        refundDate: review.refundDate || "",
+        refundReason: review.refundReason || "No refund issued",
+        teacherAlreadyPaid: Boolean(review.teacherAlreadyPaid),
+        teacherId: review.teacherId || context.teacherId || "",
+        payrollDeductionAmount: Number(review.payrollDeductionAmount || 0),
+        createdAt: new Date().toISOString(),
+        appliedPayrollMonth: "",
+        appliedPayrollSequence: ""
+      };
+      payrollState.refundRecords.unshift(record);
+      scheduleAppDataSave();
+      return record;
+    };
+
+    document.getElementById("refund-review-issued")?.addEventListener("change", updateRefundReviewFields);
+    document.getElementById("refund-review-teacher-paid")?.addEventListener("change", updateRefundReviewFields);
+    document.getElementById("refund-review-cancel")?.addEventListener("click", () => closeRefundReview(null));
+    document.getElementById("refund-review-overlay")?.addEventListener("click", (event) => { if (event.target.id === "refund-review-overlay") closeRefundReview(null); });
+    document.getElementById("refund-review-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const refundIssued = document.getElementById("refund-review-issued").value === "yes";
+      const teacherAlreadyPaid = refundIssued && document.getElementById("refund-review-teacher-paid").value === "yes";
+      closeRefundReview({
+        refundIssued,
+        refundAmount: refundIssued ? Number(document.getElementById("refund-review-amount").value) : 0,
+        refundDate: refundIssued ? document.getElementById("refund-review-date").value : "",
+        refundReason: refundIssued ? document.getElementById("refund-review-reason").value.trim() : "No refund issued",
+        teacherAlreadyPaid,
+        teacherId: teacherAlreadyPaid ? document.getElementById("refund-review-teacher").value : "",
+        payrollDeductionAmount: teacherAlreadyPaid ? Number(document.getElementById("refund-review-deduction").value) : 0
+      });
+    });
+
     const renderArchivedStudents = () => {
       const list = document.getElementById("archived-student-list");
       if (!list) return;
@@ -37667,13 +37683,16 @@
     const archiveEditingRosterStudent = async () => {
       const { rosterClass, student } = currentEditingRosterStudent();
       if (!rosterClass || !student) return;
-      if (!window.confirm(`Mark ${rosterStudentFullName(student)} inactive and remove them from the active roster? Their record will remain archived.`)) return;
+      const dancerName = rosterStudentFullName(student);
+      const refundReview = await requestRefundReview({ dancerName, actionLabel: "Archive Student", teacherId: rosterClass.teacherId });
+      if (!refundReview) return;
       const archivedAt = new Date().toISOString().slice(0, 10);
       if (student.enrollmentId && window.dtSupabase && document.body.dataset.tourMode !== "true") {
         const result = await window.dtSupabase.from("class_enrollments").update({ status: "withdrawn", ended_date: archivedAt }).eq("id", student.enrollmentId);
         if (result.error) return sharedRosterError("The student could not be archived.", result.error, { reload: false });
       }
       archivedRosterStudents.unshift({ id: student.id, enrollmentId: student.enrollmentId || "", classId: rosterClass.id, firstName: student.firstName, preferredName: student.preferredName || "", lastName: student.lastName, archivedAt });
+      saveRefundReview(refundReview, { actionType: "archive_student", enrollmentId: student.enrollmentId || "", studentId: student.id, dancerName, teacherId: rosterClass.teacherId });
       rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
       closeRosterStudentEditor();
       renderClassesAndRosters();
@@ -37685,7 +37704,9 @@
     const deleteEditingRosterStudent = async () => {
       const { rosterClass, student } = currentEditingRosterStudent();
       if (!rosterClass || !student) return;
-      if (!window.confirm(`Archive ${rosterStudentFullName(student)}? Their roster history and notes will remain recoverable.`)) return;
+      const dancerName = rosterStudentFullName(student);
+      const refundReview = await requestRefundReview({ dancerName, actionLabel: "Archive Student", teacherId: rosterClass.teacherId });
+      if (!refundReview) return;
       if (student.enrollmentId && window.dtSupabase && document.body.dataset.tourMode !== "true") {
         const archivedAt = new Date().toISOString().slice(0, 10);
         const [enrollmentResult, studentResult] = await Promise.all([
@@ -37696,6 +37717,7 @@
           return sharedRosterError("The student could not be archived.", enrollmentResult.error || studentResult.error, { reload: false });
         }
       }
+      saveRefundReview(refundReview, { actionType: "archive_student", enrollmentId: student.enrollmentId || "", studentId: student.id, dancerName, teacherId: rosterClass.teacherId });
       rosterClass.students.splice(rosterClass.students.indexOf(student), 1);
       closeRosterStudentEditor();
       renderClassesAndRosters();
@@ -42343,6 +42365,19 @@
         if (!entry.teacherId || !Number(entry.hours)) return;
         lines.push({ teacherId: entry.teacherId, hours: Number(entry.hours), type: "Working Hours", description: entry.description || "Admin/preparation time", amount: Number(entry.hours) * 20, held: false });
       });
+      (payrollState.refundRecords || []).forEach((entry) => {
+        const appliedToCurrentRun = entry.appliedPayrollMonth === payrollState.month && String(entry.appliedPayrollSequence) === String(payrollState.sequence);
+        if (!entry.teacherAlreadyPaid || !entry.teacherId || !Number(entry.payrollDeductionAmount) || (entry.appliedPayrollMonth && !appliedToCurrentRun)) return;
+        lines.push({
+          teacherId: entry.teacherId,
+          studentId: entry.studentId || "",
+          type: "Refund Deduction",
+          description: `${entry.dancerName || "Dancer"} · ${entry.refundReason || "Family refund"} · family refund ${payrollCurrency(entry.refundAmount)}`,
+          amount: -Math.abs(Number(entry.payrollDeductionAmount)),
+          held: false,
+          refundRecordId: entry.id
+        });
+      });
       (payrollState.adjustments || []).forEach((entry) => {
         if (!entry.teacherId || !Number(entry.amount)) return;
         lines.push({ teacherId: entry.teacherId, type: "Adjustment", description: entry.reason || "Manual adjustment", amount: Number(entry.amount), held: false });
@@ -42564,7 +42599,7 @@
       }
       if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${DTWorkClock.reviewMarkup()}<div class="payroll-explanation">Approved recorded hours are included automatically at $20 per hour. Use manual hours only for work not already recorded.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
       if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[teacher.payTier])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
-      if (step === 6) body = `<div class="payroll-explanation">Every manual adjustment requires a teacher, amount, and reason and will appear on the pay stub and audit history.</div><div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`;
+      if (step === 6) { const refundDeductions = (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth); body = `<div class="payroll-explanation">Refund deductions are added automatically when a family refund records that the teacher was already paid. Every manual adjustment also requires a teacher, amount, and reason.</div>${refundDeductions.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Deduction</span><span>Refund</span><span>Reason</span></div>${refundDeductions.map((entry) => `<div class="payroll-table-row"><strong>${escapeText(fullName(payrollTeachers().find((teacher) => teacher.id === entry.teacherId)))}</strong><strong>−${payrollCurrency(entry.payrollDeductionAmount)}</strong><span>${escapeText(entry.dancerName)} · ${payrollCurrency(entry.refundAmount)}</span><span>${escapeText(entry.refundReason || "Family refund")}</span></div>`).join("")}</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`; }
       if (step === 7) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
       if (step === 6) {
         const confirmedRows=Object.entries(payrollConfirmedTuition).filter(([key])=>key.startsWith(payrollState.month+":"));
@@ -42717,7 +42752,7 @@
       if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
-      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
+      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
       if (event.target.closest("#mark-payroll-paid")) {
         const button=event.target.closest("#mark-payroll-paid");button.disabled=true;
         try { await finalizePayrollPayStubs(); payrollState.status="paid";payrollState.paidAt=new Date().toISOString();renderPayrollWizard();scheduleAppDataSave();showToast("Payroll marked paid - statements posted to Teacher Tools"); }
@@ -46778,6 +46813,8 @@
         const name = relatedResult.dataset.enrollmentRelatedSelect;
         if (name && !selectedNames.some((selected) => selected.toLowerCase() === name.toLowerCase())) selectedNames.push(name);
         item.related_dancer_name = selectedNames.join(" • ");
+        const currentTuitionType = effectiveEnrollmentTuitionType(item, suggestEnrollmentClass(item));
+        if (["none", "sibling"].includes(currentTuitionType)) item.tuition_discount = "sibling";
         await syncReciprocalRelatedDancer([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" "), name, true);
         renderEnrollmentQueue();
         return;
@@ -46789,6 +46826,7 @@
         const removedSiblingName = relatedRemove.dataset.enrollmentRelatedRemove;
         const removedName = removedSiblingName.toLowerCase();
         item.related_dancer_name = enrollmentRelatedDancerNames(item).filter((name) => name.toLowerCase() !== removedName).join(" • ");
+        if (!enrollmentRelatedDancerNames(item).length && item.tuition_discount === "sibling") item.tuition_discount = "none";
         await syncReciprocalRelatedDancer([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" "), removedSiblingName, false);
         renderEnrollmentQueue();
         return;
@@ -46869,10 +46907,10 @@
           return;
         }
         const dancerName = [item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "this enrollment";
-        const paidWarning = String(item.payment_status || "").toLowerCase() === "paid"
-          ? "\n\nThe enrollment fee is marked paid. Voiding preserves that payment evidence and does not issue a refund."
-          : "";
-        if (!window.confirm(`Void the duplicate enrollment for ${dancerName}?\n\nThe submission will be removed from the active enrollment queue but kept for audit history.${paidWarning}`)) return;
+        const suggestedClass = suggestEnrollmentClass(item);
+        const suggestedRosterClass = rosterClasses.find((rosterClass) => rosterClass.id === (item.matched_dance_class_id || suggestedClass?.classId));
+        const refundReview = await requestRefundReview({ dancerName, actionLabel: "Void Enrollment", teacherId: suggestedRosterClass?.teacherId || "" });
+        if (!refundReview) return;
         const voidedAt = new Date().toISOString();
         const voidedBy = window.dtCurrentProfile?.full_name || window.dtCurrentProfile?.email || "Director/Admin";
         const auditNote = `VOIDED — Duplicate enrollment — ${new Date(voidedAt).toLocaleString()} — ${voidedBy}`;
@@ -46902,12 +46940,13 @@
         item.registration_notes = registrationNotes;
         item.reviewed_by = window.dtCurrentProfile?.id || null;
         item.reviewed_at = voidedAt;
+        saveRefundReview(refundReview, { actionType: "void_enrollment", enrollmentId: item.id, studentId: item.placed_student_id || "", dancerName, teacherId: suggestedRosterClass?.teacherId || "" });
         enrollmentBatchSelected.delete(item.id);
         selectedEnrollmentIntakeId = "";
         enrollmentReviewOpen = false;
         renderEnrollmentQueue();
         renderEnrollmentStudentSummary();
-        showToast("Duplicate enrollment voided. Payment evidence was preserved.");
+        showToast(refundReview.refundIssued ? "Enrollment voided and refund details recorded." : "Enrollment voided. No refund was recorded.");
         return;
       }
       const checklistButton = event.target.closest("[data-enrollment-checklist]");
@@ -49188,12 +49227,16 @@
       if (select) {
         const name = select.dataset.rosterRelatedSelect;
         if (name && !names.some((selected) => selected.toLowerCase() === name.toLowerCase())) names.push(name);
+        const tuitionSelect = document.getElementById("roster-edit-tuition-discount");
+        if (tuitionSelect && ["none", "sibling"].includes(tuitionSelect.value)) tuitionSelect.value = "sibling";
         await syncReciprocalRelatedDancer(sourceName, name, true);
       }
       if (remove) {
         const removedSiblingName = remove.dataset.rosterRelatedRemove;
         const removedName = removedSiblingName.toLowerCase();
         names.splice(0, names.length, ...names.filter((name) => name.toLowerCase() !== removedName));
+        const tuitionSelect = document.getElementById("roster-edit-tuition-discount");
+        if (!names.length && tuitionSelect?.value === "sibling") tuitionSelect.value = "none";
         await syncReciprocalRelatedDancer(sourceName, removedSiblingName, false);
       }
       hidden.value = names.join(" • ");
@@ -49576,9 +49619,7 @@
       typeFilter: "all",
       currentTrackId: "",
       repeatCurrentTrack: false,
-      previewPlaying: false,
-      catalogTracks: [],
-      catalogLoaded: false
+      previewPlaying: false
     };
 
     const workshopMusicFallback = [
@@ -49652,20 +49693,13 @@
       coverItems.forEach((item) => { item.cover_url = signedUrls.get(item.cover_storage_path) || ""; });
     };
 
-    const isMyOwnPlaylist = (playlist) => Boolean(playlist && playlist.owner === "teacher" && playlist.teacher_id === window.dtCurrentProfile?.id);
-
     const renderMusicTrackList = () => {
       const list = document.getElementById("music-track-list");
       const title = document.getElementById("music-track-list-title");
       const count = document.getElementById("music-track-count");
-      const ownerActions = document.getElementById("my-playlist-owner-actions");
-      const addPanel = document.getElementById("add-my-tracks-panel");
       if (!list || !title || !count) return;
       const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      const mine = isMyOwnPlaylist(selected);
-      if (ownerActions) ownerActions.hidden = !mine;
-      if (!mine && addPanel) addPanel.hidden = true;
-      if (!selected || (!musicPlaylistTracks(selected).length && !mine)) {
+      if (!selected || !musicPlaylistTracks(selected).length) {
         const grid = document.getElementById("music-playlist-grid");
         const trackPanel = document.getElementById("music-track-panel");
         const backButton = document.getElementById("music-back-to-playlists");
@@ -49680,7 +49714,7 @@
       title.textContent = selected?.name || "Songs";
       count.textContent = `${visibleTracks.length} Song${visibleTracks.length === 1 ? "" : "s"}`;
       if (!visibleTracks.length) {
-        list.innerHTML = `<div class="row"><div><strong>${query ? "No matching songs" : (mine ? "No songs yet" : "No songs available")}</strong><small>${query ? "Try another search." : (mine ? "Tap “+ Add Songs” to pull them from DT Tunes." : "Choose another playlist.")}</small></div></div>`;
+        list.innerHTML = `<div class="row"><div><strong>${query ? "No matching songs" : "No songs available"}</strong><small>${query ? "Try another search." : "Choose another playlist."}</small></div></div>`;
         return;
       }
       const audio = document.getElementById("dt-tunes-audio");
@@ -49694,17 +49728,10 @@
           : (trackIndex < currentTrackIndex ? "completed" : "current");
         const isCurrentTrack = progressionState === "current";
         const isCurrentTrackPlaying = isCurrentTrack && currentlyPlaying;
-        const ownerButtons = mine ? `
-          <div class="music-track-row-actions">
-            <button class="secondary" type="button" data-move-my-track="${escapeText(track.id)}" data-dir="up" ${trackIndex === 0 ? "disabled" : ""} aria-label="Move ${escapeText(track.title)} up">&uarr;</button>
-            <button class="secondary" type="button" data-move-my-track="${escapeText(track.id)}" data-dir="down" ${trackIndex === tracks.length - 1 ? "disabled" : ""} aria-label="Move ${escapeText(track.title)} down">&darr;</button>
-            <button class="danger-btn" type="button" data-remove-my-track="${escapeText(track.id)}">Remove</button>
-          </div>` : "";
         return `
         <div class="row music-track-row is-${progressionState}" data-music-track-state="${progressionState}">
           <div><strong>${escapeText(track.title)}</strong><small>${escapeText(musicArtistLabel(track.artist))} • ${musicDurationLabel(track.duration_seconds)}</small></div>
           <button class="icon-btn music-track-button ${isCurrentTrack ? "is-current" : ""} ${isCurrentTrackPlaying ? "is-playing" : ""}" type="button" data-music-track="${escapeText(track.id)}" aria-label="${isCurrentTrackPlaying ? "Pause" : "Play"} ${escapeText(track.title)}">${isCurrentTrackPlaying ? "❚❚" : "▶"}</button>
-          ${ownerButtons}
         </div>
       `;
       }).join("");
@@ -49717,9 +49744,7 @@
       const cover = coverUrl
         ? `<img class="playlist-cover" src="${escapeText(coverUrl)}" alt="" onerror="this.hidden = true">`
         : "";
-      const isMine = playlist.owner === "teacher" && playlist.teacher_id === window.dtCurrentProfile?.id;
-      const ownerTag = playlist.owner === "teacher" ? `<span class="playlist-owner-tag">${isMine ? "Yours" : "Teacher playlist"}</span>` : "";
-      return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""} ${isMine ? "owned-by-me" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}">${cover}<strong>${escapeText(playlist.name)}</strong><small>${songCount} song${songCount === 1 ? "" : "s"}</small>${ownerTag}</button>`;
+      return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}">${cover}<strong>${escapeText(playlist.name)}</strong><small>${songCount} song${songCount === 1 ? "" : "s"}</small></button>`;
     }).join("");
 
     const renderMusicPlaylists = () => {
@@ -49756,256 +49781,23 @@
       if (!client || !profile) return;
       setText("music-profile-label", `${profile.full_name} • shared teacher library`);
       if (grid) grid.innerHTML = `<p class="subtle">Opening your shared playlists…</p>`;
-      const [directorResult, myResult] = await Promise.all([
-        client
-          .from("music_playlists")
-          .select("id, name, category, sort_order, cover_path, cover_storage_path, music_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path, cover_path, cover_storage_path))")
-          .eq("active", true)
-          .order("sort_order"),
-        client
-          .from("music_teacher_playlists")
-          .select("id, teacher_id, name, sort_order, cover_path, cover_storage_path, music_teacher_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path, cover_path, cover_storage_path))")
-          .eq("teacher_id", profile.id)
-          .eq("active", true)
-          .order("name")
-      ]);
-      if (directorResult.error) {
-        console.error("DT Tunes could not load", directorResult.error);
+      const { data, error } = await client
+        .from("music_playlists")
+        .select("id, name, category, sort_order, cover_path, cover_storage_path, music_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path, cover_path, cover_storage_path))")
+        .eq("active", true)
+        .order("sort_order");
+      if (error) {
+        console.error("DT Tunes could not load", error);
         if (grid) grid.innerHTML = `<p class="subtle">DT Tunes couldn’t open. Refresh and try again.</p>`;
         setText("music-track-count", "Unavailable");
         return;
       }
-      if (myResult.error) console.error("Your DT Tunes playlists could not load", myResult.error);
-      const directorPlaylists = (directorResult.data || []).map((playlist) => ({ ...playlist, owner: "director" }));
-      const myPlaylists = (myResult.data || []).map((playlist) => ({
-        ...playlist,
-        owner: "teacher",
-        music_playlist_tracks: (playlist.music_teacher_playlist_tracks || []).map((link) => ({ position: link.position, music_tracks: link.music_tracks }))
-      }));
-      musicLibraryState.playlists = [...directorPlaylists, ...myPlaylists];
+      musicLibraryState.playlists = data || [];
       await hydrateMusicCoverUrls(musicLibraryState.playlists, client);
       musicLibraryState.selectedPlaylistId = "";
       renderMusicPlaylists();
       updateMyDayMusicPlayer();
-      loadMusicCatalog(client);
     };
-
-    const loadMusicCatalog = async (client = window.dtSupabase) => {
-      if (!client) return;
-      const { data, error } = await client
-        .from("music_tracks")
-        .select("id, title, artist, duration_seconds, storage_path, cover_path, cover_storage_path, catalog_section")
-        .eq("active", true)
-        .order("title");
-      if (error) { console.error("DT Song Catalog could not load", error); return; }
-      musicLibraryState.catalogTracks = data || [];
-      musicLibraryState.catalogLoaded = true;
-    };
-
-    const refreshMyPlaylist = async (playlistId) => {
-      await loadSharedMusicLibrary(window.dtCurrentProfile);
-      musicLibraryState.selectedPlaylistId = playlistId;
-      renderMusicPlaylists();
-    };
-
-    const createMyPlaylist = async (name) => {
-      const client = window.dtSupabase;
-      const profile = window.dtCurrentProfile;
-      if (!client || !profile) return { error: new Error("Not signed in.") };
-      const id = crypto.randomUUID();
-      const sortOrder = Math.max(-1, ...musicLibraryState.playlists.filter((p) => p.owner === "teacher").map((p) => Number(p.sort_order) || 0)) + 1;
-      const { error } = await client.from("music_teacher_playlists").insert({ id, teacher_id: profile.id, name, sort_order: sortOrder, active: true });
-      if (!error) await refreshMyPlaylist(id);
-      return { error, id };
-    };
-
-    const renameMyPlaylist = async (playlistId, name) => {
-      const client = window.dtSupabase;
-      if (!client) return { error: new Error("Not signed in.") };
-      const { error } = await client.from("music_teacher_playlists").update({ name }).eq("id", playlistId);
-      if (!error) await refreshMyPlaylist(playlistId);
-      return { error };
-    };
-
-    const deleteMyPlaylist = async (playlistId) => {
-      const client = window.dtSupabase;
-      if (!client) return { error: new Error("Not signed in.") };
-      const { error } = await client.from("music_teacher_playlists").delete().eq("id", playlistId);
-      if (!error) {
-        musicLibraryState.selectedPlaylistId = "";
-        await loadSharedMusicLibrary(window.dtCurrentProfile);
-      }
-      return { error };
-    };
-
-    const addTracksToMyPlaylist = async (playlistId, trackIds) => {
-      const client = window.dtSupabase;
-      if (!client || !trackIds.length) return { error: null };
-      const playlist = musicLibraryState.playlists.find((p) => p.id === playlistId);
-      let next = Math.max(-1, ...musicPlaylistTracks(playlist).map((track, index) => index)) + 1;
-      const rows = trackIds.map((trackId) => ({ playlist_id: playlistId, track_id: trackId, position: next++ }));
-      const { error } = await client.from("music_teacher_playlist_tracks").insert(rows);
-      if (!error) await refreshMyPlaylist(playlistId);
-      return { error };
-    };
-
-    const removeTrackFromMyPlaylist = async (playlistId, trackId) => {
-      const client = window.dtSupabase;
-      if (!client) return { error: new Error("Not signed in.") };
-      const { error } = await client.from("music_teacher_playlist_tracks").delete().eq("playlist_id", playlistId).eq("track_id", trackId);
-      if (!error) {
-        const remaining = musicPlaylistTracks(musicLibraryState.playlists.find((p) => p.id === playlistId)).map((t) => t.id).filter((id) => id !== trackId);
-        for (let i = 0; i < remaining.length; i += 1) {
-          await client.from("music_teacher_playlist_tracks").update({ position: i }).eq("playlist_id", playlistId).eq("track_id", remaining[i]);
-        }
-        await refreshMyPlaylist(playlistId);
-      }
-      return { error };
-    };
-
-    const swapMyTrackPositions = async (playlistId, trackA, trackB) => {
-      const client = window.dtSupabase;
-      const playlist = musicLibraryState.playlists.find((p) => p.id === playlistId);
-      const links = playlist?.music_playlist_tracks || [];
-      const rowA = links.find((link) => link.music_tracks?.id === trackA);
-      const rowB = links.find((link) => link.music_tracks?.id === trackB);
-      if (!rowA || !rowB) return new Error("Those songs are no longer in this playlist.");
-      const parking = Math.max(0, ...links.map((link) => Number(link.position) || 0)) + 1;
-      const steps = [
-        { track: trackA, position: parking },
-        { track: trackB, position: rowA.position },
-        { track: trackA, position: rowB.position }
-      ];
-      for (const step of steps) {
-        const { error } = await client.from("music_teacher_playlist_tracks")
-          .update({ position: step.position })
-          .eq("playlist_id", playlistId)
-          .eq("track_id", step.track);
-        if (error) return error;
-      }
-      return null;
-    };
-
-    const renderAddMyTracks = () => {
-      const listEl = document.getElementById("add-my-tracks-list");
-      if (!listEl) return;
-      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      if (!selected) return;
-      const already = new Set(musicPlaylistTracks(selected).map((track) => track.id));
-      const search = (document.getElementById("add-my-tracks-search")?.value || "").trim().toLowerCase();
-      const available = musicLibraryState.catalogTracks
-        .filter((track) => !already.has(track.id))
-        .filter((track) => !search || `${track.title} ${track.artist || ""}`.toLowerCase().includes(search));
-      listEl.innerHTML = available.length
-        ? available.map((track) => `<label><input type="checkbox" value="${escapeText(track.id)}"><span>${escapeText(track.title)} — <small>${escapeText(musicArtistLabel(track.artist))}</small></span></label>`).join("")
-        : `<p class="subtle">${search ? "No catalog songs match that search." : (musicLibraryState.catalogLoaded ? "Every catalog song is already in this playlist." : "Loading the DT Song Catalog…")}</p>`;
-    };
-
-    document.getElementById("open-create-my-playlist")?.addEventListener("click", () => {
-      const form = document.getElementById("create-my-playlist-form");
-      if (form) { form.hidden = false; document.getElementById("new-my-playlist-name")?.focus(); }
-    });
-    document.getElementById("cancel-create-my-playlist")?.addEventListener("click", () => {
-      const form = document.getElementById("create-my-playlist-form");
-      if (form) { form.hidden = true; form.reset(); setText("my-playlist-form-status", ""); }
-    });
-    document.getElementById("create-my-playlist-form")?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const nameInput = document.getElementById("new-my-playlist-name");
-      const name = (nameInput?.value || "").trim();
-      if (!name) return;
-      const submitButton = event.currentTarget.querySelector('[type="submit"]');
-      if (submitButton) submitButton.disabled = true;
-      setText("my-playlist-form-status", "Creating your playlist…");
-      const { error } = await createMyPlaylist(name);
-      if (submitButton) submitButton.disabled = false;
-      if (error) {
-        setText("my-playlist-form-status", error.code === "23505" ? "You already have a playlist with that name." : "That playlist could not be created. Please try again.");
-        return;
-      }
-      event.currentTarget.reset();
-      event.currentTarget.hidden = true;
-      setText("my-playlist-form-status", "");
-    });
-
-    document.getElementById("rename-my-playlist")?.addEventListener("click", async () => {
-      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      if (!isMyOwnPlaylist(selected)) return;
-      const name = prompt("Rename this playlist:", selected.name);
-      if (!name || !name.trim() || name.trim() === selected.name) return;
-      const { error } = await renameMyPlaylist(selected.id, name.trim());
-      if (error) showToast?.("That name could not be saved. Please try again.");
-    });
-
-    document.getElementById("delete-my-playlist")?.addEventListener("click", async () => {
-      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      if (!isMyOwnPlaylist(selected)) return;
-      if (!confirm(`Delete “${selected.name}”? This only removes your playlist — the songs stay in DT Tunes.`)) return;
-      const { error } = await deleteMyPlaylist(selected.id);
-      if (error) showToast?.("That playlist could not be deleted. Please try again.");
-    });
-
-    document.getElementById("open-add-my-tracks")?.addEventListener("click", () => {
-      const panel = document.getElementById("add-my-tracks-panel");
-      if (!panel) return;
-      panel.hidden = !panel.hidden;
-      const openButton = document.getElementById("open-add-my-tracks");
-      if (openButton) openButton.textContent = panel.hidden ? "+ Add Songs" : "Close";
-      if (!panel.hidden) {
-        const searchInput = document.getElementById("add-my-tracks-search");
-        if (searchInput) searchInput.value = "";
-        setText("add-my-tracks-status", "");
-        if (!musicLibraryState.catalogLoaded) loadMusicCatalog().then(renderAddMyTracks);
-        renderAddMyTracks();
-      }
-    });
-    document.getElementById("cancel-add-my-tracks")?.addEventListener("click", () => {
-      const panel = document.getElementById("add-my-tracks-panel");
-      if (panel) panel.hidden = true;
-      const openButton = document.getElementById("open-add-my-tracks");
-      if (openButton) openButton.textContent = "+ Add Songs";
-    });
-    document.getElementById("add-my-tracks-search")?.addEventListener("input", renderAddMyTracks);
-    document.getElementById("confirm-add-my-tracks")?.addEventListener("click", async () => {
-      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      if (!isMyOwnPlaylist(selected)) return;
-      const chosen = Array.from(document.querySelectorAll("#add-my-tracks-list input:checked")).map((input) => input.value);
-      if (!chosen.length) { setText("add-my-tracks-status", "Tick at least one song first."); return; }
-      const confirmButton = document.getElementById("confirm-add-my-tracks");
-      if (confirmButton) confirmButton.disabled = true;
-      setText("add-my-tracks-status", `Adding ${chosen.length} song${chosen.length === 1 ? "" : "s"}…`);
-      const { error } = await addTracksToMyPlaylist(selected.id, chosen);
-      if (confirmButton) confirmButton.disabled = false;
-      if (error) { setText("add-my-tracks-status", "Those songs could not be added. Please try again."); return; }
-      setText("add-my-tracks-status", `Added ${chosen.length} song${chosen.length === 1 ? "" : "s"}.`);
-      renderAddMyTracks();
-    });
-
-    document.addEventListener("click", async (event) => {
-      const moveButton = event.target.closest("[data-move-my-track]");
-      if (moveButton) {
-        const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-        if (!isMyOwnPlaylist(selected)) return;
-        const tracks = musicPlaylistTracks(selected);
-        const index = tracks.findIndex((track) => track.id === moveButton.dataset.moveMyTrack);
-        const targetIndex = moveButton.dataset.dir === "up" ? index - 1 : index + 1;
-        if (index < 0 || targetIndex < 0 || targetIndex >= tracks.length) return;
-        moveButton.disabled = true;
-        const error = await swapMyTrackPositions(selected.id, tracks[index].id, tracks[targetIndex].id);
-        if (error) { showToast?.("That song could not be moved. Please try again."); moveButton.disabled = false; return; }
-        await refreshMyPlaylist(selected.id);
-        return;
-      }
-      const removeButton = event.target.closest("[data-remove-my-track]");
-      if (removeButton) {
-        const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-        if (!isMyOwnPlaylist(selected)) return;
-        const track = musicPlaylistTracks(selected).find((item) => item.id === removeButton.dataset.removeMyTrack);
-        if (!confirm(`Remove “${track?.title || "this song"}” from ${selected.name}? It stays in DT Tunes.`)) return;
-        const { error } = await removeTrackFromMyPlaylist(selected.id, removeButton.dataset.removeMyTrack);
-        if (error) showToast?.("That song could not be removed. Please try again.");
-      }
-    });
 
     if (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1") {
       window.setTimeout(() => loadSharedMusicLibrary(window.dtCurrentProfile), 0);
@@ -50240,17 +50032,13 @@
       const playlistButton = event.target.closest("[data-music-playlist]");
       if (playlistButton) {
         const playlist = musicLibraryState.playlists.find((item) => item.id === playlistButton.dataset.musicPlaylist);
-        if (!playlist || (!musicPlaylistTracks(playlist).length && !isMyOwnPlaylist(playlist))) {
+        if (!playlist || !musicPlaylistTracks(playlist).length) {
           musicLibraryState.selectedPlaylistId = "";
           renderMusicPlaylists();
           showToast("That playlist does not have songs yet.");
           return;
         }
         musicLibraryState.selectedPlaylistId = playlist.id;
-        const addTracksPanel = document.getElementById("add-my-tracks-panel");
-        if (addTracksPanel) addTracksPanel.hidden = true;
-        const openAddTracksButton = document.getElementById("open-add-my-tracks");
-        if (openAddTracksButton) openAddTracksButton.textContent = "+ Add Songs";
         renderMusicPlaylists();
         updateMyDayMusicPlayer();
         document.getElementById("music-playlist-grid")?.setAttribute("hidden", "");
