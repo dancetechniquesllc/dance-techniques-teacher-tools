@@ -20799,6 +20799,19 @@
       renderStudentLibrary();
       await syncStudentToEnrollmentIntake(target.student, target.rosterClass);
     };
+    const persistEnrollmentRelatedDancers = async (item) => {
+      scheduleAppDataSave();
+      await syncEnrollmentIntakeToStudent(item);
+      if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !item?.id) return true;
+      const { error } = await window.dtSupabase.from("enrollments").update({
+        related_dancer_name: item.related_dancer_name || null,
+        tuition_discount: item.tuition_discount || "none"
+      }).eq("id", item.id);
+      if (!error) return true;
+      console.error("The sibling relationship could not be saved.", error);
+      showToast("The sibling could not be saved. Please try again.");
+      return false;
+    };
 
     const renderEnrollmentQueue = () => {
       syncTeacherProfileColorRules();
@@ -46809,12 +46822,20 @@
       if (relatedResult) {
         const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
         if (!item) return;
+        const previousRelatedDancerName = item.related_dancer_name || "";
+        const previousTuitionDiscount = item.tuition_discount || "none";
         const selectedNames = enrollmentRelatedDancerNames(item);
         const name = relatedResult.dataset.enrollmentRelatedSelect;
         if (name && !selectedNames.some((selected) => selected.toLowerCase() === name.toLowerCase())) selectedNames.push(name);
         item.related_dancer_name = selectedNames.join(" • ");
         const currentTuitionType = effectiveEnrollmentTuitionType(item, suggestEnrollmentClass(item));
         if (["none", "sibling"].includes(currentTuitionType)) item.tuition_discount = "sibling";
+        if (!await persistEnrollmentRelatedDancers(item)) {
+          item.related_dancer_name = previousRelatedDancerName;
+          item.tuition_discount = previousTuitionDiscount;
+          renderEnrollmentQueue();
+          return;
+        }
         await syncReciprocalRelatedDancer([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" "), name, true);
         renderEnrollmentQueue();
         return;
@@ -46823,10 +46844,18 @@
       if (relatedRemove) {
         const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
         if (!item) return;
+        const previousRelatedDancerName = item.related_dancer_name || "";
+        const previousTuitionDiscount = item.tuition_discount || "none";
         const removedSiblingName = relatedRemove.dataset.enrollmentRelatedRemove;
         const removedName = removedSiblingName.toLowerCase();
         item.related_dancer_name = enrollmentRelatedDancerNames(item).filter((name) => name.toLowerCase() !== removedName).join(" • ");
         if (!enrollmentRelatedDancerNames(item).length && item.tuition_discount === "sibling") item.tuition_discount = "none";
+        if (!await persistEnrollmentRelatedDancers(item)) {
+          item.related_dancer_name = previousRelatedDancerName;
+          item.tuition_discount = previousTuitionDiscount;
+          renderEnrollmentQueue();
+          return;
+        }
         await syncReciprocalRelatedDancer([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" "), removedSiblingName, false);
         renderEnrollmentQueue();
         return;

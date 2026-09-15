@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v236-refunds-sibling-links";
+const CACHE_NAME = "my-dance-techniques-v237-persistent-sibling-links";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
