@@ -2012,6 +2012,7 @@
     .teacher-orders-pickup-actions button { min-width: min(260px, 100%); }
     .teacher-orders-fill-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 18px; margin-bottom: 10px; }
     .teacher-orders-fill-actions button { width: 100%; min-width: 0; padding-inline: 6px; border-color: color-mix(in oklch, var(--berry) 25%, var(--border)); border-radius: 10px; background: var(--blush); color: var(--berry); font-size: 11px; }
+    .teacher-orders-fill-actions #teacher-boutique-print-labels { grid-column: 1; }
     .teacher-orders-fill-actions #teacher-orders-size-quantities,
     .teacher-orders-fill-actions #teacher-boutique-pull-items { grid-column: 2; }
     .teacher-orders-fill-actions #teacher-orders-self-fill-button,
@@ -15291,7 +15292,7 @@
                 <details class="panel teacher-order-fulfillment-group">
                   <summary><svg class="teacher-order-fulfillment-icon" aria-hidden="true"><use href="#icon-boutique-backend"></use></svg><strong>Boutique Orders</strong></summary>
                   <div class="teacher-order-fulfillment-body">
-                    <details class="panel" id="teacher-boutique-fill-panel"><summary><strong>Fill Orders</strong></summary><p class="subtle">Pull your boutique orders, then confirm everything you collected.</p><div class="teacher-orders-fill-actions"><button type="button" id="teacher-boutique-pull-items">Pull Sizes</button><button type="button" id="teacher-boutique-fill-button">Fill Orders</button></div><div class="teacher-orders-card-grid" id="teacher-boutique-fill-list"></div></details>
+                    <details class="panel" id="teacher-boutique-fill-panel"><summary><strong>Fill Orders</strong></summary><p class="subtle">Pull your boutique orders, select what you collected, and print labels when needed.</p><div class="teacher-orders-fill-actions"><button type="button" id="teacher-boutique-print-labels" disabled>Print Labels</button><button type="button" id="teacher-boutique-pull-items">Pull Sizes</button><button type="button" id="teacher-boutique-fill-button">Fill Orders</button></div><div class="teacher-orders-card-grid" id="teacher-boutique-fill-list"></div></details>
                     <details class="panel"><summary><strong>Pickup Orders</strong></summary><p class="subtle">Collect every completed order assigned to you.</p><div class="teacher-orders-card-grid" id="teacher-boutique-pickup-list"></div></details>
                     <details class="panel"><summary><strong>Deliver Orders</strong></summary><p class="subtle">Deliver these orders to their dancers on dance day.</p><div class="teacher-orders-card-grid" id="teacher-boutique-deliver-list"></div></details>
                   </div>
@@ -19293,7 +19294,7 @@
         classroom: "Movement Room",
         capacity: 12,
         students: [
-          { id: "ava-m", firstName: "Ava", lastName: "Martinez", classroom: "Toddlers A", birthdate: "2024-01-18", status: "enrolled", parentName: "Jordan Sample", parentEmail: "jordan.sample@example.com" },
+          { id: "ava-m", firstName: "Ava", lastName: "Martinez", classroom: "Toddlers A", officialClassroom: "Toddlers A", birthdate: "2024-01-18", status: "enrolled", parentName: "Jordan Sample", parentEmail: "jordan.sample@example.com" },
           { id: "miles-carter-sample", firstName: "Miles", lastName: "Carter", classroom: "Toddlers A", birthdate: "2023-12-11", status: "enrolled", gender: "male", photo: "" },
           { id: "charlotte-r", firstName: "Charlotte", lastName: "Reynolds", classroom: "Toddlers B", birthdate: "2023-11-02", status: "enrolled" },
           { id: "ella-s", firstName: "Ella", lastName: "Sullivan", classroom: "Toddlers A", birthdate: "2024-03-09", status: "enrolled" },
@@ -33740,6 +33741,82 @@
     const boutiqueOrderNextStatus = (status) => ({ to_fill: "to_pick_up", to_pick_up: "to_deliver", to_deliver: "delivered" })[status] || "";
     const boutiqueStatusCorrectionMarkup = (order) => order.status === "delivered" ? `<div class="order-status-correction"><select data-boutique-status-correction="${rosterSafe(order.id)}" aria-label="Correct delivery status"><option value="delivered">Delivered</option><option value="to_deliver">To Deliver</option><option value="to_pick_up">To Pick Up</option><option value="to_fill">To Fill</option></select><button type="button" data-boutique-status-correction-save="${rosterSafe(order.id)}">Save</button></div>` : "";
     const boutiqueOrderSizes = (order) => [...new Set((order.boutique_order_items || []).map(boutiqueOrderItemSize).filter(Boolean))];
+    const boutiqueLabelDay = (day) => ({ Monday: "M", Tuesday: "TU", Wednesday: "W", Thursday: "TH", Friday: "F", Saturday: "SA", Sunday: "SU" })[day] || String(day || "").slice(0, 2).toUpperCase();
+    const boutiqueLabelPeriod = (time) => {
+      const value = String(time || "").trim();
+      const meridiem = value.match(/\b(am|pm)\b/i)?.[1];
+      if (meridiem) return meridiem.toUpperCase();
+      const hour = Number(value.match(/^\s*(\d{1,2})/)?.[1]);
+      return Number.isFinite(hour) ? (hour < 12 ? "AM" : "PM") : "";
+    };
+    const boutiqueLabelItems = (order) => {
+      const selections = ensureBoutiqueItemSelections(order);
+      return (order.boutique_order_items || []).filter((item) => (
+        selections.has(String(item.id)) && !boutiqueOrderItemAwaitingStock(item)
+      )).map((item) => ({
+        name: String(item.name || "Boutique item").trim(),
+        size: boutiqueOrderItemSize(item),
+        quantity: Math.max(1, Number(item.quantity) || 1)
+      }));
+    };
+    const boutiqueLabelMarkup = (order) => {
+      const record = boutiqueOrderStudentRecord(order.assigned_student_id);
+      if (!record) return "";
+      const classroom = String(record.student.officialClassroom || record.student.official_classroom || "Official Classroom Not Entered").trim();
+      const school = rosterSchoolNickname(record.rosterClass.schoolName) || record.rosterClass.schoolName || "School Not Entered";
+      const teacher = rosterTeacherName(record.rosterClass.teacherId) || "Dance Teacher";
+      const schedule = [boutiqueLabelDay(record.rosterClass.day), boutiqueLabelPeriod(record.rosterClass.time)].filter(Boolean).join(" · ");
+      const items = boutiqueLabelItems(order);
+      if (!items.length) return "";
+      return `<section class="boutique-print-label">
+        <header class="boutique-print-top"><img src="${rosterSafe(new URL("assets/boutique-label-logo.png", location.href).href)}" alt="Dance Techniques logo"><div><strong>${rosterSafe(teacher)}</strong><span>${rosterSafe(schedule)}</span></div></header>
+        <h1>${rosterSafe(rosterStudentFullName(record.student))}</h1>
+        <div class="boutique-print-location"><span>${rosterSafe(classroom)} at</span><strong>${rosterSafe(school)}</strong></div>
+        <div class="boutique-print-goodies"><b aria-hidden="true">✦</b><span>You've Got Goodies!</span><b aria-hidden="true">✦</b></div>
+        <div class="boutique-print-items">${items.map((item) => `<div class="boutique-print-item"><span class="boutique-print-quantity ${item.quantity > 1 ? "is-multiple" : ""}">${item.quantity}</span><strong>${rosterSafe(item.name)}</strong><span>${item.size ? `Size ${rosterSafe(item.size)}` : ""}</span></div>`).join("")}</div>
+      </section>`;
+    };
+    const boutiqueLabelDocument = (orders) => `<!doctype html><html><head><meta charset="utf-8"><title>Boutique Labels</title><style>
+      @page { size: 4in 6in; margin: 0; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; color: #000; background: #fff; font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; }
+      .boutique-print-label { width: 4in; height: 6in; padding: .24in; display: grid; grid-template-rows: auto auto auto auto 1fr; gap: .14in; break-after: page; page-break-after: always; overflow: hidden; }
+      .boutique-print-label:last-child { break-after: auto; page-break-after: auto; }
+      .boutique-print-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .16in; padding-bottom: .12in; border-bottom: 2px solid #000; }
+      .boutique-print-top img { display: block; width: 1.08in; height: .64in; object-fit: contain; object-position: left center; filter: grayscale(1) contrast(1.3); }
+      .boutique-print-top div { display: grid; gap: .03in; text-align: right; }
+      .boutique-print-top strong { font-size: 14pt; line-height: 1.1; }
+      .boutique-print-top span { font-size: 11pt; font-weight: 700; letter-spacing: .08em; }
+      h1 { margin: .02in 0 0; font-size: 31pt; line-height: .98; letter-spacing: -.035em; overflow-wrap: anywhere; }
+      .boutique-print-location { display: grid; gap: .02in; }
+      .boutique-print-location span { font-size: 14pt; font-weight: 700; }
+      .boutique-print-location strong { font-size: 18pt; line-height: 1.05; }
+      .boutique-print-goodies { display: flex; align-items: center; justify-content: center; gap: .09in; padding-top: .09in; border-top: 2px solid #000; font-size: 14pt; font-weight: 800; text-align: center; }
+      .boutique-print-goodies b { font-size: 16pt; line-height: 1; }
+      .boutique-print-items { display: grid; align-content: start; }
+      .boutique-print-item { min-height: .47in; display: grid; grid-template-columns: .38in minmax(0, 1fr) auto; align-items: center; gap: .08in; border-bottom: 1px solid #000; font-size: 12pt; }
+      .boutique-print-item > strong { font-size: 13pt; line-height: 1.1; }
+      .boutique-print-item > span:last-child { white-space: nowrap; }
+      .boutique-print-quantity { width: .31in; height: .31in; display: grid; place-items: center; font-weight: 800; line-height: 1; }
+      .boutique-print-quantity.is-multiple { border: 2px solid #000; border-radius: 50%; }
+      @media screen { body { display: grid; justify-content: center; gap: .2in; padding: .2in; background: #eee; } .boutique-print-label { background: #fff; box-shadow: 0 3px 16px rgba(0,0,0,.18); } }
+      @media print { html, body { width: 4in; } }
+    </style></head><body>${orders.map(boutiqueLabelMarkup).filter(Boolean).join("")}<script>
+      const printWhenReady = () => { window.focus(); window.print(); };
+      const images = Array.from(document.images);
+      Promise.all(images.map((image) => image.complete ? Promise.resolve() : new Promise((resolve) => { image.addEventListener("load", resolve, { once: true }); image.addEventListener("error", resolve, { once: true }); }))).then(() => setTimeout(printWhenReady, 80));
+      window.addEventListener("afterprint", () => window.close());
+    <\/script></body></html>`;
+    const printSelectedBoutiqueLabels = () => {
+      const orders = boutiqueOrders.filter((order) => pendingTeacherBoutiqueFills.has(order.id) && order.status === "to_fill" && boutiqueLabelItems(order).length);
+      if (!orders.length) return showToast("Select at least one boutique order to print.");
+      const printWindow = window.open("", "dt-boutique-labels");
+      if (!printWindow) return showToast("Allow pop-ups so the printer window can open.");
+      printWindow.opener = null;
+      printWindow.document.open();
+      printWindow.document.write(boutiqueLabelDocument(orders));
+      printWindow.document.close();
+    };
 
     const filteredDirectorBoutiqueOrders = () => {
       const search = document.getElementById("boutique-order-search")?.value.trim().toLowerCase() || "";
@@ -34614,6 +34691,11 @@
         boutiqueFillButton.disabled = !boutiqueFill.length;
         boutiqueFillButton.textContent = teacherBoutiqueFillActive ? `Confirm Filled Orders${pendingTeacherBoutiqueFills.size ? ` (${pendingTeacherBoutiqueFills.size})` : ""}` : "Fill Orders";
       }
+      const boutiquePrintButton = document.getElementById("teacher-boutique-print-labels");
+      if (boutiquePrintButton) {
+        boutiquePrintButton.disabled = !teacherBoutiqueFillActive || !pendingTeacherBoutiqueFills.size;
+        boutiquePrintButton.textContent = pendingTeacherBoutiqueFills.size ? `Print Labels (${pendingTeacherBoutiqueFills.size})` : "Print Labels";
+      }
       const deliverButton = document.getElementById("teacher-orders-deliver-button");
       if (deliverButton) deliverButton.disabled = !possession.length;
     }
@@ -34991,6 +35073,7 @@
         ? `${savedCount} saved · ${failedRecords.length} still need confirmation`
         : `${savedCount} order${savedCount === 1 ? "" : "s"} filled and ready for pickup`);
     });
+    document.getElementById("teacher-boutique-print-labels")?.addEventListener("click", printSelectedBoutiqueLabels);
     document.getElementById("teacher-boutique-fill-button")?.addEventListener("click", async () => {
       const panel = document.getElementById("teacher-boutique-fill-panel");
       if (!teacherBoutiqueFillActive) {

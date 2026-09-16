@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v237-persistent-sibling-links";
+const CACHE_NAME = "my-dance-techniques-v238-boutique-labels";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
@@ -34,6 +34,7 @@ const CORE_ASSETS = [
   "./assets/app-icon-schedule.png",
   "./assets/app-icon-messages.png",
   "./assets/dance-techniques-logo-only.png",
+  "./assets/boutique-label-logo.png",
   "./assets/app-icon-payday.png",
   "./assets/app-icon-partner-schools.png",
   "./assets/dance-techniques-blush-logo.png",
