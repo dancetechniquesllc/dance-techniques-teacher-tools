@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v238-boutique-labels";
+const CACHE_NAME = "my-dance-techniques-v240-preorder-label-button";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
