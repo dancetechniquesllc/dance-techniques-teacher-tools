@@ -5131,97 +5131,6 @@
       border-color: #b3c2aa;
     }
 
-    .my-playlists-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin: 14px 0 10px;
-    }
-
-    .my-playlists-toolbar p { margin: 0; }
-
-    .my-playlist-form {
-      margin-bottom: 14px;
-      display: grid;
-      gap: 10px;
-    }
-
-    .my-playlist-form .actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    #my-playlist-owner-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    #my-playlist-owner-actions button {
-      min-height: 34px;
-      padding: 0 12px;
-      font-size: 12.5px;
-    }
-
-    .music-track-row-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .music-track-row-actions button {
-      min-height: 30px;
-      padding: 0 8px;
-      font-size: 13px;
-    }
-
-    .add-my-tracks-panel {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--border);
-      display: grid;
-      gap: 10px;
-    }
-
-    .add-my-tracks-list {
-      max-height: 260px;
-      overflow-y: auto;
-      display: grid;
-      gap: 6px;
-    }
-
-    .add-my-tracks-list label {
-      flex-direction: row;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 620;
-      color: var(--fg);
-    }
-
-    .add-my-tracks-list input[type="checkbox"] {
-      width: 18px;
-      min-height: 18px;
-    }
-
-    .playlist.owned-by-me {
-      box-shadow: inset 0 0 0 2px var(--fg);
-    }
-
-    .playlist-owner-tag {
-      display: inline-block;
-      margin-top: 2px;
-      font-size: 10.5px;
-      font-weight: 720;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--muted);
-    }
-
     .music-now-playing {
       display: grid;
       grid-template-columns: minmax(88px, 132px) 1fr;
@@ -15749,19 +15658,6 @@
                 <label class="music-type-filter"><span>Sort by</span><select id="music-type-filter" aria-label="Sort playlists by dance type"><option value="all">All</option><option value="ballet">Ballet</option><option value="tap">Tap</option><option value="tot">Tot</option></select></label>
               </div>
 
-              <div class="my-playlists-toolbar">
-                <p class="subtle">Build your own playlists from DT Tunes songs.</p>
-                <button class="secondary" type="button" id="open-create-my-playlist">+ New Playlist</button>
-              </div>
-              <form class="panel my-playlist-form" id="create-my-playlist-form" hidden>
-                <label>Playlist name<input id="new-my-playlist-name" required maxlength="80" placeholder="Example: Miss Lexi's Ballet Mix"></label>
-                <div class="actions">
-                  <button class="primary" type="submit">Create Playlist</button>
-                  <button class="secondary" type="button" id="cancel-create-my-playlist">Cancel</button>
-                  <span class="status" id="my-playlist-form-status"></span>
-                </div>
-              </form>
-
               <div class="playlist-grid" id="music-playlist-grid" aria-live="polite"></div>
 
               <div class="panel" id="music-track-panel" style="margin-top:12px;" hidden>
@@ -15770,24 +15666,9 @@
                     <h3 id="music-track-list-title">Songs</h3>
                     <span class="status ok" id="music-track-count">Loading</span>
                   </div>
-                  <div id="my-playlist-owner-actions" hidden>
-                    <button class="secondary" type="button" id="open-add-my-tracks">+ Add Songs</button>
-                    <button class="secondary" type="button" id="rename-my-playlist">Rename</button>
-                    <button class="danger-btn" type="button" id="delete-my-playlist">Delete Playlist</button>
-                  </div>
                 </div>
                 <div class="list" id="music-track-list">
                   <div class="row"><div><strong>Opening DT Tunes…</strong><small>Your private teacher library is loading.</small></div></div>
-                </div>
-                <div class="add-my-tracks-panel" id="add-my-tracks-panel" hidden>
-                  <strong>Add songs from the DT Song Catalog</strong>
-                  <label>Find a song<input type="search" id="add-my-tracks-search" placeholder="Search by title or artist"></label>
-                  <div class="add-my-tracks-list" id="add-my-tracks-list"></div>
-                  <div class="actions">
-                    <button class="primary" type="button" id="confirm-add-my-tracks">Add to Playlist</button>
-                    <button class="secondary" type="button" id="cancel-add-my-tracks">Cancel</button>
-                    <span class="status" id="add-my-tracks-status"></span>
-                  </div>
                 </div>
               </div>
             </section>
@@ -16220,7 +16101,7 @@
                   <div><h4>Assign a Credit</h4></div>
                 </button>
               </div>
-              <p class="subtle"><strong>Billing scope:</strong> Primrose Rowlett · Class 5 only</p>
+              <p class="subtle"><strong>Billing scope:</strong> Primrose Rowlett · 4/5s only</p>
               <div class="invoice-tuition-toggle" role="tablist" aria-label="Tuition types">
                 <button type="button" role="tab" aria-selected="true" data-invoice-tuition-type="tuition"><strong>Tuition</strong><small>$55 · <span data-tuition-count="tuition">0</span> dancers</small></button>
                 <button type="button" role="tab" aria-selected="false" data-invoice-tuition-type="sibling"><strong>Sibling</strong><small>$45 · <span data-tuition-count="sibling">0</span> dancers</small></button>
@@ -17123,7 +17004,7 @@
                 <h3>Parent Messages</h3>
                 <p class="subtle">Shared family conversations from Parent Portal and Teacher Tools.</p>
                 <div class="rc5-preinvite-toolbar">
-                  <span><strong>RC5 Pre-Invite Setup</strong><small>Review every Primrose Rowlett Class 5 family and finish billing before sending Parent Portal invitations.</small></span>
+                  <span><strong>RC5 Pre-Invite Setup</strong><small>Review every Primrose Rowlett 4/5s family and finish billing before sending Parent Portal invitations.</small></span>
                   <div class="rc5-preinvite-actions"><button class="secondary" type="button" data-open-rc5-messages>Show RC5 Families</button><button class="secondary" type="button" data-open-rc5-billing>Review RC5 Billing</button><button class="primary" type="button" data-assign-rc5-draft-plans>Assign Draft Plans</button></div>
                 </div>
                 <p class="subtle" id="rc5-billing-assignment-result" role="status" aria-live="polite"></p>
@@ -26067,8 +25948,18 @@
           && `${student.firstName || ""} ${student.lastName || ""}`.trim().toLowerCase() !== "madeline spataro"
         ));
       });
-      const previewMadelineClass = rosterClasses.find((rosterClass) => rosterClass.id === "primrose-rockwall-ages-3-5");
-      previewMadelineClass?.students.unshift(previewMadeline);
+      const previewMadelineClass = rosterClasses.find((rosterClass) => (
+        rosterClass.id === "primrose-rockwall-ages-3-5"
+        || rosterClass.id === "1b0adc62-ed27-4646-beaa-a096d9c51fa6"
+      ));
+      if (previewMadelineClass) {
+        previewMadelineClass.id = "1b0adc62-ed27-4646-beaa-a096d9c51fa6";
+        previewMadelineClass.name = "4/5s";
+        previewMadelineClass.schoolName = "Primrose Rowlett";
+        previewMadelineClass.day = "Thursday";
+        previewMadelineClass.time = "9:45 AM";
+        previewMadelineClass.students.unshift(previewMadeline);
+      }
     }
 
     const sampleRosterLastNames = {
@@ -30920,11 +30811,14 @@
       return true;
     };
 
+    const rc5ClassId = "1b0adc62-ed27-4646-beaa-a096d9c51fa6";
     const rc5RosterClass = () => rosterClasses.find((rosterClass) => (
+      rosterClass.sourceActive !== false && String(rosterClass.id || "") === rc5ClassId
+    )) || (["127.0.0.1", "localhost"].includes(location.hostname) ? rosterClasses.find((rosterClass) => (
       rosterClass.sourceActive !== false
       && /rowlett/i.test(String(rosterClass.schoolName || ""))
-      && /(?:class\s*)?5\b/i.test(String(rosterClass.name || rosterClass.className || ""))
-    ));
+      && /(?:4\s*\/\s*5s?|class\s*5)\b/i.test(String(rosterClass.name || rosterClass.className || ""))
+    )) : null);
     if (document.documentElement.dataset.localPreview === "true" && !teacherParentPreviewConversations.length) {
       const sampleClass = rc5RosterClass();
       const sampleStudent = sampleClass ? [...(sampleClass.students || [])]
@@ -30940,7 +30834,7 @@
           studentName: sampleStudentName,
           initials: `${sampleFirstName[0] || ""}${sampleLastName[0] || ""}`.toUpperCase(),
           school: sampleClass.schoolName,
-          className: sampleClass.name || sampleClass.className || "Class 5",
+          className: sampleClass.name || sampleClass.className || "4/5s",
           unread: 1,
           order: Date.now(),
           timestamp: "Just now",
@@ -30953,8 +30847,9 @@
         });
       }
     }
-    const rc5ClassForMessages = rc5RosterClass();
-    if (rc5ClassForMessages) {
+    const syncRc5FamilyPreviewConversations = () => {
+      const rc5ClassForMessages = rc5RosterClass();
+      if (!rc5ClassForMessages) return;
       [...(rc5ClassForMessages.students || [])]
         .filter((student) => student.status === "enrolled")
         .sort((left, right) => `${left.firstName || left.first_name || ""} ${left.lastName || left.last_name || ""}`.localeCompare(`${right.firstName || right.first_name || ""} ${right.lastName || right.last_name || ""}`))
@@ -30962,15 +30857,23 @@
         const firstName = student.firstName || student.first_name || "Dancer";
         const lastName = student.lastName || student.last_name || "";
         const studentName = `${firstName} ${lastName}`.trim();
-        const alreadyIncluded = teacherParentPreviewConversations.some((conversation) => String(conversation.studentName || "").trim().toLowerCase() === studentName.trim().toLowerCase());
+        const studentId = String(student.id || student.studentId || "");
+        const alreadyIncluded = teacherParentPreviewConversations.some((conversation) => (
+          (studentId && String(conversation.studentId || "") === studentId)
+          || (
+            String(conversation.studentName || "").trim().toLowerCase() === studentName.trim().toLowerCase()
+            && enrollmentSchoolNameMatches(conversation.school, rc5ClassForMessages.schoolName)
+          )
+        ));
         if (alreadyIncluded) return;
         const parentName = student.parentName || [student.parentFirstName, student.parentLastName].filter(Boolean).join(" ") || "Primary adult not linked";
         teacherParentPreviewConversations.push({
           id: `rc5-family-${student.id || student.studentId || studentIndex}`,
+          studentId,
           studentName,
           initials: `${firstName[0] || ""}${lastName[0] || ""}`.toUpperCase(),
           school: rc5ClassForMessages.schoolName,
-          className: rc5ClassForMessages.name || rc5ClassForMessages.className || "Class 5",
+          className: rc5ClassForMessages.name || rc5ClassForMessages.className || "4/5s",
           guardianNames: [parentName],
           unread: 0,
           order: 0,
@@ -30979,7 +30882,8 @@
           messages: []
         });
       });
-    }
+    };
+    syncRc5FamilyPreviewConversations();
     const parentConversationStudent = (conversation) => {
       const targetName = String(conversation?.studentName || "").trim().toLowerCase();
       const matchingClass = rosterClasses.find((rosterClass) => (
@@ -31008,6 +30912,7 @@
     const renderRc5FamilyReadiness = () => {
       const target = document.getElementById("rc5-family-readiness");
       if (!target) return;
+      syncRc5FamilyPreviewConversations();
       const rosterClass = rc5RosterClass();
       const students = rosterClass ? sortRosterStudents(rosterEnrolled(rosterClass)) : [];
       target.hidden = false;
@@ -31083,6 +30988,7 @@
     const renderAdminParentMessagePreview = () => {
       const list = document.getElementById("admin-parent-message-preview-list");
       if (!list) return;
+      syncRc5FamilyPreviewConversations();
       const schoolSelect = document.getElementById("admin-parent-school-filter");
       const classSelect = document.getElementById("admin-parent-class-filter");
       const daySelect = document.getElementById("admin-parent-day-filter");
@@ -31873,7 +31779,15 @@
     });
     document.getElementById("admin-messages-parents-panel")?.addEventListener("click", async (event) => {
       if (event.target.closest("[data-open-rc5-messages]")) {
-        const rc5Conversation = teacherParentPreviewConversations.find((conversation) => /rowlett/i.test(String(conversation.school || "")) && /(?:class\s*)?5\b/i.test(String(conversation.className || "")));
+        syncRc5FamilyPreviewConversations();
+        const rc5Class = rc5RosterClass();
+        const rc5Conversation = teacherParentPreviewConversations.find((conversation) => (
+          String(conversation.id || "").startsWith("rc5-family-")
+          || (
+            enrollmentSchoolNameMatches(conversation.school, rc5Class?.schoolName)
+            && String(conversation.className || "").trim().toLowerCase() === String(rc5Class?.name || rc5Class?.className || "").trim().toLowerCase()
+          )
+        ));
         adminParentMessageFilters.school = rc5Conversation?.school || "all";
         adminParentMessageFilters.className = rc5Conversation?.className || "all";
         adminParentMessageFilters.day = "all";
@@ -42972,18 +42886,25 @@
     };
     const invoicePreviewDancers = () => {
       const seen = new Set();
-      return rosterClasses.flatMap((rosterClass) => (rosterClass.students || []).map((student) => ({ student, schoolName: invoiceSchoolNickname(rosterClass.schoolName || rosterClass.school), className: rosterClass.name || rosterClass.className || rosterClass.class_name || rosterClass.classroom || "", teacherName: rosterTeacherName(rosterClass.teacherId) })))
+      return rosterClasses.flatMap((rosterClass) => (rosterClass.students || []).map((student) => ({ student, classId: rosterClass.id || "", schoolName: invoiceSchoolNickname(rosterClass.schoolName || rosterClass.school), className: rosterClass.name || rosterClass.className || rosterClass.class_name || rosterClass.classroom || "", teacherName: rosterTeacherName(rosterClass.teacherId) })))
         .filter(({ student }) => student?.id && !seen.has(student.id) && seen.add(student.id))
         .sort((a, b) => `${a.student.firstName || ""} ${a.student.lastName || ""}`.localeCompare(`${b.student.firstName || ""} ${b.student.lastName || ""}`));
     };
-    const rowlettClass5InvoiceDancers = () => invoicePreviewDancers().filter(({ schoolName, className }) => {
-      const school = String(schoolName || "").trim().toLowerCase();
-      const classroom = String(className || "").trim().toLowerCase();
-      return school === "primrose rowlett" && classroom === "class 5";
-    });
-    const activeInvoiceDancers = () => ["127.0.0.1", "localhost"].includes(location.hostname)
-      ? invoicePreviewDancers()
-      : rowlettClass5InvoiceDancers();
+    const rc5InvoiceDancers = () => {
+      const rosterClass = rc5RosterClass();
+      if (!rosterClass) return [];
+      return (rosterClass.students || [])
+        .filter((student) => student?.id && student.status === "enrolled")
+        .map((student) => ({
+          student,
+          classId: rosterClass.id || "",
+          schoolName: invoiceSchoolNickname(rosterClass.schoolName || rosterClass.school),
+          className: rosterClass.name || rosterClass.className || rosterClass.class_name || rosterClass.classroom || "",
+          teacherName: rosterTeacherName(rosterClass.teacherId)
+        }))
+        .sort((left, right) => `${left.student.firstName || ""} ${left.student.lastName || ""}`.localeCompare(`${right.student.firstName || ""} ${right.student.lastName || ""}`));
+    };
+    const activeInvoiceDancers = () => rc5InvoiceDancers();
     let selectedTuitionPlan = "tuition";
     const tuitionPlanForStudent = (student, schoolName = "") => {
       const discount = String(student?.tuitionDiscount || student?.tuition_discount || "none").trim().toLowerCase();
@@ -49767,9 +49688,7 @@
       typeFilter: "all",
       currentTrackId: "",
       repeatCurrentTrack: false,
-      previewPlaying: false,
-      catalogTracks: [],
-      catalogLoaded: false
+      previewPlaying: false
     };
 
     const workshopMusicFallback = [
@@ -49843,20 +49762,13 @@
       coverItems.forEach((item) => { item.cover_url = signedUrls.get(item.cover_storage_path) || ""; });
     };
 
-    const isMyOwnPlaylist = (playlist) => Boolean(playlist && playlist.owner === "teacher" && playlist.teacher_id === window.dtCurrentProfile?.id);
-
     const renderMusicTrackList = () => {
       const list = document.getElementById("music-track-list");
       const title = document.getElementById("music-track-list-title");
       const count = document.getElementById("music-track-count");
-      const ownerActions = document.getElementById("my-playlist-owner-actions");
-      const addPanel = document.getElementById("add-my-tracks-panel");
       if (!list || !title || !count) return;
       const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      const mine = isMyOwnPlaylist(selected);
-      if (ownerActions) ownerActions.hidden = !mine;
-      if (!mine && addPanel) addPanel.hidden = true;
-      if (!selected || (!musicPlaylistTracks(selected).length && !mine)) {
+      if (!selected || !musicPlaylistTracks(selected).length) {
         const grid = document.getElementById("music-playlist-grid");
         const trackPanel = document.getElementById("music-track-panel");
         const backButton = document.getElementById("music-back-to-playlists");
@@ -49871,7 +49783,7 @@
       title.textContent = selected?.name || "Songs";
       count.textContent = `${visibleTracks.length} Song${visibleTracks.length === 1 ? "" : "s"}`;
       if (!visibleTracks.length) {
-        list.innerHTML = `<div class="row"><div><strong>${query ? "No matching songs" : (mine ? "No songs yet" : "No songs available")}</strong><small>${query ? "Try another search." : (mine ? "Tap “+ Add Songs” to pull them from DT Tunes." : "Choose another playlist.")}</small></div></div>`;
+        list.innerHTML = `<div class="row"><div><strong>${query ? "No matching songs" : "No songs available"}</strong><small>${query ? "Try another search." : "Choose another playlist."}</small></div></div>`;
         return;
       }
       const audio = document.getElementById("dt-tunes-audio");
@@ -49885,17 +49797,10 @@
           : (trackIndex < currentTrackIndex ? "completed" : "current");
         const isCurrentTrack = progressionState === "current";
         const isCurrentTrackPlaying = isCurrentTrack && currentlyPlaying;
-        const ownerButtons = mine ? `
-          <div class="music-track-row-actions">
-            <button class="secondary" type="button" data-move-my-track="${escapeText(track.id)}" data-dir="up" ${trackIndex === 0 ? "disabled" : ""} aria-label="Move ${escapeText(track.title)} up">&uarr;</button>
-            <button class="secondary" type="button" data-move-my-track="${escapeText(track.id)}" data-dir="down" ${trackIndex === tracks.length - 1 ? "disabled" : ""} aria-label="Move ${escapeText(track.title)} down">&darr;</button>
-            <button class="danger-btn" type="button" data-remove-my-track="${escapeText(track.id)}">Remove</button>
-          </div>` : "";
         return `
         <div class="row music-track-row is-${progressionState}" data-music-track-state="${progressionState}">
           <div><strong>${escapeText(track.title)}</strong><small>${escapeText(musicArtistLabel(track.artist))} • ${musicDurationLabel(track.duration_seconds)}</small></div>
           <button class="icon-btn music-track-button ${isCurrentTrack ? "is-current" : ""} ${isCurrentTrackPlaying ? "is-playing" : ""}" type="button" data-music-track="${escapeText(track.id)}" aria-label="${isCurrentTrackPlaying ? "Pause" : "Play"} ${escapeText(track.title)}">${isCurrentTrackPlaying ? "❚❚" : "▶"}</button>
-          ${ownerButtons}
         </div>
       `;
       }).join("");
@@ -49908,9 +49813,7 @@
       const cover = coverUrl
         ? `<img class="playlist-cover" src="${escapeText(coverUrl)}" alt="" onerror="this.hidden = true">`
         : "";
-      const isMine = playlist.owner === "teacher" && playlist.teacher_id === window.dtCurrentProfile?.id;
-      const ownerTag = playlist.owner === "teacher" ? `<span class="playlist-owner-tag">${isMine ? "Yours" : "Teacher playlist"}</span>` : "";
-      return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""} ${isMine ? "owned-by-me" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}">${cover}<strong>${escapeText(playlist.name)}</strong><small>${songCount} song${songCount === 1 ? "" : "s"}</small>${ownerTag}</button>`;
+      return `<button class="playlist ${playlist.id === musicLibraryState.selectedPlaylistId ? "selected" : ""}" type="button" data-music-playlist="${escapeText(playlist.id)}">${cover}<strong>${escapeText(playlist.name)}</strong><small>${songCount} song${songCount === 1 ? "" : "s"}</small></button>`;
     }).join("");
 
     const renderMusicPlaylists = () => {
@@ -49947,256 +49850,23 @@
       if (!client || !profile) return;
       setText("music-profile-label", `${profile.full_name} • shared teacher library`);
       if (grid) grid.innerHTML = `<p class="subtle">Opening your shared playlists…</p>`;
-      const [directorResult, myResult] = await Promise.all([
-        client
-          .from("music_playlists")
-          .select("id, name, category, sort_order, cover_path, cover_storage_path, music_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path, cover_path, cover_storage_path))")
-          .eq("active", true)
-          .order("sort_order"),
-        client
-          .from("music_teacher_playlists")
-          .select("id, teacher_id, name, sort_order, cover_path, cover_storage_path, music_teacher_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path, cover_path, cover_storage_path))")
-          .eq("teacher_id", profile.id)
-          .eq("active", true)
-          .order("name")
-      ]);
-      if (directorResult.error) {
-        console.error("DT Tunes could not load", directorResult.error);
+      const { data, error } = await client
+        .from("music_playlists")
+        .select("id, name, category, sort_order, cover_path, cover_storage_path, music_playlist_tracks(position, music_tracks(id, title, artist, duration_seconds, storage_path, cover_path, cover_storage_path))")
+        .eq("active", true)
+        .order("sort_order");
+      if (error) {
+        console.error("DT Tunes could not load", error);
         if (grid) grid.innerHTML = `<p class="subtle">DT Tunes couldn’t open. Refresh and try again.</p>`;
         setText("music-track-count", "Unavailable");
         return;
       }
-      if (myResult.error) console.error("Your DT Tunes playlists could not load", myResult.error);
-      const directorPlaylists = (directorResult.data || []).map((playlist) => ({ ...playlist, owner: "director" }));
-      const myPlaylists = (myResult.data || []).map((playlist) => ({
-        ...playlist,
-        owner: "teacher",
-        music_playlist_tracks: (playlist.music_teacher_playlist_tracks || []).map((link) => ({ position: link.position, music_tracks: link.music_tracks }))
-      }));
-      musicLibraryState.playlists = [...directorPlaylists, ...myPlaylists];
+      musicLibraryState.playlists = data || [];
       await hydrateMusicCoverUrls(musicLibraryState.playlists, client);
       musicLibraryState.selectedPlaylistId = "";
       renderMusicPlaylists();
       updateMyDayMusicPlayer();
-      loadMusicCatalog(client);
     };
-
-    const loadMusicCatalog = async (client = window.dtSupabase) => {
-      if (!client) return;
-      const { data, error } = await client
-        .from("music_tracks")
-        .select("id, title, artist, duration_seconds, storage_path, cover_path, cover_storage_path, catalog_section")
-        .eq("active", true)
-        .order("title");
-      if (error) { console.error("DT Song Catalog could not load", error); return; }
-      musicLibraryState.catalogTracks = data || [];
-      musicLibraryState.catalogLoaded = true;
-    };
-
-    const refreshMyPlaylist = async (playlistId) => {
-      await loadSharedMusicLibrary(window.dtCurrentProfile);
-      musicLibraryState.selectedPlaylistId = playlistId;
-      renderMusicPlaylists();
-    };
-
-    const createMyPlaylist = async (name) => {
-      const client = window.dtSupabase;
-      const profile = window.dtCurrentProfile;
-      if (!client || !profile) return { error: new Error("Not signed in.") };
-      const id = crypto.randomUUID();
-      const sortOrder = Math.max(-1, ...musicLibraryState.playlists.filter((p) => p.owner === "teacher").map((p) => Number(p.sort_order) || 0)) + 1;
-      const { error } = await client.from("music_teacher_playlists").insert({ id, teacher_id: profile.id, name, sort_order: sortOrder, active: true });
-      if (!error) await refreshMyPlaylist(id);
-      return { error, id };
-    };
-
-    const renameMyPlaylist = async (playlistId, name) => {
-      const client = window.dtSupabase;
-      if (!client) return { error: new Error("Not signed in.") };
-      const { error } = await client.from("music_teacher_playlists").update({ name }).eq("id", playlistId);
-      if (!error) await refreshMyPlaylist(playlistId);
-      return { error };
-    };
-
-    const deleteMyPlaylist = async (playlistId) => {
-      const client = window.dtSupabase;
-      if (!client) return { error: new Error("Not signed in.") };
-      const { error } = await client.from("music_teacher_playlists").delete().eq("id", playlistId);
-      if (!error) {
-        musicLibraryState.selectedPlaylistId = "";
-        await loadSharedMusicLibrary(window.dtCurrentProfile);
-      }
-      return { error };
-    };
-
-    const addTracksToMyPlaylist = async (playlistId, trackIds) => {
-      const client = window.dtSupabase;
-      if (!client || !trackIds.length) return { error: null };
-      const playlist = musicLibraryState.playlists.find((p) => p.id === playlistId);
-      let next = Math.max(-1, ...musicPlaylistTracks(playlist).map((track, index) => index)) + 1;
-      const rows = trackIds.map((trackId) => ({ playlist_id: playlistId, track_id: trackId, position: next++ }));
-      const { error } = await client.from("music_teacher_playlist_tracks").insert(rows);
-      if (!error) await refreshMyPlaylist(playlistId);
-      return { error };
-    };
-
-    const removeTrackFromMyPlaylist = async (playlistId, trackId) => {
-      const client = window.dtSupabase;
-      if (!client) return { error: new Error("Not signed in.") };
-      const { error } = await client.from("music_teacher_playlist_tracks").delete().eq("playlist_id", playlistId).eq("track_id", trackId);
-      if (!error) {
-        const remaining = musicPlaylistTracks(musicLibraryState.playlists.find((p) => p.id === playlistId)).map((t) => t.id).filter((id) => id !== trackId);
-        for (let i = 0; i < remaining.length; i += 1) {
-          await client.from("music_teacher_playlist_tracks").update({ position: i }).eq("playlist_id", playlistId).eq("track_id", remaining[i]);
-        }
-        await refreshMyPlaylist(playlistId);
-      }
-      return { error };
-    };
-
-    const swapMyTrackPositions = async (playlistId, trackA, trackB) => {
-      const client = window.dtSupabase;
-      const playlist = musicLibraryState.playlists.find((p) => p.id === playlistId);
-      const links = playlist?.music_playlist_tracks || [];
-      const rowA = links.find((link) => link.music_tracks?.id === trackA);
-      const rowB = links.find((link) => link.music_tracks?.id === trackB);
-      if (!rowA || !rowB) return new Error("Those songs are no longer in this playlist.");
-      const parking = Math.max(0, ...links.map((link) => Number(link.position) || 0)) + 1;
-      const steps = [
-        { track: trackA, position: parking },
-        { track: trackB, position: rowA.position },
-        { track: trackA, position: rowB.position }
-      ];
-      for (const step of steps) {
-        const { error } = await client.from("music_teacher_playlist_tracks")
-          .update({ position: step.position })
-          .eq("playlist_id", playlistId)
-          .eq("track_id", step.track);
-        if (error) return error;
-      }
-      return null;
-    };
-
-    const renderAddMyTracks = () => {
-      const listEl = document.getElementById("add-my-tracks-list");
-      if (!listEl) return;
-      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      if (!selected) return;
-      const already = new Set(musicPlaylistTracks(selected).map((track) => track.id));
-      const search = (document.getElementById("add-my-tracks-search")?.value || "").trim().toLowerCase();
-      const available = musicLibraryState.catalogTracks
-        .filter((track) => !already.has(track.id))
-        .filter((track) => !search || `${track.title} ${track.artist || ""}`.toLowerCase().includes(search));
-      listEl.innerHTML = available.length
-        ? available.map((track) => `<label><input type="checkbox" value="${escapeText(track.id)}"><span>${escapeText(track.title)} — <small>${escapeText(musicArtistLabel(track.artist))}</small></span></label>`).join("")
-        : `<p class="subtle">${search ? "No catalog songs match that search." : (musicLibraryState.catalogLoaded ? "Every catalog song is already in this playlist." : "Loading the DT Song Catalog…")}</p>`;
-    };
-
-    document.getElementById("open-create-my-playlist")?.addEventListener("click", () => {
-      const form = document.getElementById("create-my-playlist-form");
-      if (form) { form.hidden = false; document.getElementById("new-my-playlist-name")?.focus(); }
-    });
-    document.getElementById("cancel-create-my-playlist")?.addEventListener("click", () => {
-      const form = document.getElementById("create-my-playlist-form");
-      if (form) { form.hidden = true; form.reset(); setText("my-playlist-form-status", ""); }
-    });
-    document.getElementById("create-my-playlist-form")?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const nameInput = document.getElementById("new-my-playlist-name");
-      const name = (nameInput?.value || "").trim();
-      if (!name) return;
-      const submitButton = event.currentTarget.querySelector('[type="submit"]');
-      if (submitButton) submitButton.disabled = true;
-      setText("my-playlist-form-status", "Creating your playlist…");
-      const { error } = await createMyPlaylist(name);
-      if (submitButton) submitButton.disabled = false;
-      if (error) {
-        setText("my-playlist-form-status", error.code === "23505" ? "You already have a playlist with that name." : "That playlist could not be created. Please try again.");
-        return;
-      }
-      event.currentTarget.reset();
-      event.currentTarget.hidden = true;
-      setText("my-playlist-form-status", "");
-    });
-
-    document.getElementById("rename-my-playlist")?.addEventListener("click", async () => {
-      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      if (!isMyOwnPlaylist(selected)) return;
-      const name = prompt("Rename this playlist:", selected.name);
-      if (!name || !name.trim() || name.trim() === selected.name) return;
-      const { error } = await renameMyPlaylist(selected.id, name.trim());
-      if (error) showToast?.("That name could not be saved. Please try again.");
-    });
-
-    document.getElementById("delete-my-playlist")?.addEventListener("click", async () => {
-      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      if (!isMyOwnPlaylist(selected)) return;
-      if (!confirm(`Delete “${selected.name}”? This only removes your playlist — the songs stay in DT Tunes.`)) return;
-      const { error } = await deleteMyPlaylist(selected.id);
-      if (error) showToast?.("That playlist could not be deleted. Please try again.");
-    });
-
-    document.getElementById("open-add-my-tracks")?.addEventListener("click", () => {
-      const panel = document.getElementById("add-my-tracks-panel");
-      if (!panel) return;
-      panel.hidden = !panel.hidden;
-      const openButton = document.getElementById("open-add-my-tracks");
-      if (openButton) openButton.textContent = panel.hidden ? "+ Add Songs" : "Close";
-      if (!panel.hidden) {
-        const searchInput = document.getElementById("add-my-tracks-search");
-        if (searchInput) searchInput.value = "";
-        setText("add-my-tracks-status", "");
-        if (!musicLibraryState.catalogLoaded) loadMusicCatalog().then(renderAddMyTracks);
-        renderAddMyTracks();
-      }
-    });
-    document.getElementById("cancel-add-my-tracks")?.addEventListener("click", () => {
-      const panel = document.getElementById("add-my-tracks-panel");
-      if (panel) panel.hidden = true;
-      const openButton = document.getElementById("open-add-my-tracks");
-      if (openButton) openButton.textContent = "+ Add Songs";
-    });
-    document.getElementById("add-my-tracks-search")?.addEventListener("input", renderAddMyTracks);
-    document.getElementById("confirm-add-my-tracks")?.addEventListener("click", async () => {
-      const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-      if (!isMyOwnPlaylist(selected)) return;
-      const chosen = Array.from(document.querySelectorAll("#add-my-tracks-list input:checked")).map((input) => input.value);
-      if (!chosen.length) { setText("add-my-tracks-status", "Tick at least one song first."); return; }
-      const confirmButton = document.getElementById("confirm-add-my-tracks");
-      if (confirmButton) confirmButton.disabled = true;
-      setText("add-my-tracks-status", `Adding ${chosen.length} song${chosen.length === 1 ? "" : "s"}…`);
-      const { error } = await addTracksToMyPlaylist(selected.id, chosen);
-      if (confirmButton) confirmButton.disabled = false;
-      if (error) { setText("add-my-tracks-status", "Those songs could not be added. Please try again."); return; }
-      setText("add-my-tracks-status", `Added ${chosen.length} song${chosen.length === 1 ? "" : "s"}.`);
-      renderAddMyTracks();
-    });
-
-    document.addEventListener("click", async (event) => {
-      const moveButton = event.target.closest("[data-move-my-track]");
-      if (moveButton) {
-        const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-        if (!isMyOwnPlaylist(selected)) return;
-        const tracks = musicPlaylistTracks(selected);
-        const index = tracks.findIndex((track) => track.id === moveButton.dataset.moveMyTrack);
-        const targetIndex = moveButton.dataset.dir === "up" ? index - 1 : index + 1;
-        if (index < 0 || targetIndex < 0 || targetIndex >= tracks.length) return;
-        moveButton.disabled = true;
-        const error = await swapMyTrackPositions(selected.id, tracks[index].id, tracks[targetIndex].id);
-        if (error) { showToast?.("That song could not be moved. Please try again."); moveButton.disabled = false; return; }
-        await refreshMyPlaylist(selected.id);
-        return;
-      }
-      const removeButton = event.target.closest("[data-remove-my-track]");
-      if (removeButton) {
-        const selected = musicLibraryState.playlists.find((playlist) => playlist.id === musicLibraryState.selectedPlaylistId);
-        if (!isMyOwnPlaylist(selected)) return;
-        const track = musicPlaylistTracks(selected).find((item) => item.id === removeButton.dataset.removeMyTrack);
-        if (!confirm(`Remove “${track?.title || "this song"}” from ${selected.name}? It stays in DT Tunes.`)) return;
-        const { error } = await removeTrackFromMyPlaylist(selected.id, removeButton.dataset.removeMyTrack);
-        if (error) showToast?.("That song could not be removed. Please try again.");
-      }
-    });
 
     if (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1") {
       window.setTimeout(() => loadSharedMusicLibrary(window.dtCurrentProfile), 0);
@@ -50431,17 +50101,13 @@
       const playlistButton = event.target.closest("[data-music-playlist]");
       if (playlistButton) {
         const playlist = musicLibraryState.playlists.find((item) => item.id === playlistButton.dataset.musicPlaylist);
-        if (!playlist || (!musicPlaylistTracks(playlist).length && !isMyOwnPlaylist(playlist))) {
+        if (!playlist || !musicPlaylistTracks(playlist).length) {
           musicLibraryState.selectedPlaylistId = "";
           renderMusicPlaylists();
           showToast("That playlist does not have songs yet.");
           return;
         }
         musicLibraryState.selectedPlaylistId = playlist.id;
-        const addTracksPanel = document.getElementById("add-my-tracks-panel");
-        if (addTracksPanel) addTracksPanel.hidden = true;
-        const openAddTracksButton = document.getElementById("open-add-my-tracks");
-        if (openAddTracksButton) openAddTracksButton.textContent = "+ Add Songs";
         renderMusicPlaylists();
         updateMyDayMusicPlayer();
         document.getElementById("music-playlist-grid")?.setAttribute("hidden", "");

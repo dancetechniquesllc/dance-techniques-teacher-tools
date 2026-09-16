@@ -35,15 +35,6 @@
     .tab[aria-selected="true"] { border-color: var(--burgundy); background: var(--burgundy); color: white; }
     .panel { display: grid; gap: 16px; }
     .card { border: 1px solid var(--line); border-radius: 20px; background: white; box-shadow: var(--shadow); padding: 20px; }
-    .by-teacher-groups { display: grid; gap: 18px; margin-top: 14px; }
-    .by-teacher-group h3 { margin: 0 0 8px; font-size: 1rem; color: var(--burgundy-dark); }
-    .by-teacher-playlist { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; background: #fffafa; }
-    .by-teacher-playlist summary { cursor: pointer; display: flex; justify-content: space-between; gap: 10px; font-weight: 700; list-style: none; }
-    .by-teacher-playlist summary::-webkit-details-marker { display: none; }
-    .by-teacher-playlist summary span { color: var(--muted); font-weight: 600; font-size: .85rem; }
-    .by-teacher-playlist ul { margin: 10px 0 0; padding-left: 18px; color: var(--ink); font-size: .92rem; }
-    .by-teacher-playlist li { margin-bottom: 4px; }
-    .by-teacher-playlist li small { color: var(--muted); }
     .card-head { display: flex; justify-content: space-between; align-items: start; gap: 18px; margin-bottom: 16px; }
     .card h2, .card h3 { margin: 0; color: var(--burgundy-dark); }
     .card h2 { font: 700 1.55rem/1.1 Georgia, serif; }
@@ -137,7 +128,6 @@
       <button class="tab" type="button" data-tab="playlists" aria-selected="true">Teacher Playlists</button>
       <button class="tab" type="button" data-tab="catalog" aria-selected="false">DT Song Catalog</button>
       <button class="tab" type="button" data-tab="add-song" aria-selected="false">Add a DT Original</button>
-      <button class="tab" type="button" data-tab="by-teacher" aria-selected="false">Playlists Teachers Made</button>
     </nav>
 
     <div class="loading" id="loading">Opening your DT music…</div>
@@ -225,15 +215,6 @@
         <div class="actions"><button class="primary" type="submit" id="upload-song-button">Upload Song &amp; Send to Playlists</button><span class="status" id="song-form-status" role="status"></span></div>
       </form>
     </section>
-
-    <section class="panel" id="panel-by-teacher" data-panel="by-teacher" hidden>
-      <div class="card">
-        <div class="card-head">
-          <div><h2>Playlists Teachers Made</h2><p>View-only. Each teacher names and builds their own playlists from the DT Song Catalog &mdash; you can look, but only they can edit or delete theirs.</p></div>
-        </div>
-        <div class="by-teacher-groups" id="by-teacher-groups"><p class="empty">Loading teacher playlists&hellip;</p></div>
-      </div>
-    </section>
   </main>
 
   <script>
@@ -253,50 +234,6 @@
       document.querySelectorAll("[data-tab]").forEach((button) => button.setAttribute("aria-selected", button.dataset.tab === name ? "true" : "false"));
       document.querySelectorAll("[data-panel]").forEach((panel) => { panel.hidden = panel.dataset.panel !== name; });
       if (name === "catalog") renderCatalog();
-      if (name === "by-teacher") loadTeacherMadePlaylists();
-    }
-
-    // Read-only oversight: every teacher's own DT Tunes playlists, grouped by
-    // teacher. Directors can look here but editing stays with the teacher who
-    // owns each playlist — this screen never writes to music_teacher_playlists.
-    async function loadTeacherMadePlaylists() {
-      const container = $("#by-teacher-groups");
-      if (container) container.innerHTML = `<p class="empty">Loading teacher playlists&hellip;</p>`;
-      const [playlistResult, profileResult] = await Promise.all([
-        state.client
-          .from("music_teacher_playlists")
-          .select("id,teacher_id,name,active,music_teacher_playlist_tracks(position,music_tracks(id,title,artist,duration_seconds,catalog_section))")
-          .eq("active", true),
-        state.client.from("profiles").select("id,full_name,active").eq("role", "teacher")
-      ]);
-      if (playlistResult.error || profileResult.error) {
-        if (container) container.innerHTML = `<p class="empty">Teacher playlists couldn’t load. Refresh and try again.</p>`;
-        return;
-      }
-      const teacherNames = new Map((profileResult.data || []).map((profile) => [profile.id, profile.full_name || "Unnamed teacher"]));
-      const byTeacher = new Map();
-      (playlistResult.data || []).forEach((playlist) => {
-        const name = teacherNames.get(playlist.teacher_id) || "Former teacher";
-        if (!byTeacher.has(playlist.teacher_id)) byTeacher.set(playlist.teacher_id, { name, playlists: [] });
-        byTeacher.get(playlist.teacher_id).playlists.push(playlist);
-      });
-      if (!byTeacher.size) {
-        if (container) container.innerHTML = `<p class="empty">No teacher has built their own playlist yet.</p>`;
-        return;
-      }
-      const groups = [...byTeacher.values()].sort((a, b) => a.name.localeCompare(b.name));
-      if (container) container.innerHTML = groups.map((group) => `
-        <div class="by-teacher-group">
-          <h3>${escapeText(group.name)}</h3>
-          ${group.playlists.map((playlist) => {
-            const tracks = (playlist.music_teacher_playlist_tracks || []).slice().sort((a, b) => a.position - b.position).map((link) => link.music_tracks).filter(Boolean);
-            return `<details class="by-teacher-playlist">
-              <summary><strong>${escapeText(playlist.name)}</strong><span>${tracks.length} song${tracks.length === 1 ? "" : "s"}</span></summary>
-              ${tracks.length ? `<ul>${tracks.map((track) => `<li>${escapeText(track.title)} <small>${escapeText(track.catalog_section || "")}</small></li>`).join("")}</ul>` : `<p class="empty">No songs added yet.</p>`}
-            </details>`;
-          }).join("")}
-        </div>
-      `).join("");
     }
 
     async function signedCover(path) {
