@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v241-teacher-playlists-restored-2";
+const CACHE_NAME = "my-dance-techniques-v241-photo-frame-source-icons";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
