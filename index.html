@@ -410,14 +410,14 @@
       display: grid;
       place-items: center;
       padding: 0;
-      border: 1px solid oklch(78% 0.05 24 / 0.45);
+      border: 1px solid #c8912d;
       border-radius: 999px;
-      background: oklch(92% 0.04 25);
-      color: var(--berry);
+      background: #fff7e8;
+      color: #9a6717;
       box-shadow: 0 6px 14px oklch(22% 0.03 245 / 0.07);
     }
-    .director-message-shortcut svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-    .director-message-shortcut:hover, .director-message-shortcut:focus-visible { border-color: var(--berry); transform: translateY(-1px); }
+    .director-message-shortcut svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .director-message-shortcut:hover, .director-message-shortcut:focus-visible { border-color: #8a590d; background: #fff2d5; outline: 3px solid rgb(213 140 36 / .22); outline-offset: 2px; transform: translateY(-1px); }
     .director-task-shortcut { position:relative; width:42px; height:42px; display:grid; place-items:center; padding:0; border:1px solid var(--accent-strong); border-radius:999px; background:var(--blush); color:var(--berry); box-shadow:0 6px 14px oklch(22% 0.03 245 / .07); }
     .director-task-shortcut svg { width:21px; height:21px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
     .director-task-shortcut:hover,.director-task-shortcut:focus-visible { transform:translateY(-1px); outline:3px solid oklch(78% .05 24 / .35); outline-offset:2px; }
@@ -488,10 +488,7 @@
     .director-session-notifications > summary,
     .director-session-notifications > summary:hover,
     .director-session-notifications > summary:focus-visible,
-    .director-session-notifications[open] > summary,
-    .director-message-shortcut,
-    .director-message-shortcut:hover,
-    .director-message-shortcut:focus-visible {
+    .director-session-notifications[open] > summary {
       border-color: var(--accent-strong);
       background: var(--blush);
       color: var(--berry);
@@ -2805,15 +2802,14 @@
       transition: transform .16s ease;
     }
     .teacher-roster-active-card[open] > summary::before { transform: rotate(90deg); }
-    .teacher-roster-active-card:not([open]) > summary { padding-bottom: 62px; }
+    .teacher-roster-active-card:not([open]) > summary { padding-bottom: 14px; }
     .teacher-roster-active-card > summary .teacher-roster-active-heading { width: 100%; margin: 0; }
     .teacher-roster-active-heading {
       position: relative;
       display: grid;
       grid-template-columns: minmax(0, 1fr) 104px;
       grid-template-areas:
-        "timing timing"
-        "title title"
+        "title timing"
         "details post";
       align-items: center;
       gap: 7px 8px;
@@ -2854,7 +2850,7 @@
     .teacher-roster-duration { position: static; display: inline-flex; align-items: center; gap: 3px; padding: 0; border-radius: 0; background: transparent !important; color: var(--fg) !important; font-size: inherit; font-weight: 500; white-space: nowrap; }
     .teacher-roster-duration strong { color: var(--brick); font-weight: 800; }
     .teacher-class-session-timing {
-      grid-area: timing; position: static; display: grid; justify-items: end; gap: 1px; margin: 0; padding: 0;
+      grid-area: timing; position: static; align-self: start; display: grid; justify-items: end; gap: 1px; margin: 0; padding: 0;
       color: #52705a; font-size: 9px; font-weight: 700; line-height: 1.15; white-space: nowrap;
     }
     .teacher-class-session-timing strong { color: #52705a; font-family: Georgia, "Times New Roman", serif; font-size: 15px; font-variant-numeric: tabular-nums; }
@@ -5001,15 +4997,15 @@
     }
 
     .player-slot {
-      min-height: 166px;
+      min-height: 310px;
       border-radius: 8px;
       border: 1px dashed #8f9f84;
       background:
         linear-gradient(135deg, #edf0e8, #d9e1d2);
       display: grid;
       align-content: center;
-      gap: 12px;
-      padding: 16px;
+      gap: 18px;
+      padding: 20px 16px;
       margin-bottom: 12px;
       position: sticky;
       top: 8px;
@@ -5041,20 +5037,21 @@
       align-self: start;
       display: grid;
       justify-items: center;
-      gap: 14px;
+      gap: 22px;
       text-align: center;
     }
 
     .music-player-copy .class-title {
       margin: 0;
       color: var(--fg);
-      font-size: clamp(22px, 3vw, 31px);
+      font-size: clamp(30px, 6vw, 40px);
       line-height: 1.05;
+      white-space: nowrap;
     }
 
     .music-main-toggle {
-      width: 76px;
-      height: 76px;
+      width: clamp(112px, 28vw, 150px);
+      height: clamp(112px, 28vw, 150px);
       position: relative;
       display: inline-grid;
       place-items: center;
@@ -5064,7 +5061,7 @@
       background: var(--blush);
       color: var(--fg);
       font: inherit;
-      font-size: 30px;
+      font-size: 48px;
       font-weight: 850;
       line-height: 1;
       box-shadow: 0 9px 20px rgb(143 79 85 / 0.18);
@@ -5094,16 +5091,38 @@
 
     .music-timeline {
       display: grid;
-      grid-template-columns: auto minmax(100px, 1fr) auto;
+      grid-template-columns: 58px auto minmax(80px, 1fr) auto 58px;
       align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      border-radius: 999px;
-      background: rgb(255 255 255 / 0.62);
+      gap: 10px;
+      padding: 0;
+      background: transparent;
       color: #52604d;
       font-size: 13px;
       font-weight: 720;
     }
+
+    .music-skip-compact {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: #34402f;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 850;
+      line-height: 1;
+      position: relative;
+    }
+
+    .music-skip-arrow { font-size: 50px; font-weight: 500; line-height: 1; }
+    .music-skip-label { position: absolute; inset: 0; display: grid; place-items: center; padding-top: 5px; font-size: 14px; }
+
+    .music-skip-compact:hover,
+    .music-skip-compact:focus-visible { border-color: #718166; background: #e8ede4; outline: none; }
 
     .music-timeline progress {
       width: 100%;
@@ -5120,13 +5139,18 @@
 
     .dt-tunes-controls {
       display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
     }
 
     .dt-tunes-control {
-      min-height: 40px;
-      padding: 0 10px;
+      min-height: 70px;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 3px;
+      grid-column: auto !important;
+      padding: 8px 6px;
       border: 1px solid #aebaa6;
       border-radius: 999px;
       background: rgb(255 255 255 / 0.62);
@@ -5134,6 +5158,13 @@
       font: inherit;
       font-size: 13px;
       font-weight: 740;
+    }
+
+    .dt-tunes-control-icon {
+      display: block;
+      font-size: 25px;
+      font-weight: 850;
+      line-height: 1;
     }
 
     .dt-tunes-control:hover,
@@ -5158,6 +5189,7 @@
     }
 
     .music-now-playing-art {
+      display: none !important;
       width: 100%;
       aspect-ratio: 1;
       object-fit: cover;
@@ -5170,6 +5202,102 @@
 
     .music-now-playing:has(.music-now-playing-art[hidden]) {
       grid-template-columns: 1fr;
+    }
+
+    .music-now-playing { grid-template-columns: 1fr; }
+
+    @media (max-width: 430px) {
+      .player-slot { min-height: 0; gap: 14px; padding: 17px 12px; }
+      .music-player-copy { gap: 16px; }
+      .music-player-copy .class-title { font-size: clamp(28px, 9vw, 36px); }
+      .music-main-toggle { width: 104px; height: 104px; font-size: 38px; }
+      .music-timeline { grid-template-columns: 48px auto minmax(70px, 1fr) auto 48px; gap: 6px; font-size: 12px; }
+      .music-skip-compact { width: 48px; height: 48px; font-size: 14px; }
+      .music-skip-arrow { font-size: 43px; }
+      .music-skip-label { font-size: 12px; }
+      .dt-tunes-controls { gap: 5px; }
+      .dt-tunes-control { min-height: 62px; padding: 6px 2px; font-size: 10.5px; }
+      .dt-tunes-control-icon { font-size: 21px; }
+    }
+
+    /* DT Tunes player follows the large, calm classroom-control layout. */
+    #music-view .player-slot {
+      min-height: 520px;
+      align-content: space-between;
+      gap: 26px;
+      padding: 38px 24px 30px;
+      border: 0;
+      border-radius: 26px;
+      background: radial-gradient(circle at 50% 38%, rgb(255 255 255 / .72), transparent 42%), linear-gradient(135deg, #f5f7ef, #e7eee1 58%, #f5f6ef);
+      box-shadow: 0 14px 34px rgb(69 58 54 / .12);
+    }
+    #music-view .music-player-copy { gap: 30px; }
+    #music-view .music-player-copy .class-title { font-size: clamp(44px, 7vw, 68px); }
+    #music-view .music-main-toggle {
+      width: clamp(150px, 24vw, 188px);
+      height: clamp(150px, 24vw, 188px);
+      border-width: 4px;
+      font-size: 58px;
+    }
+    #music-view .music-timeline {
+      grid-template-columns: 82px auto minmax(120px, 1fr) auto 82px;
+      gap: 14px;
+      font-size: 20px;
+    }
+    #music-view .music-skip-compact { width: 82px; height: 82px; font-size: 18px; }
+    #music-view .music-skip-arrow { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; font-size: 0; }
+    #music-view .music-skip-arrow path { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    #music-view .music-skip-label { padding-top: 7px; font-size: 18px; }
+    #music-view .dt-tunes-controls { gap: 14px; }
+    #music-view .dt-tunes-control { min-height: 96px; gap: 7px; border-width: 2px; font-size: 19px; }
+    #music-view .dt-tunes-control-icon { font-size: 34px; }
+    body[data-mode="teacher"][data-view-tab="music"] .tabbar {
+      position: sticky;
+      top: max(22px, env(safe-area-inset-top));
+      z-index: 70;
+      height: 0;
+      margin: 0 22px 0 0;
+      pointer-events: none;
+    }
+    body[data-mode="teacher"][data-view-tab="music"] .nav-menu-wrap { pointer-events: auto; }
+    body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button {
+      width: 78px;
+      height: 78px;
+      border: 0;
+      border-radius: 22px;
+      background: rgb(255 251 247 / .9);
+    }
+    body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button svg { width: 36px; height: 36px; stroke-width: 2.8; }
+    body[data-mode="teacher"] #music-view > .mobile-head { display: none; }
+    #music-view { container-type: inline-size; }
+
+    @media (max-width: 430px) {
+      #music-view .player-slot { min-height: 500px; gap: 18px; padding: 74px 8px 20px; border-radius: 20px; overflow: hidden; }
+      #music-view .music-player-copy { gap: 22px; }
+      #music-view .music-player-copy .class-title { font-size: 36px; }
+      #music-view .music-main-toggle { width: 128px; height: 128px; font-size: 44px; }
+      #music-view .music-timeline { grid-template-columns: 58px 42px minmax(56px, 1fr) 42px 58px; gap: 4px; font-size: 13px; }
+      #music-view .music-skip-compact { width: 58px; height: 58px; }
+      #music-view .music-skip-label { padding-top: 5px; font-size: 13px; }
+      #music-view .dt-tunes-controls { gap: 5px; }
+      #music-view .dt-tunes-control { min-width: 0; min-height: 72px; padding: 6px 1px; gap: 2px; font-size: 10px; }
+      #music-view .dt-tunes-control-icon { font-size: 23px; }
+      body[data-mode="teacher"][data-view-tab="music"] .tabbar { top: max(14px, env(safe-area-inset-top)); margin-right: 12px; }
+      body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button { width: 54px; height: 54px; border-radius: 16px; }
+      body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button svg { width: 27px; height: 27px; }
+    }
+
+    @container (max-width: 430px) {
+      #music-view .player-slot { min-height: 500px; gap: 18px; padding: 74px 8px 20px; border-radius: 20px; overflow: hidden; }
+      #music-view .music-player-copy { gap: 22px; }
+      #music-view .music-player-copy .class-title { font-size: 36px; }
+      #music-view .music-main-toggle { width: 128px; height: 128px; font-size: 44px; }
+      #music-view .music-timeline { grid-template-columns: 58px 42px minmax(56px, 1fr) 42px 58px; gap: 4px; font-size: 13px; }
+      #music-view .music-skip-compact { width: 58px; height: 58px; }
+      #music-view .music-skip-label { padding-top: 5px; font-size: 13px; }
+      #music-view .dt-tunes-controls { gap: 5px; }
+      #music-view .dt-tunes-control { min-width: 0; min-height: 72px; padding: 6px 1px; gap: 2px; font-size: 10px; }
+      #music-view .dt-tunes-control-icon { font-size: 23px; }
     }
 
     .playlist.selected {
@@ -6833,7 +6961,7 @@
     .tabbar {
       position: sticky;
       top: 12px;
-      z-index: 3;
+      z-index: 60;
       display: grid;
       justify-items: end;
       margin: 0 0 12px;
@@ -6881,7 +7009,7 @@
       border-radius: 12px;
       background: var(--surface);
       box-shadow: 0 18px 42px oklch(22% 0.03 245 / 0.16);
-      z-index: 10;
+      z-index: 70;
     }
 
     .nav-menu-wrap.open .nav-menu-panel {
@@ -8357,6 +8485,9 @@
     .preorder-heading-copy small { color: var(--muted); font-size: 11px; font-weight: 800; }
     .preorder-summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
     .preorder-summary { display: grid; gap: 3px; min-height: 82px; padding: 13px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); text-align: center; }
+    button.preorder-summary { width: 100%; color: inherit; font: inherit; cursor: pointer; }
+    button.preorder-summary:hover, button.preorder-summary:focus-visible { border-color: var(--berry); box-shadow: 0 0 0 2px color-mix(in oklch, var(--berry) 14%, transparent); }
+    button.preorder-summary[aria-pressed="true"] { border-color: var(--berry); background: var(--blush); }
     .preorder-summary strong { color: var(--berry); font-size: 25px; line-height: 1; }
     .preorder-summary span { font-size: 11px; font-weight: 900; }
     .preorder-summary small { color: var(--muted); font-size: 10px; }
@@ -8603,6 +8734,18 @@
     .boutique-kit-note-field { display: grid; gap: 7px; margin-top: 15px; color: var(--fg); font-size: 12px; font-weight: 850; }
     .boutique-kit-note-field textarea { width: 100%; min-height: 130px; margin: 0; resize: vertical; }
     .boutique-kit-note-remove { margin-right: auto; color: var(--brick); }
+    .boutique-delivery-issue-dialog { width: min(620px, 100%); }
+    .boutique-delivery-issue-fields { display: grid; gap: 12px; margin-top: 16px; }
+    .boutique-delivery-issue-choice { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .boutique-delivery-issue-choice button { min-height: 58px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); color: var(--fg); font: inherit; font-weight: 900; }
+    .boutique-delivery-issue-choice button[aria-pressed="true"] { border-color: var(--berry); background: var(--blush); color: var(--berry); }
+    .boutique-delivery-issue-panel { display: grid; gap: 12px; }
+    .boutique-delivery-issue-panel[hidden] { display: none; }
+    .boutique-delivery-issue-field { display: grid; gap: 6px; color: var(--fg); font-size: 12px; font-weight: 850; }
+    .boutique-delivery-issue-field select, .boutique-delivery-issue-field textarea { width: 100%; margin: 0; }
+    .boutique-delivery-issue-history { display: grid; gap: 8px; margin-top: 12px; }
+    .boutique-delivery-issue-history-card { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); }
+    .boutique-delivery-issue-history-card small { color: var(--muted); }
     .delivery-message-dialog { width: min(680px, 100%); }
     .delivery-message-fields { display: grid; gap: 14px; margin-top: 15px; }
     .delivery-message-field { display: grid; gap: 7px; color: var(--fg); font-size: 12px; font-weight: 850; }
@@ -14733,12 +14876,16 @@
       body[data-mode="teacher"] .admin-shell .admin-grid { display: none; }
     }
 
-    .tt-feedback-launcher-panel { display: flex; justify-content: center; padding: 18px; }
+    .tt-feedback-launcher-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; justify-items: center; gap: 12px; padding: 18px; }
     body[data-user-role="teacher"] #roster-parent-portal-access { display: none; }
     .tt-feedback-launcher { display: grid; justify-items: center; gap: 8px; min-width: 150px; padding: 12px 18px; border: 0; border-radius: 20px; background: transparent; color: var(--brick); font: inherit; font-weight: 850; cursor: pointer; }
     .tt-feedback-launcher img { width: 92px; height: 92px; object-fit: contain; }
     .tt-feedback-launcher span { font-size: 15px; line-height: 1.2; text-align: center; }
     .tt-feedback-launcher:hover, .tt-feedback-launcher:focus-visible { background: color-mix(in srgb, var(--blush) 24%, white); outline: 3px solid color-mix(in srgb, var(--brick) 40%, transparent); outline-offset: 2px; }
+    .tt-profile-check-in { display: grid; justify-items: center; gap: 8px; min-width: 150px; padding: 12px 18px; border: 0; border-radius: 20px; background: transparent; color: var(--fg); font: inherit; font-weight: 850; cursor: pointer; }
+    .tt-profile-check-in img { width: 92px; height: 92px; object-fit: contain; }
+    .tt-profile-check-in span { font-size: 15px; line-height: 1.2; text-align: center; }
+    .tt-profile-check-in:hover, .tt-profile-check-in:focus-visible { background: color-mix(in srgb, var(--sage) 24%, white); outline: 3px solid color-mix(in srgb, var(--sage-dark) 40%, transparent); outline-offset: 2px; }
     .tt-feedback-dialog { border: 0; padding: 0; background: transparent; width: min(540px, calc(100vw - 24px)); max-width: none; color: var(--fg); }
     .tt-feedback-dialog::backdrop { background: rgba(36, 25, 24, .45); backdrop-filter: blur(3px); }
     .tt-feedback-dialog-inner { max-height: min(88vh, 720px); overflow: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 26px; padding: 20px; box-shadow: var(--shadow); }
@@ -14957,7 +15104,7 @@
             <div class="notification-center-list" data-notification-list aria-live="polite"></div>
           </div>
         </details>
-        <button class="director-message-shortcut" type="button" data-admin-open-section="messages" aria-label="Open Messages" title="Messages"><svg viewBox="0 0 32 32" aria-hidden="true"><use href="#icon-messages"></use></svg><span class="notification-unread-count" id="admin-messages-shortcut-bubble" aria-hidden="true"></span></button>
+        <button class="director-message-shortcut" type="button" data-admin-open-section="messages" aria-label="Open Messages" title="Messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h11.5a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H10l-4.5 3v-3H4a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3Z"></path><path d="M7 9.5h5.5M7 12.5h8"></path><path d="M18.5 9.25H20a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1v2l-3-2h-2.25"></path></svg><span class="notification-unread-count" id="admin-messages-shortcut-bubble" aria-hidden="true"></span></button>
         <button class="director-task-shortcut" type="button" data-open-director-tasks aria-label="Open Tasks" title="Tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="m8 12 2.5 2.5L16 9"></path></svg><span class="notification-unread-count" id="director-task-count" aria-label="0 open tasks">0</span></button>
         <dialog class="director-task-dialog" id="director-task-dialog" aria-labelledby="director-task-title"><div class="director-task-head"><div><h2 id="director-task-title">0 Tasks</h2><p id="director-task-subtitle">Parent messages and follow-ups</p></div><div class="director-task-head-actions"><select class="director-task-sort" id="director-task-sort" aria-label="Sort tasks"><option value="priority">Top Priority</option><option value="recent">Most Recent</option><option value="lexi">Ms. Lexi</option><option value="tiffany">Ms. Tiffany</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select><button class="director-task-history-button" type="button" data-director-task-history>Task History</button><button class="director-task-add" type="button" data-director-task-add aria-label="Add a task" title="Add Task"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button><button class="director-task-close" type="button" data-close-director-tasks aria-label="Close Tasks"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"></path></svg></button></div></div><div style="padding:8px 20px"><p id="director-task-sync-status" role="status">Opening tasks…</p><button type="button" data-director-task-retry>Retry</button> <button type="button" data-director-task-review>Review shared tasks</button></div><div class="director-task-list" id="director-task-list"></div></dialog>
         <dialog class="director-task-complete-dialog" id="director-task-complete-dialog" aria-labelledby="director-task-complete-title"><div class="director-task-complete-card"><h2 id="director-task-complete-title">Mark as Complete?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-task-complete-cancel>Cancel</button><button class="director-task-complete-yes" type="button" data-task-complete-confirm>Yes</button></div></div></dialog>
@@ -15115,10 +15262,6 @@
                     <img src="assets/app-icon-partner-schools.png" alt="">
                   </span>
                   <span class="app-label">My Schools</span>
-                </button>
-                <button class="app-tile" id="teacher-work-launcher" data-tab-jump="my-day" aria-label="Open Check In" hidden>
-                  <span class="app-icon image-icon" aria-hidden="true"><img src="assets/event-check-in-out.png" alt=""></span>
-                  <span class="app-label">Check In</span>
                 </button>
                 <button class="app-tile" data-tab-jump="pay" aria-label="Open Payday">
                   <span class="app-icon image-icon pay" aria-hidden="true">
@@ -15664,16 +15807,19 @@
                     <button class="music-main-toggle" type="button" data-my-day-music-toggle aria-label="Play or pause song">▶</button>
                   </div>
                 </div>
-                <audio class="dt-tunes-audio" id="dt-tunes-audio" preload="none"></audio>
+                <audio class="dt-tunes-audio" id="dt-tunes-audio" preload="auto"></audio>
                 <div class="music-timeline" aria-label="Song progress">
+                  <button class="music-skip-compact" type="button" data-music-skip="-15" aria-label="Rewind 15 seconds"><svg class="music-skip-arrow" viewBox="0 0 64 64" aria-hidden="true"><path d="M18 16H8v-10"></path><path d="M9 16a25 25 0 1 1-3 25"></path></svg><span class="music-skip-label">15s</span></button>
                   <span data-music-current-time>0:00</span>
                   <input class="music-seek-slider" type="range" data-music-progress min="0" max="100" step="0.1" value="0" aria-label="Song position" disabled>
                   <span data-music-duration>0:00</span>
+                  <button class="music-skip-compact" type="button" data-music-skip="15" aria-label="Forward 15 seconds"><svg class="music-skip-arrow" viewBox="0 0 64 64" aria-hidden="true"><path d="M46 16h10v-10"></path><path d="M55 16a25 25 0 1 0 3 25"></path></svg><span class="music-skip-label">15s</span></button>
                 </div>
                 <div class="dt-tunes-controls" aria-label="Playlist controls">
-                  <button class="dt-tunes-control" type="button" data-music-skip="-15" aria-label="Rewind 15 seconds">↶ 15s</button><button class="dt-tunes-control" type="button" data-music-skip="15" aria-label="Forward 15 seconds">15s ↷</button><button class="dt-tunes-control" type="button" data-music-control="previous" aria-label="Play previous song">⏮ Previous</button>
-                  <button class="dt-tunes-control" id="dt-tunes-repeat" type="button" data-music-control="repeat" aria-label="Repeat current song" aria-pressed="false">↻ Repeat</button>
-                  <button class="dt-tunes-control" type="button" data-music-control="next" aria-label="Play next song">Next ⏭</button>
+                  <button class="dt-tunes-control" type="button" data-music-control="start-over" aria-label="Start song over"><span class="dt-tunes-control-icon" aria-hidden="true">|◀</span><span>Start Over</span></button>
+                  <button class="dt-tunes-control" type="button" data-music-control="previous" aria-label="Play previous song"><span class="dt-tunes-control-icon" aria-hidden="true">◀◀</span><span>Previous</span></button>
+                  <button class="dt-tunes-control" id="dt-tunes-repeat" type="button" data-music-control="repeat" aria-label="Repeat current song" aria-pressed="false"><span class="dt-tunes-control-icon" aria-hidden="true">↻</span><span>Repeat</span></button>
+                  <button class="dt-tunes-control" type="button" data-music-control="next" aria-label="Play next song"><span class="dt-tunes-control-icon" aria-hidden="true">▶▶</span><span>Next</span></button>
                 </div>
               </div>
 
@@ -15770,9 +15916,13 @@
               </div>
 
               <div class="panel tt-feedback-launcher-panel">
+                <button class="tt-profile-check-in" id="teacher-work-launcher" data-tab-jump="my-day" type="button" aria-label="Open Check In" hidden>
+                  <img src="assets/event-check-in-out.png" alt="">
+                  <span>Check In</span>
+                </button>
                 <button class="tt-feedback-launcher" id="tt-feedback-launcher" type="button" aria-haspopup="dialog" aria-controls="tt-feedback-dialog">
                   <img src="assets/feedback/help-shape-magic.png" alt="">
-                  <span>Help Shape the Magic</span>
+                  <span>Shape the Magic</span>
                 </button>
               </div>
 
@@ -18590,7 +18740,7 @@
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m8 15 2 2 5-5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Attendance</strong><small>Review attendance history and class helper records.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-attendance"></section></details>
         <details class="roster-profile-raw" id="roster-profile-tuition-plan"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M15.5 8.5H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8.5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Tuition Plan</strong><small>Open this dancer’s complete financial hub.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-billing-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Email &amp; Newsletter History</strong><small>See sent, delivered, read, link-clicked, and Parent Portal setup activity.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
-        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M8 9V6a4 4 0 0 1 8 0v3"></path></svg></span><span class="roster-profile-tool-copy"><strong>Boutique Orders</strong><small>Track T-shirt, bag, pickup, and delivery status.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-shirt-field"><label>T-Shirt &amp; Bag Status<select id="roster-edit-kit-status"><option value="not_ready">To Fill</option><option value="ready">To Pick Up</option><option value="picked_up">To Deliver</option><option value="delivered">Delivered</option></select></label><div class="roster-profile-delivery-date"><span>T-Shirt &amp; Bag Delivery Date</span><strong id="roster-edit-kit-delivered-date">Not delivered</strong></div></div><div class="roster-profile-placeholder" id="roster-edit-boutique-orders">No boutique orders are assigned to this dancer.</div></details>
+        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M8 9V6a4 4 0 0 1 8 0v3"></path></svg></span><span class="roster-profile-tool-copy"><strong>Boutique Orders</strong><small>Track T-shirt, bag, pickup, delivery, and issue history.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-shirt-field"><label>T-Shirt &amp; Bag Status<select id="roster-edit-kit-status"><option value="not_ready">To Fill</option><option value="ready">To Pick Up</option><option value="picked_up">To Deliver</option><option value="delivered">Delivered</option></select></label><div class="roster-profile-delivery-date"><span>T-Shirt &amp; Bag Delivery Date</span><strong id="roster-edit-kit-delivered-date">Not delivered</strong></div></div><div class="roster-profile-placeholder" id="roster-edit-boutique-orders">No boutique orders are assigned to this dancer.</div><div class="boutique-delivery-issue-history" id="roster-profile-kit-delivery-history"></div></details>
         </div>
       </form>
       <div class="confirm-actions roster-profile-actions">
@@ -18864,6 +19014,36 @@
       </div>
     </div>
   </div>
+  <div class="confirm-overlay" id="boutique-delivery-issue-overlay" aria-hidden="true">
+    <div class="confirm-dialog boutique-delivery-issue-dialog" role="dialog" aria-modal="true" aria-labelledby="boutique-delivery-issue-title">
+      <div class="boutique-quantity-header">
+        <div><h3 id="boutique-delivery-issue-title">Delivery Issue?</h3><p id="boutique-delivery-issue-student"></p></div>
+        <button class="boutique-quantity-close" type="button" id="boutique-delivery-issue-close" aria-label="Close delivery issue">×</button>
+      </div>
+      <div class="boutique-delivery-issue-fields">
+        <div class="boutique-delivery-issue-choice" role="group" aria-label="Delivery issue type">
+          <button type="button" data-delivery-issue-type="dispute" aria-pressed="false">Dispute</button>
+          <button type="button" data-delivery-issue-type="error" aria-pressed="false">Error</button>
+        </div>
+        <div class="boutique-delivery-issue-panel" id="boutique-delivery-error-panel" hidden>
+          <label class="boutique-delivery-issue-field">Send dancer back to
+            <select id="boutique-delivery-error-step"><option value="waiting">Fill</option><option value="ready">Pick Up</option><option value="picked_up">Deliver</option></select>
+          </label>
+        </div>
+        <div class="boutique-delivery-issue-panel" id="boutique-delivery-dispute-panel" hidden>
+          <label class="boutique-delivery-issue-field">Dispute reason
+            <select id="boutique-delivery-dispute-reason"><option value="exchange">Exchange</option><option value="not_received">Didn't Receive</option></select>
+          </label>
+          <label class="boutique-delivery-issue-field" id="boutique-delivery-exchange-size-field">New T-Shirt size<select id="boutique-delivery-exchange-size"></select></label>
+          <label class="boutique-delivery-issue-field" id="boutique-delivery-notes-field" hidden>Notes and delivery details<textarea id="boutique-delivery-issue-notes" rows="5" maxlength="1000" placeholder="What happened, who reported it, and any follow-up details..."></textarea></label>
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <button class="secondary" type="button" id="boutique-delivery-issue-cancel">Cancel</button>
+        <button class="primary" type="button" id="boutique-delivery-issue-save" disabled>Save &amp; Reassign</button>
+      </div>
+    </div>
+  </div>
   <div class="confirm-overlay" id="delivery-message-overlay" aria-hidden="true">
     <div class="confirm-dialog delivery-message-dialog" role="dialog" aria-modal="true" aria-labelledby="delivery-message-title">
       <div class="boutique-quantity-header">
@@ -19010,8 +19190,8 @@
   <dialog class="tt-feedback-dialog" id="tt-feedback-dialog" aria-labelledby="tt-feedback-dialog-title">
     <div class="tt-feedback-dialog-inner">
       <div class="tt-feedback-dialog-head">
-        <h2 id="tt-feedback-dialog-title">Help Shape the Magic</h2>
-        <button class="tt-feedback-dialog-close" type="button" data-tt-feedback-close aria-label="Close Help Shape the Magic">&times;</button>
+        <h2 id="tt-feedback-dialog-title">Shape the Magic</h2>
+        <button class="tt-feedback-dialog-close" type="button" data-tt-feedback-close aria-label="Close Shape the Magic">&times;</button>
       </div>
       <section class="tt-feedback-categories" id="tt-feedback-categories">
         <div class="tt-feedback-grid" aria-label="Choose a feedback category">
@@ -20238,6 +20418,13 @@
       if (leftKey === rightKey) return 1;
       const leftTokens = [...new Set(leftKey.split(/\s+/).filter(Boolean))];
       const rightTokens = [...new Set(rightKey.split(/\s+/).filter(Boolean))];
+      // Campus directions are part of a school's identity. Without this guard,
+      // "Primrose North Rockwall" was treated as a close match for the separate
+      // "Primrose Rockwall" campus because the shorter name is fully contained.
+      const campusDirections = new Set(["north", "south", "east", "west"]);
+      const leftDirections = leftTokens.filter((token) => campusDirections.has(token));
+      const rightDirections = rightTokens.filter((token) => campusDirections.has(token));
+      if (leftDirections.join(" ") !== rightDirections.join(" ")) return 0;
       const shared = leftTokens.filter((token) => rightTokens.includes(token)).length;
       if (!shared) return 0;
       const leftCoverage = shared / leftTokens.length;
@@ -21976,6 +22163,7 @@
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(student.id || "")) return true;
       const actorId = window.dtCurrentProfile?.id || profileTeacher?.id || null;
       const payload = {
+        tshirt_size: normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender) || null,
         kit_ready: Boolean(student.kitReady || student.kitPickedUp || student.kitReceived),
         kit_ready_at: (student.kitReady || student.kitPickedUp || student.kitReceived) ? (student.kitReadyAt || student.kitPickedUpAt || student.kitDeliveredAt || new Date().toISOString()) : null,
         kit_ready_by: (student.kitReady || student.kitPickedUp || student.kitReceived) ? (student.kitReadyBy || student.kitPickedUpBy || student.kitDeliveredBy || actorId) : null,
@@ -21985,7 +22173,8 @@
         kit_received: Boolean(student.kitReceived),
         kit_delivered_at: student.kitReceived ? (student.kitDeliveredAt || new Date().toISOString()) : null,
         kit_delivered_by: student.kitReceived ? (student.kitDeliveredBy || actorId) : null,
-        kit_delivery_note: student.kitDeliveryNote || null
+        kit_delivery_note: student.kitDeliveryNote || null,
+        additional_information: student.additionalInformation && typeof student.additionalInformation === "object" ? student.additionalInformation : {}
       };
       const { error } = await window.dtSupabase.from("students").update(payload).eq("id", student.id);
       if (error) throw error;
@@ -33947,7 +34136,7 @@
       return `<div class="preorder-planner"><table><thead><tr><th>Size</th><th>Customer Orders</th><th>Planned Extras</th><th>Order From Vendor</th></tr></thead><tbody>${sizes.map((size) => {
         const customerCount = orders.filter((order) => order.size === size).reduce((sum, order) => sum + Math.max(1, Number(order.quantity) || 1), 0);
         const extraCount = extras[size] || 0;
-        return `<tr><td><strong>${rosterSafe(size)}</strong></td><td>${customerCount}</td><td><input type="number" inputmode="numeric" min="0" step="1" value="${extraCount}" data-preorder-extra-campaign="${rosterSafe(campaign.id)}" data-preorder-extra-size="${rosterSafe(size)}" aria-label="Extra ${rosterSafe(size)} quarter zips"></td><td><strong>${customerCount + extraCount}</strong></td></tr>`;
+        return `<tr><td><strong>${rosterSafe(size)}</strong></td><td>${customerCount}</td><td><input type="number" inputmode="numeric" min="0" step="1" value="${extraCount}" data-preorder-extra-campaign="${rosterSafe(campaign.id)}" data-preorder-extra-size="${rosterSafe(size)}" data-preorder-customer-count="${customerCount}" aria-label="Extra ${rosterSafe(size)} quarter zips"></td><td><strong data-preorder-vendor-quantity="${rosterSafe(size)}">${customerCount + extraCount}</strong></td></tr>`;
       }).join("")}</tbody></table></div>`;
     };
 
@@ -34000,10 +34189,14 @@
         const schools = [...new Set(orders.map((order) => order.school_name).filter(Boolean))]
           .sort((left, right) => rosterSchoolNickname(left).localeCompare(rosterSchoolNickname(right), undefined, { sensitivity: "base" }));
         const sizes = preorderOrderedSizes(campaign, orders.map((order) => order.size));
+        const filterSearch = document.getElementById(`preorder-search-${campaign.id}`)?.value || "";
+        const filterStatus = document.getElementById(`preorder-status-${campaign.id}`)?.value || "all";
+        const filterSchool = document.getElementById(`preorder-school-${campaign.id}`)?.value || "all";
+        const filterSize = document.getElementById(`preorder-size-${campaign.id}`)?.value || "all";
         const visible = preorderFilteredOrders(campaign);
         const selectedLabelCount = orders.filter((order) => selectedPreorderLabelIds.has(String(order.id))).length;
         const action = campaign.vendor_status === "collecting" ? { status: "ordered", label: "Mark Ordered from Vendor" } : campaign.vendor_status === "ordered" ? { status: "received", label: "Mark Shipment Delivered" } : null;
-        return `<section class="preorder-campaign" data-preorder-campaign="${rosterSafe(campaign.id)}"><div class="preorder-heading-copy">${campaign.image_url ? `<img src="${rosterSafe(campaign.image_url)}" alt="">` : ""}<span><strong>${rosterSafe(campaign.title)}</strong><small>Closes ${rosterSafe(preorderDate(campaign.deadline))} · ${rosterSafe(campaign.vendor_status === "collecting" ? "Collecting Orders" : campaign.vendor_status === "ordered" ? "Ordered from Vendor" : campaign.vendor_status === "received" ? "Shipment Delivered" : "Closed")}</small></span></div><div class="preorder-summary-grid"><span class="preorder-summary"><strong>${activeOrders.length}</strong><span>Paid Orders</span><small>Active submissions</small></span><span class="preorder-summary"><strong>${pieces}</strong><span>Items Ordered</span><small>Across all sizes</small></span><span class="preorder-summary"><strong>${pieces + extras}</strong><span>Order Quantity</span><small>Orders + extras</small></span><span class="preorder-summary"><strong>${needsReview}</strong><span>Needs Review</span><small>Profile matches</small></span></div>${preorderPlannerMarkup(campaign)}<div class="preorder-toolbar"><input id="preorder-search-${rosterSafe(campaign.id)}" type="search" placeholder="Search dancer or personalization" aria-label="Search ${rosterSafe(campaign.title)}"><select id="preorder-status-${rosterSafe(campaign.id)}" aria-label="Preorder status"><option value="all">All statuses</option><option value="needs_review">Needs review</option>${["new", "ordered", "received", "ready_to_distribute", "delivered", "payment_failed", "cancelled", "refunded"].map((status) => `<option value="${status}">${rosterSafe(preorderStatusLabel(status))}</option>`).join("")}</select><select id="preorder-school-${rosterSafe(campaign.id)}" aria-label="Preorder school"><option value="all">All schools</option>${schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}</select><select id="preorder-size-${rosterSafe(campaign.id)}" aria-label="Preorder size"><option value="all">All sizes</option>${sizes.map((size) => `<option value="${rosterSafe(size)}">${rosterSafe(size)}</option>`).join("")}</select></div><div class="preorder-actions"><strong id="preorder-visible-${rosterSafe(campaign.id)}">${visible.length} order${visible.length === 1 ? "" : "s"}</strong><span><button class="secondary" type="button" data-preorder-label-select-visible="${rosterSafe(campaign.id)}">Select Visible Labels</button><button class="secondary" type="button" data-preorder-print-labels="${rosterSafe(campaign.id)}" ${selectedLabelCount ? "" : "disabled"}>Print Labels${selectedLabelCount ? ` (${selectedLabelCount})` : ""}</button><button class="secondary" type="button" data-preorder-save-extras="${rosterSafe(campaign.id)}">Save Extras</button>${action ? `<button type="button" data-preorder-campaign-status="${rosterSafe(campaign.id)}" data-preorder-next-status="${action.status}">${action.label}</button>` : ""}</span></div><div class="preorder-order-grid" id="preorder-orders-${rosterSafe(campaign.id)}">${visible.length ? visible.map((order) => preorderOrderCardMarkup(campaign, order)).join("") : `<div class="boutique-kit-empty">No preorder orders match these filters.</div>`}</div></section>`;
+        return `<section class="preorder-campaign" data-preorder-campaign="${rosterSafe(campaign.id)}"><div class="preorder-heading-copy">${campaign.image_url ? `<img src="${rosterSafe(campaign.image_url)}" alt="">` : ""}<span><strong>${rosterSafe(campaign.title)}</strong><small>Closes ${rosterSafe(preorderDate(campaign.deadline))} · ${rosterSafe(campaign.vendor_status === "collecting" ? "Collecting Orders" : campaign.vendor_status === "ordered" ? "Ordered from Vendor" : campaign.vendor_status === "received" ? "Shipment Delivered" : "Closed")}</small></span></div><div class="preorder-summary-grid"><span class="preorder-summary"><strong>${activeOrders.length}</strong><span>Paid Orders</span><small>Active submissions</small></span><span class="preorder-summary"><strong>${pieces}</strong><span>Items Ordered</span><small>Across all sizes</small></span><span class="preorder-summary"><strong data-preorder-total-quantity>${pieces + extras}</strong><span>Order Quantity</span><small>Orders + extras</small></span><button class="preorder-summary" type="button" data-preorder-needs-review="${rosterSafe(campaign.id)}" aria-pressed="${filterStatus === "needs_review"}"><strong>${needsReview}</strong><span>Needs Review</span><small>Profile matches</small></button></div>${preorderPlannerMarkup(campaign)}<div class="preorder-toolbar"><input id="preorder-search-${rosterSafe(campaign.id)}" type="search" value="${rosterSafe(filterSearch)}" placeholder="Search dancer or personalization" aria-label="Search ${rosterSafe(campaign.title)}"><select id="preorder-status-${rosterSafe(campaign.id)}" aria-label="Preorder status"><option value="all" ${filterStatus === "all" ? "selected" : ""}>All statuses</option><option value="needs_review" ${filterStatus === "needs_review" ? "selected" : ""}>Needs review</option>${["new", "ordered", "received", "ready_to_distribute", "delivered", "payment_failed", "cancelled", "refunded"].map((status) => `<option value="${status}" ${filterStatus === status ? "selected" : ""}>${rosterSafe(preorderStatusLabel(status))}</option>`).join("")}</select><select id="preorder-school-${rosterSafe(campaign.id)}" aria-label="Preorder school"><option value="all" ${filterSchool === "all" ? "selected" : ""}>All schools</option>${schools.map((school) => `<option value="${rosterSafe(school)}" ${filterSchool === school ? "selected" : ""}>${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}</select><select id="preorder-size-${rosterSafe(campaign.id)}" aria-label="Preorder size"><option value="all" ${filterSize === "all" ? "selected" : ""}>All sizes</option>${sizes.map((size) => `<option value="${rosterSafe(size)}" ${filterSize === size ? "selected" : ""}>${rosterSafe(size)}</option>`).join("")}</select></div><div class="preorder-actions"><strong id="preorder-visible-${rosterSafe(campaign.id)}">${visible.length} order${visible.length === 1 ? "" : "s"}</strong><span><button class="secondary" type="button" data-preorder-label-select-visible="${rosterSafe(campaign.id)}">Select Visible Labels</button><button class="secondary" type="button" data-preorder-print-labels="${rosterSafe(campaign.id)}" ${selectedLabelCount ? "" : "disabled"}>Print Labels${selectedLabelCount ? ` (${selectedLabelCount})` : ""}</button><button class="secondary" type="button" data-preorder-save-extras="${rosterSafe(campaign.id)}">Save Extras</button>${action ? `<button type="button" data-preorder-campaign-status="${rosterSafe(campaign.id)}" data-preorder-next-status="${action.status}">${action.label}</button>` : ""}</span></div><div class="preorder-order-grid" id="preorder-orders-${rosterSafe(campaign.id)}">${visible.length ? visible.map((order) => preorderOrderCardMarkup(campaign, order)).join("") : `<div class="boutique-kit-empty">No preorder orders match these filters.</div>`}</div></section>`;
       }).join("");
     };
 
@@ -34012,6 +34205,38 @@
       setText(`preorder-visible-${campaign.id}`, `${visible.length} order${visible.length === 1 ? "" : "s"}`);
       const list = document.getElementById(`preorder-orders-${campaign.id}`);
       if (list) list.innerHTML = visible.length ? visible.map((order) => preorderOrderCardMarkup(campaign, order)).join("") : `<div class="boutique-kit-empty">No preorder orders match these filters.</div>`;
+    };
+
+    const preorderExtraRows = (campaignId) => [...document.querySelectorAll(`[data-preorder-extra-campaign="${CSS.escape(String(campaignId))}"]`)].map((input) => ({
+      campaign_id: campaignId,
+      size: input.dataset.preorderExtraSize,
+      quantity: Math.max(0, Number(input.value) || 0)
+    }));
+
+    const updatePreorderExtraTotals = (campaignId) => {
+      const section = document.querySelector(`[data-preorder-campaign="${CSS.escape(String(campaignId))}"]`);
+      if (!section) return;
+      let total = 0;
+      section.querySelectorAll(`[data-preorder-extra-campaign="${CSS.escape(String(campaignId))}"]`).forEach((input) => {
+        const quantity = Math.max(0, Number(input.value) || 0);
+        const rowTotal = Math.max(0, Number(input.dataset.preorderCustomerCount) || 0) + quantity;
+        const output = input.closest("tr")?.querySelector("[data-preorder-vendor-quantity]");
+        if (output) output.textContent = String(rowTotal);
+        total += rowTotal;
+      });
+      const summary = section.querySelector("[data-preorder-total-quantity]");
+      if (summary) summary.textContent = String(total);
+    };
+
+    const savePreorderExtras = async (campaignId) => {
+      const rows = preorderExtraRows(campaignId);
+      const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(campaignId));
+      if (document.body.dataset.tourMode !== "true") {
+        const { error } = await window.dtSupabase.from("boutique_preorder_extras").upsert(rows, { onConflict: "campaign_id,size" });
+        if (error) return { ok: false, error };
+      }
+      if (campaign) campaign.boutique_preorder_extras = rows.map(({ size, quantity }) => ({ size, quantity }));
+      return { ok: true };
     };
 
     const loadBoutiquePreorders = async (profile = window.dtCurrentProfile) => {
@@ -34052,6 +34277,11 @@
 
     document.getElementById("preorder-sync")?.addEventListener("click", () => document.body.dataset.tourMode === "true" ? showToast("Preview preorder data is already current") : refreshPreordersFromJotform());
     document.getElementById("preorder-campaigns")?.addEventListener("input", (event) => {
+      const extraInput = event.target.closest("[data-preorder-extra-campaign]");
+      if (extraInput) {
+        updatePreorderExtraTotals(extraInput.dataset.preorderExtraCampaign);
+        return;
+      }
       if (!event.target.matches(".preorder-toolbar input")) return;
       const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(event.target.closest("[data-preorder-campaign]")?.dataset.preorderCampaign));
       if (campaign) renderBoutiquePreorderOrderList(campaign);
@@ -34060,7 +34290,12 @@
       const assign = event.target.closest("[data-preorder-assign]");
       if (!assign) {
         const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(event.target.closest("[data-preorder-campaign]")?.dataset.preorderCampaign));
-        if (campaign && event.target.matches(".preorder-toolbar select")) renderBoutiquePreorderOrderList(campaign);
+        if (campaign && event.target.matches(".preorder-toolbar select")) {
+          if (event.target.id === `preorder-status-${campaign.id}`) {
+            event.target.closest("[data-preorder-campaign]")?.querySelector("[data-preorder-needs-review]")?.setAttribute("aria-pressed", String(event.target.value === "needs_review"));
+          }
+          renderBoutiquePreorderOrderList(campaign);
+        }
         return;
       }
       const order = boutiquePreorderCampaigns.flatMap(preorderCampaignOrders).find((item) => String(item.id) === String(assign.dataset.preorderAssign));
@@ -34077,6 +34312,17 @@
       showToast("Preorder match saved");
     });
     document.getElementById("preorder-campaigns")?.addEventListener("click", async (event) => {
+      const needsReviewButton = event.target.closest("[data-preorder-needs-review]");
+      if (needsReviewButton) {
+        const campaignId = needsReviewButton.dataset.preorderNeedsReview;
+        const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(campaignId));
+        const status = document.getElementById(`preorder-status-${campaignId}`);
+        if (!campaign || !status) return;
+        status.value = status.value === "needs_review" ? "all" : "needs_review";
+        needsReviewButton.setAttribute("aria-pressed", String(status.value === "needs_review"));
+        renderBoutiquePreorderOrderList(campaign);
+        return;
+      }
       const labelToggle = event.target.closest("[data-preorder-label-toggle]");
       if (labelToggle) {
         const orderId = String(labelToggle.dataset.preorderLabelToggle);
@@ -34102,22 +34348,22 @@
       const extrasButton = event.target.closest("[data-preorder-save-extras]");
       if (extrasButton) {
         const campaignId = extrasButton.dataset.preorderSaveExtras;
-        const rows = [...document.querySelectorAll(`[data-preorder-extra-campaign="${CSS.escape(campaignId)}"]`)].map((input) => ({ campaign_id: campaignId, size: input.dataset.preorderExtraSize, quantity: Math.max(0, Number(input.value) || 0) }));
-        if (document.body.dataset.tourMode === "true") {
-          const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(campaignId));
-          if (campaign) campaign.boutique_preorder_extras = rows;
-          renderBoutiquePreorders();
-          return showToast("Extra quantities saved in preview");
-        }
-        const { error } = await window.dtSupabase.from("boutique_preorder_extras").upsert(rows, { onConflict: "campaign_id,size" });
-        if (error) return showToast("Extra quantities could not be saved.");
-        await loadBoutiquePreorders();
-        return showToast("Extra quantities saved");
+        extrasButton.disabled = true;
+        const saved = await savePreorderExtras(campaignId);
+        extrasButton.disabled = false;
+        if (!saved.ok) return showToast("Extra quantities could not be saved.");
+        return showToast(document.body.dataset.tourMode === "true" ? "Extra quantities saved in preview" : "Extra quantities saved");
       }
       const campaignButton = event.target.closest("[data-preorder-campaign-status]");
       if (campaignButton) {
         const campaignId = campaignButton.dataset.preorderCampaignStatus;
         const nextStatus = campaignButton.dataset.preorderNextStatus;
+        campaignButton.disabled = true;
+        const extrasSaved = await savePreorderExtras(campaignId);
+        if (!extrasSaved.ok) {
+          campaignButton.disabled = false;
+          return showToast("Save the extra quantities before marking this preorder ordered.");
+        }
         if (document.body.dataset.tourMode === "true") {
           const campaign = boutiquePreorderCampaigns.find((item) => String(item.id) === String(campaignId));
           if (campaign) {
@@ -34136,7 +34382,6 @@
           renderDirectorBoutiqueOrders(); renderTeacherOrders();
           return showToast(nextStatus === "ordered" ? "Preorder marked ordered from vendor" : "Shipment delivered · preorders moved to Boutique To Fill");
         }
-        campaignButton.disabled = true;
         const { error } = await window.dtSupabase.rpc("set_boutique_preorder_campaign_status", { target_campaign_id: campaignId, target_status: nextStatus });
         if (error) { campaignButton.disabled = false; return showToast(error.message || "The preorder campaign could not be updated."); }
         await loadBoutiquePreorders(); await loadBoutiqueStock();
@@ -37922,6 +38167,18 @@
       const orders = boutiqueOrders.filter((order) => String(order.assigned_student_id || "") === String(student?.id || ""));
       container.innerHTML = orders.length ? orders.map((order) => `<div class="boutique-order-item"><strong>${rosterSafe(boutiqueOrderItemsLabel(order))}</strong><span>${rosterSafe(boutiqueStatusLabel(order.status))}</span></div>`).join("") : "No boutique orders are assigned to this dancer.";
     };
+    const renderRosterProfileKitDeliveryHistory = (student) => {
+      const container = document.getElementById("roster-profile-kit-delivery-history");
+      if (!container) return;
+      const history = Array.isArray(student?.additionalInformation?.kit_delivery_history) ? student.additionalInformation.kit_delivery_history : [];
+      container.innerHTML = history.length ? `<strong>Delivery Issue History</strong>${history.map((entry) => {
+        const createdAt = entry.createdAt ? new Date(entry.createdAt) : null;
+        const deliveredAt = entry.originalDeliveredAt ? new Date(entry.originalDeliveredAt) : null;
+        const typeLabel = entry.issueType === "error" ? "Delivery Error" : entry.reason === "exchange" ? "Exchange" : "Didn't Receive";
+        const sizeLabel = entry.newSize ? `${entry.originalSize || "Unknown size"} → ${entry.newSize}` : (entry.originalSize || "Size not recorded");
+        return `<div class="boutique-delivery-issue-history-card"><strong>${rosterSafe(typeLabel)} · ${rosterSafe(sizeLabel)}</strong><small>Original delivery: ${rosterSafe(deliveredAt && !Number.isNaN(deliveredAt.getTime()) ? deliveredAt.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "Date not recorded")}</small><small>Reported: ${rosterSafe(createdAt && !Number.isNaN(createdAt.getTime()) ? createdAt.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "Date not recorded")} · Sent to ${rosterSafe(entry.targetStatus === "ready" ? "Pick Up" : entry.targetStatus === "picked_up" ? "Deliver" : "Fill")}</small>${entry.notes ? `<span>${rosterSafe(entry.notes)}</span>` : ""}</div>`;
+      }).join("")}` : `<div class="teacher-roster-empty">No delivery issues recorded.</div>`;
+    };
     const setRosterProfileTab = (tabName = "profile") => {
       const activeTab = ["profile", "parent-portal", "histories"].includes(tabName) ? tabName : "profile";
       document.querySelectorAll("[data-roster-profile-tab]").forEach((button) => {
@@ -38144,6 +38401,7 @@
         ? deliveredDate.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })
         : "Not delivered";
       renderRosterProfileBoutiqueOrders(student);
+      renderRosterProfileKitDeliveryHistory(student);
       document.getElementById("roster-edit-parent-relationship").value = profileValue("parentRelationship", "parent_relationship");
       document.getElementById("roster-edit-enrollment-history").value = profileValue("enrollmentHistory", "enrollment_history");
       document.getElementById("roster-edit-related-dancer").value = profileValue("relatedDancerName", "related_dancer_name");
@@ -38462,6 +38720,8 @@
     const selectedBoutiqueKitIds = new Set();
     let boutiqueKitNoteStudentId = "";
     let boutiqueOrderNoteId = "";
+    let boutiqueDeliveryIssueStudentId = "";
+    let boutiqueDeliveryIssueType = "";
     const boutiqueKitRecords = () => [...new Map(rosterClasses.filter((item) => item.sourceActive !== false).flatMap((rosterClass) => rosterEnrolled(rosterClass).map((student) => ({ rosterClass, student }))).map((record) => [record.student.id, record])).values()];
     const boutiqueKitStatus = (student) => student.kitReceived ? "received" : student.kitPickedUp ? "picked_up" : student.kitReady ? "ready" : "waiting";
     const boutiqueShirtSizeOrder = ["NB", "0-3M", "3-6M", "6-9M", "9-12M", "12M", "18M", "24M", "2T", "3T", "4T", "5T", "SC", "MC", "6T", "6", "6X", "7", "8", "YXS", "YS", "YM", "YL", "YXL", "AXS", "AS", "AM", "AL", "AXL", "A2XL", "A3XL"];
@@ -38821,7 +39081,9 @@
         const receivesSageBoyShirt = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
         const hasNote = Boolean(String(student.kitDeliveryNote || "").trim());
         const studentName = rosterStudentFullName(student);
-        return `<article class="boutique-kit-card is-${status} ${selectedBoutiqueKitIds.has(student.id) ? "is-selected" : ""}"><button class="boutique-kit-card-select" type="button" ${selectable ? `data-boutique-kit-select-card="${rosterSafe(student.id)}"` : "disabled"} aria-pressed="${selectedBoutiqueKitIds.has(student.id) ? "true" : "false"}" aria-label="${selectedBoutiqueKitIds.has(student.id) ? "Deselect" : "Select"} ${rosterSafe(studentName)}"><span class="boutique-kit-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="boutique-kit-student"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(studentName)}</strong><small>${rosterSafe(rosterAge(student.birthdate))}</small></span></span><span class="boutique-kit-location"><strong>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))}</strong><small>${rosterSafe(rosterClass.name)} · ${rosterSafe(rosterTeacherName(rosterClass.teacherId))}</small></span><span class="boutique-kit-size ${receivesSageBoyShirt ? "is-sage-boy" : ""}">${rosterSafe(size)}</span></button><button class="boutique-kit-note-button ${hasNote ? "has-note" : ""}" type="button" data-boutique-kit-note="${rosterSafe(student.id)}" aria-label="${hasNote ? "Edit" : "Add"} delivery note for ${rosterSafe(studentName)}" title="${hasNote ? "Edit delivery note" : "Add delivery note"}">+</button></article>`;
+        const cardAction = selectable ? `data-boutique-kit-select-card="${rosterSafe(student.id)}"` : `data-boutique-kit-delivery-issue="${rosterSafe(student.id)}"`;
+        const cardLabel = selectable ? `${selectedBoutiqueKitIds.has(student.id) ? "Deselect" : "Select"} ${studentName}` : `Open delivery issue for ${studentName}`;
+        return `<article class="boutique-kit-card is-${status} ${selectedBoutiqueKitIds.has(student.id) ? "is-selected" : ""}"><button class="boutique-kit-card-select" type="button" ${cardAction} aria-pressed="${selectedBoutiqueKitIds.has(student.id) ? "true" : "false"}" aria-label="${rosterSafe(cardLabel)}"><span class="boutique-kit-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="boutique-kit-student"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span><strong>${rosterSafe(studentName)}</strong><small>${rosterSafe(rosterAge(student.birthdate))}</small></span></span><span class="boutique-kit-location"><strong>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))}</strong><small>${rosterSafe(rosterClass.name)} · ${rosterSafe(rosterTeacherName(rosterClass.teacherId))}</small></span><span class="boutique-kit-size ${receivesSageBoyShirt ? "is-sage-boy" : ""}">${rosterSafe(size)}</span></button><button class="boutique-kit-note-button ${hasNote ? "has-note" : ""}" type="button" data-boutique-kit-note="${rosterSafe(student.id)}" aria-label="${hasNote ? "Edit" : "Add"} delivery note for ${rosterSafe(studentName)}" title="${hasNote ? "Edit delivery note" : "Add delivery note"}">+</button></article>`;
       }).join("") : `<div class="boutique-kit-empty">No enrollment kits match these filters.</div>`;
       const activeStatus = document.getElementById("boutique-kit-status-filter")?.value || "waiting";
       const selectedCount = [...selectedBoutiqueKitIds].filter((id) => records.some(({ student }) => student.id === id && boutiqueKitStatus(student) === activeStatus)).length;
@@ -38844,6 +39106,111 @@
       } catch (error) {
         sharedRosterError("The T-Shirt and bag updates could not be saved.", error, { reload: false });
       }
+    };
+
+    const closeBoutiqueDeliveryIssue = () => {
+      const overlay = document.getElementById("boutique-delivery-issue-overlay");
+      overlay?.classList.remove("active");
+      overlay?.setAttribute("aria-hidden", "true");
+      boutiqueDeliveryIssueStudentId = "";
+      boutiqueDeliveryIssueType = "";
+    };
+    const updateBoutiqueDeliveryIssueForm = () => {
+      document.querySelectorAll("[data-delivery-issue-type]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.deliveryIssueType === boutiqueDeliveryIssueType)));
+      const errorPanel = document.getElementById("boutique-delivery-error-panel");
+      const disputePanel = document.getElementById("boutique-delivery-dispute-panel");
+      if (errorPanel) errorPanel.hidden = boutiqueDeliveryIssueType !== "error";
+      if (disputePanel) disputePanel.hidden = boutiqueDeliveryIssueType !== "dispute";
+      const disputeReason = document.getElementById("boutique-delivery-dispute-reason")?.value || "exchange";
+      const exchangeField = document.getElementById("boutique-delivery-exchange-size-field");
+      const notesField = document.getElementById("boutique-delivery-notes-field");
+      if (exchangeField) exchangeField.hidden = boutiqueDeliveryIssueType !== "dispute" || disputeReason !== "exchange";
+      if (notesField) notesField.hidden = boutiqueDeliveryIssueType !== "dispute" || disputeReason !== "not_received";
+      const saveButton = document.getElementById("boutique-delivery-issue-save");
+      if (saveButton) saveButton.disabled = !boutiqueDeliveryIssueType;
+    };
+    const openBoutiqueDeliveryIssue = (studentId) => {
+      const record = boutiqueKitRecords().find(({ student }) => String(student.id) === String(studentId));
+      if (!record || boutiqueKitStatus(record.student) !== "received") return;
+      boutiqueDeliveryIssueStudentId = String(studentId);
+      boutiqueDeliveryIssueType = "";
+      setText("boutique-delivery-issue-student", `${rosterStudentFullName(record.student)} · Delivered ${normalizedEnrollmentShirtSize(record.student.tshirtSize || record.student.tshirt_size, record.student.gender) || "size not entered"}`);
+      const sizeSelect = document.getElementById("boutique-delivery-exchange-size");
+      if (sizeSelect) {
+        const currentSize = normalizedEnrollmentShirtSize(record.student.tshirtSize || record.student.tshirt_size, record.student.gender);
+        const sizes = [...new Set([...boutiqueShirtSizeOrder, ...boutiqueEnrollmentShirtStock.map((item) => item.size), currentSize].filter(Boolean))].sort(boutiqueShirtSizeSort);
+        sizeSelect.innerHTML = sizes.map((size) => `<option value="${rosterSafe(size)}" ${size === currentSize ? "selected" : ""}>${rosterSafe(size)}</option>`).join("");
+      }
+      const notes = document.getElementById("boutique-delivery-issue-notes");
+      if (notes) notes.value = "";
+      const reason = document.getElementById("boutique-delivery-dispute-reason");
+      if (reason) reason.value = "exchange";
+      const step = document.getElementById("boutique-delivery-error-step");
+      if (step) step.value = "waiting";
+      updateBoutiqueDeliveryIssueForm();
+      const overlay = document.getElementById("boutique-delivery-issue-overlay");
+      overlay?.classList.add("active");
+      overlay?.setAttribute("aria-hidden", "false");
+    };
+    const setBoutiqueKitWorkflowStep = (student, status, actionAt, actionBy) => {
+      student.kitReady = ["ready", "picked_up"].includes(status);
+      student.kitPickedUp = status === "picked_up";
+      student.kitReceived = false;
+      student.kitReadyAt = student.kitReady ? actionAt : "";
+      student.kitReadyBy = student.kitReady ? actionBy : "";
+      student.kitPickedUpAt = student.kitPickedUp ? actionAt : "";
+      student.kitPickedUpBy = student.kitPickedUp ? actionBy : "";
+      student.kitDeliveredAt = "";
+      student.kitDeliveredBy = "";
+    };
+    const saveBoutiqueDeliveryIssue = async () => {
+      const record = boutiqueKitRecords().find(({ student }) => String(student.id) === boutiqueDeliveryIssueStudentId);
+      if (!record || boutiqueKitStatus(record.student) !== "received" || !boutiqueDeliveryIssueType) return;
+      const student = record.student;
+      const actionAt = new Date().toISOString();
+      const actionBy = window.dtCurrentProfile?.id || profileTeacher?.id || "";
+      const originalSize = normalizedEnrollmentShirtSize(student.tshirtSize || student.tshirt_size, student.gender) || "";
+      const originalDeliveredAt = student.kitDeliveredAt || actionAt;
+      let targetStatus = "waiting";
+      let reason = "";
+      let newSize = "";
+      let notes = "";
+      if (boutiqueDeliveryIssueType === "error") {
+        targetStatus = document.getElementById("boutique-delivery-error-step")?.value || "waiting";
+        reason = `Moved to ${targetStatus === "ready" ? "Pick Up" : targetStatus === "picked_up" ? "Deliver" : "Fill"}`;
+      } else {
+        reason = document.getElementById("boutique-delivery-dispute-reason")?.value || "exchange";
+        if (reason === "exchange") {
+          newSize = document.getElementById("boutique-delivery-exchange-size")?.value || "";
+          if (!newSize) return showToast("Choose the new T-Shirt size.");
+          student.tshirtSize = newSize;
+          student.tshirt_size = newSize;
+        } else {
+          notes = String(document.getElementById("boutique-delivery-issue-notes")?.value || "").trim();
+          if (!notes) return showToast("Add notes and delivery details for the missing bag.");
+        }
+      }
+      student.additionalInformation = student.additionalInformation && typeof student.additionalInformation === "object" ? student.additionalInformation : {};
+      const history = Array.isArray(student.additionalInformation.kit_delivery_history) ? [...student.additionalInformation.kit_delivery_history] : [];
+      history.unshift({
+        id: `kit-issue-${Date.now()}`,
+        issueType: boutiqueDeliveryIssueType,
+        reason,
+        originalSize,
+        originalDeliveredAt,
+        originalDeliveredBy: student.kitDeliveredBy || "",
+        targetStatus,
+        newSize,
+        notes,
+        createdAt: actionAt,
+        createdBy: actionBy
+      });
+      student.additionalInformation.kit_delivery_history = history;
+      setBoutiqueKitWorkflowStep(student, targetStatus, actionAt, actionBy);
+      const savedIssueType = boutiqueDeliveryIssueType;
+      closeBoutiqueDeliveryIssue();
+      await saveBoutiqueKitRecords([record]);
+      showToast(savedIssueType === "error" ? "Delivery error corrected." : reason === "exchange" ? "Exchange sent back to Fill." : "Missing delivery sent back to Fill.");
     };
 
     const closeBoutiqueKitNote = () => {
@@ -39476,6 +39843,11 @@
     attachBoutiqueCollapse("boutique-orders-collapse", "boutique-orders-body", "Boutique Orders");
     attachBoutiqueCollapse("preorders-collapse", "preorders-body", "Preorders");
     document.getElementById("boutique-kit-list")?.addEventListener("click", (event) => {
+      const issueButton = event.target.closest("[data-boutique-kit-delivery-issue]");
+      if (issueButton) {
+        openBoutiqueDeliveryIssue(issueButton.dataset.boutiqueKitDeliveryIssue);
+        return;
+      }
       const noteButton = event.target.closest("[data-boutique-kit-note]");
       if (noteButton) {
         openBoutiqueKitNote(noteButton.dataset.boutiqueKitNote);
@@ -39487,6 +39859,17 @@
       if (selectedBoutiqueKitIds.has(studentId)) selectedBoutiqueKitIds.delete(studentId);
       else selectedBoutiqueKitIds.add(studentId);
       renderBoutiqueBackendSummary();
+    });
+    document.querySelectorAll("[data-delivery-issue-type]").forEach((button) => button.addEventListener("click", () => {
+      boutiqueDeliveryIssueType = button.dataset.deliveryIssueType;
+      updateBoutiqueDeliveryIssueForm();
+    }));
+    document.getElementById("boutique-delivery-dispute-reason")?.addEventListener("change", updateBoutiqueDeliveryIssueForm);
+    document.getElementById("boutique-delivery-issue-close")?.addEventListener("click", closeBoutiqueDeliveryIssue);
+    document.getElementById("boutique-delivery-issue-cancel")?.addEventListener("click", closeBoutiqueDeliveryIssue);
+    document.getElementById("boutique-delivery-issue-save")?.addEventListener("click", saveBoutiqueDeliveryIssue);
+    document.getElementById("boutique-delivery-issue-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "boutique-delivery-issue-overlay") closeBoutiqueDeliveryIssue();
     });
     document.getElementById("boutique-kit-note-close")?.addEventListener("click", closeBoutiqueKitNote);
     document.getElementById("boutique-kit-note-cancel")?.addEventListener("click", closeBoutiqueKitNote);
@@ -42456,6 +42839,33 @@
       return matches.length ? matches.reduce((sum, record) => sum + Number(record.amount || 0), 0) : null;
     };
 
+    const tiffanyWylieSeptemberVendorCreditLines = () => {
+      if (payrollState.month !== "2026-10") return [];
+      const teacher = payrollTeachers().find((item) => fullName(item).trim().toLowerCase() === "tiffany edwards");
+      const septemberStatement = teacher?.payStubs?.find((stub) => stub.payDate === "2026-09-15")?.statement;
+      if (!teacher || !Array.isArray(septemberStatement?.ownStudents)) return [];
+      return septemberStatement.ownStudents.flatMap((student) => {
+        const isWylie = enrollmentSchoolNameMatches(student.school, "Primrose School of Wylie");
+        const septemberNetPay = Number(student.amount || 0);
+        if (!isWylie || !student.vendor || septemberNetPay <= 0) return [];
+        // September's 10% vendor fee left Tiffany with 90% of her normal
+        // circumstance-based rate. Reversing it is therefore net pay / 9.
+        const credit = Math.round((septemberNetPay / 9) * 100) / 100;
+        return [{
+          teacherId: teacher.id,
+          type: "Prior Payroll Credit",
+          studentName: student.name || "Wylie dancer",
+          school: student.school,
+          category: student.category || "none",
+          fraction: Number(student.fraction ?? 1),
+          description: `${student.name || "Wylie dancer"} · Primrose Wylie September 10% vendor-fee credit`,
+          amount: credit,
+          held: false,
+          sourcePayday: "2026-09-15"
+        }];
+      });
+    };
+
     const calculatePayrollPreview = () => {
       const lines = [];
       const teachersByTier = Object.fromEntries(payrollTeachers().map((teacher) => [teacher.id, payrollTierIsAssigned(teacher.payTier) ? teacher.payTier : ""]));
@@ -42554,15 +42964,16 @@
         if (!entry.teacherId || !Number(entry.amount)) return;
         lines.push({ teacherId: entry.teacherId, type: "Adjustment", description: entry.reason || "Manual adjustment", amount: Number(entry.amount), held: false });
       });
+      lines.push(...(typeof tiffanyWylieSeptemberVendorCreditLines === "function" ? tiffanyWylieSeptemberVendorCreditLines() : []));
       const summaries = payrollTeachers().map((teacher) => {
         const teacherLines = lines.filter((line) => line.teacherId === teacher.id);
         const gross = teacherLines.reduce((sum, line) => sum + Number(line.amount || 0), 0);
         const held = teacherLines.filter((line) => line.held).reduce((sum, line) => sum + Number(line.amount || 0), 0);
         const final = Math.max(0, gross - held);
-        const releasedPastDuePay = teacherLines
-          .filter((line) => line.type === "Past-Due Pay Release")
+        const immediateFirstPaymentCredits = teacherLines
+          .filter((line) => ["Past-Due Pay Release", "Prior Payroll Credit"].includes(line.type))
           .reduce((sum, line) => sum + Number(line.amount || 0), 0);
-        const currentPeriodPay = Math.max(0, final - releasedPastDuePay);
+        const currentPeriodPay = Math.max(0, final - immediateFirstPaymentCredits);
         const estimatedHalf = currentPeriodPay / 2;
         const recordedFirstPayment = payrollRecordedFirstPayment(teacher.id);
         const payment = recordedFirstPayment !== null
@@ -42570,8 +42981,8 @@
           : teacher.payTier === "tier_b_teacher"
           ? final
           : payrollState.sequence === "1"
-            ? estimatedHalf + releasedPastDuePay
-            : Math.max(0, currentPeriodPay - estimatedHalf) + releasedPastDuePay;
+            ? estimatedHalf + immediateFirstPaymentCredits
+            : Math.max(0, currentPeriodPay - estimatedHalf);
         return { teacher, lines: teacherLines, gross, held, final, payment, recordedFirstPayment, issues: officialPayrollPaymentsError ? 1 : payrollTierIsAssigned(teacher.payTier) ? 0 : 1 };
       });
       return { lines, summaries, total: summaries.reduce((sum, item) => sum + item.payment, 0), issues: summaries.reduce((sum, item) => sum + item.issues, 0) };
@@ -42771,7 +43182,7 @@
       }
       if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${DTWorkClock.reviewMarkup()}<div class="payroll-explanation">Approved recorded hours are included automatically at $20 per hour. Use manual hours only for work not already recorded.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
       if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[teacher.payTier])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
-      if (step === 6) { const refundDeductions = (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth); body = `<div class="payroll-explanation">Refund deductions are added automatically when a family refund records that the teacher was already paid. Every manual adjustment also requires a teacher, amount, and reason.</div>${refundDeductions.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Deduction</span><span>Refund</span><span>Reason</span></div>${refundDeductions.map((entry) => `<div class="payroll-table-row"><strong>${escapeText(fullName(payrollTeachers().find((teacher) => teacher.id === entry.teacherId)))}</strong><strong>−${payrollCurrency(entry.payrollDeductionAmount)}</strong><span>${escapeText(entry.dancerName)} · ${payrollCurrency(entry.refundAmount)}</span><span>${escapeText(entry.refundReason || "Family refund")}</span></div>`).join("")}</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`; }
+      if (step === 6) { const refundDeductions = (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth); const wylieCredits = tiffanyWylieSeptemberVendorCreditLines(); const wylieCreditTotal = wylieCredits.reduce((sum, entry) => sum + entry.amount, 0); body = `<div class="payroll-explanation">Refund deductions are added automatically when a family refund records that the teacher was already paid. Every manual adjustment also requires a teacher, amount, and reason.</div>${wylieCredits.length ? `<div class="payroll-explanation"><strong>Tiffany’s Primrose Wylie credit: ${payrollCurrency(wylieCreditTotal)}</strong><br>${wylieCredits.length} September paid dancer${wylieCredits.length === 1 ? "" : "s"} · the former 10% vendor fee is restored in full on the October 1 paycheck. Each dancer appears separately on the pay stub.</div>` : ""}${refundDeductions.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Deduction</span><span>Refund</span><span>Reason</span></div>${refundDeductions.map((entry) => `<div class="payroll-table-row"><strong>${escapeText(fullName(payrollTeachers().find((teacher) => teacher.id === entry.teacherId)))}</strong><strong>−${payrollCurrency(entry.payrollDeductionAmount)}</strong><span>${escapeText(entry.dancerName)} · ${payrollCurrency(entry.refundAmount)}</span><span>${escapeText(entry.refundReason || "Family refund")}</span></div>`).join("")}</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`; }
       if (step === 7) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
       if (step === 6) {
         const confirmedRows=Object.entries(payrollConfirmedTuition).filter(([key])=>key.startsWith(payrollState.month+":"));
@@ -49816,6 +50227,68 @@
       repeatCurrentTrack: false,
       previewPlaying: false
     };
+    const musicSignedUrlCache = new Map();
+    const musicSignedUrlRequests = new Map();
+    let musicNextTrackPreloader = null;
+    let musicPlaybackRequestId = 0;
+
+    const cachedMusicTrackUrl = (track) => {
+      const cached = musicSignedUrlCache.get(track?.storage_path);
+      return cached && cached.expiresAt > Date.now() ? cached.url : "";
+    };
+    const musicTrackSignedUrl = async (track, client = window.dtSupabase) => {
+      if (!track?.storage_path || !client) return "";
+      const cachedUrl = cachedMusicTrackUrl(track);
+      if (cachedUrl) return cachedUrl;
+      if (musicSignedUrlRequests.has(track.storage_path)) return musicSignedUrlRequests.get(track.storage_path);
+      const request = client.storage.from("teacher-music").createSignedUrl(track.storage_path, 3600)
+        .then(({ data, error }) => {
+          if (error || !data?.signedUrl) throw error || new Error("Signed music URL was unavailable");
+          musicSignedUrlCache.set(track.storage_path, { url: data.signedUrl, expiresAt: Date.now() + (50 * 60 * 1000) });
+          return data.signedUrl;
+        })
+        .finally(() => musicSignedUrlRequests.delete(track.storage_path));
+      musicSignedUrlRequests.set(track.storage_path, request);
+      return request;
+    };
+    const primeMusicPlaylistUrls = async (playlist, client = window.dtSupabase) => {
+      if (!playlist || !client) return;
+      const tracks = musicPlaylistTracks(playlist).filter((track) => track.storage_path && !cachedMusicTrackUrl(track));
+      if (!tracks.length) return;
+      const { data, error } = await client.storage.from("teacher-music").createSignedUrls(tracks.map((track) => track.storage_path), 3600);
+      if (error) { console.warn("DT Tunes playlist links could not be prepared early.", error); return; }
+      (data || []).forEach((item, index) => {
+        if (!item?.signedUrl) return;
+        const path = item.path || tracks[index]?.storage_path;
+        if (path) musicSignedUrlCache.set(path, { url: item.signedUrl, expiresAt: Date.now() + (50 * 60 * 1000) });
+      });
+      const firstTrack = musicPlaylistTracks(playlist)[0];
+      const firstUrl = cachedMusicTrackUrl(firstTrack);
+      if (firstUrl && musicLibraryState.selectedPlaylistId === playlist.id && !musicLibraryState.currentTrackId) {
+        const preloader = new Audio();
+        preloader.preload = "auto";
+        preloader.src = firstUrl;
+        preloader.load();
+        musicNextTrackPreloader = preloader;
+      }
+    };
+    const preloadUpcomingMusicTrack = async () => {
+      const tracks = currentMusicPlaylistTracks();
+      const currentIndex = tracks.findIndex((track) => track.id === musicLibraryState.currentTrackId);
+      const nextTrack = tracks[currentIndex + 1];
+      if (!nextTrack?.storage_path || nextTrack.workshop_preview) return;
+      try {
+        const url = await musicTrackSignedUrl(nextTrack);
+        if (!url || musicLibraryState.currentTrackId !== tracks[currentIndex]?.id) return;
+        const preloader = new Audio();
+        preloader.preload = "auto";
+        preloader.src = url;
+        preloader.load();
+        musicNextTrackPreloader = preloader;
+      } catch (error) {
+        console.warn("The next DT Tunes song could not be prepared early.", error);
+      }
+    };
 
     const workshopMusicFallback = [
       ["DT Ballet — September", "dt-ballet-september.webp", [["Let's Go Get Our Friends",155],["Ballet Day",158],["Ballet Pizza Treat",135],["Ruffy and Lucy Right and Left",117],["Butterfly, Fly Away",138],["Princess Toes, Troll Toes",110],["Straddle Stretch",109],["Pizza Feet",137],["Tippy Toes Circle",169],["Go To The Wall",122],["Grand Battements Kicks",167],["Hide & Seek Across the Floor",204],["Ballerina, Turn Around",81],["Au Revoir, Little Dancers",104],["Bye Bye, Ruffy & Lucy",91],["Merci-Happy Chappies",102],["Finger on the Wall",183]]],
@@ -49988,10 +50461,12 @@
         return;
       }
       musicLibraryState.playlists = data || [];
-      await hydrateMusicCoverUrls(musicLibraryState.playlists, client);
       musicLibraryState.selectedPlaylistId = "";
       renderMusicPlaylists();
       updateMyDayMusicPlayer();
+      hydrateMusicCoverUrls(musicLibraryState.playlists, client).then(() => renderMusicPlaylists()).catch((coverError) => {
+        console.warn("DT Tunes artwork will finish loading later.", coverError);
+      });
     };
 
     if (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1") {
@@ -50038,15 +50513,21 @@
         return;
       }
       if (!client) return;
-      const { data, error } = await client.storage.from("teacher-music").createSignedUrl(track.storage_path, 3600);
-      if (error || !data?.signedUrl) {
+      const playbackRequestId = ++musicPlaybackRequestId;
+      let signedUrl = "";
+      try {
+        signedUrl = await musicTrackSignedUrl(track, client);
+      } catch (error) {
         console.error("DT Tunes song could not open", error);
         showToast("That song couldn’t open. Please try again.");
         return;
       }
-      audio.src = data.signedUrl;
+      if (playbackRequestId !== musicPlaybackRequestId || musicLibraryState.currentTrackId !== track.id) return;
+      audio.src = signedUrl;
+      audio.load();
       try {
         await audio.play();
+        preloadUpcomingMusicTrack();
       } catch (_) {
         showToast("Press play in the music player to begin.");
       }
@@ -50167,7 +50648,7 @@
       if (audio) audio.loop = musicLibraryState.repeatCurrentTrack;
       if (button) {
         button.setAttribute("aria-pressed", String(musicLibraryState.repeatCurrentTrack));
-        button.textContent = musicLibraryState.repeatCurrentTrack ? "↻ Repeating" : "↻ Repeat";
+        button.innerHTML = `<span class="dt-tunes-control-icon" aria-hidden="true">↻</span><span>${musicLibraryState.repeatCurrentTrack ? "Repeating" : "Repeat"}</span>`;
       }
       updateMyDayMusicPlayer();
       showToast(musicLibraryState.repeatCurrentTrack ? "This song will repeat." : "Playlist play will continue normally.");
@@ -50234,6 +50715,7 @@
           return;
         }
         musicLibraryState.selectedPlaylistId = playlist.id;
+        primeMusicPlaylistUrls(playlist);
         renderMusicPlaylists();
         updateMyDayMusicPlayer();
         document.getElementById("music-playlist-grid")?.setAttribute("hidden", "");
@@ -50251,6 +50733,7 @@
       }
       const controlButton = event.target.closest("[data-music-control]");
       if (!controlButton) return;
+      if (controlButton.dataset.musicControl === "start-over") seekMusicPosition(0);
       if (controlButton.dataset.musicControl === "previous") playAdjacentMusicTrack(-1);
       if (controlButton.dataset.musicControl === "next") playAdjacentMusicTrack(1);
       if (controlButton.dataset.musicControl === "repeat") toggleMusicRepeat();
@@ -50301,6 +50784,7 @@
         audio.load();
       }
       const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+      primeMusicPlaylistUrls(playlist);
       setText("music-now-playing-title", playlist?.name || "Choose a song");
       setText("music-now-playing-artist", playlist ? `${musicPlaylistTracks(playlist).length} songs ready` : "Your shared Dance Techniques music library is ready.");
       renderMusicPlaylists();
