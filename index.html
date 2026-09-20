@@ -8810,6 +8810,7 @@
     .boutique-delivery-issue-panel { display: grid; gap: 12px; }
     .boutique-delivery-issue-panel[hidden] { display: none; }
     .boutique-delivery-issue-field { display: grid; gap: 6px; color: var(--fg); font-size: 12px; font-weight: 850; }
+    .boutique-delivery-issue-field[hidden] { display: none; }
     .boutique-delivery-issue-field select, .boutique-delivery-issue-field textarea { width: 100%; margin: 0; }
     .boutique-delivery-issue-history { display: grid; gap: 8px; margin-top: 12px; }
     .boutique-delivery-issue-history-card { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); }
@@ -8826,7 +8827,9 @@
     .boutique-order-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
     .boutique-order-card { position: relative; min-width: 0; display: grid; justify-items: center; align-content: start; gap: 8px; padding: 17px 12px 48px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); text-align: center; transition: border-color .16s ease, background .16s ease, transform .16s ease, box-shadow .16s ease; }
     .boutique-order-card[data-boutique-order-select-card] { cursor: pointer; }
+    .boutique-order-card[data-boutique-order-delivery-issue-card] { cursor: pointer; }
     .boutique-order-card[data-boutique-order-select-card]:hover { transform: translateY(-1px); border-color: #d8a7a3; }
+    .boutique-order-card[data-boutique-order-delivery-issue-card]:hover { transform: translateY(-1px); border-color: #d8a7a3; }
     .boutique-order-card.is-selected { border-color: var(--berry); background: var(--blush); box-shadow: 0 0 0 2px rgb(108 10 67 / .08); }
     .boutique-order-card.is-to_fill:not(.is-selected) { border-color: #e2a0a6; background: #fff7f7; }
     .boutique-order-card .roster-student-photo { width: 58px; height: 58px; flex-basis: 58px; font-size: 17px; }
@@ -19102,6 +19105,7 @@
           <label class="boutique-delivery-issue-field">Dispute reason
             <select id="boutique-delivery-dispute-reason"><option value="exchange">Exchange</option><option value="not_received">Didn't Receive</option></select>
           </label>
+          <label class="boutique-delivery-issue-field" id="boutique-delivery-exchange-item-field" hidden>Item to exchange<select id="boutique-delivery-exchange-item"></select></label>
           <label class="boutique-delivery-issue-field" id="boutique-delivery-exchange-size-field">New T-Shirt size<select id="boutique-delivery-exchange-size"></select></label>
           <label class="boutique-delivery-issue-field" id="boutique-delivery-notes-field" hidden>Notes and delivery details<textarea id="boutique-delivery-issue-notes" rows="5" maxlength="1000" placeholder="What happened, who reported it, and any follow-up details..."></textarea></label>
         </div>
@@ -34528,7 +34532,7 @@
         const itemSelectionActive = order.status === "to_fill" && selectedBoutiqueOrderIds.has(order.id);
         const unfillMode = activeBoutiqueUnfillOrderIds.has(String(order.id));
         const hasNote = Boolean(boutiqueOrderDeliveryNote(order));
-        return `<div class="boutique-order-card is-${rosterSafe(order.status)} ${selectedBoutiqueOrderIds.has(order.id) ? "is-selected" : ""}" ${selectable ? `data-boutique-order-select-card="${rosterSafe(order.id)}"` : ""}>${dayLabel ? `<span class="boutique-kit-day-bubble" title="${rosterSafe(assigned.rosterClass.day)}">${dayLabel}</span>` : ""}<button class="boutique-order-profile-trigger" type="button" data-boutique-assign-open="${rosterSafe(order.id)}" aria-label="${assigned ? "Change assigned dancer" : "Assign order to a dancer"}"><span class="roster-student-photo ${assigned ? rosterStudentBadgeClasses(assigned.student) : ""}">${assigned ? (assigned.student.photo ? `<img src="${rosterSafe(assigned.student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(assigned.student))) : `<span class="boutique-assign-circle-copy"><strong>+</strong><small>Assign</small></span>`}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span></button><strong>${rosterSafe(displayName)}</strong><small>${rosterSafe(schoolLabel)}</small><span class="boutique-order-number">${rosterSafe(boutiqueStatusLabel(order.status))}</span>${boutiqueOrderItemsMarkup(order, itemSelectionActive, unfillMode)}${boutiqueStatusCorrectionMarkup(order)}${boutiqueOrderUnfillMarkup(order)}<button class="boutique-kit-note-button ${hasNote ? "has-note" : ""}" type="button" data-boutique-order-note="${rosterSafe(order.id)}" aria-label="${hasNote ? "Edit" : "Add"} delivery note for ${rosterSafe(displayName)}" title="${hasNote ? "Edit delivery note" : "Add delivery note"}">+</button></div>`;
+        return `<div class="boutique-order-card is-${rosterSafe(order.status)} ${selectedBoutiqueOrderIds.has(order.id) ? "is-selected" : ""}" ${selectable ? `data-boutique-order-select-card="${rosterSafe(order.id)}"` : order.status === "delivered" ? `data-boutique-order-delivery-issue-card="${rosterSafe(order.id)}" role="button" tabindex="0" aria-label="Open delivery issue for ${rosterSafe(displayName)}"` : ""}>${dayLabel ? `<span class="boutique-kit-day-bubble" title="${rosterSafe(assigned.rosterClass.day)}">${dayLabel}</span>` : ""}<button class="boutique-order-profile-trigger" type="button" data-boutique-assign-open="${rosterSafe(order.id)}" aria-label="${assigned ? "Change assigned dancer" : "Assign order to a dancer"}"><span class="roster-student-photo ${assigned ? rosterStudentBadgeClasses(assigned.student) : ""}">${assigned ? (assigned.student.photo ? `<img src="${rosterSafe(assigned.student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(assigned.student))) : `<span class="boutique-assign-circle-copy"><strong>+</strong><small>Assign</small></span>`}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span></button><strong>${rosterSafe(displayName)}</strong><small>${rosterSafe(schoolLabel)}</small><span class="boutique-order-number">${rosterSafe(boutiqueStatusLabel(order.status))}</span>${boutiqueOrderItemsMarkup(order, itemSelectionActive, unfillMode)}${boutiqueOrderUnfillMarkup(order)}<button class="boutique-kit-note-button ${hasNote ? "has-note" : ""}" type="button" data-boutique-order-note="${rosterSafe(order.id)}" aria-label="${hasNote ? "Edit" : "Add"} delivery note for ${rosterSafe(displayName)}" title="${hasNote ? "Edit delivery note" : "Add delivery note"}">+</button></div>`;
       }).join("") : `<div class="boutique-kit-empty">${boutiqueOrders.length ? "No Wix orders match that search." : "No Wix orders have arrived yet."}</div>`;
       const selected = boutiqueOrders.filter((order) => selectedBoutiqueOrderIds.has(order.id));
       const advanceButton = document.getElementById("boutique-order-advance-selected");
@@ -35118,6 +35122,11 @@
         return;
       }
       if (event.target.closest("select,button,a,input")) return;
+      const deliveryIssueCard = event.target.closest("[data-boutique-order-delivery-issue-card]");
+      if (deliveryIssueCard) {
+        openBoutiqueOrderDeliveryIssue(deliveryIssueCard.dataset.boutiqueOrderDeliveryIssueCard);
+        return;
+      }
       const card = event.target.closest("[data-boutique-order-select-card]");
       if (!card) return;
       const orderId = card.dataset.boutiqueOrderSelectCard;
@@ -38254,13 +38263,16 @@
     const renderRosterProfileKitDeliveryHistory = (student) => {
       const container = document.getElementById("roster-profile-kit-delivery-history");
       if (!container) return;
-      const history = Array.isArray(student?.additionalInformation?.kit_delivery_history) ? student.additionalInformation.kit_delivery_history : [];
+      const kitHistory = Array.isArray(student?.additionalInformation?.kit_delivery_history) ? student.additionalInformation.kit_delivery_history : [];
+      const boutiqueHistory = Array.isArray(student?.additionalInformation?.boutique_delivery_history) ? student.additionalInformation.boutique_delivery_history.map((entry) => ({ ...entry, isBoutiqueOrder: true })) : [];
+      const history = [...kitHistory, ...boutiqueHistory].sort((left, right) => String(right.createdAt || "").localeCompare(String(left.createdAt || "")));
       container.innerHTML = history.length ? `<strong>Delivery Issue History</strong>${history.map((entry) => {
         const createdAt = entry.createdAt ? new Date(entry.createdAt) : null;
         const deliveredAt = entry.originalDeliveredAt ? new Date(entry.originalDeliveredAt) : null;
         const typeLabel = entry.issueType === "error" ? "Delivery Error" : entry.reason === "exchange" ? "Exchange" : "Didn't Receive";
-        const sizeLabel = entry.newSize ? `${entry.originalSize || "Unknown size"} → ${entry.newSize}` : (entry.originalSize || "Size not recorded");
-        return `<div class="boutique-delivery-issue-history-card"><strong>${rosterSafe(typeLabel)} · ${rosterSafe(sizeLabel)}</strong><small>Original delivery: ${rosterSafe(deliveredAt && !Number.isNaN(deliveredAt.getTime()) ? deliveredAt.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "Date not recorded")}</small><small>Reported: ${rosterSafe(createdAt && !Number.isNaN(createdAt.getTime()) ? createdAt.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "Date not recorded")} · Sent to ${rosterSafe(entry.targetStatus === "ready" ? "Pick Up" : entry.targetStatus === "picked_up" ? "Deliver" : "Fill")}</small>${entry.notes ? `<span>${rosterSafe(entry.notes)}</span>` : ""}</div>`;
+        const sizeLabel = entry.isBoutiqueOrder ? (entry.exchangeItem ? `${entry.exchangeItem.name}: ${entry.exchangeItem.originalSize || "No size"} → ${entry.exchangeItem.newSize}` : (entry.originalItems || []).map((item) => `${item.name}${item.size ? ` (${item.size})` : ""}`).join(", ")) : entry.newSize ? `${entry.originalSize || "Unknown size"} → ${entry.newSize}` : (entry.originalSize || "Size not recorded");
+        const targetLabel = ["ready", "to_pick_up"].includes(entry.targetStatus) ? "Pick Up" : ["picked_up", "to_deliver"].includes(entry.targetStatus) ? "Deliver" : "Fill";
+        return `<div class="boutique-delivery-issue-history-card"><strong>${entry.isBoutiqueOrder ? "Boutique · " : ""}${rosterSafe(typeLabel)} · ${rosterSafe(sizeLabel || "Items recorded")}</strong><small>Original delivery: ${rosterSafe(deliveredAt && !Number.isNaN(deliveredAt.getTime()) ? deliveredAt.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "Date not recorded")}</small><small>Reported: ${rosterSafe(createdAt && !Number.isNaN(createdAt.getTime()) ? createdAt.toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "Date not recorded")} · Sent to ${rosterSafe(targetLabel)}</small>${entry.notes ? `<span>${rosterSafe(entry.notes)}</span>` : ""}</div>`;
       }).join("")}` : `<div class="teacher-roster-empty">No delivery issues recorded.</div>`;
     };
     const setRosterProfileTab = (tabName = "profile") => {
@@ -38805,6 +38817,7 @@
     let boutiqueKitNoteStudentId = "";
     let boutiqueOrderNoteId = "";
     let boutiqueDeliveryIssueStudentId = "";
+    let boutiqueDeliveryIssueOrderId = "";
     let boutiqueDeliveryIssueType = "";
     const boutiqueKitRecords = () => [...new Map(rosterClasses.filter((item) => item.sourceActive !== false).flatMap((rosterClass) => rosterEnrolled(rosterClass).map((student) => ({ rosterClass, student }))).map((record) => [record.student.id, record])).values()];
     const boutiqueKitStatus = (student) => student.kitReceived ? "received" : student.kitPickedUp ? "picked_up" : student.kitReady ? "ready" : "waiting";
@@ -39197,6 +39210,7 @@
       overlay?.classList.remove("active");
       overlay?.setAttribute("aria-hidden", "true");
       boutiqueDeliveryIssueStudentId = "";
+      boutiqueDeliveryIssueOrderId = "";
       boutiqueDeliveryIssueType = "";
     };
     const updateBoutiqueDeliveryIssueForm = () => {
@@ -39206,9 +39220,13 @@
       if (errorPanel) errorPanel.hidden = boutiqueDeliveryIssueType !== "error";
       if (disputePanel) disputePanel.hidden = boutiqueDeliveryIssueType !== "dispute";
       const disputeReason = document.getElementById("boutique-delivery-dispute-reason")?.value || "exchange";
+      const exchangeItemField = document.getElementById("boutique-delivery-exchange-item-field");
       const exchangeField = document.getElementById("boutique-delivery-exchange-size-field");
       const notesField = document.getElementById("boutique-delivery-notes-field");
+      if (exchangeItemField) exchangeItemField.hidden = !boutiqueDeliveryIssueOrderId || boutiqueDeliveryIssueType !== "dispute" || disputeReason !== "exchange";
       if (exchangeField) exchangeField.hidden = boutiqueDeliveryIssueType !== "dispute" || disputeReason !== "exchange";
+      const exchangeSizeLabel = exchangeField?.childNodes?.[0];
+      if (exchangeSizeLabel?.nodeType === Node.TEXT_NODE) exchangeSizeLabel.textContent = boutiqueDeliveryIssueOrderId ? "New size" : "New T-Shirt size";
       if (notesField) notesField.hidden = boutiqueDeliveryIssueType !== "dispute" || disputeReason !== "not_received";
       const saveButton = document.getElementById("boutique-delivery-issue-save");
       if (saveButton) saveButton.disabled = !boutiqueDeliveryIssueType;
@@ -39217,7 +39235,9 @@
       const record = boutiqueKitRecords().find(({ student }) => String(student.id) === String(studentId));
       if (!record || boutiqueKitStatus(record.student) !== "received") return;
       boutiqueDeliveryIssueStudentId = String(studentId);
+      boutiqueDeliveryIssueOrderId = "";
       boutiqueDeliveryIssueType = "";
+      setText("boutique-delivery-issue-title", "Delivery Issue?");
       setText("boutique-delivery-issue-student", `${rosterStudentFullName(record.student)} · Delivered ${normalizedEnrollmentShirtSize(record.student.tshirtSize || record.student.tshirt_size, record.student.gender) || "size not entered"}`);
       const sizeSelect = document.getElementById("boutique-delivery-exchange-size");
       if (sizeSelect) {
@@ -39225,6 +39245,37 @@
         const sizes = [...new Set([...boutiqueShirtSizeOrder, ...boutiqueEnrollmentShirtStock.map((item) => item.size), currentSize].filter(Boolean))].sort(boutiqueShirtSizeSort);
         sizeSelect.innerHTML = sizes.map((size) => `<option value="${rosterSafe(size)}" ${size === currentSize ? "selected" : ""}>${rosterSafe(size)}</option>`).join("");
       }
+      const notes = document.getElementById("boutique-delivery-issue-notes");
+      if (notes) notes.value = "";
+      const reason = document.getElementById("boutique-delivery-dispute-reason");
+      if (reason) reason.value = "exchange";
+      const step = document.getElementById("boutique-delivery-error-step");
+      if (step) step.value = "waiting";
+      updateBoutiqueDeliveryIssueForm();
+      const overlay = document.getElementById("boutique-delivery-issue-overlay");
+      overlay?.classList.add("active");
+      overlay?.setAttribute("aria-hidden", "false");
+    };
+    const boutiqueExchangeSizes = (currentSize = "") => [...new Set([...boutiqueShirtSizeOrder, ...boutiqueEnrollmentShirtStock.map((item) => item.size), ...boutiqueApparelStock.map((item) => item.size), currentSize].filter(Boolean))].sort(boutiqueShirtSizeSort);
+    const updateBoutiqueOrderExchangeSizes = () => {
+      const order = boutiqueOrders.find((item) => String(item.id) === boutiqueDeliveryIssueOrderId);
+      const item = order?.boutique_order_items?.find((candidate) => String(candidate.id) === String(document.getElementById("boutique-delivery-exchange-item")?.value || ""));
+      const currentSize = boutiqueOrderItemSize(item);
+      const sizeSelect = document.getElementById("boutique-delivery-exchange-size");
+      if (sizeSelect) sizeSelect.innerHTML = boutiqueExchangeSizes(currentSize).map((size) => `<option value="${rosterSafe(size)}" ${size === currentSize ? "selected" : ""}>${rosterSafe(size)}</option>`).join("");
+    };
+    const openBoutiqueOrderDeliveryIssue = (orderId) => {
+      const order = boutiqueOrders.find((item) => String(item.id) === String(orderId));
+      if (!order || order.status !== "delivered") return;
+      const record = boutiqueOrderStudentRecord(order.assigned_student_id);
+      boutiqueDeliveryIssueStudentId = String(order.assigned_student_id || "");
+      boutiqueDeliveryIssueOrderId = String(order.id);
+      boutiqueDeliveryIssueType = "";
+      setText("boutique-delivery-issue-title", "Boutique Delivery Issue?");
+      setText("boutique-delivery-issue-student", `${record ? rosterStudentFullName(record.student) : boutiqueOrderDancerName(order) || "Boutique order"} · ${boutiqueOrderNumber(order)}`);
+      const exchangeItem = document.getElementById("boutique-delivery-exchange-item");
+      if (exchangeItem) exchangeItem.innerHTML = (order.boutique_order_items || []).map((item) => `<option value="${rosterSafe(item.id)}">${rosterSafe(item.name || "Boutique item")}${boutiqueOrderItemSize(item) ? ` · ${rosterSafe(boutiqueOrderItemSize(item))}` : ""}</option>`).join("");
+      updateBoutiqueOrderExchangeSizes();
       const notes = document.getElementById("boutique-delivery-issue-notes");
       if (notes) notes.value = "";
       const reason = document.getElementById("boutique-delivery-dispute-reason");
@@ -39248,6 +39299,65 @@
       student.kitDeliveredBy = "";
     };
     const saveBoutiqueDeliveryIssue = async () => {
+      if (boutiqueDeliveryIssueOrderId) {
+        const order = boutiqueOrders.find((item) => String(item.id) === boutiqueDeliveryIssueOrderId);
+        if (!order || order.status !== "delivered" || !boutiqueDeliveryIssueType) return;
+        const actionAt = new Date().toISOString();
+        const actionBy = window.dtCurrentProfile?.id || profileTeacher?.id || "";
+        let targetStatus = "to_fill";
+        let reason = "";
+        let newSize = "";
+        let notes = "";
+        let exchangeItem = null;
+        if (boutiqueDeliveryIssueType === "error") {
+          targetStatus = ({ waiting: "to_fill", ready: "to_pick_up", picked_up: "to_deliver" })[document.getElementById("boutique-delivery-error-step")?.value || "waiting"] || "to_fill";
+          reason = `Moved to ${boutiqueStatusLabel(targetStatus)}`;
+        } else {
+          reason = document.getElementById("boutique-delivery-dispute-reason")?.value || "exchange";
+          if (reason === "exchange") {
+            exchangeItem = order.boutique_order_items?.find((item) => String(item.id) === String(document.getElementById("boutique-delivery-exchange-item")?.value || ""));
+            newSize = document.getElementById("boutique-delivery-exchange-size")?.value || "";
+            if (!exchangeItem || !newSize) return showToast("Choose the item and its new size.");
+          } else {
+            notes = String(document.getElementById("boutique-delivery-issue-notes")?.value || "").trim();
+            if (!notes) return showToast("Add notes and delivery details for the missing order.");
+          }
+        }
+        const originalItems = (order.boutique_order_items || []).map((item) => ({ id: item.id, name: item.name || "Boutique item", size: boutiqueOrderItemSize(item), quantity: Math.max(1, Number(item.quantity) || 1) }));
+        const historyEntry = { id: `boutique-issue-${Date.now()}`, orderId: order.id, orderNumber: order.wix_order_number || "", issueType: boutiqueDeliveryIssueType, reason, originalItems, originalDeliveredAt: order.delivered_at || actionAt, targetStatus, exchangeItem: exchangeItem ? { id: exchangeItem.id, name: exchangeItem.name || "Boutique item", originalSize: boutiqueOrderItemSize(exchangeItem), newSize } : null, notes, createdAt: actionAt, createdBy: actionBy };
+        const nextRawOrder = { ...(order.raw_order || {}), boutique_delivery_issue_history: [historyEntry, ...(Array.isArray(order.raw_order?.boutique_delivery_issue_history) ? order.raw_order.boutique_delivery_issue_history : [])] };
+        const payload = { status: targetStatus, filled_at: targetStatus === "to_fill" ? null : (order.filled_at || actionAt), picked_up_at: ["to_fill", "to_pick_up"].includes(targetStatus) ? null : (order.picked_up_at || actionAt), delivered_at: null, raw_order: nextRawOrder };
+        if (exchangeItem) {
+          const nextOptions = { ...(exchangeItem.options || {}) };
+          const sizeKey = Object.keys(nextOptions).find((key) => /size/i.test(key)) || "Size";
+          nextOptions[sizeKey] = newSize;
+          exchangeItem.options = nextOptions;
+          exchangeItem.fulfilled_quantity = 0;
+        }
+        const record = boutiqueOrderStudentRecord(order.assigned_student_id);
+        if (record) {
+          record.student.additionalInformation = record.student.additionalInformation && typeof record.student.additionalInformation === "object" ? record.student.additionalInformation : {};
+          record.student.additionalInformation.boutique_delivery_history = [historyEntry, ...(Array.isArray(record.student.additionalInformation.boutique_delivery_history) ? record.student.additionalInformation.boutique_delivery_history : [])];
+        }
+        scheduleAppDataSave();
+        if (document.body.dataset.tourMode !== "true") {
+          if (exchangeItem) {
+            const itemResult = await window.dtSupabase.from("boutique_order_items").update({ options: exchangeItem.options, fulfilled_quantity: 0 }).eq("id", exchangeItem.id);
+            if (itemResult.error) return showToast(itemResult.error.message || "The replacement size could not be saved.");
+          }
+          const orderResult = await window.dtSupabase.from("boutique_orders").update(payload).eq("id", order.id);
+          if (orderResult.error) return showToast(orderResult.error.message || "The delivery issue could not be saved.");
+          if (record) await saveSharedKitStatus(record.student);
+        }
+        Object.assign(order, payload);
+        const savedIssueType = boutiqueDeliveryIssueType;
+        closeBoutiqueDeliveryIssue();
+        renderDirectorBoutiqueOrders();
+        renderTeacherOrders();
+        renderStudentLibrary();
+        showToast(savedIssueType === "error" ? "Delivery error corrected." : reason === "exchange" ? "Exchange sent back to Fill." : "Missing order sent back to Fill.");
+        return;
+      }
       const record = boutiqueKitRecords().find(({ student }) => String(student.id) === boutiqueDeliveryIssueStudentId);
       if (!record || boutiqueKitStatus(record.student) !== "received" || !boutiqueDeliveryIssueType) return;
       const student = record.student;
@@ -39949,6 +40059,7 @@
       updateBoutiqueDeliveryIssueForm();
     }));
     document.getElementById("boutique-delivery-dispute-reason")?.addEventListener("change", updateBoutiqueDeliveryIssueForm);
+    document.getElementById("boutique-delivery-exchange-item")?.addEventListener("change", updateBoutiqueOrderExchangeSizes);
     document.getElementById("boutique-delivery-issue-close")?.addEventListener("click", closeBoutiqueDeliveryIssue);
     document.getElementById("boutique-delivery-issue-cancel")?.addEventListener("click", closeBoutiqueDeliveryIssue);
     document.getElementById("boutique-delivery-issue-save")?.addEventListener("click", saveBoutiqueDeliveryIssue);
