@@ -5073,6 +5073,8 @@
       transform: translateY(-1px);
     }
 
+    .music-main-toggle[hidden] { display: none !important; }
+
     .music-main-toggle[aria-label^="Pause"] {
       font-size: 0;
     }
@@ -5183,28 +5185,48 @@
 
     .music-now-playing {
       display: grid;
-      grid-template-columns: minmax(88px, 132px) 1fr;
-      align-items: start;
-      gap: 15px;
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+
+    .music-art-stage {
+      position: relative;
+      display: grid;
+      place-items: center;
     }
 
     .music-now-playing-art {
-      display: none !important;
-      width: 100%;
+      display: block;
+      width: clamp(150px, 24vw, 188px);
       aspect-ratio: 1;
       object-fit: cover;
-      border-radius: 12px;
-      border: 1px solid color-mix(in oklch, var(--rose-gold), white 58%);
+      border-radius: 22px;
+      border: 2px solid color-mix(in oklch, var(--rose-gold), white 42%);
       box-shadow: 0 10px 24px oklch(35% 0.05 20 / 0.16);
     }
 
-    .music-now-playing-art[hidden] { display: none; }
+    .music-now-playing-art[hidden] { display: none !important; }
 
-    .music-now-playing:has(.music-now-playing-art[hidden]) {
-      grid-template-columns: 1fr;
+    .music-art-stage:has(.music-now-playing-art:not([hidden])) .music-main-toggle {
+      position: absolute;
+      right: -10px;
+      bottom: -10px;
+      width: 58px;
+      height: 58px;
+      border-width: 3px;
+      font-size: 23px;
+      box-shadow: 0 7px 16px rgb(69 58 54 / .22);
     }
 
-    .music-now-playing { grid-template-columns: 1fr; }
+    .music-art-stage:has(.music-now-playing-art:not([hidden])) .music-main-toggle[aria-label^="Pause"]::before {
+      width: 14px;
+      height: 22px;
+      background: linear-gradient(90deg, currentColor 0 4px, transparent 4px 10px, currentColor 10px 14px);
+    }
+
+    .music-art-stage:has(.music-now-playing-art:not([hidden])) .music-main-toggle[aria-label^="Pause"] {
+      font-size: 0 !important;
+    }
 
     @media (max-width: 430px) {
       .player-slot { min-height: 0; gap: 14px; padding: 17px 12px; }
@@ -5253,51 +5275,65 @@
     #music-view .dt-tunes-control-icon { font-size: 34px; }
     body[data-mode="teacher"][data-view-tab="music"] .tabbar {
       position: sticky;
-      top: max(22px, env(safe-area-inset-top));
+      top: max(14px, env(safe-area-inset-top));
       z-index: 70;
-      height: 0;
-      margin: 0 22px 0 0;
+      width: 100%;
+      min-width: 0;
+      height: 54px;
+      margin: 0 0 -54px;
+      padding: 0;
+      background: transparent;
       pointer-events: none;
     }
-    body[data-mode="teacher"][data-view-tab="music"] .nav-menu-wrap { pointer-events: auto; }
+    body[data-mode="teacher"][data-view-tab="music"] .nav-menu-wrap {
+      position: absolute;
+      top: 0;
+      right: 0;
+      pointer-events: auto;
+    }
     body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button {
-      width: 78px;
-      height: 78px;
+      width: 54px;
+      height: 54px;
       border: 0;
-      border-radius: 22px;
+      border-radius: 16px;
       background: rgb(255 251 247 / .9);
     }
-    body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button svg { width: 36px; height: 36px; stroke-width: 2.8; }
+    body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button svg { width: 27px; height: 27px; stroke-width: 2.8; }
     body[data-mode="teacher"] #music-view > .mobile-head { display: none; }
     #music-view { container-type: inline-size; }
 
     @media (max-width: 430px) {
-      #music-view .player-slot { min-height: 500px; gap: 18px; padding: 74px 8px 20px; border-radius: 20px; overflow: hidden; }
-      #music-view .music-player-copy { gap: 22px; }
-      #music-view .music-player-copy .class-title { font-size: 36px; }
-      #music-view .music-main-toggle { width: 128px; height: 128px; font-size: 44px; }
-      #music-view .music-timeline { grid-template-columns: 58px 42px minmax(56px, 1fr) 42px 58px; gap: 4px; font-size: 13px; }
-      #music-view .music-skip-compact { width: 58px; height: 58px; }
-      #music-view .music-skip-label { padding-top: 5px; font-size: 13px; }
-      #music-view .dt-tunes-controls { gap: 5px; }
-      #music-view .dt-tunes-control { min-width: 0; min-height: 72px; padding: 6px 1px; gap: 2px; font-size: 10px; }
-      #music-view .dt-tunes-control-icon { font-size: 23px; }
-      body[data-mode="teacher"][data-view-tab="music"] .tabbar { top: max(14px, env(safe-area-inset-top)); margin-right: 12px; }
-      body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button { width: 54px; height: 54px; border-radius: 16px; }
-      body[data-mode="teacher"][data-view-tab="music"] .nav-menu-button svg { width: 27px; height: 27px; }
+      #music-view .player-slot { min-height: 0; align-content: start; gap: 15px; margin-top: 0; padding: 18px 10px 12px; border-radius: 20px; overflow: hidden; }
+      #music-view .music-now-playing, #music-view .music-player-copy { width: 100%; min-width: 0; }
+      #music-view .music-player-copy { gap: 18px; }
+      #music-view .music-player-copy .class-title { width: 100%; max-width: 100%; padding: 0 62px 0 6px; font-size: 34px; white-space: normal; overflow-wrap: anywhere; text-wrap: balance; }
+      #music-view .music-main-toggle { width: 108px; height: 108px; font-size: 38px; }
+      #music-view .music-now-playing-art { width: 160px; border-radius: 20px; }
+      #music-view .music-art-stage:has(.music-now-playing-art:not([hidden])) .music-main-toggle { right: -8px; bottom: -8px; width: 46px; height: 46px; font-size: 18px; }
+      #music-view .music-timeline { grid-template-columns: 48px 42px minmax(56px, 1fr) 42px 48px; gap: 4px; font-size: 13px; }
+      #music-view .music-timeline { margin-top: 10px; }
+      #music-view .music-skip-compact { width: 48px; height: 48px; }
+      #music-view .music-skip-label { padding-top: 4px; font-size: 12px; }
+      #music-view .dt-tunes-controls { gap: 12px; padding-inline: 4px; }
+      #music-view .dt-tunes-control { min-width: 0; min-height: 58px; padding: 5px 1px; gap: 1px; font-size: 9.5px; }
+      #music-view .dt-tunes-control-icon { font-size: 19px; }
     }
 
     @container (max-width: 430px) {
-      #music-view .player-slot { min-height: 500px; gap: 18px; padding: 74px 8px 20px; border-radius: 20px; overflow: hidden; }
-      #music-view .music-player-copy { gap: 22px; }
-      #music-view .music-player-copy .class-title { font-size: 36px; }
-      #music-view .music-main-toggle { width: 128px; height: 128px; font-size: 44px; }
-      #music-view .music-timeline { grid-template-columns: 58px 42px minmax(56px, 1fr) 42px 58px; gap: 4px; font-size: 13px; }
-      #music-view .music-skip-compact { width: 58px; height: 58px; }
-      #music-view .music-skip-label { padding-top: 5px; font-size: 13px; }
-      #music-view .dt-tunes-controls { gap: 5px; }
-      #music-view .dt-tunes-control { min-width: 0; min-height: 72px; padding: 6px 1px; gap: 2px; font-size: 10px; }
-      #music-view .dt-tunes-control-icon { font-size: 23px; }
+      #music-view .player-slot { min-height: 0; align-content: start; gap: 15px; margin-top: 0; padding: 18px 10px 12px; border-radius: 20px; overflow: hidden; }
+      #music-view .music-now-playing, #music-view .music-player-copy { width: 100%; min-width: 0; }
+      #music-view .music-player-copy { gap: 18px; }
+      #music-view .music-player-copy .class-title { width: 100%; max-width: 100%; padding: 0 62px 0 6px; font-size: 34px; white-space: normal; overflow-wrap: anywhere; text-wrap: balance; }
+      #music-view .music-main-toggle { width: 108px; height: 108px; font-size: 38px; }
+      #music-view .music-now-playing-art { width: 160px; border-radius: 20px; }
+      #music-view .music-art-stage:has(.music-now-playing-art:not([hidden])) .music-main-toggle { right: -8px; bottom: -8px; width: 46px; height: 46px; font-size: 18px; }
+      #music-view .music-timeline { grid-template-columns: 48px 42px minmax(56px, 1fr) 42px 48px; gap: 4px; font-size: 13px; }
+      #music-view .music-timeline { margin-top: 10px; }
+      #music-view .music-skip-compact { width: 48px; height: 48px; }
+      #music-view .music-skip-label { padding-top: 4px; font-size: 12px; }
+      #music-view .dt-tunes-controls { gap: 12px; padding-inline: 4px; }
+      #music-view .dt-tunes-control { min-width: 0; min-height: 58px; padding: 5px 1px; gap: 1px; font-size: 9.5px; }
+      #music-view .dt-tunes-control-icon { font-size: 19px; }
     }
 
     .playlist.selected {
@@ -5511,6 +5547,10 @@
       position: sticky;
       top: max(8px, env(safe-area-inset-top));
       z-index: 40;
+    }
+
+    body[data-mode="teacher"][data-view-tab="music"] #music-view .player-slot {
+      top: 0;
     }
 
     .message-shell {
@@ -15872,10 +15912,12 @@
 
               <div class="player-slot">
                 <div class="music-now-playing">
-                  <img class="music-now-playing-art" id="music-now-playing-art" alt="" hidden>
                   <div class="music-player-copy">
                     <p class="class-title" id="music-now-playing-title">Choose a song</p>
-                    <button class="music-main-toggle" type="button" data-my-day-music-toggle aria-label="Play or pause song">▶</button>
+                    <div class="music-art-stage">
+                      <img class="music-now-playing-art" id="music-now-playing-art" alt="" hidden>
+                      <button class="music-main-toggle" type="button" data-my-day-music-toggle aria-label="Play or pause song">▶</button>
+                    </div>
                   </div>
                 </div>
                 <audio class="dt-tunes-audio" id="dt-tunes-audio" preload="auto"></audio>
@@ -50570,7 +50612,13 @@
             artist: track.artist || "Dance Techniques",
             duration_seconds: Number(track.seconds || 0),
             storage_path: "",
-            cover_path: track.cover?.split("/").pop() || "",
+            cover_path: track.cover?.split("/").pop() || `${String(track.title || "")
+              .normalize("NFKD")
+              .replace(/[’']/g, "-")
+              .replace(/&/g, " and ")
+              .replace(/[^a-zA-Z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")
+              .toLowerCase()}.webp`,
             workshop_preview: true
           }
         }))
@@ -50593,6 +50641,37 @@
       .sort((left, right) => left.position - right.position)
       .map((entry) => entry.music_tracks)
       .filter(Boolean);
+
+    const musicAssignedCoverUrl = (item, localFolder) => {
+      if (!item) return "";
+      if (item.cover_url) return item.cover_url;
+      const filename = item.cover_path?.split("/").pop();
+      return filename ? `assets/dt-tunes/${localFolder}/${encodeURIComponent(filename)}` : "";
+    };
+
+    const musicNowPlayingCoverUrl = (track, playlist) => {
+      const songCoverUrl = musicAssignedCoverUrl(track, "song-covers");
+      if (songCoverUrl) return songCoverUrl;
+      return musicAssignedCoverUrl(playlist, "playlist-covers");
+    };
+
+    const showMusicNowPlayingArtwork = (track, playlist) => {
+      const artwork = document.getElementById("music-now-playing-art");
+      if (!artwork) return;
+      const coverUrl = musicNowPlayingCoverUrl(track, playlist);
+      const playlistCoverUrl = musicAssignedCoverUrl(playlist, "playlist-covers");
+      artwork.hidden = !coverUrl;
+      artwork.src = coverUrl;
+      artwork.alt = coverUrl ? `${track?.title || playlist?.name || "Music"} album art` : "";
+      artwork.onerror = () => {
+        if (playlistCoverUrl && artwork.src !== new URL(playlistCoverUrl, window.location.href).href) {
+          artwork.src = playlistCoverUrl;
+          artwork.alt = `${playlist?.name || "Playlist"} artwork`;
+          return;
+        }
+        artwork.hidden = true;
+      };
+    };
 
     const hydrateMusicCoverUrls = async (playlists, client) => {
       const coverItems = [
@@ -50712,7 +50791,12 @@
       musicLibraryState.selectedPlaylistId = "";
       renderMusicPlaylists();
       updateMyDayMusicPlayer();
-      hydrateMusicCoverUrls(musicLibraryState.playlists, client).then(() => renderMusicPlaylists()).catch((coverError) => {
+      hydrateMusicCoverUrls(musicLibraryState.playlists, client).then(() => {
+        renderMusicPlaylists();
+        const activePlaylist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+        const activeTrack = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === musicLibraryState.currentTrackId);
+        if (activeTrack) showMusicNowPlayingArtwork(activeTrack, activePlaylist);
+      }).catch((coverError) => {
         console.warn("DT Tunes artwork will finish loading later.", coverError);
       });
     };
@@ -50745,15 +50829,9 @@
       setText("music-now-playing-title", track.title);
       setText("music-now-playing-artist", artist);
       updateMyDayMusicPlayer();
-      const artwork = document.getElementById("music-now-playing-art");
-      const coverFilename = track.cover_path?.split("/").pop();
-      const coverUrl = track.cover_url || (coverFilename ? `assets/dt-tunes/song-covers/${encodeURIComponent(coverFilename)}` : "");
-      if (artwork) {
-        artwork.hidden = !coverUrl;
-        artwork.src = coverUrl;
-        artwork.alt = coverUrl ? `${track.title} album art` : "";
-        artwork.onerror = () => { artwork.hidden = true; };
-      }
+      const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+      const coverUrl = musicNowPlayingCoverUrl(track, playlist);
+      showMusicNowPlayingArtwork(track, playlist);
       if (track.workshop_preview) {
         showToast(`${track.title} is selected for this preview.`);
         renderMusicTrackList();
@@ -50858,6 +50936,7 @@
         select.value = musicLibraryState.selectedPlaylistId;
       });
       document.querySelectorAll("[data-my-day-music-toggle]").forEach((button) => {
+        if (button.classList.contains("music-main-toggle")) button.hidden = !track;
         button.textContent = isPlaying ? "❚❚" : "▶";
         button.setAttribute("aria-label", isPlaying ? "Pause DT Tunes" : "Play DT Tunes");
       });
@@ -51035,6 +51114,12 @@
       primeMusicPlaylistUrls(playlist);
       setText("music-now-playing-title", playlist?.name || "Choose a song");
       setText("music-now-playing-artist", playlist ? `${musicPlaylistTracks(playlist).length} songs ready` : "Your shared Dance Techniques music library is ready.");
+      const artwork = document.getElementById("music-now-playing-art");
+      if (artwork) {
+        artwork.hidden = true;
+        artwork.removeAttribute("src");
+        artwork.alt = "";
+      }
       renderMusicPlaylists();
       updateMyDayMusicPlayer();
       if (playlist) showToast(`${playlist.name} is ready to play.`);
