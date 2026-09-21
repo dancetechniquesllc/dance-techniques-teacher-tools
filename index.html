@@ -15521,8 +15521,8 @@
                     </details>
                     <details class="panel" id="teacher-orders-deliver-panel">
                       <summary><strong>Deliver Orders</strong></summary>
-                      <p class="subtle">Deliver these through the class roster on dance day.</p>
-                      <div class="teacher-orders-step-actions"><button type="button" id="teacher-orders-deliver-button" data-tab-jump="rosters">Deliver Orders</button></div>
+                      <p class="subtle">Select the orders you delivered, then confirm them here.</p>
+                      <div class="teacher-orders-step-actions"><button type="button" id="teacher-orders-deliver-button">Deliver Orders</button></div>
                       <div class="teacher-orders-card-grid" id="teacher-orders-possession-list"></div>
                     </details>
                   </div>
@@ -33753,6 +33753,7 @@
     let teacherOrderPickupActive = false;
     let teacherOrderSelfFillActive = false;
     let teacherOrderSelfFillSaving = false;
+    let teacherOrderDeliveryActive = false;
     let teacherBoutiqueFillActive = false;
     let activeBoutiquePartialOrderId = "";
     let teacherOrderSearchTerm = "";
@@ -34957,10 +34958,11 @@
       const key = `${rosterClass.id}:${student.id}`;
       const pickupSelectable = status === "ready" && teacherOrderPickupActive;
       const selfFillSelectable = status === "waiting" && teacherOrderSelfFillActive;
-      const selectable = pickupSelectable || selfFillSelectable;
-      const selected = pickupSelectable ? pendingTeacherKitPickups.has(key) : selfFillSelectable ? pendingTeacherKitSelfFills.has(key) : false;
+      const deliverySelectable = status === "picked_up" && teacherOrderDeliveryActive;
+      const selectable = pickupSelectable || selfFillSelectable || deliverySelectable;
+      const selected = pickupSelectable ? pendingTeacherKitPickups.has(key) : selfFillSelectable ? pendingTeacherKitSelfFills.has(key) : deliverySelectable ? pendingTeacherKitDeliveries.has(key) : false;
       const dateLabel = status === "delivered" && student.kitDeliveredAt ? new Date(student.kitDeliveredAt).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "";
-      const selectionAttribute = pickupSelectable ? `data-teacher-order-pickup="${rosterSafe(key)}"` : selfFillSelectable ? `data-teacher-order-self-fill="${rosterSafe(key)}"` : "";
+      const selectionAttribute = pickupSelectable ? `data-teacher-order-pickup="${rosterSafe(key)}"` : selfFillSelectable ? `data-teacher-order-self-fill="${rosterSafe(key)}"` : deliverySelectable ? `data-teacher-order-delivery="${rosterSafe(key)}"` : "";
       const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
       const receivesSageBoyShirt = boutiqueEnrollmentShirtProduct(student) === "Sage Boy T";
       const correction = status === "delivered" ? `<div class="order-status-correction"><select data-kit-status-correction="${rosterSafe(key)}" aria-label="Correct T-Shirt and bag status"><option value="delivered">Delivered</option><option value="picked_up">To Deliver</option><option value="ready">To Pick Up</option><option value="waiting">To Fill</option></select><button type="button" data-kit-status-correction-save="${rosterSafe(key)}">Save</button></div>` : "";
@@ -35073,7 +35075,10 @@
         boutiquePrintButton.textContent = pendingTeacherBoutiqueFills.size ? `Print Labels (${pendingTeacherBoutiqueFills.size})` : "Print Labels";
       }
       const deliverButton = document.getElementById("teacher-orders-deliver-button");
-      if (deliverButton) deliverButton.disabled = !possession.length;
+      if (deliverButton) {
+        deliverButton.disabled = !possession.length;
+        deliverButton.textContent = teacherOrderDeliveryActive ? `Confirm Delivered${pendingTeacherKitDeliveries.size ? ` (${pendingTeacherKitDeliveries.size})` : ""}` : "Deliver Orders";
+      }
     }
 
     document.getElementById("boutique-order-search")?.addEventListener("input", renderDirectorBoutiqueOrders);
@@ -35321,18 +35326,24 @@
       teacherOrderSchoolFilter = "all";
       pendingTeacherKitPickups.clear();
       pendingTeacherKitSelfFills.clear();
+      pendingTeacherKitDeliveries.clear();
+      teacherOrderDeliveryActive = false;
       renderTeacherOrders();
     });
     document.getElementById("teacher-orders-search")?.addEventListener("input", (event) => {
       teacherOrderSearchTerm = event.target.value.trim().toLowerCase();
       pendingTeacherKitPickups.clear();
       pendingTeacherKitSelfFills.clear();
+      pendingTeacherKitDeliveries.clear();
+      teacherOrderDeliveryActive = false;
       renderTeacherOrders();
     });
     document.getElementById("teacher-orders-school-filter")?.addEventListener("change", (event) => {
       teacherOrderSchoolFilter = event.target.value;
       pendingTeacherKitPickups.clear();
       pendingTeacherKitSelfFills.clear();
+      pendingTeacherKitDeliveries.clear();
+      teacherOrderDeliveryActive = false;
       renderTeacherOrders();
     });
     document.getElementById("teacher-orders-gender-filter")?.addEventListener("change", (event) => {
@@ -35340,12 +35351,16 @@
       teacherOrderSizeFilter = "all";
       pendingTeacherKitPickups.clear();
       pendingTeacherKitSelfFills.clear();
+      pendingTeacherKitDeliveries.clear();
+      teacherOrderDeliveryActive = false;
       renderTeacherOrders();
     });
     document.getElementById("teacher-orders-size-filter")?.addEventListener("change", (event) => {
       teacherOrderSizeFilter = event.target.value;
       pendingTeacherKitPickups.clear();
       pendingTeacherKitSelfFills.clear();
+      pendingTeacherKitDeliveries.clear();
+      teacherOrderDeliveryActive = false;
       renderTeacherOrders();
     });
     document.getElementById("teacher-orders-sort")?.addEventListener("change", (event) => {
@@ -35368,12 +35383,22 @@
       else pendingTeacherKitSelfFills.add(key);
       renderTeacherOrders();
     });
+    document.getElementById("teacher-orders-possession-list")?.addEventListener("click", (event) => {
+      const row = event.target.closest("[data-teacher-order-delivery]");
+      if (!row || !teacherOrderDeliveryActive) return;
+      const key = row.dataset.teacherOrderDelivery;
+      if (pendingTeacherKitDeliveries.has(key)) pendingTeacherKitDeliveries.delete(key);
+      else pendingTeacherKitDeliveries.add(key);
+      renderTeacherOrders();
+    });
     document.getElementById("teacher-orders-pickup-button")?.addEventListener("click", async () => {
       if (!teacherOrderPickupActive) {
         teacherOrderPickupActive = true;
         teacherOrderSelfFillActive = false;
+        teacherOrderDeliveryActive = false;
         pendingTeacherKitPickups.clear();
         pendingTeacherKitSelfFills.clear();
+        pendingTeacherKitDeliveries.clear();
         renderTeacherOrders();
         return;
       }
@@ -35403,8 +35428,10 @@
       if (!teacherOrderSelfFillActive) {
         teacherOrderSelfFillActive = true;
         teacherOrderPickupActive = false;
+        teacherOrderDeliveryActive = false;
         pendingTeacherKitSelfFills.clear();
         pendingTeacherKitPickups.clear();
+        pendingTeacherKitDeliveries.clear();
         if (panel) panel.open = true;
         renderTeacherOrders();
         return;
@@ -35453,6 +35480,32 @@
       showToast(failedRecords.length
         ? `${savedCount} saved · ${failedRecords.length} still need confirmation`
         : `${savedCount} order${savedCount === 1 ? "" : "s"} filled and ready for pickup`);
+    });
+    document.getElementById("teacher-orders-deliver-button")?.addEventListener("click", () => {
+      if (!teacherOrderDeliveryActive) {
+        teacherOrderDeliveryActive = true;
+        teacherOrderPickupActive = false;
+        teacherOrderSelfFillActive = false;
+        pendingTeacherKitDeliveries.clear();
+        pendingTeacherKitPickups.clear();
+        pendingTeacherKitSelfFills.clear();
+        renderTeacherOrders();
+        return;
+      }
+      if (!pendingTeacherKitDeliveries.size) return showToast("Select every order you delivered");
+      const records = [...pendingTeacherKitDeliveries].map(teacherOrderRecordForKey).filter((record) => record?.student?.kitPickedUp && !record.student.kitReceived);
+      if (!records.length) return showToast("Select at least one order to mark delivered");
+      openDeliveryMessage({
+        type: "kit",
+        records,
+        onComplete: () => {
+          pendingTeacherKitDeliveries.clear();
+          teacherOrderDeliveryActive = false;
+          renderTeacherOrders();
+          renderTeacherRosters();
+          renderStudentLibrary();
+        }
+      });
     });
     document.getElementById("teacher-boutique-print-labels")?.addEventListener("click", printSelectedBoutiqueLabels);
     document.getElementById("teacher-boutique-fill-button")?.addEventListener("click", async () => {
