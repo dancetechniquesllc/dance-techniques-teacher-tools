@@ -2884,7 +2884,7 @@
     .photo-frame-picker select { width:100%; min-height:44px; border:1px solid var(--brick); border-radius:12px; padding:10px 12px; background:white; color:var(--fg); font:inherit; }
     .photo-frame-stage { position: relative; width: min(100%, 250px); aspect-ratio: 2 / 3; margin-inline: auto; overflow: hidden; border-radius: 18px; background: #181515; }
     .photo-frame-stage video, .photo-frame-stage > img { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .photo-frame-stage video { object-fit: cover; }
+    .photo-frame-stage video { object-fit: contain; background: #181515; }
     .photo-frame-stage > img { z-index: 1; object-fit: fill; pointer-events: none; }
     .photo-frame-stage .photo-frame-result { z-index: 2; object-fit: cover; }
     .photo-frame-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
@@ -51932,12 +51932,17 @@
         const context = canvas.getContext("2d");
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
-        const scale = Math.max(canvas.width / width, canvas.height / height);
-        const sourceWidth = canvas.width / scale;
-        const sourceHeight = canvas.height / scale;
-        const sourceX = (width - sourceWidth) / 2;
-        const sourceY = (height - sourceHeight) / 2;
-        context.drawImage(source, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, canvas.width, canvas.height);
+        const backgroundScale = Math.max(canvas.width / width, canvas.height / height);
+        const backgroundWidth = width * backgroundScale;
+        const backgroundHeight = height * backgroundScale;
+        context.save();
+        context.filter = "blur(34px) brightness(.82)";
+        context.drawImage(source, (canvas.width - backgroundWidth) / 2, (canvas.height - backgroundHeight) / 2, backgroundWidth, backgroundHeight);
+        context.restore();
+        const photoScale = Math.min(canvas.width / width, canvas.height / height);
+        const photoWidth = width * photoScale;
+        const photoHeight = height * photoScale;
+        context.drawImage(source, (canvas.width - photoWidth) / 2, (canvas.height - photoHeight) / 2, photoWidth, photoHeight);
         context.drawImage(await loadImage(selectedFrame[1]), 0, 0, canvas.width, canvas.height);
         const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.98));
         if (!blob) return;
