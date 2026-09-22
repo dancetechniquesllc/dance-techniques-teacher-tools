@@ -7071,16 +7071,21 @@
       top: 12px;
       z-index: 60;
       display: grid;
-      justify-items: end;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      justify-items: stretch;
       margin: 0 0 12px;
     }
 
-    body[data-view-tab="today"] .tabbar {
+    body[data-view-tab="today"] .tabbar:not(:has(.teacher-mini-player[data-active="true"])) {
       display: none;
     }
 
     .nav-menu-wrap {
       position: relative;
+      grid-column: 2;
+      justify-self: end;
     }
 
     .nav-menu-button {
@@ -7103,6 +7108,160 @@
       stroke-width: 2.4;
       fill: none;
       stroke-linecap: round;
+
+    }
+
+    .teacher-mini-player {
+      min-width: 0;
+      height: 44px;
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-rows: 12px 24px;
+      align-items: center;
+      column-gap: 5px;
+      grid-column: 1;
+      padding: 3px 24px 4px 7px;
+      border: 1px solid #aebaa6;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #f1f5ed, #dfe8d9);
+      color: #34402f;
+      box-shadow: 0 9px 22px rgb(69 58 54 / 0.12);
+    }
+
+    .teacher-mini-player[hidden] { display: none !important; }
+
+    .teacher-mini-player-title {
+      min-width: 0;
+      grid-column: 1 / -1;
+      align-self: end;
+      overflow: hidden;
+      color: #34402f;
+      font-size: 11.5px;
+      font-weight: 850;
+      line-height: 1;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-right: 3px;
+    }
+
+    .teacher-mini-player button {
+      width: 22px;
+      min-width: 22px;
+      height: 22px;
+      min-height: 22px;
+      justify-self: center;
+      display: grid;
+      place-items: center;
+      padding: 2px;
+      border: 1px solid #aebaa6;
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.64);
+      color: #34402f;
+      font: inherit;
+      font-size: 8px;
+      font-weight: 850;
+      line-height: 1;
+    }
+
+    .teacher-mini-player button:hover,
+    .teacher-mini-player button:focus-visible {
+      border-color: #718166;
+      background: #c8d3c0;
+      outline: none;
+    }
+
+    .teacher-mini-player .teacher-mini-toggle {
+      background: #718166;
+      color: #fff;
+    }
+
+    .teacher-mini-player .teacher-mini-open-music,
+    .teacher-mini-player .teacher-mini-stop {
+      width: 22px;
+      min-width: 22px;
+      height: 22px;
+      min-height: 22px;
+      padding: 2px;
+    }
+
+    .teacher-mini-player button[data-teacher-mini-skip] {
+      border-color: transparent;
+      background: transparent;
+    }
+
+    .teacher-mini-player button[data-teacher-mini-skip]:hover,
+    .teacher-mini-player button[data-teacher-mini-skip]:focus-visible {
+      border-color: transparent;
+      background: rgb(255 255 255 / 0.44);
+    }
+
+    .teacher-mini-player .teacher-mini-stop {
+      position: absolute;
+      top: 3px;
+      right: 4px;
+      width: 15px;
+      min-width: 15px;
+      height: 15px;
+      min-height: 15px;
+      padding: 2px;
+      border: 0;
+      background: #111;
+      color: #fff;
+      box-shadow: none;
+    }
+
+    .teacher-mini-player .teacher-mini-stop:hover,
+    .teacher-mini-player .teacher-mini-stop:focus-visible {
+      background: #111;
+    }
+
+    .teacher-mini-player .teacher-mini-stop svg {
+      width: 10px;
+      height: 10px;
+      stroke-width: 2.6;
+    }
+
+    .teacher-mini-player svg {
+      width: 12px;
+      height: 12px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.25;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .teacher-mini-player .teacher-mini-toggle svg {
+      fill: currentColor;
+      stroke: none;
+    }
+
+    .teacher-mini-player .teacher-mini-skip-label {
+      width: 20px;
+      height: 20px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .teacher-mini-player .teacher-mini-skip-label svg {
+      position: absolute;
+      inset: 0;
+      width: 20px;
+      height: 20px;
+    }
+
+    .teacher-mini-player .teacher-mini-skip-label span {
+      position: relative;
+      z-index: 1;
+      padding-top: 2px;
+      font-size: 6.5px;
+      font-weight: 900;
+    }
+
+    @media (max-width: 430px) {
+      .teacher-mini-player { column-gap: 3px; padding-inline: 6px; }
     }
 
     .nav-menu-panel {
@@ -15243,6 +15402,15 @@
         <article class="phone" aria-label="Teacher mobile PWA">
           <div class="phone-screen">
             <nav class="tabbar" aria-label="Teacher app navigation">
+              <section class="teacher-mini-player" id="teacher-mini-player" aria-label="Current song controls" data-active="false" hidden>
+                <strong class="teacher-mini-player-title" data-teacher-mini-title>Current song</strong>
+                <button type="button" data-teacher-mini-skip="-15" aria-label="Rewind 15 seconds"><span class="teacher-mini-skip-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7H3V3"></path><path d="M3.5 7a9 9 0 1 1-1 9"></path></svg><span>15</span></span></button>
+                <button class="teacher-mini-toggle" type="button" data-teacher-mini-toggle aria-label="Pause song"><svg viewBox="0 0 24 24" aria-hidden="true"><path data-teacher-mini-toggle-icon d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></button>
+                <button type="button" data-teacher-mini-skip="15" aria-label="Forward 15 seconds"><span class="teacher-mini-skip-label"><span>15</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 7h4V3"></path><path d="M20.5 7a9 9 0 1 0 1 9"></path></svg></span></button>
+                <button type="button" data-teacher-mini-next aria-label="Play next song"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 6 8 6-8 6V6Z"></path><path d="m12 6 8 6-8 6V6Z"></path></svg></button>
+                <button class="teacher-mini-open-music" type="button" data-teacher-mini-open aria-label="Open Music" title="Open Music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V5l10-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="16" cy="16" r="3"></circle></svg></button>
+                <button class="teacher-mini-stop" type="button" data-teacher-mini-stop aria-label="Stop music and close player" title="Stop music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg></button>
+              </section>
               <div class="nav-menu-wrap" id="teacher-nav-menu">
                 <button class="nav-menu-button" id="teacher-nav-button" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="teacher-nav-panel">
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -22721,6 +22889,8 @@
       }
       document.body.dataset.teacherTab = topLevelTab;
       document.body.dataset.viewTab = tab;
+      const miniPlayer = document.getElementById("teacher-mini-player");
+      if (miniPlayer) miniPlayer.hidden = tab === "music" || miniPlayer.dataset.active !== "true";
       document.querySelectorAll(".view").forEach((view) => view.classList.toggle("active", view.id === `${tab}-view`));
       document.querySelectorAll("[data-tab]").forEach((button) => button.classList.toggle("active", button.dataset.tab === topLevelTab));
       const navValue = tab === "teacher-conversation" ? "messages" : tab;
@@ -50955,6 +51125,39 @@
         button.setAttribute("aria-pressed", String(musicLibraryState.repeatCurrentTrack));
         button.textContent = musicLibraryState.repeatCurrentTrack ? "↻ Repeating" : "↻ Repeat";
       });
+      const miniPlayer = document.getElementById("teacher-mini-player");
+      if (miniPlayer) {
+        miniPlayer.dataset.active = track ? "true" : "false";
+        miniPlayer.hidden = !track || currentViewTab === "music";
+      }
+      document.querySelectorAll("[data-teacher-mini-title]").forEach((element) => { element.textContent = track?.title || "Current song"; });
+      document.querySelectorAll("[data-teacher-mini-toggle]").forEach((button) => {
+        button.setAttribute("aria-label", isPlaying ? "Pause song" : "Play song");
+        const icon = button.querySelector("[data-teacher-mini-toggle-icon]");
+        if (icon) icon.setAttribute("d", isPlaying ? "M7 5h4v14H7zM13 5h4v14h-4z" : "m8 5 11 7-11 7V5Z");
+      });
+    };
+
+    const stopMusicPlayback = () => {
+      const audio = document.getElementById("dt-tunes-audio");
+      musicPlaybackRequestId += 1;
+      musicLibraryState.currentTrackId = "";
+      musicLibraryState.previewPlaying = false;
+      if (audio) {
+        audio.pause();
+        audio.removeAttribute("src");
+        audio.load();
+      }
+      setText("music-now-playing-title", "Choose a song");
+      setText("music-now-playing-artist", "Your shared Dance Techniques music library is ready.");
+      const artwork = document.getElementById("music-now-playing-art");
+      if (artwork) {
+        artwork.hidden = true;
+        artwork.removeAttribute("src");
+        artwork.alt = "";
+      }
+      updateMyDayMusicPlayer();
+      renderMusicTrackList();
     };
 
     const playAdjacentMusicTrack = (direction, { automatic = false } = {}) => {
@@ -51067,6 +51270,37 @@
     });
 
     document.addEventListener("click", (event) => {
+      if (event.target.closest("[data-teacher-mini-open]")) {
+        setTab("music");
+        return;
+      }
+      if (event.target.closest("[data-teacher-mini-stop]")) {
+        stopMusicPlayback();
+        return;
+      }
+      const miniSkip = event.target.closest("[data-teacher-mini-skip]");
+      if (miniSkip) {
+        const audio = document.getElementById("dt-tunes-audio");
+        if (Number.isFinite(audio?.duration) && audio.duration > 0) seekMusicPosition(audio.currentTime + Number(miniSkip.dataset.teacherMiniSkip));
+        return;
+      }
+      if (event.target.closest("[data-teacher-mini-next]")) {
+        playAdjacentMusicTrack(1);
+        return;
+      }
+      if (event.target.closest("[data-teacher-mini-toggle]")) {
+        const audio = document.getElementById("dt-tunes-audio");
+        const selectedTrack = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((track) => track.id === musicLibraryState.currentTrackId);
+        if (selectedTrack?.workshop_preview) {
+          musicLibraryState.previewPlaying = !musicLibraryState.previewPlaying;
+          updateMyDayMusicPlayer();
+          renderMusicTrackList();
+        } else if (audio?.src) {
+          if (audio.paused) audio.play().catch(() => showToast("Open DT Tunes and press play to begin."));
+          else audio.pause();
+        }
+        return;
+      }
       const toggle = event.target.closest("[data-my-day-music-toggle]");
       if (toggle) {
         const audio = document.getElementById("dt-tunes-audio");
