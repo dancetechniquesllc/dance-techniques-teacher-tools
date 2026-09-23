@@ -2882,7 +2882,7 @@
     .photo-frame-body { display: grid; gap: 10px; padding: 4px 16px 14px; }
     .photo-frame-picker { display:grid; gap:6px; font-size:13px; font-weight:800; }
     .photo-frame-picker select { width:100%; min-height:44px; border:1px solid var(--brick); border-radius:12px; padding:10px 12px; background:white; color:var(--fg); font:inherit; }
-    .photo-frame-stage { position: relative; width: min(100%, 250px); aspect-ratio: 2 / 3; margin-inline: auto; overflow: hidden; border-radius: 18px; background: #181515; }
+    .photo-frame-stage { position: relative; width: min(100%, 250px); aspect-ratio: 2 / 3; margin-inline: auto; overflow: hidden; border-radius: 18px; background: #181515; touch-action: none; }
     .photo-frame-stage video, .photo-frame-stage > img { position: absolute; inset: 0; width: 100%; height: 100%; }
     .photo-frame-stage video { object-fit: contain; background: #181515; }
     .photo-frame-stage > img { z-index: 1; object-fit: fill; pointer-events: none; }
@@ -18766,9 +18766,8 @@
       <h3 id="teacher-new-enrollment-dialog-title">Assign New Enrollment</h3>
       <p id="teacher-new-enrollment-dialog-summary"></p>
       <form class="teacher-roster-form" id="teacher-new-enrollment-form">
-        <label class="full-field">Class
-          <select id="teacher-new-enrollment-class" required></select>
-        </label>
+        <select id="teacher-new-enrollment-class" required hidden aria-label="Selected class"></select>
+        <div class="enrollment-placement-class-grid full-field" id="teacher-new-enrollment-class-options"></div>
         <p class="full-field subtle" id="teacher-new-enrollment-dialog-detail" role="status" aria-live="polite"></p>
       </form>
       <div class="confirm-actions">
@@ -36135,8 +36134,14 @@
 
     const teacherRosterClassMatchesSchool = (rosterClass, school) => {
       if (!rosterClass || !school) return false;
-      if (rosterClass.partnerSchoolId && school.id) return String(rosterClass.partnerSchoolId) === String(school.id);
-      return enrollmentOfficialSchoolMatchesClass(school, rosterClass);
+      if (rosterClass.partnerSchoolId && school.id && String(rosterClass.partnerSchoolId) === String(school.id)) return true;
+      const rosterSchoolKey = enrollmentSchoolKey(rosterClass.schoolName);
+      return rosterSchoolKey && [
+        school.name,
+        school.nickname,
+        ...(Array.isArray(school.aliases) ? school.aliases : []),
+        ...(Array.isArray(school.alternateNames) ? school.alternateNames : [])
+      ].filter(Boolean).some((name) => enrollmentSchoolKey(name) === rosterSchoolKey);
     };
 
     const teacherRosterSelectedSchool = (schools = assignedTeacherSchools()) => {
@@ -36401,27 +36406,65 @@
       if (!school) return showToast("This enrollment is not assigned to one of your schools");
       selectedTeacherNewEnrollmentId = item.id;
       const classroom = String(item.official_classroom || "").trim();
-      const availableClasses = teacherRosterClasses().filter((rosterClass) => {
-        const sameSchool = teacherRosterClassMatchesSchool(rosterClass, school);
-        const capacity = Number(rosterClass.capacity) || 0;
-        return sameSchool && rosterClass.sourceActive !== false && (!capacity || rosterEnrolled(rosterClass).length < capacity);
-      });
+      let availableClasses = rosterClasses
+        .filter((rosterClass) => rosterClass.sourceActive !== false
+          && teacherRosterClassMatchesSchool(rosterClass, school)
+          && (document.body.dataset.tourMode === "true" || rosterClass.teacherId === profileTeacher?.id))
+        .sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time)
+          || left.name.localeCompare(right.name, undefined, { numeric: true }));
+      if (!availableClasses.length && document.body.dataset.tourMode === "true") {
+        const previewClass = {
+          id: `tour-assignment-${enrollmentSchoolKey(school.name)}`,
+          name: item.requested_class_name || "Ages 3–5",
+          schoolName: school.name,
+          teacherId: profileTeacher?.id || "lexi",
+          day: "Tuesday",
+          time: "3:15 PM",
+          capacity: 12,
+          students: []
+        };
+        rosterClasses.push(previewClass);
+        availableClasses = [previewClass];
+      }
       const select = document.getElementById("teacher-new-enrollment-class");
+      const options = document.getElementById("teacher-new-enrollment-class-options");
       const submit = document.getElementById("teacher-new-enrollment-submit");
       const detail = document.getElementById("teacher-new-enrollment-dialog-detail");
       setText("teacher-new-enrollment-dialog-summary", `${teacherNewEnrollmentName(item)} · ${school.nickname || school.name}`);
       select.innerHTML = availableClasses.length
-        ? `<option value="">Choose a class</option>${availableClasses.map((rosterClass) => `<option value="${rosterSafe(rosterClass.id)}">${rosterSafe(rosterClass.name)} · ${rosterSafe(friendlyScheduleTime(rosterClass.time) || "Time Not Set")} (${rosterEnrolled(rosterClass).length}/${Number(rosterClass.capacity) || "—"})</option>`).join("")}`
-        : `<option value="">No eligible classes available</option>`;
+        ? `<option value="">Choose a class</option>${availableClasses.map((rosterClass) => {
+          const enrolledCount = rosterEnrolled(rosterClass).length;
+          const recommendedCapacity = classRecommendedCapacity(rosterClass);
+          return `<option value="${rosterSafe(rosterClass.id)}">${rosterSafe(rosterClass.name)} · ${rosterSafe(friendlyScheduleTime(rosterClass.time) || "Time Not Set")} (${enrolledCount}/${recommendedCapacity}${enrolledCount >= recommendedCapacity ? " · Full" : ""})</option>`;
+        }).join("")}`
+        : `<option value="">No classes available</option>`;
+      options.innerHTML = availableClasses.length ? availableClasses.map((rosterClass) => {
+        const enrolledCount = rosterEnrolled(rosterClass).length;
+        const recommendedCapacity = classRecommendedCapacity(rosterClass);
+        const students = rosterEnrolled(rosterClass).slice(0, 10).map((student) => `<div class="enrollment-class-compare-student"><span class="roster-student-photo">${rosterSafe(rosterStudentInitials(student))}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(student.officialClassroom || student.classroom || "Classroom not entered")}</small></div>`).join("");
+        return `<article class="roster-class-card enrollment-placement-class-card" data-teacher-enrollment-class-card="${rosterSafe(rosterClass.id)}"><div class="enrollment-class-compare-heading"><strong>${rosterSafe(rosterClass.name)}</strong><small>${rosterSafe(rosterClass.day || "Day not set")} · ${rosterSafe(friendlyScheduleTime(rosterClass.time) || "Time not set")}</small></div><div class="enrollment-class-compare-bubbles"><span>${enrolledCount}/${recommendedCapacity} Enrolled${enrolledCount >= recommendedCapacity ? " · Full" : ""}</span></div><div class="enrollment-class-compare-students">${students || '<div class="enrollment-class-empty-roster">No dancers assigned yet.</div>'}</div><span class="enrollment-class-card-actions"><button class="enrollment-class-card-assign" type="button" data-teacher-enrollment-class="${rosterSafe(rosterClass.id)}">Assign Class</button></span></article>`;
+      }).join("") : '<div class="roster-empty">No active classes are available for this school.</div>';
+      options.onclick = (event) => {
+        const button = event.target.closest("[data-teacher-enrollment-class]");
+        if (!button) return;
+        select.value = button.dataset.teacherEnrollmentClass || "";
+        options.querySelectorAll("[data-teacher-enrollment-class-card]").forEach((card) => card.classList.toggle("is-assigned", card.dataset.teacherEnrollmentClassCard === select.value));
+        options.querySelectorAll("[data-teacher-enrollment-class]").forEach((control) => {
+          const selected = control.dataset.teacherEnrollmentClass === select.value;
+          control.classList.toggle("is-selected", selected);
+          control.textContent = selected ? "Class Selected" : "Assign Class";
+        });
+        submit.disabled = !select.value;
+      };
       select.disabled = !classroom || !availableClasses.length;
-      submit.disabled = select.disabled;
+      submit.disabled = true;
       detail.textContent = !classroom
         ? "An Official Classroom must be added by the director before this dancer can be assigned."
         : !availableClasses.length
-          ? "No class with available space is currently assigned to you at this school."
-          : `Official Classroom: ${classroom}. Choose a class, then review and assign.`;
+          ? "No active class is currently assigned to you at this school."
+          : `Official Classroom: ${classroom}. Choose a class, then review and assign. Full classes will use the same review as the Director Dashboard.`;
       setTeacherRosterOverlay("teacher-new-enrollment-overlay", true);
-      window.setTimeout(() => (select.disabled ? document.getElementById("teacher-new-enrollment-cancel") : select)?.focus(), 40);
+      window.setTimeout(() => (select.disabled ? document.getElementById("teacher-new-enrollment-cancel") : options.querySelector("[data-teacher-enrollment-class]"))?.focus(), 40);
     };
 
     const assignTeacherNewEnrollment = async () => {
@@ -36429,14 +36472,17 @@
       const item = teacherRosterVisibleNewEnrollments().find((entry) => String(entry.id) === String(selectedTeacherNewEnrollmentId));
       const school = teacherNewEnrollmentSchool(item);
       const classId = document.getElementById("teacher-new-enrollment-class")?.value || "";
-      const rosterClass = teacherRosterClasses().find((entry) => entry.id === classId);
+      const authorizedClasses = document.body.dataset.tourMode === "true" ? rosterClasses : teacherRosterClasses();
+      const rosterClass = authorizedClasses.find((entry) => entry.id === classId);
       if (!item || !school) return showToast("This enrollment is no longer available to assign");
       if (!String(item.official_classroom || "").trim()) return showToast("An Official Classroom is required before assignment");
       if (!rosterClass || !teacherRosterClassMatchesSchool(rosterClass, school)) {
         return showToast("Choose one of your authorized classes for this school");
       }
-      const capacity = Number(rosterClass.capacity) || 0;
-      if (capacity && rosterEnrolled(rosterClass).length >= capacity) return showToast("That class is full. Choose another class.");
+      if (rosterEnrolled(rosterClass).length >= classRecommendedCapacity(rosterClass)) {
+        showFullClassCelebration(rosterClass, teacherNewEnrollmentName(item));
+        return;
+      }
       teacherNewEnrollmentAssigning = true;
       const submit = document.getElementById("teacher-new-enrollment-submit");
       submit.disabled = true;
@@ -40812,9 +40858,10 @@
             .map(([schoolNickname, classes]) => {
               const dayLabels = [...new Set(classes.map((item) => item.day).filter(Boolean))];
               const teacherNames = [...new Set(classes.map((item) => rosterTeacherName(item.teacherId)).filter(Boolean))];
+              const enrolledAtSchool = new Set(classes.flatMap((item) => rosterEnrolled(item).map((student) => student.id || `${student.firstName || ""}-${student.lastName || ""}`))).size;
               const dayShort = { Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" };
               return `<section class="roster-school-results">
-        <div class="roster-school-results-heading"><div class="roster-school-results-title"><span class="roster-school-day-bubbles">${dayLabels.map((day) => `<span class="roster-school-day-bubble" title="${rosterSafe(day)}">${rosterSafe(dayShort[day] || day.slice(0, 2))}</span>`).join("")}</span><h3>${rosterSafe(schoolNickname)}${teacherNames.length ? ` – ${rosterSafe(teacherNames.join(" & "))}` : ""}</h3></div><button class="roster-multi-class-open" type="button" data-roster-multi-class-open="${rosterSafe(classes[0]?.schoolName || schoolNickname)}">Rearrange Classes</button></div>
+        <div class="roster-school-results-heading"><div class="roster-school-results-title"><span class="roster-school-day-bubbles">${dayLabels.map((day) => `<span class="roster-school-day-bubble" title="${rosterSafe(day)}">${rosterSafe(dayShort[day] || day.slice(0, 2))}</span>`).join("")}</span><h3>${rosterSafe(schoolNickname)} – ${enrolledAtSchool} Enrolled${teacherNames.length ? ` – ${rosterSafe(teacherNames.join(" & "))}` : ""}</h3></div><button class="roster-multi-class-open" type="button" data-roster-multi-class-open="${rosterSafe(classes[0]?.schoolName || schoolNickname)}">Rearrange Classes</button></div>
               <div class="roster-school-results-line" aria-hidden="true"></div>
               <div class="roster-school-class-grid">${classes.sort((left, right) => (left.day || "").localeCompare(right.day || "") || (left.time || "").localeCompare(right.time || "") || left.name.localeCompare(right.name, undefined, { numeric: true })).map(rosterClassCardMarkup).join("")}</div>
             </section>`;
@@ -51794,6 +51841,10 @@
       let resultFile = null;
       let facingMode = "environment";
       let libraryPhoto = null;
+      let photoZoom = 1;
+      let cameraTrackZoomSupported = false;
+      let pinchStartDistance = 0;
+      let pinchStartZoom = 1;
 
       const modal = document.createElement("div");
       modal.className = "photo-frame-modal";
@@ -51847,6 +51898,7 @@
       document.body.appendChild(modal);
 
       const video = modal.querySelector("video");
+      const stage = modal.querySelector(".photo-frame-stage");
       const overlay = modal.querySelector(".photo-frame-overlay");
       const result = modal.querySelector(".photo-frame-result");
       const status = modal.querySelector(".photo-frame-status");
@@ -51863,6 +51915,14 @@
         stream?.getTracks().forEach((track) => track.stop());
         stream = null;
         video.srcObject = null;
+        cameraTrackZoomSupported = false;
+      };
+      const updateZoomPreview = () => {
+        video.style.transform = cameraTrackZoomSupported ? "" : `scale(${photoZoom})`;
+      };
+      const resetPhotoZoom = () => {
+        photoZoom = 1;
+        updateZoomPreview();
       };
       const resetResult = () => {
         if (resultUrl) URL.revokeObjectURL(resultUrl);
@@ -51889,6 +51949,7 @@
       };
       const startCamera = async () => {
         libraryPhoto = null;
+        resetPhotoZoom();
         stopCamera();
         resetResult();
         startButton.querySelector(".photo-frame-action-label").textContent = "Camera";
@@ -51898,14 +51959,18 @@
             audio: false,
             video: {
               facingMode: { ideal: facingMode },
-              width: { ideal: 2160 },
-              height: { ideal: 3840 },
+              width: { ideal: 4096 },
+              height: { ideal: 6144 },
               aspectRatio: { ideal: 2 / 3 }
             }
           });
           video.srcObject = stream;
           await video.play();
-          status.textContent = "Line up the dancer inside the frame.";
+          const track = stream.getVideoTracks()[0];
+          const capabilities = track?.getCapabilities?.() || {};
+          cameraTrackZoomSupported = Number.isFinite(capabilities.zoom?.max) && capabilities.zoom.max > capabilities.zoom.min;
+          updateZoomPreview();
+          status.textContent = "Line up the dancer inside the frame. Pinch with two fingers to zoom.";
           libraryButton.hidden = true;
           startButton.hidden = true;
           captureButton.hidden = false;
@@ -51926,25 +51991,37 @@
       const composePhoto = async (source, width, height) => {
         if (!width || !height) return;
         resetResult();
+        let photoSource = source;
+        let photoSourceWidth = width;
+        let photoSourceHeight = height;
+        const portraitCameraCapture = source === video
+          && window.matchMedia?.("(orientation: portrait)").matches
+          && width > height;
+        if (portraitCameraCapture) {
+          const orientedCanvas = document.createElement("canvas");
+          orientedCanvas.width = height;
+          orientedCanvas.height = width;
+          const orientedContext = orientedCanvas.getContext("2d");
+          orientedContext.translate(orientedCanvas.width, 0);
+          orientedContext.rotate(Math.PI / 2);
+          orientedContext.drawImage(source, 0, 0, width, height);
+          photoSource = orientedCanvas;
+          photoSourceWidth = orientedCanvas.width;
+          photoSourceHeight = orientedCanvas.height;
+        }
         const canvas = document.createElement("canvas");
-        canvas.width = 1024;
-        canvas.height = 1536;
+        canvas.width = 2048;
+        canvas.height = 3072;
         const context = canvas.getContext("2d");
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
-        const backgroundScale = Math.max(canvas.width / width, canvas.height / height);
-        const backgroundWidth = width * backgroundScale;
-        const backgroundHeight = height * backgroundScale;
-        context.save();
-        context.filter = "blur(34px) brightness(.82)";
-        context.drawImage(source, (canvas.width - backgroundWidth) / 2, (canvas.height - backgroundHeight) / 2, backgroundWidth, backgroundHeight);
-        context.restore();
-        const photoScale = Math.min(canvas.width / width, canvas.height / height);
-        const photoWidth = width * photoScale;
-        const photoHeight = height * photoScale;
-        context.drawImage(source, (canvas.width - photoWidth) / 2, (canvas.height - photoHeight) / 2, photoWidth, photoHeight);
+        const effectiveZoom = source === video && cameraTrackZoomSupported ? 1 : photoZoom;
+        const photoScale = Math.max(canvas.width / photoSourceWidth, canvas.height / photoSourceHeight) * effectiveZoom;
+        const photoWidth = photoSourceWidth * photoScale;
+        const photoHeight = photoSourceHeight * photoScale;
+        context.drawImage(photoSource, (canvas.width - photoWidth) / 2, (canvas.height - photoHeight) / 2, photoWidth, photoHeight);
         context.drawImage(await loadImage(selectedFrame[1]), 0, 0, canvas.width, canvas.height);
-        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.98));
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 1));
         if (!blob) return;
         stopCamera();
         resultFile = new File([blob], `dance-techniques-${Date.now()}.jpg`, { type: "image/jpeg" });
@@ -51959,7 +52036,7 @@
         startButton.hidden = true;
         saveButton.hidden = false;
         actions.classList.add("is-result");
-        status.textContent = "Photo ready.";
+        status.textContent = "Photo ready. Pinch with two fingers to adjust the zoom.";
       };
       const capturePhoto = async () => {
         await composePhoto(video, video.videoWidth, video.videoHeight);
@@ -51986,11 +52063,33 @@
         try {
           const photo = await loadImage(url);
           stopCamera();
+          resetPhotoZoom();
           libraryPhoto = photo;
           await composePhoto(photo, photo.naturalWidth, photo.naturalHeight);
         } catch (error) {
           status.textContent = "This photo could not be opened. Try a JPEG or PNG photo.";
         } finally { URL.revokeObjectURL(url); }
+      });
+      const touchDistance = (touches) => Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
+      stage.addEventListener("touchstart", (event) => {
+        if (event.touches.length !== 2 || (!stream && !libraryPhoto)) return;
+        pinchStartDistance = touchDistance(event.touches);
+        pinchStartZoom = photoZoom;
+      }, { passive: true });
+      stage.addEventListener("touchmove", (event) => {
+        if (event.touches.length !== 2 || !pinchStartDistance || (!stream && !libraryPhoto)) return;
+        event.preventDefault();
+        photoZoom = Math.min(4, Math.max(1, pinchStartZoom * touchDistance(event.touches) / pinchStartDistance));
+        if (stream && cameraTrackZoomSupported) {
+          const track = stream.getVideoTracks()[0];
+          const range = track?.getCapabilities?.().zoom;
+          const trackZoom = range ? Math.min(range.max, Math.max(range.min, range.min + (photoZoom - 1) / 3 * (range.max - range.min))) : 1;
+          track?.applyConstraints?.({ advanced: [{ zoom: trackZoom }] }).catch(() => { cameraTrackZoomSupported = false; updateZoomPreview(); });
+        } else updateZoomPreview();
+      }, { passive: false });
+      stage.addEventListener("touchend", () => {
+        pinchStartDistance = 0;
+        if (libraryPhoto) composePhoto(libraryPhoto, libraryPhoto.naturalWidth, libraryPhoto.naturalHeight).catch(() => { status.textContent = "Could not update the zoom. Please try again."; });
       });
       const savePhoto = async () => {
         if (!resultFile) return;

@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v259-photo-frame-fit";
+const CACHE_NAME = "my-dance-techniques-v264-hd-photo-frame-zoom";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
