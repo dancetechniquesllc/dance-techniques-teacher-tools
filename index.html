@@ -44415,6 +44415,8 @@
       scheduleAppDataSave();
     });
     document.getElementById("open-school-partnership-payments")?.addEventListener("click", async () => {
+      schoolPartnershipPaymentState.month = defaultPayrollMonth();
+      schoolPartnershipPaymentState.selectedSchoolId = "";
       document.getElementById("finance-folio-cards").hidden = true;
       document.getElementById("payroll-workspace").hidden = true;
       document.getElementById("partnership-payment-workspace").hidden = false;

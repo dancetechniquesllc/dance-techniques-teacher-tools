@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v275-vendor-proration-pay-period";
+const CACHE_NAME = "my-dance-techniques-v276-vendor-current-month";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
