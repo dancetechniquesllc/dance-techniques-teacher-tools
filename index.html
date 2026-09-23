@@ -43307,7 +43307,10 @@
         (rosterClass.students || []).forEach((student) => {
           if (!["enrolled", "active"].includes(String(student.status || "").toLowerCase()) || records.has(student.id)) return;
           const discount = payrollDiscountFor(student);
-          const tuition = monthlyTuitionForCircumstance(discount, school);
+          const tuition = enrollmentSchoolNameMatches(school.name, "Meadow Oaks")
+            || enrollmentSchoolNameMatches(school.nickname, "Meadow Oaks")
+            ? 65
+            : monthlyTuitionForCircumstance(discount, school);
           const balanceRecord = payrollState.outstandingStudents?.[student.id];
           const basePayment = tuition * shareRate;
           const savedHolds = vendorFeeHoldsForStudent(student, school);
