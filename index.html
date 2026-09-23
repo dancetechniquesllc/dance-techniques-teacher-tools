@@ -32209,6 +32209,32 @@
       return field.value;
     };
 
+    const partnerSchoolMatchesScheduleRecord = (school, record) => {
+      if (!school || !record) return false;
+      if (school.id && (String(record.id || "") === String(school.id) || String(record.partnerSchoolId || "") === String(school.id))) return true;
+      return [school.name, school.nickname, ...(school.aliases || []), ...(school.alternateNames || [])]
+        .filter(Boolean)
+        .some((name) => enrollmentSchoolNameMatches(name, record.name || record.schoolName || record.nickname));
+    };
+
+    const syncAllPartnerSchoolScheduleReferences = (changedSchool = null) => {
+      syncTeachingTeamSchools();
+      const sourceSchools = changedSchool ? [changedSchool] : schoolLibrary;
+      sourceSchools.forEach((school) => {
+        const dayName = weekdayNames[Number(school.dayOfWeek)] || "To schedule";
+        teachers.forEach((teacher) => {
+          (teacher.schools || []).filter((teacherSchool) => partnerSchoolMatchesScheduleRecord(school, teacherSchool)).forEach((teacherSchool) => {
+            teacherSchool.dayOfWeek = school.dayOfWeek;
+            teacherSchool.timeBlock = school.timeBlock || teacherSchool.timeBlock || "AM";
+          });
+        });
+        rosterClasses.filter((rosterClass) => partnerSchoolMatchesScheduleRecord(school, rosterClass)).forEach((rosterClass) => {
+          rosterClass.partnerSchoolId = school.id || rosterClass.partnerSchoolId || "";
+          rosterClass.day = dayName;
+        });
+      });
+    };
+
     const syncPartnerSchoolReferences = (school, fieldName, previousValue) => {
       if (!school) return;
       if ((fieldName === "name" || fieldName === "nickname") && previousValue && previousValue !== school[fieldName]) {
@@ -32225,9 +32251,9 @@
         enrollmentSchoolNameMatches(rosterClass.schoolName, school.name)
         || enrollmentSchoolNameMatches(rosterClass.schoolName, school.nickname)
       ));
-      if (fieldName === "dayOfWeek") matchingClasses.forEach((rosterClass) => { rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule"; });
+      if (fieldName === "dayOfWeek" || fieldName === "timeBlock") syncAllPartnerSchoolScheduleReferences(school);
       if (fieldName === "assignedTeacherId") matchingClasses.forEach((rosterClass) => { rosterClass.teacherId = school.assignedTeacherId || ""; });
-      syncTeachingTeamSchools();
+      if (fieldName !== "dayOfWeek" && fieldName !== "timeBlock") syncTeachingTeamSchools();
     };
 
     const partnerSchoolAddressPayload = (value = "") => {
@@ -32987,10 +33013,13 @@
       const school = profileTeacher.schools[Number(scheduleField.dataset.partnerSchoolIndex)];
       if (!school) return;
       const fieldName = scheduleField.dataset.partnerSchoolSchedule;
+      const previousValue = school[fieldName];
       school[fieldName] = fieldName === "dayOfWeek" ? (scheduleField.value ? Number(scheduleField.value) : "") : scheduleField.value;
-      rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name).forEach((rosterClass) => {
-        if (fieldName === "dayOfWeek") rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
-      });
+      const sourceSchool = schoolLibrarySourceForTeacherSchool(school);
+      if (sourceSchool) {
+        sourceSchool[fieldName] = school[fieldName];
+        syncPartnerSchoolReferences(sourceSchool, fieldName, previousValue);
+      } else if (fieldName === "dayOfWeek" || fieldName === "timeBlock") syncAllPartnerSchoolScheduleReferences(school);
       markScheduleDirty();
       renderHomeWidget();
       renderMyDay();
@@ -33227,12 +33256,19 @@
       if (!school) return;
       const schoolField = field.dataset.teacherSchoolField;
       const previousSchoolName = school.name;
+      const previousValue = school[schoolField];
       school[schoolField] = schoolField === "classCount" || schoolField === "dayOfWeek" ? (field.value === "" ? "" : Number(field.value)) : field.value;
       if (schoolField === "classCount") normalizeClassCurriculumRows(school);
-      rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === previousSchoolName).forEach((rosterClass) => {
-        if (schoolField === "name") rosterClass.schoolName = school.name;
-        if (schoolField === "dayOfWeek") rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
-      });
+      const sourceSchool = schoolLibrarySourceForTeacherSchool(school);
+      if (sourceSchool) {
+        sourceSchool[schoolField] = school[schoolField];
+        syncPartnerSchoolReferences(sourceSchool, schoolField, previousValue);
+      } else {
+        rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === previousSchoolName).forEach((rosterClass) => {
+          if (schoolField === "name") rosterClass.schoolName = school.name;
+          if (schoolField === "dayOfWeek") rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
+        });
+      }
       scheduleAppDataSave();
       document.querySelectorAll(`[data-school-index="${field.dataset.teacherSchoolIndex}"] [data-school-field="${schoolField}"]`).forEach((match) => {
         match.value = field.value;
@@ -33261,10 +33297,10 @@
       if (!school) return;
       saveButton.disabled = true;
       saveButton.textContent = "Saving…";
-      syncTeachingTeamSchools();
+      syncAllPartnerSchoolScheduleReferences();
       saveAppData();
       const schoolSaved = await syncPartnerSchoolToDatabase(school);
-      syncTeachingTeamSchools();
+      syncAllPartnerSchoolScheduleReferences();
       saveAppData();
       const [assignmentsSaved, cloudSaved] = await Promise.all([
         schoolSaved === false ? Promise.resolve(false) : syncSchoolAssignmentsToDatabase([school]),
@@ -52310,6 +52346,7 @@
         }
       }
       await DTWorkClock.load();
+      syncAllPartnerSchoolScheduleReferences();
       const removedDemoContent = stripLegacyProductionDemoContent();
       if (data?.payload || isLeader || removedDemoContent || durableIsdLoaded) {
         renderCloudSyncedAppData();

@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v272-cotton-mill-wednesday";
+const CACHE_NAME = "my-dance-techniques-v273-partner-school-day-sync";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
