@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v270-meadow-oaks-65";
+const CACHE_NAME = "my-dance-techniques-v271-payable-teachers-only";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",

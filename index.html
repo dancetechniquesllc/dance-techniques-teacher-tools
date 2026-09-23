@@ -19671,7 +19671,7 @@
         tshirtSize: "M",
         birthday: "1990-06-12",
         teacherType: "Admin",
-        payTier: "tier_b_teacher",
+        payTier: "tier_c_administrator",
         loginEmail: "lexi@dancetechniques.example",
         accessLevel: "Teacher + admin tools",
         inviteStatus: "Login active",
@@ -19846,13 +19846,17 @@
     const requiredActiveStaffNames = new Set(["tiffany edwards"]);
     teachers.push(...teachingTeamDirectorySeeds.map((profile) => duplicateTeacherProfile(teachers[0], profile)));
 
-    const knownFoundingTeacherNames = new Set(["erika webb", "judy coulter"]);
+    const knownPayrollTiers = new Map([
+      ["erika webb", "tier_a_founding_teacher"],
+      ["judy coulter", "tier_a_founding_teacher"],
+      ["lexi king", "tier_c_administrator"],
+      ["tiffany edwards", "tier_d_director"]
+    ]);
     const applyKnownPayrollTiers = () => {
       teachers.forEach((teacher) => {
         const teacherName = `${teacher?.firstName || ""} ${teacher?.lastName || ""}`.trim().toLowerCase();
-        if (knownFoundingTeacherNames.has(teacherName)) {
-          teacher.payTier = "tier_a_founding_teacher";
-        }
+        const knownTier = knownPayrollTiers.get(teacherName);
+        if (knownTier) teacher.payTier = knownTier;
       });
     };
     applyKnownPayrollTiers();
@@ -19860,6 +19864,7 @@
     const tiffanyProfile = teachers.find((teacher) => teacher.id === "tiffany");
     if (tiffanyProfile) {
       tiffanyProfile.teacherType = "Director";
+      tiffanyProfile.payTier = "tier_d_director";
       tiffanyProfile.accessLevel = "Director dashboard (no admin profile editing)";
       tiffanyProfile.inviteStatus = "Ready to invite";
       tiffanyProfile.loginNotes = "Director access includes the Director Dashboard and Teacher Tools, but cannot edit admin profiles.";
