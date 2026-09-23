@@ -7770,6 +7770,19 @@
     .partnership-payment-detail { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .partnership-payment-detail[hidden] { display: none; }
     .partnership-payment-detail-actions { display: flex; justify-content: flex-end; gap: 8px; }
+    .partnership-payment-approval { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); }
+    .partnership-payment-approval h4, .partnership-payment-approval p { margin: 0; }
+    .partnership-payment-approval-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .partnership-payment-approval-grid label { display: grid; gap: 5px; font-size: 11px; font-weight: 800; }
+    .partnership-payment-approval-grid input { box-sizing: border-box; width: 100%; }
+    .partnership-payment-safety { padding: 10px 12px; border-radius: 10px; background: #fff4d6; color: #5f4914; font-weight: 750; }
+    .partnership-payment-history { display: grid; gap: 7px; }
+    .partnership-payment-history-row { display: flex; justify-content: space-between; gap: 12px; padding: 9px 11px; border-radius: 10px; background: var(--surface-soft); }
+    .partnership-payment-student-row.is-unpaid { background: #fff0ee; color: #a13138; }
+    .partnership-payment-student-row.is-unpaid strong, .partnership-payment-student-row.is-unpaid small { color: #a13138; }
+    .school-profile-payment-settings { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); }
+    .school-profile-payment-settings[hidden] { display: none; }
+    .school-profile-payment-settings > p { grid-column: 1 / -1; margin: 0; color: var(--muted); font-size: 12px; }
     .payroll-period-toolbar { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(160px, .75fr) auto; gap: 10px; align-items: end; }
     .payroll-period-toolbar label { display: grid; gap: 5px; font-size: 12px; font-weight: 700; }
     .payroll-wizard { display: grid; grid-template-columns: 235px minmax(0, 1fr); gap: 14px; align-items: start; }
@@ -7844,7 +7857,7 @@
       .payroll-period-toolbar { grid-template-columns: 1fr; }
       .payroll-filter-row { grid-template-columns: 1fr 1fr; }
       .payroll-student-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .partnership-payment-grid, .partnership-payment-toolbar { grid-template-columns: 1fr; }
+      .partnership-payment-grid, .partnership-payment-toolbar, .partnership-payment-approval-grid, .school-profile-payment-settings { grid-template-columns: 1fr; }
     }
     @media (max-width: 480px) {
       .payroll-stub-teacher-grid { grid-template-columns: 1fr; }
@@ -16663,7 +16676,7 @@
                 <label>Search<input type="search" id="partnership-payment-search" placeholder="Search school or director"></label>
                 <label>Teacher<select id="partnership-payment-teacher"><option value="all">All Teachers</option></select></label>
                 <label>Dance Day<select id="partnership-payment-day"><option value="all">All Dance Days</option></select></label>
-                <label>Status<select id="partnership-payment-status"><option value="all">All Payment Statuses</option><option value="ready">Ready to Pay</option><option value="held">Held Balance</option><option value="paid">Paid</option></select></label>
+                <label>Status<select id="partnership-payment-status"><option value="all">All Payment Statuses</option><option value="ready">Amount Pending</option><option value="held">Held Balance</option><option value="amount_confirmed">Amount Confirmed</option><option value="sent">Payment Sent</option><option value="paid">Payment Verified</option></select></label>
               </div>
               <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="partnership-payment-search,partnership-payment-teacher,partnership-payment-day,partnership-payment-status">Reset Filter</button></div>
               <div class="partnership-payment-grid" id="partnership-payment-grid"></div>
@@ -22035,7 +22048,13 @@
       const newsletterArchiveQuery = ["admin", "director"].includes(profile.role)
         ? client.from("parent_portal_newsletters").select("id,guardian_id,newsletter_key,subject,sent_at,read_at,source").order("sent_at", { ascending: false })
         : Promise.resolve({ data: [], error: null });
-      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult] = await Promise.all([
+      const partnershipPaymentsQuery = ["admin", "director"].includes(profile.role)
+        ? client.from("school_partnership_payments").select("*").order("payment_month", { ascending: false })
+        : Promise.resolve({ data: [], error: null });
+      const partnershipPreferencesQuery = ["admin", "director"].includes(profile.role)
+        ? client.from("partner_school_payment_preferences").select("*")
+        : Promise.resolve({ data: [], error: null });
+      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("guardian_user_accounts").select("user_id, guardian_id, revoked_at"),
         partnerSchoolsQuery,
@@ -22047,11 +22066,13 @@
         client.from("class_attendance_records").select("dance_class_id, student_id, attendance_date, status, check_in_at, check_out_at"),
         emailHistoryQuery,
         familyLinksQuery,
-        newsletterArchiveQuery
+        newsletterArchiveQuery,
+        partnershipPaymentsQuery,
+        partnershipPreferencesQuery
       ]);
       const attendanceTableUnavailable = attendanceResult.error?.code === "42P01";
       const failed = [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult,
-        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult].find((result) => result.error);
+        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult].find((result) => result.error);
       if (failed) {
         sharedRosterReady = false;
         replaceCollection(rosterClasses, []);
@@ -22067,6 +22088,28 @@
         .map((account) => String(account.user_id || ""))
         .filter(Boolean));
       const schools = schoolsResult.data || [];
+      const partnershipPreferenceBySchoolId = new Map((partnershipPreferencesResult.data || []).map((preference) => [preference.partner_school_id, preference]));
+      schoolPartnershipPaymentState.payments = Object.fromEntries((partnershipPaymentsResult.data || []).map((payment) => [
+        `${String(payment.payment_month || "").slice(0, 7)}::${payment.partner_school_id}`,
+        {
+          id: payment.id,
+          status: payment.status === "verified" ? "paid" : payment.status,
+          databaseStatus: payment.status,
+          amount: Number(payment.paid_amount || payment.expected_amount || 0),
+          expected: Number(payment.expected_amount || 0),
+          held: Number(payment.held_amount || 0),
+          paidDate: payment.paid_date || "",
+          amountConfirmedAt: payment.amount_confirmed_at || "",
+          paymentMethod: payment.payment_method || "",
+          paymentDestination: payment.payment_destination_snapshot || "",
+          recipientName: payment.recipient_name_snapshot || "",
+          confirmationReference: payment.confirmation_reference || "",
+          receiptPath: payment.receipt_path || "",
+          sentAt: payment.sent_at || "",
+          verifiedAt: payment.verified_at || "",
+          calculationSnapshot: payment.calculation_snapshot || {}
+        }
+      ]));
       const assignments = assignmentsResult.data || [];
       const activeAssignments = assignments.filter((assignment) => assignment.active !== false);
       let recoverInactiveAssignments = false;
@@ -22160,6 +22203,7 @@
       const assignmentCountBeforeMerge = schoolLibraryAssignmentCount();
       if (schools.length) {
         const mergedSchools = schools.map((school, index) => {
+          const paymentPreference = partnershipPreferenceBySchoolId.get(school.id) || {};
           const resolvedSchoolId = String(school.id || "");
           const localAssignedTeacherId = localSchoolAssignmentsById.get(resolvedSchoolId);
           const activeAssignment = activeAssignments.find((assignment) => assignment.partner_school_id === school.id);
@@ -22175,6 +22219,8 @@
           assignedTeacherId: databaseAssignedTeacherId || localAssignedTeacherId || "",
           recoveredFromInactiveAssignment: Boolean(recoveredInactiveAssignment?.teacher_id),
           classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "",
+          preferredVendorPaymentMethod: paymentPreference.preferred_method || "", vendorPaymentDestination: paymentPreference.payment_destination || "",
+          vendorPaymentRecipientName: paymentPreference.expected_recipient_name || "",
           importantNotes: school.important_notes || "", lifecycleStatus: normalizeSchoolLifecycleStatus(school),
           active: school.active !== false, updatedAt: school.updated_at || "", color: partnerSchoolColors[index % partnerSchoolColors.length]
           };
@@ -25658,6 +25704,7 @@
     ];
     const partnershipBenefitOptions = [
       { value: "10% Tuition", label: "10% Tuition" },
+      { value: "30% Tuition", label: "30% Tuition" },
       { value: "Free Admin Tuition", label: "Free Admin Tuition" },
       { value: "50% off Staff Tuition", label: "50% off Staff Tuition" },
       { value: "Spirit Shirts", label: "Spirit Shirts" }
@@ -25719,6 +25766,7 @@
       },
       outstandingStudents: {},
       clearedBalances: {},
+      vendorFeeHolds: [],
       teacherCommissionRates: {},
       yearEndPromotionReviews: {},
       workingHours: [],
@@ -29586,6 +29634,27 @@
                 </select>
                 <span class="calendar-field-label">Partnership Benefit</span>
               </label>
+              <section class="school-profile-payment-settings" data-school-payment-settings ${/^\s*\d+(?:\.\d+)?%\s*Tuition\s*$/i.test(String(school.partnershipBenefit || "")) ? "" : "hidden"}>
+                <label class="calendar-field">
+                  <select aria-label="Preferred vendor payment method for ${escapeText(school.name || "school")}" data-school-library-field="preferredVendorPaymentMethod">
+                    <option value="" ${school.preferredVendorPaymentMethod ? "" : "selected"}>Choose Method</option>
+                    <option value="zelle" ${school.preferredVendorPaymentMethod === "zelle" ? "selected" : ""}>Zelle</option>
+                    <option value="venmo" ${school.preferredVendorPaymentMethod === "venmo" ? "selected" : ""}>Venmo</option>
+                    <option value="check" ${school.preferredVendorPaymentMethod === "check" ? "selected" : ""}>Check</option>
+                    <option value="direct_deposit" ${school.preferredVendorPaymentMethod === "direct_deposit" ? "selected" : ""}>Direct Deposit</option>
+                  </select>
+                  <span class="calendar-field-label">Preferred Method</span>
+                </label>
+                <label class="calendar-field">
+                  <input aria-label="Payment destination for ${escapeText(school.name || "school")}" data-school-library-field="vendorPaymentDestination" value="${escapeText(school.vendorPaymentDestination || "")}" placeholder="Zelle email, phone, Venmo, or check note">
+                  <span class="calendar-field-label">Payment Contact or Delivery Note</span>
+                </label>
+                <label class="calendar-field">
+                  <input aria-label="Expected payment recipient for ${escapeText(school.name || "school")}" data-school-library-field="vendorPaymentRecipientName" value="${escapeText(school.vendorPaymentRecipientName || "")}" placeholder="Name shown before payment">
+                  <span class="calendar-field-label">Expected Recipient Name</span>
+                </label>
+                <p>DD never stores bank account or routing numbers. Keep direct-deposit instructions with your bank.</p>
+              </section>
               <label class="calendar-field school-profile-season">
                 <input aria-label="26-27 season starts for ${escapeText(school.name || "school")}" type="date" data-school-library-field="seasonStartDate" value="${escapeText(school.seasonStartDate || "2026-08-31")}">
                 <span class="calendar-field-label">26-27 Season Starts</span>
@@ -31900,6 +31969,9 @@
         email: "",
         importantNotes: "",
         partnershipBenefit: "",
+        preferredVendorPaymentMethod: "",
+        vendorPaymentDestination: "",
+        vendorPaymentRecipientName: "",
         assignedTeacherId: profileTeacher.id,
         classCurriculum: [],
         color: schoolColors[schoolLibrary.length % schoolColors.length]
@@ -32165,6 +32237,11 @@
 
     const syncPartnerSchoolToDatabase = async (school) => {
       if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !school) return true;
+      const hasPercentageBenefit = /^\s*\d+(?:\.\d+)?%\s*Tuition\s*$/i.test(String(school.partnershipBenefit || ""));
+      if (hasPercentageBenefit && (!school.preferredVendorPaymentMethod || !school.vendorPaymentRecipientName || (["zelle", "venmo"].includes(school.preferredVendorPaymentMethod) && !school.vendorPaymentDestination))) {
+        showToast("Choose the payment method, expected recipient, and any Zelle or Venmo contact before saving this school.");
+        return false;
+      }
       const payload = {
         name: school.name || "Partner School",
         nickname: school.nickname || null,
@@ -32198,6 +32275,19 @@
       }
       if (!isUuid(school.id) && data?.id) school.id = data.id;
       school.updatedAt = data.updated_at || school.updatedAt || "";
+      const preferenceQuery = hasPercentageBenefit
+        ? window.dtSupabase.from("partner_school_payment_preferences").upsert({
+            partner_school_id: school.id,
+            preferred_method: school.preferredVendorPaymentMethod,
+            payment_destination: school.vendorPaymentDestination || null,
+            expected_recipient_name: school.vendorPaymentRecipientName
+          }, { onConflict: "partner_school_id" })
+        : window.dtSupabase.from("partner_school_payment_preferences").delete().eq("partner_school_id", school.id);
+      const { error: preferenceError } = await preferenceQuery;
+      if (preferenceError) {
+        console.error("Partner School payment preference could not be synchronized", preferenceError);
+        return false;
+      }
       return true;
     };
 
@@ -33218,6 +33308,10 @@
         return;
       }
       school[fieldName] = schoolLibraryFieldValue(field);
+      if (fieldName === "partnershipBenefit") {
+        const settings = card.querySelector("[data-school-payment-settings]");
+        if (settings) settings.hidden = !/^\s*\d+(?:\.\d+)?%\s*Tuition\s*$/i.test(String(school.partnershipBenefit || ""));
+      }
       syncPartnerSchoolReferences(school, fieldName, previousValue);
       scheduleAppDataSave();
       if (fieldName === "assignedTeacherId") {
@@ -43187,6 +43281,19 @@
     };
 
     const partnershipPaymentKey = (school, month = schoolPartnershipPaymentState.month) => `${month}::${school.id || school.name}`;
+    const partnershipBenefitPercent = (school) => {
+      const match = String(school?.partnershipBenefit || "").match(/^\s*(\d+(?:\.\d+)?)%\s*Tuition\s*$/i);
+      return match ? Number(match[1]) : 0;
+    };
+    const vendorPaymentMethodLabel = (method) => ({ zelle: "Zelle", venmo: "Venmo", check: "Check", direct_deposit: "Direct Deposit" }[method] || "Payment method not selected");
+    const vendorFeeHoldMatchesSchool = (hold, school) => (
+      (hold.schoolId && school.id && String(hold.schoolId) === String(school.id))
+      || enrollmentSchoolNameMatches(hold.schoolName, school.name)
+      || enrollmentSchoolNameMatches(hold.schoolName, school.nickname)
+    );
+    const vendorFeeHoldsForStudent = (student, school) => (payrollState.vendorFeeHolds || []).filter((hold) => (
+      String(hold.studentId) === String(student.id) && vendorFeeHoldMatchesSchool(hold, school)
+    ));
     const partnershipPaymentInitials = (school) => {
       const source = String(school.initials || school.nickname || school.name || "PS").trim();
       const generated = source.split(/\s+/).map((word) => word[0] || "").join("").slice(0, 5).toUpperCase();
@@ -43195,27 +43302,44 @@
     };
     const partnershipPaymentStudents = (school) => {
       const records = new Map();
+      const shareRate = partnershipBenefitPercent(school) / 100;
       rosterClasses.filter((rosterClass) => enrollmentSchoolNameMatches(rosterClass.schoolName, school.name) || enrollmentSchoolNameMatches(rosterClass.schoolName, school.nickname)).forEach((rosterClass) => {
         (rosterClass.students || []).forEach((student) => {
           if (!["enrolled", "active"].includes(String(student.status || "").toLowerCase()) || records.has(student.id)) return;
           const discount = payrollDiscountFor(student);
           const tuition = monthlyTuitionForCircumstance(discount, school);
           const balanceRecord = payrollState.outstandingStudents?.[student.id];
-          const held = payrollBalanceIsUnresolved(balanceRecord);
-          records.set(student.id, { student, rosterClass, discount, tuition, payment: tuition * .1, held });
+          const basePayment = tuition * shareRate;
+          const savedHolds = vendorFeeHoldsForStudent(student, school);
+          const monthHold = savedHolds.find((hold) => hold.originalMonth === schoolPartnershipPaymentState.month)
+            || (balanceRecord?.selected && balanceRecord.month === schoolPartnershipPaymentState.month ? { amount: basePayment, status: payrollBalanceIsUnresolved(balanceRecord) ? "held" : "released" } : null);
+          const carryovers = savedHolds.filter((hold) => hold.status === "released" && hold.releasedMonth === schoolPartnershipPaymentState.month && hold.originalMonth !== schoolPartnershipPaymentState.month);
+          if (!carryovers.length && balanceRecord?.selected && ["paid", "paid_late_fee"].includes(balanceRecord.status) && balanceRecord.month !== schoolPartnershipPaymentState.month && balanceRecord.resolvedPayrollMonth === schoolPartnershipPaymentState.month) {
+            carryovers.push({ amount: basePayment, originalMonth: balanceRecord.month, status: "released" });
+          }
+          const carryoverAmount = carryovers.reduce((sum, hold) => sum + Number(hold.amount || 0), 0);
+          const unpaidForMonth = Boolean(monthHold);
+          const payment = (unpaidForMonth ? 0 : basePayment) + carryoverAmount;
+          records.set(student.id, {
+            student, rosterClass, discount, tuition, basePayment, payment, held: unpaidForMonth,
+            withheldAmount: unpaidForMonth ? Number(monthHold.amount || basePayment) : 0,
+            carryoverAmount, carryoverMonths: carryovers.map((hold) => hold.originalMonth).filter(Boolean)
+          });
         });
       });
       return [...records.values()].sort((a, b) => rosterStudentFullName(a.student).localeCompare(rosterStudentFullName(b.student)));
     };
     const schoolPartnershipPaymentRecords = () => schoolLibrary.map((school) => {
       const students = partnershipPaymentStudents(school);
-      const cashBenefit = String(school.partnershipBenefit || "") === "10% Tuition";
+      const benefitPercent = partnershipBenefitPercent(school);
+      const cashBenefit = benefitPercent > 0;
       const expected = cashBenefit ? students.reduce((sum, item) => sum + item.payment, 0) : 0;
-      const held = cashBenefit ? students.filter((item) => item.held).reduce((sum, item) => sum + item.payment, 0) : 0;
-      const ready = Math.max(0, expected - held);
+      const held = cashBenefit ? students.reduce((sum, item) => sum + Number(item.withheldAmount || 0), 0) : 0;
+      const ready = Math.max(0, expected);
       const saved = schoolPartnershipPaymentState.payments?.[partnershipPaymentKey(school)] || null;
-      const status = saved?.status === "paid" ? "paid" : !cashBenefit ? "not_applicable" : held > 0 ? "held" : "ready";
-      return { school, students, cashBenefit, expected, held, ready, saved, status };
+      const savedStatus = saved?.databaseStatus || saved?.status || "";
+      const status = ["verified", "paid"].includes(savedStatus) ? "paid" : savedStatus === "sent" ? "sent" : savedStatus === "amount_confirmed" ? "amount_confirmed" : !cashBenefit ? "not_applicable" : ready <= 0 && held > 0 ? "held" : "ready";
+      return { school, students, cashBenefit, benefitPercent, expected, held, ready, saved, status };
     });
     const filteredSchoolPartnershipPaymentRecords = () => schoolPartnershipPaymentRecords().filter((record) => {
       const state = schoolPartnershipPaymentState;
@@ -43227,15 +43351,32 @@
       if (state.status !== "all" && record.status !== state.status) return false;
       return true;
     });
-    const partnershipPaymentStatusLabel = (status) => ({ ready: "Ready to Pay", held: "Held Balance", paid: "Paid", not_applicable: "No Cash Payment" }[status] || "Review");
-    const partnershipPaymentStatusClass = (status) => status === "paid" ? "ok" : status === "held" ? "private" : status === "ready" ? "pending" : "disabled";
+    const partnershipPaymentStatusLabel = (status) => ({ ready: "Amount Pending", held: "Held Balance", amount_confirmed: "Amount Confirmed", sent: "Payment Sent", paid: "Payment Verified", not_applicable: "No Cash Payment" }[status] || "Review");
+    const partnershipPaymentStatusClass = (status) => status === "paid" ? "ok" : status === "held" ? "private" : ["ready", "amount_confirmed", "sent"].includes(status) ? "pending" : "disabled";
+    const partnershipPaymentProofMarkup = (record) => {
+      const saved = record.saved || {};
+      const rows = [
+        saved.amountConfirmedAt && ["Amount confirmed", new Date(saved.amountConfirmedAt).toLocaleString()],
+        saved.sentAt && ["Payment sent", new Date(saved.sentAt).toLocaleString()],
+        saved.confirmationReference && ["Confirmation", saved.confirmationReference],
+        saved.receiptPath && ["Receipt", "Receipt attached"],
+        saved.verifiedAt && ["Verified", new Date(saved.verifiedAt).toLocaleString()]
+      ].filter(Boolean);
+      return rows.length ? `<div class="partnership-payment-history">${rows.map(([label, value]) => `<div class="partnership-payment-history-row"><strong>${escapeText(label)}</strong><span>${escapeText(value)}</span></div>`).join("")}</div>` : "";
+    };
     const renderSchoolPartnershipPaymentDetail = (record) => {
       const detail = document.getElementById("partnership-payment-detail");
       if (!detail) return;
       if (!record) { detail.hidden = true; detail.innerHTML = ""; return; }
       detail.hidden = false;
-      const amount = record.saved?.status === "paid" ? Number(record.saved.amount || 0) : record.ready;
-      detail.innerHTML = `<div class="admin-card-header"><div><h3>${escapeText(record.school.name)}</h3><p>${escapeText(record.school.partnershipBenefit || "No partnership benefit selected")} · ${escapeText(rosterTeacherName(record.school.assignedTeacherId))}</p></div><button class="secondary" type="button" data-close-partnership-detail>Close</button></div>${record.cashBenefit ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Dancer</span><span>Tuition</span><span>10% Share</span><span>Status</span></div>${record.students.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(rosterStudentFullName(item.student))}</strong><small>${escapeText(item.rosterClass.name)} · ${escapeText(item.discount === "none" ? "Regular tuition" : `${item.discount} tuition`)}</small></span><span>${payrollCurrency(item.tuition)}</span><span>${payrollCurrency(item.payment)}</span><span class="status ${item.held ? "private" : "ok"}">${item.held ? "Held" : "Included"}</span></div>`).join("") || `<div class="payroll-placeholder">No active dancers are assigned to this school.</div>`}</div>` : `<div class="payroll-explanation">${record.school.partnershipBenefit ? `${escapeText(record.school.partnershipBenefit)} does not create a cash payment.` : "No cash payment is created because no partnership benefit is selected."} It remains visible here so every school benefit stays documented.</div>`}<div class="partnership-payment-detail-actions">${record.saved?.status === "paid" ? `<span class="status ok">Paid ${escapeText(record.saved.paidDate || "")}</span><button class="secondary" type="button" data-reopen-partnership-payment="${escapeText(record.school.id || record.school.name)}">Reopen Payment</button>` : record.cashBenefit ? `<button class="primary" type="button" data-mark-partnership-paid="${escapeText(record.school.id || record.school.name)}" ${amount <= 0 ? "disabled" : ""}>Mark ${payrollCurrency(amount)} Paid</button>` : ""}</div>`;
+      const amount = ["paid", "sent", "amount_confirmed"].includes(record.status) ? Number(record.saved?.amount || record.ready) : record.ready;
+      const method = record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod || "";
+      const destination = record.saved?.paymentDestination || record.school.vendorPaymentDestination || "";
+      const recipient = record.saved?.recipientName || record.school.vendorPaymentRecipientName || "";
+      const settingsReady = Boolean(method && recipient && (!["zelle", "venmo"].includes(method) || destination));
+      const paymentForm = record.status === "amount_confirmed" ? `<section class="partnership-payment-approval"><h4>Complete ${escapeText(vendorPaymentMethodLabel(method))} Payment</h4><p><strong>${payrollCurrency(amount)}</strong> to <strong>${escapeText(recipient)}</strong>${destination ? ` · ${escapeText(destination)}` : ""}</p>${method === "direct_deposit" ? `<p class="partnership-payment-safety">Use the bank instructions kept outside DD. Never enter routing or account numbers here.</p>` : `<p class="partnership-payment-safety">Before sending, make sure the name shown in your payment app exactly matches ${escapeText(recipient)}.</p>`}<div class="partnership-payment-approval-grid"><label>Confirmation or Reference Number<input data-partnership-confirmation maxlength="120" placeholder="Enter after payment"></label><label>Receipt Screenshot or PDF<input data-partnership-receipt type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></label></div><p>At least one proof item is required for the permanent record.</p><div class="partnership-payment-detail-actions"><button class="primary" type="button" data-record-partnership-payment="${escapeText(record.school.id || record.school.name)}">Record Payment Sent</button></div></section>` : "";
+      const sentAction = record.status === "sent" ? `<button class="primary" type="button" data-verify-partnership-payment="${escapeText(record.school.id || record.school.name)}">Verify Payment Record</button>` : "";
+      detail.innerHTML = `<div class="admin-card-header"><div><h3>${escapeText(record.school.name)}</h3><p>${escapeText(record.school.partnershipBenefit || "No partnership benefit selected")} · ${escapeText(rosterTeacherName(record.school.assignedTeacherId))}</p></div><button class="secondary" type="button" data-close-partnership-detail>Close</button></div>${record.cashBenefit ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Dancer</span><span>Tuition</span><span>${escapeText(record.benefitPercent)}% Share</span><span>Status</span></div>${record.students.map((item) => `<div class="payroll-table-row partnership-payment-student-row ${item.held ? "is-unpaid" : ""}"><span><strong>${escapeText(rosterStudentFullName(item.student))}</strong><small>${escapeText(item.rosterClass.name)} · ${escapeText(item.discount === "none" ? "Regular tuition" : `${item.discount} tuition`)}</small></span><span>${payrollCurrency(item.tuition)}</span><strong>${payrollCurrency(item.payment)}</strong><span class="status ${item.held ? "danger" : "ok"}">${item.held ? "Not Paid · Held" : item.carryoverAmount > 0 ? `Paid · Includes ${item.carryoverMonths.map(payrollBalanceMonthLabel).join(" + ")} carryover` : "Included"}</span></div>`).join("") || `<div class="payroll-placeholder">No active dancers are assigned to this school.</div>`}</div>` : ""}<section class="partnership-payment-approval"><h4>${escapeText(partnershipPaymentStatusLabel(record.status))} · ${payrollCurrency(amount)}</h4><p>${escapeText(vendorPaymentMethodLabel(method))}${recipient ? ` · ${escapeText(recipient)}` : ""}</p>${record.held > 0 ? `<p class="partnership-payment-safety">${payrollCurrency(record.held)} is withheld because Dance Techniques has not been paid. It will carry forward automatically after Payroll marks the balance paid.</p>` : ""}${!settingsReady && record.status === "ready" ? `<p class="partnership-payment-safety">Add the preferred payment method and expected recipient name in this Partner School profile before confirming the amount.</p>` : ""}${partnershipPaymentProofMarkup(record)}</section>${paymentForm}<div class="partnership-payment-detail-actions">${record.status === "paid" ? `<span class="status ok">Verified ${escapeText(record.saved?.paidDate || "")}</span><button class="secondary" type="button" data-reopen-partnership-payment="${escapeText(record.school.id || record.school.name)}">Reopen Payment</button>` : record.status === "ready" ? `<button class="primary" type="button" data-confirm-partnership-amount="${escapeText(record.school.id || record.school.name)}" ${amount <= 0 || !settingsReady ? "disabled" : ""}>Confirm Amount · ${payrollCurrency(amount)}</button>` : sentAction}</div>`;
       detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
     };
     const renderSchoolPartnershipPayments = () => {
@@ -43255,9 +43396,110 @@
       if (day) { const values = [...new Set(schoolLibrary.map((school) => String(school.dayOfWeek || "")).filter(Boolean))].sort(); day.innerHTML = `<option value="all">All Dance Days</option>${values.map((value) => `<option value="${escapeText(value)}">${escapeText(weekdayNames[Number(value)] || "Unassigned")}</option>`).join("")}`; day.value = schoolPartnershipPaymentState.day; }
       const status = document.getElementById("partnership-payment-status"); if (status) status.value = schoolPartnershipPaymentState.status;
       const grid = document.getElementById("partnership-payment-grid");
-      if (grid) grid.innerHTML = visible.length ? visible.map((record) => { const dayText = record.school.dayOfWeek ? (weekdayNames[Number(record.school.dayOfWeek)] || "U").slice(0, 2) : "U"; const shownAmount = record.saved?.status === "paid" ? Number(record.saved.amount || 0) : record.ready; return `<button class="partnership-payment-card" type="button" data-open-partnership-payment="${escapeText(record.school.id || record.school.name)}"><span class="partnership-payment-day">${escapeText(dayText)}</span><span class="school-directory-initials">${escapeText(partnershipPaymentInitials(record.school))}</span><strong>${escapeText(record.school.nickname || record.school.name)}</strong><small>${escapeText(record.school.directorName || "Director not entered")}</small><small>10% Tuition Partnership</small><strong>${payrollCurrency(shownAmount)}</strong><span class="status ${partnershipPaymentStatusClass(record.status)}">${escapeText(partnershipPaymentStatusLabel(record.status))}</span></button>`; }).join("") : `<div class="payroll-placeholder">No schools with a 10% Tuition partnership match these filters. Partnership benefits are assigned in Partner Schools.</div>`;
+      if (grid) grid.innerHTML = visible.length ? visible.map((record) => { const dayText = record.school.dayOfWeek ? (weekdayNames[Number(record.school.dayOfWeek)] || "U").slice(0, 2) : "U"; const shownAmount = ["paid", "sent", "amount_confirmed"].includes(record.status) ? Number(record.saved?.amount || record.ready) : record.ready; return `<button class="partnership-payment-card" type="button" data-open-partnership-payment="${escapeText(record.school.id || record.school.name)}"><span class="partnership-payment-day">${escapeText(dayText)}</span><span class="school-directory-initials">${escapeText(partnershipPaymentInitials(record.school))}</span><strong>${escapeText(record.school.nickname || record.school.name)}</strong><small>${escapeText(record.school.directorName || "Director not entered")}</small><small>${escapeText(record.school.partnershipBenefit)} · ${escapeText(vendorPaymentMethodLabel(record.school.preferredVendorPaymentMethod))}</small><strong>${payrollCurrency(shownAmount)}</strong><span class="status ${partnershipPaymentStatusClass(record.status)}">${escapeText(partnershipPaymentStatusLabel(record.status))}</span></button>`; }).join("") : `<div class="payroll-placeholder">No schools with a percentage-based tuition partnership match these filters. Partnership benefits are assigned in Partner Schools.</div>`;
       const selected = records.find((record) => record.cashBenefit && String(record.school.id || record.school.name) === String(schoolPartnershipPaymentState.selectedSchoolId));
       renderSchoolPartnershipPaymentDetail(selected);
+    };
+
+    const partnershipPaymentLocalRecord = (payment) => ({
+      id: payment.id || "",
+      status: payment.status === "verified" ? "paid" : payment.status,
+      databaseStatus: payment.status,
+      amount: Number(payment.paid_amount || payment.expected_amount || 0),
+      expected: Number(payment.expected_amount || 0),
+      held: Number(payment.held_amount || 0),
+      paidDate: payment.paid_date || "",
+      amountConfirmedAt: payment.amount_confirmed_at || "",
+      paymentMethod: payment.payment_method || "",
+      paymentDestination: payment.payment_destination_snapshot || "",
+      recipientName: payment.recipient_name_snapshot || "",
+      confirmationReference: payment.confirmation_reference || "",
+      receiptPath: payment.receipt_path || "",
+      sentAt: payment.sent_at || "",
+      verifiedAt: payment.verified_at || "",
+      calculationSnapshot: payment.calculation_snapshot || {}
+    });
+    const persistPartnershipPayment = async (record, status, additions = {}, eventType = "") => {
+      const now = new Date().toISOString();
+      const existing = record.saved || {};
+      const confirmedAmount = status === "amount_confirmed" ? record.ready : Number(existing.amount || record.ready);
+      const confirmedHeld = status === "amount_confirmed" ? record.held : Number(existing.held ?? record.held);
+      const calculationSnapshot = status === "amount_confirmed" || !Object.keys(existing.calculationSnapshot || {}).length
+        ? {
+            benefitPercent: record.benefitPercent,
+            calculatedAt: existing.amountConfirmedAt || now,
+            students: record.students.map((item) => ({ studentId: item.student.id, studentName: rosterStudentFullName(item.student), tuition: item.tuition, share: item.payment, held: item.held, carryoverAmount: item.carryoverAmount || 0 }))
+          }
+        : existing.calculationSnapshot;
+      const base = {
+        partner_school_id: record.school.id,
+        payment_month: `${schoolPartnershipPaymentState.month}-01`,
+        partnership_benefit: record.school.partnershipBenefit,
+        expected_amount: confirmedAmount,
+        held_amount: confirmedHeld,
+        paid_amount: ["sent", "verified", "paid"].includes(status) ? confirmedAmount : 0,
+        status,
+        calculation_snapshot: calculationSnapshot,
+        payment_method: existing.paymentMethod || record.school.preferredVendorPaymentMethod || null,
+        payment_destination_snapshot: existing.paymentDestination || record.school.vendorPaymentDestination || null,
+        recipient_name_snapshot: existing.recipientName || record.school.vendorPaymentRecipientName || null,
+        amount_confirmed_at: existing.amountConfirmedAt || null,
+        confirmation_reference: existing.confirmationReference || null,
+        receipt_path: existing.receiptPath || null,
+        sent_at: existing.sentAt || null,
+        verified_at: existing.verifiedAt || null,
+        ...additions
+      };
+      const actorId = window.dtCurrentProfile?.id;
+      if (status === "amount_confirmed") { base.amount_confirmed_at = now; if (isUuid(actorId)) base.amount_confirmed_by = actorId; }
+      if (status === "sent") base.sent_at = now;
+      if (status === "verified") {
+        base.verified_at = now;
+        base.paid_date = payrollDateKey(new Date());
+        if (isUuid(actorId)) { base.verified_by = actorId; base.paid_by = actorId; }
+      }
+      let savedPayment = { ...base, id: existing.id || crypto.randomUUID() };
+      if (document.body.dataset.tourMode !== "true") {
+        if (!window.dtSupabase || !isUuid(record.school.id)) throw new Error("Open the signed-in Director Dashboard before recording this payment.");
+        const { data, error } = await window.dtSupabase.from("school_partnership_payments")
+          .upsert(base, { onConflict: "partner_school_id,payment_month" }).select("*").single();
+        if (error) throw error;
+        savedPayment = data;
+        if (status === "amount_confirmed") {
+          const { error: deleteError } = await window.dtSupabase.from("school_partnership_payment_lines").delete().eq("payment_id", data.id);
+          if (deleteError) throw deleteError;
+          if (record.students.length) {
+            const { error: lineError } = await window.dtSupabase.from("school_partnership_payment_lines").insert(record.students.map((item) => ({
+              payment_id: data.id, student_id: isUuid(item.student.id) ? item.student.id : null, tuition_discount: item.discount || "none",
+              tuition_amount: item.tuition, partnership_share: item.payment, held: item.held,
+              line_snapshot: { studentName: rosterStudentFullName(item.student), className: item.rosterClass.name }
+            })));
+            if (lineError) throw lineError;
+          }
+        }
+        if (eventType) {
+          const { error: eventError } = await window.dtSupabase.from("school_partnership_payment_events").insert({
+            payment_id: data.id, event_type: eventType, amount: confirmedAmount, payment_method: base.payment_method,
+            confirmation_reference: base.confirmation_reference || null, receipt_path: base.receipt_path || null,
+            details: { schoolName: record.school.name, paymentMonth: schoolPartnershipPaymentState.month }
+          });
+          if (eventError) throw eventError;
+        }
+      }
+      schoolPartnershipPaymentState.payments ||= {};
+      schoolPartnershipPaymentState.payments[partnershipPaymentKey(record.school)] = partnershipPaymentLocalRecord(savedPayment);
+      scheduleAppDataSave();
+      return savedPayment;
+    };
+    const uploadPartnershipPaymentReceipt = async (record, file) => {
+      if (!file) return "";
+      if (file.size > 10 * 1024 * 1024) throw new Error("The receipt must be 10 MB or smaller.");
+      if (document.body.dataset.tourMode === "true") return `tour/${file.name}`;
+      const extension = String(file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+      const path = `${record.school.id}/${schoolPartnershipPaymentState.month}/${crypto.randomUUID()}.${extension}`;
+      const { error } = await window.dtSupabase.storage.from("vendor-payment-receipts").upload(path, file, { upsert: false, contentType: file.type || undefined });
+      if (error) throw error;
+      return path;
     };
 
     const payrollSteps = [
@@ -43953,6 +44195,30 @@
         }
         const selected = !payrollBalanceIsUnresolved(existing);
         const heldPayLines = selected ? calculatePayrollPreview().lines.filter((line) => line.studentId === id && !line.held && Number(line.amount) > 0).map((line) => ({ teacherId: line.teacherId, studentId: line.studentId, type: line.type, description: line.description, amount: Number(line.amount) })) : [];
+        const studentRecord = payrollAllStudents().find(({ student }) => String(student.id) === String(id));
+        const vendorSchool = studentRecord && schoolLibrary.find((school) => (
+          enrollmentSchoolNameMatches(studentRecord.rosterClass.schoolName, school.name)
+          || enrollmentSchoolNameMatches(studentRecord.rosterClass.schoolName, school.nickname)
+        ));
+        const vendorPercent = partnershipBenefitPercent(vendorSchool);
+        payrollState.vendorFeeHolds ||= [];
+        payrollState.vendorFeeHolds = payrollState.vendorFeeHolds.filter((hold) => !(String(hold.studentId) === String(id) && hold.originalMonth === payrollState.month));
+        if (selected && studentRecord && vendorSchool && vendorPercent > 0) {
+          const tuition = monthlyTuitionForCircumstance(payrollDiscountFor(studentRecord.student), vendorSchool);
+          payrollState.vendorFeeHolds.push({
+            id: `${payrollState.month}:${id}:${vendorSchool.id || vendorSchool.name}`,
+            studentId: id,
+            studentName: rosterStudentFullName(studentRecord.student),
+            schoolId: vendorSchool.id || "",
+            schoolName: vendorSchool.name,
+            originalMonth: payrollState.month,
+            benefitPercent: vendorPercent,
+            tuition,
+            amount: Math.round(tuition * vendorPercent) / 100,
+            status: "held",
+            markedAt: new Date().toISOString()
+          });
+        }
         payrollState.outstandingStudents[id] = selected
           ? { selected: true, month: payrollState.month, status: "still_unpaid", markedAt: new Date().toISOString(), heldPayLines }
           : { ...(existing || {}), selected: false, status: "", markedAt: "", heldPayLines: [] };
@@ -44002,11 +44268,21 @@
           record.resolvedAt = new Date().toISOString();
           payrollState.clearedBalances ||= {};
           payrollState.clearedBalances[id] = { date: payrollDateKey(new Date()), lateFeePaid: record.status === "paid_late_fee", recordedAt: record.resolvedAt };
+          (payrollState.vendorFeeHolds || []).filter((hold) => String(hold.studentId) === String(id) && hold.originalMonth === record.month && hold.status === "held").forEach((hold) => {
+            hold.status = "released";
+            hold.releasedMonth = payrollState.month;
+            hold.releasedAt = record.resolvedAt;
+          });
         } else {
           delete record.resolvedPayrollMonth;
           delete record.resolvedSequence;
           delete record.resolvedAt;
           if (payrollState.clearedBalances) delete payrollState.clearedBalances[id];
+          (payrollState.vendorFeeHolds || []).filter((hold) => String(hold.studentId) === String(id) && hold.originalMonth === record.month && hold.status === "released").forEach((hold) => {
+            hold.status = "held";
+            delete hold.releasedMonth;
+            delete hold.releasedAt;
+          });
         }
         renderPayrollWizard();
         scheduleAppDataSave();
@@ -44559,25 +44835,80 @@
       renderSchoolPartnershipPayments();
       scheduleAppDataSave();
     });
-    document.getElementById("partnership-payment-workspace")?.addEventListener("click", (event) => {
+    document.getElementById("partnership-payment-workspace")?.addEventListener("click", async (event) => {
       const open = event.target.closest("[data-open-partnership-payment]");
       if (open) { schoolPartnershipPaymentState.selectedSchoolId = open.dataset.openPartnershipPayment; renderSchoolPartnershipPayments(); return; }
       if (event.target.closest("[data-close-partnership-detail]")) { schoolPartnershipPaymentState.selectedSchoolId = ""; renderSchoolPartnershipPayments(); return; }
-      const paid = event.target.closest("[data-mark-partnership-paid]");
-      if (paid) {
-        const record = schoolPartnershipPaymentRecords().find((item) => String(item.school.id || item.school.name) === paid.dataset.markPartnershipPaid);
+      const confirm = event.target.closest("[data-confirm-partnership-amount]");
+      if (confirm) {
+        const record = schoolPartnershipPaymentRecords().find((item) => String(item.school.id || item.school.name) === confirm.dataset.confirmPartnershipAmount);
         if (!record || !record.cashBenefit || record.ready <= 0) return;
-        schoolPartnershipPaymentState.payments ||= {};
-        schoolPartnershipPaymentState.payments[partnershipPaymentKey(record.school)] = { status: "paid", amount: record.ready, expected: record.expected, held: record.held, paidDate: payrollDateKey(new Date()), recordedAt: new Date().toISOString(), studentSnapshot: record.students.map((item) => ({ studentId: item.student.id, studentName: rosterStudentFullName(item.student), tuition: item.tuition, share: item.payment, held: item.held })) };
-        renderSchoolPartnershipPayments(); scheduleAppDataSave(); showToast(`${record.school.nickname || record.school.name} payment marked paid`); return;
+        confirm.disabled = true;
+        confirm.textContent = "Confirming…";
+        try {
+          await persistPartnershipPayment(record, "amount_confirmed", {}, "amount_confirmed");
+          renderSchoolPartnershipPayments();
+          showToast(`${record.school.nickname || record.school.name} amount confirmed`);
+        } catch (error) {
+          console.error("Vendor payment amount could not be confirmed", error);
+          showToast(error.message || "The amount could not be confirmed");
+          renderSchoolPartnershipPayments();
+        }
+        return;
+      }
+      const sent = event.target.closest("[data-record-partnership-payment]");
+      if (sent) {
+        const record = schoolPartnershipPaymentRecords().find((item) => String(item.school.id || item.school.name) === sent.dataset.recordPartnershipPayment);
+        const detail = document.getElementById("partnership-payment-detail");
+        const confirmationReference = detail?.querySelector("[data-partnership-confirmation]")?.value.trim() || "";
+        const receiptFile = detail?.querySelector("[data-partnership-receipt]")?.files?.[0] || null;
+        if (!record || record.status !== "amount_confirmed") return;
+        if (!confirmationReference && !receiptFile) { showToast("Add a confirmation number or receipt before recording payment"); return; }
+        sent.disabled = true;
+        sent.textContent = "Saving Payment…";
+        try {
+          const receiptPath = await uploadPartnershipPaymentReceipt(record, receiptFile);
+          await persistPartnershipPayment(record, "sent", { confirmation_reference: confirmationReference || null, receipt_path: receiptPath || null }, "payment_sent");
+          renderSchoolPartnershipPayments();
+          showToast(`${record.school.nickname || record.school.name} payment recorded`);
+        } catch (error) {
+          console.error("Vendor payment proof could not be saved", error);
+          showToast(error.message || "The payment record could not be saved");
+          renderSchoolPartnershipPayments();
+        }
+        return;
+      }
+      const verify = event.target.closest("[data-verify-partnership-payment]");
+      if (verify) {
+        const record = schoolPartnershipPaymentRecords().find((item) => String(item.school.id || item.school.name) === verify.dataset.verifyPartnershipPayment);
+        if (!record || record.status !== "sent") return;
+        verify.disabled = true;
+        verify.textContent = "Verifying…";
+        try {
+          await persistPartnershipPayment(record, "verified", {}, "payment_verified");
+          renderSchoolPartnershipPayments();
+          showToast(`${record.school.nickname || record.school.name} payment verified`);
+        } catch (error) {
+          console.error("Vendor payment record could not be verified", error);
+          showToast(error.message || "The payment record could not be verified");
+          renderSchoolPartnershipPayments();
+        }
+        return;
       }
       const reopen = event.target.closest("[data-reopen-partnership-payment]");
       if (reopen) {
         const record = schoolPartnershipPaymentRecords().find((item) => String(item.school.id || item.school.name) === reopen.dataset.reopenPartnershipPayment);
         if (!record) return;
-        const key = partnershipPaymentKey(record.school);
-        schoolPartnershipPaymentState.payments[key] = { ...(schoolPartnershipPaymentState.payments[key] || {}), status: "reopened", reopenedAt: new Date().toISOString() };
-        renderSchoolPartnershipPayments(); scheduleAppDataSave(); showToast("School payment reopened for review");
+        reopen.disabled = true;
+        try {
+          await persistPartnershipPayment(record, "reopened", {}, "payment_reopened");
+          renderSchoolPartnershipPayments();
+          showToast("School payment reopened for review");
+        } catch (error) {
+          console.error("Vendor payment could not be reopened", error);
+          showToast(error.message || "The payment could not be reopened");
+          renderSchoolPartnershipPayments();
+        }
       }
     });
 
