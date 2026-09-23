@@ -59,6 +59,7 @@
     .track-list { display: grid; gap: 8px; }
     .track-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px; border: 1px solid #f0e1e4; border-radius: 14px; background: #fff; }
     .cover { width: 52px; aspect-ratio: 1; object-fit: cover; border-radius: 11px; background: linear-gradient(135deg, #f6dce2, #fff7f1); }
+    .selected-playlist-head { display: flex; gap: 12px; align-items: center; }
     .track-row strong, .catalog-song strong { display: block; }
     .track-row small, .catalog-song small { color: var(--muted); }
     .secondary, .danger, .primary { min-height: 42px; border-radius: 11px; padding: 0 15px; font-weight: 800; }
@@ -155,12 +156,15 @@
           </div>
           <div>
             <div class="card-head">
-              <div><h3 id="selected-playlist-name">Choose a playlist</h3><p id="selected-playlist-count">Select a playlist to see its songs.</p></div>
+              <div class="selected-playlist-head"><span id="selected-playlist-cover"></span><div><h3 id="selected-playlist-name">Choose a playlist</h3><p id="selected-playlist-count">Select a playlist to see its songs.</p></div></div>
               <div class="track-actions">
+                <button class="secondary small-button" type="button" id="change-playlist-cover" hidden>Change Cover</button>
                 <button class="secondary small-button" type="button" id="open-add-tracks" hidden>+ Add Songs</button>
                 <button class="danger small-button" type="button" id="hide-playlist" hidden>Hide from Teachers</button>
+                <input id="playlist-cover-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
               </div>
             </div>
+            <p class="status" id="playlist-cover-status"></p>
             <div class="track-list" id="playlist-track-list"><p class="empty">Choose a playlist on the left.</p></div>
             <div class="add-tracks" id="add-tracks-panel" hidden>
               <strong>Add songs already in your catalog</strong>
@@ -357,6 +361,8 @@
       $("#selected-playlist-count").textContent = playlist ? `${tracks.length} song${tracks.length === 1 ? "" : "s"} · Teachers receive changes automatically.` : "Select a playlist to see its songs.";
       $("#hide-playlist").hidden = !playlist;
       $("#open-add-tracks").hidden = !playlist;
+      $("#change-playlist-cover").hidden = !playlist;
+      $("#selected-playlist-cover").innerHTML = playlist ? coverMarkup(playlist, playlist.name) : "";
       if (!playlist) { $("#add-tracks-panel").hidden = true; }
       if (!$("#add-tracks-panel").hidden) renderAddTracks();
       $("#playlist-track-list").innerHTML = !playlist ? `<p class="empty">Choose a playlist on the left.</p>` : !tracks.length ? `<p class="empty">No songs yet. Tap “+ Add Songs” to pull them from your catalog.</p>` : tracks.map((track, index) => `
@@ -558,6 +564,49 @@
       $("#hide-playlist").disabled = false;
       if (error) return alert("That playlist could not be hidden. Please try again.");
       await loadData("");
+    });
+
+    $("#change-playlist-cover").addEventListener("click", () => {
+      setStatus("#playlist-cover-status", "");
+      $("#playlist-cover-file").value = "";
+      $("#playlist-cover-file").click();
+    });
+
+    // Covers are uploaded under a fresh timestamped name rather than replacing the
+    // old file: uploadCover uses upsert:false, and a stable name would also stay
+    // cached in teachers' browsers after a change. The previous file is removed
+    // only once the new path is safely recorded.
+    $("#playlist-cover-file").addEventListener("change", async (event) => {
+      const input = event.currentTarget;
+      const file = input.files[0];
+      const playlist = selectedPlaylist();
+      if (!file || !playlist) { input.value = ""; return; }
+      const button = $("#change-playlist-cover");
+      const previousPath = playlist.cover_storage_path || "";
+      const coverPath = `playlist-covers/${playlist.id}-${Date.now()}.${safeExtension(file)}`;
+      let uploaded = false;
+      button.disabled = true;
+      setStatus("#playlist-cover-status", "Checking the image…");
+      try {
+        await requireSquareCover(file);
+        setStatus("#playlist-cover-status", "Uploading the cover…");
+        await uploadCover(file, coverPath);
+        uploaded = true;
+        const { error } = await state.client.from("music_playlists").update({ cover_storage_path: coverPath }).eq("id", playlist.id);
+        if (error) throw error;
+        if (previousPath && previousPath !== coverPath) {
+          await state.client.storage.from("teacher-music-covers").remove([previousPath]);
+        }
+        await loadData(playlist.id);
+        setStatus("#playlist-cover-status", "Cover updated. Teachers see it the next time DT Tunes opens.");
+      } catch (error) {
+        if (uploaded) await state.client.storage.from("teacher-music-covers").remove([coverPath]);
+        const friendly = /square|10 MB|could not be opened/.test(error?.message || "");
+        setStatus("#playlist-cover-status", friendly ? error.message : "That cover could not be saved. Please try again.", true);
+      } finally {
+        button.disabled = false;
+        input.value = "";
+      }
     });
 
     $("#create-playlist-form").addEventListener("submit", async (event) => {
