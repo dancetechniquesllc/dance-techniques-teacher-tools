@@ -43352,12 +43352,26 @@
       const initials = /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)?$/.test(source) ? source.toUpperCase() : generated;
       return initials.includes("-") ? initials.replace("-", "\n-") : initials;
     };
+    const vendorFeePayrollProrationFor = (studentId, month) => {
+      const exact = payrollState.prorations?.[month]?.[studentId];
+      if (exact != null) return exact;
+      // The first paycheck of a month covers the second half of the prior
+      // tuition month (for example, the October 1 payroll covers Sep 16-Oct 1).
+      // A manual proration reviewed in that payroll therefore belongs to the
+      // prior month's Partner School share as well.
+      const [year, monthNumber] = String(month || "").split("-").map(Number);
+      if (!year || !monthNumber) return null;
+      const followingPayrollMonth = new Date(year, monthNumber, 1);
+      const followingMonthKey = `${followingPayrollMonth.getFullYear()}-${String(followingPayrollMonth.getMonth() + 1).padStart(2, "0")}`;
+      if (String(payrollState.sequence || "1") !== "1" || String(payrollState.month || "") !== followingMonthKey) return null;
+      return payrollState.prorations?.[followingMonthKey]?.[studentId] ?? null;
+    };
     const vendorFeeProrationPercentFor = (studentId, month) => {
       const confirmed = payrollConfirmedTuition?.[`${month}:${studentId}`];
       const confirmedPercent = confirmed
         ? DTEnrollmentTuition.percentage(Number(confirmed.full_tuition), Number(confirmed.recorded_tuition))
         : null;
-      const value = Number(confirmedPercent ?? payrollState.prorations?.[month]?.[studentId] ?? 100);
+      const value = Number(confirmedPercent ?? vendorFeePayrollProrationFor(studentId, month) ?? 100);
       return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 100;
     };
     const vendorFeeStudentCalculation = (student, school, month, benefitPercent = partnershipBenefitPercent(school)) => {
