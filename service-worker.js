@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v264-hd-photo-frame-zoom";
+const CACHE_NAME = "my-dance-techniques-v265-teacher-playlists-restored";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
