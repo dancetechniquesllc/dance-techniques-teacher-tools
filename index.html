@@ -43352,23 +43352,44 @@
       const initials = /^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)?$/.test(source) ? source.toUpperCase() : generated;
       return initials.includes("-") ? initials.replace("-", "\n-") : initials;
     };
+    const vendorFeeProrationPercentFor = (studentId, month) => {
+      const confirmed = payrollConfirmedTuition?.[`${month}:${studentId}`];
+      const confirmedPercent = confirmed
+        ? DTEnrollmentTuition.percentage(Number(confirmed.full_tuition), Number(confirmed.recorded_tuition))
+        : null;
+      const value = Number(confirmedPercent ?? payrollState.prorations?.[month]?.[studentId] ?? 100);
+      return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : 100;
+    };
+    const vendorFeeStudentCalculation = (student, school, month, benefitPercent = partnershipBenefitPercent(school)) => {
+      const discount = payrollDiscountFor(student);
+      const fullTuition = enrollmentSchoolNameMatches(school.name, "Meadow Oaks")
+        || enrollmentSchoolNameMatches(school.nickname, "Meadow Oaks")
+        ? 65
+        : monthlyTuitionForCircumstance(discount, school);
+      const prorationPercent = vendorFeeProrationPercentFor(student.id, month);
+      const tuition = Math.round(fullTuition * prorationPercent) / 100;
+      const basePayment = Math.round(tuition * Number(benefitPercent || 0)) / 100;
+      return { discount, fullTuition, prorationPercent, tuition, basePayment };
+    };
     const partnershipPaymentStudents = (school) => {
       const records = new Map();
-      const shareRate = partnershipBenefitPercent(school) / 100;
       rosterClasses.filter((rosterClass) => enrollmentSchoolNameMatches(rosterClass.schoolName, school.name) || enrollmentSchoolNameMatches(rosterClass.schoolName, school.nickname)).forEach((rosterClass) => {
         (rosterClass.students || []).forEach((student) => {
           if (!["enrolled", "active"].includes(String(student.status || "").toLowerCase()) || records.has(student.id)) return;
-          const discount = payrollDiscountFor(student);
-          const tuition = enrollmentSchoolNameMatches(school.name, "Meadow Oaks")
-            || enrollmentSchoolNameMatches(school.nickname, "Meadow Oaks")
-            ? 65
-            : monthlyTuitionForCircumstance(discount, school);
+          const { discount, tuition, prorationPercent, basePayment } = vendorFeeStudentCalculation(
+            student,
+            school,
+            schoolPartnershipPaymentState.month,
+            partnershipBenefitPercent(school)
+          );
           const balanceRecord = payrollState.outstandingStudents?.[student.id];
-          const basePayment = tuition * shareRate;
           const savedHolds = vendorFeeHoldsForStudent(student, school);
           const monthHold = savedHolds.find((hold) => hold.originalMonth === schoolPartnershipPaymentState.month)
             || (balanceRecord?.selected && balanceRecord.month === schoolPartnershipPaymentState.month ? { amount: basePayment, status: payrollBalanceIsUnresolved(balanceRecord) ? "held" : "released" } : null);
-          const carryovers = savedHolds.filter((hold) => hold.status === "released" && hold.releasedMonth === schoolPartnershipPaymentState.month && hold.originalMonth !== schoolPartnershipPaymentState.month);
+          const carryovers = savedHolds.filter((hold) => hold.status === "released" && hold.releasedMonth === schoolPartnershipPaymentState.month && hold.originalMonth !== schoolPartnershipPaymentState.month).map((hold) => ({
+            ...hold,
+            amount: vendorFeeStudentCalculation(student, school, hold.originalMonth, hold.benefitPercent || partnershipBenefitPercent(school)).basePayment
+          }));
           if (!carryovers.length && balanceRecord?.selected && ["paid", "paid_late_fee"].includes(balanceRecord.status) && balanceRecord.month !== schoolPartnershipPaymentState.month && balanceRecord.resolvedPayrollMonth === schoolPartnershipPaymentState.month) {
             carryovers.push({ amount: basePayment, originalMonth: balanceRecord.month, status: "released" });
           }
@@ -43376,8 +43397,8 @@
           const unpaidForMonth = Boolean(monthHold);
           const payment = (unpaidForMonth ? 0 : basePayment) + carryoverAmount;
           records.set(student.id, {
-            student, rosterClass, discount, tuition, basePayment, payment, held: unpaidForMonth,
-            withheldAmount: unpaidForMonth ? Number(monthHold.amount || basePayment) : 0,
+            student, rosterClass, discount, tuition, prorationPercent, basePayment, payment, held: unpaidForMonth,
+            withheldAmount: unpaidForMonth ? basePayment : 0,
             carryoverAmount, carryoverMonths: carryovers.map((hold) => hold.originalMonth).filter(Boolean)
           });
         });
@@ -43431,7 +43452,7 @@
       const settingsReady = Boolean(method && recipient && (!["zelle", "venmo"].includes(method) || destination));
       const paymentForm = record.status === "amount_confirmed" ? `<section class="partnership-payment-approval"><h4>Complete ${escapeText(vendorPaymentMethodLabel(method))} Payment</h4><p><strong>${payrollCurrency(amount)}</strong> to <strong>${escapeText(recipient)}</strong>${destination ? ` · ${escapeText(destination)}` : ""}</p>${method === "direct_deposit" ? `<p class="partnership-payment-safety">Use the bank instructions kept outside DD. Never enter routing or account numbers here.</p>` : `<p class="partnership-payment-safety">Before sending, make sure the name shown in your payment app exactly matches ${escapeText(recipient)}.</p>`}<div class="partnership-payment-approval-grid"><label>Confirmation or Reference Number<input data-partnership-confirmation maxlength="120" placeholder="Enter after payment"></label><label>Receipt Screenshot or PDF<input data-partnership-receipt type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></label></div><p>At least one proof item is required for the permanent record.</p><div class="partnership-payment-detail-actions"><button class="primary" type="button" data-record-partnership-payment="${escapeText(record.school.id || record.school.name)}">Record Payment Sent</button></div></section>` : "";
       const sentAction = record.status === "sent" ? `<button class="primary" type="button" data-verify-partnership-payment="${escapeText(record.school.id || record.school.name)}">Verify Payment Record</button>` : "";
-      detail.innerHTML = `<div class="admin-card-header"><div><h3>${escapeText(record.school.name)}</h3><p>${escapeText(record.school.partnershipBenefit || "No partnership benefit selected")} · ${escapeText(rosterTeacherName(record.school.assignedTeacherId))}</p></div><button class="secondary" type="button" data-close-partnership-detail>Close</button></div>${record.cashBenefit ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Dancer</span><span>Tuition</span><span>${escapeText(record.benefitPercent)}% Share</span><span>Status</span></div>${record.students.map((item) => `<div class="payroll-table-row partnership-payment-student-row ${item.held ? "is-unpaid" : ""}"><span><strong>${escapeText(rosterStudentFullName(item.student))}</strong><small>${escapeText(item.rosterClass.name)} · ${escapeText(item.discount === "none" ? "Regular tuition" : `${item.discount} tuition`)}</small></span><span>${payrollCurrency(item.tuition)}</span><strong>${payrollCurrency(item.payment)}</strong><span class="status ${item.held ? "danger" : "ok"}">${item.held ? "Not Paid · Held" : item.carryoverAmount > 0 ? `Paid · Includes ${item.carryoverMonths.map(payrollBalanceMonthLabel).join(" + ")} carryover` : "Included"}</span></div>`).join("") || `<div class="payroll-placeholder">No active dancers are assigned to this school.</div>`}</div>` : ""}<section class="partnership-payment-approval"><h4>${escapeText(partnershipPaymentStatusLabel(record.status))} · ${payrollCurrency(amount)}</h4><p>${escapeText(vendorPaymentMethodLabel(method))}${recipient ? ` · ${escapeText(recipient)}` : ""}</p>${record.held > 0 ? `<p class="partnership-payment-safety">${payrollCurrency(record.held)} is withheld because Dance Techniques has not been paid. It will carry forward automatically after Payroll marks the balance paid.</p>` : ""}${!settingsReady && record.status === "ready" ? `<p class="partnership-payment-safety">Add the preferred payment method and expected recipient name in this Partner School profile before confirming the amount.</p>` : ""}${partnershipPaymentProofMarkup(record)}</section>${paymentForm}<div class="partnership-payment-detail-actions">${record.status === "paid" ? `<span class="status ok">Verified ${escapeText(record.saved?.paidDate || "")}</span><button class="secondary" type="button" data-reopen-partnership-payment="${escapeText(record.school.id || record.school.name)}">Reopen Payment</button>` : record.status === "ready" ? `<button class="primary" type="button" data-confirm-partnership-amount="${escapeText(record.school.id || record.school.name)}" ${amount <= 0 || !settingsReady ? "disabled" : ""}>Confirm Amount · ${payrollCurrency(amount)}</button>` : sentAction}</div>`;
+      detail.innerHTML = `<div class="admin-card-header"><div><h3>${escapeText(record.school.name)}</h3><p>${escapeText(record.school.partnershipBenefit || "No partnership benefit selected")} · ${escapeText(rosterTeacherName(record.school.assignedTeacherId))}</p></div><button class="secondary" type="button" data-close-partnership-detail>Close</button></div>${record.cashBenefit ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Dancer</span><span>Tuition</span><span>${escapeText(record.benefitPercent)}% Share</span><span>Status</span></div>${record.students.map((item) => `<div class="payroll-table-row partnership-payment-student-row ${item.held ? "is-unpaid" : ""}"><span><strong>${escapeText(rosterStudentFullName(item.student))}</strong><small>${escapeText(item.rosterClass.name)} · ${escapeText(item.prorationPercent !== 100 ? `${item.prorationPercent}% prorated` : item.discount === "none" ? "Regular tuition" : `${item.discount} tuition`)}</small></span><span>${payrollCurrency(item.tuition)}</span><strong>${payrollCurrency(item.payment)}</strong><span class="status ${item.held ? "danger" : "ok"}">${item.held ? "Not Paid · Held" : item.carryoverAmount > 0 ? `Paid · Includes ${item.carryoverMonths.map(payrollBalanceMonthLabel).join(" + ")} carryover` : "Included"}</span></div>`).join("") || `<div class="payroll-placeholder">No active dancers are assigned to this school.</div>`}</div>` : ""}<section class="partnership-payment-approval"><h4>${escapeText(partnershipPaymentStatusLabel(record.status))} · ${payrollCurrency(amount)}</h4><p>${escapeText(vendorPaymentMethodLabel(method))}${recipient ? ` · ${escapeText(recipient)}` : ""}</p>${record.held > 0 ? `<p class="partnership-payment-safety">${payrollCurrency(record.held)} is withheld because Dance Techniques has not been paid. It will carry forward automatically after Payroll marks the balance paid.</p>` : ""}${!settingsReady && record.status === "ready" ? `<p class="partnership-payment-safety">Add the preferred payment method and expected recipient name in this Partner School profile before confirming the amount.</p>` : ""}${partnershipPaymentProofMarkup(record)}</section>${paymentForm}<div class="partnership-payment-detail-actions">${record.status === "paid" ? `<span class="status ok">Verified ${escapeText(record.saved?.paidDate || "")}</span><button class="secondary" type="button" data-reopen-partnership-payment="${escapeText(record.school.id || record.school.name)}">Reopen Payment</button>` : record.status === "ready" ? `<button class="primary" type="button" data-confirm-partnership-amount="${escapeText(record.school.id || record.school.name)}" ${amount <= 0 || !settingsReady ? "disabled" : ""}>Confirm Amount · ${payrollCurrency(amount)}</button>` : sentAction}</div>`;
       detail.scrollIntoView({ behavior: "smooth", block: "nearest" });
     };
     const renderSchoolPartnershipPayments = () => {
@@ -43483,7 +43504,7 @@
         ? {
             benefitPercent: record.benefitPercent,
             calculatedAt: existing.amountConfirmedAt || now,
-            students: record.students.map((item) => ({ studentId: item.student.id, studentName: rosterStudentFullName(item.student), tuition: item.tuition, share: item.payment, held: item.held, carryoverAmount: item.carryoverAmount || 0 }))
+            students: record.students.map((item) => ({ studentId: item.student.id, studentName: rosterStudentFullName(item.student), tuition: item.tuition, prorationPercent: item.prorationPercent, share: item.payment, held: item.held, carryoverAmount: item.carryoverAmount || 0 }))
           }
         : existing.calculationSnapshot;
       const base = {
@@ -43993,11 +44014,14 @@
     };
 
     let payrollConfirmedTuition = {};
-    const loadConfirmedEnrollmentTuition = async () => {
+    const loadConfirmedEnrollmentTuition = async (month = "") => {
       if(!window.dtSupabase || document.body.dataset.tourMode === "true") return;
-      const {data,error}=await window.dtSupabase.from("enrollment_tuition_confirmations").select("student_id,billing_month,full_tuition,recorded_tuition,confirmed_at").eq("billing_month",payrollState.month+"-01");
+      let query=window.dtSupabase.from("enrollment_tuition_confirmations").select("student_id,billing_month,full_tuition,recorded_tuition,confirmed_at");
+      if(month)query=query.eq("billing_month",month+"-01");
+      const {data,error}=await query;
       if(error)throw new Error("Confirmed enrollment tuition could not load. Please retry before approving payroll.");
-      payrollConfirmedTuition=Object.fromEntries((data||[]).map(row=>[`${row.billing_month.slice(0,7)}:${row.student_id}`,row]));
+      const loaded=Object.fromEntries((data||[]).map(row=>[`${row.billing_month.slice(0,7)}:${row.student_id}`,row]));
+      payrollConfirmedTuition=month?{...payrollConfirmedTuition,...loaded}:loaded;
     };
     const payrollProrationFraction = (studentId) => {
       const confirmed=payrollConfirmedTuition[`${payrollState.month}:${studentId}`];
@@ -44223,7 +44247,7 @@
       if (!await loadOfficialPayrollPayments()) return;
       if (!await DTWorkClock.load()) { showToast("Working hours could not load. Try again before starting payroll."); return; }
       payrollState.month = document.getElementById("payroll-month")?.value || defaultPayrollMonth();
-      try { await loadConfirmedEnrollmentTuition(); } catch(error) { showToast(error.message); return; }
+      try { await loadConfirmedEnrollmentTuition(payrollState.month); } catch(error) { showToast(error.message); return; }
       payrollState.sequence = document.getElementById("payroll-sequence")?.value || "1";
       payrollState.status = "in_progress";
       payrollState.currentStep = 0;
@@ -44277,7 +44301,7 @@
         payrollState.vendorFeeHolds ||= [];
         payrollState.vendorFeeHolds = payrollState.vendorFeeHolds.filter((hold) => !(String(hold.studentId) === String(id) && hold.originalMonth === payrollState.month));
         if (selected && studentRecord && vendorSchool && vendorPercent > 0) {
-          const tuition = monthlyTuitionForCircumstance(payrollDiscountFor(studentRecord.student), vendorSchool);
+          const vendorCalculation = vendorFeeStudentCalculation(studentRecord.student, vendorSchool, payrollState.month, vendorPercent);
           payrollState.vendorFeeHolds.push({
             id: `${payrollState.month}:${id}:${vendorSchool.id || vendorSchool.name}`,
             studentId: id,
@@ -44286,8 +44310,9 @@
             schoolName: vendorSchool.name,
             originalMonth: payrollState.month,
             benefitPercent: vendorPercent,
-            tuition,
-            amount: Math.round(tuition * vendorPercent) / 100,
+            tuition: vendorCalculation.tuition,
+            prorationPercent: vendorCalculation.prorationPercent,
+            amount: vendorCalculation.basePayment,
             status: "held",
             markedAt: new Date().toISOString()
           });
@@ -44306,7 +44331,7 @@
       if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
-      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
+      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(payrollState.month); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
       if (event.target.closest("#mark-payroll-paid")) {
         const button=event.target.closest("#mark-payroll-paid");button.disabled=true;
         try { await finalizePayrollPayStubs(); payrollState.status="paid";payrollState.paidAt=new Date().toISOString();renderPayrollWizard();scheduleAppDataSave();showToast("Payroll marked paid - statements posted to Teacher Tools"); }
@@ -44375,10 +44400,12 @@
       renderPayrollWizard();
       scheduleAppDataSave();
     });
-    document.getElementById("open-school-partnership-payments")?.addEventListener("click", () => {
+    document.getElementById("open-school-partnership-payments")?.addEventListener("click", async () => {
       document.getElementById("finance-folio-cards").hidden = true;
       document.getElementById("payroll-workspace").hidden = true;
       document.getElementById("partnership-payment-workspace").hidden = false;
+      try { await loadConfirmedEnrollmentTuition(); }
+      catch (error) { showToast("Prorated tuition could not load. Vendor amounts are unavailable until you retry."); return; }
       renderSchoolPartnershipPayments();
     });
     document.getElementById("close-school-partnership-payments")?.addEventListener("click", () => {

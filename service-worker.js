@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v273-partner-school-day-sync";
+const CACHE_NAME = "my-dance-techniques-v274-vendor-fee-proration";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
