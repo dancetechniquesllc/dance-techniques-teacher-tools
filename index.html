@@ -43658,10 +43658,11 @@
       "Big Blue Marble Adademy Murphy",
       "Children's Lighthouse Rockwall"
     ]);
+    const payrollNormalizedTeacherName = (teacher) => String(fullName(teacher) || "").trim().toLowerCase().replace(/\s+/g, " ");
     const payrollUsesTaylorOneTimeCoverageCutoff = (rosterClass) => {
       if (payrollState.month !== "2026-10" || payrollState.sequence !== "1") return false;
       const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
-      return normalizeName(fullName(teacher)) === "taylor smith" && payrollTaylorCoverageSchools.has(rosterClass.schoolName);
+      return payrollNormalizedTeacherName(teacher) === "taylor smith" && payrollTaylorCoverageSchools.has(rosterClass.schoolName);
     };
     const payrollTeacherClassDates = (rosterClass) => {
       const { start, end } = payrollPayPeriodRange();
@@ -43677,7 +43678,7 @@
       const configured = Number(payrollState.teacherCommissionRates?.[teacherId]);
       if (payrollTeacherCommissionOptions.includes(configured)) return configured;
       const teacher = teachers.find((item) => item.id === teacherId);
-      return normalizeName(fullName(teacher)) === "makayla sifuentes" ? 3 : 2;
+      return payrollNormalizedTeacherName(teacher) === "makayla sifuentes" ? 3 : 2;
     };
     const payrollTeacherCommissionOptionsMarkup = (teacherId) => {
       const selected = payrollTeacherCommissionRate(teacherId);

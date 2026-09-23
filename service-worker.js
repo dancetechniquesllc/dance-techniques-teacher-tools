@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v268-taylor-payroll-cutoff";
+const CACHE_NAME = "my-dance-techniques-v269-payroll-steps-hotfix";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
