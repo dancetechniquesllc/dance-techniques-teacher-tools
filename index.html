@@ -43653,14 +43653,31 @@
       const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
       return teacher?.payTier === "tier_b_teacher";
     });
+    const payrollTaylorCoverageSchools = new Set([
+      "Arka Montessori Lavon",
+      "Big Blue Marble Adademy Murphy",
+      "Children's Lighthouse Rockwall"
+    ]);
+    const payrollUsesTaylorOneTimeCoverageCutoff = (rosterClass) => {
+      if (payrollState.month !== "2026-10" || payrollState.sequence !== "1") return false;
+      const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
+      return normalizeName(fullName(teacher)) === "taylor smith" && payrollTaylorCoverageSchools.has(rosterClass.schoolName);
+    };
     const payrollTeacherClassDates = (rosterClass) => {
       const { start, end } = payrollPayPeriodRange();
-      return payrollClassDatesBetween(rosterClass, start, end, "Scheduled class in this pay period");
+      const oneTimeTaylorCoverage = payrollUsesTaylorOneTimeCoverageCutoff(rosterClass);
+      const effectiveStart = oneTimeTaylorCoverage ? new Date("2026-09-19T12:00:00") : start;
+      const reason = oneTimeTaylorCoverage
+        ? "One-time Taylor coverage after Kara's final day"
+        : "Scheduled class in this pay period";
+      return payrollClassDatesBetween(rosterClass, effectiveStart, end, reason);
     };
     const payrollTeacherCommissionOptions = [2, 2.5, 3, 3.5, 4, 4.5, 5];
     const payrollTeacherCommissionRate = (teacherId) => {
       const configured = Number(payrollState.teacherCommissionRates?.[teacherId]);
-      return payrollTeacherCommissionOptions.includes(configured) ? configured : 2;
+      if (payrollTeacherCommissionOptions.includes(configured)) return configured;
+      const teacher = teachers.find((item) => item.id === teacherId);
+      return normalizeName(fullName(teacher)) === "makayla sifuentes" ? 3 : 2;
     };
     const payrollTeacherCommissionOptionsMarkup = (teacherId) => {
       const selected = payrollTeacherCommissionRate(teacherId);
@@ -44044,7 +44061,7 @@
       const preview = calculatePayrollPreview();
       let body = "";
       if (step === 0) body = `<div class="payroll-choice-grid"><button class="payroll-choice-card ${payrollState.sequence === "1" ? "is-selected" : ""}" type="button" data-payroll-sequence-choice="1"><strong>1st · Estimated Half</strong><small>Exactly half of expected ${payrollMonthLabel()} payroll.</small></button><button class="payroll-choice-card ${payrollState.sequence === "2" ? "is-selected" : ""}" type="button" data-payroll-sequence-choice="2"><strong>15th · True-Up</strong><small>The accurate remaining amount after holds, releases, changes, and the first payment.</small></button></div><div class="payroll-explanation"><strong>${payrollMonthLabel()}</strong> · Payday ${payrollPayday().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })} · Preparation deadline ${new Date(payrollPayday().getTime() - 5 * 86400000).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>`;
-      if (step === 1) { const visibleClasses = payrollFilteredClasses(); body = `<div class="payroll-explanation"><strong>Teacher tier · ${escapeText(payrollPayPeriodLabel())}</strong><br>Only Teacher-tier classes occurring inside this pay period are shown. This will usually be two payable occurrences for each weekly dance class.</div>${payrollFilterRowMarkup("classes", { includeStatus: true })}<div class="payroll-table"><div class="payroll-table-row is-header"><span>School</span><span>Payable</span><span>Excluded</span><span>Reason Recorded</span></div>${visibleClasses.map((rosterClass) => { const dates = payrollTeacherClassDates(rosterClass); const payable = dates.filter((item) => item.status === "payable"); const excluded = dates.filter((item) => item.status === "excluded"); return `<div class="payroll-table-row"><span><strong>${escapeText(rosterClass.schoolName)}</strong><small>${escapeText(rosterClass.name)} · ${escapeText(rosterTeacherName(rosterClass.teacherId))}</small></span><span>${payable.length}</span><span>${excluded.length}</span><span>${escapeText(excluded[0]?.reason || payable[0]?.reason || "Schedule needed")}</span></div>`; }).join("") || `<div class="payroll-placeholder">No Teacher-tier classes occur in this pay period.</div>`}</div><div class="payroll-explanation">Canceled and original rescheduled dates are excluded with a reason. Makeup dates are paid in the pay period when they actually occur and remain linked to the original class change.</div>`; }
+      if (step === 1) { const visibleClasses = payrollFilteredClasses(); const taylorCutoffNotice = payrollState.month === "2026-10" && payrollState.sequence === "1" ? `<div class="payroll-explanation"><strong>One-time Taylor coverage · Sep 19–Oct 1, 2026</strong><br>Only Kara's former Arka Lavon, Big Blue Marble, and Children's Lighthouse Rockwall classes after September 18 count for Taylor. Fate is not included. Taylor's regular classes still use the full pay period.</div>` : ""; body = `<div class="payroll-explanation"><strong>Teacher tier · ${escapeText(payrollPayPeriodLabel())}</strong><br>Only Teacher-tier classes occurring inside this pay period are shown. This will usually be two payable occurrences for each weekly dance class.</div>${taylorCutoffNotice}${payrollFilterRowMarkup("classes", { includeStatus: true })}<div class="payroll-table"><div class="payroll-table-row is-header"><span>School</span><span>Payable</span><span>Excluded</span><span>Reason Recorded</span></div>${visibleClasses.map((rosterClass) => { const dates = payrollTeacherClassDates(rosterClass); const payable = dates.filter((item) => item.status === "payable"); const excluded = dates.filter((item) => item.status === "excluded"); return `<div class="payroll-table-row"><span><strong>${escapeText(rosterClass.schoolName)}</strong><small>${escapeText(rosterClass.name)} · ${escapeText(rosterTeacherName(rosterClass.teacherId))}</small></span><span>${payable.length}</span><span>${excluded.length}</span><span>${escapeText(excluded[0]?.reason || payable[0]?.reason || "Schedule needed")}</span></div>`; }).join("") || `<div class="payroll-placeholder">No Teacher-tier classes occur in this pay period.</div>`}</div><div class="payroll-explanation">Canceled and original rescheduled dates are excluded with a reason. Makeup dates are paid in the pay period when they actually occur and remain linked to the original class change.</div>`; }
       if (step === 2) {
         if (payrollState.sequence !== "2") body = `<div class="payroll-placeholder">Review current payment status during the 15th · True-Up payroll. Continue to Outstanding Balances to review any carried balances.</div>`;
         else { const visibleStudents = payrollFilteredStudents("outstanding"); body = `<div class="payroll-explanation">Everyone defaults to paid. Select a student only when their entire current balance is unpaid. No amount entry is needed.</div>${payrollFilterRowMarkup("outstanding")}<div class="payroll-student-grid">${payrollStudentCardsMarkup("outstanding", visibleStudents) || `<div class="payroll-placeholder">No students match these filters.</div>`}</div>`; }
