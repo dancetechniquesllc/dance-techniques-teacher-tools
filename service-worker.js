@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v278-partner-breakdown-email";
+const CACHE_NAME = "my-dance-techniques-v279-partner-share-subject";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",

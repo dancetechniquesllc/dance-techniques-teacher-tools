@@ -43530,7 +43530,7 @@
       document.getElementById("partnership-breakdown-title").textContent = `${record.school.nickname || record.school.name} · ${partnershipBreakdownMonthLabel()}`;
       document.getElementById("partnership-breakdown-subtitle").textContent = "Review the statement and generated email before sending.";
       const email = record.school.email || "";
-      document.getElementById("partnership-breakdown-email").innerHTML = `<h4>Generated Email</h4><label>To<input type="email" id="partnership-breakdown-recipient" value="${escapeText(email)}" readonly></label><label>Subject<input id="partnership-breakdown-subject" value="Your ${escapeText(partnershipBreakdownMonthLabel())} Dance Techniques Partner School Share" readonly></label><div class="partnership-breakdown-email-body">Hi ${escapeText(record.school.directorName || "Director")}!<br><br>Your <strong>${escapeText(partnershipBreakdownMonthLabel())} Partner School Share</strong> is on its way. The complete blush statement shown here will be included in the email.<br><br><strong>Partner School Share:</strong> ${payrollCurrency(record.saved?.amount || record.ready)}<br><strong>Payment Method:</strong> ${escapeText(vendorPaymentMethodLabel(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod))}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}<br><br>Warmly,<br><strong>Dance Techniques</strong></div>${email ? "" : `<p class="partnership-breakdown-error">Add an email address to this Partner School profile before sending.</p>`}`;
+      document.getElementById("partnership-breakdown-email").innerHTML = `<h4>Generated Email</h4><label>To<input type="email" id="partnership-breakdown-recipient" value="${escapeText(email)}" readonly></label><label>Subject<input id="partnership-breakdown-subject" value="${escapeText(partnershipBreakdownMonthLabel())} Partner School Share" readonly></label><div class="partnership-breakdown-email-body">Hi ${escapeText(record.school.directorName || "Director")}!<br><br>Your <strong>${escapeText(partnershipBreakdownMonthLabel())} Partner School Share</strong> is on its way. The complete blush statement shown here will be included in the email.<br><br><strong>Partner School Share:</strong> ${payrollCurrency(record.saved?.amount || record.ready)}<br><strong>Payment Method:</strong> ${escapeText(vendorPaymentMethodLabel(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod))}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}<br><br>Warmly,<br><strong>Dance Techniques</strong></div>${email ? "" : `<p class="partnership-breakdown-error">Add an email address to this Partner School profile before sending.</p>`}`;
       document.getElementById("send-partnership-breakdown").disabled = !email;
       overlay?.classList.add("active"); overlay?.setAttribute("aria-hidden", "false");
     };
@@ -43541,7 +43541,7 @@
       button.disabled = true; button.textContent = "Sending…";
       try {
         const statementHtml = partnershipBreakdownStatementHtml(record);
-        const subject = `Your ${partnershipBreakdownMonthLabel()} Dance Techniques Partner School Share`;
+        const subject = `${partnershipBreakdownMonthLabel()} Partner School Share`;
         if (document.body.dataset.tourMode === "true") {
           record.saved.breakdownSentAt = new Date().toISOString(); record.saved.breakdownSentTo = record.school.email;
         } else {
