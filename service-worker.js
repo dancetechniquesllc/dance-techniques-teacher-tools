@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v281-photo-frame-multiselect";
+const CACHE_NAME = "my-dance-techniques-v282-hispanic-heritage-frame";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
@@ -13,6 +13,7 @@ const CORE_ASSETS = [
   "./assets/photo-frames/butterflies.png",
   "./assets/photo-frames/boutique-delivery.png",
   "./assets/photo-frames/dance-besties.png",
+  "./assets/photo-frames/hispanic-heritage.png",
   "./assets/photo-frames/first-position.png",
 
   "./roster-care.js?v=20260908",
