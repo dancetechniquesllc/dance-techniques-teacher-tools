@@ -52790,6 +52790,8 @@
       let resultFile = null;
       let facingMode = "environment";
       let libraryPhoto = null;
+      let libraryPhotos = [];
+      let batchResultFiles = [];
       let photoZoom = 1;
       let cameraTrackZoomSupported = false;
       let pinchStartDistance = 0;
@@ -52823,7 +52825,7 @@
                 <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M15 7h34a5 5 0 0 1 5 5v40a5 5 0 0 1-5 5H15a5 5 0 0 1-5-5V12a5 5 0 0 1 5-5Z"/><path d="M16 13h32v29H16z"/><circle cx="39" cy="23" r="5"/><path d="m16 38 9-10 8 8 5-6 10 12"/><path d="M24 51h16"/></svg>
                 <span class="photo-frame-action-label">Photos</span>
               </button>
-              <input class="photo-frame-file" type="file" accept="image/*" hidden>
+              <input class="photo-frame-file" type="file" accept="image/*" multiple hidden>
               <button class="photo-frame-capture photo-frame-source" type="button" aria-label="Take Photo" hidden>
                 <svg viewBox="0 0 64 64" aria-hidden="true"><path d="M11 23h11l4-7h12l4 7h11a5 5 0 0 1 5 5v22a5 5 0 0 1-5 5H11a5 5 0 0 1-5-5V28a5 5 0 0 1 5-5Z"/><circle cx="32" cy="39" r="10"/><path d="M51 4c1.1 5.2 3.8 7.9 9 9-5.2 1.1-7.9 3.8-9 9-1.1-5.2-3.8-7.9-9-9 5.2-1.1 7.9-3.8 9-9Z"/></svg>
                 <span class="photo-frame-action-label">Take Photo</span>
@@ -52886,6 +52888,8 @@
       };
       const closeModal = () => {
         libraryPhoto = null;
+        libraryPhotos = [];
+        batchResultFiles = [];
         stopCamera();
         resetResult();
         modal.hidden = true;
@@ -52898,6 +52902,8 @@
       };
       const startCamera = async () => {
         libraryPhoto = null;
+        libraryPhotos = [];
+        batchResultFiles = [];
         resetPhotoZoom();
         stopCamera();
         resetResult();
@@ -52988,11 +52994,26 @@
         status.textContent = "Photo ready. Pinch with two fingers to adjust the zoom.";
       };
       const capturePhoto = async () => {
+        batchResultFiles = [];
         await composePhoto(video, video.videoWidth, video.videoHeight);
         if (resultFile) await savePhoto();
       };
+      const composeLibraryBatch = async () => {
+        if (!libraryPhotos.length) return;
+        batchResultFiles = [];
+        for (let index = 0; index < libraryPhotos.length; index += 1) {
+          const photo = libraryPhotos[index];
+          status.textContent = `Applying ${selectedFrame[0]} frame to photo ${index + 1} of ${libraryPhotos.length}…`;
+          await composePhoto(photo, photo.naturalWidth, photo.naturalHeight);
+          if (resultFile) batchResultFiles.push(resultFile);
+        }
+        resultFile = batchResultFiles[batchResultFiles.length - 1] || null;
+        status.textContent = `${batchResultFiles.length} framed photo${batchResultFiles.length === 1 ? " is" : "s are"} ready. Tap Save to add ${batchResultFiles.length === 1 ? "it" : "them"} to Photos.`;
+      };
       const backToPhotoChoices = () => {
         libraryPhoto = null;
+        libraryPhotos = [];
+        batchResultFiles = [];
         stopCamera();
         resetResult();
         status.textContent = "";
@@ -53004,20 +53025,27 @@
       const fileInput = modal.querySelector(".photo-frame-file");
       libraryButton.addEventListener("click", () => fileInput.click());
       fileInput.addEventListener("change", async () => {
-        const file = fileInput.files[0];
-        if (!file) return;
+        const files = [...fileInput.files];
+        if (!files.length) return;
         fileInput.value = "";
-        const url = URL.createObjectURL(file);
-        status.textContent = "Preparing your photo…";
+        status.textContent = `Preparing ${files.length} photo${files.length === 1 ? "" : "s"}…`;
         try {
-          const photo = await loadImage(url);
+          const photos = [];
+          for (const file of files) {
+            const url = URL.createObjectURL(file);
+            try { photos.push(await loadImage(url)); }
+            finally { URL.revokeObjectURL(url); }
+          }
           stopCamera();
           resetPhotoZoom();
-          libraryPhoto = photo;
-          await composePhoto(photo, photo.naturalWidth, photo.naturalHeight);
+          libraryPhotos = photos;
+          libraryPhoto = photos[photos.length - 1] || null;
+          await composeLibraryBatch();
         } catch (error) {
-          status.textContent = "This photo could not be opened. Try a JPEG or PNG photo.";
-        } finally { URL.revokeObjectURL(url); }
+          libraryPhotos = [];
+          batchResultFiles = [];
+          status.textContent = "One of these photos could not be opened. Try JPEG or PNG photos.";
+        }
       });
       const touchDistance = (touches) => Math.hypot(touches[0].clientX - touches[1].clientX, touches[0].clientY - touches[1].clientY);
       stage.addEventListener("touchstart", (event) => {
@@ -53038,22 +53066,27 @@
       }, { passive: false });
       stage.addEventListener("touchend", () => {
         pinchStartDistance = 0;
-        if (libraryPhoto) composePhoto(libraryPhoto, libraryPhoto.naturalWidth, libraryPhoto.naturalHeight).catch(() => { status.textContent = "Could not update the zoom. Please try again."; });
+        if (libraryPhotos.length) composeLibraryBatch().catch(() => { status.textContent = "Could not update the zoom. Please try again."; });
       });
       const savePhoto = async () => {
-        if (!resultFile) return;
+        const files = batchResultFiles.length ? batchResultFiles : resultFile ? [resultFile] : [];
+        if (!files.length) return;
         try {
-          if (navigator.canShare?.({ files: [resultFile] })) {
-            status.textContent = "Choose Save Image to add this framed photo to Photos.";
-            await navigator.share({ files: [resultFile], title: "Dance Techniques Photo" });
-            status.textContent = "Photo saved or shared.";
+          if (navigator.canShare?.({ files })) {
+            status.textContent = `Choose Save ${files.length === 1 ? "Image" : `${files.length} Images`} to add ${files.length === 1 ? "this framed photo" : "these framed photos"} to Photos.`;
+            await navigator.share({ files, title: files.length === 1 ? "Dance Techniques Photo" : "Dance Techniques Photos" });
+            status.textContent = `${files.length} photo${files.length === 1 ? "" : "s"} saved or shared.`;
             return;
           }
-          const link = document.createElement("a");
-          link.href = resultUrl;
-          link.download = resultFile.name;
-          link.click();
-          status.textContent = "Photo saved to this device.";
+          for (const file of files) {
+            const url = URL.createObjectURL(file);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = file.name;
+            link.click();
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+          }
+          status.textContent = `${files.length} photo${files.length === 1 ? "" : "s"} saved to this device.`;
         } catch (error) {
           if (error?.name === "AbortError") status.textContent = "Photo ready. Tap Save Photo whenever you are ready.";
           else status.textContent = "The photo could not be saved. Tap Save Photo to try again.";
@@ -53073,7 +53106,7 @@
         resetResult();
         status.textContent = "";
         if (!stream) startButton.hidden = false;
-        if (libraryPhoto) composePhoto(libraryPhoto, libraryPhoto.naturalWidth, libraryPhoto.naturalHeight).catch(() => { status.textContent = "Could not prepare this frame. Please try again."; });
+        if (libraryPhotos.length) composeLibraryBatch().catch(() => { status.textContent = "Could not prepare this frame. Please try again."; });
       });
       modal.querySelector(".photo-frame-close").addEventListener("click", closeModal);
       modal.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });

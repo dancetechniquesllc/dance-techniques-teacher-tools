@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v280-check-received-confirmation";
+const CACHE_NAME = "my-dance-techniques-v281-photo-frame-multiselect";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
