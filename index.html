@@ -22138,6 +22138,7 @@
           breakdownSentAt: payment.breakdown_sent_at || "",
           breakdownSentTo: payment.breakdown_sent_to || "",
           breakdownProviderMessageId: payment.breakdown_provider_message_id || "",
+          checkReceivedAt: payment.check_received_at || "",
           calculationSnapshot: payment.calculation_snapshot || {}
         }
       ]));
@@ -43516,7 +43517,8 @@
       const month = partnershipBreakdownMonthLabel();
       const amount = Number(record.saved?.amount || record.ready || 0);
       const method = vendorPaymentMethodLabel(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod);
-      return `<div style="margin:0;padding:24px;background:#f2d8d4;color:#171313;font-family:Arial,sans-serif"><div style="max-width:1000px;margin:auto"><section style="margin-bottom:18px;padding:24px;background:#fffaf8;border-radius:16px"><p>Hi ${escapeText(director)}!</p><p>Your <strong>${escapeText(month)} Partner School Share</strong> is on its way! Below is a complete breakdown of participating dancers, tuition collected, and your school’s share for the month.</p><p><strong>Partner School Share:</strong> ${payrollCurrency(amount)}<br><strong>Payment Method:</strong> ${escapeText(method)}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}</p><p>Thank you for being such a valued Dance Techniques partner and for allowing us to bring dance right into your school. We’re so grateful to grow alongside you!</p><p>Warmly,<br><strong>Dance Techniques</strong><br><em>Helping Your School Shine—One Dance Step at a Time.</em></p></section>${statementHtml}</div></div>`;
+      const checkConfirmation = String(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod) === "check" ? `<p>Your check has been mailed to the address we have on file. Once the physical check arrives, please click <strong>Check Received</strong> below to let us know it made it safely to you.</p>{{CHECK_RECEIVED_BUTTON}}` : "";
+      return `<div style="margin:0;padding:24px;background:#f2d8d4;color:#171313;font-family:Arial,sans-serif"><div style="max-width:1000px;margin:auto"><section style="margin-bottom:18px;padding:24px;background:#fffaf8;border-radius:16px"><p>Hi ${escapeText(director)}!</p><p>Your <strong>${escapeText(month)} Partner School Share</strong> is on its way! Below is a complete breakdown of participating dancers, tuition collected, and your school’s share for the month.</p><p><strong>Partner School Share:</strong> ${payrollCurrency(amount)}<br><strong>Payment Method:</strong> ${escapeText(method)}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}</p>${checkConfirmation}<p>Thank you for being such a valued Dance Techniques partner and for allowing us to bring dance right into your school. We’re so grateful to grow alongside you!</p><p>Warmly,<br><strong>Dance Techniques</strong><br><em>Helping Your School Shine—One Dance Step at a Time.</em></p></section>${statementHtml}</div></div>`;
     };
     const closePartnershipBreakdown = () => {
       const overlay = document.getElementById("partnership-breakdown-overlay");
@@ -43616,6 +43618,7 @@
       breakdownSentAt: payment.breakdown_sent_at || "",
       breakdownSentTo: payment.breakdown_sent_to || "",
       breakdownProviderMessageId: payment.breakdown_provider_message_id || "",
+      checkReceivedAt: payment.check_received_at || "",
       calculationSnapshot: payment.calculation_snapshot || {}
     });
     const persistPartnershipPayment = async (record, status, additions = {}, eventType = "") => {
