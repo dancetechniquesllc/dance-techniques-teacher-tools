@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v284-breakdown-review";
+const CACHE_NAME = "my-dance-techniques-v285-breakdown-sent-state";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
