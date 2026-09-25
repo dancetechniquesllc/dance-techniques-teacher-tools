@@ -22536,7 +22536,7 @@
       const payload = enrollmentFieldsFromStudent(student, rosterClass);
       enrollmentIntakeQueue.filter((item) => (item.placed_student_id && item.placed_student_id === student.id)
         || (item.placed_class_enrollment_id && student.enrollmentId && item.placed_class_enrollment_id === student.enrollmentId)).forEach((item) => Object.assign(item, payload));
-      if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !student.id) return;
+      if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !isUuid(student.id)) return;
       const { error } = await window.dtSupabase.from("enrollments").update(payload).eq("placed_student_id", student.id);
       if (error) sharedRosterError("The enrollment record could not be synchronized.", error, { reload: false });
     };
@@ -22594,9 +22594,16 @@
 
     const saveSharedStudent = async (student, rosterClass) => {
       await syncStudentToEnrollmentIntake(student, rosterClass);
-      if (!sharedRosterReady || !window.dtSupabase) return true;
+      if (document.body.dataset.tourMode === "true") return true;
+      if (!sharedRosterReady || !window.dtSupabase) {
+        showToast("The prospect was not saved. Reconnect to the shared roster and try again; your information is still in this form.");
+        return false;
+      }
       if (rosterClass.sharedSavePending) await rosterClass.sharedSavePending;
-      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(rosterClass.id || "")) return true;
+      if (!isUuid(rosterClass.id)) {
+        showToast("The prospect was not saved because this class is not connected to the shared roster. Your information is still in this form.");
+        return false;
+      }
       const studentPayload = {
         first_name: student.firstName, last_name: student.lastName, preferred_name: student.preferredName || null,
         birth_date: student.birthdate || null, gender: student.gender === "male" ? "male" : "female", classroom: student.classroom || null,
@@ -38014,8 +38021,10 @@
       showToast(`${name} created for ${school.nickname || school.name}`);
     });
 
-    document.getElementById("teacher-roster-future-form")?.addEventListener("submit", (event) => {
+    document.getElementById("teacher-roster-future-form")?.addEventListener("submit", async (event) => {
       event.preventDefault();
+      const submitButton = document.querySelector(".trial-request-submit");
+      if (submitButton?.disabled) return;
       const availableClasses = futureDancerCreatorClasses();
       const rosterClass = availableClasses.find((item) => item.id === document.getElementById("teacher-roster-future-class")?.value);
       if (!rosterClass) return showToast("Choose one of your assigned classes");
@@ -38055,24 +38064,37 @@
           trial_completed_at: new Date().toISOString()
         };
       }
-      const student = existingStudent || {
+      const student = existingStudent ? JSON.parse(JSON.stringify(existingStudent)) : {
         id: `future-${firstName}-${lastName}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
         status: "trial-scheduled",
         trialAttendancePending: true,
         additionalInformation: { trial_attendance_pending: true }
       };
       Object.assign(student, studentDetails);
-      if (!existingStudent) rosterClass.students.push(student);
-      else if (sourceClass.id !== rosterClass.id) {
-        sourceClass.students.splice(sourceClass.students.indexOf(existingStudent), 1);
-        rosterClass.students.push(existingStudent);
+      const normalButtonLabel = existingStudent ? "Trial Complete" : "Add Prospect Dancer";
+      if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Saving…"; }
+      try {
+        const saved = await saveSharedStudent(student, rosterClass);
+        if (saved !== true) return;
+        if (!existingStudent) rosterClass.students.push(student);
+        else {
+          Object.assign(existingStudent, student);
+          if (sourceClass.id !== rosterClass.id) {
+            sourceClass.students.splice(sourceClass.students.indexOf(existingStudent), 1);
+            rosterClass.students.push(existingStudent);
+          }
+        }
+        setTeacherRosterOverlay("teacher-roster-future-overlay", false);
+        renderTeacherRosters();
+        renderClassesAndRosters();
+        scheduleAppDataSave();
+        showToast(existingStudent ? `${firstName}’s trial is complete and saved for Director follow-up` : `${firstName} saved as a prospect dancer`);
+      } catch (error) {
+        console.error("The prospect dancer could not be saved", error);
+        showToast(error?.message || "The prospect dancer was not saved. Your information is still in this form.");
+      } finally {
+        if (submitButton?.isConnected) { submitButton.disabled = false; submitButton.textContent = normalButtonLabel; }
       }
-      setTeacherRosterOverlay("teacher-roster-future-overlay", false);
-      renderTeacherRosters();
-      renderClassesAndRosters();
-      scheduleAppDataSave();
-      saveSharedStudent(student, rosterClass);
-      showToast(existingStudent ? `${firstName}’s trial is complete and ready for Director follow-up` : `${firstName} added as a prospect dancer`);
     });
 
     const rosterSafe = (value = "") => String(value)
