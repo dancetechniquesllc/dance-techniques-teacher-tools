@@ -52499,7 +52499,8 @@
           ...clonePayload(data.payload),
           teachers: undefined,
           schoolLibrary: undefined,
-          rosterClasses: undefined
+          rosterClasses: undefined,
+          schoolPartnershipPaymentState: undefined
         } : data.payload;
         if (isLeader && cloudPayloadShouldApply(data.payload)) applyPersistedAppData(cloudSettingsPayload, { mergeTeachers: true });
         else if (isLeader && data?.payload && !cloudPayloadShouldApply(data.payload)) {
