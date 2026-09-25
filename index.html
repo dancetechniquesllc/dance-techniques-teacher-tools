@@ -43538,6 +43538,16 @@
       const overlay = document.getElementById("partnership-breakdown-overlay");
       overlay?.classList.remove("active"); overlay?.setAttribute("aria-hidden", "true"); partnershipBreakdownRecord = null;
     };
+    const partnershipBreakdownErrorMessage = async (error) => {
+      try {
+        const response = error?.context;
+        if (response && typeof response.clone === "function") {
+          const payload = await response.clone().json();
+          if (payload?.message) return String(payload.message);
+        }
+      } catch (_) {}
+      return error?.message || "The breakdown could not be sent. Please try again.";
+    };
     const openPartnershipBreakdown = (record) => {
       const overlay = document.getElementById("partnership-breakdown-overlay");
       const statement = partnershipBreakdownStatementHtml(record);
@@ -43562,8 +43572,8 @@
         if (document.body.dataset.tourMode === "true") {
           record.saved.breakdownSentAt = new Date().toISOString(); record.saved.breakdownSentTo = recipientEmail;
         } else {
-          const { data, error } = await window.dtSupabase.functions.invoke("send-partner-school-breakdown", { body: { paymentId: record.saved.id, subject, html: partnershipBreakdownEmailHtml(record, statementHtml) } });
-          if (error) throw error;
+          const { data, error } = await window.dtSupabase.functions.invoke("send-partner-school-breakdown", { body: { paymentId: record.saved.id, partnerSchoolId: record.school.id, paymentMonth: schoolPartnershipPaymentState.month, subject, html: partnershipBreakdownEmailHtml(record, statementHtml) } });
+          if (error) throw new Error(await partnershipBreakdownErrorMessage(error));
           if (!data?.ok) throw new Error(data?.message || "The breakdown could not be sent.");
           record.saved.breakdownSentAt = data.sentAt || new Date().toISOString();
           record.saved.breakdownSentTo = data.sentTo || recipientEmail;
