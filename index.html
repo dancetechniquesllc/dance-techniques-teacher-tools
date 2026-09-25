@@ -17404,7 +17404,7 @@
             </div>
             <div class="enrollment-student-view-panel" id="director-future-dancers-panel" data-enrollment-student-panel="future-dancers" hidden>
               <div class="section-title" style="margin-top:8px">
-                <div><h3>Future Dancers</h3><p>Completed trials ready for Director follow-up.</p></div>
+                <div><h3>Future Dancers</h3><p>Every prospect entered in Teacher Tools, including completed trials ready for Director follow-up.</p></div>
                 <button class="primary roster-add-future-button" type="button" id="director-add-trial">Add Trial</button>
               </div>
               <div class="roster-toolbar">
@@ -20067,6 +20067,8 @@
     let officialClassroomManagerSchoolId = "";
     let officialClassroomManagerSource = "enrollment";
     let enrollmentIntakeSubscription = null;
+    let sharedRosterSubscription = null;
+    let sharedRosterRefreshTimer = null;
     let teacherRosterNewEnrollments = document.body.dataset.tourMode === "true"
       ? enrollmentIntakeQueue.map((item) => ({ ...item, official_classroom: item.official_classroom || item.student_classroom || "" }))
       : [];
@@ -21869,6 +21871,23 @@
       enrollmentIntakeSubscription = window.dtSupabase
         .channel("director-enrollment-intake")
         .on("postgres_changes", { event: "*", schema: "public", table: "enrollments" }, () => loadEnrollmentIntakeQueue(profile))
+        .subscribe();
+    };
+
+    const subscribeSharedRosterChanges = (profile = window.dtCurrentProfile) => {
+      if (!window.dtSupabase || !profile || sharedRosterSubscription || document.body.dataset.tourMode === "true") return;
+      const refresh = () => {
+        clearTimeout(sharedRosterRefreshTimer);
+        sharedRosterRefreshTimer = window.setTimeout(async () => {
+          await loadSharedClassesAndRosters(profile);
+          renderEnrollmentStudentsView();
+        }, 250);
+      };
+      sharedRosterSubscription = window.dtSupabase
+        .channel(`shared-rosters-${profile.id}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "students" }, refresh)
+        .on("postgres_changes", { event: "*", schema: "public", table: "class_enrollments" }, refresh)
+        .on("postgres_changes", { event: "*", schema: "public", table: "dance_classes" }, refresh)
         .subscribe();
     };
 
@@ -38305,9 +38324,8 @@
       const schoolFilter = document.getElementById("director-future-dancer-school");
       const dayFilter = document.getElementById("director-future-dancer-day");
       const searchInput = document.getElementById("director-future-dancer-search");
-      const allRecords = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).flatMap((rosterClass) => rosterClass.students
-        .filter((student) => student.status !== "enrolled" && student.additionalInformation?.trial_completed && !student.additionalInformation?.future_dancer_archived)
-        .map((student) => ({ rosterClass, student })));
+      const allRecords = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false)
+        .flatMap((rosterClass) => rosterProspects(rosterClass).map((student) => ({ rosterClass, student })));
       const schools = [...new Set(allRecords.map(({ rosterClass }) => rosterClass.schoolName))].sort((left, right) => rosterSchoolNickname(left).localeCompare(rosterSchoolNickname(right)));
       if (schoolFilter) {
         schoolFilter.innerHTML = `<option value="all">All partner schools</option>${schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("")}`;
@@ -38334,7 +38352,7 @@
       const summary = document.getElementById("enrollment-student-summary");
       if (!summary) return;
       const activeClasses = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false);
-      const futureDancers = activeClasses.reduce((count, rosterClass) => count + rosterClass.students.filter((student) => student.status !== "enrolled" && student.additionalInformation?.trial_completed && !student.additionalInformation?.future_dancer_archived).length, 0);
+      const futureDancers = activeClasses.reduce((count, rosterClass) => count + rosterProspects(rosterClass).length, 0);
       const incompleteEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) !== "complete").length;
       const dancerDirectoryCount = dashboardEntityUniqueCount(dashboardEntityStudentRecords());
       const metrics = [
@@ -52602,6 +52620,7 @@
       await loadStaffFeedbackInbox();
       await ensureEmailPlanUpgradeNotification(profile);
       subscribeEnrollmentIntakeQueue(profile);
+      subscribeSharedRosterChanges(profile);
       subscribeNotificationSystem(profile);
       subscribeStaffFeedbackInbox(profile);
       loadSharedMusicLibrary(profile);
