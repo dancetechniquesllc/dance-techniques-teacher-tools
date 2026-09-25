@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v294-reference-only-payment-resolution";
+const CACHE_NAME = "my-dance-techniques-v295-email-safe-partner-share";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
