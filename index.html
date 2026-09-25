@@ -43486,6 +43486,9 @@
     };
     let partnershipBreakdownRecord = null;
     const partnershipBreakdownMonthLabel = () => new Date(`${schoolPartnershipPaymentState.month}-01T12:00:00`).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const partnershipBreakdownRecipientEmail = (school) => [school?.vendorPaymentDestination, school?.email]
+      .map((value) => String(value || "").trim().toLowerCase())
+      .find((value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) || "";
     const partnershipBreakdownCategory = (item) => item.discount === "staff" ? "Staff Tuition" : item.discount === "sibling" ? "Sibling Tuition" : item.discount === "director" ? "Director Tuition" : "Standard Tuition";
     const partnershipBreakdownStatementHtml = (record) => {
       const frozen = record.saved?.calculationSnapshot?.students;
@@ -43531,31 +43534,32 @@
       document.getElementById("partnership-breakdown-statement").innerHTML = statement;
       document.getElementById("partnership-breakdown-title").textContent = `${record.school.nickname || record.school.name} · ${partnershipBreakdownMonthLabel()}`;
       document.getElementById("partnership-breakdown-subtitle").textContent = "Review the statement and generated email before sending.";
-      const email = record.school.email || "";
-      document.getElementById("partnership-breakdown-email").innerHTML = `<h4>Generated Email</h4><label>To<input type="email" id="partnership-breakdown-recipient" value="${escapeText(email)}" readonly></label><label>Subject<input id="partnership-breakdown-subject" value="${escapeText(partnershipBreakdownMonthLabel())} Partner School Share" readonly></label><div class="partnership-breakdown-email-body">Hi ${escapeText(record.school.directorName || "Director")}!<br><br>Your <strong>${escapeText(partnershipBreakdownMonthLabel())} Partner School Share</strong> is on its way. The complete blush statement shown here will be included in the email.<br><br><strong>Partner School Share:</strong> ${payrollCurrency(record.saved?.amount || record.ready)}<br><strong>Payment Method:</strong> ${escapeText(vendorPaymentMethodLabel(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod))}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}<br><br>Warmly,<br><strong>Dance Techniques</strong></div>${email ? "" : `<p class="partnership-breakdown-error">Add an email address to this Partner School profile before sending.</p>`}`;
+      const email = partnershipBreakdownRecipientEmail(record.school);
+      document.getElementById("partnership-breakdown-email").innerHTML = `<h4>Generated Email</h4><label>To<input type="email" id="partnership-breakdown-recipient" value="${escapeText(email)}" readonly></label><label>Subject<input id="partnership-breakdown-subject" value="${escapeText(partnershipBreakdownMonthLabel())} Partner School Share" readonly></label><div class="partnership-breakdown-email-body">Hi ${escapeText(record.school.directorName || "Director")}!<br><br>Your <strong>${escapeText(partnershipBreakdownMonthLabel())} Partner School Share</strong> is on its way. The complete blush statement shown here will be included in the email.<br><br><strong>Partner School Share:</strong> ${payrollCurrency(record.saved?.amount || record.ready)}<br><strong>Payment Method:</strong> ${escapeText(vendorPaymentMethodLabel(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod))}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}<br><br>Warmly,<br><strong>Dance Techniques</strong></div>${email ? "" : `<p class="partnership-breakdown-error">Add a valid payment contact or school email before sending.</p>`}`;
       document.getElementById("send-partnership-breakdown").disabled = !email;
       overlay?.classList.add("active"); overlay?.setAttribute("aria-hidden", "false");
     };
     const sendPartnershipBreakdown = async () => {
       const record = partnershipBreakdownRecord;
       const button = document.getElementById("send-partnership-breakdown");
-      if (!record || !record.saved?.id || !record.school.email || !button) return;
+      const recipientEmail = partnershipBreakdownRecipientEmail(record?.school);
+      if (!record || !record.saved?.id || !recipientEmail || !button) return;
       button.disabled = true; button.textContent = "Sending…";
       try {
         const statementHtml = partnershipBreakdownStatementHtml(record);
         const subject = `${partnershipBreakdownMonthLabel()} Partner School Share`;
         if (document.body.dataset.tourMode === "true") {
-          record.saved.breakdownSentAt = new Date().toISOString(); record.saved.breakdownSentTo = record.school.email;
+          record.saved.breakdownSentAt = new Date().toISOString(); record.saved.breakdownSentTo = recipientEmail;
         } else {
           const { data, error } = await window.dtSupabase.functions.invoke("send-partner-school-breakdown", { body: { paymentId: record.saved.id, subject, html: partnershipBreakdownEmailHtml(record, statementHtml) } });
           if (error) throw error;
           if (!data?.ok) throw new Error(data?.message || "The breakdown could not be sent.");
           record.saved.breakdownSentAt = data.sentAt || new Date().toISOString();
-          record.saved.breakdownSentTo = data.sentTo || record.school.email;
+          record.saved.breakdownSentTo = data.sentTo || recipientEmail;
           record.saved.breakdownProviderMessageId = data.messageId || "";
         }
         closePartnershipBreakdown(); renderSchoolPartnershipPayments();
-        showToast(`${record.school.nickname || record.school.name} breakdown sent to ${record.school.email}`);
+        showToast(`${record.school.nickname || record.school.name} breakdown sent to ${recipientEmail}`);
       } catch (error) {
         console.error("Partner School Share breakdown could not be sent", error);
         showToast(error.message || "The breakdown could not be sent. Please try again.");

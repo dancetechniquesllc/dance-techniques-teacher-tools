@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v282-hispanic-heritage-frame";
+const CACHE_NAME = "my-dance-techniques-v283-partner-payment-email";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
