@@ -22165,6 +22165,10 @@
           breakdownSentAt: payment.breakdown_sent_at || "",
           breakdownSentTo: payment.breakdown_sent_to || "",
           breakdownProviderMessageId: payment.breakdown_provider_message_id || "",
+          breakdownFailedAt: payment.breakdown_failed_at || "",
+          breakdownFailedTo: payment.breakdown_failed_to || "",
+          breakdownFailureReason: payment.breakdown_failure_reason || "",
+          breakdownFailureCode: payment.breakdown_failure_code || "",
           checkReceivedAt: payment.check_received_at || "",
           calculationSnapshot: payment.calculation_snapshot || {}
         }
@@ -43528,6 +43532,7 @@
         saved.confirmationReference && ["Confirmation", saved.confirmationReference],
         saved.receiptPath && ["Receipt", "Receipt attached"],
         saved.breakdownSentAt && ["Breakdown sent", `${saved.breakdownSentTo || record.school.email || "School email"} · ${new Date(saved.breakdownSentAt).toLocaleString()}`],
+        !saved.breakdownSentAt && saved.breakdownFailedAt && ["Breakdown send failed", `${saved.breakdownFailureReason || "The email was not sent."} · ${new Date(saved.breakdownFailedAt).toLocaleString()}`],
         saved.verifiedAt && ["Verified", new Date(saved.verifiedAt).toLocaleString()]
       ].filter(Boolean);
       return rows.length ? `<div class="partnership-payment-history">${rows.map(([label, value]) => `<div class="partnership-payment-history-row"><strong>${escapeText(label)}</strong><span>${escapeText(value)}</span></div>`).join("")}</div>` : "";
@@ -43623,7 +43628,12 @@
         showToast(`${record.school.nickname || record.school.name} breakdown sent to ${recipientEmail}`);
       } catch (error) {
         console.error("Partner School Share breakdown could not be sent", error);
-        showToast(error.message || "The breakdown could not be sent. Please try again.");
+        const reason = error.message || "The breakdown could not be sent. Please try again.";
+        record.saved.breakdownFailedAt = new Date().toISOString();
+        record.saved.breakdownFailedTo = recipientEmail;
+        record.saved.breakdownFailureReason = reason;
+        renderSchoolPartnershipPayments();
+        showToast(reason);
         button.disabled = false; button.textContent = "Send Breakdown";
       }
     };
@@ -43683,6 +43693,10 @@
       breakdownSentAt: payment.breakdown_sent_at || "",
       breakdownSentTo: payment.breakdown_sent_to || "",
       breakdownProviderMessageId: payment.breakdown_provider_message_id || "",
+      breakdownFailedAt: payment.breakdown_failed_at || "",
+      breakdownFailedTo: payment.breakdown_failed_to || "",
+      breakdownFailureReason: payment.breakdown_failure_reason || "",
+      breakdownFailureCode: payment.breakdown_failure_code || "",
       checkReceivedAt: payment.check_received_at || "",
       calculationSnapshot: payment.calculation_snapshot || {}
     });
