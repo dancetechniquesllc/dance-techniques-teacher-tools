@@ -7771,19 +7771,23 @@
     .partnership-payment-detail { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .partnership-payment-detail[hidden] { display: none; }
     .partnership-payment-detail-actions { display: flex; justify-content: flex-end; gap: 8px; }
-    .partnership-breakdown-dialog { width: min(1180px, calc(100vw - 28px)); max-height: calc(100vh - 28px); overflow: auto; padding: 0; background: #fffaf8; }
+    .confirm-dialog.partnership-breakdown-dialog { width: min(1180px, calc(100vw - 28px)); max-height: calc(100vh - 28px); overflow: auto; padding: 0; border-radius: 18px; background: #fffaf8; }
     .partnership-breakdown-toolbar { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 22px; border-bottom: 1px solid var(--border); background: #fffaf8f2; backdrop-filter: blur(12px); }
     .partnership-breakdown-toolbar h3, .partnership-breakdown-toolbar p { margin: 0; }
     .partnership-breakdown-toolbar-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
     .partnership-breakdown-review { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, .55fr); gap: 20px; padding: 22px; }
     .partnership-breakdown-statement { min-width: 0; overflow: auto; border: 1px solid #d8aaa6; border-radius: 16px; background: #f2d8d4; padding: 18px; }
-    .partnership-breakdown-statement > div { min-width: 680px; }
+    .partnership-breakdown-statement::before { content: "Generated Partner School Share Statement"; display: block; margin: 0 0 12px; font-size: 16px; font-weight: 900; }
+    .partnership-breakdown-statement > article { min-width: 680px; }
     .partnership-breakdown-email { align-self: start; display: grid; gap: 14px; padding: 18px; border: 1px solid #d8aaa6; border-radius: 16px; background: white; }
     .partnership-breakdown-email h4, .partnership-breakdown-email p { margin: 0; }
     .partnership-breakdown-email label { display: grid; gap: 6px; font-weight: 800; }
     .partnership-breakdown-email-body { padding: 15px; border-radius: 12px; background: #f9ece9; line-height: 1.55; }
+    .partnership-breakdown-check-preview { margin: 18px 0; text-align: center; }
+    .partnership-breakdown-check-preview span { display: inline-block; padding: 14px 25px; border-radius: 999px; background: #111; color: #fff; font-weight: 900; letter-spacing: .05em; }
+    .partnership-breakdown-check-preview small { display: block; margin-top: 9px; color: #674f4f; line-height: 1.4; }
     .partnership-breakdown-error { color: #9d1f2f; font-weight: 800; }
-    @media (max-width: 860px) { .partnership-breakdown-review { grid-template-columns: 1fr; padding: 12px; } .partnership-breakdown-toolbar { align-items: flex-start; } }
+    @media (max-width: 860px) { .confirm-dialog.partnership-breakdown-dialog { width: calc(100vw - 12px); max-height: calc(100dvh - 12px); } .partnership-breakdown-review { grid-template-columns: 1fr; padding: 12px; } .partnership-breakdown-toolbar { align-items: flex-start; } }
     .partnership-payment-approval { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-soft); }
     .partnership-payment-approval h4, .partnership-payment-approval p { margin: 0; }
     .partnership-payment-approval-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
@@ -43489,6 +43493,9 @@
     const partnershipBreakdownRecipientEmail = (school) => [school?.vendorPaymentDestination, school?.email]
       .map((value) => String(value || "").trim().toLowerCase())
       .find((value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) || "";
+    const partnershipBreakdownCheckPreview = (record) => String(record?.saved?.paymentMethod || record?.school?.preferredVendorPaymentMethod || "") === "check"
+      ? `<div class="partnership-breakdown-check-preview"><span>CHECK RECEIVED</span><small>The secure confirmation link is added automatically when this email is sent. The school should click it only after the physical check arrives.</small></div>`
+      : "";
     const partnershipBreakdownCategory = (item) => item.discount === "staff" ? "Staff Tuition" : item.discount === "sibling" ? "Sibling Tuition" : item.discount === "director" ? "Director Tuition" : "Standard Tuition";
     const partnershipBreakdownStatementHtml = (record) => {
       const frozen = record.saved?.calculationSnapshot?.students;
@@ -43535,7 +43542,7 @@
       document.getElementById("partnership-breakdown-title").textContent = `${record.school.nickname || record.school.name} · ${partnershipBreakdownMonthLabel()}`;
       document.getElementById("partnership-breakdown-subtitle").textContent = "Review the statement and generated email before sending.";
       const email = partnershipBreakdownRecipientEmail(record.school);
-      document.getElementById("partnership-breakdown-email").innerHTML = `<h4>Generated Email</h4><label>To<input type="email" id="partnership-breakdown-recipient" value="${escapeText(email)}" readonly></label><label>Subject<input id="partnership-breakdown-subject" value="${escapeText(partnershipBreakdownMonthLabel())} Partner School Share" readonly></label><div class="partnership-breakdown-email-body">Hi ${escapeText(record.school.directorName || "Director")}!<br><br>Your <strong>${escapeText(partnershipBreakdownMonthLabel())} Partner School Share</strong> is on its way. The complete blush statement shown here will be included in the email.<br><br><strong>Partner School Share:</strong> ${payrollCurrency(record.saved?.amount || record.ready)}<br><strong>Payment Method:</strong> ${escapeText(vendorPaymentMethodLabel(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod))}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}<br><br>Warmly,<br><strong>Dance Techniques</strong></div>${email ? "" : `<p class="partnership-breakdown-error">Add a valid payment contact or school email before sending.</p>`}`;
+      document.getElementById("partnership-breakdown-email").innerHTML = `<h4>Generated Email</h4><label>To<input type="email" id="partnership-breakdown-recipient" value="${escapeText(email)}" readonly></label><label>Subject<input id="partnership-breakdown-subject" value="${escapeText(partnershipBreakdownMonthLabel())} Partner School Share" readonly></label><div class="partnership-breakdown-email-body">Hi ${escapeText(record.school.directorName || "Director")}!<br><br>Your <strong>${escapeText(partnershipBreakdownMonthLabel())} Partner School Share</strong> is on its way. The complete blush statement shown beside this preview will be included in the email.<br><br><strong>Partner School Share:</strong> ${payrollCurrency(record.saved?.amount || record.ready)}<br><strong>Payment Method:</strong> ${escapeText(vendorPaymentMethodLabel(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod))}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}<br>${partnershipBreakdownCheckPreview(record)}<br>Warmly,<br><strong>Dance Techniques</strong></div>${email ? "" : `<p class="partnership-breakdown-error">Add a valid payment contact or school email before sending.</p>`}`;
       document.getElementById("send-partnership-breakdown").disabled = !email;
       overlay?.classList.add("active"); overlay?.setAttribute("aria-hidden", "false");
     };
