@@ -43617,7 +43617,7 @@
         if (document.body.dataset.tourMode === "true") {
           record.saved.breakdownSentAt = new Date().toISOString(); record.saved.breakdownSentTo = recipientEmail;
         } else {
-          const { data, error } = await window.dtSupabase.functions.invoke("send-partner-school-breakdown", { body: { paymentId: record.saved.id, partnerSchoolId: record.school.id, paymentMonth: schoolPartnershipPaymentState.month, subject, html: partnershipBreakdownEmailHtml(record, statementHtml) } });
+          const { data, error } = await window.dtSupabase.functions.invoke("send-partner-school-breakdown", { body: { paymentId: record.saved.id, partnerSchoolId: record.school.id, paymentMonth: schoolPartnershipPaymentState.month, confirmationReference: record.saved.confirmationReference, subject, html: partnershipBreakdownEmailHtml(record, statementHtml) } });
           if (error) throw new Error(await partnershipBreakdownErrorMessage(error));
           if (!data?.ok) throw new Error(data?.message || "The breakdown could not be sent.");
           record.saved.breakdownSentAt = data.sentAt || new Date().toISOString();

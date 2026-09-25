@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v290-breakdown-failure-audit";
+const CACHE_NAME = "my-dance-techniques-v291-breakdown-payment-resolution";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
