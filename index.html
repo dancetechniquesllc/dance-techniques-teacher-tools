@@ -17074,7 +17074,7 @@
                   <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="boutique-order-search,boutique-order-status-filter,boutique-order-day-filter,boutique-order-school-filter,boutique-order-teacher-filter,boutique-order-size-filter">Reset Filter</button></div>
                   <div class="boutique-kit-actions">
                     <strong id="boutique-order-visible-count">0 orders</strong>
-                    <span class="boutique-kit-action-group"><button class="secondary boutique-quantity-button" type="button" id="boutique-order-quantities">Pull Stock</button><button class="secondary" type="button" id="boutique-order-select-visible">Select All</button><button class="secondary" type="button" id="boutique-order-clear-selection">Clear Selection</button><button type="button" id="boutique-order-advance-selected">Mark Filled</button></span>
+                    <span class="boutique-kit-action-group"><button class="secondary boutique-quantity-button" type="button" id="boutique-order-quantities">Pull Stock</button><button class="secondary" type="button" id="boutique-order-select-visible">Select All</button><button class="secondary" type="button" id="boutique-order-clear-selection">Clear Selection</button><button class="secondary" type="button" id="boutique-order-print-labels" disabled>Print Labels</button><button type="button" id="boutique-order-advance-selected">Mark Filled</button></span>
                   </div>
                   <div class="boutique-kit-list boutique-order-card-grid" id="director-boutique-order-list"><div class="boutique-kit-empty">Opening Wix orders…</div></div>
                 </div>
@@ -35079,6 +35079,12 @@
         advanceButton.disabled = !nextStatus || !selected.length;
         advanceButton.textContent = currentStatus === "unassigned" ? "Assign Students First" : nextStatus ? `${boutiqueStatusLabel(nextStatus)}${selected.length ? ` (${selected.length})` : ""}` : "Workflow Complete";
       }
+      const printButton = document.getElementById("boutique-order-print-labels");
+      if (printButton) {
+        const printableSelected = selected.filter((order) => boutiqueLabelItems(order).length);
+        printButton.disabled = !printableSelected.length;
+        printButton.textContent = printableSelected.length ? `Print Labels (${printableSelected.length})` : "Print Labels";
+      }
     };
 
     const teacherBoutiqueOrders = () => boutiqueOrders.filter((order) => {
@@ -35707,6 +35713,16 @@
     document.getElementById("boutique-order-clear-selection")?.addEventListener("click", () => {
       selectedBoutiqueOrderIds.clear();
       renderDirectorBoutiqueOrders();
+    });
+    document.getElementById("boutique-order-print-labels")?.addEventListener("click", () => {
+      const orders = boutiqueOrders.filter((order) => selectedBoutiqueOrderIds.has(order.id) && boutiqueLabelItems(order).length);
+      if (!orders.length) return showToast("Select at least one boutique order to print.");
+      const printWindow = window.open("", "dt-boutique-labels");
+      if (!printWindow) return showToast("Allow pop-ups so the printer window can open.");
+      printWindow.opener = null;
+      printWindow.document.open();
+      printWindow.document.write(boutiqueLabelDocument(orders));
+      printWindow.document.close();
     });
     document.getElementById("boutique-order-advance-selected")?.addEventListener("click", async () => {
       const currentStatus = document.getElementById("boutique-order-status-filter")?.value || "to_fill";
