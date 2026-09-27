@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v296-class-weekday-bubbles";
+const CACHE_NAME = "my-dance-techniques-v297-class-weekday-anomalies";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
