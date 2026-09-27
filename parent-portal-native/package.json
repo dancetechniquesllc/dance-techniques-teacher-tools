@@ -1,0 +1,21 @@
+{
+  "name": "dance-techniques-parent-portal-native",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Native iOS and Android shell for the Dance Techniques Parent Portal.",
+  "scripts": {
+    "prepare:web": "node scripts/prepare-web.mjs",
+    "sync": "pnpm prepare:web && cap sync",
+    "open:ios": "pnpm sync && cap open ios",
+    "open:android": "pnpm sync && cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/ios": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  },
+  "packageManager": "pnpm@11.19.0"
+}

@@ -1,0 +1,13 @@
+{
+  "appId": "com.dancetechniques.parentportal",
+  "appName": "My Dance Techniques",
+  "webDir": "www",
+  "backgroundColor": "#fffaf6",
+  "ios": {
+    "contentInset": "automatic",
+    "backgroundColor": "#fffaf6"
+  },
+  "android": {
+    "backgroundColor": "#fffaf6"
+  }
+}
