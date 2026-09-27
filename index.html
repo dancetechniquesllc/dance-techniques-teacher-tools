@@ -31301,6 +31301,10 @@
         return;
       }
       profileTeacher = teacher;
+      document.body.dataset.teacherToolsViewer = "true";
+      document.body.dataset.mode = "teacher";
+      document.body.dataset.currentTeacherId = teacher.id;
+      document.querySelectorAll("[data-mode-btn]").forEach((item) => item.classList.toggle("active", item.dataset.modeBtn === "teacher"));
       syncTeachingTeamSchools();
       syncPersonalForm();
       renderProfileHero();
@@ -31314,9 +31318,6 @@
       renderPayDateOptions();
       renderPayArchive();
       renderTeacherMessages();
-      document.body.dataset.teacherToolsViewer = "true";
-      document.body.dataset.mode = "teacher";
-      document.querySelectorAll("[data-mode-btn]").forEach((item) => item.classList.toggle("active", item.dataset.modeBtn === "teacher"));
       setTab("today");
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
@@ -31324,6 +31325,7 @@
     const closeTeacherToolsViewer = () => {
       delete document.body.dataset.teacherToolsViewer;
       document.body.dataset.mode = "admin";
+      document.body.dataset.currentTeacherId = window.dtCurrentProfile?.id || "";
       document.body.dataset.adminPage = "home";
       document.body.dataset.adminSection = "teacher-profiles";
       document.querySelectorAll("[data-mode-btn]").forEach((item) => item.classList.toggle("active", item.dataset.modeBtn === "admin"));
