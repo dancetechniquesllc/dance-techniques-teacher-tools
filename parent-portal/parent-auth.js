@@ -18,6 +18,7 @@
   let pendingPhone = "";
   let phoneSetupPurpose = "first";
   const parentVapidPublicKey = "BFgsYSQnkEQ8aUqbeweRXsPaaccqTz5hFGjzh3ybTOTxybs8ZLfHuQcPhQhMEpq7tCekPQjubaEFWsuasMgK5yI";
+  let nativePushListenersReady = false;
   const urlBase64ToBytes = (value) => Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=")), (character) => character.charCodeAt(0));
   const ordinalDate = (day) => { const lastTwo = day % 100; return `${day}${lastTwo >= 11 && lastTwo <= 13 ? "th" : day % 10 === 1 ? "st" : day % 10 === 2 ? "nd" : day % 10 === 3 ? "rd" : "th"}`; };
 
@@ -44,6 +45,12 @@
   };
 
   const syncExistingParentPush = async () => {
+    const nativePush = window.Capacitor?.Plugins?.PushNotifications;
+    if (window.Capacitor?.isNativePlatform?.() && nativePush) {
+      const permission = await nativePush.checkPermissions();
+      if (permission.receive === "granted") await registerNativeParentPush();
+      return permission.receive === "granted";
+    }
     if (!client || typeof Notification === "undefined" || Notification.permission !== "granted" || !("serviceWorker" in navigator) || !("PushManager" in window)) return false;
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.getSubscription();
@@ -63,10 +70,51 @@
     return true;
   };
 
+  const saveNativePushToken = async (token) => {
+    const { data: { user } } = await client.auth.getUser();
+    const platform = window.Capacitor?.getPlatform?.();
+    if (!user?.id || !token || !["ios", "android"].includes(platform)) return false;
+    const { error } = await client.from("parent_native_push_tokens").upsert({
+      user_id: user.id,
+      token,
+      platform,
+      active: true,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "user_id,token" });
+    if (error) throw error;
+    return true;
+  };
+
+  const registerNativeParentPush = async () => {
+    const nativePush = window.Capacitor?.Plugins?.PushNotifications;
+    if (!nativePush) return false;
+    if (!nativePushListenersReady) {
+      nativePushListenersReady = true;
+      await nativePush.addListener("registration", ({ value }) => saveNativePushToken(value).catch(console.error));
+      await nativePush.addListener("registrationError", (error) => console.error("Native push registration failed.", error));
+      await nativePush.addListener("pushNotificationActionPerformed", ({ notification }) => {
+        const destination = notification?.data?.url;
+        if (destination) window.location.assign(destination);
+      });
+    }
+    await nativePush.register();
+    return true;
+  };
+
   const enableParentPush = async (trigger) => {
-    if (!client || !("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined") return;
+    if (!client) return;
     const original = trigger.querySelector("small")?.textContent || "";
     try {
+      const nativePush = window.Capacitor?.Plugins?.PushNotifications;
+      if (window.Capacitor?.isNativePlatform?.() && nativePush) {
+        let permission = await nativePush.checkPermissions();
+        if (permission.receive === "prompt" || permission.receive === "prompt-with-rationale") permission = await nativePush.requestPermissions();
+        if (permission.receive !== "granted") throw new Error("Notifications were not allowed on this device.");
+        await registerNativeParentPush();
+        completeChecklistItem(trigger, "Complete — native Parent Portal notifications are active on this device.");
+        return;
+      }
+      if (!("serviceWorker" in navigator) || !("PushManager" in window) || typeof Notification === "undefined") throw new Error("Notifications are not available on this device.");
       const permission = await Notification.requestPermission();
       if (permission !== "granted") throw new Error("Notifications were not allowed on this device.");
       const registration = await navigator.serviceWorker.ready;
@@ -739,7 +787,7 @@
         <h3 id="family-dancers-title">My Dancers</h3>
         <div class="family-dancer-grid"></div>
       </section>
-      <div class="profile-list"><button type="button" id="open-withdrawal-request">Request Withdrawal or School Change <span>›</span></button><button type="button" id="pp-sign-out">Sign Out <span>›</span></button></div>`;
+      <div class="profile-list"><button type="button" id="open-withdrawal-request">Request Withdrawal or School Change <span>›</span></button><button type="button" id="pp-delete-account">Delete My Parent Portal Account <span>›</span></button><button type="button" id="pp-sign-out">Sign Out <span>›</span></button></div>`;
     profileCard.querySelector("h2").textContent = guardian.full_name || [guardian.first_name, guardian.last_name].filter(Boolean).join(" ") || "Parent Portal Family";
     profileCard.querySelector("p").textContent = `Authorized family access for ${students.map(dancerName).join(" and ")}.`;
     const dancerGrid = profileCard.querySelector(".family-dancer-grid");
@@ -767,6 +815,36 @@
     document.getElementById("pp-sign-out").addEventListener("click", async () => {
       await client.auth.signOut();
       window.location.assign("/parent-portal/");
+    });
+    document.getElementById("pp-delete-account").addEventListener("click", () => {
+      const dialog = document.getElementById("family-dialog");
+      const title = document.getElementById("family-dialog-title");
+      const content = document.getElementById("family-dialog-content");
+      title.textContent = "Delete Parent Portal Account";
+      content.innerHTML = `<form class="family-preview-form" id="parent-account-deletion-form"><p class="family-preview-note wide">This permanently removes your Parent Portal login and immediately signs you out. Dance Techniques will complete removal of your account data within 7 days. Financial, enrollment, or safety records will be retained only when legally or operationally required.</p><label class="wide">Type DELETE to confirm<input id="parent-account-deletion-confirmation" autocomplete="off" required></label><p class="family-preview-note wide" id="parent-account-deletion-status" role="status" aria-live="polite"></p><button class="berry-button family-preview-submit wide" type="submit">Permanently Delete My Account</button></form>`;
+      dialog.showModal();
+      document.getElementById("parent-account-deletion-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const confirmation = document.getElementById("parent-account-deletion-confirmation");
+        const status = document.getElementById("parent-account-deletion-status");
+        const submit = event.currentTarget.querySelector("button[type=submit]");
+        if (confirmation.value.trim().toUpperCase() !== "DELETE") {
+          status.textContent = "Type DELETE exactly to confirm permanent account deletion.";
+          return;
+        }
+        submit.disabled = true;
+        submit.textContent = "Deleting…";
+        const { error } = await client.functions.invoke("delete-parent-account", { body: { confirmation: "DELETE" } });
+        if (error) {
+          status.textContent = error.message || "Your account could not be deleted. Please try again.";
+          submit.disabled = false;
+          submit.textContent = "Permanently Delete My Account";
+          return;
+        }
+        await client.auth.signOut({ scope: "local" });
+        dialog.close();
+        await stopSession("Your Parent Portal account has been deleted. Contact Dance Techniques if you need help with retained enrollment or payment records.");
+      });
     });
   };
 
