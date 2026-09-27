@@ -15,6 +15,8 @@
   let client = null;
   let openingSession = false;
   let activeSetupAccessToken = "";
+  let pendingPhone = "";
+  let phoneSetupPurpose = "first";
   const parentVapidPublicKey = "BFgsYSQnkEQ8aUqbeweRXsPaaccqTz5hFGjzh3ybTOTxybs8ZLfHuQcPhQhMEpq7tCekPQjubaEFWsuasMgK5yI";
   const urlBase64ToBytes = (value) => Uint8Array.from(atob(value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=")), (character) => character.charCodeAt(0));
   const ordinalDate = (day) => { const lastTwo = day % 100; return `${day}${lastTwo >= 11 && lastTwo <= 13 ? "th" : day % 10 === 1 ? "st" : day % 10 === 2 ? "nd" : day % 10 === 3 ? "rd" : "th"}`; };
@@ -1199,10 +1201,55 @@
 
   const friendlyLoginError = (error) => {
     const copy = String(error?.message || "").toLowerCase();
-    if (copy.includes("invalid login credentials")) return "That email or password doesn’t match an invited Parent Portal account.";
-    if (copy.includes("email not confirmed")) return "Open the secure invitation from Dance Techniques before logging in.";
+    if (copy.includes("invalid login credentials")) return "That cell number or password doesn’t match an approved Parent Portal account.";
+    if (copy.includes("phone provider") || copy.includes("sms provider")) return "Text verification is not available yet. Please contact Dance Techniques.";
+    if (copy.includes("rate limit")) return "Please wait a minute before requesting another text code.";
     if (copy.includes("failed to fetch")) return "We couldn’t reach the secure portal. Check your connection and try again.";
     return "The Parent Portal couldn’t sign in. Please try again or contact Dance Techniques for a new secure invitation.";
+  };
+
+  const normalizeUsPhone = (value) => {
+    const raw = String(value || "").trim();
+    const digits = raw.replace(/\D/g, "");
+    if (digits.length === 10) return `+1${digits}`;
+    if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+    if (raw.startsWith("+") && digits.length >= 8 && digits.length <= 15) return `+${digits}`;
+    return "";
+  };
+
+  const maskedPhone = (phone) => {
+    const digits = String(phone || "").replace(/\D/g, "");
+    const local = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+    return local.length === 10 ? `(***) ***-${local.slice(-4)}` : "your cell phone";
+  };
+
+  const resetPhoneVerification = () => {
+    pendingPhone = "";
+    const codeField = document.getElementById("pp-code-field");
+    const codeInput = document.getElementById("pp-verify-code");
+    const submit = document.getElementById("pp-phone-code-submit");
+    const message = document.getElementById("pp-phone-code-message");
+    if (codeField) codeField.hidden = true;
+    if (codeInput) { codeInput.value = ""; codeInput.required = false; }
+    if (submit) submit.textContent = "Text Me a Code";
+    if (message) message.textContent = "";
+  };
+
+  const showPhoneVerification = (purpose = "first") => {
+    phoneSetupPurpose = purpose === "recovery" ? "recovery" : "first";
+    resetPhoneVerification();
+    const loginForm = document.getElementById("pp-login-form");
+    const codeForm = document.getElementById("pp-phone-code-form");
+    const phoneInput = document.getElementById("pp-verify-phone");
+    const loginPhone = document.getElementById("pp-login-phone")?.value || "";
+    const copy = document.getElementById("pp-phone-code-copy");
+    document.getElementById("pp-auth-login").dataset.phoneSetup = "true";
+    if (loginForm) loginForm.hidden = true;
+    if (codeForm) codeForm.hidden = false;
+    if (copy) copy.textContent = phoneSetupPurpose === "recovery"
+      ? "Verify the cell number connected to your family, then create a new password."
+      : "Verify the cell number connected to your family, then create your Parent Portal password.";
+    if (phoneInput) { phoneInput.value = loginPhone; phoneInput.disabled = false; phoneInput.focus(); }
   };
 
   const initialize = async () => {
@@ -1251,10 +1298,14 @@
     submit.disabled = true;
     submit.textContent = "Opening…";
     message.textContent = "";
-    const { data, error } = await client.auth.signInWithPassword({
-      email: document.getElementById("pp-login-email").value.trim(),
-      password: document.getElementById("pp-login-password").value
-    });
+    const phone = normalizeUsPhone(document.getElementById("pp-login-phone").value);
+    if (!phone) {
+      submit.disabled = false;
+      submit.textContent = "Log In";
+      message.textContent = "Enter a complete cell phone number, including area code.";
+      return;
+    }
+    const { data, error } = await client.auth.signInWithPassword({ phone, password: document.getElementById("pp-login-password").value });
     submit.disabled = false;
     submit.textContent = "Log In";
     if (error || !data.session) {
@@ -1262,6 +1313,57 @@
       return;
     }
     await openFamilyPortal();
+  });
+
+  document.querySelectorAll("[data-start-phone-setup]").forEach((button) => button.addEventListener("click", () => showPhoneVerification(button.dataset.startPhoneSetup)));
+  document.getElementById("pp-phone-code-back")?.addEventListener("click", () => {
+    resetPhoneVerification();
+    delete document.getElementById("pp-auth-login").dataset.phoneSetup;
+    document.getElementById("pp-phone-code-form").hidden = true;
+    document.getElementById("pp-login-form").hidden = false;
+    document.getElementById("pp-login-phone")?.focus();
+  });
+  document.getElementById("pp-phone-code-form")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const phoneInput = document.getElementById("pp-verify-phone");
+    const codeInput = document.getElementById("pp-verify-code");
+    const codeField = document.getElementById("pp-code-field");
+    const submit = document.getElementById("pp-phone-code-submit");
+    const message = document.getElementById("pp-phone-code-message");
+    submit.disabled = true;
+    message.textContent = "";
+    try {
+      if (!pendingPhone) {
+        const phone = normalizeUsPhone(phoneInput.value);
+        if (!phone) throw new Error("Enter a complete cell phone number, including area code.");
+        const { error } = await client.auth.signInWithOtp({ phone, options: { shouldCreateUser: false } });
+        if (error) throw error;
+        pendingPhone = phone;
+        phoneInput.disabled = true;
+        codeField.hidden = false;
+        codeInput.required = true;
+        submit.textContent = "Verify Code";
+        message.textContent = `A 6-digit code was sent to ${maskedPhone(phone)}.`;
+        codeInput.focus();
+        return;
+      }
+      const token = codeInput.value.replace(/\D/g, "");
+      if (token.length !== 6) throw new Error("Enter the complete 6-digit verification code.");
+      const { data, error } = await client.auth.verifyOtp({ phone: pendingPhone, token, type: "sms" });
+      if (error || !data?.session) throw error || new Error("That verification code could not be confirmed.");
+      activeSetupAccessToken = data.session.access_token || "";
+      document.getElementById("pp-auth-setup").querySelector("h2").textContent = phoneSetupPurpose === "recovery" ? "Create a New Password" : "Create Your Password";
+      document.getElementById("pp-auth-setup").querySelector(".pp-auth-copy").textContent = phoneSetupPurpose === "recovery"
+        ? "Your cell number is verified. Create the new password you’ll use with your phone number."
+        : "Your cell number is verified and connected to your family. Create the password you’ll use when returning to the Parent Portal.";
+      showView("setup");
+      document.getElementById("pp-setup-password")?.focus();
+    } catch (error) {
+      message.textContent = friendlyLoginError(error) || error?.message || "The verification code could not be confirmed.";
+      if (/complete cell|6-digit/i.test(error?.message || "")) message.textContent = error.message;
+    } finally {
+      submit.disabled = false;
+    }
   });
 
   document.getElementById("pp-setup-form").addEventListener("submit", async (event) => {
