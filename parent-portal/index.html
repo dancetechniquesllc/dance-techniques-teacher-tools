@@ -311,6 +311,7 @@
     .sandbox-checkout-button:hover{background:var(--brick-deep)}
     .sandbox-checkout-button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
     .calendar-event-time{grid-row:4}
+    .pp-sms-consent{display:grid!important;grid-template-columns:auto 1fr;align-items:start;gap:9px!important;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#fffaf6;color:var(--muted)!important;font-size:11px!important;font-weight:650!important;line-height:1.42}.pp-sms-consent input{width:18px!important;min-height:18px!important;margin:1px 0 0;accent-color:var(--brick)}.pp-sms-consent a{color:var(--brick);font-weight:800}
   </style>
 </head>
 <body>
@@ -334,6 +335,7 @@
         <form class="pp-auth-form" id="pp-phone-code-form" hidden>
           <p class="pp-auth-copy" id="pp-phone-code-copy">Enter the cell number connected to your Dance Techniques family.</p>
           <label>Cell Phone Number<span class="pp-input-wrap"><svg class="pp-input-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"></path><path d="M9 6h6M11 18h2"></path></svg><input id="pp-verify-phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(214) 555-1234" required></span></label>
+          <label class="pp-sms-consent"><input id="pp-sms-consent" type="checkbox" required><span>By checking this box and selecting “Text Me a Code,” I agree to receive an automated one-time verification text from Dance Techniques LLC at the number entered. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase. See our <a href="../privacy-policy/" target="_blank" rel="noopener">Privacy Policy</a> and <a href="../terms-and-conditions/" target="_blank" rel="noopener">Terms &amp; Conditions</a>.</span></label>
           <label id="pp-code-field" hidden>Text Verification Code<span class="pp-input-wrap"><svg class="pp-input-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m4 7 8 6 8-6"></path></svg><input id="pp-verify-code" type="text" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit code"></span></label>
           <p class="pp-auth-message" id="pp-phone-code-message" role="status" aria-live="polite"></p>
           <button class="berry-button" id="pp-phone-code-submit" type="submit">Text Me a Code</button>
