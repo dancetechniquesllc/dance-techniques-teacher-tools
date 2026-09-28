@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "414148809111",
+    "project_id": "dance-techniques-parent-portal",
+    "storage_bucket": "dance-techniques-parent-portal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:414148809111:android:bd078a1824b4346a5474d2",
+        "android_client_info": {
+          "package_name": "com.dancetechniques.parentportal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4a6_LYWHnUSkLPvxYaCuTAHHvIGhqGWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
