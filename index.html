@@ -22654,6 +22654,37 @@
       // profile already contains useful information.
     };
 
+    const saveSharedStudentPhoto = async (student, studentId) => {
+      if (!student.photo?.startsWith("data:image/")) return true;
+      const previousPhotoPath = student.photoPath || "";
+      const photoPath = `${studentId}/${Date.now()}.jpg`;
+      let photoBlob;
+      try {
+        photoBlob = await fetch(student.photo).then((response) => response.blob());
+      } catch (error) {
+        return sharedRosterError("The dancer photo could not be prepared for saving.", error);
+      }
+      const upload = await window.dtSupabase.storage.from("student-photos").upload(photoPath, photoBlob, { contentType: "image/jpeg", upsert: false });
+      if (upload.error) return sharedRosterError("The dancer details were shared, but the photo was not uploaded.", upload.error);
+      const photoUpdate = await window.dtSupabase.from("students").update({ photo_path: photoPath }).eq("id", studentId).select("id, photo_path").maybeSingle();
+      if (photoUpdate.error || photoUpdate.data?.photo_path !== photoPath) {
+        return sharedRosterError("The photo uploaded, but could not be attached to the dancer.", photoUpdate.error || new Error("The dancer photo link was not verified."));
+      }
+      const signed = await window.dtSupabase.storage.from("student-photos").createSignedUrl(photoPath, 3600);
+      const savedPhoto = signed.data?.signedUrl || student.photo;
+      rosterClasses.forEach((item) => item.students.forEach((record) => {
+        if (String(record.id) !== String(studentId)) return;
+        record.photoPath = photoPath;
+        record.photo = savedPhoto;
+      }));
+      student.photoPath = photoPath;
+      student.photo = savedPhoto;
+      if (previousPhotoPath && previousPhotoPath !== photoPath) {
+        void window.dtSupabase.storage.from("student-photos").remove([previousPhotoPath]);
+      }
+      return true;
+    };
+
     const saveSharedStudent = async (student, rosterClass) => {
       await syncStudentToEnrollmentIntake(student, rosterClass);
       if (document.body.dataset.tourMode === "true") return true;
@@ -22707,15 +22738,7 @@
         const noteResult = await noteQuery.select("id").single();
         if (!noteResult.error) student.noteId = noteResult.data.id;
       }
-      if (student.photo?.startsWith("data:image/")) {
-        const photoPath = `${studentId}/${Date.now()}.jpg`;
-        const photoBlob = await fetch(student.photo).then((response) => response.blob());
-        const upload = await window.dtSupabase.storage.from("student-photos").upload(photoPath, photoBlob, { contentType: "image/jpeg", upsert: false });
-        if (upload.error) return sharedRosterError("The dancer details were shared, but the photo was not uploaded.", upload.error);
-        const photoUpdate = await window.dtSupabase.from("students").update({ photo_path: photoPath }).eq("id", studentId);
-        if (photoUpdate.error) return sharedRosterError("The photo uploaded, but could not be attached to the dancer.", photoUpdate.error);
-        student.photoPath = photoPath;
-      }
+      if (!(await saveSharedStudentPhoto(student, studentId))) return false;
       return true;
     };
 
@@ -38095,7 +38118,8 @@
         try {
           student.photo = await openProfilePhotoCropper(file);
           scheduleAppDataSave();
-          await saveSharedStudent(student, rosterClass);
+          const saved = await saveSharedStudent(student, rosterClass);
+          if (!saved) return;
           renderTeacherRosters();
           renderStudentLibrary();
           renderClassesAndRosters();
