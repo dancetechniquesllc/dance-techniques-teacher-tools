@@ -21909,7 +21909,7 @@
       if (document.body.dataset.tourMode === "true") { renderEnrollmentQueue(); return; }
       if (!window.dtSupabase || !["admin", "director"].includes(profile?.role)) return;
       setEnrollmentQueueState("loading", "Opening new enrollments…", "Checking the secure Jotform intake queue.");
-      const { data, error } = await window.dtSupabase.from("enrollments").select(enrollmentQueueColumns).neq("status", "archived").order("created_at", { ascending: false }).limit(100);
+      const { data, error } = await window.dtSupabase.from("enrollments").select(enrollmentQueueColumns).neq("status", "archived").order("created_at", { ascending: false }).limit(1000);
       if (error) {
         console.error("Enrollment intake queue could not load", error);
         setEnrollmentQueueState("error", "New enrollments could not be opened", "Refresh the page or try again in a moment.");
