@@ -8608,6 +8608,13 @@
     .roster-class-student .roster-student-photo { width: 46px; height: 46px; font-size: 12px; }
     .roster-class-student span:last-child { max-width: 100%; overflow: hidden; color: var(--fg); font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
     .roster-class-no-students { grid-column: 1 / -1; color: var(--muted); font-size: 10px; }
+    .roster-recital-planning { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 8px; padding: 9px 10px 10px; border: 1px solid color-mix(in srgb, var(--berry) 18%, transparent); border-radius: 15px; color: var(--fg); }
+    .roster-recital-planning > strong { grid-column: 1 / -1; color: var(--berry); font-size: 11px; line-height: 1.15; }
+    .roster-recital-planning > span { display: grid; gap: 1px; font-size: 9px; font-weight: 750; line-height: 1.15; }
+    .roster-recital-planning > span strong { color: inherit; font-size: 13px; }
+    .roster-recital-planning.is-ballet { background: var(--blush); }
+    .roster-recital-planning.is-tap { background: var(--sage); }
+    .roster-recital-planning.is-either { background: color-mix(in srgb, var(--gold) 54%, white); }
     .roster-enrollment-bubble { display: inline-flex !important; width: fit-content; margin-top: 8px !important; padding: 5px 9px; border-radius: 999px; font-weight: 850; color: oklch(28% 0.04 40) !important; }
     .roster-enrollment-bubble.low { background: oklch(91% 0.12 90); }
     .roster-enrollment-bubble.ready { background: oklch(88% 0.11 145); }
@@ -41490,6 +41497,22 @@
         const assignedTeacher = teachers.find((teacher) => teacher.id === item.teacherId);
         const enrolledStudents = rosterEnrolled(item);
         const enrolled = enrolledStudents.length;
+        const recitalNeeds = enrolledStudents.reduce((counts, student) => {
+          const intakeRecord = enrollmentIntakeQueue.find((entry) => (
+            (entry.placed_student_id && String(entry.placed_student_id) === String(student.id))
+            || (entry.placed_class_enrollment_id && student.enrollmentId && String(entry.placed_class_enrollment_id) === String(student.enrollmentId))
+          ));
+          const lastYearSelection = String(student.requestedDanceStyle || student.requested_dance_style || intakeRecord?.requested_dance_style || "").trim().toLowerCase();
+          if (lastYearSelection === "tap") counts.ballet += 1;
+          else if (lastYearSelection === "ballet") counts.tap += 1;
+          else counts.either += 1;
+          return counts;
+        }, { ballet: 0, tap: 0, either: 0 });
+        const recitalTheme = recitalNeeds.ballet > recitalNeeds.tap && recitalNeeds.ballet > recitalNeeds.either
+          ? "ballet"
+          : recitalNeeds.tap > recitalNeeds.ballet && recitalNeeds.tap > recitalNeeds.either
+            ? "tap"
+            : "either";
         const datedStudents = enrolledStudents.filter((student) => student.birthdate).sort((left, right) => right.birthdate.localeCompare(left.birthdate));
         const ageRange = datedStudents.length
           ? `${rosterAge(datedStudents[0].birthdate)} – ${rosterAge(datedStudents[datedStudents.length - 1].birthdate)}`
@@ -41512,6 +41535,12 @@
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
             <span>${rosterSafe(`${rosterStudentFirstName(student)}${firstNameCounts.get(rosterStudentFirstName(student).trim().toLowerCase()) > 1 && student.lastName ? ` ${student.lastName.trim().charAt(0).toUpperCase()}.` : ""}`)}</span>
           </span>`).join("") : `<span class="roster-class-no-students">No enrolled dancers yet</span>`}</span>
+          <span class="roster-recital-planning is-${recitalTheme}" aria-label="Recital planning: ${recitalNeeds.ballet} need Ballet, ${recitalNeeds.tap} need Tap, and ${recitalNeeds.either} can perform either">
+            <strong>Needs to Perform</strong>
+            <span>Ballet<strong>${recitalNeeds.ballet}</strong></span>
+            <span>Tap<strong>${recitalNeeds.tap}</strong></span>
+            <span>Either<strong>${recitalNeeds.either}</strong></span>
+          </span>
         </button>`;
       };
       if (list) {
