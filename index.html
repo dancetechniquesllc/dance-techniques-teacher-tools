@@ -8608,10 +8608,10 @@
     .roster-class-student .roster-student-photo { width: 46px; height: 46px; font-size: 12px; }
     .roster-class-student span:last-child { max-width: 100%; overflow: hidden; color: var(--fg); font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
     .roster-class-no-students { grid-column: 1 / -1; color: var(--muted); font-size: 10px; }
-    .roster-recital-planning { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-top: 8px; padding: 9px 10px 10px; border: 1px solid color-mix(in srgb, var(--berry) 18%, transparent); border-radius: 15px; color: var(--fg); }
-    .roster-recital-planning > strong { grid-column: 1 / -1; color: var(--berry); font-size: 11px; line-height: 1.15; }
-    .roster-recital-planning > span { display: grid; gap: 1px; font-size: 9px; font-weight: 750; line-height: 1.15; }
-    .roster-recital-planning > span strong { color: inherit; font-size: 13px; }
+    .roster-recital-planning { width: 100%; display: flex; align-items: center; gap: 5px; margin-top: 7px; padding: 6px 7px; border: 1px solid color-mix(in srgb, var(--berry) 15%, transparent); border-radius: 999px; color: var(--fg); }
+    .roster-recital-planning > strong { flex: 1 1 auto; min-width: 0; color: var(--berry); font-size: 9px; line-height: 1.05; text-align: left; }
+    .roster-recital-need { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 3px; padding: 4px 6px; border-radius: 999px; background: rgb(255 255 255 / .48); font-size: 8px; font-weight: 750; line-height: 1; white-space: nowrap; }
+    .roster-recital-need strong { color: inherit; font-size: 10px; }
     .roster-recital-planning.is-ballet { background: var(--blush); }
     .roster-recital-planning.is-tap { background: var(--sage); }
     .roster-recital-planning.is-either { background: color-mix(in srgb, var(--gold) 54%, white); }
@@ -41537,9 +41537,9 @@
           </span>`).join("") : `<span class="roster-class-no-students">No enrolled dancers yet</span>`}</span>
           <span class="roster-recital-planning is-${recitalTheme}" aria-label="Recital planning: ${recitalNeeds.ballet} need Ballet, ${recitalNeeds.tap} need Tap, and ${recitalNeeds.either} can perform either">
             <strong>Needs to Perform</strong>
-            <span>Ballet<strong>${recitalNeeds.ballet}</strong></span>
-            <span>Tap<strong>${recitalNeeds.tap}</strong></span>
-            <span>Either<strong>${recitalNeeds.either}</strong></span>
+            <span class="roster-recital-need">Ballet <strong>${recitalNeeds.ballet}</strong></span>
+            <span class="roster-recital-need">Tap <strong>${recitalNeeds.tap}</strong></span>
+            <span class="roster-recital-need">Either <strong>${recitalNeeds.either}</strong></span>
           </span>
         </button>`;
       };
