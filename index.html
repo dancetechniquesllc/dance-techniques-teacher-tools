@@ -23906,15 +23906,19 @@
       return adjustedSchoolEventsForOverrides(school, profileSchool, schoolEvents).flatMap(({ week, curriculum, date, scheduledDate, effectiveDate }) => {
         const hasCurriculum = Boolean(week && curriculum);
         const schoolClasses = rescheduleRosterClassesForEvent({ school: school.school });
-        const hasClassChanges = rescheduleOverridesForTeacher().some((item) => item.classId &&
-          enrollmentSchoolNameMatches(item.schoolName, school.school) && item.originalDate === scheduledDate);
         const groups = new Map();
-        const occurrences = hasClassChanges && schoolClasses.length ? schoolClasses : [null];
+        const occurrences = schoolClasses.length ? schoolClasses : [null];
         occurrences.forEach((rosterClass) => {
         const override = rescheduleOverrideFor(school.school, scheduledDate, week, curriculum, rosterClass?.id || "");
         if (override && rescheduleActionFor(override) !== "reschedule_now") return;
-        const eventDate = override?.newDate || effectiveDate;
-        const eventTimeBlock = override?.timeBlock || profileSchool?.timeBlock || school.timeBlock || "AM";
+        let classDate = effectiveDate;
+        if (rosterClass?.scheduleDay !== "" && rosterClass?.scheduleDay != null) {
+          const date = new Date(`${effectiveDate}T12:00:00`);
+          date.setDate(date.getDate() + Number(rosterClass.scheduleDay) - date.getDay());
+          classDate = isoDate(date);
+        }
+        const eventDate = override?.newDate || classDate;
+        const eventTimeBlock = override?.timeBlock || rosterClass?.timeBlock || profileSchool?.timeBlock || school.timeBlock || "AM";
         const key = JSON.stringify([eventDate, eventTimeBlock, override?.originalDate || "", override?.reason || ""]);
         if (groups.has(key)) {
           const group = groups.get(key);
@@ -23928,7 +23932,7 @@
         classNames: rosterClass ? [rosterClass.name] : undefined,
         school: school.school,
         displaySchool: profileSchool?.nickname?.trim() || school.nickname || school.school,
-        day: override ? weekdayLabelFromDate(eventDate) : dayLabelForSchool(profileSchool, school.day),
+        day: weekdayLabelFromDate(eventDate),
         isd: profileSchool?.isd || school.isd,
         address: profileSchool?.address || school.school,
         teacher: profileTeacher.firstName || teacherNickname(profileTeacher),
