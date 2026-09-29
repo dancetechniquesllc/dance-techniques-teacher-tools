@@ -2885,6 +2885,9 @@
     .teacher-class-session-timing.is-complete { color: #a01e2d; }
     .teacher-class-session-timing.is-warning strong { color: #8a6a09; }
     .teacher-class-session-timing.is-complete strong { color: #a01e2d; }
+    .teacher-class-settings-button { position: absolute; top: 58px; right: 14px; z-index: 4; display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid color-mix(in srgb, var(--brick) 30%, transparent); border-radius: 999px; background: var(--blush); color: var(--berry); box-shadow: 0 3px 9px rgb(91 43 39 / .14); font-size: 21px; line-height: 1; }
+    .teacher-class-settings-button:hover { background: color-mix(in srgb, var(--blush) 78%, white); transform: rotate(18deg); }
+    .teacher-roster-active-card:not([open]) > summary .teacher-class-settings-button { display: none; }
     .teacher-roster-start-button { min-height: 30px; padding: 0 10px; border: 1px solid var(--fg); border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 10px; font-weight: 800; }
     .teacher-roster-start-button.is-active { border-color: var(--brick); background: var(--blush); color: var(--brick); }
     .teacher-roster-class-actions { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 13px; align-items: start; }
@@ -18878,13 +18881,19 @@
           <select id="teacher-roster-class-time" aria-describedby="teacher-roster-class-time-help"></select>
           <small id="teacher-roster-class-time-help">Times are available every 15 minutes.</small>
         </label>
+        <label>Day
+          <select id="teacher-roster-class-day"><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option></select>
+        </label>
+        <label>AM / PM
+          <select id="teacher-roster-class-period"><option value="AM">AM</option><option value="PM">PM</option></select>
+        </label>
         <label>Capacity
           <input id="teacher-roster-class-capacity" type="number" min="1" max="99" value="12" required>
         </label>
       </form>
       <div class="confirm-actions">
         <button class="secondary" type="button" id="teacher-roster-class-cancel">Cancel</button>
-        <button class="primary" type="submit" form="teacher-roster-class-form">Create Class</button>
+        <button class="primary" type="submit" form="teacher-roster-class-form" id="teacher-roster-class-submit">Create Class</button>
       </div>
     </div>
   </div>
@@ -36806,6 +36815,21 @@
           </div>
         </details>`;
       }).join("");
+      list.querySelectorAll("[data-teacher-roster-details]").forEach((details) => {
+        const classId = details.dataset.teacherRosterDetails || "";
+        const rosterClass = visibleClasses.find((item) => String(item.id) === String(classId));
+        const summary = details.querySelector(":scope > summary");
+        const actions = summary?.querySelector(".teacher-roster-class-actions");
+        if (!rosterClass || !summary || !actions) return;
+        const settings = document.createElement("button");
+        settings.type = "button";
+        settings.className = "teacher-class-settings-button";
+        settings.dataset.teacherClassSettings = rosterClass.id;
+        settings.setAttribute("aria-label", `Edit ${rosterClass.name} class settings`);
+        settings.title = "Class settings";
+        settings.textContent = "⚙";
+        summary.insertBefore(settings, actions);
+      });
       updateTeacherClassStopwatches();
       if (myDayRosterPopupClassId) window.setTimeout(mountMyDayRosterPopup, 0);
     }
@@ -37161,9 +37185,11 @@
       }
     };
 
+    let editingTeacherRosterClassId = "";
     const openTeacherRosterClassCreator = () => {
       const schools = assignedTeacherSchools();
       if (!schools.length) return showToast("No assigned schools are available");
+      editingTeacherRosterClassId = "";
       const schoolSelect = document.getElementById("teacher-roster-class-school");
       schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
       if (teacherRosterSchoolFilter !== "all" && schools.some((school) => school.name === teacherRosterSchoolFilter)) schoolSelect.value = teacherRosterSchoolFilter;
@@ -37171,7 +37197,31 @@
       document.getElementById("teacher-roster-class-level").innerHTML = optionMarkup(classLevelOptions, "1");
       document.getElementById("teacher-roster-class-name").value = "";
       document.getElementById("teacher-roster-class-time").innerHTML = quarterHourOptions("");
+      document.getElementById("teacher-roster-class-day").value = String(schools.find((school) => school.name === schoolSelect.value)?.dayOfWeek ?? 1);
+      document.getElementById("teacher-roster-class-period").value = "AM";
       document.getElementById("teacher-roster-class-capacity").value = "12";
+      setText("teacher-roster-class-title", "Create a Class");
+      setText("teacher-roster-class-submit", "Create Class");
+      setTeacherRosterOverlay("teacher-roster-class-overlay", true);
+      window.setTimeout(() => document.getElementById("teacher-roster-class-name")?.focus(), 40);
+    };
+
+    const openTeacherRosterClassEditor = (rosterClass) => {
+      if (!rosterClass || !teacherRosterClasses().some((item) => item.id === rosterClass.id)) return;
+      const schools = assignedTeacherSchools();
+      editingTeacherRosterClassId = rosterClass.id;
+      const schoolSelect = document.getElementById("teacher-roster-class-school");
+      schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
+      schoolSelect.value = schools.find((school) => teacherRosterClassMatchesSchool(rosterClass, school))?.name || schools[0]?.name || "";
+      document.getElementById("teacher-roster-class-age").innerHTML = optionMarkup(classAgeOptions, rosterClass.ageGroup || "Tots");
+      document.getElementById("teacher-roster-class-level").innerHTML = optionMarkup(classLevelOptions, String(rosterClass.level || "1"));
+      document.getElementById("teacher-roster-class-name").value = rosterClass.name || "";
+      document.getElementById("teacher-roster-class-time").innerHTML = quarterHourOptions(rosterClass.time || "");
+      document.getElementById("teacher-roster-class-day").value = String(rosterClass.scheduleDay ?? Number(Object.entries(weekdayNames).find(([, label]) => label === rosterClass.day)?.[0] || 1));
+      document.getElementById("teacher-roster-class-period").value = rosterClass.timeBlock === "PM" ? "PM" : "AM";
+      document.getElementById("teacher-roster-class-capacity").value = String(rosterClass.capacity || 12);
+      setText("teacher-roster-class-title", "Edit Class Settings");
+      setText("teacher-roster-class-submit", "Save Class");
       setTeacherRosterOverlay("teacher-roster-class-overlay", true);
       window.setTimeout(() => document.getElementById("teacher-roster-class-name")?.focus(), 40);
     };
@@ -37522,6 +37572,14 @@
       openRosterPrintDialog(selectedClass, schoolClasses);
     });
     document.getElementById("teacher-roster-list")?.addEventListener("click", (event) => {
+      const classSettingsButton = event.target.closest("[data-teacher-class-settings]");
+      if (classSettingsButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(classSettingsButton.dataset.teacherClassSettings));
+        if (rosterClass) openTeacherRosterClassEditor(rosterClass);
+        return;
+      }
       const newEnrollmentButton = event.target.closest("[data-teacher-new-enrollment]");
       if (newEnrollmentButton) {
         event.preventDefault();
@@ -37870,7 +37928,10 @@
       teacherDancerDirectoryFilters[key] = event.target.value || (key === "search" ? "" : "all");
       renderTeacherDancers();
     }));
-    document.getElementById("teacher-roster-class-cancel")?.addEventListener("click", () => setTeacherRosterOverlay("teacher-roster-class-overlay", false));
+    document.getElementById("teacher-roster-class-cancel")?.addEventListener("click", () => {
+      editingTeacherRosterClassId = "";
+      setTeacherRosterOverlay("teacher-roster-class-overlay", false);
+    });
     document.getElementById("teacher-measurements-school")?.addEventListener("change", async (event) => {
       await saveCurrentTeacherMeasurements();
       teacherMeasurementsClassId = teacherMeasurementClassesForSchool(event.target.value)[0]?.id || "";
@@ -38224,11 +38285,14 @@
     ["teacher-roster-class-overlay", "teacher-roster-future-overlay", "teacher-new-enrollment-overlay"].forEach((id) => document.getElementById(id)?.addEventListener("click", (event) => {
       if (event.target.id === id) {
         if (id === "teacher-new-enrollment-overlay") closeTeacherNewEnrollmentDialog();
-        else setTeacherRosterOverlay(id, false);
+        else {
+          if (id === "teacher-roster-class-overlay") editingTeacherRosterClassId = "";
+          setTeacherRosterOverlay(id, false);
+        }
       }
     }));
 
-    document.getElementById("teacher-roster-class-form")?.addEventListener("submit", (event) => {
+    document.getElementById("teacher-roster-class-form")?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const school = assignedTeacherSchools().find((item) => item.name === document.getElementById("teacher-roster-class-school")?.value);
       if (!school) return showToast("Choose one of your assigned schools");
@@ -38236,6 +38300,32 @@
       if (!name) return showToast("Add a class name");
       const selectedTime = document.getElementById("teacher-roster-class-time").value || "";
       if (selectedTime && !isQuarterHourTime(selectedTime)) return showToast("Choose a class time on a 15-minute increment.");
+      const scheduleDay = Math.max(1, Math.min(5, Number(document.getElementById("teacher-roster-class-day").value) || 1));
+      const timeBlock = document.getElementById("teacher-roster-class-period").value === "PM" ? "PM" : "AM";
+      const existingClass = teacherRosterClasses().find((item) => String(item.id) === String(editingTeacherRosterClassId));
+      if (existingClass) {
+        existingClass.name = name;
+        existingClass.ageGroup = document.getElementById("teacher-roster-class-age").value || "Tots";
+        existingClass.level = document.getElementById("teacher-roster-class-level").value || "1";
+        existingClass.time = selectedTime;
+        existingClass.assignmentId = school.assignmentId || existingClass.assignmentId || "";
+        existingClass.schoolName = school.name;
+        existingClass.scheduleDay = scheduleDay;
+        existingClass.day = weekdayNames[scheduleDay] || "To schedule";
+        existingClass.timeBlock = timeBlock;
+        existingClass.capacity = Math.max(1, Number(document.getElementById("teacher-roster-class-capacity").value) || 12);
+        existingClass.teacherId = profileTeacher.id;
+        scheduleAppDataSave();
+        const saved = await saveSharedClass(existingClass);
+        if (!saved) return;
+        editingTeacherRosterClassId = "";
+        teacherRosterSchoolFilter = school.name;
+        setTeacherRosterOverlay("teacher-roster-class-overlay", false);
+        renderTeacherRosters();
+        renderClassesAndRosters();
+        showToast(`${name} settings saved`);
+        return;
+      }
       const rosterClass = {
         id: `roster-${profileTeacher.id}-${school.name}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
         name,
@@ -38245,7 +38335,9 @@
         assignmentId: school.assignmentId || "",
         teacherId: profileTeacher.id,
         schoolName: school.name,
-        day: weekdayNames[school.dayOfWeek] || "To schedule",
+        scheduleDay,
+        day: weekdayNames[scheduleDay] || "To schedule",
+        timeBlock,
         capacity: Math.max(1, Number(document.getElementById("teacher-roster-class-capacity").value) || 12),
         students: [],
         sourceActive: true
