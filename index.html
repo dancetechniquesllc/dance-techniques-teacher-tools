@@ -21918,6 +21918,10 @@
       enrollmentIntakeQueue = data || [];
       setEnrollmentQueueState("ready");
       renderEnrollmentQueue();
+      // Classes & Rosters may render before the enrollment intake finishes
+      // loading. Refresh the class cards now so recital planning uses the
+      // linked 2025 recital answers instead of leaving every dancer as Either.
+      if (sharedRosterReady) renderClassesAndRosters();
     };
 
     const subscribeEnrollmentIntakeQueue = (profile = window.dtCurrentProfile) => {
