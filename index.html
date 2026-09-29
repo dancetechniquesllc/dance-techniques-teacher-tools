@@ -22233,8 +22233,6 @@
       ]));
       const assignments = assignmentsResult.data || [];
       const activeAssignments = assignments.filter((assignment) => assignment.active !== false);
-      let recoverInactiveAssignments = false;
-      try { recoverInactiveAssignments = !window.localStorage?.getItem(operationalRecoveryCompletedKey); } catch (error) {}
       const classes = classesResult.data || [];
       archivedRosterStudents = (archivedResult.data || []).map((enrollment) => ({
         id: enrollment.students?.id || enrollment.student_id,
@@ -22249,13 +22247,6 @@
       (notesResult.data || []).forEach((note) => { if (!notesByStudent.has(note.student_id)) notesByStudent.set(note.student_id, note); });
       const schoolById = new Map(schools.map((school) => [school.id, school]));
       const assignmentById = new Map(assignments.map((assignment) => [assignment.id, assignment]));
-      const localSchoolAssignmentsById = new Map();
-      schoolLibrary.forEach((school) => {
-        if (school?.id) {
-          localSchoolAssignmentsById.set(String(school.id), school.assignedTeacherId || "");
-        }
-      });
-
       const preservedTeacherDirectory = teachers.map((teacher) => JSON.parse(JSON.stringify(teacher)));
       const liveTeachers = profiles.filter((item) => !guardianProfileIds.has(String(item.id))).map((item) => {
         const names = item.full_name.trim().split(/\s+/);
@@ -22269,12 +22260,10 @@
         teacher.teacherType = item.role === "teacher" ? "Teacher" : (item.role === "director" ? "Director" : "Admin");
         teacher.color = item.color || teacher.color || "";
         teacher.phone = item.phone || teacher.phone || "";
-        const hasRecoverableAssignment = recoverInactiveAssignments && assignments.some((assignment) => assignment.teacher_id === item.id);
         const normalizedLiveName = item.full_name.trim().toLowerCase();
         const isRequiredActiveStaff = requiredActiveStaffNames.has(normalizedLiveName);
-        teacher.status = item.active === false && !hasRecoverableAssignment && !isRequiredActiveStaff ? "inactive" : "active";
+        teacher.status = item.active === false && !isRequiredActiveStaff ? "inactive" : "active";
         if (item.active === false && isRequiredActiveStaff) teacher.recoveredRequiredStaff = true;
-        if (item.active === false && hasRecoverableAssignment) teacher.recoveredFromInactive = true;
         teacher.schools = activeAssignments.filter((assignment) => assignment.teacher_id === item.id).map((assignment) => {
           const school = schoolById.get(assignment.partner_school_id) || {};
           return {
@@ -22321,24 +22310,17 @@
       }
       document.body.dataset.currentTeacherId = profileTeacher.id;
       await window.dtCompleteTeacherProfileResolution?.({ profileId: profile.id, ready: true });
-      const assignmentCountBeforeMerge = schoolLibraryAssignmentCount();
       if (schools.length) {
         const mergedSchools = schools.map((school, index) => {
           const paymentPreference = partnershipPreferenceBySchoolId.get(school.id) || {};
-          const resolvedSchoolId = String(school.id || "");
-          const localAssignedTeacherId = localSchoolAssignmentsById.get(resolvedSchoolId);
           const activeAssignment = activeAssignments.find((assignment) => assignment.partner_school_id === school.id);
-          const recoveredInactiveAssignment = !activeAssignment && recoverInactiveAssignments
-            ? assignments.find((assignment) => assignment.partner_school_id === school.id)
-            : null;
-          const databaseAssignedTeacherId = activeAssignment?.teacher_id || recoveredInactiveAssignment?.teacher_id || "";
+          const databaseAssignedTeacherId = activeAssignment?.teacher_id || "";
           return {
           id: school.id, name: school.name, nickname: school.nickname || school.name, address: [school.address, school.city, school.state, school.postal_code].filter(Boolean).join(", "),
           initials: school.initials || "",
           isd: school.district || "", directorName: school.director_name || "", phone: school.director_phone || "", email: school.director_email || "",
           dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", seasonStartDate: school.season_start_date || "",
-          assignedTeacherId: databaseAssignedTeacherId || localAssignedTeacherId || "",
-          recoveredFromInactiveAssignment: Boolean(recoveredInactiveAssignment?.teacher_id),
+          assignedTeacherId: databaseAssignedTeacherId,
           classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "",
           preferredVendorPaymentMethod: paymentPreference.preferred_method || "", vendorPaymentDestination: paymentPreference.payment_destination || "",
           vendorPaymentRecipientName: paymentPreference.expected_recipient_name || "",
@@ -22347,10 +22329,6 @@
           };
         });
         replaceCollection(schoolLibrary, mergedSchools);
-        if (!assignmentCountBeforeMerge && !schoolLibraryAssignmentCount(schoolLibrary) && restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true })) {
-          showToast("School assignments were restored from your last local backup.");
-          scheduleAppDataSave();
-        }
       } else if (schoolLibrary.length) {
         console.error("The shared partner-school table is empty; the preserved directory remains visible and will not be overwritten.");
       }
@@ -26539,7 +26517,9 @@
             ...currentSchool,
             ...savedSchool,
             id: currentSchool.id || savedSchool.id,
-            assignedTeacherId: currentSchool.assignedTeacherId || savedSchool.assignedTeacherId || ""
+            // The live directory is authoritative, including an intentionally
+            // blank assignment. A saved snapshot must not reassign a school.
+            assignedTeacherId: currentSchool.assignedTeacherId || ""
           } : currentSchool;
         });
         savedSchoolLibrary.forEach((savedSchool) => {
@@ -26557,9 +26537,6 @@
           school.assignedTeacherId = persistedTeacherIdMap.get(school.assignedTeacherId);
         }
       });
-      if (!schoolLibraryAssignmentCount() && restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true })) {
-        scheduleAppDataSave();
-      }
       const hasPersistedRosterClasses = Array.isArray(persisted.rosterClasses);
       const pendingLocalRosterClasses = rosterClasses.filter((rosterClass) => (
         String(rosterClass.id || "").startsWith("roster-")
@@ -52883,7 +52860,6 @@
         ...restoreMissingTeachersFromHistory(),
         ...teachers.filter((teacher) => teacher.recoveredFromInactive)
       ].filter((teacher, index, list) => list.findIndex((candidate) => candidate.id === teacher.id) === index) : [];
-      const recoveredAssignments = shouldRunOperationalRecovery ? restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true }) : false;
       let schoolScheduleRecoveryAlreadyCompleted = false;
       try { schoolScheduleRecoveryAlreadyCompleted = Boolean(window.localStorage?.getItem(schoolScheduleRecoveryCompletedKey)); } catch (error) {}
       const recoveredSchoolSchedules = isLeader && !schoolScheduleRecoveryAlreadyCompleted
@@ -52894,7 +52870,7 @@
       const recoveredMissingSchoolData = isLeader && !missingSchoolDataRecoveryAlreadyCompleted
         ? restoreMissingSchoolDataFromHistory()
         : [];
-      if (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length || recoveredMissingSchoolData.length) scheduleAppDataSave();
+      if (recoveredTeachers.length || recoveredSchoolSchedules.length || recoveredMissingSchoolData.length) scheduleAppDataSave();
       if (isLeader) {
         const currentTierByTeacher = new Map();
         const { data: tierAssignments, error: tierAssignmentsError } = await client
@@ -52941,16 +52917,10 @@
             if (recoveredMissingSchoolData.length) showToast(`${recoveredMissingSchoolData.length} Partner School record${recoveredMissingSchoolData.length === 1 ? "" : "s"} recovered.`);
           }
         }
-        const recoveredInactiveSchools = schoolLibrary.filter((school) => school.recoveredFromInactiveAssignment);
-        const assignmentsSynced = recoveredInactiveSchools.length
-          ? await syncSchoolAssignmentsToDatabase(recoveredInactiveSchools)
-          : true;
-        if (assignmentsSynced) recoveredInactiveSchools.forEach((school) => { delete school.recoveredFromInactiveAssignment; });
-        if (!assignmentsSynced) showToast("Some teacher school assignments still need attention.");
-        else if (recoveredTeachers.length || recoveredAssignments) {
-          showToast(`${recoveredTeachers.length ? `${recoveredTeachers.length} teacher profile${recoveredTeachers.length === 1 ? "" : "s"} and ` : ""}${recoveredAssignments ? "school assignments" : "saved records"} restored from autosave.`);
+        if (recoveredTeachers.length) {
+          showToast(`${recoveredTeachers.length} teacher profile${recoveredTeachers.length === 1 ? "" : "s"} restored from autosave.`);
         }
-        if (shouldRunOperationalRecovery && assignmentsSynced) {
+        if (shouldRunOperationalRecovery) {
           try { window.localStorage?.setItem(operationalRecoveryCompletedKey, new Date().toISOString()); } catch (error) {}
         }
       }
@@ -52964,7 +52934,7 @@
       }
       try { await loadIssuedPayrollStatements(); renderPaydaySummary(); renderPayArchive(); } catch(error) { showToast(error.message); }
       cloudPersistenceReady = true;
-      if (isLeader && (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length || recoveredMissingSchoolData.length)) await saveCloudAppData();
+      if (isLeader && (recoveredTeachers.length || recoveredSchoolSchedules.length || recoveredMissingSchoolData.length)) await saveCloudAppData();
       if (removedDemoContent) await saveCloudAppData();
     };
 
