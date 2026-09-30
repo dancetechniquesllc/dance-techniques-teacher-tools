@@ -2885,8 +2885,10 @@
     .teacher-class-session-timing.is-complete { color: #a01e2d; }
     .teacher-class-session-timing.is-warning strong { color: #8a6a09; }
     .teacher-class-session-timing.is-complete strong { color: #a01e2d; }
-    .teacher-class-settings-button { position: absolute; top: 58px; right: 14px; z-index: 4; display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid color-mix(in srgb, var(--brick) 30%, transparent); border-radius: 999px; background: var(--blush); color: var(--berry); box-shadow: 0 3px 9px rgb(91 43 39 / .14); font-size: 21px; line-height: 1; }
-    .teacher-class-settings-button:hover { background: color-mix(in srgb, var(--blush) 78%, white); transform: rotate(18deg); }
+      .teacher-class-settings-button { position: absolute; top: 14px; right: 14px; z-index: 4; display: grid; place-items: center; width: 38px; height: 38px; padding: 0; border: 1px solid color-mix(in srgb, var(--brick) 30%, transparent); border-radius: 999px; background: var(--blush); color: var(--berry); box-shadow: 0 3px 9px rgb(91 43 39 / .14); line-height: 1; }
+      .teacher-class-settings-button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+      .teacher-class-settings-button:hover,
+      .teacher-class-settings-button:focus-visible { background: color-mix(in srgb, var(--blush) 78%, white); outline: 3px solid color-mix(in srgb, var(--blush) 62%, transparent); outline-offset: 2px; transform: translateY(-1px); }
     .teacher-roster-active-card:not([open]) > summary .teacher-class-settings-button { display: none; }
     .teacher-roster-start-button { min-height: 30px; padding: 0 10px; border: 1px solid var(--fg); border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 10px; font-weight: 800; }
     .teacher-roster-start-button.is-active { border-color: var(--brick); background: var(--blush); color: var(--brick); }
@@ -36842,7 +36844,7 @@
         settings.dataset.teacherClassSettings = rosterClass.id;
         settings.setAttribute("aria-label", `Edit ${rosterClass.name} class settings`);
         settings.title = "Class settings";
-        settings.textContent = "⚙";
+          settings.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path><path d="M19.1 13.1c.05-.36.08-.73.08-1.1s-.03-.74-.08-1.1l2-1.55-2-3.46-2.48 1a8.5 8.5 0 0 0-1.9-1.1L14.35 3h-4l-.37 2.79a8.5 8.5 0 0 0-1.9 1.1l-2.48-1-2 3.46 2 1.55c-.05.36-.08.73-.08 1.1s.03.74.08 1.1l-2 1.55 2 3.46 2.48-1a8.5 8.5 0 0 0 1.9 1.1l.37 2.79h4l.37-2.79a8.5 8.5 0 0 0 1.9-1.1l2.48 1 2-3.46-2-1.55Z"></path></svg>`;
         summary.insertBefore(settings, actions);
       });
       updateTeacherClassStopwatches();
