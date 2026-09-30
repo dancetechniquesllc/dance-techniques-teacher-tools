@@ -1,7 +1,7 @@
 (() => {
   const SEASON = "2027";
   const STAGE_CAP = 12;
-  const state = { section: "shows", view: "teacher", loading: false, groups: [], classes: [], persisted: false, showPlan: null, notice: "", productionShow: "" };
+  const state = { section: "shows", view: "teacher", loading: false, groups: [], classes: [], persisted: false, showPlan: null, notice: "", productionShow: "", filters: { teacher: "", school: "", requirement: "" } };
   const productionShows = [
     { id:"s9", time:"9:00 AM", drop:"8:20 AM", schools:3, dancers:48, ready:88, performances:3 },
     { id:"s1130", time:"11:30 AM", drop:"10:50 AM", schools:4, dancers:61, ready:76, performances:1 },
@@ -13,6 +13,7 @@
   const title = (value) => String(value || "").replace(/\b\w/g, (c) => c.toUpperCase());
   const activeRosterClasses = () => typeof rosterClasses === "undefined" ? [] : rosterClasses.filter((item) => item.sourceActive !== false);
   const teacherName = (id) => typeof rosterTeacherName === "function" ? rosterTeacherName(id) : "Teacher";
+  const teacherColor = (name) => typeof messageAssignedColor === "function" ? messageAssignedColor(name, "Teacher") : "#dba9a1";
   const enrolled = (item) => (item.students || []).filter((student) => student.status === "enrolled");
   const fullName = (student) => [student.preferredName || student.firstName, student.lastName].filter(Boolean).join(" ").trim();
   const schoolKey = (value) => String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
@@ -34,7 +35,7 @@
     const related = students.flatMap((student) => String(student.relatedDancerName || "").split(" • ").map((name) => name.trim()).filter(Boolean));
     return {
       id: String(item.id), source: item, name: item.name || "Class", school: item.schoolName || "School",
-      teacherId: String(item.teacherId || ""), teacher: teacherName(item.teacherId), requirement: requirementFor(item),
+      teacherId: String(item.teacherId || ""), teacher: teacherName(item.teacherId), teacherColor: teacherColor(teacherName(item.teacherId)), requirement: requirementFor(item),
       level: Number(item.level || 1), count: students.length, students, related,
       minAge: ages[0] ?? null, maxAge: ages.at(-1) ?? null, avgAge: ages.length ? ages.reduce((a,b)=>a+b,0)/ages.length : null,
       ageData: ages.length, day: item.day || "", time: item.time || ""
@@ -190,10 +191,27 @@
     state.groups.filter((group)=>group.decision!=="rejected").forEach((group)=>group.teacherIds.forEach((id)=>map.get(id)?.groups.add(group.id)));
     return [...map.values()].map((item)=>({...item,routines:item.groups.size,status:item.groups.size<4?"Under Target":item.groups.size<=6?"Ideal — 4–6":"Above Target"})).sort((a,b)=>a.name.localeCompare(b.name));
   };
+  const filteredGroups = () => state.groups.filter((group) => (
+    (!state.filters.teacher || group.classes.some((item) => item.teacherId === state.filters.teacher))
+    && (!state.filters.school || group.classes.some((item) => item.school === state.filters.school))
+    && (!state.filters.requirement || group.requirement === state.filters.requirement)
+  ));
+  const filterMarkup = () => {
+    const teacherOptions = [...new Map(state.classes.map((item) => [item.teacherId,item.teacher])).entries()].sort((a,b) => a[1].localeCompare(b[1]));
+    const schoolOptions = [...new Set(state.classes.map((item) => item.school))].sort();
+    return `<div class="stage-match-filters">
+      <label>Teacher<select data-stage-filter="teacher"><option value="">All Teachers</option>${teacherOptions.map(([id,name])=>`<option value="${esc(id)}" ${state.filters.teacher===id?"selected":""}>${esc(name)}</option>`).join("")}</select></label>
+      <label>School<select data-stage-filter="school"><option value="">All Schools</option>${schoolOptions.map((school)=>`<option value="${esc(school)}" ${state.filters.school===school?"selected":""}>${esc(school)}</option>`).join("")}</select></label>
+      <label>Routine Need<select data-stage-filter="requirement"><option value="">All Routine Needs</option>${["ballet","tap","either"].map((value)=>`<option value="${value}" ${state.filters.requirement===value?"selected":""}>${title(value)}</option>`).join("")}</select></label>
+      <button class="secondary" type="button" data-stage-clear-filters>Clear Filters</button>
+      <span>${filteredGroups().length} match${filteredGroups().length===1?"":"es"}</span>
+    </div>`;
+  };
   const groupCard = (group) => {
     const total=group.classes.reduce((sum,item)=>sum+item.count,0), spread=ageSpread(group.classes);
     const relationLabel=group.relationship==="combine"?(group.crossTeacher?"Cross-Teacher Combine Suggested":"Combine Suggested"):group.relationship==="share"?"Share Choreography":"Keep Separate";
-    return `<article class="stage-match-card ${group.crossTeacher?"cross-teacher":""}" data-stage-group="${esc(group.id)}">
+    const cardColor=group.crossTeacher?"":group.classes[0]?.teacherColor||"#dba9a1";
+    return `<article class="stage-match-card ${group.crossTeacher?"cross-teacher":""}" data-stage-group="${esc(group.id)}" ${cardColor?`style="--stage-teacher-color:${esc(cardColor)}"`:""}>
       <div class="stage-match-head"><div><span class="stage-status ${group.quality}">${esc(title(group.quality))} Match</span><h5>${esc(group.name)}</h5><p>${esc(relationLabel)} · ${total} dancer${total===1?"":"s"}${spread==null?"":` · ${spread}-month age span`}</p></div><span class="stage-decision ${group.decision}">${esc(title(group.decision))}</span></div>
       <div class="stage-class-list">${group.classes.map((item)=>`<div class="stage-class-row"><span><strong>${esc(item.school)} · ${esc(item.name)}</strong><small>${esc(item.teacher)} · ${item.count} dancers · ${item.ageData?`${item.minAge}–${item.maxAge} months`:`Birthdates needed`}</small></span><span>${esc(title(item.requirement))}</span></div>`).join("")}</div>
       <div class="stage-reasons">${(group.analysis.reasons||[]).map((reason)=>`<span>✓ ${esc(reason)}</span>`).join("")}</div>
@@ -201,12 +219,12 @@
       <div class="stage-card-actions"><label>Plan<select data-stage-relation><option value="combine" ${group.relationship==="combine"?"selected":""}>Combine & Perform Together</option><option value="share" ${group.relationship==="share"?"selected":""}>Share Choreography — Perform Separately</option><option value="separate" ${group.relationship==="separate"?"selected":""}>Keep Separate</option></select></label><label>Routine Owner<select data-stage-owner><option value="lead_teacher" ${group.owner==="lead_teacher"?"selected":""}>Lead Teacher / Choreographer</option><option value="shared" ${group.owner==="shared"?"selected":""}>Shared Choreography</option><option value="dt_standard" ${group.owner==="dt_standard"?"selected":""}>DT Standard Routine</option></select></label><button class="primary" data-stage-approve>${group.decision==="approved"?"Approved ✓":"Approve"}</button><button class="secondary" data-stage-lock>${group.decision==="locked"?"Locked 🔒":"Lock"}</button><button class="secondary" data-stage-reject>Keep Separate</button></div>
     </article>`;
   };
-  const teacherView = () => `<div class="stage-load-grid">${teacherLoad().map((item)=>`<button class="stage-load-card ${item.status.startsWith("Above")?"above":item.status.startsWith("Ideal")?"ideal":"under"}" data-stage-teacher="${esc(item.id)}"><strong>${esc(item.name)}</strong><span>${item.classes} Classes</span><b>${item.routines} Unique Recital Dances</b><small>${esc(item.status)}</small></button>`).join("")}</div><div class="stage-match-grid">${state.groups.filter((group)=>!group.crossTeacher).map(groupCard).join("")}</div>${state.groups.some((group)=>group.crossTeacher)?`<section class="stage-cross-section"><h4>Cross-Teacher Young-Class Opportunities</h4><p>Exceptions only. Every suggestion requires director approval.</p><div class="stage-match-grid">${state.groups.filter((group)=>group.crossTeacher).map(groupCard).join("")}</div></section>`:""}`;
+  const teacherView = () => { const groups=filteredGroups(); return `<div class="stage-load-grid">${teacherLoad().map((item)=>`<button class="stage-load-card ${item.status.startsWith("Above")?"above":item.status.startsWith("Ideal")?"ideal":"under"}" data-stage-teacher="${esc(item.id)}"><strong>${esc(item.name)}</strong><span>${item.classes} Classes</span><b>${item.routines} Unique Recital Dances</b><small>${esc(item.status)}</small></button>`).join("")}</div><div class="stage-match-grid">${groups.filter((group)=>!group.crossTeacher).map(groupCard).join("")}</div>${groups.some((group)=>group.crossTeacher)?`<section class="stage-cross-section"><h4>Cross-Teacher Young-Class Opportunities</h4><p>Exceptions only. Every suggestion requires director approval.</p><div class="stage-match-grid">${groups.filter((group)=>group.crossTeacher).map(groupCard).join("")}</div></section>`:""}`; };
   const schoolView = () => {
-    const schools=[...new Set(state.classes.map((item)=>item.school))].sort();
-    return `<div class="stage-school-grid">${schools.map((school)=>{const classes=state.classes.filter((item)=>item.school===school);const groups=state.groups.filter((group)=>group.classes.some((item)=>item.school===school));const shows=[...new Set(groups.flatMap((group)=>Object.values(group.showAssignments||{})))].filter(Boolean);const siblingCount=classes.flatMap((item)=>item.related).length;return `<article class="stage-school-card"><h5>${esc(school)}</h5><p>${classes.length} classes · ${classes.reduce((sum,item)=>sum+item.count,0)} dancers</p><div>${classes.map((item)=>`<span>${esc(item.name)} · ${esc(item.teacher)} · ${item.count}</span>`).join("")}</div><small>${groups.length} routine group${groups.length===1?"":"s"} · ${siblingCount} sibling link${siblingCount===1?"":"s"}${shows.length?` · Proposed Show ${shows.join(", ")}`:""}</small></article>`;}).join("")}</div>`;
+    const visible=filteredGroups();const schools=[...new Set(state.classes.map((item)=>item.school))].filter((school)=>!state.filters.school||school===state.filters.school).sort();
+    return `<div class="stage-school-grid">${schools.map((school)=>{const classes=state.classes.filter((item)=>item.school===school&&(!state.filters.teacher||item.teacherId===state.filters.teacher));const groups=visible.filter((group)=>group.classes.some((item)=>item.school===school));if(!classes.length||!groups.length)return "";const shows=[...new Set(groups.flatMap((group)=>Object.values(group.showAssignments||{})))].filter(Boolean);const siblingCount=classes.flatMap((item)=>item.related).length;return `<article class="stage-school-card"><h5>${esc(school)}</h5><p>${classes.length} classes · ${classes.reduce((sum,item)=>sum+item.count,0)} dancers</p><div>${classes.map((item)=>`<span>${esc(item.name)} · ${esc(item.teacher)} · ${item.count}</span>`).join("")}</div><small>${groups.length} routine group${groups.length===1?"":"s"} · ${siblingCount} sibling link${siblingCount===1?"":"s"}${shows.length?` · Proposed Show ${shows.join(", ")}`:""}</small></article>`;}).join("")}</div>`;
   };
-  const routineView = () => `<div class="stage-match-grid">${[...state.groups].sort((a,b)=>b.classes.length-a.classes.length).map(groupCard).join("")}</div>`;
+  const routineView = () => `<div class="stage-match-grid">${filteredGroups().sort((a,b)=>b.classes.length-a.classes.length).map(groupCard).join("")}</div>`;
   const siblingComponents = () => {
     const byName=new Map();state.classes.forEach((item)=>item.students.forEach((student)=>byName.set(fullName(student).toLowerCase(),item)));
     const edges=[];state.classes.forEach((item)=>item.students.forEach((student)=>String(student.relatedDancerName||"").split(" • ").map((name)=>name.trim().toLowerCase()).filter(Boolean).forEach((name)=>{const other=byName.get(name);if(other&&other.id!==item.id)edges.push([item.id,other.id]);})));
@@ -241,7 +259,7 @@
   const render = () => {
     if(!root())return;
     const body=state.view==="teacher"?teacherView():state.view==="school"?schoolView():state.view==="routine"?routineView():showView();
-    const matching=`<div class="stage-master-toolbar"><div><h4>2027 Recital Matching</h4><p>Match choreography first. Build four mirrored shows second.</p></div><div class="big-stage-actions"><button class="secondary" data-stage-recalculate>Recalculate Suggestions</button>${state.view!=="show"?`<button class="primary" data-stage-build-shows>Build Four Shows</button>`:""}</div></div>${state.notice?`<div class="big-stage-note">${esc(state.notice)}</div>`:""}<nav class="stage-view-tabs" aria-label="Recital planning views">${[["teacher","Teacher View"],["school","School View"],["routine","Routine View"],["show","Show View"]].map(([key,label])=>`<button data-stage-view="${key}" aria-pressed="${state.view===key}">${label}</button>`).join("")}</nav>${state.loading?`<div class="stage-empty">Analyzing current classes, ages, recital needs, and family links…</div>`:body}`;
+    const matching=`<div class="stage-master-toolbar"><div><h4>2027 Recital Matching</h4><p>Match choreography first. Build four mirrored shows second.</p></div><div class="big-stage-actions"><button class="secondary" data-stage-recalculate>Recalculate Suggestions</button>${state.view!=="show"?`<button class="primary" data-stage-build-shows>Build Four Shows</button>`:""}</div></div>${state.notice?`<div class="big-stage-note">${esc(state.notice)}</div>`:""}${filterMarkup()}<nav class="stage-view-tabs" aria-label="Recital planning views">${[["teacher","Teacher View"],["school","School View"],["routine","Routine View"],["show","Show View"]].map(([key,label])=>`<button data-stage-view="${key}" aria-pressed="${state.view===key}">${label}</button>`).join("")}</nav>${state.loading?`<div class="stage-empty">Analyzing current classes, ages, recital needs, and family links…</div>`:body}`;
     root().innerHTML=`<div class="big-stage-shell"><nav class="stage-section-toggle" aria-label="The Big Stage sections"><button data-stage-section="shows" aria-pressed="${state.section==="shows"}">Show Production</button><button data-stage-section="matching" aria-pressed="${state.section==="matching"}">Recital Matching</button></nav>${state.section==="shows"?productionView():matching}</div>`;
   };
   const initialize = async (force=false) => {
@@ -255,6 +273,7 @@
     state.notice=adjusted?"Classes at the same school were separated into different routines.":force?"Suggestions recalculated. Approved, modified, and locked decisions were preserved.":`${state.classes.length} active classes analyzed. No show assignments have been made yet.`;render();
   };
   document.addEventListener("change", async (event) => {
+    const filter=event.target.closest("[data-stage-filter]");if(filter){state.filters[filter.dataset.stageFilter]=filter.value;render();return;}
     const card=event.target.closest("[data-stage-group]");if(!card)return;const group=state.groups.find((item)=>item.id===card.dataset.stageGroup);if(!group)return;
     if(event.target.matches("[data-stage-relation]")){group.relationship=event.target.value;group.decision="modified";group.stageSets=group.relationship==="combine"?[group.classes]:group.classes.map((item)=>[item]);if(group.relationship==="combine"&&group.classes.reduce((sum,item)=>sum+item.count,0)>STAGE_CAP){group.relationship="share";group.stageSets=bestCombineSets(group.classes);state.notice="That full combine exceeds 12 dancers, so it remains shared choreography with safe stage groups.";}await persistGroup(group);render();}
     if(event.target.matches("[data-stage-owner]")){group.owner=event.target.value;group.decision=group.decision==="suggested"?"modified":group.decision;await persistGroup(group);render();}
@@ -264,6 +283,8 @@
     const production=event.target.closest("[data-stage-production-show]");if(production){state.productionShow=production.dataset.stageProductionShow;render();return;}
     if(event.target.closest("[data-stage-production-back]")){state.productionShow="";render();return;}
     const view=event.target.closest("[data-stage-view]");if(view){state.view=view.dataset.stageView;render();return;}
+    if(event.target.closest("[data-stage-clear-filters]")){state.filters={teacher:"",school:"",requirement:""};render();return;}
+    const teacherFilter=event.target.closest("[data-stage-teacher]");if(teacherFilter){state.filters.teacher=teacherFilter.dataset.stageTeacher;render();return;}
     if(event.target.closest("[data-stage-recalculate]")){await initialize(true);return;}
     if(event.target.closest("[data-stage-build-shows]")){buildShows();state.view="show";render();return;}
     const card=event.target.closest("[data-stage-group]");if(!card)return;const group=state.groups.find((item)=>item.id===card.dataset.stageGroup);if(!group)return;
