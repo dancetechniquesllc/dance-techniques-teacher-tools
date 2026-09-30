@@ -41501,9 +41501,9 @@
           else counts.either += 1;
           return counts;
         }, { ballet: 0, tap: 0, either: 0 });
-        const recitalTheme = recitalNeeds.ballet > recitalNeeds.tap && recitalNeeds.ballet > recitalNeeds.either
+        const recitalTheme = recitalNeeds.ballet > recitalNeeds.tap && recitalNeeds.ballet >= recitalNeeds.either
           ? "ballet"
-          : recitalNeeds.tap > recitalNeeds.ballet && recitalNeeds.tap > recitalNeeds.either
+          : recitalNeeds.tap > recitalNeeds.ballet && recitalNeeds.tap >= recitalNeeds.either
             ? "tap"
             : "either";
         const datedStudents = enrolledStudents.filter((student) => student.birthdate).sort((left, right) => right.birthdate.localeCompare(left.birthdate));
