@@ -38541,7 +38541,18 @@
       return `${a.lastName} ${rosterStudentFirstName(a)}`.localeCompare(`${b.lastName} ${rosterStudentFirstName(b)}`);
     });
 
-    const filteredRosterClasses = () => rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).filter((rosterClass) => {
+    const rosterClassSchoolIsCurrent = (rosterClass) => {
+      const school = schoolLibrary.find((item) => (
+        (rosterClass.partnerSchoolId && String(item.id) === String(rosterClass.partnerSchoolId))
+        || enrollmentSchoolNameMatches(item.name, rosterClass.schoolName)
+        || enrollmentSchoolNameMatches(item.nickname, rosterClass.schoolName)
+      ));
+      return !school || normalizeSchoolLifecycleStatus(school) === "current";
+    };
+
+    const filteredRosterClasses = () => rosterClasses
+      .filter((rosterClass) => rosterClass.sourceActive !== false && rosterClassSchoolIsCurrent(rosterClass))
+      .filter((rosterClass) => {
       if (rosterSchoolFilter !== "all" && rosterClass.schoolName !== rosterSchoolFilter) return false;
       if (rosterTeacherFilter !== "all" && rosterClass.teacherId !== rosterTeacherFilter) return false;
       if (!rosterSearchTerm) return true;
@@ -41416,9 +41427,9 @@
       }
       const schoolSelect = document.getElementById("roster-school-filter");
       const teacherSelect = document.getElementById("roster-teacher-filter");
-      const activeRosterClasses = rosterClasses.filter((item) => item.sourceActive !== false);
+      const activeRosterClasses = rosterClasses.filter((item) => item.sourceActive !== false && rosterClassSchoolIsCurrent(item));
       const allSchoolNames = [...new Set([
-        ...schoolLibrary.map((school) => school.name).filter(Boolean),
+        ...schoolLibrary.filter((school) => normalizeSchoolLifecycleStatus(school) === "current").map((school) => school.name).filter(Boolean),
         ...activeRosterClasses.map((item) => item.schoolName).filter(Boolean)
       ])].sort();
       const rosterTeacherDirectory = classesAndRostersTeacherDirectory();
