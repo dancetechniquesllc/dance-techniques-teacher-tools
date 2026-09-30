@@ -21189,6 +21189,7 @@
       || !["placed", "complete"].includes(String(item?.status || "").trim().toLowerCase())
     );
     const enrollmentWorkflowStage = (item) => enrollmentNextChecklistStep(item);
+    const enrollmentIsNew = (item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) === "assign-class";
     const enrollmentWorkflowLabel = (item) => {
       const stage = enrollmentWorkflowStage(item);
       if (stage === "assign-class") return "Not Placed";
@@ -21538,7 +21539,7 @@
 
     const renderEnrollmentQueue = () => {
       syncTeacherProfileColorRules();
-      const newCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentWorkflowStage(item) !== "complete").length;
+      const newCount = enrollmentIntakeQueue.filter(enrollmentIsNew).length;
       setText("roster-enrollments-waiting-count", String(newCount));
       renderEnrollmentQueueFilters();
       const list = document.getElementById("enrollment-queue-list");
@@ -38615,7 +38616,7 @@
         const haystack = `${student.firstName} ${student.preferredName || ""} ${student.lastName} ${student.parentFirstName || ""} ${student.parentLastName || ""} ${student.parentEmail || ""} ${rosterClass.schoolName} ${rosterClass.name}`.toLowerCase();
         return !term || haystack.includes(term);
       }).sort((left, right) => `${left.student.lastName} ${rosterStudentFirstName(left.student)}`.localeCompare(`${right.student.lastName} ${rosterStudentFirstName(right.student)}`));
-      const newEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentWorkflowStage(item) !== "complete").length;
+      const newEnrollmentCount = enrollmentIntakeQueue.filter(enrollmentIsNew).length;
       document.getElementById("admin-student-library-count").textContent = `${newEnrollmentCount} New · ${records.length} Student${records.length === 1 ? "" : "s"}`;
       const cardMarkup = ({ rosterClass, student }, { includeTeacher = true, includeSchoolClass = true } = {}) => {
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
@@ -38675,10 +38676,10 @@
       if (!summary) return;
       const activeClasses = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false);
       const futureDancers = activeClasses.reduce((count, rosterClass) => count + rosterProspects(rosterClass).length, 0);
-      const incompleteEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) !== "complete").length;
+      const newEnrollmentCount = enrollmentIntakeQueue.filter(enrollmentIsNew).length;
       const dancerDirectoryCount = dashboardEntityUniqueCount(dashboardEntityStudentRecords());
       const metrics = [
-        [incompleteEnrollmentCount, "New Enrollments", "enrollments"],
+        [newEnrollmentCount, "New Enrollments", "enrollments"],
         [dancerDirectoryCount, "Dancer Directory", "directory"],
         [futureDancers, "Future Dancers", "future-dancers"]
       ];
