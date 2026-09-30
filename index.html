@@ -8606,6 +8606,19 @@
     .roster-class-card > .roster-enrollment-bubble { position: absolute; top: 12px; right: 12px; left: auto; min-height: 30px; align-items: center; padding: 5px 10px; transform: none; margin: 0 !important; white-space: nowrap; }
     .roster-class-age-range { margin-bottom: 5px; }
     .roster-class-students { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px 6px; margin-top: 8px; }
+    .roster-card-performance-groups { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; margin-top: 10px; text-align: left; }
+    .roster-card-performance-group { --recital-group-tone: var(--blush); display: grid; align-content: start; gap: 8px; min-width: 0; padding: 10px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 58%,var(--border)); border-radius: 14px; background: color-mix(in srgb,var(--recital-group-tone) 17%,white); }
+    .roster-card-performance-group.tone-sage { --recital-group-tone: var(--sage); }
+    .roster-card-performance-group.tone-blue { --recital-group-tone: #b9dcef; }
+    .roster-card-performance-group.tone-gold { --recital-group-tone: #f0d58c; }
+    .roster-card-performance-group.tone-lavender { --recital-group-tone: var(--lavender); }
+    .roster-card-performance-group > strong { color: var(--berry); font-size: 13px; }
+    .roster-card-performance-group > small { color: var(--muted); font-size: 9px; }
+    .roster-card-performance-group .roster-class-students { grid-template-columns: repeat(4,minmax(0,1fr)); margin-top: 0; }
+    .roster-card-performance-group .roster-recital-planning { position: static; margin-top: auto; }
+    @media (max-width: 640px) {
+      .roster-card-performance-group .roster-class-students { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    }
     .roster-class-student { min-width: 0; display: grid; justify-items: center; gap: 4px; }
     .roster-class-student .roster-student-photo { width: 46px; height: 46px; font-size: 12px; }
     .roster-class-student span:last-child { max-width: 100%; overflow: hidden; color: var(--fg); font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
@@ -8618,6 +8631,75 @@
     .roster-recital-planning.is-ballet { background: var(--blush); }
     .roster-recital-planning.is-tap { background: var(--sage); }
     .roster-recital-planning.is-either { background: color-mix(in srgb, var(--gold) 54%, white); }
+    .roster-meta-recital { background: color-mix(in srgb, var(--blush) 72%, white) !important; color: var(--berry) !important; }
+    .roster-recital-group-actions { display: flex; align-items: center; gap: 8px; }
+    .roster-recital-group-actions button { min-height: 40px; border-color: color-mix(in srgb, var(--berry) 24%, var(--border)); background: color-mix(in srgb, var(--blush) 42%, white); color: var(--berry); }
+    .roster-recital-group-actions button.is-active { background: var(--berry); color: white; }
+    .roster-recital-group-actions button.is-active[data-recital-edit-groups] { animation: recital-done-editing-pulse 1.45s ease-in-out infinite; box-shadow: 0 0 0 0 rgb(107 9 72 / .34); }
+    @keyframes recital-done-editing-pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgb(107 9 72 / .3); } 50% { transform: scale(1.035); box-shadow: 0 0 0 8px rgb(107 9 72 / 0); } }
+    @media (prefers-reduced-motion: reduce) { .roster-recital-group-actions button.is-active[data-recital-edit-groups] { animation: none; outline: 3px solid color-mix(in srgb,var(--berry) 35%,transparent); outline-offset: 3px; } }
+    .roster-class-detail-actions { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; margin: 10px 0 18px; }
+    .roster-class-detail-actions button { min-width: 0; }
+    .recital-performance-groups { display: grid; grid-template-columns: repeat(auto-fit,minmax(360px,1fr)); gap: 14px; }
+    .recital-performance-group { --recital-group-tone: var(--blush); display: grid; align-content: start; gap: 12px; min-width: 0; padding: 16px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 60%,var(--border)); border-radius: 18px; background: color-mix(in srgb,var(--recital-group-tone) 18%,white); }
+    .recital-performance-group.tone-sage { --recital-group-tone: var(--sage); }
+    .recital-performance-group.tone-blue { --recital-group-tone: #b9dcef; }
+    .recital-performance-group.tone-gold { --recital-group-tone: #f0d58c; }
+    .recital-performance-group.tone-lavender { --recital-group-tone: var(--lavender); }
+    .recital-performance-group.is-drop-target { outline: 3px solid var(--berry); outline-offset: 2px; }
+    .recital-performance-group > header { display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; align-items: start; gap: 10px; }
+    .recital-performance-group > header h5,.recital-performance-group > header p { margin: 0; }
+    .recital-performance-group > header h5 { color: var(--berry); font-family: Georgia,"Times New Roman",serif; font-size: 20px; }
+    .recital-performance-group > header p { margin-top: 3px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .recital-performance-group > header button { min-height: 34px; padding: 6px 10px; }
+    .recital-group-badge { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; background: color-mix(in srgb,var(--recital-group-tone) 76%,var(--berry)); color: white; font-size: 18px; font-weight: 900; }
+    .recital-group-classrooms { display: grid; gap: 10px; }
+    .recital-performance-group .roster-classroom-group { padding: 10px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 50%,var(--border)); border-radius: 13px; background: rgb(255 255 255 / .48); }
+    .recital-performance-group .roster-classroom-group > h5 { display: flex; justify-content: space-between; margin: 0 0 8px; color: var(--berry); }
+    .recital-performance-group .roster-classroom-group > h5 small { color: var(--muted); font-family: var(--font-body); font-size: 9px; }
+    .recital-performance-group .roster-student-list { grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); }
+    .recital-performance-group .roster-recital-planning { position: static; margin-top: 2px; }
+    .recital-empty-classroom { padding: 14px; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted); text-align: center; }
+    .recital-student-move,.recital-add-to-group { display: grid; gap: 4px; color: var(--muted); font-size: 8px; font-weight: 850; text-transform: uppercase; }
+    .recital-student-move select,.recital-add-to-group select { min-width: 0; min-height: 34px; padding: 5px 24px 5px 8px; border: 1px solid var(--border); border-radius: 9px; background: white; font: inherit; text-transform: none; }
+    .recital-add-to-group { padding: 10px; border: 1px dashed color-mix(in srgb,var(--recital-group-tone) 75%,var(--berry)); border-radius: 11px; }
+    .recital-add-performance-group { grid-column: 1/-1; display: grid; justify-items: center; gap: 3px; min-height: 76px; border: 1px dashed var(--brick); border-radius: 15px; background: transparent; color: var(--berry); font-size: 14px; font-weight: 900; }
+    .recital-add-performance-group small { color: var(--muted); font-size: 9px; font-weight: 650; }
+    .recital-unassigned-warning { grid-column: 1/-1; padding: 12px; border: 1px solid #d8a447; border-radius: 12px; background: #fff5d8; color: #6b4d12; }
+    .recital-performance-groups.is-editing [draggable="true"] { cursor: grab; }
+    .recital-performance-groups.is-editing [draggable="true"].is-dragging { opacity: .45; }
+    .recital-split-alert { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 12px; margin: 16px 0; padding: 14px 16px; border: 1px solid color-mix(in srgb,var(--brick) 46%,var(--border)); border-radius: 16px; background: color-mix(in srgb,var(--blush) 24%,white); }
+    .recital-split-alert-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: var(--brick); color: white; font-size: 20px; font-weight: 900; }
+    .recital-split-alert strong,.recital-split-alert small { display: block; }
+    .recital-split-alert strong { color: var(--berry); font-size: 15px; }
+    .recital-split-alert small { margin-top: 3px; color: var(--muted); }
+    .recital-split-alert button { min-height: 42px; border-color: color-mix(in srgb,var(--brick) 56%,var(--border)); background: color-mix(in srgb,var(--blush) 30%,white); color: var(--berry); }
+    .roster-class-card .recital-split-alert { grid-template-columns: auto minmax(0,1fr); width: 100%; margin: 10px 0 2px; padding: 10px 12px; text-align: left; }
+    .roster-class-card .recital-split-alert-icon { width: 30px; height: 30px; font-size: 16px; }
+    .roster-class-card .recital-split-alert strong { font-size: 12px; }
+    .roster-class-card .recital-split-alert small { font-size: 9px; }
+    .recital-split-settings-button { border-color: color-mix(in srgb,var(--sage) 72%,#6f8068) !important; background: var(--sage) !important; color: #31402d !important; }
+    .confirm-dialog.recital-suggestion-dialog { width: min(760px,calc(100vw - 30px)); max-height: min(82vh,760px); overflow: auto; }
+    .recital-suggestion-dialog > h3,.recital-suggestion-dialog > p { margin: 0; }
+    .recital-suggestion-dialog > p { margin-top: 5px; color: var(--muted); }
+    .recital-suggestion-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 16px 0; }
+    .recital-suggestion-grid article { --recital-group-tone: var(--blush); display: grid; grid-template-columns: auto minmax(0,1fr); gap: 10px; padding: 14px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 58%,var(--border)); border-radius: 14px; background: color-mix(in srgb,var(--recital-group-tone) 18%,white); }
+    .recital-suggestion-grid article.tone-sage { --recital-group-tone: var(--sage); }
+    .recital-suggestion-grid article.tone-blue { --recital-group-tone: #b9dcef; }
+    .recital-suggestion-grid article.tone-gold { --recital-group-tone: #f0d58c; }
+    .recital-suggestion-grid article.tone-lavender { --recital-group-tone: var(--lavender); }
+    .recital-suggestion-grid strong,.recital-suggestion-grid small { display: block; }
+    .recital-suggestion-grid small,.recital-suggestion-grid p { margin-top: 4px; color: var(--muted); font-size: 10px; }
+    .recital-suggestion-name { width: 100%; min-height: 38px; padding: 7px 10px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 75%,var(--border)); border-radius: 10px; background: rgb(255 255 255 / .78); color: var(--berry); font: inherit; font-weight: 850; }
+    .recital-suggestion-students { display: grid; gap: 7px; margin-top: 10px; }
+    .recital-suggestion-student { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 42%,var(--border)); border-radius: 10px; background: rgb(255 255 255 / .76); cursor: grab; }
+    .recital-suggestion-student.is-dragging { opacity: .42; }
+    .recital-suggestion-student span { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: color-mix(in srgb,var(--recital-group-tone) 70%,white); color: var(--berry); font-size: 9px; font-weight: 900; }
+    .recital-suggestion-student b { font-size: 10px; }
+    .recital-suggestion-drop { grid-column: 1/-1; min-height: 42px; padding: 9px; border: 1px dashed color-mix(in srgb,var(--recital-group-tone) 72%,var(--berry)); border-radius: 10px; color: var(--muted); text-align: center; font-size: 9px; font-weight: 800; }
+    .recital-suggestion-grid article.is-drop-target { outline: 3px solid var(--berry); outline-offset: 2px; }
+    .recital-suggestion-help { display: block; margin-top: 8px; color: var(--muted); font-size: 9px; font-weight: 700; }
+    @media (max-width: 760px) { .roster-class-detail-actions { grid-template-columns: repeat(2,minmax(0,1fr)); } .recital-performance-groups { grid-template-columns: 1fr; } .recital-performance-group > header { grid-template-columns: auto minmax(0,1fr); } .recital-performance-group > header button { grid-row: 2; } .recital-split-alert { grid-template-columns: auto minmax(0,1fr); } .recital-split-alert button { grid-column: 1/-1; } }
     .roster-enrollment-bubble { display: inline-flex !important; width: fit-content; margin-top: 8px !important; padding: 5px 9px; border-radius: 999px; font-weight: 850; color: oklch(28% 0.04 40) !important; }
     .roster-enrollment-bubble.low { background: oklch(91% 0.12 90); }
     .roster-enrollment-bubble.ready { background: oklch(88% 0.11 145); }
@@ -20070,6 +20152,9 @@
     let rosterSchoolFilter = "all";
     let rosterTeacherFilter = "all";
     let rosterSearchTerm = "";
+    const recitalPerformanceGroupsByClass = new Map();
+    let recitalGroupEditClassId = "";
+    let pendingRecitalGroupSuggestion = null;
     let editingRosterStudentId = "";
     let editingRosterClassId = "";
     let rosterProfileNavigationClassId = "";
@@ -22175,7 +22260,7 @@
       const partnershipPreferencesQuery = ["admin", "director"].includes(profile.role)
         ? client.from("partner_school_payment_preferences").select("*")
         : Promise.resolve({ data: [], error: null });
-      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult] = await Promise.all([
+      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, recitalGroupsResult, recitalMembersResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("guardian_user_accounts").select("user_id, guardian_id, revoked_at"),
         partnerSchoolsQuery,
@@ -22189,11 +22274,13 @@
         familyLinksQuery,
         newsletterArchiveQuery,
         partnershipPaymentsQuery,
-        partnershipPreferencesQuery
+        partnershipPreferencesQuery,
+        ["admin", "director"].includes(profile.role) ? client.from("class_recital_performance_groups").select("*").order("position") : Promise.resolve({ data: [], error: null }),
+        ["admin", "director"].includes(profile.role) ? client.from("class_recital_performance_group_members").select("*") : Promise.resolve({ data: [], error: null })
       ]);
       const attendanceTableUnavailable = attendanceResult.error?.code === "42P01";
       const failed = [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult,
-        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult].find((result) => result.error);
+        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, recitalGroupsResult, recitalMembersResult].find((result) => result.error);
       if (failed) {
         sharedRosterReady = false;
         replaceCollection(rosterClasses, []);
@@ -22242,6 +22329,14 @@
       const assignments = assignmentsResult.data || [];
       const activeAssignments = assignments.filter((assignment) => assignment.active !== false);
       const classes = classesResult.data || [];
+      recitalPerformanceGroupsByClass.clear();
+      (recitalGroupsResult.data || []).forEach((group) => {
+        const normalized = { id: group.id, classId: group.dance_class_id, name: group.name, position: Number(group.position || 1), tone: group.tone || "blush", requirement: group.recital_requirement || "either", studentIds: [] };
+        if (!recitalPerformanceGroupsByClass.has(normalized.classId)) recitalPerformanceGroupsByClass.set(normalized.classId, []);
+        recitalPerformanceGroupsByClass.get(normalized.classId).push(normalized);
+      });
+      const recitalGroupById = new Map([...recitalPerformanceGroupsByClass.values()].flat().map((group) => [group.id, group]));
+      (recitalMembersResult.data || []).forEach((member) => recitalGroupById.get(member.group_id)?.studentIds.push(String(member.student_id)));
       archivedRosterStudents = (archivedResult.data || []).map((enrollment) => ({
         id: enrollment.students?.id || enrollment.student_id,
         enrollmentId: enrollment.id,
@@ -38605,6 +38700,130 @@
       return [...groups.entries()].sort(([left], [right]) => left.localeCompare(right, undefined, { sensitivity: "base", numeric: true })).map(([classroom, classroomStudents]) => `<section class="roster-classroom-group"><h5>${rosterSafe(classroom)}</h5><div class="roster-student-list">${renderRosterStudentRows(classroomStudents, prospective)}</div></section>`).join("");
     };
 
+    const recitalStudentAgeMonths = (student) => {
+      if (!student?.birthdate) return null;
+      const born = new Date(`${student.birthdate}T12:00:00`);
+      if (Number.isNaN(born.valueOf())) return null;
+      const today = new Date();
+      return (today.getFullYear() - born.getFullYear()) * 12 + today.getMonth() - born.getMonth() - (today.getDate() < born.getDate() ? 1 : 0);
+    };
+    const recitalGroupAgeRange = (students) => {
+      const ages = students.map(recitalStudentAgeMonths).filter(Number.isFinite).sort((a,b) => a-b);
+      if (!ages.length) return { label: "Birthdates needed", spread: null };
+      const ageLabel = (months) => `${Math.floor(months / 12)}y ${months % 12}m`;
+      return { label: `${ageLabel(ages[0])} – ${ageLabel(ages.at(-1))}`, spread: ages.at(-1) - ages[0] };
+    };
+    const recitalNeedsForStudents = (students) => students.reduce((counts, student) => {
+      const intakeRecord = enrollmentIntakeQueue.find((entry) => String(entry.placed_student_id || "") === String(student.id));
+      const prior = String(student.requestedDanceStyle || student.requested_dance_style || intakeRecord?.requested_dance_style || "").trim().toLowerCase();
+      if (prior === "tap") counts.ballet += 1; else if (prior === "ballet") counts.tap += 1; else counts.either += 1;
+      return counts;
+    }, { ballet: 0, tap: 0, either: 0 });
+    const suggestedRequirementForStudents = (students) => {
+      const needs = recitalNeedsForStudents(students);
+      if (needs.ballet >= needs.either && needs.ballet >= needs.tap) return "ballet";
+      if (needs.tap >= needs.either && needs.tap >= needs.ballet) return "tap";
+      return "either";
+    };
+    const buildSuggestedRecitalGroups = (rosterClass) => {
+      const students = [...rosterEnrolled(rosterClass)].sort((a,b) => (recitalStudentAgeMonths(b) ?? -1) - (recitalStudentAgeMonths(a) ?? -1));
+      const buckets = [];
+      students.forEach((student) => {
+        const age = recitalStudentAgeMonths(student);
+        let bucket = buckets.find((candidate) => candidate.length < 12 && (age == null || recitalGroupAgeRange([...candidate,student]).spread <= 12));
+        if (!bucket) { bucket = []; buckets.push(bucket); }
+        bucket.push(student);
+      });
+      if (buckets.length < 2 && students.length > 1) {
+        const midpoint = Math.ceil(students.length / 2);
+        buckets.splice(0,buckets.length,students.slice(0,midpoint),students.slice(midpoint));
+      }
+      const tones = ["blush","sage","blue","gold","lavender"];
+      return buckets.filter((bucket) => bucket.length).map((bucket,index) => ({
+        id: crypto.randomUUID(), classId: rosterClass.id, position: index+1, tone: tones[index % tones.length],
+        name: `${index === 0 ? "Older" : index === buckets.length-1 ? "Younger" : `Group ${String.fromCharCode(65+index)}`} ${rosterClass.name}`,
+        requirement: suggestedRequirementForStudents(bucket), studentIds: bucket.map((student) => String(student.id))
+      }));
+    };
+    const saveRecitalGroupsForClass = async (rosterClass, groups) => {
+      recitalPerformanceGroupsByClass.set(String(rosterClass.id), groups);
+      if (!window.dtSupabase || document.body.dataset.tourMode === "true") { renderClassesAndRosters(); return true; }
+      const existing = await window.dtSupabase.from("class_recital_performance_groups").select("id").eq("dance_class_id",rosterClass.id);
+      if (existing.error) { sharedRosterError("Recital groups could not be opened.",existing.error,{reload:false}); return false; }
+      if (existing.data?.length) {
+        const removed = await window.dtSupabase.from("class_recital_performance_groups").delete().eq("dance_class_id",rosterClass.id);
+        if (removed.error) { sharedRosterError("Recital groups could not be replaced.",removed.error,{reload:false}); return false; }
+      }
+      const inserted = await window.dtSupabase.from("class_recital_performance_groups").insert(groups.map((group,index) => ({ dance_class_id:rosterClass.id,name:group.name,position:index+1,tone:group.tone,recital_requirement:group.requirement,created_by:window.dtCurrentProfile?.id||null }))).select("*");
+      if (inserted.error) { sharedRosterError("Recital groups could not be saved.",inserted.error,{reload:false}); return false; }
+      const savedGroups = (inserted.data || []).sort((a,b)=>a.position-b.position).map((row,index) => ({ id:row.id,classId:row.dance_class_id,name:row.name,position:row.position,tone:row.tone,requirement:row.recital_requirement,studentIds:[...groups[index].studentIds] }));
+      const members = savedGroups.flatMap((group) => group.studentIds.map((studentId) => ({ group_id:group.id,dance_class_id:rosterClass.id,student_id:studentId })));
+      if (members.length) {
+        const memberResult = await window.dtSupabase.from("class_recital_performance_group_members").insert(members);
+        if (memberResult.error) { sharedRosterError("Recital group dancers could not be saved.",memberResult.error,{reload:false}); return false; }
+      }
+      recitalPerformanceGroupsByClass.set(String(rosterClass.id),savedGroups);
+      renderClassesAndRosters();
+      return true;
+    };
+    const moveStudentToRecitalGroup = async (rosterClass, studentId, targetGroupId) => {
+      const groups = recitalPerformanceGroupsByClass.get(String(rosterClass.id)) || [];
+      const target = groups.find((group) => String(group.id) === String(targetGroupId));
+      if (!target || !rosterEnrolled(rosterClass).some((student) => String(student.id) === String(studentId))) return false;
+      groups.forEach((group) => { group.studentIds = group.studentIds.filter((id) => String(id) !== String(studentId)); });
+      target.studentIds.push(String(studentId));
+      if (window.dtSupabase && document.body.dataset.tourMode !== "true") {
+        const result = await window.dtSupabase.from("class_recital_performance_group_members").upsert({ group_id:target.id,dance_class_id:rosterClass.id,student_id:studentId },{ onConflict:"dance_class_id,student_id" });
+        if (result.error) { sharedRosterError("That recital group move could not be saved.",result.error,{reload:false}); return false; }
+      }
+      renderClassesAndRosters();
+      return true;
+    };
+    const recitalGroupStudentMarkup = (student, rosterClass, group, groups, editing) => `<article class="roster-profile-student-card ${student.gender === "male" ? "is-male" : ""}" ${editing?`draggable="true" data-recital-drag-student="${rosterSafe(student.id)}" data-recital-source-group="${rosterSafe(group.id)}" title="Drag ${rosterSafe(rosterStudentFullName(student))} to another performance group"`:""}>
+      <button class="roster-profile-student-card-main" type="button" data-roster-edit-student="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${rosterSafe(student.photo)}" alt="">`:rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterAge(student.birthdate))}</small></button>
+    </article>`;
+    const renderRecitalPerformanceGroups = (rosterClass, groups) => {
+      const editing = recitalGroupEditClassId === String(rosterClass.id);
+      const enrolled = rosterEnrolled(rosterClass);
+      const assigned = new Set(groups.flatMap((group)=>group.studentIds.map(String)));
+      const unassigned = enrolled.filter((student)=>!assigned.has(String(student.id)));
+      return `<div class="recital-performance-groups ${editing?"is-editing":""}" data-recital-class="${rosterSafe(rosterClass.id)}">${groups.map((group,index) => {
+        const students = enrolled.filter((student)=>group.studentIds.map(String).includes(String(student.id)));
+        const age = recitalGroupAgeRange(students);const needs=recitalNeedsForStudents(students);
+        const classrooms = [...new Set(students.map((student)=>String(student.officialClassroom||student.classroom||"Classroom Not Assigned").trim()))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+        return `<section class="recital-performance-group tone-${rosterSafe(group.tone)}" data-recital-drop-group="${rosterSafe(group.id)}"><header><span class="recital-group-badge">${String.fromCharCode(65+index)}</span><div><h5>${rosterSafe(group.name)}</h5><p>${students.length} dancer${students.length===1?"":"s"} · Age range: ${rosterSafe(age.label)}${age.spread==null?"":` · ${age.spread}-month span`}</p></div><button class="secondary" type="button" data-recital-rename-group="${rosterSafe(group.id)}">Rename</button>${editing&&students.length===0&&groups.length>1?`<button class="secondary" type="button" data-recital-delete-group="${rosterSafe(group.id)}">Delete</button>`:""}</header>
+          <div class="recital-group-classrooms">${classrooms.map((classroom)=>{const classroomStudents=students.filter((student)=>String(student.officialClassroom||student.classroom||"Classroom Not Assigned").trim()===classroom);return `<section class="roster-classroom-group"><h5>${rosterSafe(classroom)} <small>${classroomStudents.length} dancer${classroomStudents.length===1?"":"s"}</small></h5><div class="roster-student-list">${classroomStudents.map((student)=>recitalGroupStudentMarkup(student,rosterClass,group,groups,editing)).join("")}</div></section>`;}).join("")}${editing&&!students.length?`<div class="recital-empty-classroom">Drop a dancer here</div>`:""}</div>
+          <div class="roster-recital-planning is-${rosterSafe(group.requirement)}"><strong>Needs to Perform</strong><select class="roster-recital-select" data-recital-group-requirement="${rosterSafe(group.id)}"><option value="tap" ${group.requirement==="tap"?"selected":""}>Tap</option><option value="ballet" ${group.requirement==="ballet"?"selected":""}>Ballet</option><option value="either" ${group.requirement==="either"?"selected":""}>Either</option></select><span class="roster-recital-need">Ballet <strong>${needs.ballet}</strong></span><span class="roster-recital-need">Tap <strong>${needs.tap}</strong></span><span class="roster-recital-need">Either <strong>${needs.either}</strong></span></div>
+        </section>`;
+      }).join("")}${editing?`<button class="recital-add-performance-group" type="button" data-recital-add-performance-group>＋ Add Performance Group<small>For larger classes, create another recital-only group.</small></button>`:""}${unassigned.length?`<div class="recital-unassigned-warning"><strong>${unassigned.length} dancer${unassigned.length===1?" needs":"s need"} a recital group:</strong> ${unassigned.map(rosterStudentFullName).map(rosterSafe).join(", ")}</div>`:""}</div>`;
+    };
+    const recitalSuggestionMarkup = (rosterClass) => {
+      const suggestion = pendingRecitalGroupSuggestion;
+      if (!suggestion || String(suggestion.classId)!==String(rosterClass.id)) return "";
+      const enrolled = rosterEnrolled(rosterClass);
+      return `<div class="confirm-overlay active recital-suggestion-overlay"><section class="confirm-dialog recital-suggestion-dialog" role="dialog" aria-modal="true" aria-labelledby="recital-suggestion-title"><h3 id="recital-suggestion-title">Suggested Recital Groups</h3><p>Review and edit the suggestion before applying it. Primary classroom assignments will not change.</p><small class="recital-suggestion-help">Rename a group, or drag dancers between groups. Their official classroom stays the same.</small><div class="recital-suggestion-grid">${suggestion.groups.map((group,index)=>{const students=enrolled.filter((student)=>group.studentIds.includes(String(student.id)));const age=recitalGroupAgeRange(students);return `<article class="tone-${rosterSafe(group.tone)}" data-recital-suggestion-drop="${rosterSafe(group.id)}"><span class="recital-group-badge">${String.fromCharCode(65+index)}</span><div><input class="recital-suggestion-name" type="text" value="${rosterSafe(group.name)}" aria-label="Group ${String.fromCharCode(65+index)} name" data-recital-suggestion-name="${rosterSafe(group.id)}"><small>${students.length} dancer${students.length===1?"":"s"} · ${rosterSafe(age.label)}</small><div class="recital-suggestion-students">${students.map((student)=>`<div class="recital-suggestion-student" draggable="true" data-recital-suggestion-student="${rosterSafe(student.id)}"><span>${rosterSafe(rosterStudentInitials(student))}</span><b>${rosterSafe(rosterStudentFullName(student))}</b></div>`).join("")}${students.length?"":`<div class="recital-suggestion-drop">Drop a dancer here</div>`}</div></div></article>`;}).join("")}</div><div class="confirm-actions"><button class="secondary" type="button" data-recital-cancel-suggestion>Keep Current Roster</button><button class="primary" type="button" data-recital-apply-suggestion>Apply Edited Groups</button></div></section></div>`;
+    };
+    window.dtOpenRecitalGroupSuggestion = (classId) => {
+      const rosterClass=rosterClasses.find((item)=>String(item.id)===String(classId));if(!rosterClass)return;
+      const groups=buildSuggestedRecitalGroups(rosterClass);if(groups.length<2)return showToast("This class does not currently need more than one recital group.");
+      pendingRecitalGroupSuggestion={classId:rosterClass.id,groups};renderClassesAndRosters();
+    };
+    window.dtCancelRecitalSuggestion = () => { pendingRecitalGroupSuggestion=null;renderClassesAndRosters(); };
+    window.dtApplyRecitalSuggestion = () => {
+      const suggestion=pendingRecitalGroupSuggestion;if(!suggestion)return;
+      const rosterClass=rosterClasses.find((item)=>String(item.id)===String(suggestion.classId));if(!rosterClass)return;
+      suggestion.groups.forEach((group,index)=>{group.name=String(group.name||"").trim()||`Group ${String.fromCharCode(65+index)}`;});
+      pendingRecitalGroupSuggestion=null;recitalGroupEditClassId=String(rosterClass.id);
+      void saveRecitalGroupsForClass(rosterClass,suggestion.groups).then((saved)=>showToast(saved?"Recital groups created. Classroom groups stayed unchanged.":"The recital groups could not be saved."));
+    };
+    const bindRecitalGroupControls = (detail,rosterClass) => {
+      detail.querySelector("[data-recital-suggest-split]")?.addEventListener("click",(event)=>{event.stopPropagation();window.dtOpenRecitalGroupSuggestion(rosterClass.id);});
+      detail.querySelector("[data-recital-edit-groups]")?.addEventListener("click",(event)=>{event.stopPropagation();recitalGroupEditClassId=recitalGroupEditClassId===String(rosterClass.id)?"":String(rosterClass.id);renderClassesAndRosters();});
+      detail.querySelectorAll("[data-recital-rename-group]").forEach((button)=>button.addEventListener("click",(event)=>{event.stopPropagation();const groups=recitalPerformanceGroupsByClass.get(String(rosterClass.id))||[];const group=groups.find((item)=>String(item.id)===String(button.dataset.recitalRenameGroup));if(!group)return;const name=window.prompt("Performance group name",group.name);if(!name?.trim())return;group.name=name.trim();void saveRecitalGroupsForClass(rosterClass,groups).then((saved)=>showToast(saved?"Performance group renamed":"The group name could not be saved."));}));
+      detail.querySelectorAll("[data-recital-delete-group]").forEach((button)=>button.addEventListener("click",(event)=>{event.stopPropagation();const groups=recitalPerformanceGroupsByClass.get(String(rosterClass.id))||[];const group=groups.find((item)=>String(item.id)===String(button.dataset.recitalDeleteGroup));if(!group||group.studentIds.length)return showToast("Move every dancer out of this group before deleting it.");if(!window.confirm(`Delete ${group.name}?`))return;void saveRecitalGroupsForClass(rosterClass,groups.filter((item)=>item!==group).map((item,index)=>({...item,position:index+1})));}));
+      detail.querySelector("[data-recital-add-performance-group]")?.addEventListener("click",(event)=>{event.stopPropagation();const groups=recitalPerformanceGroupsByClass.get(String(rosterClass.id))||[],tones=["blush","sage","blue","gold","lavender"],index=groups.length;groups.push({id:crypto.randomUUID(),classId:rosterClass.id,name:`Group ${String.fromCharCode(65+index)}`,position:index+1,tone:tones[index%tones.length],requirement:"either",studentIds:[]});void saveRecitalGroupsForClass(rosterClass,groups).then((saved)=>showToast(saved?"Performance group added":"The group could not be added."));});
+    };
+
     const renderStudentLibrary = () => {
       const list = document.getElementById("admin-student-library-list");
       const schoolFilter = document.getElementById("student-library-school");
@@ -41438,6 +41657,14 @@
 
     function renderClassesAndRosters() {
       renderBoutiqueBackendSummary();
+      if (document.body.dataset.tourMode === "true" && new URLSearchParams(location.search).has("dramatic-age-preview")) {
+        const previewClass = rosterClasses.find((item) => String(item.id) === "primrose-north-under-3") || rosterClasses.find((item) => rosterEnrolled(item).length > 1);
+        const previewStudents = previewClass ? rosterEnrolled(previewClass) : [];
+        if (previewStudents.length > 1) {
+          previewStudents[0].birthdate = "2024-11-01";
+          previewStudents[previewStudents.length - 1].birthdate = "2022-05-01";
+        }
+      }
       const sharedState = document.body.dataset.sharedRosterState;
       if (document.body.dataset.tourMode !== "true" && sharedState !== "ready") {
         document.getElementById("admin-roster-summary").innerHTML = "";
@@ -41532,6 +41759,10 @@
         const ageRange = datedStudents.length
           ? `${rosterAge(datedStudents[0].birthdate)} – ${rosterAge(datedStudents[datedStudents.length - 1].birthdate)}`
           : "Ages not entered";
+        const recitalAgeRange = recitalGroupAgeRange(enrolledStudents);
+        const recitalGroups = (recitalPerformanceGroupsByClass.get(String(item.id)) || []).sort((a,b)=>a.position-b.position);
+        const hasRecitalGroups = recitalGroups.length > 1;
+        const showSplitSuggestion = !hasRecitalGroups && recitalAgeRange.spread > 12;
         const firstNameCounts = enrolledStudents.reduce((counts, student) => {
           const key = rosterStudentFirstName(student).trim().toLowerCase();
           counts.set(key, (counts.get(key) || 0) + 1);
@@ -41539,14 +41770,15 @@
         }, new Map());
         const weekdayShort = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[item.day] || "—";
         const hasDayOverride = item.scheduleDay !== "" && item.scheduleDay != null;
-        return `<button class="roster-class-card ${item.id === selectedRosterClassId && rosterClassProfileOpen ? "is-selected" : ""}" type="button" data-roster-class="${rosterSafe(item.id)}">
+        return `<button class="roster-class-card ${hasRecitalGroups ? "is-recital-split" : ""} ${item.id === selectedRosterClassId && rosterClassProfileOpen ? "is-selected" : ""}" type="button" data-roster-class="${rosterSafe(item.id)}">
           <span class="roster-class-schedule-bubbles"><span class="roster-class-weekday-bubble${hasDayOverride ? " is-override" : ""}" title="${rosterSafe(item.day || "Dance day not set")}">${rosterSafe(weekdayShort)}</span><span class="roster-class-time-bubble">${rosterSafe(friendlyScheduleTime(item.time, item.timeBlock || "Time not set"))}</span></span>
           <span class="roster-class-level-bubble">Level ${rosterSafe(item.level || "—")}</span>
           <small class="roster-enrollment-bubble ${enrolled >= item.capacity ? "full" : (enrolled >= 7 ? "ready" : "low")}">${enrolled}/${item.capacity}${enrolled >= item.capacity ? " · Full" : " Enrolled"}</small>
           <span class="roster-class-teacher-bubble teacher-identity-bubble ${teacherProfileColorClass(assignedTeacher || item.teacherId)}" title="${rosterSafe(assignedTeacher ? rosterTeacherName(item.teacherId) : "Teacher unassigned")}" aria-label="${rosterSafe(assignedTeacher ? `Assigned to ${rosterTeacherName(item.teacherId)}` : "Teacher unassigned")}">${assignedTeacher?.photo ? `<img src="${rosterSafe(assignedTeacher.photo)}" alt="">` : rosterSafe(assignedTeacher ? initialsFor(assignedTeacher) : "—")}</span>
           <strong>${rosterSafe(item.name)}</strong>
           <small class="roster-class-age-range">${rosterSafe(ageRange)}</small>
-          <span class="roster-class-students">${enrolledStudents.length ? enrolledStudents.map((student) => `<span class="roster-class-student">
+          ${showSplitSuggestion ? `<span class="recital-split-alert"><span class="recital-split-alert-icon" aria-hidden="true">!</span><span><strong>Split Suggested</strong><small>This class has a ${recitalAgeRange.spread}-month age spread. Consider splitting it for recital.</small></span></span>` : ""}
+          ${hasRecitalGroups ? `<span class="roster-card-performance-groups">${recitalGroups.map((group,index)=>{const groupStudents=enrolledStudents.filter((student)=>group.studentIds.map(String).includes(String(student.id)));const groupNeeds=recitalNeedsForStudents(groupStudents);const groupAge=recitalGroupAgeRange(groupStudents);const requirement=["tap","ballet","either"].includes(group.requirement)?group.requirement:suggestedRequirementForStudents(groupStudents);return `<span class="roster-card-performance-group tone-${rosterSafe(group.tone)}"><strong>${String.fromCharCode(65+index)} · ${rosterSafe(group.name)}</strong><small>${groupStudents.length} dancer${groupStudents.length===1?"":"s"} · ${rosterSafe(groupAge.label)}</small><span class="roster-class-students">${groupStudents.map((student)=>`<span class="roster-class-student"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${rosterSafe(student.photo)}" alt="">`:rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span>${rosterSafe(rosterStudentFirstName(student))}</span></span>`).join("")}</span><span class="roster-recital-planning is-${rosterSafe(requirement)}"><strong>Needs to Perform</strong><span class="roster-recital-need">Ballet <strong>${groupNeeds.ballet}</strong></span><span class="roster-recital-need">Tap <strong>${groupNeeds.tap}</strong></span><span class="roster-recital-need">Either <strong>${groupNeeds.either}</strong></span></span></span>`;}).join("")}</span>` : `<span class="roster-class-students">${enrolledStudents.length ? enrolledStudents.map((student) => `<span class="roster-class-student">
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
             <span>${rosterSafe(`${rosterStudentFirstName(student)}${firstNameCounts.get(rosterStudentFirstName(student).trim().toLowerCase()) > 1 && student.lastName ? ` ${student.lastName.trim().charAt(0).toUpperCase()}.` : ""}`)}</span>
           </span>`).join("") : `<span class="roster-class-no-students">No enrolled dancers yet</span>`}</span>
@@ -41560,7 +41792,7 @@
             <span class="roster-recital-need">Ballet <strong>${recitalNeeds.ballet}</strong></span>
             <span class="roster-recital-need">Tap <strong>${recitalNeeds.tap}</strong></span>
             <span class="roster-recital-need">Either <strong>${recitalNeeds.either}</strong></span>
-          </span>
+          </span>`}
         </button>`;
       };
       if (list) {
@@ -41603,6 +41835,16 @@
       profileOverlay?.setAttribute("aria-hidden", "false");
       const enrolled = rosterEnrolled(selected);
       const prospects = rosterProspects(selected);
+      if (document.body.dataset.tourMode === "true" && new URLSearchParams(location.search).has("dramatic-age-preview") && enrolled.length > 1) {
+        enrolled[0].birthdate = "2024-11-01";
+        enrolled[enrolled.length - 1].birthdate = "2022-05-01";
+      }
+      if (document.body.dataset.tourMode === "true" && new URLSearchParams(location.search).has("recital-group-preview") && !recitalPerformanceGroupsByClass.has(String(selected.id)) && enrolled.length > 1) {
+        recitalPerformanceGroupsByClass.set(String(selected.id),buildSuggestedRecitalGroups(selected));
+        recitalGroupEditClassId = String(selected.id);
+      }
+      const recitalGroups = (recitalPerformanceGroupsByClass.get(String(selected.id)) || []).sort((a,b)=>a.position-b.position);
+      const classIsSplitForRecital = recitalGroups.length > 1;
       const assignedDancers = rosterClassAssignedDancers(selected);
       const classCanBeDeleted = assignedDancers.total === 0;
       detail.innerHTML = `
@@ -41614,6 +41856,7 @@
           <span class="school-library-assignment ${teacherAssignmentColorClass(selected.teacherId)}" ${teacherAssignmentStyle(selected.teacherId)}>Teacher · ${rosterSafe(rosterTeacherName(selected.teacherId))}</span>
           <span>${rosterSafe(selected.day)} · ${rosterSafe(friendlyScheduleTime(selected.time, selected.timeBlock || "Time not set"))}</span>
           <span>${enrolled.length}/${selected.capacity} Enrolled</span>
+          ${classIsSplitForRecital ? `<span class="roster-meta-recital">Recital: ${recitalGroups.length} Groups</span>` : ""}
           ${selected.ageGroup ? `<span>${rosterSafe(selected.ageGroup)}</span>` : ""}${selected.level ? `<span>Level ${rosterSafe(selected.level)}</span>` : ""}
         </div>
         <div class="roster-toolbar">
@@ -41623,15 +41866,18 @@
           <label>AM/PM<select data-roster-class-setting="timeBlock" aria-label="AM or PM for this class">${optionMarkup([{ value: "AM", label: "AM" }, { value: "PM", label: "PM" }], selected.timeBlock || "AM")}</select></label>
           <label>Start Time<select data-roster-class-setting="time" aria-label="Class start time in 15-minute increments">${quarterHourOptions(selected.time || "")}</select></label>
         </div>
-        <div class="roster-section-heading"><div><h4>Class Roster</h4><small>Official class roster</small></div><div class="roster-class-action-row"><button class="secondary" type="button" data-roster-class-feed><img src="../../parent-portal/assets/badges/class-post.png" alt="">Class Feed</button><button class="secondary" type="button" data-roster-personal-feed><img src="assets/parent-portal-private-profile.png" alt="">Personal Feeds</button><button class="secondary roster-class-post-button" type="button" data-roster-post><img src="assets/parent-portal-post.png" alt="">Post</button><button class="secondary" type="button" data-roster-print>Print Roster</button><button class="secondary" type="button" data-roster-add="enrolled">Add a Dancer</button></div></div>
-        <div class="roster-classroom-groups">${renderRosterStudentClassroomGroups(enrolled)}</div>
+        <div class="roster-section-heading"><div><h4>Class Roster</h4><small>${classIsSplitForRecital ? "Organized by recital performance groups. Dancers remain in their same classroom groups." : "Official class roster"}</small></div><div class="roster-recital-group-actions">${classIsSplitForRecital ? `<button class="secondary" type="button" data-recital-suggest-split onclick="event.stopPropagation();window.dtOpenRecitalGroupSuggestion('${rosterSafe(selected.id)}')">Suggest Groups</button><button class="secondary ${recitalGroupEditClassId===String(selected.id)?"is-active":""}" type="button" data-recital-edit-groups>${recitalGroupEditClassId===String(selected.id)?"Done Editing":"Edit Groups"}</button>` : ""}</div></div>
+        <div class="roster-class-action-row roster-class-detail-actions"><button class="secondary" type="button" data-roster-class-feed><img src="../../parent-portal/assets/badges/class-post.png" alt="">Class Feed</button><button class="secondary" type="button" data-roster-personal-feed><img src="assets/parent-portal-private-profile.png" alt="">Personal Feeds</button><button class="secondary roster-class-post-button" type="button" data-roster-post><img src="assets/parent-portal-post.png" alt="">Post</button><button class="secondary" type="button" data-roster-print>Print Roster</button><button class="secondary" type="button" data-roster-add="enrolled">Add a Dancer</button></div>
+        <div class="roster-classroom-groups">${classIsSplitForRecital ? renderRecitalPerformanceGroups(selected,recitalGroups) : renderRosterStudentClassroomGroups(enrolled)}</div>
         <div class="roster-section-heading"><div><h4>Future Dancers</h4><small>Trials and friendly follow-up</small></div><button class="roster-add-future-button" type="button" data-roster-add="prospective">Add a Future Dancer</button></div>
         <div class="roster-student-list">${renderRosterStudentRows(prospects, true)}</div>
         <div class="roster-section-heading">
           <div><h4>Class Settings</h4><small>${classCanBeDeleted ? "This class is empty and can be deleted." : "Remove or reassign every dancer before deleting this class."}</small></div>
-          <button class="danger-btn" type="button" data-roster-delete-class="${rosterSafe(selected.id)}" ${classCanBeDeleted ? "" : "disabled"}>Delete Class</button>
+          <div class="roster-recital-group-actions">${!classIsSplitForRecital ? `<button class="secondary recital-split-settings-button" type="button" data-recital-suggest-split onclick="event.stopPropagation();window.dtOpenRecitalGroupSuggestion('${rosterSafe(selected.id)}')">Split Class for Recital</button>` : ""}<button class="danger-btn" type="button" data-roster-delete-class="${rosterSafe(selected.id)}" ${classCanBeDeleted ? "" : "disabled"}>Delete Class</button></div>
         </div>
+        ${recitalSuggestionMarkup(selected)}
       `;
+      bindRecitalGroupControls(detail, selected);
       void hydrateClassParentPortalStatus(selected);
     }
 
@@ -50870,6 +51116,26 @@
     });
 
     document.getElementById("admin-home-classes-rosters")?.addEventListener("change", (event) => {
+      const selectedClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
+      const selectedGroups = selectedClass ? (recitalPerformanceGroupsByClass.get(String(selectedClass.id)) || []) : [];
+      const groupRequirement = event.target.closest("[data-recital-group-requirement]");
+      if (groupRequirement && selectedClass) {
+        const group = selectedGroups.find((item) => String(item.id) === String(groupRequirement.dataset.recitalGroupRequirement));
+        if (!group) return;
+        group.requirement = groupRequirement.value;
+        void saveRecitalGroupsForClass(selectedClass,selectedGroups).then((saved)=>showToast(saved?"Recital performance updated":"The recital performance could not be saved."));
+        return;
+      }
+      const moveStudent = event.target.closest("[data-recital-move-student]");
+      if (moveStudent && selectedClass) {
+        void moveStudentToRecitalGroup(selectedClass,moveStudent.dataset.recitalMoveStudent,moveStudent.value).then((saved)=>showToast(saved?"Dancer moved without changing the classroom assignment":"That recital move could not be saved."));
+        return;
+      }
+      const addToGroup = event.target.closest("[data-recital-add-to-group]");
+      if (addToGroup && addToGroup.value && selectedClass) {
+        void moveStudentToRecitalGroup(selectedClass,addToGroup.value,addToGroup.dataset.recitalAddToGroup).then((saved)=>showToast(saved?"Dancer added to the recital group":"That recital assignment could not be saved."));
+        return;
+      }
       const recitalSelect = event.target.closest("[data-recital-performance-select]");
       if (recitalSelect) {
         event.stopPropagation();
@@ -51104,6 +51370,57 @@
       }
       const rosterClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
       if (!rosterClass) return;
+      const recitalGroups = recitalPerformanceGroupsByClass.get(String(rosterClass.id)) || [];
+      if (event.target.closest("[data-recital-suggest-split]")) {
+        const suggested = buildSuggestedRecitalGroups(rosterClass);
+        if (suggested.length < 2) return showToast("This class does not currently need more than one recital group.");
+        pendingRecitalGroupSuggestion = { classId:rosterClass.id,groups:suggested };
+        renderClassesAndRosters();
+        return;
+      }
+      if (event.target.closest("[data-recital-cancel-suggestion]")) {
+        pendingRecitalGroupSuggestion = null;
+        renderClassesAndRosters();
+        return;
+      }
+      if (event.target.closest("[data-recital-apply-suggestion]")) {
+        const suggested = pendingRecitalGroupSuggestion?.groups || [];
+        suggested.forEach((group,index)=>{group.name=String(group.name||"").trim()||`Group ${String.fromCharCode(65+index)}`;});
+        pendingRecitalGroupSuggestion = null;
+        recitalGroupEditClassId = String(rosterClass.id);
+        void saveRecitalGroupsForClass(rosterClass,suggested).then((saved)=>showToast(saved?"Recital groups created. Classroom groups stayed unchanged.":"The recital groups could not be saved."));
+        return;
+      }
+      if (event.target.closest("[data-recital-edit-groups]")) {
+        recitalGroupEditClassId = recitalGroupEditClassId === String(rosterClass.id) ? "" : String(rosterClass.id);
+        renderClassesAndRosters();
+        return;
+      }
+      const renameGroup = event.target.closest("[data-recital-rename-group]");
+      if (renameGroup) {
+        const group = recitalGroups.find((item)=>String(item.id)===String(renameGroup.dataset.recitalRenameGroup));
+        if (!group) return;
+        const name = window.prompt("Performance group name",group.name);
+        if (!name?.trim()) return;
+        group.name = name.trim();
+        void saveRecitalGroupsForClass(rosterClass,recitalGroups).then((saved)=>showToast(saved?"Performance group renamed":"The group name could not be saved."));
+        return;
+      }
+      const deleteGroup = event.target.closest("[data-recital-delete-group]");
+      if (deleteGroup) {
+        const group = recitalGroups.find((item)=>String(item.id)===String(deleteGroup.dataset.recitalDeleteGroup));
+        if (!group || group.studentIds.length) return showToast("Move every dancer out of this group before deleting it.");
+        if (!window.confirm(`Delete ${group.name}?`)) return;
+        const remaining = recitalGroups.filter((item)=>item!==group).map((item,index)=>({...item,position:index+1}));
+        void saveRecitalGroupsForClass(rosterClass,remaining).then((saved)=>showToast(saved?"Empty recital group deleted":"The group could not be deleted."));
+        return;
+      }
+      if (event.target.closest("[data-recital-add-performance-group]")) {
+        const tones=["blush","sage","blue","gold","lavender"];const index=recitalGroups.length;
+        recitalGroups.push({id:crypto.randomUUID(),classId:rosterClass.id,name:`Group ${String.fromCharCode(65+index)}`,position:index+1,tone:tones[index%tones.length],requirement:"either",studentIds:[]});
+        void saveRecitalGroupsForClass(rosterClass,recitalGroups).then((saved)=>showToast(saved?"Performance group added":"The group could not be added."));
+        return;
+      }
       if (event.target.closest("[data-roster-class-feed]")) {
         openRosterClassFeed(rosterClass);
         return;
@@ -51193,6 +51510,73 @@
         if (!student) return;
         openRosterStudentEditor(rosterClass, student, { navigationScope: "class" });
       }
+    });
+    let recitalSuggestionDraggedStudentId = "";
+    document.addEventListener("input", (event) => {
+      const input = event.target.closest("[data-recital-suggestion-name]");
+      if (!input || !pendingRecitalGroupSuggestion) return;
+      const group = pendingRecitalGroupSuggestion.groups.find((item)=>String(item.id)===String(input.dataset.recitalSuggestionName));
+      if (group) group.name = input.value;
+    });
+    document.addEventListener("dragstart", (event) => {
+      const card = event.target.closest("[data-recital-suggestion-student]");
+      if (!card) return;
+      recitalSuggestionDraggedStudentId = card.dataset.recitalSuggestionStudent;
+      card.classList.add("is-dragging");
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain",recitalSuggestionDraggedStudentId);
+    });
+    document.addEventListener("dragover", (event) => {
+      const target = event.target.closest("[data-recital-suggestion-drop]");
+      if (!target || !recitalSuggestionDraggedStudentId) return;
+      event.preventDefault();
+      document.querySelectorAll("[data-recital-suggestion-drop].is-drop-target").forEach((item)=>item.classList.toggle("is-drop-target",item===target));
+    });
+    document.addEventListener("drop", (event) => {
+      const target = event.target.closest("[data-recital-suggestion-drop]");
+      if (!target || !recitalSuggestionDraggedStudentId || !pendingRecitalGroupSuggestion) return;
+      event.preventDefault();
+      const studentId = recitalSuggestionDraggedStudentId;
+      recitalSuggestionDraggedStudentId = "";
+      pendingRecitalGroupSuggestion.groups.forEach((group)=>{ group.studentIds=group.studentIds.filter((id)=>String(id)!==String(studentId)); });
+      const targetGroup = pendingRecitalGroupSuggestion.groups.find((group)=>String(group.id)===String(target.dataset.recitalSuggestionDrop));
+      if (targetGroup && !targetGroup.studentIds.map(String).includes(String(studentId))) targetGroup.studentIds.push(String(studentId));
+      renderClassesAndRosters();
+    });
+    document.addEventListener("dragend", () => {
+      recitalSuggestionDraggedStudentId = "";
+      document.querySelectorAll("[data-recital-suggestion-drop].is-drop-target").forEach((item)=>item.classList.remove("is-drop-target"));
+      document.querySelectorAll("[data-recital-suggestion-student].is-dragging").forEach((item)=>item.classList.remove("is-dragging"));
+    });
+    let recitalDraggedStudentId = "";
+    document.addEventListener("dragstart", (event) => {
+      const card = event.target.closest("[data-recital-drag-student]");
+      if (!card) return;
+      recitalDraggedStudentId = card.dataset.recitalDragStudent;
+      card.classList.add("is-dragging");
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain",recitalDraggedStudentId);
+    });
+    document.addEventListener("dragover", (event) => {
+      const target = event.target.closest("[data-recital-drop-group]");
+      if (!target || !recitalDraggedStudentId) return;
+      event.preventDefault();
+      document.querySelectorAll("[data-recital-drop-group].is-drop-target").forEach((item)=>item.classList.toggle("is-drop-target",item===target));
+    });
+    document.addEventListener("drop", (event) => {
+      const target = event.target.closest("[data-recital-drop-group]");
+      if (!target || !recitalDraggedStudentId) return;
+      event.preventDefault();
+      const rosterClass = rosterClasses.find((item)=>String(item.id)===String(selectedRosterClassId));
+      const studentId = recitalDraggedStudentId;recitalDraggedStudentId="";
+      document.querySelectorAll("[data-recital-drop-group].is-drop-target").forEach((item)=>item.classList.remove("is-drop-target"));
+      document.querySelectorAll("[data-recital-drag-student].is-dragging").forEach((item)=>item.classList.remove("is-dragging"));
+      if (rosterClass) void moveStudentToRecitalGroup(rosterClass,studentId,target.dataset.recitalDropGroup).then((saved)=>showToast(saved?"Dancer moved without changing the classroom assignment":"That recital move could not be saved."));
+    });
+    document.addEventListener("dragend", () => {
+      recitalDraggedStudentId="";
+      document.querySelectorAll("[data-recital-drop-group].is-drop-target").forEach((item)=>item.classList.remove("is-drop-target"));
+      document.querySelectorAll("[data-recital-drag-student].is-dragging").forEach((item)=>item.classList.remove("is-dragging"));
     });
     document.getElementById("roster-class-feed-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "roster-class-feed-overlay" || event.target.closest("[data-close-roster-class-feed]")) closeRosterClassFeed();
@@ -51471,6 +51855,15 @@
       if (event.target.id !== "roster-class-profile-overlay") return;
       rosterClassProfileOpen = false;
       renderClassesAndRosters();
+    });
+    document.addEventListener("change", (event) => {
+      const control=event.target.closest("[data-recital-group-requirement],[data-recital-move-student],[data-recital-add-to-group]");if(!control)return;
+      const rosterClass=rosterClasses.find((item)=>String(item.id)===String(selectedRosterClassId));if(!rosterClass)return;
+      const groups=recitalPerformanceGroupsByClass.get(String(rosterClass.id))||[];
+      if(control.matches("[data-recital-group-requirement]")){const group=groups.find((item)=>String(item.id)===String(control.dataset.recitalGroupRequirement));if(!group)return;group.requirement=control.value;void saveRecitalGroupsForClass(rosterClass,groups);return;}
+      const studentId=control.matches("[data-recital-move-student]")?control.dataset.recitalMoveStudent:control.value;
+      const groupId=control.matches("[data-recital-move-student]")?control.value:control.dataset.recitalAddToGroup;
+      if(studentId&&groupId)void moveStudentToRecitalGroup(rosterClass,studentId,groupId).then((saved)=>showToast(saved?"Dancer moved without changing the classroom assignment":"That recital move could not be saved."));
     });
     window.addEventListener("beforeunload", (event) => {
       if (!rosterMultiHasUnsavedChanges()) return;
