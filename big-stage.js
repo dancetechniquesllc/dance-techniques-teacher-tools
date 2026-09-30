@@ -15,6 +15,11 @@
   const teacherName = (id) => typeof rosterTeacherName === "function" ? rosterTeacherName(id) : "Teacher";
   const enrolled = (item) => (item.students || []).filter((student) => student.status === "enrolled");
   const fullName = (student) => [student.preferredName || student.firstName, student.lastName].filter(Boolean).join(" ").trim();
+  const schoolKey = (value) => String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  const hasSchoolConflict = (classes) => {
+    const schools = classes.map((item) => schoolKey(item.school)).filter(Boolean);
+    return new Set(schools).size !== schools.length;
+  };
   const monthsOld = (birthdate) => {
     if (!birthdate) return null;
     const born = new Date(`${birthdate}T12:00:00`);
@@ -41,6 +46,7 @@
   };
   const compatibleRequirement = (a,b) => a === b || a === "either" || b === "either";
   const pairScore = (a,b, cross = false) => {
+    if (schoolKey(a.school) === schoolKey(b.school)) return -100;
     if (!compatibleRequirement(a.requirement,b.requirement)) return -100;
     const spread = ageSpread([a,b]);
     const levelGap = Math.abs(a.level-b.level);
@@ -61,6 +67,7 @@
         const subset = remaining.filter((_,index) => mask & (1<<index));
         const total = subset.reduce((sum,item)=>sum+item.count,0);
         if (total > STAGE_CAP) continue;
+        if (hasSchoolConflict(subset)) continue;
         const spread = ageSpread(subset);
         if (spread != null && spread > 18) continue;
         if (subset.length > best.length || (subset.length === best.length && total > best.reduce((sum,item)=>sum+item.count,0))) best = subset;
@@ -152,6 +159,31 @@
     const persistedClassIds=new Set(persisted.flatMap((group)=>group.classes.map((item)=>item.id)));
     return [...persisted,...generated.map((group)=>({...group,classes:group.classes.filter((item)=>!persistedClassIds.has(item.id))})).filter((group)=>group.classes.length)];
   };
+  const enforceUniqueRoutinePerSchool = (groups) => groups.flatMap((group) => {
+    if (!hasSchoolConflict(group.classes)) return [group];
+    const buckets = [];
+    group.classes.forEach((item) => {
+      const bucket = buckets.find((candidate) => !candidate.some((existing) => schoolKey(existing.school) === schoolKey(item.school)));
+      if (bucket) bucket.push(item); else buckets.push([item]);
+    });
+    return buckets.map((classes,index) => {
+      const stageSets = group.relationship === "separate" ? classes.map((item) => [item]) : bestCombineSets(classes);
+      return {
+        ...group,
+        id: index === 0 ? group.id : crypto.randomUUID(),
+        name: index === 0 ? group.name : `${group.name} · Separate Routine ${index+1}`,
+        decision: group.decision === "suggested" ? "suggested" : "modified",
+        teacherIds: [...new Set(classes.map((item) => item.teacherId))],
+        crossTeacher: new Set(classes.map((item) => item.teacherId)).size > 1,
+        classes,
+        stageSets,
+        relationship: classes.length === 1 ? "separate" : stageSets.length === 1 ? "combine" : "share",
+        quality: qualityFor(classes),
+        analysis: analysisFor(classes, new Set(classes.map((item) => item.teacherId)).size > 1),
+        schoolRuleAdjusted: true
+      };
+    });
+  });
   const teacherLoad = () => {
     const map=new Map();
     state.classes.forEach((item)=>{if(!map.has(item.teacherId))map.set(item.teacherId,{id:item.teacherId,name:item.teacher,classes:0,groups:new Set()});map.get(item.teacherId).classes+=1;});
@@ -218,8 +250,9 @@
     const persisted=force?state.groups.filter((group)=>["approved","modified","locked"].includes(group.decision)):await loadPersisted();
     const generated=generatedGroups(state.classes);const assigned=new Set(generated.flatMap((group)=>group.classes.map((item)=>item.id)));
     const cross=crossTeacherSuggestions(state.classes.filter((item)=>assigned.has(item.id)));
-    state.groups=mergePlans([...generated,...cross],persisted);state.persisted=true;state.loading=false;
-    state.notice=force?"Suggestions recalculated. Approved, modified, and locked decisions were preserved.":`${state.classes.length} active classes analyzed. No show assignments have been made yet.`;render();
+    state.groups=enforceUniqueRoutinePerSchool(mergePlans([...generated,...cross],persisted));state.persisted=true;state.loading=false;
+    const adjusted=state.groups.some((group)=>group.schoolRuleAdjusted);
+    state.notice=adjusted?"Classes at the same school were separated into different routines.":force?"Suggestions recalculated. Approved, modified, and locked decisions were preserved.":`${state.classes.length} active classes analyzed. No show assignments have been made yet.`;render();
   };
   document.addEventListener("change", async (event) => {
     const card=event.target.closest("[data-stage-group]");if(!card)return;const group=state.groups.find((item)=>item.id===card.dataset.stageGroup);if(!group)return;
@@ -234,8 +267,8 @@
     if(event.target.closest("[data-stage-recalculate]")){await initialize(true);return;}
     if(event.target.closest("[data-stage-build-shows]")){buildShows();state.view="show";render();return;}
     const card=event.target.closest("[data-stage-group]");if(!card)return;const group=state.groups.find((item)=>item.id===card.dataset.stageGroup);if(!group)return;
-    if(event.target.closest("[data-stage-approve]")){if(String(group.id).startsWith("cross-"))group.id=crypto.randomUUID();group.decision="approved";await persistGroup(group);state.notice=`${group.name} approved.`;render();}
-    if(event.target.closest("[data-stage-lock]")){if(String(group.id).startsWith("cross-"))group.id=crypto.randomUUID();group.decision="locked";await persistGroup(group);state.notice=`${group.name} locked. Recalculation will preserve it.`;render();}
+    if(event.target.closest("[data-stage-approve]")){if(hasSchoolConflict(group.classes)){state.notice="Two classes at the same school cannot perform the same routine.";render();return;}if(String(group.id).startsWith("cross-"))group.id=crypto.randomUUID();group.decision="approved";await persistGroup(group);state.notice=`${group.name} approved.`;render();}
+    if(event.target.closest("[data-stage-lock]")){if(hasSchoolConflict(group.classes)){state.notice="Two classes at the same school cannot perform the same routine.";render();return;}if(String(group.id).startsWith("cross-"))group.id=crypto.randomUUID();group.decision="locked";await persistGroup(group);state.notice=`${group.name} locked. Recalculation will preserve it.`;render();}
     if(event.target.closest("[data-stage-reject]")){group.decision="rejected";group.relationship="separate";if(!String(group.id).startsWith("cross-"))await persistGroup(group);state.notice=`${group.name} will stay separate.`;render();}
   });
   window.renderBigStage=()=>initialize(false);
