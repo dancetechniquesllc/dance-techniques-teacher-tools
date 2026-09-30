@@ -17247,7 +17247,7 @@
             <div class="dashboard-entity-summary" id="roster-entity-summary" aria-label="Classes and Rosters teacher summaries"></div>
             <div class="enrollment-queue-panel" id="enrollment-queue-panel" hidden>
               <div class="section-title">
-                <div><h3>New Enrollments</h3><p>Ready for your review and class placement.</p></div>
+                <div><h3>Enrollment Setup</h3><p>Every incomplete enrollment stays here until each required step is recorded.</p></div>
                 <span class="admin-page-actions">
                   <button class="secondary" type="button" id="refresh-enrollment-queue">Refresh</button>
                   <button class="secondary" type="button" data-close-enrollment-queue>View All Students</button>
@@ -17405,12 +17405,12 @@
             <div class="enrollment-summary-row" id="enrollment-student-summary" aria-label="Enrollment and student summary"></div>
             <div class="dashboard-entity-summary" id="enrollment-entity-summary" aria-label="Enrollment and Students teacher summaries"></div>
             <div class="enrollment-student-view-toggle" role="tablist" aria-label="Enrollment and student view">
-              <button class="is-selected" type="button" role="tab" aria-selected="true" data-enrollment-student-view="enrollments">New Enrollments</button>
+              <button class="is-selected" type="button" role="tab" aria-selected="true" data-enrollment-student-view="enrollments">Enrollment Setup</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="directory">Dancer Directory</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="future-dancers">Future Dancers</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="rowlett-5-invites">Rowlett 5 Invites</button>
             </div>
-            <div class="enrollment-checklist-summary" id="enrollment-checklist-summary" aria-label="New Enrollment next-step summary"></div>
+            <div class="enrollment-checklist-summary" id="enrollment-checklist-summary" aria-label="Enrollment setup next-step summary"></div>
             <div class="enrollment-student-view-panel" id="enrollment-student-intake-slot" data-enrollment-student-panel="enrollments"></div>
             <div class="enrollment-student-view-panel" id="dancer-directory-panel" data-enrollment-student-panel="directory" hidden>
               <div class="section-title" style="margin-top:8px">
@@ -38676,10 +38676,10 @@
       if (!summary) return;
       const activeClasses = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false);
       const futureDancers = activeClasses.reduce((count, rosterClass) => count + rosterProspects(rosterClass).length, 0);
-      const newEnrollmentCount = enrollmentIntakeQueue.filter(enrollmentIsNew).length;
+      const incompleteEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) !== "complete").length;
       const dancerDirectoryCount = dashboardEntityUniqueCount(dashboardEntityStudentRecords());
       const metrics = [
-        [newEnrollmentCount, "New Enrollments", "enrollments"],
+        [incompleteEnrollmentCount, "Setup Needed", "enrollments"],
         [dancerDirectoryCount, "Dancer Directory", "directory"],
         [futureDancers, "Future Dancers", "future-dancers"]
       ];
