@@ -36483,7 +36483,12 @@
         || enrollmentSchoolNameMatches(school.name, rosterClass?.schoolName)
         || enrollmentSchoolNameMatches(school.nickname, rosterClass?.schoolName)
       ));
-      return rosterClass?.day || weekdayNames[Number(assignedSchool?.dayOfWeek)] || "";
+      const explicitDay = rosterClass?.day || "";
+      const explicitDayKey = teacherRosterDayKey(explicitDay);
+      const validWeekdays = new Set(["monday", "tuesday", "wednesday", "thursday", "friday"]);
+      if (validWeekdays.has(explicitDayKey)) return explicitDay;
+      const classScheduleDay = weekdayNames[Number(rosterClass?.scheduleDay)];
+      return classScheduleDay || weekdayNames[Number(assignedSchool?.dayOfWeek)] || "";
     };
 
     const teacherRosterClassIsToday = (rosterClass) => {
