@@ -8610,6 +8610,7 @@
     .roster-class-no-students { grid-column: 1 / -1; color: var(--muted); font-size: 10px; }
     .roster-recital-planning { position: absolute; right: 14px; bottom: 16px; left: 14px; width: auto; display: flex; align-items: center; gap: 5px; margin: 0; padding: 6px 7px; border: 1px solid color-mix(in srgb, var(--berry) 15%, transparent); border-radius: 999px; color: var(--fg); }
     .roster-recital-planning > strong { flex: 1 1 auto; min-width: 0; color: var(--berry); font-size: 9px; line-height: 1.05; text-align: left; }
+    .roster-recital-select { flex: 0 0 auto; min-height: 26px; max-width: 70px; padding: 3px 18px 3px 7px; border: 1px solid rgb(255 255 255 / .7); border-radius: 999px; background-color: rgb(255 255 255 / .58); color: var(--fg); font-family: var(--font-body); font-size: 8px; font-weight: 850; line-height: 1; }
     .roster-recital-need { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 3px; padding: 4px 6px; border-radius: 999px; background: rgb(255 255 255 / .48); font-size: 8px; font-weight: 750; line-height: 1; white-space: nowrap; }
     .roster-recital-need strong { color: inherit; font-size: 10px; }
     .roster-recital-planning.is-ballet { background: var(--blush); }
@@ -21190,6 +21191,10 @@
     );
     const enrollmentWorkflowStage = (item) => enrollmentNextChecklistStep(item);
     const enrollmentIsNew = (item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) === "assign-class";
+    const enrollmentSetupCohort = () => [...enrollmentIntakeQueue]
+      .filter((item) => !enrollmentIsArchived(item))
+      .sort((left, right) => new Date(right.submitted_at || right.created_at || 0) - new Date(left.submitted_at || left.created_at || 0))
+      .slice(0, 15);
     const enrollmentWorkflowLabel = (item) => {
       const stage = enrollmentWorkflowStage(item);
       if (stage === "assign-class") return "Not Placed";
@@ -21282,7 +21287,7 @@
       const classId = item.matched_dance_class_id || suggestEnrollmentClass(item)?.classId;
       return rosterClasses.find((rosterClass) => rosterClass.id === classId)?.day || "";
     };
-    const filteredEnrollmentQueue = () => enrollmentIntakeQueue.filter((item) => {
+    const filteredEnrollmentQueue = () => enrollmentSetupCohort().filter((item) => {
       const nextStep = enrollmentNextChecklistStep(item);
       if (!enrollmentBelongsInWorkflow(item) || nextStep === "complete") return false;
       if (enrollmentChecklistFilter !== "all" && nextStep !== enrollmentChecklistFilter) return false;
@@ -21539,7 +21544,7 @@
 
     const renderEnrollmentQueue = () => {
       syncTeacherProfileColorRules();
-      const newCount = enrollmentIntakeQueue.filter(enrollmentIsNew).length;
+      const newCount = enrollmentSetupCohort().filter(enrollmentIsNew).length;
       setText("roster-enrollments-waiting-count", String(newCount));
       renderEnrollmentQueueFilters();
       const list = document.getElementById("enrollment-queue-list");
@@ -22411,6 +22416,7 @@
           day: weekdayNames[item.schedule_day ?? school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
           updatedAt: item.updated_at || "",
           helperHistory: Array.isArray(item.helper_history) ? item.helper_history : [],
+          recitalPerformance: ["tap", "ballet", "either"].includes(String(item.recital_performance || "").toLowerCase()) ? String(item.recital_performance).toLowerCase() : "",
           attendance: attendanceByClass.get(item.id) || {},
           students: enrollments.filter((enrollment) => enrollment.dance_class_id === item.id).map((enrollment) => {
             const student = enrollment.students || {};
@@ -22502,7 +22508,7 @@
           scheduleAppDataSave();
           return false;
         }
-        const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), schedule_day: rosterClass.scheduleDay === "" || rosterClass.scheduleDay == null ? null : Number(rosterClass.scheduleDay), schedule_period: rosterClass.timeBlock || null, start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active", helper_history: rosterClass.helperHistory || [] };
+        const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), schedule_day: rosterClass.scheduleDay === "" || rosterClass.scheduleDay == null ? null : Number(rosterClass.scheduleDay), schedule_period: rosterClass.timeBlock || null, start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active", helper_history: rosterClass.helperHistory || [], recital_performance: ["tap", "ballet", "either"].includes(rosterClass.recitalPerformance) ? rosterClass.recitalPerformance : null };
         let query = oldId?.startsWith("roster-")
           ? window.dtSupabase.from("dance_classes").insert(payload)
           : window.dtSupabase.from("dance_classes").update(payload).eq("id", oldId);
@@ -38616,7 +38622,7 @@
         const haystack = `${student.firstName} ${student.preferredName || ""} ${student.lastName} ${student.parentFirstName || ""} ${student.parentLastName || ""} ${student.parentEmail || ""} ${rosterClass.schoolName} ${rosterClass.name}`.toLowerCase();
         return !term || haystack.includes(term);
       }).sort((left, right) => `${left.student.lastName} ${rosterStudentFirstName(left.student)}`.localeCompare(`${right.student.lastName} ${rosterStudentFirstName(right.student)}`));
-      const newEnrollmentCount = enrollmentIntakeQueue.filter(enrollmentIsNew).length;
+      const newEnrollmentCount = enrollmentSetupCohort().filter(enrollmentIsNew).length;
       document.getElementById("admin-student-library-count").textContent = `${newEnrollmentCount} New · ${records.length} Student${records.length === 1 ? "" : "s"}`;
       const cardMarkup = ({ rosterClass, student }, { includeTeacher = true, includeSchoolClass = true } = {}) => {
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
@@ -38676,7 +38682,7 @@
       if (!summary) return;
       const activeClasses = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false);
       const futureDancers = activeClasses.reduce((count, rosterClass) => count + rosterProspects(rosterClass).length, 0);
-      const incompleteEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) !== "complete").length;
+      const incompleteEnrollmentCount = enrollmentSetupCohort().filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) !== "complete").length;
       const dancerDirectoryCount = dashboardEntityUniqueCount(dashboardEntityStudentRecords());
       const metrics = [
         [incompleteEnrollmentCount, "Setup Needed", "enrollments"],
@@ -38720,7 +38726,7 @@
         ["implement-billing", "Implement Billing Plan"],
         ["welcome-email", "Welcome Email"]
       ];
-      const eligible = enrollmentIntakeQueue.filter(enrollmentBelongsInWorkflow);
+      const eligible = enrollmentSetupCohort().filter(enrollmentBelongsInWorkflow);
       summary.innerHTML = steps.map(([step, label]) => {
         const count = eligible.filter((item) => enrollmentNextChecklistStep(item) === step).length;
         return `<button type="button" data-enrollment-summary-step="${step}" aria-pressed="${enrollmentChecklistFilter === step ? "true" : "false"}"><strong>${count}</strong><small>${rosterSafe(label)}</small></button>`;
@@ -41501,11 +41507,14 @@
           else counts.either += 1;
           return counts;
         }, { ballet: 0, tap: 0, either: 0 });
-        const recitalTheme = recitalNeeds.ballet > recitalNeeds.tap && recitalNeeds.ballet >= recitalNeeds.either
+        const calculatedRecitalPerformance = recitalNeeds.ballet > recitalNeeds.tap && recitalNeeds.ballet >= recitalNeeds.either
           ? "ballet"
           : recitalNeeds.tap > recitalNeeds.ballet && recitalNeeds.tap >= recitalNeeds.either
             ? "tap"
             : "either";
+        const recitalPerformance = ["tap", "ballet", "either"].includes(item.recitalPerformance)
+          ? item.recitalPerformance
+          : calculatedRecitalPerformance;
         const datedStudents = enrolledStudents.filter((student) => student.birthdate).sort((left, right) => right.birthdate.localeCompare(left.birthdate));
         const ageRange = datedStudents.length
           ? `${rosterAge(datedStudents[0].birthdate)} – ${rosterAge(datedStudents[datedStudents.length - 1].birthdate)}`
@@ -41528,8 +41537,13 @@
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
             <span>${rosterSafe(`${rosterStudentFirstName(student)}${firstNameCounts.get(rosterStudentFirstName(student).trim().toLowerCase()) > 1 && student.lastName ? ` ${student.lastName.trim().charAt(0).toUpperCase()}.` : ""}`)}</span>
           </span>`).join("") : `<span class="roster-class-no-students">No enrolled dancers yet</span>`}</span>
-          <span class="roster-recital-planning is-${recitalTheme}" aria-label="Recital planning: ${recitalNeeds.ballet} need Ballet, ${recitalNeeds.tap} need Tap, and ${recitalNeeds.either} can perform either">
+          <span class="roster-recital-planning is-${recitalPerformance}" aria-label="Recital planning: ${recitalNeeds.ballet} need Ballet, ${recitalNeeds.tap} need Tap, and ${recitalNeeds.either} can perform either. Selected performance: ${recitalPerformance}.">
             <strong>Needs to Perform</strong>
+            <select class="roster-recital-select" data-recital-performance-select="${rosterSafe(item.id)}" aria-label="Select recital performance for ${rosterSafe(item.name)}">
+              <option value="tap" ${recitalPerformance === "tap" ? "selected" : ""}>Tap</option>
+              <option value="ballet" ${recitalPerformance === "ballet" ? "selected" : ""}>Ballet</option>
+              <option value="either" ${recitalPerformance === "either" ? "selected" : ""}>Either</option>
+            </select>
             <span class="roster-recital-need">Ballet <strong>${recitalNeeds.ballet}</strong></span>
             <span class="roster-recital-need">Tap <strong>${recitalNeeds.tap}</strong></span>
             <span class="roster-recital-need">Either <strong>${recitalNeeds.either}</strong></span>
@@ -50843,6 +50857,19 @@
     });
 
     document.getElementById("admin-home-classes-rosters")?.addEventListener("change", (event) => {
+      const recitalSelect = event.target.closest("[data-recital-performance-select]");
+      if (recitalSelect) {
+        event.stopPropagation();
+        const rosterClass = rosterClasses.find((item) => item.id === recitalSelect.dataset.recitalPerformanceSelect);
+        if (!rosterClass) return;
+        rosterClass.recitalPerformance = recitalSelect.value;
+        renderClassesAndRosters();
+        scheduleAppDataSave();
+        void saveSharedClass(rosterClass).then((saved) => {
+          showToast(saved ? `${recitalSelect.value.replace(/^./, (letter) => letter.toUpperCase())} selected for ${rosterClass.name}` : "The recital selection could not be saved.");
+        });
+        return;
+      }
       const field = event.target.closest("[data-roster-class-setting]");
       if (!field) return;
       const rosterClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
@@ -51020,6 +51047,10 @@
     });
 
     document.getElementById("admin-home-classes-rosters")?.addEventListener("click", (event) => {
+      if (event.target.closest("[data-recital-performance-select]")) {
+        event.stopPropagation();
+        return;
+      }
       const deleteClassButton = event.target.closest("[data-roster-delete-class]");
       if (deleteClassButton) {
         const rosterClass = rosterClasses.find((item) => item.id === deleteClassButton.dataset.rosterDeleteClass);
