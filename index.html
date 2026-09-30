@@ -22545,9 +22545,13 @@
         return false;
       }
       if (document.body.dataset.tourMode !== "true" && sharedRosterReady && window.dtSupabase && !String(rosterClass.id || "").startsWith("roster-")) {
-        const { error } = await window.dtSupabase.from("dance_classes").update({ status: "inactive" }).eq("id", rosterClass.id);
+        const { data, error } = await window.dtSupabase.from("dance_classes").update({ status: "inactive" }).eq("id", rosterClass.id).select("id").maybeSingle();
         if (error) {
           sharedRosterError("The class could not be deleted.", error, { reload: false });
+          return false;
+        }
+        if (!data?.id) {
+          showToast("The class could not be deleted. Refresh Classes & Rosters and try again.");
           return false;
         }
       }
@@ -38508,7 +38512,9 @@
     const rosterClassAssignedDancers = (rosterClass) => {
       const rosterStudents = (rosterClass?.students || []).filter((student) => !student.additionalInformation?.future_dancer_archived);
       const queuedAssignments = enrollmentIntakeQueue.filter((item) => (
-        String(item.matched_dance_class_id || item.placed_dance_class_id || "") === String(rosterClass?.id || "")
+        enrollmentBelongsInWorkflow(item)
+        && enrollmentNextChecklistStep(item) === "assign-class"
+        && String(item.matched_dance_class_id || "") === String(rosterClass?.id || "")
       ));
       return { rosterStudents, queuedAssignments, total: rosterStudents.length + queuedAssignments.length };
     };
