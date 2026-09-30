@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Check Received · Dance Techniques</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;background:#f2d8d4;color:#1d1717;font-family:Arial,sans-serif}.card{width:min(500px,100%);padding:34px;border-radius:24px;background:#fffaf8;box-shadow:0 24px 80px #3d24243d;text-align:center}.mark{display:grid;place-items:center;width:76px;height:76px;margin:0 auto 18px;border-radius:50%;background:#f0cfcc;color:#171313;font-size:36px;font-weight:900}.mark.confirmed{background:#aebba5;color:#203224}h1{margin:0 0 12px;font-family:Georgia,serif;font-size:30px}p{margin:0 0 24px;color:#674f4f;line-height:1.6}.school{font-weight:900;color:#1d1717}.actions{display:flex;justify-content:center;gap:10px}.button{display:inline-block;padding:14px 22px;border:0;border-radius:999px;background:#111;color:#fff;font:inherit;font-weight:900;letter-spacing:.03em;cursor:pointer}.button.received{background:#aebba5;color:#203224}.secondary{background:#fffaf8;color:#674f4f;border:1px solid #b57a76}.button:disabled{opacity:.6;cursor:wait}@media(max-width:480px){.actions{flex-direction:column-reverse}.button{width:100%}}
+  </style>
+</head>
+<body>
+  <main class="card" id="card"><div class="mark">✓</div><h1>Opening your confirmation…</h1><p>Please wait just a moment.</p></main>
+  <script>
+    const endpoint = "https://pgagpvfiplizahsnmvxf.supabase.co/functions/v1/partner-school-check-received";
+    const token = new URLSearchParams(location.search).get("token") || "";
+    const card = document.getElementById("card");
+    const escapeText = (value) => String(value || "").replace(/[&<>"']/g, (character) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[character]));
+    const invalid = () => { card.innerHTML = '<div class="mark">!</div><h1>This link is no longer active.</h1><p>Please contact Dance Techniques if you still need to confirm this check.</p>'; };
+    const confirmed = (school) => { card.innerHTML = `<div class="mark confirmed">✓</div><h1>Thank you!</h1><p class="school">${escapeText(school)}</p><p>Your check has been marked as received.</p><span class="button received">CHECK RECEIVED ✓</span>`; };
+    const ready = (school) => {
+      card.innerHTML = `<div class="mark">✓</div><h1>Did your check arrive?</h1><p class="school">${escapeText(school)}</p><p>Thank you for being a valued Dance Techniques partner! Please confirm below once your physical check has arrived safely in your hands. We’re so grateful for your partnership and all you do to help our dancers shine!</p><div class="actions"><button class="button secondary" id="not-yet" type="button">Not Yet</button><button class="button" id="confirm" type="button">Yes, Check Received</button></div>`;
+      document.getElementById("not-yet").onclick = () => history.length > 1 ? history.back() : window.close();
+      document.getElementById("confirm").onclick = submit;
+    };
+    const load = async () => {
+      try {
+        const response = await fetch(`${endpoint}?format=json&token=${encodeURIComponent(token)}`);
+        const data = await response.json();
+        if (!response.ok || !data.valid) return invalid();
+        data.confirmed ? confirmed(data.school) : ready(data.school);
+      } catch { invalid(); }
+    };
+    const submit = async () => {
+      const button = document.getElementById("confirm");
+      button.disabled = true;
+      button.textContent = "Confirming…";
+      try {
+        const response = await fetch(endpoint, { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body:new URLSearchParams({token}) });
+        const data = await response.json();
+        if (!response.ok || !data.valid) return invalid();
+        confirmed(data.school);
+      } catch { invalid(); }
+    };
+    load();
+  </script>
+</body>
+</html>
