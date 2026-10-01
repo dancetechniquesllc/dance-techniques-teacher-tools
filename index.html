@@ -2542,10 +2542,36 @@
       color: var(--berry);
       font-weight: 850;
     }
-    .teacher-roster-management-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+    .teacher-roster-management-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
     .teacher-roster-management-row .teacher-roster-multi-class-edit { margin: 0; }
-    .teacher-roster-print-button { min-height: 42px; border: 1px solid color-mix(in srgb, #68775f 55%, var(--border)); border-radius: 999px; background: #c6d3b5; color: #31402e; font-weight: 850; }
-    .teacher-roster-print-button:hover, .teacher-roster-print-button:focus-visible { background: color-mix(in srgb, #c6d3b5 82%, white); outline: 2px solid #68775f; outline-offset: 2px; }
+    .teacher-roster-management-row button { min-height: 42px; padding: 8px 10px; border-radius: 999px; font-weight: 850; }
+    .teacher-roster-action-blush { border: 1px solid var(--border); background: var(--blush); color: var(--berry); }
+    .teacher-roster-action-blush:hover, .teacher-roster-action-blush:focus-visible { background: color-mix(in srgb, var(--blush) 82%, white); outline: 2px solid var(--berry); outline-offset: 2px; }
+    .teacher-roster-action-sage { border: 1px solid color-mix(in srgb, #68775f 55%, var(--border)); background: #c6d3b5; color: #31402e; }
+    .teacher-roster-action-sage:hover, .teacher-roster-action-sage:focus-visible { background: color-mix(in srgb, #c6d3b5 82%, white); outline: 2px solid #68775f; outline-offset: 2px; }
+    .teacher-measurements-dialog { width: min(620px, 100%); max-height: calc(100dvh - 28px); overflow: auto; }
+    .teacher-measurements-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .teacher-measurements-head h3, .teacher-measurements-head p { margin: 0; }
+    .teacher-measurements-close { min-width: 38px; min-height: 38px; padding: 0; border-radius: 999px; }
+    .teacher-measurements-selectors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+    .teacher-measurements-selectors label, .teacher-measurements-fields label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: .04em; }
+    .teacher-measurements-classes { display: flex; gap: 8px; overflow-x: auto; padding: 2px 1px 12px; scrollbar-width: thin; }
+    .teacher-measurements-class { flex: 0 0 auto; min-height: 40px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--berry); font-weight: 800; }
+    .teacher-measurements-class.is-active { background: var(--blush); border-color: var(--berry); }
+    .teacher-measurements-student { display: grid; justify-items: center; gap: 10px; padding: 18px; border: 1px solid var(--border); border-radius: 22px; background: var(--surface-soft); text-align: center; }
+    .teacher-measurements-photo { display: grid; place-items: center; width: 92px; height: 92px; overflow: hidden; border: 4px solid var(--lavender); border-radius: 50%; background: var(--lavender-soft); color: var(--berry); font-size: 25px; font-weight: 900; }
+    .teacher-measurements-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .teacher-measurements-student h4 { margin: 0; font-size: 24px; }
+    .teacher-measurements-student > small { color: var(--muted); font-weight: 750; }
+    .teacher-measurements-fields { width: 100%; display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; }
+    .teacher-measurements-input { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+    .teacher-measurements-fields input { min-width: 0; min-height: 46px; }
+    .teacher-measurements-half { min-width: 50px; min-height: 46px; padding: 0 10px; border: 1px solid var(--sage-deep); border-radius: 12px; background: var(--sage); color: #34412f; font-size: 16px; font-weight: 900; }
+    .teacher-measurements-carousel { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; }
+    .teacher-measurements-arrow { width: 42px; height: 42px; padding: 0; border-radius: 50%; background: var(--blush); color: var(--berry); font-size: 23px; }
+    .teacher-measurements-progress { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .teacher-measurements-empty { padding: 28px 16px; color: var(--muted); text-align: center; }
+    @media (max-width: 520px) { .teacher-measurements-selectors, .teacher-measurements-fields { grid-template-columns: 1fr; } }
     @media (max-width: 390px) { .teacher-roster-management-row { gap: 6px; } .teacher-roster-management-row button { font-size: 11px; } }
 
     .enrollment-tempo-card {
@@ -8552,6 +8578,7 @@
     }
 
     .roster-class-card.is-selected { background: var(--blush); }
+    .roster-class-card:not(.is-recital-split) { padding-bottom: 76px; }
     .roster-class-card strong,
     .roster-class-card small { display: block; }
     .roster-class-card > strong { color: var(--berry); font-size: 22px; line-height: 1.15; }
@@ -8593,7 +8620,7 @@
     .roster-class-student .roster-student-photo { width: 46px; height: 46px; font-size: 12px; }
     .roster-class-student span:last-child { max-width: 100%; overflow: hidden; color: var(--fg); font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
     .roster-class-no-students { grid-column: 1 / -1; color: var(--muted); font-size: 10px; }
-    .roster-recital-planning { position: absolute; right: 14px; bottom: 16px; left: 14px; width: auto; display: flex; align-items: center; gap: 5px; margin: 0; padding: 6px 7px; border: 1px solid color-mix(in srgb, var(--berry) 15%, transparent); border-radius: 999px; color: var(--fg); }
+    .roster-recital-planning { position: absolute; right: 14px; bottom: 10px; left: 14px; width: auto; display: flex; align-items: center; gap: 5px; margin: 0; padding: 6px 7px; border: 1px solid color-mix(in srgb, var(--berry) 15%, transparent); border-radius: 999px; color: var(--fg); }
     .roster-recital-planning > strong { flex: 1 1 auto; min-width: 0; color: var(--berry); font-size: 9px; line-height: 1.05; text-align: left; }
     .roster-recital-select { flex: 0 0 auto; min-height: 26px; max-width: 70px; padding: 3px 18px 3px 7px; border: 1px solid rgb(255 255 255 / .7); border-radius: 999px; background-color: rgb(255 255 255 / .58); color: var(--fg); font-family: var(--font-body); font-size: 8px; font-weight: 850; line-height: 1; }
     .roster-recital-need { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 3px; padding: 4px 6px; border-radius: 999px; background: rgb(255 255 255 / .48); font-size: 8px; font-weight: 750; line-height: 1; white-space: nowrap; }
@@ -15905,14 +15932,13 @@
               </section>
 
               <div class="teacher-roster-toolbar">
-                <button class="primary" type="button" id="teacher-roster-create-class">Create Class</button>
                 <button class="secondary roster-add-future-button" type="button" id="teacher-roster-add-future">Add Prospect Dancer</button>
               </div>
               <label class="teacher-roster-filter">
                 <select id="teacher-roster-school-filter" aria-label="Filter rosters by assigned school"></select>
               </label>
-              <div class="teacher-roster-management-row"><button class="teacher-roster-multi-class-edit" type="button" id="teacher-roster-multi-class-edit">Rearrange Classes</button><button class="teacher-roster-print-button" type="button" id="teacher-roster-print">Print Rosters</button></div>
-              <div class="teacher-roster-management-row"><button class="care-brick" type="button" id="teacher-roster-shoe-check">Shoe Check</button><button class="care-gold" type="button" id="teacher-roster-move-ups">Move Ups</button></div>
+              <div class="teacher-roster-management-row"><button class="teacher-roster-multi-class-edit teacher-roster-action-blush" type="button" id="teacher-roster-multi-class-edit">Edit Classes</button><button class="teacher-roster-action-blush" type="button" id="teacher-roster-create-class">Create Class</button><button class="teacher-roster-print-button teacher-roster-action-blush" type="button" id="teacher-roster-print">Print Rosters</button></div>
+              <div class="teacher-roster-management-row"><button class="teacher-roster-action-sage" type="button" id="teacher-roster-move-ups">Move Ups</button><button class="teacher-roster-action-sage" type="button" id="teacher-roster-shoe-check">Shoe Check</button><button class="teacher-roster-action-sage" type="button" id="teacher-roster-measurements">Measurements</button></div>
               <div class="teacher-roster-list" id="teacher-roster-list"></div>
             </section>
 
@@ -18960,6 +18986,14 @@
         <button class="secondary" type="button" id="teacher-roster-class-cancel">Cancel</button>
         <button class="primary" type="submit" form="teacher-roster-class-form" id="teacher-roster-class-submit">Create Class</button>
       </div>
+    </div>
+  </div>
+  <div class="confirm-overlay" id="teacher-measurements-overlay" aria-hidden="true">
+    <div class="confirm-dialog teacher-measurements-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-measurements-title">
+      <div class="teacher-measurements-head"><div><h3 id="teacher-measurements-title">Measurements</h3><p class="subtle">Choose a class, then measure one dancer at a time.</p></div><button class="secondary teacher-measurements-close" type="button" id="teacher-measurements-close" aria-label="Close Measurements">×</button></div>
+      <div class="teacher-measurements-selectors"><label>School<select id="teacher-measurements-school"></select></label><label>Class<select id="teacher-measurements-class"></select></label></div>
+      <div class="teacher-measurements-classes" id="teacher-measurements-classes" aria-label="Classes"></div>
+      <div id="teacher-measurements-content"></div>
     </div>
   </div>
   <div class="confirm-overlay" id="teacher-activities-overlay" aria-hidden="true">
@@ -37254,6 +37288,94 @@
       window.setTimeout(() => document.getElementById("teacher-roster-class-name")?.focus(), 40);
     };
 
+    let teacherMeasurementsClassId = "";
+    let teacherMeasurementsStudentIndex = 0;
+    let teacherMeasurementsSaving = false;
+    const teacherMeasurementClassesForSchool = (schoolName) => teacherRosterClasses().filter((rosterClass) => (
+      enrollmentSchoolNameMatches(rosterClass.schoolName, schoolName)
+    ));
+    const teacherMeasurementStudents = () => {
+      const rosterClass = teacherRosterClasses().find((item) => item.id === teacherMeasurementsClassId);
+      return rosterClass ? teacherRosterAttendanceStudents(rosterClass) : [];
+    };
+    const teacherMeasurementValue = (student, key) => {
+      const saved = student?.additionalInformation?.costume_measurements || student?.measurements || {};
+      return saved[key] ?? "";
+    };
+    const renderTeacherMeasurements = () => {
+      const schoolSelect = document.getElementById("teacher-measurements-school");
+      const classSelect = document.getElementById("teacher-measurements-class");
+      const classes = teacherMeasurementClassesForSchool(schoolSelect?.value || "");
+      if (!classes.some((item) => item.id === teacherMeasurementsClassId)) teacherMeasurementsClassId = classes[0]?.id || "";
+      if (classSelect) {
+        classSelect.innerHTML = classes.length
+          ? classes.map((item) => `<option value="${rosterSafe(item.id)}" ${item.id === teacherMeasurementsClassId ? "selected" : ""}>${rosterSafe(item.name)}</option>`).join("")
+          : '<option value="">No classes at this school</option>';
+        classSelect.disabled = !classes.length;
+      }
+      const classButtons = document.getElementById("teacher-measurements-classes");
+      if (classButtons) classButtons.innerHTML = classes.map((item) => `<button class="teacher-measurements-class ${item.id === teacherMeasurementsClassId ? "is-active" : ""}" type="button" data-measurements-class="${rosterSafe(item.id)}">${rosterSafe(item.name)}</button>`).join("");
+      const students = teacherMeasurementStudents();
+      teacherMeasurementsStudentIndex = Math.max(0, Math.min(teacherMeasurementsStudentIndex, Math.max(0, students.length - 1)));
+      const student = students[teacherMeasurementsStudentIndex];
+      const content = document.getElementById("teacher-measurements-content");
+      if (!content) return;
+      if (!student) {
+        content.innerHTML = `<div class="teacher-measurements-empty">${classes.length ? "This class does not have any dancers to measure yet." : "Choose a school with at least one class."}</div>`;
+        return;
+      }
+      const isBoy = ["male", "boy", "m"].includes(String(student.gender || "").trim().toLowerCase());
+      content.innerHTML = `<section class="teacher-measurements-student">
+        <span class="teacher-measurements-photo">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}</span>
+        <div><h4>${rosterSafe(rosterStudentFullName(student))}</h4><small>${rosterSafe(rosterAge(student.birthdate))}</small></div>
+        <div class="teacher-measurements-fields">
+          <label>Chest (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="chest" value="${rosterSafe(teacherMeasurementValue(student, "chest"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to chest">+ ½</button></span></label>
+          <label>Waist (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="waist" value="${rosterSafe(teacherMeasurementValue(student, "waist"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to waist">+ ½</button></span></label>
+          <label>Hips (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="hips" value="${rosterSafe(teacherMeasurementValue(student, "hips"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to hips">+ ½</button></span></label>
+          <label>Girth (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="girth" value="${rosterSafe(teacherMeasurementValue(student, "girth"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to girth">+ ½</button></span></label>
+          ${isBoy ? `<label>Length (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="length" value="${rosterSafe(teacherMeasurementValue(student, "length"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to length">+ ½</button></span></label>` : ""}
+        </div>
+        <div class="teacher-measurements-carousel"><button class="teacher-measurements-arrow" type="button" data-measurements-step="-1" aria-label="Previous dancer">‹</button><span class="teacher-measurements-progress">${teacherMeasurementsStudentIndex + 1} of ${students.length}${teacherMeasurementsSaving ? " · Saving…" : ""}</span><button class="teacher-measurements-arrow" type="button" data-measurements-step="1" aria-label="Next dancer">›</button></div>
+      </section>`;
+    };
+    const saveCurrentTeacherMeasurements = async () => {
+      const student = teacherMeasurementStudents()[teacherMeasurementsStudentIndex];
+      if (!student || teacherMeasurementsSaving) return;
+      const fields = [...document.querySelectorAll("#teacher-measurements-content [data-measurement-field]")];
+      const measurements = Object.fromEntries(fields.map((field) => [field.dataset.measurementField, field.value === "" ? null : Number(field.value)]));
+      teacherMeasurementsSaving = true;
+      student.additionalInformation = {
+        ...(student.additionalInformation || {}),
+        costume_measurements: {
+          ...(student.additionalInformation?.costume_measurements || {}),
+          ...measurements,
+          measured_at: new Date().toISOString(),
+          measured_by: window.dtCurrentProfile?.id || profileTeacher?.id || null
+        }
+      };
+      student.measurements = { ...(student.measurements || {}), ...measurements };
+      try {
+        await saveSharedKitStatus(student);
+      } catch (error) {
+        console.error("Dancer measurements could not be saved", error);
+        showToast("Measurements could not be saved. Try again.");
+      } finally {
+        teacherMeasurementsSaving = false;
+      }
+    };
+    const openTeacherMeasurements = () => {
+      const schools = assignedTeacherSchools().filter((school) => teacherMeasurementClassesForSchool(school.name).length);
+      if (!schools.length) return showToast("Create a class before entering measurements");
+      const schoolSelect = document.getElementById("teacher-measurements-school");
+      schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
+      const filteredSchool = teacherRosterSchoolFilter !== "all" && schools.find((school) => enrollmentSchoolNameMatches(school.name, teacherRosterSchoolFilter));
+      schoolSelect.value = filteredSchool?.name || schools[0].name;
+      teacherMeasurementsClassId = teacherMeasurementClassesForSchool(schoolSelect.value)[0]?.id || "";
+      teacherMeasurementsStudentIndex = 0;
+      renderTeacherMeasurements();
+      setTeacherRosterOverlay("teacher-measurements-overlay", true);
+    };
+
     let editingTeacherProspectStudentId = "";
     let editingTeacherProspectClassId = "";
     let pendingTeacherProspectPhoto = "";
@@ -37471,6 +37593,7 @@
     };
 
     document.getElementById("teacher-roster-create-class")?.addEventListener("click", openTeacherRosterClassCreator);
+    document.getElementById("teacher-roster-measurements")?.addEventListener("click", openTeacherMeasurements);
     document.getElementById("teacher-roster-add-future")?.addEventListener("click", () => openTeacherFutureDancerCreator());
     document.getElementById("teacher-roster-school-filter")?.addEventListener("change", (event) => {
       teacherRosterSchoolFilter = event.target.value || "all";
