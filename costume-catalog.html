@@ -400,18 +400,12 @@ const companies = [...new Set(COSTUMES.map(c=>c.company))].sort();
 const sel = document.getElementById("filterCompany");
 companies.forEach(c => { const o=document.createElement("option"); o.value=c; o.textContent=c; sel.appendChild(o); });
 
-function switchTab(tab, trigger = null) {
+function switchTab(tab) {
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  const tabButton = trigger || [...document.querySelectorAll('.tab')].find((button) => button.getAttribute('onclick')?.includes(`'${tab}'`));
-  tabButton?.classList.add('active');
+  event.target.classList.add('active');
   document.getElementById('panel-'+tab).classList.add('active');
   if(tab==='charts') renderCharts();
-}
-
-if (new URLSearchParams(window.location.search).get('tab') === 'matcher') {
-  switchTab('matcher');
-  window.setTimeout(() => document.getElementById('s-name')?.focus(), 0);
 }
 
 function renderGrid() {

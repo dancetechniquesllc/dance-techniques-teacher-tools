@@ -214,7 +214,7 @@
               <option>Tap</option>
               <option>Tots</option>
               <option>Transitions</option>
-              <option>Openers &amp; Closers</option>
+              <option>Holidays</option>
               <option>Celebrations</option>
               <option>Other DT Originals</option>
             </select>
@@ -241,7 +241,7 @@
   </main>
 
   <script>
-    const CATALOG_SECTIONS = ["Ballet", "Tap", "Tots", "Transitions", "Openers & Closers", "Celebrations", "Other DT Originals"];
+    const CATALOG_SECTIONS = ["Ballet", "Tap", "Tots", "Transitions", "Holidays", "Celebrations", "Other DT Originals"];
     const state = { client: null, playlists: [], tracks: [], links: [], selectedPlaylistId: "", catalogSection: "All", catalogSearch: "" };
     const $ = (selector) => document.querySelector(selector);
     const escapeText = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
