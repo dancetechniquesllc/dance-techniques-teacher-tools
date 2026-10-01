@@ -9185,7 +9185,8 @@
     .boutique-order-card .boutique-order-number { color: var(--berry); font-size: 10px; font-weight: 900; }
     .boutique-order-items { width: 100%; display: grid; gap: 5px; }
     .boutique-order-item { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; width: 100%; padding: 5px 7px; border: 1px solid transparent; border-radius: 8px; background: var(--surface-soft); color: var(--muted); font: inherit; font-size: 10px; line-height: 1.2; text-align: center; }
-    .boutique-item-unfill { position: absolute; left: 10px; bottom: 10px; z-index: 4; display: grid; place-items: center; width: 28px; min-width: 28px; height: 28px; min-height: 28px; padding: 0; border: 1px solid #d8a7a3; border-radius: 50%; background: white; color: var(--berry); font: 800 18px/1 Arial, sans-serif; text-align: center; cursor: pointer; box-shadow: none; }
+    .boutique-item-unfill { position: absolute; right: 48px; bottom: 10px; left: auto; z-index: 4; display: grid; place-items: center; width: 28px; min-width: 28px; height: 28px; min-height: 28px; padding: 0; border: 1px solid #d8a7a3; border-radius: 50%; background: white; color: var(--berry); text-align: center; cursor: pointer; box-shadow: none; }
+    .boutique-item-unfill svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
     .boutique-item-unfill:hover, .boutique-item-unfill:focus-visible { background: var(--blush); border-color: var(--brick); }
     .boutique-item-unfill.is-active { background: var(--brick); border-color: var(--brick); color: white; }
     .boutique-order-item.is-unfill-target { cursor: pointer; border-color: color-mix(in srgb, var(--brick) 45%, var(--border)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brick) 12%, transparent); }
@@ -34514,7 +34515,7 @@
       const available = order.status !== "to_fill" && (order.boutique_order_items || []).length > 0;
       if (!available) return "";
       const active = activeBoutiqueUnfillOrderIds.has(String(order.id));
-      return `<button class="boutique-item-unfill ${active ? "is-active" : ""}" type="button" data-boutique-order-unfill-toggle="${rosterSafe(order.id)}" title="Move an item back to To Fill" aria-label="Move an item in this order back to To Fill" aria-pressed="${active ? "true" : "false"}">↩</button>`;
+      return `<button class="boutique-item-unfill ${active ? "is-active" : ""}" type="button" data-boutique-order-unfill-toggle="${rosterSafe(order.id)}" title="Move an item back to To Fill" aria-label="Move an item in this order back to To Fill" aria-pressed="${active ? "true" : "false"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 4 12l5 5"></path><path d="M5 12h8a7 7 0 0 1 7 7"></path></svg></button>`;
     };
     const toggleBoutiqueOrderUnfillMode = (orderId) => {
       const id = String(orderId || "");
