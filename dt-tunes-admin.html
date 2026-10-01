@@ -59,6 +59,8 @@
     .track-list { display: grid; gap: 8px; }
     .track-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px; border: 1px solid #f0e1e4; border-radius: 14px; background: #fff; }
     .cover { width: 52px; aspect-ratio: 1; object-fit: cover; border-radius: 11px; background: linear-gradient(135deg, #f6dce2, #fff7f1); }
+    .cover-blank { aspect-ratio: auto; height: auto; min-height: 52px; display: flex; align-items: center; justify-content: center; padding: 4px; text-align: center; }
+    .cover-blank small { font-size: 8px; line-height: 1.3; color: #a9757f; word-break: break-word; }
     .selected-playlist-head { display: flex; gap: 12px; align-items: center; }
     .track-row strong, .catalog-song strong { display: block; }
     .track-row small, .catalog-song small { color: var(--muted); }
@@ -255,8 +257,9 @@
     const tracksForPlaylist = (playlistId) => state.links.filter((link) => link.playlist_id === playlistId).sort((a, b) => a.position - b.position).map((link) => state.tracks.find((track) => track.id === link.track_id)).filter(Boolean);
     const coverMarkup = (item, label) => {
       if (item.cover_url) return `<img class="cover" src="${escapeText(item.cover_url)}" alt="${escapeText(label)} cover" onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'cover' }))">`;
-      const debug = `storage: ${item.cover_storage_path || "(none)"} | path: ${item.cover_path || "(none)"}`;
-      return `<span class="cover" aria-hidden="true" title="${escapeText(debug)}"></span>`;
+      const storageText = item.cover_storage_path || "none";
+      const pathText = item.cover_path || "none";
+      return `<span class="cover cover-blank" aria-hidden="true"><small>storage:<br>${escapeText(storageText)}<br>path:<br>${escapeText(pathText)}</small></span>`;
     };
 
     function showTab(name) {
