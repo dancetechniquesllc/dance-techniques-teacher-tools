@@ -257,12 +257,17 @@
     const setStatus = (selector, message, isError = false) => { const node = $(selector); if (!node) return; node.textContent = message; node.classList.toggle("error", isError); };
     const selectedPlaylist = () => state.playlists.find((playlist) => playlist.id === state.selectedPlaylistId && playlist.active);
     const tracksForPlaylist = (playlistId) => state.links.filter((link) => link.playlist_id === playlistId).sort((a, b) => a.position - b.position).map((link) => state.tracks.find((track) => track.id === link.track_id)).filter(Boolean);
+    const blankCoverMarkup = (id, storageText, pathText, allowAttach) => {
+      const attach = allowAttach ? `<label class="cover-attach-label">Attach<input type="file" accept="image/png,image/jpeg,image/webp" class="cover-attach-input" data-attach-cover="${escapeText(id)}" hidden></label>` : "";
+      return `<span class="cover cover-blank" aria-hidden="true"><small>storage:<br>${escapeText(storageText || "none")}<br>path:<br>${escapeText(pathText || "none")}<br>(broken link)</small>${attach}</span>`;
+    };
+    window.dtCoverFallback = (img) => {
+      img.replaceWith(createFromHTML(blankCoverMarkup(img.dataset.coverId, img.dataset.coverStorage, img.dataset.coverPath, img.dataset.coverAttach === "1")));
+    };
+    const createFromHTML = (html) => { const template = document.createElement("template"); template.innerHTML = html.trim(); return template.content.firstElementChild; };
     const coverMarkup = (item, label, allowAttach = false) => {
-      if (item.cover_url) return `<img class="cover" src="${escapeText(item.cover_url)}" alt="${escapeText(label)} cover" onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'cover' }))">`;
-      const storageText = item.cover_storage_path || "none";
-      const pathText = item.cover_path || "none";
-      const attach = allowAttach ? `<label class="cover-attach-label">Attach<input type="file" accept="image/png,image/jpeg,image/webp" class="cover-attach-input" data-attach-cover="${escapeText(item.id)}" hidden></label>` : "";
-      return `<span class="cover cover-blank" aria-hidden="true"><small>storage:<br>${escapeText(storageText)}<br>path:<br>${escapeText(pathText)}</small>${attach}</span>`;
+      if (item.cover_url) return `<img class="cover" src="${escapeText(item.cover_url)}" alt="${escapeText(label)} cover" data-cover-id="${escapeText(item.id)}" data-cover-storage="${escapeText(item.cover_storage_path || "")}" data-cover-path="${escapeText(item.cover_path || "")}" data-cover-attach="${allowAttach ? "1" : "0"}" onerror="window.dtCoverFallback(this)">`;
+      return blankCoverMarkup(item.id, item.cover_storage_path, item.cover_path, allowAttach);
     };
 
     function showTab(name) {
