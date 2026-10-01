@@ -19087,7 +19087,7 @@
   <div class="confirm-overlay" id="teacher-roster-future-overlay" aria-hidden="true">
     <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-roster-future-title">
       <h3 id="teacher-roster-future-title">Trial Request</h3>
-      <p>Add the dancer and parent contact information to one of your assigned classes.</p>
+      <p>Add any information you have. All prospect details are optional.</p>
       <form class="teacher-roster-form" id="teacher-roster-future-form">
         <label>Class Attending
           <select id="teacher-roster-future-class"></select>
@@ -19096,10 +19096,10 @@
           <select id="teacher-roster-future-classroom"></select>
         </label>
         <label>First Name
-          <input id="teacher-roster-future-first" required autocomplete="off">
+          <input id="teacher-roster-future-first" autocomplete="off">
         </label>
         <label>Last Name
-          <input id="teacher-roster-future-last" required autocomplete="off">
+          <input id="teacher-roster-future-last" autocomplete="off">
         </label>
         <label>Birthdate
           <input id="teacher-roster-future-birthdate" type="date">
@@ -38431,7 +38431,7 @@
       const firstName = document.getElementById("teacher-roster-future-first").value.trim();
       const lastName = document.getElementById("teacher-roster-future-last").value.trim();
       const birthdate = document.getElementById("teacher-roster-future-birthdate").value;
-      if (!firstName || !lastName) return showToast("Add the dancer’s first and last name");
+      const prospectDisplayName = [firstName, lastName].filter(Boolean).join(" ") || "Prospect dancer";
       const officialClassroom = document.getElementById("teacher-roster-future-classroom").value.trim();
       const parentFirstName = document.getElementById("teacher-roster-future-parent-first").value.trim();
       const parentLastName = document.getElementById("teacher-roster-future-parent-last").value.trim();
@@ -38488,7 +38488,7 @@
         renderTeacherRosters();
         renderClassesAndRosters();
         scheduleAppDataSave();
-        showToast(existingStudent ? `${firstName}’s trial is complete and saved for Director follow-up` : `${firstName} saved as a prospect dancer`);
+        showToast(existingStudent ? `${prospectDisplayName}’s trial is complete and saved for Director follow-up` : `${prospectDisplayName} saved`);
       } catch (error) {
         console.error("The prospect dancer could not be saved", error);
         showToast(error?.message || "The prospect dancer was not saved. Your information is still in this form.");
