@@ -253,7 +253,11 @@
     const setStatus = (selector, message, isError = false) => { const node = $(selector); if (!node) return; node.textContent = message; node.classList.toggle("error", isError); };
     const selectedPlaylist = () => state.playlists.find((playlist) => playlist.id === state.selectedPlaylistId && playlist.active);
     const tracksForPlaylist = (playlistId) => state.links.filter((link) => link.playlist_id === playlistId).sort((a, b) => a.position - b.position).map((link) => state.tracks.find((track) => track.id === link.track_id)).filter(Boolean);
-    const coverMarkup = (item, label) => item.cover_url ? `<img class="cover" src="${escapeText(item.cover_url)}" alt="${escapeText(label)} cover" onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'cover' }))">` : `<span class="cover" aria-hidden="true"></span>`;
+    const coverMarkup = (item, label) => {
+      if (item.cover_url) return `<img class="cover" src="${escapeText(item.cover_url)}" alt="${escapeText(label)} cover" onerror="this.replaceWith(Object.assign(document.createElement('span'), { className: 'cover' }))">`;
+      const debug = `storage: ${item.cover_storage_path || "(none)"} | path: ${item.cover_path || "(none)"}`;
+      return `<span class="cover" aria-hidden="true" title="${escapeText(debug)}"></span>`;
+    };
 
     function showTab(name) {
       document.querySelectorAll("[data-tab]").forEach((button) => button.setAttribute("aria-selected", button.dataset.tab === name ? "true" : "false"));
