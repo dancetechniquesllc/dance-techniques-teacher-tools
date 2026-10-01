@@ -23562,6 +23562,13 @@
       "Highview Learning Center": 4
     };
     const classCountForSchool = (schoolName, profileSchool) => {
+      const liveClassCount = rosterClasses.filter((rosterClass) => (
+        rosterClass.sourceActive !== false &&
+        String(rosterClass.teacherId || "") === String(profileTeacher?.id || "") &&
+        (enrollmentOfficialSchoolMatchesClass(profileSchool, rosterClass)
+          || enrollmentSchoolNameMatches(rosterClass.schoolName, schoolName))
+      )).length;
+      if (sharedRosterReady || document.body.dataset.tourMode === "true") return liveClassCount;
       const profileCount = Number(profileSchool?.classCount);
       return profileSchool?.classCount !== "" && profileSchool?.classCount != null && Number.isFinite(profileCount) ? profileCount : (schoolClassCounts[schoolName] || 4);
     };
