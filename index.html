@@ -22520,7 +22520,9 @@
         return {
           id: item.id, assignmentId: item.teacher_school_assignment_id, name: item.name, ageGroup: item.age_group, level: String(item.level),
           time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", partnerSchoolId: school.id || assignment?.partner_school_id || "", schoolName: school.name || "Partner School",
-          day: weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
+          scheduleDay: item.schedule_day == null ? "" : Number(item.schedule_day),
+          timeBlock: item.schedule_period || school.time_of_day || "AM",
+          day: weekdayNames[item.schedule_day ?? school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
           updatedAt: item.updated_at || "",
           helperHistory: Array.isArray(item.helper_history) ? item.helper_history : [],
           attendance: attendanceByClass.get(item.id) || {},
@@ -22614,7 +22616,7 @@
           scheduleAppDataSave();
           return false;
         }
-        const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active", helper_history: rosterClass.helperHistory || [] };
+        const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), schedule_day: rosterClass.scheduleDay === "" || rosterClass.scheduleDay == null ? null : Number(rosterClass.scheduleDay), schedule_period: rosterClass.timeBlock || null, start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active", helper_history: rosterClass.helperHistory || [] };
         let query = oldId?.startsWith("roster-")
           ? window.dtSupabase.from("dance_classes").insert(payload)
           : window.dtSupabase.from("dance_classes").update(payload).eq("id", oldId);
@@ -22801,9 +22803,9 @@
       };
       let studentId = student.id;
       if (!student.enrollmentId) {
-        const { data, error } = await window.dtSupabase.from("students").insert(studentPayload).select("id").single();
+        studentId = isUuid(studentId) ? studentId : crypto.randomUUID();
+        const { error } = await window.dtSupabase.from("students").insert({ id: studentId, ...studentPayload });
         if (error) return sharedRosterError("The dancer was not shared.", error);
-        studentId = data.id;
         student.id = studentId;
         const enrollment = await window.dtSupabase.from("class_enrollments").insert({ dance_class_id: rosterClass.id, student_id: studentId, status: dbEnrollmentStatus(student.status), trial_date: student.trialDate || null }).select("id").single();
         if (enrollment.error) return sharedRosterError("The class enrollment was not shared.", enrollment.error);
@@ -30089,7 +30091,7 @@
           rosterClass.name = row.title || `Class ${rowIndex + 1}`;
           rosterClass.ageGroup = row.age || "";
           rosterClass.level = row.level || "";
-          rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
+          rosterClass.day = weekdayNames[Number(rosterClass.scheduleDay || school.dayOfWeek)] || "To schedule";
           rosterClass.time = row.startTime || "";
           rosterClass.classroom = row.age || "Classroom not set";
           rosterClass.schoolStudentEstimate = row.students;
@@ -31227,7 +31229,7 @@
             teacher,
             school: school?.nickname || school?.name || rosterClass.schoolName || rosterClass.name || "Scheduled Class",
             time: rosterClass.time || "",
-            timeBlock: rosterClass.scheduleChange?.timeBlock || school?.timeBlock || "AM",
+            timeBlock: rosterClass.scheduleChange?.timeBlock || rosterClass.timeBlock || school?.timeBlock || "AM",
             detail: closure ? `No Class · ${closure.reason || "District closure"}` : (rosterClass.scheduleChange ? `${rosterClass.name} · Makeup for ${rescheduleDateLabel(rosterClass.scheduleChange.originalDate)}` : ""),
             closed: Boolean(closure)
           };
@@ -32457,7 +32459,7 @@
         });
         rosterClasses.filter((rosterClass) => partnerSchoolMatchesScheduleRecord(school, rosterClass)).forEach((rosterClass) => {
           rosterClass.partnerSchoolId = school.id || rosterClass.partnerSchoolId || "";
-          rosterClass.day = dayName;
+          rosterClass.day = weekdayNames[Number(rosterClass.scheduleDay)] || dayName;
         });
       });
     };
@@ -33396,7 +33398,7 @@
         syncPartnerSchoolReferences(sourceSchool, schoolField, previousValue);
         scheduleCloudAppDataSave();
       }
-      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name).forEach((item) => {
+      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name && !item.scheduleDay).forEach((item) => {
         item.day = weekdayNames[school.dayOfWeek] || "To schedule";
       });
       if (!["classCount", "address", "directorName", "phone", "email"].includes(schoolField)) markScheduleDirty();
@@ -33431,7 +33433,7 @@
         syncPartnerSchoolReferences(sourceSchool, schoolField, previousValue);
         scheduleCloudAppDataSave();
       }
-      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name).forEach((item) => {
+      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name && !item.scheduleDay).forEach((item) => {
         item.day = weekdayNames[school.dayOfWeek] || "To schedule";
       });
       if (!["classCount", "address", "directorName", "phone", "email"].includes(schoolField)) markScheduleDirty();
@@ -33493,7 +33495,7 @@
       } else {
         rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === previousSchoolName).forEach((rosterClass) => {
           if (schoolField === "name") rosterClass.schoolName = school.name;
-          if (schoolField === "dayOfWeek") rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
+          if (schoolField === "dayOfWeek" && !rosterClass.scheduleDay) rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
         });
       }
       scheduleAppDataSave();
@@ -36565,7 +36567,7 @@
         || enrollmentSchoolNameMatches(school.name, rosterClass?.schoolName)
         || enrollmentSchoolNameMatches(school.nickname, rosterClass?.schoolName)
       ));
-      return weekdayNames[Number(assignedSchool?.dayOfWeek)] || rosterClass?.day || "";
+      return rosterClass?.day || weekdayNames[Number(assignedSchool?.dayOfWeek)] || "";
     };
 
     const teacherRosterClassIsToday = (rosterClass) => {
@@ -41787,7 +41789,7 @@
         </div>
         <div class="roster-meta">
           <span class="school-library-assignment ${teacherAssignmentColorClass(selected.teacherId)}" ${teacherAssignmentStyle(selected.teacherId)}>Teacher · ${rosterSafe(rosterTeacherName(selected.teacherId))}</span>
-          <span>${rosterSafe(selected.day)} · ${rosterSafe(friendlyScheduleTime(selected.time))}</span>
+          <span>${rosterSafe(selected.day)} · ${rosterSafe(friendlyScheduleTime(selected.time, selected.timeBlock || "Time not set"))}</span>
           <span>${enrolled.length}/${selected.capacity} Enrolled</span>
           ${classIsSplitForRecital ? `<span class="roster-meta-recital">Recital: ${recitalGroups.length} Groups</span>` : ""}
           ${selected.ageGroup ? `<span>${rosterSafe(selected.ageGroup)}</span>` : ""}${selected.level ? `<span>Level ${rosterSafe(selected.level)}</span>` : ""}
@@ -41795,6 +41797,8 @@
         <div class="roster-toolbar">
           <label>Age<select data-roster-class-setting="ageGroup">${optionMarkup(classAgeOptions, selected.ageGroup || "Tots")}</select></label>
           <label>Level<select data-roster-class-setting="level">${optionMarkup(classLevelOptions, selected.level || "1")}</select></label>
+          <label>Dance Day<select data-roster-class-setting="scheduleDay" aria-label="Dance day for this class"><option value=""${selected.scheduleDay === "" || selected.scheduleDay == null ? " selected" : ""}>Use school day (${rosterSafe((schoolLibrary.find((school) => String(school.id) === String(selected.partnerSchoolId)) || {}).dayOfWeek ? weekdayNames[Number((schoolLibrary.find((school) => String(school.id) === String(selected.partnerSchoolId)) || {}).dayOfWeek)] : selected.day || "not set")})</option>${optionMarkup(dayOptions, selected.scheduleDay)}</select></label>
+          <label>AM/PM<select data-roster-class-setting="timeBlock" aria-label="AM or PM for this class">${optionMarkup([{ value: "AM", label: "AM" }, { value: "PM", label: "PM" }], selected.timeBlock || "AM")}</select></label>
           <label>Start Time<select data-roster-class-setting="time" aria-label="Class start time in 15-minute increments">${quarterHourOptions(selected.time || "")}</select></label>
         </div>
         <div class="roster-section-heading"><div><h4>Class Roster</h4><small>${classIsSplitForRecital ? "Organized by recital performance groups. Dancers remain in their same classroom groups." : "Official class roster"}</small></div><div class="roster-recital-group-actions">${classIsSplitForRecital ? `<button class="secondary" type="button" data-recital-suggest-split onclick="event.stopPropagation();window.dtOpenRecitalGroupSuggestion('${rosterSafe(selected.id)}')">Suggest Groups</button><button class="secondary ${recitalGroupEditClassId===String(selected.id)?"is-active":""}" type="button" data-recital-edit-groups>${recitalGroupEditClassId===String(selected.id)?"Done Editing":"Edit Groups"}</button>` : ""}</div></div>
@@ -43181,7 +43185,7 @@
       )) || {};
       const student = record?.student || {};
       const teacherId = rosterClass.teacherId || school.teacherId || school.assignedTeacherId || school.teacher_id || "";
-      const timeOfDay = String(school.timeBlock || rosterClass.timeBlock || "").trim().toUpperCase();
+      const timeOfDay = String(rosterClass.timeBlock || school.timeBlock || "").trim().toUpperCase();
       const savedSchoolNickname = newsletterResolvedValue(school.nickname);
       const schoolNameFallback = newsletterResolvedValue(recordSchoolName) || newsletterResolvedValue(school.name);
       const schoolNickname = savedSchoolNickname
@@ -51091,7 +51095,13 @@
         return;
       }
       const wasTotsClass = setting === "ageGroup" && isTotsAgeClass(rosterClass);
-      rosterClass[setting] = field.value;
+      if (setting === "scheduleDay") {
+        rosterClass.scheduleDay = field.value === "" ? "" : Number(field.value);
+        const assignedSchool = schoolLibrary.find((school) => String(school.id) === String(rosterClass.partnerSchoolId));
+        rosterClass.day = weekdayNames[Number(rosterClass.scheduleDay || assignedSchool?.dayOfWeek)] || "To schedule";
+      } else {
+        rosterClass[setting] = field.value;
+      }
       if (setting === "ageGroup") {
         rosterClass.classroom = field.value;
         if (!isTotsAgeClass(rosterClass) && Number(rosterClass.capacity) === 8) rosterClass.capacity = 12;
@@ -51102,6 +51112,7 @@
         if (setting === "ageGroup") row.age = field.value;
         if (setting === "level") row.level = field.value;
         if (setting === "time") row.startTime = field.value;
+        if (setting === "scheduleDay") row.day = rosterClass.day;
       }
       renderClassesAndRosters();
       scheduleAppDataSave();
