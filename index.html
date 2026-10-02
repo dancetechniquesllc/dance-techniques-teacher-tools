@@ -51286,7 +51286,7 @@
       if (saved) showToast(`${rosterClass.name} created and shared with ${teacherNickname(teacher)}`);
     });
 
-    document.getElementById("admin-home-classes-rosters")?.addEventListener("click", (event) => {
+    document.getElementById("admin-home-classes-rosters")?.addEventListener("click", async (event) => {
       const deleteClassButton = event.target.closest("[data-roster-delete-class]");
       if (deleteClassButton) {
         const rosterClass = rosterClasses.find((item) => item.id === deleteClassButton.dataset.rosterDeleteClass);
