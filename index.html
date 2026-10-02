@@ -15887,7 +15887,7 @@
 
             <section class="view" id="dancers-view">
               <div class="mobile-head page-head">
-                <button class="back-btn" data-tab-jump="today" aria-label="Back to Today">&larr;</button>
+                <button class="back-btn" type="button" data-dancers-back aria-label="Back to Teacher Tools home">&larr;</button>
                 <div class="mobile-title">
                   <h2>My Dancers</h2>
                   <p class="subtle" id="teacher-dancers-subtitle">Dancers in your assigned classes</p>
@@ -16763,7 +16763,7 @@
 
           <section class="admin-profile-card admin-section-page big-stage" id="admin-home-big-stage">
             <div class="admin-card-header big-stage-heading">
-              <div><span class="big-stage-eyebrow">LOCAL PREVIEW · NO LIVE DATA CHANGES</span><h3>The Big Stage</h3><p><em>Plan every show, performance, costume, and recital detail in one beautiful place.</em></p></div>
+              <div><span class="big-stage-eyebrow">DIRECTOR DASHBOARD ONLY</span><h3>The Big Stage</h3><p><em>Plan every show, performance, costume, and recital detail in one beautiful place.</em></p></div>
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
             <div id="big-stage-app"></div>
@@ -22653,9 +22653,17 @@
         return false;
       }
       if (document.body.dataset.tourMode !== "true" && sharedRosterReady && window.dtSupabase && !String(rosterClass.id || "").startsWith("roster-")) {
-        const { error } = await window.dtSupabase.from("dance_classes").update({ status: "inactive" }).eq("id", rosterClass.id);
+        const canPermanentlyDelete = ["admin", "director"].includes(String(window.dtCurrentProfile?.role || "").toLowerCase());
+        const query = canPermanentlyDelete
+          ? window.dtSupabase.from("dance_classes").delete().eq("id", rosterClass.id)
+          : window.dtSupabase.from("dance_classes").update({ status: "inactive" }).eq("id", rosterClass.id);
+        const { data, error } = await query.select("id").maybeSingle();
         if (error) {
           sharedRosterError("The class could not be deleted.", error, { reload: false });
+          return false;
+        }
+        if (!data?.id) {
+          showToast("The shared database did not confirm this deletion. Refresh and try again.");
           return false;
         }
       }
@@ -23312,6 +23320,15 @@
         const open = !menu?.classList.contains("open");
         menu?.classList.toggle("open", open);
         navToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        return;
+      }
+
+      const dancersBackButton = event.target.closest("[data-dancers-back]");
+      if (dancersBackButton) {
+        event.preventDefault();
+        navigationGuardBypass = true;
+        setTab("today");
+        navigationGuardBypass = false;
         return;
       }
 
@@ -26727,19 +26744,28 @@
     };
 
     const repairCrossedProfilePhotos = () => {
+      let repaired = false;
       teachers.filter((teacher) => String(teacher?.displayName || `${teacher?.firstName || ""} ${teacher?.lastName || ""}`).trim().toLowerCase() === "dance techniques").forEach((teacher) => {
         teacher.photo = "";
         teacher.photoOwnerId = "";
+        repaired = true;
       });
       const lexi = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "lexi");
       const tiffany = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "tiffany");
+      const judy = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "judy");
       if (lexi?.photo && tiffany?.photo && lexi.photo === tiffany.photo) {
         lexi.photo = "";
         lexi.photoOwnerId = "";
         console.warn("A crossed Lexi/Tiffany profile photo was removed. Upload Lexi’s correct photo to restore it.");
-        return true;
+        repaired = true;
       }
-      return false;
+      if (judy?.photo && tiffany?.photo && judy.photo === tiffany.photo) {
+        judy.photo = "";
+        judy.photoOwnerId = "";
+        console.warn("A crossed Judy/Tiffany profile photo was removed. Upload Judy’s correct photo to restore it.");
+        repaired = true;
+      }
+      return repaired;
     };
 
     const reconcileTeachingTeamWithLiveProfiles = async (client) => {
@@ -29249,15 +29275,15 @@
       kara: "#cbb7df"
     };
     const teacherColorValue = (teacher) => {
-      const saved = String(teacher?.color || "").trim().toLowerCase();
-      if (/^#[0-9a-f]{6}$/.test(saved)) return saved;
-      if (teacherColorPalette[saved]) return teacherColorPalette[saved];
       const teacherIdentity = String(teacher?.firstName || teacher?.displayName || "")
         .trim()
         .toLowerCase()
         .replace(/^ms\.\s*/, "")
         .split(/\s+/)[0];
-      return teacherColorPalette[teacherIdentity] || "";
+      if (teacherColorPalette[teacherIdentity]) return teacherColorPalette[teacherIdentity];
+      const saved = String(teacher?.color || "").trim().toLowerCase();
+      if (/^#[0-9a-f]{6}$/.test(saved)) return saved;
+      return teacherColorPalette[saved] || "";
     };
     const teacherProfileColor = (teacher) => teacherColorValue(teacher) || "#dba9a1";
     const coordinatedInitialColor = (backgroundColor) => {
@@ -51272,7 +51298,7 @@
         if (!window.confirm(`Delete ${rosterClass.name}? This empty class will be removed from Classes & Rosters.`)) return;
         deleteClassButton.disabled = true;
         deleteClassButton.textContent = "Deleting…";
-        deleteSharedClass(rosterClass);
+        await deleteSharedClass(rosterClass);
         return;
       }
       if (event.target.closest("[data-roster-show-prospects]")) {
@@ -53935,8 +53961,8 @@
       });
     })();
   </script>
-  <link rel="stylesheet" href="big-stage.css?v=20260911">
-  <script src="big-stage.js?v=20260911"></script>
+  <link rel="stylesheet" href="big-stage.css?v=20261001-match-restore">
+  <script src="big-stage.js?v=20261001-match-restore"></script>
   <script src="director-task-sync.js?v=20260908"></script>
   <script src="director-corner.js?v=20260908"></script>
   <script src="tulle.js?v=20260729-questions"></script>
