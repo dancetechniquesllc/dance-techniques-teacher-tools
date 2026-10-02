@@ -2542,36 +2542,10 @@
       color: var(--berry);
       font-weight: 850;
     }
-    .teacher-roster-management-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+    .teacher-roster-management-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
     .teacher-roster-management-row .teacher-roster-multi-class-edit { margin: 0; }
-    .teacher-roster-management-row button { min-height: 42px; padding: 8px 10px; border-radius: 999px; font-weight: 850; }
-    .teacher-roster-action-blush { border: 1px solid var(--border); background: var(--blush); color: var(--berry); }
-    .teacher-roster-action-blush:hover, .teacher-roster-action-blush:focus-visible { background: color-mix(in srgb, var(--blush) 82%, white); outline: 2px solid var(--berry); outline-offset: 2px; }
-    .teacher-roster-action-sage { border: 1px solid color-mix(in srgb, #68775f 55%, var(--border)); background: #c6d3b5; color: #31402e; }
-    .teacher-roster-action-sage:hover, .teacher-roster-action-sage:focus-visible { background: color-mix(in srgb, #c6d3b5 82%, white); outline: 2px solid #68775f; outline-offset: 2px; }
-    .teacher-measurements-dialog { width: min(620px, 100%); max-height: calc(100dvh - 28px); overflow: auto; }
-    .teacher-measurements-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-    .teacher-measurements-head h3, .teacher-measurements-head p { margin: 0; }
-    .teacher-measurements-close { min-width: 38px; min-height: 38px; padding: 0; border-radius: 999px; }
-    .teacher-measurements-selectors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
-    .teacher-measurements-selectors label, .teacher-measurements-fields label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 850; text-transform: uppercase; letter-spacing: .04em; }
-    .teacher-measurements-classes { display: flex; gap: 8px; overflow-x: auto; padding: 2px 1px 12px; scrollbar-width: thin; }
-    .teacher-measurements-class { flex: 0 0 auto; min-height: 40px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--berry); font-weight: 800; }
-    .teacher-measurements-class.is-active { background: var(--blush); border-color: var(--berry); }
-    .teacher-measurements-student { display: grid; justify-items: center; gap: 10px; padding: 18px; border: 1px solid var(--border); border-radius: 22px; background: var(--surface-soft); text-align: center; }
-    .teacher-measurements-photo { display: grid; place-items: center; width: 92px; height: 92px; overflow: hidden; border: 4px solid var(--lavender); border-radius: 50%; background: var(--lavender-soft); color: var(--berry); font-size: 25px; font-weight: 900; }
-    .teacher-measurements-photo img { width: 100%; height: 100%; object-fit: cover; }
-    .teacher-measurements-student h4 { margin: 0; font-size: 24px; }
-    .teacher-measurements-student > small { color: var(--muted); font-weight: 750; }
-    .teacher-measurements-fields { width: 100%; display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; }
-    .teacher-measurements-input { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
-    .teacher-measurements-fields input { min-width: 0; min-height: 46px; }
-    .teacher-measurements-half { min-width: 50px; min-height: 46px; padding: 0 10px; border: 1px solid var(--sage-deep); border-radius: 12px; background: var(--sage); color: #34412f; font-size: 16px; font-weight: 900; }
-    .teacher-measurements-carousel { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; }
-    .teacher-measurements-arrow { width: 42px; height: 42px; padding: 0; border-radius: 50%; background: var(--blush); color: var(--berry); font-size: 23px; }
-    .teacher-measurements-progress { color: var(--muted); font-size: 12px; font-weight: 800; }
-    .teacher-measurements-empty { padding: 28px 16px; color: var(--muted); text-align: center; }
-    @media (max-width: 520px) { .teacher-measurements-selectors, .teacher-measurements-fields { grid-template-columns: 1fr; } }
+    .teacher-roster-print-button { min-height: 42px; border: 1px solid color-mix(in srgb, #68775f 55%, var(--border)); border-radius: 999px; background: #c6d3b5; color: #31402e; font-weight: 850; }
+    .teacher-roster-print-button:hover, .teacher-roster-print-button:focus-visible { background: color-mix(in srgb, #c6d3b5 82%, white); outline: 2px solid #68775f; outline-offset: 2px; }
     @media (max-width: 390px) { .teacher-roster-management-row { gap: 6px; } .teacher-roster-management-row button { font-size: 11px; } }
 
     .enrollment-tempo-card {
@@ -2885,10 +2859,6 @@
     .teacher-class-session-timing.is-complete { color: #a01e2d; }
     .teacher-class-session-timing.is-warning strong { color: #8a6a09; }
     .teacher-class-session-timing.is-complete strong { color: #a01e2d; }
-      .teacher-class-settings-button { flex: 0 0 auto; display: grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 1px solid color-mix(in srgb, var(--brick) 30%, transparent); border-radius: 999px; background: var(--blush); color: var(--berry); box-shadow: 0 3px 9px rgb(91 43 39 / .14); line-height: 1; }
-      .teacher-class-settings-button svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-      .teacher-class-settings-button:hover,
-      .teacher-class-settings-button:focus-visible { background: color-mix(in srgb, var(--blush) 78%, white); outline: 3px solid color-mix(in srgb, var(--blush) 62%, transparent); outline-offset: 2px; transform: translateY(-1px); }
     .teacher-roster-start-button { min-height: 30px; padding: 0 10px; border: 1px solid var(--fg); border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 10px; font-weight: 800; }
     .teacher-roster-start-button.is-active { border-color: var(--brick); background: var(--blush); color: var(--brick); }
     .teacher-roster-class-actions { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-top: 13px; align-items: start; }
@@ -2913,7 +2883,6 @@
     .photo-frame-picker { display:grid; gap:6px; font-size:13px; font-weight:800; }
     .photo-frame-picker select { width:100%; min-height:44px; border:1px solid var(--brick); border-radius:12px; padding:10px 12px; background:white; color:var(--fg); font:inherit; }
     .photo-frame-stage { position: relative; width: min(100%, 250px); aspect-ratio: 2 / 3; margin-inline: auto; overflow: hidden; border-radius: 18px; background: #181515; touch-action: none; }
-    .photo-frame-stage.is-landscape { width: min(100%, 480px); aspect-ratio: 3 / 2; }
     .photo-frame-stage video, .photo-frame-stage > img { position: absolute; inset: 0; width: 100%; height: 100%; }
     .photo-frame-stage video { object-fit: contain; background: #181515; }
     .photo-frame-stage > img { z-index: 1; object-fit: fill; pointer-events: none; }
@@ -3299,7 +3268,6 @@
     .teacher-roster-future-panel { margin-top: 12px; border-top: 1px solid var(--border); }
     .teacher-roster-future-panel > summary { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0 4px; cursor: pointer; font-weight: 750; }
     .teacher-roster-future-panel > summary button { flex: 0 0 auto; }
-    .teacher-roster-future-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 
     .teacher-roster-student strong,
     .teacher-roster-student small { display: block; }
@@ -8578,7 +8546,6 @@
     }
 
     .roster-class-card.is-selected { background: var(--blush); }
-    .roster-class-card:not(.is-recital-split) { padding-bottom: 76px; }
     .roster-class-card strong,
     .roster-class-card small { display: block; }
     .roster-class-card > strong { color: var(--berry); font-size: 22px; line-height: 1.15; }
@@ -8603,101 +8570,10 @@
     .roster-class-card > .roster-enrollment-bubble { position: absolute; top: 12px; right: 12px; left: auto; min-height: 30px; align-items: center; padding: 5px 10px; transform: none; margin: 0 !important; white-space: nowrap; }
     .roster-class-age-range { margin-bottom: 5px; }
     .roster-class-students { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px 6px; margin-top: 8px; }
-    .roster-card-performance-groups { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; margin-top: 10px; text-align: left; }
-    .roster-card-performance-group { --recital-group-tone: var(--blush); display: grid; align-content: start; gap: 8px; min-width: 0; padding: 10px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 58%,var(--border)); border-radius: 14px; background: color-mix(in srgb,var(--recital-group-tone) 17%,white); }
-    .roster-card-performance-group.tone-sage { --recital-group-tone: var(--sage); }
-    .roster-card-performance-group.tone-blue { --recital-group-tone: #b9dcef; }
-    .roster-card-performance-group.tone-gold { --recital-group-tone: #f0d58c; }
-    .roster-card-performance-group.tone-lavender { --recital-group-tone: var(--lavender); }
-    .roster-card-performance-group > strong { color: var(--berry); font-size: 13px; }
-    .roster-card-performance-group > small { color: var(--muted); font-size: 9px; }
-    .roster-card-performance-group .roster-class-students { grid-template-columns: repeat(4,minmax(0,1fr)); margin-top: 0; }
-    .roster-card-performance-group .roster-recital-planning { position: static; margin-top: auto; }
-    @media (max-width: 640px) {
-      .roster-card-performance-group .roster-class-students { grid-template-columns: repeat(3,minmax(0,1fr)); }
-    }
     .roster-class-student { min-width: 0; display: grid; justify-items: center; gap: 4px; }
     .roster-class-student .roster-student-photo { width: 46px; height: 46px; font-size: 12px; }
     .roster-class-student span:last-child { max-width: 100%; overflow: hidden; color: var(--fg); font-size: 10px; font-weight: 750; text-overflow: ellipsis; white-space: nowrap; }
     .roster-class-no-students { grid-column: 1 / -1; color: var(--muted); font-size: 10px; }
-    .roster-recital-planning { position: absolute; right: 14px; bottom: 10px; left: 14px; width: auto; display: flex; align-items: center; gap: 5px; margin: 0; padding: 6px 7px; border: 1px solid color-mix(in srgb, var(--berry) 15%, transparent); border-radius: 999px; color: var(--fg); }
-    .roster-recital-planning > strong { flex: 1 1 auto; min-width: 0; color: var(--berry); font-size: 9px; line-height: 1.05; text-align: left; }
-    .roster-recital-select { flex: 0 0 auto; min-height: 26px; max-width: 70px; padding: 3px 18px 3px 7px; border: 1px solid rgb(255 255 255 / .7); border-radius: 999px; background-color: rgb(255 255 255 / .58); color: var(--fg); font-family: var(--font-body); font-size: 8px; font-weight: 850; line-height: 1; }
-    .roster-recital-need { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 3px; padding: 4px 6px; border-radius: 999px; background: rgb(255 255 255 / .48); font-size: 8px; font-weight: 750; line-height: 1; white-space: nowrap; }
-    .roster-recital-need strong { color: inherit; font-size: 10px; }
-    .roster-recital-planning.is-ballet { background: var(--blush); }
-    .roster-recital-planning.is-tap { background: var(--sage); }
-    .roster-recital-planning.is-either { background: color-mix(in srgb, var(--gold) 54%, white); }
-    .roster-meta-recital { background: color-mix(in srgb, var(--blush) 72%, white) !important; color: var(--berry) !important; }
-    .roster-recital-group-actions { display: flex; align-items: center; gap: 8px; }
-    .roster-recital-group-actions button { min-height: 40px; border-color: color-mix(in srgb, var(--berry) 24%, var(--border)); background: color-mix(in srgb, var(--blush) 42%, white); color: var(--berry); }
-    .roster-recital-group-actions button.is-active { background: var(--berry); color: white; }
-    .roster-recital-group-actions button.is-active[data-recital-edit-groups] { animation: recital-done-editing-pulse 1.45s ease-in-out infinite; box-shadow: 0 0 0 0 rgb(107 9 72 / .34); }
-    @keyframes recital-done-editing-pulse { 0%,100% { transform: scale(1); box-shadow: 0 0 0 0 rgb(107 9 72 / .3); } 50% { transform: scale(1.035); box-shadow: 0 0 0 8px rgb(107 9 72 / 0); } }
-    @media (prefers-reduced-motion: reduce) { .roster-recital-group-actions button.is-active[data-recital-edit-groups] { animation: none; outline: 3px solid color-mix(in srgb,var(--berry) 35%,transparent); outline-offset: 3px; } }
-    .roster-class-detail-actions { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 8px; margin: 10px 0 18px; }
-    .roster-class-detail-actions button { min-width: 0; }
-    .recital-performance-groups { display: grid; grid-template-columns: repeat(auto-fit,minmax(360px,1fr)); gap: 14px; }
-    .recital-performance-group { --recital-group-tone: var(--blush); display: grid; align-content: start; gap: 12px; min-width: 0; padding: 16px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 60%,var(--border)); border-radius: 18px; background: color-mix(in srgb,var(--recital-group-tone) 18%,white); }
-    .recital-performance-group.tone-sage { --recital-group-tone: var(--sage); }
-    .recital-performance-group.tone-blue { --recital-group-tone: #b9dcef; }
-    .recital-performance-group.tone-gold { --recital-group-tone: #f0d58c; }
-    .recital-performance-group.tone-lavender { --recital-group-tone: var(--lavender); }
-    .recital-performance-group.is-drop-target { outline: 3px solid var(--berry); outline-offset: 2px; }
-    .recital-performance-group > header { display: grid; grid-template-columns: auto minmax(0,1fr) auto auto; align-items: start; gap: 10px; }
-    .recital-performance-group > header h5,.recital-performance-group > header p { margin: 0; }
-    .recital-performance-group > header h5 { color: var(--berry); font-family: Georgia,"Times New Roman",serif; font-size: 20px; }
-    .recital-performance-group > header p { margin-top: 3px; color: var(--muted); font-size: 10px; font-weight: 700; }
-    .recital-performance-group > header button { min-height: 34px; padding: 6px 10px; }
-    .recital-group-badge { display: grid; width: 40px; height: 40px; place-items: center; border-radius: 50%; background: color-mix(in srgb,var(--recital-group-tone) 76%,var(--berry)); color: white; font-size: 18px; font-weight: 900; }
-    .recital-group-classrooms { display: grid; gap: 10px; }
-    .recital-performance-group .roster-classroom-group { padding: 10px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 50%,var(--border)); border-radius: 13px; background: rgb(255 255 255 / .48); }
-    .recital-performance-group .roster-classroom-group > h5 { display: flex; justify-content: space-between; margin: 0 0 8px; color: var(--berry); }
-    .recital-performance-group .roster-classroom-group > h5 small { color: var(--muted); font-family: var(--font-body); font-size: 9px; }
-    .recital-performance-group .roster-student-list { grid-template-columns: repeat(auto-fit,minmax(130px,1fr)); }
-    .recital-performance-group .roster-recital-planning { position: static; margin-top: 2px; }
-    .recital-empty-classroom { padding: 14px; border: 1px dashed var(--border); border-radius: 10px; color: var(--muted); text-align: center; }
-    .recital-student-move,.recital-add-to-group { display: grid; gap: 4px; color: var(--muted); font-size: 8px; font-weight: 850; text-transform: uppercase; }
-    .recital-student-move select,.recital-add-to-group select { min-width: 0; min-height: 34px; padding: 5px 24px 5px 8px; border: 1px solid var(--border); border-radius: 9px; background: white; font: inherit; text-transform: none; }
-    .recital-add-to-group { padding: 10px; border: 1px dashed color-mix(in srgb,var(--recital-group-tone) 75%,var(--berry)); border-radius: 11px; }
-    .recital-add-performance-group { grid-column: 1/-1; display: grid; justify-items: center; gap: 3px; min-height: 76px; border: 1px dashed var(--brick); border-radius: 15px; background: transparent; color: var(--berry); font-size: 14px; font-weight: 900; }
-    .recital-add-performance-group small { color: var(--muted); font-size: 9px; font-weight: 650; }
-    .recital-unassigned-warning { grid-column: 1/-1; padding: 12px; border: 1px solid #d8a447; border-radius: 12px; background: #fff5d8; color: #6b4d12; }
-    .recital-performance-groups.is-editing [draggable="true"] { cursor: grab; }
-    .recital-performance-groups.is-editing [draggable="true"].is-dragging { opacity: .45; }
-    .recital-split-alert { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 12px; margin: 16px 0; padding: 14px 16px; border: 1px solid color-mix(in srgb,var(--brick) 46%,var(--border)); border-radius: 16px; background: color-mix(in srgb,var(--blush) 24%,white); }
-    .recital-split-alert-icon { display: grid; width: 38px; height: 38px; place-items: center; border-radius: 50%; background: var(--brick); color: white; font-size: 20px; font-weight: 900; }
-    .recital-split-alert strong,.recital-split-alert small { display: block; }
-    .recital-split-alert strong { color: var(--berry); font-size: 15px; }
-    .recital-split-alert small { margin-top: 3px; color: var(--muted); }
-    .recital-split-alert button { min-height: 42px; border-color: color-mix(in srgb,var(--brick) 56%,var(--border)); background: color-mix(in srgb,var(--blush) 30%,white); color: var(--berry); }
-    .roster-class-card .recital-split-alert { grid-template-columns: auto minmax(0,1fr); width: 100%; margin: 10px 0 2px; padding: 10px 12px; text-align: left; }
-    .roster-class-card .recital-split-alert-icon { width: 30px; height: 30px; font-size: 16px; }
-    .roster-class-card .recital-split-alert strong { font-size: 12px; }
-    .roster-class-card .recital-split-alert small { font-size: 9px; }
-    .recital-split-settings-button { border-color: color-mix(in srgb,var(--sage) 72%,#6f8068) !important; background: var(--sage) !important; color: #31402d !important; }
-    .confirm-dialog.recital-suggestion-dialog { width: min(760px,calc(100vw - 30px)); max-height: min(82vh,760px); overflow: auto; }
-    .recital-suggestion-dialog > h3,.recital-suggestion-dialog > p { margin: 0; }
-    .recital-suggestion-dialog > p { margin-top: 5px; color: var(--muted); }
-    .recital-suggestion-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 16px 0; }
-    .recital-suggestion-grid article { --recital-group-tone: var(--blush); display: grid; grid-template-columns: auto minmax(0,1fr); gap: 10px; padding: 14px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 58%,var(--border)); border-radius: 14px; background: color-mix(in srgb,var(--recital-group-tone) 18%,white); }
-    .recital-suggestion-grid article.tone-sage { --recital-group-tone: var(--sage); }
-    .recital-suggestion-grid article.tone-blue { --recital-group-tone: #b9dcef; }
-    .recital-suggestion-grid article.tone-gold { --recital-group-tone: #f0d58c; }
-    .recital-suggestion-grid article.tone-lavender { --recital-group-tone: var(--lavender); }
-    .recital-suggestion-grid strong,.recital-suggestion-grid small { display: block; }
-    .recital-suggestion-grid small,.recital-suggestion-grid p { margin-top: 4px; color: var(--muted); font-size: 10px; }
-    .recital-suggestion-name { width: 100%; min-height: 38px; padding: 7px 10px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 75%,var(--border)); border-radius: 10px; background: rgb(255 255 255 / .78); color: var(--berry); font: inherit; font-weight: 850; }
-    .recital-suggestion-students { display: grid; gap: 7px; margin-top: 10px; }
-    .recital-suggestion-student { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid color-mix(in srgb,var(--recital-group-tone) 42%,var(--border)); border-radius: 10px; background: rgb(255 255 255 / .76); cursor: grab; }
-    .recital-suggestion-student.is-dragging { opacity: .42; }
-    .recital-suggestion-student span { display: grid; width: 28px; height: 28px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: color-mix(in srgb,var(--recital-group-tone) 70%,white); color: var(--berry); font-size: 9px; font-weight: 900; }
-    .recital-suggestion-student b { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; font-size: 10px; }
-    .recital-suggestion-student b small { flex: 0 0 auto; margin: 0; color: var(--muted); font-size: 9px; font-weight: 700; }
-    .recital-suggestion-drop { grid-column: 1/-1; min-height: 42px; padding: 9px; border: 1px dashed color-mix(in srgb,var(--recital-group-tone) 72%,var(--berry)); border-radius: 10px; color: var(--muted); text-align: center; font-size: 9px; font-weight: 800; }
-    .recital-suggestion-grid article.is-drop-target { outline: 3px solid var(--berry); outline-offset: 2px; }
-    .recital-suggestion-help { display: block; margin-top: 8px; color: var(--muted); font-size: 9px; font-weight: 700; }
-    @media (max-width: 760px) { .roster-class-detail-actions { grid-template-columns: repeat(2,minmax(0,1fr)); } .recital-performance-groups { grid-template-columns: 1fr; } .recital-performance-group > header { grid-template-columns: auto minmax(0,1fr); } .recital-performance-group > header button { grid-row: 2; } .recital-split-alert { grid-template-columns: auto minmax(0,1fr); } .recital-split-alert button { grid-column: 1/-1; } }
     .roster-enrollment-bubble { display: inline-flex !important; width: fit-content; margin-top: 8px !important; padding: 5px 9px; border-radius: 999px; font-weight: 850; color: oklch(28% 0.04 40) !important; }
     .roster-enrollment-bubble.low { background: oklch(91% 0.12 90); }
     .roster-enrollment-bubble.ready { background: oklch(88% 0.11 145); }
@@ -9309,8 +9185,7 @@
     .boutique-order-card .boutique-order-number { color: var(--berry); font-size: 10px; font-weight: 900; }
     .boutique-order-items { width: 100%; display: grid; gap: 5px; }
     .boutique-order-item { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; width: 100%; padding: 5px 7px; border: 1px solid transparent; border-radius: 8px; background: var(--surface-soft); color: var(--muted); font: inherit; font-size: 10px; line-height: 1.2; text-align: center; }
-    .boutique-item-unfill { position: absolute; right: 48px; bottom: 10px; left: auto; z-index: 4; display: grid; place-items: center; width: 28px; min-width: 28px; height: 28px; min-height: 28px; padding: 0; border: 1px solid #d8a7a3; border-radius: 50%; background: white; color: var(--berry); text-align: center; cursor: pointer; box-shadow: none; }
-    .boutique-item-unfill svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    .boutique-item-unfill { position: absolute; left: 10px; bottom: 10px; z-index: 4; display: grid; place-items: center; width: 28px; min-width: 28px; height: 28px; min-height: 28px; padding: 0; border: 1px solid #d8a7a3; border-radius: 50%; background: white; color: var(--berry); font: 800 18px/1 Arial, sans-serif; text-align: center; cursor: pointer; box-shadow: none; }
     .boutique-item-unfill:hover, .boutique-item-unfill:focus-visible { background: var(--blush); border-color: var(--brick); }
     .boutique-item-unfill.is-active { background: var(--brick); border-color: var(--brick); color: white; }
     .boutique-order-item.is-unfill-target { cursor: pointer; border-color: color-mix(in srgb, var(--brick) 45%, var(--border)); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brick) 12%, transparent); }
@@ -15887,7 +15762,7 @@
 
             <section class="view" id="dancers-view">
               <div class="mobile-head page-head">
-                <button class="back-btn" type="button" data-dancers-back aria-label="Back to Teacher Tools home">&larr;</button>
+                <button class="back-btn" data-tab-jump="today" aria-label="Back to Today">&larr;</button>
                 <div class="mobile-title">
                   <h2>My Dancers</h2>
                   <p class="subtle" id="teacher-dancers-subtitle">Dancers in your assigned classes</p>
@@ -15932,13 +15807,14 @@
               </section>
 
               <div class="teacher-roster-toolbar">
+                <button class="primary" type="button" id="teacher-roster-create-class">Create Class</button>
                 <button class="secondary roster-add-future-button" type="button" id="teacher-roster-add-future">Add Prospect Dancer</button>
               </div>
               <label class="teacher-roster-filter">
                 <select id="teacher-roster-school-filter" aria-label="Filter rosters by assigned school"></select>
               </label>
-              <div class="teacher-roster-management-row"><button class="teacher-roster-multi-class-edit teacher-roster-action-blush" type="button" id="teacher-roster-multi-class-edit">Edit Classes</button><button class="teacher-roster-action-blush" type="button" id="teacher-roster-create-class">Create Class</button><button class="teacher-roster-print-button teacher-roster-action-blush" type="button" id="teacher-roster-print">Print Rosters</button></div>
-              <div class="teacher-roster-management-row"><button class="teacher-roster-action-sage" type="button" id="teacher-roster-move-ups">Move Ups</button><button class="teacher-roster-action-sage" type="button" id="teacher-roster-shoe-check">Shoe Check</button><button class="teacher-roster-action-sage" type="button" id="teacher-roster-measurements">Measurements</button></div>
+              <div class="teacher-roster-management-row"><button class="teacher-roster-multi-class-edit" type="button" id="teacher-roster-multi-class-edit">Rearrange Classes</button><button class="teacher-roster-print-button" type="button" id="teacher-roster-print">Print Rosters</button></div>
+              <div class="teacher-roster-management-row"><button class="care-brick" type="button" id="teacher-roster-shoe-check">Shoe Check</button><button class="care-gold" type="button" id="teacher-roster-move-ups">Move Ups</button></div>
               <div class="teacher-roster-list" id="teacher-roster-list"></div>
             </section>
 
@@ -16763,7 +16639,7 @@
 
           <section class="admin-profile-card admin-section-page big-stage" id="admin-home-big-stage">
             <div class="admin-card-header big-stage-heading">
-              <div><span class="big-stage-eyebrow">DIRECTOR DASHBOARD ONLY</span><h3>The Big Stage</h3><p><em>Plan every show, performance, costume, and recital detail in one beautiful place.</em></p></div>
+              <div><span class="big-stage-eyebrow">LOCAL PREVIEW · NO LIVE DATA CHANGES</span><h3>The Big Stage</h3><p><em>Plan every show, performance, costume, and recital detail in one beautiful place.</em></p></div>
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
             <div id="big-stage-app"></div>
@@ -18972,28 +18848,14 @@
           <select id="teacher-roster-class-time" aria-describedby="teacher-roster-class-time-help"></select>
           <small id="teacher-roster-class-time-help">Times are available every 15 minutes.</small>
         </label>
-        <label>Day
-          <select id="teacher-roster-class-day"><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option></select>
-        </label>
-        <label>AM / PM
-          <select id="teacher-roster-class-period"><option value="AM">AM</option><option value="PM">PM</option></select>
-        </label>
         <label>Capacity
           <input id="teacher-roster-class-capacity" type="number" min="1" max="99" value="12" required>
         </label>
       </form>
       <div class="confirm-actions">
         <button class="secondary" type="button" id="teacher-roster-class-cancel">Cancel</button>
-        <button class="primary" type="submit" form="teacher-roster-class-form" id="teacher-roster-class-submit">Create Class</button>
+        <button class="primary" type="submit" form="teacher-roster-class-form">Create Class</button>
       </div>
-    </div>
-  </div>
-  <div class="confirm-overlay" id="teacher-measurements-overlay" aria-hidden="true">
-    <div class="confirm-dialog teacher-measurements-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-measurements-title">
-      <div class="teacher-measurements-head"><div><h3 id="teacher-measurements-title">Measurements</h3><p class="subtle">Choose a class, then measure one dancer at a time.</p></div><button class="secondary teacher-measurements-close" type="button" id="teacher-measurements-close" aria-label="Close Measurements">×</button></div>
-      <div class="teacher-measurements-selectors"><label>School<select id="teacher-measurements-school"></select></label><label>Class<select id="teacher-measurements-class"></select></label></div>
-      <div class="teacher-measurements-classes" id="teacher-measurements-classes" aria-label="Classes"></div>
-      <div id="teacher-measurements-content"></div>
     </div>
   </div>
   <div class="confirm-overlay" id="teacher-activities-overlay" aria-hidden="true">
@@ -19087,7 +18949,7 @@
   <div class="confirm-overlay" id="teacher-roster-future-overlay" aria-hidden="true">
     <div class="confirm-dialog roster-edit-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-roster-future-title">
       <h3 id="teacher-roster-future-title">Trial Request</h3>
-      <p>Add any information you have. All prospect details are optional.</p>
+      <p>Add the dancer and parent contact information to one of your assigned classes.</p>
       <form class="teacher-roster-form" id="teacher-roster-future-form">
         <label>Class Attending
           <select id="teacher-roster-future-class"></select>
@@ -19096,10 +18958,10 @@
           <select id="teacher-roster-future-classroom"></select>
         </label>
         <label>First Name
-          <input id="teacher-roster-future-first" autocomplete="off">
+          <input id="teacher-roster-future-first" required autocomplete="off">
         </label>
         <label>Last Name
-          <input id="teacher-roster-future-last" autocomplete="off">
+          <input id="teacher-roster-future-last" required autocomplete="off">
         </label>
         <label>Birthdate
           <input id="teacher-roster-future-birthdate" type="date">
@@ -20151,9 +20013,6 @@
     let rosterSchoolFilter = "all";
     let rosterTeacherFilter = "all";
     let rosterSearchTerm = "";
-    const recitalPerformanceGroupsByClass = new Map();
-    let recitalGroupEditClassId = "";
-    let pendingRecitalGroupSuggestion = null;
     let editingRosterStudentId = "";
     let editingRosterClassId = "";
     let rosterProfileNavigationClassId = "";
@@ -22250,7 +22109,7 @@
       const partnershipPreferencesQuery = ["admin", "director"].includes(profile.role)
         ? client.from("partner_school_payment_preferences").select("*")
         : Promise.resolve({ data: [], error: null });
-      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, recitalGroupsResult, recitalMembersResult] = await Promise.all([
+      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("guardian_user_accounts").select("user_id, guardian_id, revoked_at"),
         partnerSchoolsQuery,
@@ -22264,13 +22123,11 @@
         familyLinksQuery,
         newsletterArchiveQuery,
         partnershipPaymentsQuery,
-        partnershipPreferencesQuery,
-        ["admin", "director"].includes(profile.role) ? client.from("class_recital_performance_groups").select("*").order("position") : Promise.resolve({ data: [], error: null }),
-        ["admin", "director"].includes(profile.role) ? client.from("class_recital_performance_group_members").select("*") : Promise.resolve({ data: [], error: null })
+        partnershipPreferencesQuery
       ]);
       const attendanceTableUnavailable = attendanceResult.error?.code === "42P01";
       const failed = [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult,
-        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, recitalGroupsResult, recitalMembersResult].find((result) => result.error);
+        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult].find((result) => result.error);
       if (failed) {
         sharedRosterReady = false;
         replaceCollection(rosterClasses, []);
@@ -22321,14 +22178,6 @@
       let recoverInactiveAssignments = false;
       try { recoverInactiveAssignments = !window.localStorage?.getItem(operationalRecoveryCompletedKey); } catch (error) {}
       const classes = classesResult.data || [];
-      recitalPerformanceGroupsByClass.clear();
-      (recitalGroupsResult.data || []).forEach((group) => {
-        const normalized = { id: group.id, classId: group.dance_class_id, name: group.name, position: Number(group.position || 1), tone: group.tone || "blush", requirement: group.recital_requirement || "either", studentIds: [] };
-        if (!recitalPerformanceGroupsByClass.has(normalized.classId)) recitalPerformanceGroupsByClass.set(normalized.classId, []);
-        recitalPerformanceGroupsByClass.get(normalized.classId).push(normalized);
-      });
-      const recitalGroupById = new Map([...recitalPerformanceGroupsByClass.values()].flat().map((group) => [group.id, group]));
-      (recitalMembersResult.data || []).forEach((member) => recitalGroupById.get(member.group_id)?.studentIds.push(String(member.student_id)));
       archivedRosterStudents = (archivedResult.data || []).map((enrollment) => ({
         id: enrollment.students?.id || enrollment.student_id,
         enrollmentId: enrollment.id,
@@ -22520,9 +22369,7 @@
         return {
           id: item.id, assignmentId: item.teacher_school_assignment_id, name: item.name, ageGroup: item.age_group, level: String(item.level),
           time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", partnerSchoolId: school.id || assignment?.partner_school_id || "", schoolName: school.name || "Partner School",
-          scheduleDay: item.schedule_day == null ? "" : Number(item.schedule_day),
-          timeBlock: item.schedule_period || school.time_of_day || "AM",
-          day: weekdayNames[item.schedule_day ?? school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
+          day: weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
           updatedAt: item.updated_at || "",
           helperHistory: Array.isArray(item.helper_history) ? item.helper_history : [],
           attendance: attendanceByClass.get(item.id) || {},
@@ -22616,7 +22463,7 @@
           scheduleAppDataSave();
           return false;
         }
-        const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), schedule_day: rosterClass.scheduleDay === "" || rosterClass.scheduleDay == null ? null : Number(rosterClass.scheduleDay), schedule_period: rosterClass.timeBlock || null, start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active", helper_history: rosterClass.helperHistory || [] };
+        const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active", helper_history: rosterClass.helperHistory || [] };
         let query = oldId?.startsWith("roster-")
           ? window.dtSupabase.from("dance_classes").insert(payload)
           : window.dtSupabase.from("dance_classes").update(payload).eq("id", oldId);
@@ -22653,17 +22500,9 @@
         return false;
       }
       if (document.body.dataset.tourMode !== "true" && sharedRosterReady && window.dtSupabase && !String(rosterClass.id || "").startsWith("roster-")) {
-        const canPermanentlyDelete = ["admin", "director"].includes(String(window.dtCurrentProfile?.role || "").toLowerCase());
-        const query = canPermanentlyDelete
-          ? window.dtSupabase.from("dance_classes").delete().eq("id", rosterClass.id)
-          : window.dtSupabase.from("dance_classes").update({ status: "inactive" }).eq("id", rosterClass.id);
-        const { data, error } = await query.select("id").maybeSingle();
+        const { error } = await window.dtSupabase.from("dance_classes").update({ status: "inactive" }).eq("id", rosterClass.id);
         if (error) {
           sharedRosterError("The class could not be deleted.", error, { reload: false });
-          return false;
-        }
-        if (!data?.id) {
-          showToast("The shared database did not confirm this deletion. Refresh and try again.");
           return false;
         }
       }
@@ -22811,9 +22650,9 @@
       };
       let studentId = student.id;
       if (!student.enrollmentId) {
-        studentId = isUuid(studentId) ? studentId : crypto.randomUUID();
-        const { error } = await window.dtSupabase.from("students").insert({ id: studentId, ...studentPayload });
+        const { data, error } = await window.dtSupabase.from("students").insert(studentPayload).select("id").single();
         if (error) return sharedRosterError("The dancer was not shared.", error);
+        studentId = data.id;
         student.id = studentId;
         const enrollment = await window.dtSupabase.from("class_enrollments").insert({ dance_class_id: rosterClass.id, student_id: studentId, status: dbEnrollmentStatus(student.status), trial_date: student.trialDate || null }).select("id").single();
         if (enrollment.error) return sharedRosterError("The class enrollment was not shared.", enrollment.error);
@@ -23323,15 +23162,6 @@
         return;
       }
 
-      const dancersBackButton = event.target.closest("[data-dancers-back]");
-      if (dancersBackButton) {
-        event.preventDefault();
-        navigationGuardBypass = true;
-        setTab("today");
-        navigationGuardBypass = false;
-        return;
-      }
-
       const tabButton = event.target.closest("[data-tab], [data-tab-jump], [data-nav-target]");
       if (tabButton) {
         event.preventDefault();
@@ -23581,13 +23411,6 @@
       "Highview Learning Center": 4
     };
     const classCountForSchool = (schoolName, profileSchool) => {
-      const liveClassCount = rosterClasses.filter((rosterClass) => (
-        rosterClass.sourceActive !== false &&
-        String(rosterClass.teacherId || "") === String(profileTeacher?.id || "") &&
-        (enrollmentOfficialSchoolMatchesClass(profileSchool, rosterClass)
-          || enrollmentSchoolNameMatches(rosterClass.schoolName, schoolName))
-      )).length;
-      if (sharedRosterReady || document.body.dataset.tourMode === "true") return liveClassCount;
       const profileCount = Number(profileSchool?.classCount);
       return profileSchool?.classCount !== "" && profileSchool?.classCount != null && Number.isFinite(profileCount) ? profileCount : (schoolClassCounts[schoolName] || 4);
     };
@@ -23863,7 +23686,7 @@
       return matching.filter((item) => item.classId || !matching.some((other) => other.classId && other.originalDate === item.originalDate));
     };
     const rescheduleRosterClassesForEvent = (event) => rosterClasses.filter((item) => (
-      item.sourceActive !== false && String(item.teacherId || "") === String(profileTeacher.id || "") &&
+      item.sourceActive !== false && item.teacherId === profileTeacher.id &&
       enrollmentSchoolNameMatches(item.schoolName, event.school) &&
       (!event.classIds || event.classIds.includes(String(item.id)))
     )).sort((a, b) => teacherRosterTimeValue(a.time) - teacherRosterTimeValue(b.time) || a.name.localeCompare(b.name, undefined, { numeric: true }));
@@ -24004,19 +23827,15 @@
       return adjustedSchoolEventsForOverrides(school, profileSchool, schoolEvents).flatMap(({ week, curriculum, date, scheduledDate, effectiveDate }) => {
         const hasCurriculum = Boolean(week && curriculum);
         const schoolClasses = rescheduleRosterClassesForEvent({ school: school.school });
+        const hasClassChanges = rescheduleOverridesForTeacher().some((item) => item.classId &&
+          enrollmentSchoolNameMatches(item.schoolName, school.school) && item.originalDate === scheduledDate);
         const groups = new Map();
-        const occurrences = schoolClasses.length ? schoolClasses : [null];
+        const occurrences = hasClassChanges && schoolClasses.length ? schoolClasses : [null];
         occurrences.forEach((rosterClass) => {
         const override = rescheduleOverrideFor(school.school, scheduledDate, week, curriculum, rosterClass?.id || "");
         if (override && rescheduleActionFor(override) !== "reschedule_now") return;
-        let classDate = effectiveDate;
-        if (rosterClass?.scheduleDay !== "" && rosterClass?.scheduleDay != null) {
-          const date = new Date(`${effectiveDate}T12:00:00`);
-          date.setDate(date.getDate() + Number(rosterClass.scheduleDay) - date.getDay());
-          classDate = isoDate(date);
-        }
-        const eventDate = override?.newDate || classDate;
-        const eventTimeBlock = override?.timeBlock || rosterClass?.timeBlock || profileSchool?.timeBlock || school.timeBlock || "AM";
+        const eventDate = override?.newDate || effectiveDate;
+        const eventTimeBlock = override?.timeBlock || profileSchool?.timeBlock || school.timeBlock || "AM";
         const key = JSON.stringify([eventDate, eventTimeBlock, override?.originalDate || "", override?.reason || ""]);
         if (groups.has(key)) {
           const group = groups.get(key);
@@ -24030,7 +23849,7 @@
         classNames: rosterClass ? [rosterClass.name] : undefined,
         school: school.school,
         displaySchool: profileSchool?.nickname?.trim() || school.nickname || school.school,
-        day: weekdayLabelFromDate(eventDate),
+        day: override ? weekdayLabelFromDate(eventDate) : dayLabelForSchool(profileSchool, school.day),
         isd: profileSchool?.isd || school.isd,
         address: profileSchool?.address || school.school,
         teacher: profileTeacher.firstName || teacherNickname(profileTeacher),
@@ -26744,28 +26563,19 @@
     };
 
     const repairCrossedProfilePhotos = () => {
-      let repaired = false;
       teachers.filter((teacher) => String(teacher?.displayName || `${teacher?.firstName || ""} ${teacher?.lastName || ""}`).trim().toLowerCase() === "dance techniques").forEach((teacher) => {
         teacher.photo = "";
         teacher.photoOwnerId = "";
-        repaired = true;
       });
       const lexi = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "lexi");
       const tiffany = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "tiffany");
-      const judy = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "judy");
       if (lexi?.photo && tiffany?.photo && lexi.photo === tiffany.photo) {
         lexi.photo = "";
         lexi.photoOwnerId = "";
         console.warn("A crossed Lexi/Tiffany profile photo was removed. Upload Lexi’s correct photo to restore it.");
-        repaired = true;
+        return true;
       }
-      if (judy?.photo && tiffany?.photo && judy.photo === tiffany.photo) {
-        judy.photo = "";
-        judy.photoOwnerId = "";
-        console.warn("A crossed Judy/Tiffany profile photo was removed. Upload Judy’s correct photo to restore it.");
-        repaired = true;
-      }
-      return repaired;
+      return false;
     };
 
     const reconcileTeachingTeamWithLiveProfiles = async (client) => {
@@ -29275,15 +29085,15 @@
       kara: "#cbb7df"
     };
     const teacherColorValue = (teacher) => {
+      const saved = String(teacher?.color || "").trim().toLowerCase();
+      if (/^#[0-9a-f]{6}$/.test(saved)) return saved;
+      if (teacherColorPalette[saved]) return teacherColorPalette[saved];
       const teacherIdentity = String(teacher?.firstName || teacher?.displayName || "")
         .trim()
         .toLowerCase()
         .replace(/^ms\.\s*/, "")
         .split(/\s+/)[0];
-      if (teacherColorPalette[teacherIdentity]) return teacherColorPalette[teacherIdentity];
-      const saved = String(teacher?.color || "").trim().toLowerCase();
-      if (/^#[0-9a-f]{6}$/.test(saved)) return saved;
-      return teacherColorPalette[saved] || "";
+      return teacherColorPalette[teacherIdentity] || "";
     };
     const teacherProfileColor = (teacher) => teacherColorValue(teacher) || "#dba9a1";
     const coordinatedInitialColor = (backgroundColor) => {
@@ -30117,7 +29927,7 @@
           rosterClass.name = row.title || `Class ${rowIndex + 1}`;
           rosterClass.ageGroup = row.age || "";
           rosterClass.level = row.level || "";
-          rosterClass.day = weekdayNames[Number(rosterClass.scheduleDay || school.dayOfWeek)] || "To schedule";
+          rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
           rosterClass.time = row.startTime || "";
           rosterClass.classroom = row.age || "Classroom not set";
           rosterClass.schoolStudentEstimate = row.students;
@@ -31255,7 +31065,7 @@
             teacher,
             school: school?.nickname || school?.name || rosterClass.schoolName || rosterClass.name || "Scheduled Class",
             time: rosterClass.time || "",
-            timeBlock: rosterClass.scheduleChange?.timeBlock || rosterClass.timeBlock || school?.timeBlock || "AM",
+            timeBlock: rosterClass.scheduleChange?.timeBlock || school?.timeBlock || "AM",
             detail: closure ? `No Class · ${closure.reason || "District closure"}` : (rosterClass.scheduleChange ? `${rosterClass.name} · Makeup for ${rescheduleDateLabel(rosterClass.scheduleChange.originalDate)}` : ""),
             closed: Boolean(closure)
           };
@@ -32485,7 +32295,7 @@
         });
         rosterClasses.filter((rosterClass) => partnerSchoolMatchesScheduleRecord(school, rosterClass)).forEach((rosterClass) => {
           rosterClass.partnerSchoolId = school.id || rosterClass.partnerSchoolId || "";
-          rosterClass.day = weekdayNames[Number(rosterClass.scheduleDay)] || dayName;
+          rosterClass.day = dayName;
         });
       });
     };
@@ -33424,7 +33234,7 @@
         syncPartnerSchoolReferences(sourceSchool, schoolField, previousValue);
         scheduleCloudAppDataSave();
       }
-      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name && !item.scheduleDay).forEach((item) => {
+      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name).forEach((item) => {
         item.day = weekdayNames[school.dayOfWeek] || "To schedule";
       });
       if (!["classCount", "address", "directorName", "phone", "email"].includes(schoolField)) markScheduleDirty();
@@ -33459,7 +33269,7 @@
         syncPartnerSchoolReferences(sourceSchool, schoolField, previousValue);
         scheduleCloudAppDataSave();
       }
-      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name && !item.scheduleDay).forEach((item) => {
+      if (schoolField === "dayOfWeek") rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === school.name).forEach((item) => {
         item.day = weekdayNames[school.dayOfWeek] || "To schedule";
       });
       if (!["classCount", "address", "directorName", "phone", "email"].includes(schoolField)) markScheduleDirty();
@@ -33521,7 +33331,7 @@
       } else {
         rosterClasses.filter((item) => item.teacherId === profileTeacher.id && item.schoolName === previousSchoolName).forEach((rosterClass) => {
           if (schoolField === "name") rosterClass.schoolName = school.name;
-          if (schoolField === "dayOfWeek" && !rosterClass.scheduleDay) rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
+          if (schoolField === "dayOfWeek") rosterClass.day = weekdayNames[school.dayOfWeek] || "To schedule";
         });
       }
       scheduleAppDataSave();
@@ -34704,7 +34514,7 @@
       const available = order.status !== "to_fill" && (order.boutique_order_items || []).length > 0;
       if (!available) return "";
       const active = activeBoutiqueUnfillOrderIds.has(String(order.id));
-      return `<button class="boutique-item-unfill ${active ? "is-active" : ""}" type="button" data-boutique-order-unfill-toggle="${rosterSafe(order.id)}" title="Move an item back to To Fill" aria-label="Move an item in this order back to To Fill" aria-pressed="${active ? "true" : "false"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7 4 12l5 5"></path><path d="M5 12h8a7 7 0 0 1 7 7"></path></svg></button>`;
+      return `<button class="boutique-item-unfill ${active ? "is-active" : ""}" type="button" data-boutique-order-unfill-toggle="${rosterSafe(order.id)}" title="Move an item back to To Fill" aria-label="Move an item in this order back to To Fill" aria-pressed="${active ? "true" : "false"}">↩</button>`;
     };
     const toggleBoutiqueOrderUnfillMode = (orderId) => {
       const id = String(orderId || "");
@@ -36593,7 +36403,7 @@
         || enrollmentSchoolNameMatches(school.name, rosterClass?.schoolName)
         || enrollmentSchoolNameMatches(school.nickname, rosterClass?.schoolName)
       ));
-      return rosterClass?.day || weekdayNames[Number(assignedSchool?.dayOfWeek)] || "";
+      return weekdayNames[Number(assignedSchool?.dayOfWeek)] || rosterClass?.day || "";
     };
 
     const teacherRosterClassIsToday = (rosterClass) => {
@@ -36927,7 +36737,7 @@
             ${checkInSubmitted && checkOutActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-attendance="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-attendance-checkout="${rosterSafe(rosterClass.id)}">Check Out</button></div>` : ""}
             ${kitDeliveryActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-kit-delivery="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-kit-delivery-finish="${rosterSafe(rosterClass.id)}">Mark as Delivered</button></div>` : ""}
             ${boutiqueDeliveryActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-boutique-delivery="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-boutique-delivery-finish="${rosterSafe(rosterClass.id)}" ${selectedBoutiqueDeliveryCount ? "" : "disabled"}>Mark as Delivered${selectedBoutiqueDeliveryCount ? ` (${selectedBoutiqueDeliveryCount})` : ""}</button></div>` : ""}
-            <details class="teacher-roster-future-panel"><summary><span>Future Dancers (${prospects.length})</span><span class="teacher-roster-future-actions"><button class="secondary roster-add-future-button" type="button" data-teacher-roster-add-future="${rosterSafe(rosterClass.id)}">Add Prospect</button><button class="teacher-class-settings-button" type="button" data-teacher-class-settings="${rosterSafe(rosterClass.id)}" aria-label="Edit ${rosterSafe(rosterClass.name)} class settings" title="Class settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.25A3.25 3.25 0 1 0 12 8.75a3.25 3.25 0 0 0 0 6.5Z"></path><path d="M19.1 13.1c.05-.36.08-.73.08-1.1s-.03-.74-.08-1.1l2-1.55-2-3.46-2.48 1a8.5 8.5 0 0 0-1.9-1.1L14.35 3h-4l-.37 2.79a8.5 8.5 0 0 0-1.9 1.1l-2.48-1-2 3.46 2 1.55c-.05.36-.08.73-.08 1.1s.03.74.08 1.1l-2 1.55 2 3.46 2.48-1a8.5 8.5 0 0 0 1.9 1.1l.37 2.79h4l.37-2.79a8.5 8.5 0 0 0 1.9-1.1l2.48 1 2-3.46-2-1.55Z"></path></svg></button></span></summary>${prospects.length ? `<div class="teacher-future-prospect-grid">${sortRosterStudents(prospects).map((student) => teacherFutureProspectCardMarkup(student, rosterClass)).join("")}</div>` : `<div class="teacher-roster-empty">No future dancers yet.</div>`}</details>
+            <details class="teacher-roster-future-panel"><summary><span>Future Dancers (${prospects.length})</span><button class="secondary roster-add-future-button" type="button" data-teacher-roster-add-future="${rosterSafe(rosterClass.id)}">Add Prospect</button></summary>${prospects.length ? `<div class="teacher-future-prospect-grid">${sortRosterStudents(prospects).map((student) => teacherFutureProspectCardMarkup(student, rosterClass)).join("")}</div>` : `<div class="teacher-roster-empty">No future dancers yet.</div>`}</details>
           </div>
         </details>`;
       }).join("");
@@ -37286,11 +37096,9 @@
       }
     };
 
-    let editingTeacherRosterClassId = "";
     const openTeacherRosterClassCreator = () => {
       const schools = assignedTeacherSchools();
       if (!schools.length) return showToast("No assigned schools are available");
-      editingTeacherRosterClassId = "";
       const schoolSelect = document.getElementById("teacher-roster-class-school");
       schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
       if (teacherRosterSchoolFilter !== "all" && schools.some((school) => school.name === teacherRosterSchoolFilter)) schoolSelect.value = teacherRosterSchoolFilter;
@@ -37298,121 +37106,9 @@
       document.getElementById("teacher-roster-class-level").innerHTML = optionMarkup(classLevelOptions, "1");
       document.getElementById("teacher-roster-class-name").value = "";
       document.getElementById("teacher-roster-class-time").innerHTML = quarterHourOptions("");
-      document.getElementById("teacher-roster-class-day").value = String(schools.find((school) => school.name === schoolSelect.value)?.dayOfWeek ?? 1);
-      document.getElementById("teacher-roster-class-period").value = "AM";
       document.getElementById("teacher-roster-class-capacity").value = "12";
-      setText("teacher-roster-class-title", "Create a Class");
-      setText("teacher-roster-class-submit", "Create Class");
       setTeacherRosterOverlay("teacher-roster-class-overlay", true);
       window.setTimeout(() => document.getElementById("teacher-roster-class-name")?.focus(), 40);
-    };
-
-    const openTeacherRosterClassEditor = (rosterClass) => {
-      if (!rosterClass || !teacherRosterClasses().some((item) => item.id === rosterClass.id)) return;
-      const schools = assignedTeacherSchools();
-      editingTeacherRosterClassId = rosterClass.id;
-      const schoolSelect = document.getElementById("teacher-roster-class-school");
-      schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
-      schoolSelect.value = schools.find((school) => teacherRosterClassMatchesSchool(rosterClass, school))?.name || schools[0]?.name || "";
-      document.getElementById("teacher-roster-class-age").innerHTML = optionMarkup(classAgeOptions, rosterClass.ageGroup || "Tots");
-      document.getElementById("teacher-roster-class-level").innerHTML = optionMarkup(classLevelOptions, String(rosterClass.level || "1"));
-      document.getElementById("teacher-roster-class-name").value = rosterClass.name || "";
-      document.getElementById("teacher-roster-class-time").innerHTML = quarterHourOptions(rosterClass.time || "");
-      document.getElementById("teacher-roster-class-day").value = String(rosterClass.scheduleDay ?? Number(Object.entries(weekdayNames).find(([, label]) => label === rosterClass.day)?.[0] || 1));
-      document.getElementById("teacher-roster-class-period").value = rosterClass.timeBlock === "PM" ? "PM" : "AM";
-      document.getElementById("teacher-roster-class-capacity").value = String(rosterClass.capacity || 12);
-      setText("teacher-roster-class-title", "Edit Class Settings");
-      setText("teacher-roster-class-submit", "Save Class");
-      setTeacherRosterOverlay("teacher-roster-class-overlay", true);
-      window.setTimeout(() => document.getElementById("teacher-roster-class-name")?.focus(), 40);
-    };
-
-    let teacherMeasurementsClassId = "";
-    let teacherMeasurementsStudentIndex = 0;
-    let teacherMeasurementsSaving = false;
-    const teacherMeasurementClassesForSchool = (schoolName) => teacherRosterClasses().filter((rosterClass) => (
-      enrollmentSchoolNameMatches(rosterClass.schoolName, schoolName)
-    ));
-    const teacherMeasurementStudents = () => {
-      const rosterClass = teacherRosterClasses().find((item) => item.id === teacherMeasurementsClassId);
-      return rosterClass ? teacherRosterAttendanceStudents(rosterClass) : [];
-    };
-    const teacherMeasurementValue = (student, key) => {
-      const saved = student?.additionalInformation?.costume_measurements || student?.measurements || {};
-      return saved[key] ?? "";
-    };
-    const renderTeacherMeasurements = () => {
-      const schoolSelect = document.getElementById("teacher-measurements-school");
-      const classSelect = document.getElementById("teacher-measurements-class");
-      const classes = teacherMeasurementClassesForSchool(schoolSelect?.value || "");
-      if (!classes.some((item) => item.id === teacherMeasurementsClassId)) teacherMeasurementsClassId = classes[0]?.id || "";
-      if (classSelect) {
-        classSelect.innerHTML = classes.length
-          ? classes.map((item) => `<option value="${rosterSafe(item.id)}" ${item.id === teacherMeasurementsClassId ? "selected" : ""}>${rosterSafe(item.name)}</option>`).join("")
-          : '<option value="">No classes at this school</option>';
-        classSelect.disabled = !classes.length;
-      }
-      const classButtons = document.getElementById("teacher-measurements-classes");
-      if (classButtons) classButtons.innerHTML = classes.map((item) => `<button class="teacher-measurements-class ${item.id === teacherMeasurementsClassId ? "is-active" : ""}" type="button" data-measurements-class="${rosterSafe(item.id)}">${rosterSafe(item.name)}</button>`).join("");
-      const students = teacherMeasurementStudents();
-      teacherMeasurementsStudentIndex = Math.max(0, Math.min(teacherMeasurementsStudentIndex, Math.max(0, students.length - 1)));
-      const student = students[teacherMeasurementsStudentIndex];
-      const content = document.getElementById("teacher-measurements-content");
-      if (!content) return;
-      if (!student) {
-        content.innerHTML = `<div class="teacher-measurements-empty">${classes.length ? "This class does not have any dancers to measure yet." : "Choose a school with at least one class."}</div>`;
-        return;
-      }
-      const isBoy = ["male", "boy", "m"].includes(String(student.gender || "").trim().toLowerCase());
-      content.innerHTML = `<section class="teacher-measurements-student">
-        <span class="teacher-measurements-photo">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}</span>
-        <div><h4>${rosterSafe(rosterStudentFullName(student))}</h4><small>${rosterSafe(rosterAge(student.birthdate))}</small></div>
-        <div class="teacher-measurements-fields">
-          <label>Chest (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="chest" value="${rosterSafe(teacherMeasurementValue(student, "chest"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to chest">+ ½</button></span></label>
-          <label>Waist (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="waist" value="${rosterSafe(teacherMeasurementValue(student, "waist"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to waist">+ ½</button></span></label>
-          <label>Hips (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="hips" value="${rosterSafe(teacherMeasurementValue(student, "hips"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to hips">+ ½</button></span></label>
-          <label>Girth (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="girth" value="${rosterSafe(teacherMeasurementValue(student, "girth"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to girth">+ ½</button></span></label>
-          ${isBoy ? `<label>Length (inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="length" value="${rosterSafe(teacherMeasurementValue(student, "length"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to length">+ ½</button></span></label>` : ""}
-        </div>
-        <div class="teacher-measurements-carousel"><button class="teacher-measurements-arrow" type="button" data-measurements-step="-1" aria-label="Previous dancer">‹</button><span class="teacher-measurements-progress">${teacherMeasurementsStudentIndex + 1} of ${students.length}${teacherMeasurementsSaving ? " · Saving…" : ""}</span><button class="teacher-measurements-arrow" type="button" data-measurements-step="1" aria-label="Next dancer">›</button></div>
-      </section>`;
-    };
-    const saveCurrentTeacherMeasurements = async () => {
-      const student = teacherMeasurementStudents()[teacherMeasurementsStudentIndex];
-      if (!student || teacherMeasurementsSaving) return;
-      const fields = [...document.querySelectorAll("#teacher-measurements-content [data-measurement-field]")];
-      const measurements = Object.fromEntries(fields.map((field) => [field.dataset.measurementField, field.value === "" ? null : Number(field.value)]));
-      teacherMeasurementsSaving = true;
-      student.additionalInformation = {
-        ...(student.additionalInformation || {}),
-        costume_measurements: {
-          ...(student.additionalInformation?.costume_measurements || {}),
-          ...measurements,
-          measured_at: new Date().toISOString(),
-          measured_by: window.dtCurrentProfile?.id || profileTeacher?.id || null
-        }
-      };
-      student.measurements = { ...(student.measurements || {}), ...measurements };
-      try {
-        await saveSharedKitStatus(student);
-      } catch (error) {
-        console.error("Dancer measurements could not be saved", error);
-        showToast("Measurements could not be saved. Try again.");
-      } finally {
-        teacherMeasurementsSaving = false;
-      }
-    };
-    const openTeacherMeasurements = () => {
-      const schools = assignedTeacherSchools().filter((school) => teacherMeasurementClassesForSchool(school.name).length);
-      if (!schools.length) return showToast("Create a class before entering measurements");
-      const schoolSelect = document.getElementById("teacher-measurements-school");
-      schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
-      const filteredSchool = teacherRosterSchoolFilter !== "all" && schools.find((school) => enrollmentSchoolNameMatches(school.name, teacherRosterSchoolFilter));
-      schoolSelect.value = filteredSchool?.name || schools[0].name;
-      teacherMeasurementsClassId = teacherMeasurementClassesForSchool(schoolSelect.value)[0]?.id || "";
-      teacherMeasurementsStudentIndex = 0;
-      renderTeacherMeasurements();
-      setTeacherRosterOverlay("teacher-measurements-overlay", true);
     };
 
     let editingTeacherProspectStudentId = "";
@@ -37632,7 +37328,6 @@
     };
 
     document.getElementById("teacher-roster-create-class")?.addEventListener("click", openTeacherRosterClassCreator);
-    document.getElementById("teacher-roster-measurements")?.addEventListener("click", openTeacherMeasurements);
     document.getElementById("teacher-roster-add-future")?.addEventListener("click", () => openTeacherFutureDancerCreator());
     document.getElementById("teacher-roster-school-filter")?.addEventListener("change", (event) => {
       teacherRosterSchoolFilter = event.target.value || "all";
@@ -37673,14 +37368,6 @@
       openRosterPrintDialog(selectedClass, schoolClasses);
     });
     document.getElementById("teacher-roster-list")?.addEventListener("click", (event) => {
-      const classSettingsButton = event.target.closest("[data-teacher-class-settings]");
-      if (classSettingsButton) {
-        event.preventDefault();
-        event.stopPropagation();
-        const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(classSettingsButton.dataset.teacherClassSettings));
-        if (rosterClass) openTeacherRosterClassEditor(rosterClass);
-        return;
-      }
       const newEnrollmentButton = event.target.closest("[data-teacher-new-enrollment]");
       if (newEnrollmentButton) {
         event.preventDefault();
@@ -38011,7 +37698,6 @@
       const button = event.target.closest("[data-teacher-roster-add-future]");
       if (!button) return;
       event.preventDefault();
-      event.stopPropagation();
       openTeacherFutureDancerCreator(button.dataset.teacherRosterAddFuture);
     });
     document.getElementById("teacher-dancer-directory")?.addEventListener("click", (event) => {
@@ -38030,55 +37716,7 @@
       teacherDancerDirectoryFilters[key] = event.target.value || (key === "search" ? "" : "all");
       renderTeacherDancers();
     }));
-    document.getElementById("teacher-roster-class-cancel")?.addEventListener("click", () => {
-      editingTeacherRosterClassId = "";
-      setTeacherRosterOverlay("teacher-roster-class-overlay", false);
-    });
-    document.getElementById("teacher-measurements-school")?.addEventListener("change", async (event) => {
-      await saveCurrentTeacherMeasurements();
-      teacherMeasurementsClassId = teacherMeasurementClassesForSchool(event.target.value)[0]?.id || "";
-      teacherMeasurementsStudentIndex = 0;
-      renderTeacherMeasurements();
-    });
-    document.getElementById("teacher-measurements-class")?.addEventListener("change", async (event) => {
-      await saveCurrentTeacherMeasurements();
-      teacherMeasurementsClassId = event.target.value || "";
-      teacherMeasurementsStudentIndex = 0;
-      renderTeacherMeasurements();
-    });
-    document.getElementById("teacher-measurements-classes")?.addEventListener("click", async (event) => {
-      const classButton = event.target.closest("[data-measurements-class]");
-      if (!classButton) return;
-      await saveCurrentTeacherMeasurements();
-      teacherMeasurementsClassId = classButton.dataset.measurementsClass;
-      teacherMeasurementsStudentIndex = 0;
-      renderTeacherMeasurements();
-    });
-    document.getElementById("teacher-measurements-content")?.addEventListener("click", async (event) => {
-      const halfButton = event.target.closest("[data-measurements-half]");
-      if (halfButton) {
-        const input = halfButton.parentElement?.querySelector("[data-measurement-field]");
-        if (input) input.value = String((Number(input.value) || 0) + 0.5);
-        return;
-      }
-      const arrow = event.target.closest("[data-measurements-step]");
-      if (!arrow || teacherMeasurementsSaving) return;
-      await saveCurrentTeacherMeasurements();
-      const students = teacherMeasurementStudents();
-      if (!students.length) return;
-      const step = Number(arrow.dataset.measurementsStep) || 0;
-      teacherMeasurementsStudentIndex = (teacherMeasurementsStudentIndex + step + students.length) % students.length;
-      renderTeacherMeasurements();
-    });
-    document.getElementById("teacher-measurements-close")?.addEventListener("click", async () => {
-      await saveCurrentTeacherMeasurements();
-      setTeacherRosterOverlay("teacher-measurements-overlay", false);
-    });
-    document.getElementById("teacher-measurements-overlay")?.addEventListener("click", async (event) => {
-      if (event.target.id !== "teacher-measurements-overlay") return;
-      await saveCurrentTeacherMeasurements();
-      setTeacherRosterOverlay("teacher-measurements-overlay", false);
-    });
+    document.getElementById("teacher-roster-class-cancel")?.addEventListener("click", () => setTeacherRosterOverlay("teacher-roster-class-overlay", false));
     document.addEventListener("click", (event) => {
       const launch = event.target.closest("[data-teacher-class-post]");
       if (!launch) return;
@@ -38386,14 +38024,11 @@
     ["teacher-roster-class-overlay", "teacher-roster-future-overlay", "teacher-new-enrollment-overlay"].forEach((id) => document.getElementById(id)?.addEventListener("click", (event) => {
       if (event.target.id === id) {
         if (id === "teacher-new-enrollment-overlay") closeTeacherNewEnrollmentDialog();
-        else {
-          if (id === "teacher-roster-class-overlay") editingTeacherRosterClassId = "";
-          setTeacherRosterOverlay(id, false);
-        }
+        else setTeacherRosterOverlay(id, false);
       }
     }));
 
-    document.getElementById("teacher-roster-class-form")?.addEventListener("submit", async (event) => {
+    document.getElementById("teacher-roster-class-form")?.addEventListener("submit", (event) => {
       event.preventDefault();
       const school = assignedTeacherSchools().find((item) => item.name === document.getElementById("teacher-roster-class-school")?.value);
       if (!school) return showToast("Choose one of your assigned schools");
@@ -38401,32 +38036,6 @@
       if (!name) return showToast("Add a class name");
       const selectedTime = document.getElementById("teacher-roster-class-time").value || "";
       if (selectedTime && !isQuarterHourTime(selectedTime)) return showToast("Choose a class time on a 15-minute increment.");
-      const scheduleDay = Math.max(1, Math.min(5, Number(document.getElementById("teacher-roster-class-day").value) || 1));
-      const timeBlock = document.getElementById("teacher-roster-class-period").value === "PM" ? "PM" : "AM";
-      const existingClass = teacherRosterClasses().find((item) => String(item.id) === String(editingTeacherRosterClassId));
-      if (existingClass) {
-        existingClass.name = name;
-        existingClass.ageGroup = document.getElementById("teacher-roster-class-age").value || "Tots";
-        existingClass.level = document.getElementById("teacher-roster-class-level").value || "1";
-        existingClass.time = selectedTime;
-        existingClass.assignmentId = school.assignmentId || existingClass.assignmentId || "";
-        existingClass.schoolName = school.name;
-        existingClass.scheduleDay = scheduleDay;
-        existingClass.day = weekdayNames[scheduleDay] || "To schedule";
-        existingClass.timeBlock = timeBlock;
-        existingClass.capacity = Math.max(1, Number(document.getElementById("teacher-roster-class-capacity").value) || 12);
-        existingClass.teacherId = profileTeacher.id;
-        scheduleAppDataSave();
-        const saved = await saveSharedClass(existingClass);
-        if (!saved) return;
-        editingTeacherRosterClassId = "";
-        teacherRosterSchoolFilter = school.name;
-        setTeacherRosterOverlay("teacher-roster-class-overlay", false);
-        renderTeacherRosters();
-        renderClassesAndRosters();
-        showToast(`${name} settings saved`);
-        return;
-      }
       const rosterClass = {
         id: `roster-${profileTeacher.id}-${school.name}-${Date.now()}`.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
         name,
@@ -38436,9 +38045,7 @@
         assignmentId: school.assignmentId || "",
         teacherId: profileTeacher.id,
         schoolName: school.name,
-        scheduleDay,
-        day: weekdayNames[scheduleDay] || "To schedule",
-        timeBlock,
+        day: weekdayNames[school.dayOfWeek] || "To schedule",
         capacity: Math.max(1, Number(document.getElementById("teacher-roster-class-capacity").value) || 12),
         students: [],
         sourceActive: true
@@ -38463,7 +38070,7 @@
       const firstName = document.getElementById("teacher-roster-future-first").value.trim();
       const lastName = document.getElementById("teacher-roster-future-last").value.trim();
       const birthdate = document.getElementById("teacher-roster-future-birthdate").value;
-      const prospectDisplayName = [firstName, lastName].filter(Boolean).join(" ") || "Prospect dancer";
+      if (!firstName || !lastName) return showToast("Add the dancer’s first and last name");
       const officialClassroom = document.getElementById("teacher-roster-future-classroom").value.trim();
       const parentFirstName = document.getElementById("teacher-roster-future-parent-first").value.trim();
       const parentLastName = document.getElementById("teacher-roster-future-parent-last").value.trim();
@@ -38520,7 +38127,7 @@
         renderTeacherRosters();
         renderClassesAndRosters();
         scheduleAppDataSave();
-        showToast(existingStudent ? `${prospectDisplayName}’s trial is complete and saved for Director follow-up` : `${prospectDisplayName} saved`);
+        showToast(existingStudent ? `${firstName}’s trial is complete and saved for Director follow-up` : `${firstName} saved as a prospect dancer`);
       } catch (error) {
         console.error("The prospect dancer could not be saved", error);
         showToast(error?.message || "The prospect dancer was not saved. Your information is still in this form.");
@@ -38674,130 +38281,6 @@
         groups.get(classroom).push(student);
       });
       return [...groups.entries()].sort(([left], [right]) => left.localeCompare(right, undefined, { sensitivity: "base", numeric: true })).map(([classroom, classroomStudents]) => `<section class="roster-classroom-group"><h5>${rosterSafe(classroom)}</h5><div class="roster-student-list">${renderRosterStudentRows(classroomStudents, prospective)}</div></section>`).join("");
-    };
-
-    const recitalStudentAgeMonths = (student) => {
-      if (!student?.birthdate) return null;
-      const born = new Date(`${student.birthdate}T12:00:00`);
-      if (Number.isNaN(born.valueOf())) return null;
-      const today = new Date();
-      return (today.getFullYear() - born.getFullYear()) * 12 + today.getMonth() - born.getMonth() - (today.getDate() < born.getDate() ? 1 : 0);
-    };
-    const recitalGroupAgeRange = (students) => {
-      const ages = students.map(recitalStudentAgeMonths).filter(Number.isFinite).sort((a,b) => a-b);
-      if (!ages.length) return { label: "Birthdates needed", spread: null };
-      const ageLabel = (months) => `${Math.floor(months / 12)}y ${months % 12}m`;
-      return { label: `${ageLabel(ages[0])} – ${ageLabel(ages.at(-1))}`, spread: ages.at(-1) - ages[0] };
-    };
-    const recitalNeedsForStudents = (students) => students.reduce((counts, student) => {
-      const intakeRecord = enrollmentIntakeQueue.find((entry) => String(entry.placed_student_id || "") === String(student.id));
-      const prior = String(student.requestedDanceStyle || student.requested_dance_style || intakeRecord?.requested_dance_style || "").trim().toLowerCase();
-      if (prior === "tap") counts.ballet += 1; else if (prior === "ballet") counts.tap += 1; else counts.either += 1;
-      return counts;
-    }, { ballet: 0, tap: 0, either: 0 });
-    const suggestedRequirementForStudents = (students) => {
-      const needs = recitalNeedsForStudents(students);
-      if (needs.ballet >= needs.either && needs.ballet >= needs.tap) return "ballet";
-      if (needs.tap >= needs.either && needs.tap >= needs.ballet) return "tap";
-      return "either";
-    };
-    const buildSuggestedRecitalGroups = (rosterClass) => {
-      const students = [...rosterEnrolled(rosterClass)].sort((a,b) => (recitalStudentAgeMonths(b) ?? -1) - (recitalStudentAgeMonths(a) ?? -1));
-      const buckets = [];
-      students.forEach((student) => {
-        const age = recitalStudentAgeMonths(student);
-        let bucket = buckets.find((candidate) => candidate.length < 12 && (age == null || recitalGroupAgeRange([...candidate,student]).spread <= 12));
-        if (!bucket) { bucket = []; buckets.push(bucket); }
-        bucket.push(student);
-      });
-      if (buckets.length < 2 && students.length > 1) {
-        const midpoint = Math.ceil(students.length / 2);
-        buckets.splice(0,buckets.length,students.slice(0,midpoint),students.slice(midpoint));
-      }
-      const tones = ["blush","sage","blue","gold","lavender"];
-      return buckets.filter((bucket) => bucket.length).map((bucket,index) => ({
-        id: crypto.randomUUID(), classId: rosterClass.id, position: index+1, tone: tones[index % tones.length],
-        name: `${index === 0 ? "Older" : index === buckets.length-1 ? "Younger" : `Group ${String.fromCharCode(65+index)}`} ${rosterClass.name}`,
-        requirement: suggestedRequirementForStudents(bucket), studentIds: bucket.map((student) => String(student.id))
-      }));
-    };
-    const saveRecitalGroupsForClass = async (rosterClass, groups) => {
-      recitalPerformanceGroupsByClass.set(String(rosterClass.id), groups);
-      if (!window.dtSupabase || document.body.dataset.tourMode === "true") { renderClassesAndRosters(); return true; }
-      const existing = await window.dtSupabase.from("class_recital_performance_groups").select("id").eq("dance_class_id",rosterClass.id);
-      if (existing.error) { sharedRosterError("Recital groups could not be opened.",existing.error,{reload:false}); return false; }
-      if (existing.data?.length) {
-        const removed = await window.dtSupabase.from("class_recital_performance_groups").delete().eq("dance_class_id",rosterClass.id);
-        if (removed.error) { sharedRosterError("Recital groups could not be replaced.",removed.error,{reload:false}); return false; }
-      }
-      const inserted = await window.dtSupabase.from("class_recital_performance_groups").insert(groups.map((group,index) => ({ dance_class_id:rosterClass.id,name:group.name,position:index+1,tone:group.tone,recital_requirement:group.requirement,created_by:window.dtCurrentProfile?.id||null }))).select("*");
-      if (inserted.error) { sharedRosterError("Recital groups could not be saved.",inserted.error,{reload:false}); return false; }
-      const savedGroups = (inserted.data || []).sort((a,b)=>a.position-b.position).map((row,index) => ({ id:row.id,classId:row.dance_class_id,name:row.name,position:row.position,tone:row.tone,requirement:row.recital_requirement,studentIds:[...groups[index].studentIds] }));
-      const members = savedGroups.flatMap((group) => group.studentIds.map((studentId) => ({ group_id:group.id,dance_class_id:rosterClass.id,student_id:studentId })));
-      if (members.length) {
-        const memberResult = await window.dtSupabase.from("class_recital_performance_group_members").insert(members);
-        if (memberResult.error) { sharedRosterError("Recital group dancers could not be saved.",memberResult.error,{reload:false}); return false; }
-      }
-      recitalPerformanceGroupsByClass.set(String(rosterClass.id),savedGroups);
-      renderClassesAndRosters();
-      return true;
-    };
-    const moveStudentToRecitalGroup = async (rosterClass, studentId, targetGroupId) => {
-      const groups = recitalPerformanceGroupsByClass.get(String(rosterClass.id)) || [];
-      const target = groups.find((group) => String(group.id) === String(targetGroupId));
-      if (!target || !rosterEnrolled(rosterClass).some((student) => String(student.id) === String(studentId))) return false;
-      groups.forEach((group) => { group.studentIds = group.studentIds.filter((id) => String(id) !== String(studentId)); });
-      target.studentIds.push(String(studentId));
-      if (window.dtSupabase && document.body.dataset.tourMode !== "true") {
-        const result = await window.dtSupabase.from("class_recital_performance_group_members").upsert({ group_id:target.id,dance_class_id:rosterClass.id,student_id:studentId },{ onConflict:"dance_class_id,student_id" });
-        if (result.error) { sharedRosterError("That recital group move could not be saved.",result.error,{reload:false}); return false; }
-      }
-      renderClassesAndRosters();
-      return true;
-    };
-    const recitalGroupStudentMarkup = (student, rosterClass, group, groups, editing) => `<article class="roster-profile-student-card ${student.gender === "male" ? "is-male" : ""}" ${editing?`draggable="true" data-recital-drag-student="${rosterSafe(student.id)}" data-recital-source-group="${rosterSafe(group.id)}" title="Drag ${rosterSafe(rosterStudentFullName(student))} to another performance group"`:""}>
-      <button class="roster-profile-student-card-main" type="button" data-roster-edit-student="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${rosterSafe(student.photo)}" alt="">`:rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterAge(student.birthdate))}</small></button>
-    </article>`;
-    const renderRecitalPerformanceGroups = (rosterClass, groups) => {
-      const editing = recitalGroupEditClassId === String(rosterClass.id);
-      const enrolled = rosterEnrolled(rosterClass);
-      const assigned = new Set(groups.flatMap((group)=>group.studentIds.map(String)));
-      const unassigned = enrolled.filter((student)=>!assigned.has(String(student.id)));
-      return `<div class="recital-performance-groups ${editing?"is-editing":""}" data-recital-class="${rosterSafe(rosterClass.id)}">${groups.map((group,index) => {
-        const students = enrolled.filter((student)=>group.studentIds.map(String).includes(String(student.id)));
-        const age = recitalGroupAgeRange(students);const needs=recitalNeedsForStudents(students);
-        const classrooms = [...new Set(students.map((student)=>String(student.officialClassroom||student.classroom||"Classroom Not Assigned").trim()))].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
-        return `<section class="recital-performance-group tone-${rosterSafe(group.tone)}" data-recital-drop-group="${rosterSafe(group.id)}"><header><span class="recital-group-badge">${String.fromCharCode(65+index)}</span><div><h5>${rosterSafe(group.name)}</h5><p>${students.length} dancer${students.length===1?"":"s"} · Age range: ${rosterSafe(age.label)}${age.spread==null?"":` · ${age.spread}-month span`}</p></div><button class="secondary" type="button" data-recital-rename-group="${rosterSafe(group.id)}">Rename</button>${editing&&students.length===0&&groups.length>1?`<button class="secondary" type="button" data-recital-delete-group="${rosterSafe(group.id)}">Delete</button>`:""}</header>
-          <div class="recital-group-classrooms">${classrooms.map((classroom)=>{const classroomStudents=students.filter((student)=>String(student.officialClassroom||student.classroom||"Classroom Not Assigned").trim()===classroom);return `<section class="roster-classroom-group"><h5>${rosterSafe(classroom)} <small>${classroomStudents.length} dancer${classroomStudents.length===1?"":"s"}</small></h5><div class="roster-student-list">${classroomStudents.map((student)=>recitalGroupStudentMarkup(student,rosterClass,group,groups,editing)).join("")}</div></section>`;}).join("")}${editing&&!students.length?`<div class="recital-empty-classroom">Drop a dancer here</div>`:""}</div>
-          <div class="roster-recital-planning is-${rosterSafe(group.requirement)}"><strong>Needs to Perform</strong><select class="roster-recital-select" data-recital-group-requirement="${rosterSafe(group.id)}"><option value="tap" ${group.requirement==="tap"?"selected":""}>Tap</option><option value="ballet" ${group.requirement==="ballet"?"selected":""}>Ballet</option><option value="either" ${group.requirement==="either"?"selected":""}>Either</option></select><span class="roster-recital-need">Ballet <strong>${needs.ballet}</strong></span><span class="roster-recital-need">Tap <strong>${needs.tap}</strong></span><span class="roster-recital-need">Either <strong>${needs.either}</strong></span></div>
-        </section>`;
-      }).join("")}${editing?`<button class="recital-add-performance-group" type="button" data-recital-add-performance-group>＋ Add Performance Group<small>For larger classes, create another recital-only group.</small></button>`:""}${unassigned.length?`<div class="recital-unassigned-warning"><strong>${unassigned.length} dancer${unassigned.length===1?" needs":"s need"} a recital group:</strong> ${unassigned.map(rosterStudentFullName).map(rosterSafe).join(", ")}</div>`:""}</div>`;
-    };
-    const recitalSuggestionMarkup = (rosterClass) => {
-      const suggestion = pendingRecitalGroupSuggestion;
-      if (!suggestion || String(suggestion.classId)!==String(rosterClass.id)) return "";
-      const enrolled = rosterEnrolled(rosterClass);
-      return `<div class="confirm-overlay active recital-suggestion-overlay"><section class="confirm-dialog recital-suggestion-dialog" role="dialog" aria-modal="true" aria-labelledby="recital-suggestion-title"><h3 id="recital-suggestion-title">Suggested Recital Groups</h3><p>Review and edit the suggestion before applying it. Primary classroom assignments will not change.</p><small class="recital-suggestion-help">Rename a group, or drag dancers between groups. Their official classroom stays the same.</small><div class="recital-suggestion-grid">${suggestion.groups.map((group,index)=>{const students=enrolled.filter((student)=>group.studentIds.includes(String(student.id)));const age=recitalGroupAgeRange(students);return `<article class="tone-${rosterSafe(group.tone)}" data-recital-suggestion-drop="${rosterSafe(group.id)}"><span class="recital-group-badge">${String.fromCharCode(65+index)}</span><div><input class="recital-suggestion-name" type="text" value="${rosterSafe(group.name)}" aria-label="Group ${String.fromCharCode(65+index)} name" data-recital-suggestion-name="${rosterSafe(group.id)}"><small>${students.length} dancer${students.length===1?"":"s"} · ${rosterSafe(age.label)}</small><div class="recital-suggestion-students">${students.map((student)=>`<div class="recital-suggestion-student" draggable="true" data-recital-suggestion-student="${rosterSafe(student.id)}"><span>${rosterSafe(rosterStudentInitials(student))}</span><b>${rosterSafe(rosterStudentFullName(student))}${student.birthdate?`<small>${rosterSafe(rosterAge(student.birthdate))}</small>`:""}</b></div>`).join("")}${students.length?"":`<div class="recital-suggestion-drop">Drop a dancer here</div>`}</div></div></article>`;}).join("")}</div><div class="confirm-actions"><button class="secondary" type="button" data-recital-cancel-suggestion>Keep Current Roster</button><button class="primary" type="button" data-recital-apply-suggestion>Apply Edited Groups</button></div></section></div>`;
-    };
-    window.dtOpenRecitalGroupSuggestion = (classId) => {
-      const rosterClass=rosterClasses.find((item)=>String(item.id)===String(classId));if(!rosterClass)return;
-      const groups=buildSuggestedRecitalGroups(rosterClass);if(groups.length<2)return showToast("This class does not currently need more than one recital group.");
-      pendingRecitalGroupSuggestion={classId:rosterClass.id,groups};renderClassesAndRosters();
-    };
-    window.dtCancelRecitalSuggestion = () => { pendingRecitalGroupSuggestion=null;renderClassesAndRosters(); };
-    window.dtApplyRecitalSuggestion = () => {
-      const suggestion=pendingRecitalGroupSuggestion;if(!suggestion)return;
-      const rosterClass=rosterClasses.find((item)=>String(item.id)===String(suggestion.classId));if(!rosterClass)return;
-      suggestion.groups.forEach((group,index)=>{group.name=String(group.name||"").trim()||`Group ${String.fromCharCode(65+index)}`;});
-      pendingRecitalGroupSuggestion=null;recitalGroupEditClassId=String(rosterClass.id);
-      void saveRecitalGroupsForClass(rosterClass,suggestion.groups).then((saved)=>showToast(saved?"Recital groups created. Classroom groups stayed unchanged.":"The recital groups could not be saved."));
-    };
-    const bindRecitalGroupControls = (detail,rosterClass) => {
-      detail.querySelector("[data-recital-suggest-split]")?.addEventListener("click",(event)=>{event.stopPropagation();window.dtOpenRecitalGroupSuggestion(rosterClass.id);});
-      detail.querySelector("[data-recital-edit-groups]")?.addEventListener("click",(event)=>{event.stopPropagation();recitalGroupEditClassId=recitalGroupEditClassId===String(rosterClass.id)?"":String(rosterClass.id);renderClassesAndRosters();});
-      detail.querySelectorAll("[data-recital-rename-group]").forEach((button)=>button.addEventListener("click",(event)=>{event.stopPropagation();const groups=recitalPerformanceGroupsByClass.get(String(rosterClass.id))||[];const group=groups.find((item)=>String(item.id)===String(button.dataset.recitalRenameGroup));if(!group)return;const name=window.prompt("Performance group name",group.name);if(!name?.trim())return;group.name=name.trim();void saveRecitalGroupsForClass(rosterClass,groups).then((saved)=>showToast(saved?"Performance group renamed":"The group name could not be saved."));}));
-      detail.querySelectorAll("[data-recital-delete-group]").forEach((button)=>button.addEventListener("click",(event)=>{event.stopPropagation();const groups=recitalPerformanceGroupsByClass.get(String(rosterClass.id))||[];const group=groups.find((item)=>String(item.id)===String(button.dataset.recitalDeleteGroup));if(!group||group.studentIds.length)return showToast("Move every dancer out of this group before deleting it.");if(!window.confirm(`Delete ${group.name}?`))return;void saveRecitalGroupsForClass(rosterClass,groups.filter((item)=>item!==group).map((item,index)=>({...item,position:index+1})));}));
-      detail.querySelector("[data-recital-add-performance-group]")?.addEventListener("click",(event)=>{event.stopPropagation();const groups=recitalPerformanceGroupsByClass.get(String(rosterClass.id))||[],tones=["blush","sage","blue","gold","lavender"],index=groups.length;groups.push({id:crypto.randomUUID(),classId:rosterClass.id,name:`Group ${String.fromCharCode(65+index)}`,position:index+1,tone:tones[index%tones.length],requirement:"either",studentIds:[]});void saveRecitalGroupsForClass(rosterClass,groups).then((saved)=>showToast(saved?"Performance group added":"The group could not be added."));});
     };
 
     const renderStudentLibrary = () => {
@@ -41633,14 +41116,6 @@
 
     function renderClassesAndRosters() {
       renderBoutiqueBackendSummary();
-      if (document.body.dataset.tourMode === "true" && new URLSearchParams(location.search).has("dramatic-age-preview")) {
-        const previewClass = rosterClasses.find((item) => String(item.id) === "primrose-north-under-3") || rosterClasses.find((item) => rosterEnrolled(item).length > 1);
-        const previewStudents = previewClass ? rosterEnrolled(previewClass) : [];
-        if (previewStudents.length > 1) {
-          previewStudents[0].birthdate = "2024-11-01";
-          previewStudents[previewStudents.length - 1].birthdate = "2022-05-01";
-        }
-      }
       const sharedState = document.body.dataset.sharedRosterState;
       if (document.body.dataset.tourMode !== "true" && sharedState !== "ready") {
         document.getElementById("admin-roster-summary").innerHTML = "";
@@ -41712,48 +41187,26 @@
         const assignedTeacher = teachers.find((teacher) => teacher.id === item.teacherId);
         const enrolledStudents = rosterEnrolled(item);
         const enrolled = enrolledStudents.length;
-        const recitalNeeds = recitalNeedsForStudents(enrolledStudents);
-        const recitalPerformance = ["tap", "ballet", "either"].includes(item.recitalPerformance)
-          ? item.recitalPerformance
-          : suggestedRequirementForStudents(enrolledStudents);
         const datedStudents = enrolledStudents.filter((student) => student.birthdate).sort((left, right) => right.birthdate.localeCompare(left.birthdate));
         const ageRange = datedStudents.length
           ? `${rosterAge(datedStudents[0].birthdate)} – ${rosterAge(datedStudents[datedStudents.length - 1].birthdate)}`
           : "Ages not entered";
-        const recitalAgeRange = recitalGroupAgeRange(enrolledStudents);
-        const recitalGroups = (recitalPerformanceGroupsByClass.get(String(item.id)) || []).sort((a,b)=>a.position-b.position);
-        const hasRecitalGroups = recitalGroups.length > 1;
-        const showSplitSuggestion = !hasRecitalGroups && recitalAgeRange.spread > 12;
         const firstNameCounts = enrolledStudents.reduce((counts, student) => {
           const key = rosterStudentFirstName(student).trim().toLowerCase();
           counts.set(key, (counts.get(key) || 0) + 1);
           return counts;
         }, new Map());
-        const weekdayShort = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[item.day] || "—";
-        const hasDayOverride = item.scheduleDay !== "" && item.scheduleDay != null;
-        return `<button class="roster-class-card ${hasRecitalGroups ? "is-recital-split" : ""} ${item.id === selectedRosterClassId && rosterClassProfileOpen ? "is-selected" : ""}" type="button" data-roster-class="${rosterSafe(item.id)}">
-          <span class="roster-class-schedule-bubbles"><span class="roster-class-weekday-bubble${hasDayOverride ? " is-override" : ""}" title="${rosterSafe(item.day || "Dance day not set")}">${rosterSafe(weekdayShort)}</span><span class="roster-class-time-bubble">${rosterSafe(friendlyScheduleTime(item.time, item.timeBlock || "Time not set"))}</span></span>
+        return `<button class="roster-class-card ${item.id === selectedRosterClassId && rosterClassProfileOpen ? "is-selected" : ""}" type="button" data-roster-class="${rosterSafe(item.id)}">
+          <span class="roster-class-time-bubble">${rosterSafe(friendlyScheduleTime(item.time))}</span>
           <span class="roster-class-level-bubble">Level ${rosterSafe(item.level || "—")}</span>
-          <small class="roster-enrollment-bubble ${enrolled >= item.capacity ? "full" : (enrolled >= 7 ? "ready" : "low")}">${enrolled}/${item.capacity}${enrolled >= item.capacity ? " · Full" : " Enrolled"}</small>
+          <small class="roster-enrollment-bubble ${enrolled >= item.capacity ? "full" : (enrolled >= 7 ? "ready" : "low")}">${enrolled}/${item.capacity} Enrolled${enrolled >= item.capacity ? " · Full" : ""}</small>
           <span class="roster-class-teacher-bubble teacher-identity-bubble ${teacherProfileColorClass(assignedTeacher || item.teacherId)}" title="${rosterSafe(assignedTeacher ? rosterTeacherName(item.teacherId) : "Teacher unassigned")}" aria-label="${rosterSafe(assignedTeacher ? `Assigned to ${rosterTeacherName(item.teacherId)}` : "Teacher unassigned")}">${assignedTeacher?.photo ? `<img src="${rosterSafe(assignedTeacher.photo)}" alt="">` : rosterSafe(assignedTeacher ? initialsFor(assignedTeacher) : "—")}</span>
           <strong>${rosterSafe(item.name)}</strong>
           <small class="roster-class-age-range">${rosterSafe(ageRange)}</small>
-          ${showSplitSuggestion ? `<span class="recital-split-alert"><span class="recital-split-alert-icon" aria-hidden="true">!</span><span><strong>Split Suggested</strong><small>This class has a ${recitalAgeRange.spread}-month age spread. Consider splitting it for recital.</small></span></span>` : ""}
-          ${hasRecitalGroups ? `<span class="roster-card-performance-groups">${recitalGroups.map((group,index)=>{const groupStudents=enrolledStudents.filter((student)=>group.studentIds.map(String).includes(String(student.id)));const groupNeeds=recitalNeedsForStudents(groupStudents);const groupAge=recitalGroupAgeRange(groupStudents);const requirement=["tap","ballet","either"].includes(group.requirement)?group.requirement:suggestedRequirementForStudents(groupStudents);return `<span class="roster-card-performance-group tone-${rosterSafe(group.tone)}"><strong>${String.fromCharCode(65+index)} · ${rosterSafe(group.name)}</strong><small>${groupStudents.length} dancer${groupStudents.length===1?"":"s"} · ${rosterSafe(groupAge.label)}</small><span class="roster-class-students">${groupStudents.map((student)=>`<span class="roster-class-student"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${rosterSafe(student.photo)}" alt="">`:rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><span>${rosterSafe(rosterStudentFirstName(student))}</span></span>`).join("")}</span><span class="roster-recital-planning is-${rosterSafe(requirement)}"><strong>Needs to Perform</strong><span class="roster-recital-need">Ballet <strong>${groupNeeds.ballet}</strong></span><span class="roster-recital-need">Tap <strong>${groupNeeds.tap}</strong></span><span class="roster-recital-need">Either <strong>${groupNeeds.either}</strong></span></span></span>`;}).join("")}</span>` : `<span class="roster-class-students">${enrolledStudents.length ? enrolledStudents.map((student) => `<span class="roster-class-student">
+          <span class="roster-class-students">${enrolledStudents.length ? enrolledStudents.map((student) => `<span class="roster-class-student">
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
             <span>${rosterSafe(`${rosterStudentFirstName(student)}${firstNameCounts.get(rosterStudentFirstName(student).trim().toLowerCase()) > 1 && student.lastName ? ` ${student.lastName.trim().charAt(0).toUpperCase()}.` : ""}`)}</span>
           </span>`).join("") : `<span class="roster-class-no-students">No enrolled dancers yet</span>`}</span>
-          <span class="roster-recital-planning is-${recitalPerformance}" aria-label="Recital planning: ${recitalNeeds.ballet} need Ballet, ${recitalNeeds.tap} need Tap, and ${recitalNeeds.either} can perform either. Selected performance: ${recitalPerformance}.">
-            <strong>Needs to Perform</strong>
-            <select class="roster-recital-select" data-recital-performance-select="${rosterSafe(item.id)}" aria-label="Select recital performance for ${rosterSafe(item.name)}">
-              <option value="tap" ${recitalPerformance === "tap" ? "selected" : ""}>Tap</option>
-              <option value="ballet" ${recitalPerformance === "ballet" ? "selected" : ""}>Ballet</option>
-              <option value="either" ${recitalPerformance === "either" ? "selected" : ""}>Either</option>
-            </select>
-            <span class="roster-recital-need">Ballet <strong>${recitalNeeds.ballet}</strong></span>
-            <span class="roster-recital-need">Tap <strong>${recitalNeeds.tap}</strong></span>
-            <span class="roster-recital-need">Either <strong>${recitalNeeds.either}</strong></span>
-          </span>`}
         </button>`;
       };
       if (list) {
@@ -41796,16 +41249,6 @@
       profileOverlay?.setAttribute("aria-hidden", "false");
       const enrolled = rosterEnrolled(selected);
       const prospects = rosterProspects(selected);
-      if (document.body.dataset.tourMode === "true" && new URLSearchParams(location.search).has("dramatic-age-preview") && enrolled.length > 1) {
-        enrolled[0].birthdate = "2024-11-01";
-        enrolled[enrolled.length - 1].birthdate = "2022-05-01";
-      }
-      if (document.body.dataset.tourMode === "true" && new URLSearchParams(location.search).has("recital-group-preview") && !recitalPerformanceGroupsByClass.has(String(selected.id)) && enrolled.length > 1) {
-        recitalPerformanceGroupsByClass.set(String(selected.id),buildSuggestedRecitalGroups(selected));
-        recitalGroupEditClassId = String(selected.id);
-      }
-      const recitalGroups = (recitalPerformanceGroupsByClass.get(String(selected.id)) || []).sort((a,b)=>a.position-b.position);
-      const classIsSplitForRecital = recitalGroups.length > 1;
       const assignedDancers = rosterClassAssignedDancers(selected);
       const classCanBeDeleted = assignedDancers.total === 0;
       detail.innerHTML = `
@@ -41815,30 +41258,24 @@
         </div>
         <div class="roster-meta">
           <span class="school-library-assignment ${teacherAssignmentColorClass(selected.teacherId)}" ${teacherAssignmentStyle(selected.teacherId)}>Teacher · ${rosterSafe(rosterTeacherName(selected.teacherId))}</span>
-          <span>${rosterSafe(selected.day)} · ${rosterSafe(friendlyScheduleTime(selected.time, selected.timeBlock || "Time not set"))}</span>
+          <span>${rosterSafe(selected.day)} · ${rosterSafe(friendlyScheduleTime(selected.time))}</span>
           <span>${enrolled.length}/${selected.capacity} Enrolled</span>
-          ${classIsSplitForRecital ? `<span class="roster-meta-recital">Recital: ${recitalGroups.length} Groups</span>` : ""}
           ${selected.ageGroup ? `<span>${rosterSafe(selected.ageGroup)}</span>` : ""}${selected.level ? `<span>Level ${rosterSafe(selected.level)}</span>` : ""}
         </div>
         <div class="roster-toolbar">
           <label>Age<select data-roster-class-setting="ageGroup">${optionMarkup(classAgeOptions, selected.ageGroup || "Tots")}</select></label>
           <label>Level<select data-roster-class-setting="level">${optionMarkup(classLevelOptions, selected.level || "1")}</select></label>
-          <label>Dance Day<select data-roster-class-setting="scheduleDay" aria-label="Dance day for this class"><option value=""${selected.scheduleDay === "" || selected.scheduleDay == null ? " selected" : ""}>Use school day (${rosterSafe((schoolLibrary.find((school) => String(school.id) === String(selected.partnerSchoolId)) || {}).dayOfWeek ? weekdayNames[Number((schoolLibrary.find((school) => String(school.id) === String(selected.partnerSchoolId)) || {}).dayOfWeek)] : selected.day || "not set")})</option>${optionMarkup(dayOptions, selected.scheduleDay)}</select></label>
-          <label>AM/PM<select data-roster-class-setting="timeBlock" aria-label="AM or PM for this class">${optionMarkup([{ value: "AM", label: "AM" }, { value: "PM", label: "PM" }], selected.timeBlock || "AM")}</select></label>
           <label>Start Time<select data-roster-class-setting="time" aria-label="Class start time in 15-minute increments">${quarterHourOptions(selected.time || "")}</select></label>
         </div>
-        <div class="roster-section-heading"><div><h4>Class Roster</h4><small>${classIsSplitForRecital ? "Organized by recital performance groups. Dancers remain in their same classroom groups." : "Official class roster"}</small></div><div class="roster-recital-group-actions">${classIsSplitForRecital ? `<button class="secondary" type="button" data-recital-suggest-split onclick="event.stopPropagation();window.dtOpenRecitalGroupSuggestion('${rosterSafe(selected.id)}')">Suggest Groups</button><button class="secondary ${recitalGroupEditClassId===String(selected.id)?"is-active":""}" type="button" data-recital-edit-groups>${recitalGroupEditClassId===String(selected.id)?"Done Editing":"Edit Groups"}</button>` : ""}</div></div>
-        <div class="roster-class-action-row roster-class-detail-actions"><button class="secondary" type="button" data-roster-class-feed><img src="../../parent-portal/assets/badges/class-post.png" alt="">Class Feed</button><button class="secondary" type="button" data-roster-personal-feed><img src="assets/parent-portal-private-profile.png" alt="">Personal Feeds</button><button class="secondary roster-class-post-button" type="button" data-roster-post><img src="assets/parent-portal-post.png" alt="">Post</button><button class="secondary" type="button" data-roster-print>Print Roster</button><button class="secondary" type="button" data-roster-add="enrolled">Add a Dancer</button></div>
-        <div class="roster-classroom-groups">${classIsSplitForRecital ? renderRecitalPerformanceGroups(selected,recitalGroups) : renderRosterStudentClassroomGroups(enrolled)}</div>
+        <div class="roster-section-heading"><div><h4>Class Roster</h4><small>Official class roster</small></div><div class="roster-class-action-row"><button class="secondary" type="button" data-roster-class-feed><img src="../../parent-portal/assets/badges/class-post.png" alt="">Class Feed</button><button class="secondary" type="button" data-roster-personal-feed><img src="assets/parent-portal-private-profile.png" alt="">Personal Feeds</button><button class="secondary roster-class-post-button" type="button" data-roster-post><img src="assets/parent-portal-post.png" alt="">Post</button><button class="secondary" type="button" data-roster-print>Print Roster</button><button class="secondary" type="button" data-roster-add="enrolled">Add a Dancer</button></div></div>
+        <div class="roster-classroom-groups">${renderRosterStudentClassroomGroups(enrolled)}</div>
         <div class="roster-section-heading"><div><h4>Future Dancers</h4><small>Trials and friendly follow-up</small></div><button class="roster-add-future-button" type="button" data-roster-add="prospective">Add a Future Dancer</button></div>
         <div class="roster-student-list">${renderRosterStudentRows(prospects, true)}</div>
         <div class="roster-section-heading">
           <div><h4>Class Settings</h4><small>${classCanBeDeleted ? "This class is empty and can be deleted." : "Remove or reassign every dancer before deleting this class."}</small></div>
-          <div class="roster-recital-group-actions">${!classIsSplitForRecital ? `<button class="secondary recital-split-settings-button" type="button" data-recital-suggest-split onclick="event.stopPropagation();window.dtOpenRecitalGroupSuggestion('${rosterSafe(selected.id)}')">Split Class for Recital</button>` : ""}<button class="danger-btn" type="button" data-roster-delete-class="${rosterSafe(selected.id)}" ${classCanBeDeleted ? "" : "disabled"}>Delete Class</button></div>
+          <button class="danger-btn" type="button" data-roster-delete-class="${rosterSafe(selected.id)}" ${classCanBeDeleted ? "" : "disabled"}>Delete Class</button>
         </div>
-        ${recitalSuggestionMarkup(selected)}
       `;
-      bindRecitalGroupControls(detail, selected);
       void hydrateClassParentPortalStatus(selected);
     }
 
@@ -43211,7 +42648,7 @@
       )) || {};
       const student = record?.student || {};
       const teacherId = rosterClass.teacherId || school.teacherId || school.assignedTeacherId || school.teacher_id || "";
-      const timeOfDay = String(rosterClass.timeBlock || school.timeBlock || "").trim().toUpperCase();
+      const timeOfDay = String(school.timeBlock || rosterClass.timeBlock || "").trim().toUpperCase();
       const savedSchoolNickname = newsletterResolvedValue(school.nickname);
       const schoolNameFallback = newsletterResolvedValue(recordSchoolName) || newsletterResolvedValue(school.name);
       const schoolNickname = savedSchoolNickname
@@ -51077,39 +50514,6 @@
     });
 
     document.getElementById("admin-home-classes-rosters")?.addEventListener("change", (event) => {
-      const selectedClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
-      const selectedGroups = selectedClass ? (recitalPerformanceGroupsByClass.get(String(selectedClass.id)) || []) : [];
-      const groupRequirement = event.target.closest("[data-recital-group-requirement]");
-      if (groupRequirement && selectedClass) {
-        const group = selectedGroups.find((item) => String(item.id) === String(groupRequirement.dataset.recitalGroupRequirement));
-        if (!group) return;
-        group.requirement = groupRequirement.value;
-        void saveRecitalGroupsForClass(selectedClass,selectedGroups).then((saved)=>showToast(saved?"Recital performance updated":"The recital performance could not be saved."));
-        return;
-      }
-      const moveStudent = event.target.closest("[data-recital-move-student]");
-      if (moveStudent && selectedClass) {
-        void moveStudentToRecitalGroup(selectedClass,moveStudent.dataset.recitalMoveStudent,moveStudent.value).then((saved)=>showToast(saved?"Dancer moved without changing the classroom assignment":"That recital move could not be saved."));
-        return;
-      }
-      const addToGroup = event.target.closest("[data-recital-add-to-group]");
-      if (addToGroup && addToGroup.value && selectedClass) {
-        void moveStudentToRecitalGroup(selectedClass,addToGroup.value,addToGroup.dataset.recitalAddToGroup).then((saved)=>showToast(saved?"Dancer added to the recital group":"That recital assignment could not be saved."));
-        return;
-      }
-      const recitalSelect = event.target.closest("[data-recital-performance-select]");
-      if (recitalSelect) {
-        event.stopPropagation();
-        const rosterClass = rosterClasses.find((item) => item.id === recitalSelect.dataset.recitalPerformanceSelect);
-        if (!rosterClass) return;
-        rosterClass.recitalPerformance = recitalSelect.value;
-        renderClassesAndRosters();
-        scheduleAppDataSave();
-        void saveSharedClass(rosterClass).then((saved) => {
-          showToast(saved ? `${recitalSelect.value.replace(/^./, (letter) => letter.toUpperCase())} selected for ${rosterClass.name}` : "The recital selection could not be saved.");
-        });
-        return;
-      }
       const field = event.target.closest("[data-roster-class-setting]");
       if (!field) return;
       const rosterClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
@@ -51121,13 +50525,7 @@
         return;
       }
       const wasTotsClass = setting === "ageGroup" && isTotsAgeClass(rosterClass);
-      if (setting === "scheduleDay") {
-        rosterClass.scheduleDay = field.value === "" ? "" : Number(field.value);
-        const assignedSchool = schoolLibrary.find((school) => String(school.id) === String(rosterClass.partnerSchoolId));
-        rosterClass.day = weekdayNames[Number(rosterClass.scheduleDay || assignedSchool?.dayOfWeek)] || "To schedule";
-      } else {
-        rosterClass[setting] = field.value;
-      }
+      rosterClass[setting] = field.value;
       if (setting === "ageGroup") {
         rosterClass.classroom = field.value;
         if (!isTotsAgeClass(rosterClass) && Number(rosterClass.capacity) === 8) rosterClass.capacity = 12;
@@ -51138,7 +50536,6 @@
         if (setting === "ageGroup") row.age = field.value;
         if (setting === "level") row.level = field.value;
         if (setting === "time") row.startTime = field.value;
-        if (setting === "scheduleDay") row.day = rosterClass.day;
       }
       renderClassesAndRosters();
       scheduleAppDataSave();
@@ -51286,7 +50683,7 @@
       if (saved) showToast(`${rosterClass.name} created and shared with ${teacherNickname(teacher)}`);
     });
 
-    document.getElementById("admin-home-classes-rosters")?.addEventListener("click", async (event) => {
+    document.getElementById("admin-home-classes-rosters")?.addEventListener("click", (event) => {
       const deleteClassButton = event.target.closest("[data-roster-delete-class]");
       if (deleteClassButton) {
         const rosterClass = rosterClasses.find((item) => item.id === deleteClassButton.dataset.rosterDeleteClass);
@@ -51298,7 +50695,7 @@
         if (!window.confirm(`Delete ${rosterClass.name}? This empty class will be removed from Classes & Rosters.`)) return;
         deleteClassButton.disabled = true;
         deleteClassButton.textContent = "Deleting…";
-        await deleteSharedClass(rosterClass);
+        deleteSharedClass(rosterClass);
         return;
       }
       if (event.target.closest("[data-roster-show-prospects]")) {
@@ -51327,57 +50724,6 @@
       }
       const rosterClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
       if (!rosterClass) return;
-      const recitalGroups = recitalPerformanceGroupsByClass.get(String(rosterClass.id)) || [];
-      if (event.target.closest("[data-recital-suggest-split]")) {
-        const suggested = buildSuggestedRecitalGroups(rosterClass);
-        if (suggested.length < 2) return showToast("This class does not currently need more than one recital group.");
-        pendingRecitalGroupSuggestion = { classId:rosterClass.id,groups:suggested };
-        renderClassesAndRosters();
-        return;
-      }
-      if (event.target.closest("[data-recital-cancel-suggestion]")) {
-        pendingRecitalGroupSuggestion = null;
-        renderClassesAndRosters();
-        return;
-      }
-      if (event.target.closest("[data-recital-apply-suggestion]")) {
-        const suggested = pendingRecitalGroupSuggestion?.groups || [];
-        suggested.forEach((group,index)=>{group.name=String(group.name||"").trim()||`Group ${String.fromCharCode(65+index)}`;});
-        pendingRecitalGroupSuggestion = null;
-        recitalGroupEditClassId = String(rosterClass.id);
-        void saveRecitalGroupsForClass(rosterClass,suggested).then((saved)=>showToast(saved?"Recital groups created. Classroom groups stayed unchanged.":"The recital groups could not be saved."));
-        return;
-      }
-      if (event.target.closest("[data-recital-edit-groups]")) {
-        recitalGroupEditClassId = recitalGroupEditClassId === String(rosterClass.id) ? "" : String(rosterClass.id);
-        renderClassesAndRosters();
-        return;
-      }
-      const renameGroup = event.target.closest("[data-recital-rename-group]");
-      if (renameGroup) {
-        const group = recitalGroups.find((item)=>String(item.id)===String(renameGroup.dataset.recitalRenameGroup));
-        if (!group) return;
-        const name = window.prompt("Performance group name",group.name);
-        if (!name?.trim()) return;
-        group.name = name.trim();
-        void saveRecitalGroupsForClass(rosterClass,recitalGroups).then((saved)=>showToast(saved?"Performance group renamed":"The group name could not be saved."));
-        return;
-      }
-      const deleteGroup = event.target.closest("[data-recital-delete-group]");
-      if (deleteGroup) {
-        const group = recitalGroups.find((item)=>String(item.id)===String(deleteGroup.dataset.recitalDeleteGroup));
-        if (!group || group.studentIds.length) return showToast("Move every dancer out of this group before deleting it.");
-        if (!window.confirm(`Delete ${group.name}?`)) return;
-        const remaining = recitalGroups.filter((item)=>item!==group).map((item,index)=>({...item,position:index+1}));
-        void saveRecitalGroupsForClass(rosterClass,remaining).then((saved)=>showToast(saved?"Empty recital group deleted":"The group could not be deleted."));
-        return;
-      }
-      if (event.target.closest("[data-recital-add-performance-group]")) {
-        const tones=["blush","sage","blue","gold","lavender"];const index=recitalGroups.length;
-        recitalGroups.push({id:crypto.randomUUID(),classId:rosterClass.id,name:`Group ${String.fromCharCode(65+index)}`,position:index+1,tone:tones[index%tones.length],requirement:"either",studentIds:[]});
-        void saveRecitalGroupsForClass(rosterClass,recitalGroups).then((saved)=>showToast(saved?"Performance group added":"The group could not be added."));
-        return;
-      }
       if (event.target.closest("[data-roster-class-feed]")) {
         openRosterClassFeed(rosterClass);
         return;
@@ -51467,73 +50813,6 @@
         if (!student) return;
         openRosterStudentEditor(rosterClass, student, { navigationScope: "class" });
       }
-    });
-    let recitalSuggestionDraggedStudentId = "";
-    document.addEventListener("input", (event) => {
-      const input = event.target.closest("[data-recital-suggestion-name]");
-      if (!input || !pendingRecitalGroupSuggestion) return;
-      const group = pendingRecitalGroupSuggestion.groups.find((item)=>String(item.id)===String(input.dataset.recitalSuggestionName));
-      if (group) group.name = input.value;
-    });
-    document.addEventListener("dragstart", (event) => {
-      const card = event.target.closest("[data-recital-suggestion-student]");
-      if (!card) return;
-      recitalSuggestionDraggedStudentId = card.dataset.recitalSuggestionStudent;
-      card.classList.add("is-dragging");
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain",recitalSuggestionDraggedStudentId);
-    });
-    document.addEventListener("dragover", (event) => {
-      const target = event.target.closest("[data-recital-suggestion-drop]");
-      if (!target || !recitalSuggestionDraggedStudentId) return;
-      event.preventDefault();
-      document.querySelectorAll("[data-recital-suggestion-drop].is-drop-target").forEach((item)=>item.classList.toggle("is-drop-target",item===target));
-    });
-    document.addEventListener("drop", (event) => {
-      const target = event.target.closest("[data-recital-suggestion-drop]");
-      if (!target || !recitalSuggestionDraggedStudentId || !pendingRecitalGroupSuggestion) return;
-      event.preventDefault();
-      const studentId = recitalSuggestionDraggedStudentId;
-      recitalSuggestionDraggedStudentId = "";
-      pendingRecitalGroupSuggestion.groups.forEach((group)=>{ group.studentIds=group.studentIds.filter((id)=>String(id)!==String(studentId)); });
-      const targetGroup = pendingRecitalGroupSuggestion.groups.find((group)=>String(group.id)===String(target.dataset.recitalSuggestionDrop));
-      if (targetGroup && !targetGroup.studentIds.map(String).includes(String(studentId))) targetGroup.studentIds.push(String(studentId));
-      renderClassesAndRosters();
-    });
-    document.addEventListener("dragend", () => {
-      recitalSuggestionDraggedStudentId = "";
-      document.querySelectorAll("[data-recital-suggestion-drop].is-drop-target").forEach((item)=>item.classList.remove("is-drop-target"));
-      document.querySelectorAll("[data-recital-suggestion-student].is-dragging").forEach((item)=>item.classList.remove("is-dragging"));
-    });
-    let recitalDraggedStudentId = "";
-    document.addEventListener("dragstart", (event) => {
-      const card = event.target.closest("[data-recital-drag-student]");
-      if (!card) return;
-      recitalDraggedStudentId = card.dataset.recitalDragStudent;
-      card.classList.add("is-dragging");
-      event.dataTransfer.effectAllowed = "move";
-      event.dataTransfer.setData("text/plain",recitalDraggedStudentId);
-    });
-    document.addEventListener("dragover", (event) => {
-      const target = event.target.closest("[data-recital-drop-group]");
-      if (!target || !recitalDraggedStudentId) return;
-      event.preventDefault();
-      document.querySelectorAll("[data-recital-drop-group].is-drop-target").forEach((item)=>item.classList.toggle("is-drop-target",item===target));
-    });
-    document.addEventListener("drop", (event) => {
-      const target = event.target.closest("[data-recital-drop-group]");
-      if (!target || !recitalDraggedStudentId) return;
-      event.preventDefault();
-      const rosterClass = rosterClasses.find((item)=>String(item.id)===String(selectedRosterClassId));
-      const studentId = recitalDraggedStudentId;recitalDraggedStudentId="";
-      document.querySelectorAll("[data-recital-drop-group].is-drop-target").forEach((item)=>item.classList.remove("is-drop-target"));
-      document.querySelectorAll("[data-recital-drag-student].is-dragging").forEach((item)=>item.classList.remove("is-dragging"));
-      if (rosterClass) void moveStudentToRecitalGroup(rosterClass,studentId,target.dataset.recitalDropGroup).then((saved)=>showToast(saved?"Dancer moved without changing the classroom assignment":"That recital move could not be saved."));
-    });
-    document.addEventListener("dragend", () => {
-      recitalDraggedStudentId="";
-      document.querySelectorAll("[data-recital-drop-group].is-drop-target").forEach((item)=>item.classList.remove("is-drop-target"));
-      document.querySelectorAll("[data-recital-drag-student].is-dragging").forEach((item)=>item.classList.remove("is-dragging"));
     });
     document.getElementById("roster-class-feed-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "roster-class-feed-overlay" || event.target.closest("[data-close-roster-class-feed]")) closeRosterClassFeed();
@@ -51812,15 +51091,6 @@
       if (event.target.id !== "roster-class-profile-overlay") return;
       rosterClassProfileOpen = false;
       renderClassesAndRosters();
-    });
-    document.addEventListener("change", (event) => {
-      const control=event.target.closest("[data-recital-group-requirement],[data-recital-move-student],[data-recital-add-to-group]");if(!control)return;
-      const rosterClass=rosterClasses.find((item)=>String(item.id)===String(selectedRosterClassId));if(!rosterClass)return;
-      const groups=recitalPerformanceGroupsByClass.get(String(rosterClass.id))||[];
-      if(control.matches("[data-recital-group-requirement]")){const group=groups.find((item)=>String(item.id)===String(control.dataset.recitalGroupRequirement));if(!group)return;group.requirement=control.value;void saveRecitalGroupsForClass(rosterClass,groups);return;}
-      const studentId=control.matches("[data-recital-move-student]")?control.dataset.recitalMoveStudent:control.value;
-      const groupId=control.matches("[data-recital-move-student]")?control.value:control.dataset.recitalAddToGroup;
-      if(studentId&&groupId)void moveStudentToRecitalGroup(rosterClass,studentId,groupId).then((saved)=>showToast(saved?"Dancer moved without changing the classroom assignment":"That recital move could not be saved."));
     });
     window.addEventListener("beforeunload", (event) => {
       if (!rosterMultiHasUnsavedChanges()) return;
@@ -53612,9 +52882,7 @@
         ["Boutique Delivery", "assets/photo-frames/boutique-delivery.png"],
         ["Dance Besties", "assets/photo-frames/dance-besties.png"],
         ["Hispanic Heritage", "assets/photo-frames/hispanic-heritage.png"],
-        ["1st Position", "assets/photo-frames/first-position.png"],
-        ["Dance Day", "assets/photo-frames/dance-day.png"],
-        ["Group Photo", "assets/photo-frames/group-photo.png", "landscape"]
+        ["1st Position", "assets/photo-frames/first-position.png"]
       ];
       let stream = null;
       let selectedFrame = frames[0];
@@ -53707,9 +52975,6 @@
         photoZoom = 1;
         updateZoomPreview();
       };
-      const updateFrameOrientation = () => {
-        stage.classList.toggle("is-landscape", selectedFrame[2] === "landscape");
-      };
       const resetResult = () => {
         if (resultUrl) URL.revokeObjectURL(resultUrl);
         resultUrl = "";
@@ -53745,14 +53010,13 @@
         startButton.querySelector(".photo-frame-action-label").textContent = "Camera";
         status.textContent = "Opening camera…";
         try {
-          const isLandscapeFrame = selectedFrame[2] === "landscape";
           stream = await navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
               facingMode: { ideal: facingMode },
-              width: { ideal: isLandscapeFrame ? 6144 : 4096 },
-              height: { ideal: isLandscapeFrame ? 4096 : 6144 },
-              aspectRatio: { ideal: isLandscapeFrame ? 3 / 2 : 2 / 3 }
+              width: { ideal: 4096 },
+              height: { ideal: 6144 },
+              aspectRatio: { ideal: 2 / 3 }
             }
           });
           video.srcObject = stream;
@@ -53786,7 +53050,6 @@
         let photoSourceWidth = width;
         let photoSourceHeight = height;
         const portraitCameraCapture = source === video
-          && selectedFrame[2] !== "landscape"
           && window.matchMedia?.("(orientation: portrait)").matches
           && width > height;
         if (portraitCameraCapture) {
@@ -53802,9 +53065,8 @@
           photoSourceHeight = orientedCanvas.height;
         }
         const canvas = document.createElement("canvas");
-        const isLandscapeFrame = selectedFrame[2] === "landscape";
-        canvas.width = isLandscapeFrame ? 3072 : 2048;
-        canvas.height = isLandscapeFrame ? 2048 : 3072;
+        canvas.width = 2048;
+        canvas.height = 3072;
         const context = canvas.getContext("2d");
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
@@ -53939,7 +53201,6 @@
       });
       modal.querySelector(".photo-frame-select").addEventListener("change", (event) => {
         selectedFrame = frames[Number(event.target.value)] || frames[0];
-        updateFrameOrientation();
         overlay.src = selectedFrame[1];
         overlay.alt = `${selectedFrame[0]} frame preview`;
         resetResult();
@@ -53961,8 +53222,8 @@
       });
     })();
   </script>
-  <link rel="stylesheet" href="big-stage.css?v=20261001-match-restore">
-  <script src="big-stage.js?v=20261001-match-restore"></script>
+  <link rel="stylesheet" href="big-stage.css?v=20260911">
+  <script src="big-stage.js?v=20260911"></script>
   <script src="director-task-sync.js?v=20260908"></script>
   <script src="director-corner.js?v=20260908"></script>
   <script src="tulle.js?v=20260729-questions"></script>
