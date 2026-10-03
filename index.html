@@ -3183,7 +3183,7 @@
     .enrollment-summary-card[aria-pressed="true"] { border-color: var(--berry); box-shadow: inset 0 0 0 1px var(--berry); }
     .enrollment-summary-card strong { color: var(--berry); font-size: 25px; line-height: 1; }
     .enrollment-summary-card small { color: var(--muted); font-size: 11px; font-weight: 700; }
-    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .enrollment-student-view-toggle button { min-height: 48px; padding: 9px 14px; border-radius: 12px; background: transparent; color: var(--fg); font-family: var(--font-body); font-size: 16px; font-weight: 800; }
     .enrollment-student-view-toggle button.is-selected { background: var(--blush); color: var(--berry); box-shadow: 0 1px 3px oklch(35% 0.04 25 / .08); }
     .enrollment-checklist-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 7px; margin: 0 0 14px; }
@@ -3192,7 +3192,7 @@
     .enrollment-checklist-summary button strong { color: var(--berry); font-size: 20px; line-height: 1; }
     .enrollment-checklist-summary button small { color: var(--muted); font-size: 9px; font-weight: 750; line-height: 1.15; }
     .enrollment-checklist-summary button[aria-pressed="true"] { border-color: var(--berry); background: var(--blush); box-shadow: inset 0 0 0 1px var(--berry); }
-    .dashboard-entity-summary { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; margin: 14px 0 18px; }
+    .dashboard-entity-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin: 14px 0 18px; }
     .dashboard-entity-summary-card { min-width: 0; min-height: 118px; display: grid; place-items: center; align-content: center; gap: 5px; padding: 12px 8px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); color: var(--fg); font: inherit; text-align: center; }
     .dashboard-entity-summary-card:hover,
     .dashboard-entity-summary-card:focus-visible,
@@ -3215,6 +3215,15 @@
     .enrollment-change-assignment { display:grid; grid-template-columns:minmax(220px,1fr) auto; gap:8px; align-items:end; }
     .enrollment-change-assignment label { display:grid; gap:5px; color:var(--muted); font-size:10px; font-weight:850; text-transform:uppercase; }
     .enrollment-change-assignment select { min-height:42px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--fg); font:inherit; }
+    .enrollment-change-suggestions { display:grid; gap:7px; }
+    .enrollment-change-suggestions > strong { color:var(--berry); font-size:11px; }
+    .enrollment-change-suggestion-list { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .enrollment-change-suggestion { display:grid; grid-template-columns:38px minmax(0,1fr); align-items:center; gap:8px; min-height:60px; padding:9px; border:1px solid var(--border); border-radius:11px; background:var(--surface); color:var(--fg); text-align:left; }
+    .enrollment-change-suggestion:first-child { border-color:var(--sage); background:color-mix(in oklch,var(--sage) 18%,white); }
+    .enrollment-change-suggestion .roster-student-photo { width:38px; height:38px; flex-basis:38px; font-size:11px; }
+    .enrollment-change-suggestion strong,.enrollment-change-suggestion small { display:block; }
+    .enrollment-change-suggestion small { margin-top:2px; color:var(--muted); font-size:9px; line-height:1.25; }
+    .enrollment-change-suggestion em { grid-column:2; color:var(--berry); font-size:8px; font-style:normal; font-weight:850; }
     .enrollment-change-school { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:8px; align-items:end; padding:12px; border:1px solid var(--sage); border-radius:13px; background:color-mix(in oklch,var(--sage) 14%,white); }
     .enrollment-change-school label { display:grid; gap:5px; color:var(--muted); font-size:10px; font-weight:850; text-transform:uppercase; }
     .enrollment-change-school select,.enrollment-change-school input { min-height:42px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--fg); font:inherit; }
@@ -3240,7 +3249,7 @@
       .enrollment-summary-card small { font-size: 9px; }
       .enrollment-student-view-toggle button { padding-inline: 5px; font-size: 12px; }
       .enrollment-student-view-toggle { grid-template-columns: 1fr; }
-      .enrollment-change-details,.enrollment-change-steps,.enrollment-change-assignment,.enrollment-change-school { grid-template-columns:1fr; }
+      .enrollment-change-details,.enrollment-change-steps,.enrollment-change-assignment,.enrollment-change-school,.enrollment-change-suggestion-list { grid-template-columns:1fr; }
       .enrollment-checklist-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .dashboard-entity-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
@@ -17392,7 +17401,6 @@
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="directory">Dancer Directory</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="future-dancers">Future Dancers</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="enrollment-changes">Enrollment Changes</button>
-              <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="rowlett-5-invites">Rowlett 5 Invites</button>
             </div>
             <div class="enrollment-checklist-summary" id="enrollment-checklist-summary" aria-label="New Enrollment next-step summary"></div>
             <div class="enrollment-student-view-panel" id="enrollment-student-intake-slot" data-enrollment-student-panel="enrollments"></div>
@@ -17445,14 +17453,6 @@
                 <button class="secondary" type="button" id="refresh-enrollment-changes">Refresh Submissions</button>
               </div>
               <div class="enrollment-change-list" id="enrollment-change-list" aria-live="polite"></div>
-            </div>
-            <div class="enrollment-student-view-panel" id="rowlett-5-invites-panel" data-enrollment-student-panel="rowlett-5-invites" hidden>
-              <div class="parent-portal-invite-workspace">
-                <div class="section-title" style="margin-top:8px"><div><h3>Rowlett 5 Invitations</h3><p>Only families who still need a Parent Portal invitation appear here.</p></div></div>
-                <div class="parent-portal-invite-toolbar"><label><input type="checkbox" id="rowlett-5-invite-select-all"> Select all ready families</label><button class="primary" type="button" id="rowlett-5-invite-selected" disabled>Invite Selected</button></div>
-                <p class="parent-portal-invite-result" id="rowlett-5-invite-result" role="status" aria-live="polite"></p>
-                <div class="parent-portal-invite-grid" id="rowlett-5-invite-list"><div class="roster-empty">Loading invitation readiness…</div></div>
-              </div>
             </div>
           </section>
 
@@ -21914,6 +21914,32 @@
       .map((student) => ({ rosterClass, student })))
       .sort((left, right) => rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
 
+    const enrollmentChangeSuggestedStudents = (item, records) => {
+      const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+      const requestedFirst = normalize(item.dancer_first_name);
+      const requestedLast = normalize(item.dancer_last_name);
+      const requestedName = normalize(`${item.dancer_first_name || ""} ${item.dancer_last_name || ""}`);
+      const requestedSchool = normalize(item.current_school);
+      const unique = new Map();
+      records.forEach((record) => {
+        const studentFirst = normalize(record.student.firstName || record.student.preferredName);
+        const studentLast = normalize(record.student.lastName);
+        const studentName = normalize(rosterStudentFullName(record.student));
+        const school = normalize(`${record.rosterClass.schoolName || ""} ${rosterSchoolNickname(record.rosterClass.schoolName) || ""}`);
+        let score = 0;
+        const reasons = [];
+        if (requestedName && studentName === requestedName) { score += 100; reasons.push("same name"); }
+        else {
+          if (requestedFirst && studentFirst === requestedFirst) { score += 45; reasons.push("same first name"); }
+          if (requestedLast && studentLast === requestedLast) { score += 45; reasons.push("same last name"); }
+        }
+        if (requestedSchool && (school.includes(requestedSchool) || requestedSchool.includes(normalize(record.rosterClass.schoolName)))) { score += 50; reasons.push("same school"); }
+        const existing = unique.get(String(record.student.id));
+        if (!existing || score > existing.score) unique.set(String(record.student.id), { ...record, score, reasons });
+      });
+      return [...unique.values()].filter((record) => record.score > 0).sort((left, right) => right.score - left.score || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student))).slice(0, 3);
+    };
+
     const renderEnrollmentChanges = () => {
       const list = document.getElementById("enrollment-change-list");
       if (!list) return;
@@ -21927,11 +21953,13 @@
         const isSchoolChange = String(item.request_type || "").toLowerCase().includes("leaving our current school");
         const financialReady = [item.enrollment_fee_refund_status,item.brightwheel_refund_status].every((status) => ["completed","not_needed"].includes(status));
         const billingReady = item.billing_plan_status === "completed";
+        const suggestions = enrollmentChangeSuggestedStudents(item, studentRecords);
         const step = (field, title, allowNotNeeded = false) => {
           const status = item[field] || "pending";
           return `<div class="enrollment-change-step ${status!=="pending"?"is-complete":""}"><strong>${escapeText(title)}</strong><small>${status==="completed"?"✓ Complete":status==="not_needed"?"Not Needed":"Pending"}</small><div class="enrollment-change-step-actions">${status==="pending"?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="completed" data-enrollment-change-id="${escapeText(item.id)}">Complete</button>${allowNotNeeded?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="not_needed" data-enrollment-change-id="${escapeText(item.id)}">Not Needed</button>`:""}`:""}</div></div>`;
         };
         const studentOptions = studentRecords.map(({ rosterClass, student }) => `<option value="${escapeText(student.id)}" ${String(item.assigned_student_id)===String(student.id)?"selected":""}>${escapeText(rosterStudentFullName(student))} · ${escapeText(rosterSchoolNickname(rosterClass.schoolName))} · ${escapeText(rosterClass.name)}</option>`).join("");
+        const suggestionMarkup = !assigned && suggestions.length ? `<div class="enrollment-change-suggestions"><strong>Suggested Matches</strong><div class="enrollment-change-suggestion-list">${suggestions.map(({rosterClass,student,reasons})=>`<button class="enrollment-change-suggestion" type="button" data-enrollment-change-suggested-student="${escapeText(student.id)}" data-enrollment-change-id="${escapeText(item.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(rosterStudentInitials(student))}</span><span><strong>${escapeText(rosterStudentFullName(student))}</strong><small>${escapeText(rosterSchoolNickname(rosterClass.schoolName))} · ${escapeText(rosterClass.name)}</small></span><em>Suggested: ${escapeText(reasons.join(" + "))}</em></button>`).join("")}</div></div>` : "";
         const schoolNames=[...new Set(rosterClasses.filter((rosterClass)=>rosterClass.sourceActive!==false).map((rosterClass)=>rosterClass.schoolName).filter(Boolean))].sort((left,right)=>left.localeCompare(right));
         const targetSchool=item.target_school||"";
         const schoolOptions=schoolNames.map((schoolName)=>`<option value="${escapeText(schoolName)}" ${schoolName===targetSchool?"selected":""}>${escapeText(rosterSchoolNickname(schoolName))}</option>`).join("");
@@ -21941,6 +21969,7 @@
         return `<article class="enrollment-change-card">
           <div class="enrollment-change-heading"><div><h4>${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"Dancer name not entered")}</h4><p>${escapeText(item.notes||"No additional message")}</p><small>Submitted ${escapeText(enrollmentDateLabel(item.submitted_at||item.created_at))}</small></div><span class="status ${assigned?"ok":"pending"}">${assigned?"Dancer Matched":"Needs Match"}</span></div>
           <div class="enrollment-change-details"><div class="enrollment-change-value"><span>Current School</span><strong>${escapeText(item.current_school||"Not selected")}</strong></div><div class="enrollment-change-value"><span>Last Day</span><strong>${escapeText(item.last_day?new Date(`${item.last_day}T12:00:00`).toLocaleDateString():"Not entered")}</strong></div><div class="enrollment-change-value"><span>Request</span><strong>${escapeText(item.request_type||"Not selected")}</strong></div></div>
+          ${suggestionMarkup}
           <div class="enrollment-change-assignment"><label>Assign Existing Student<select data-enrollment-change-student="${escapeText(item.id)}"><option value="">Choose a dancer…</option>${studentOptions}</select></label><button class="primary" type="button" data-enrollment-change-assign="${escapeText(item.id)}">${assigned?"Update Match":"Assign Dancer"}</button></div>
           ${workflowMarkup}
         </article>`;
@@ -49326,10 +49355,11 @@
     });
     document.getElementById("enrollment-change-list")?.addEventListener("click", async (event) => {
       const assignmentButton=event.target.closest("[data-enrollment-change-assign]");
+      const suggestionButton=event.target.closest("[data-enrollment-change-suggested-student]");
       const stepButton=event.target.closest("[data-enrollment-change-step]");
       const deactivateButton=event.target.closest("[data-enrollment-change-deactivate]");
       const moveButton=event.target.closest("[data-enrollment-change-move]");
-      const requestId=assignmentButton?.dataset.enrollmentChangeAssign||stepButton?.dataset.enrollmentChangeId||deactivateButton?.dataset.enrollmentChangeDeactivate||moveButton?.dataset.enrollmentChangeMove;
+      const requestId=assignmentButton?.dataset.enrollmentChangeAssign||suggestionButton?.dataset.enrollmentChangeId||stepButton?.dataset.enrollmentChangeId||deactivateButton?.dataset.enrollmentChangeDeactivate||moveButton?.dataset.enrollmentChangeMove;
       const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(requestId));
       if(!item)return;
       const persist=async(payload)=>{
@@ -49339,7 +49369,11 @@
         if(error){console.error("Enrollment change could not save",error);showToast("Enrollment change could not be saved");return false;}
         return true;
       };
-      if(assignmentButton){
+      if(suggestionButton){
+        const record=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(suggestionButton.dataset.enrollmentChangeSuggestedStudent));
+        if(!record)return showToast("That suggested dancer could not be found");
+        if(await persist({assigned_student_id:record.student.id,assigned_class_enrollment_id:record.student.enrollmentId||null,status:"reviewing",reviewed_by:window.dtCurrentProfile?.id||null,reviewed_at:new Date().toISOString()}))showToast("Suggested dancer assigned");
+      } else if(assignmentButton){
         const select=document.querySelector(`[data-enrollment-change-student="${CSS.escape(String(item.id))}"]`);
         const record=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(select?.value));
         if(!record)return showToast("Choose an existing dancer first");
