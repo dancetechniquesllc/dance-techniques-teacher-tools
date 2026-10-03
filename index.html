@@ -51457,9 +51457,11 @@
       const previousCount = rosterEnrolled(rosterClass).length;
       const selectedSchoolName = document.getElementById("roster-edit-school").value;
       const targetClassId = document.getElementById("roster-edit-assigned-class").value;
+      const stayingInCurrentClass = String(targetClassId) === String(rosterClass.id);
       const targetClass = rosterClasses.find((item) => String(item.id) === String(targetClassId)
         && item.sourceActive !== false
-        && enrollmentSchoolNameMatches(item.schoolName, selectedSchoolName));
+        && enrollmentSchoolNameMatches(item.schoolName, selectedSchoolName))
+        || (stayingInCurrentClass ? rosterClass : null);
       if (!targetClass) {
         showToast("Choose an active class at the new school before saving.");
         restoreSaveButton();
