@@ -16634,7 +16634,7 @@
               <div><h3>Costume Catalog</h3><p><em>Browse the complete Dance Techniques costume inventory and match dancer sizes.</em></p></div>
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
-            <iframe class="dt-tunes-embedded-frame" id="costume-catalog-frame" title="Dance Techniques Costume Catalog" data-src="costume-catalog.html?v=20260911" scrolling="no" style="min-height:1100px"></iframe>
+            <iframe class="dt-tunes-embedded-frame" id="costume-catalog-frame" title="Dance Techniques Costume Catalog" data-src="costume-catalog.html?v=20261001-class-wizard" scrolling="no" style="min-height:1100px"></iframe>
           </section>
 
           <section class="admin-profile-card admin-section-page big-stage" id="admin-home-big-stage">
@@ -38222,6 +38222,59 @@
       return `${years} yr ${months} mo`;
     };
 
+    window.getCostumeMatcherData = () => {
+      const activeClasses = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false);
+      const activeTeacherIds = new Set(activeClasses.map((rosterClass) => String(rosterClass.teacherId || "")).filter(Boolean));
+      const teacherNames = new Map(teachers.map((teacher) => [String(teacher.id), teacher.displayName || fullName(teacher) || teacherNickname(teacher) || "Teacher"]));
+      return {
+        teachers: teachers
+          .filter((teacher) => activeTeacherIds.has(String(teacher.id)))
+          .map((teacher) => ({ id: String(teacher.id), name: teacherNames.get(String(teacher.id)), color: teacherProfileColor(teacher) })),
+        classes: activeClasses.map((rosterClass) => ({
+          id: String(rosterClass.id),
+          teacherId: String(rosterClass.teacherId || ""),
+          teacherName: teacherNames.get(String(rosterClass.teacherId || "")) || "Unassigned",
+          schoolName: rosterSchoolNickname(rosterClass.schoolName),
+          sourceSchoolName: rosterClass.schoolName,
+          name: rosterClass.name || "Class",
+          day: rosterClass.day || "",
+          time: rosterClass.time || "",
+          showTime: rosterClass.showTime || rosterClass.recitalShowTime || rosterClass.performanceTime || "",
+          performanceType: String(rosterClass.recitalPerformance || rosterClass.performanceType || rosterClass.performanceRequirement || "either").toLowerCase(),
+          combinedPerformanceId: String(rosterClass.combinedPerformanceId || rosterClass.combinedClassGroupId || rosterClass.recitalCombinedGroupId || rosterClass.performanceGroupId || ""),
+          combinedPerformanceName: rosterClass.combinedPerformanceName || rosterClass.combinedClassName || rosterClass.recitalCombinedName || "",
+          costumeSelection: rosterClass.costumeSelection || null,
+          students: rosterEnrolled(rosterClass).map((student, studentIndex) => ({
+            id: String(student.id),
+            name: rosterStudentFullName(student),
+            photo: student.photo || student.photoUrl || "",
+            isBoy: ["male", "boy", "m"].includes(String(student.gender || "").trim().toLowerCase()),
+            measurements: (() => {
+              const savedMeasurements = { ...(student.measurements || {}), ...(student.additionalInformation?.costume_measurements || {}) };
+              if (Number(savedMeasurements.girth) > 0 || document.body.dataset.tourMode !== "true") return savedMeasurements;
+              return [
+                { girth: 39, hips: 24, waist: 22, chest: 23 },
+                { girth: 40, hips: 25, waist: 22, chest: 23 },
+                { girth: 41, hips: 25, waist: 23, chest: 24 },
+                { girth: 42, hips: 26, waist: 23, chest: 24 },
+                { girth: 43, hips: 27, waist: 24, chest: 25 },
+                { girth: 44, hips: 28, waist: 24, chest: 26 },
+                { girth: 45, hips: 29, waist: 25, chest: 27 },
+                { girth: 46, hips: 29, waist: 25, chest: 27 }
+              ][studentIndex % 8];
+            })()
+          }))
+        }))
+      };
+    };
+    window.saveCostumeMatcherSelection = (selection) => {
+      const rosterClass = rosterClasses.find((item) => String(item.id) === String(selection?.classId || ""));
+      if (!rosterClass || !selection?.costumeName) return false;
+      rosterClass.costumeSelection = JSON.parse(JSON.stringify(selection));
+      scheduleAppDataSave();
+      return true;
+    };
+
     const rosterStatusLabel = (status) => ({
       "trial-scheduled": "Trial scheduled",
       "trial-attended": "Trial attended",
@@ -44223,7 +44276,7 @@
       const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
       if (title) title.textContent = `${fullName(teacher)} Pay Stubs`;
       if (subtitle) subtitle.textContent = payrollTierLabels[teacher.payTier] || "Finalized payroll records";
-      body.innerHTML = stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}" data-save-pdf="true">Download</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`;
+      body.innerHTML = stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? payrollCurrency(stub.amount) : "Finalized pay stub"}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}" data-save-pdf="true">Download</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`;
     };
 
     const setPayrollStubLibraryOpen = (open) => {

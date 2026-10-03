@@ -6,65 +6,78 @@
 <title>Dance Techniques LLC — Costume System</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Arial, sans-serif; background: #f0f4f8; color: #222; }
-  header { background: linear-gradient(135deg,#1F4E79,#2e75b6); color: white; padding: 18px 28px; display:flex; align-items:center; gap:16px; }
-  header h1 { font-size: 1.4rem; }
-  header p { font-size: 0.85rem; opacity: 0.85; }
-  .tabs { display:flex; gap:4px; padding: 12px 20px 0; background:#1F4E79; }
-  .tab { padding: 8px 20px; border-radius: 8px 8px 0 0; cursor:pointer; font-weight:bold; font-size:0.9rem; background:#2e75b6; color:white; border:none; }
-  .tab.active { background:white; color:#1F4E79; }
+  body { font-family: Arial, sans-serif; background: #fffaf6; color: #171313; }
+  .tabs { width:min(980px,calc(100% - 40px)); display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; margin:16px auto 0; padding:4px; border:1px solid #f0c7c1; border-radius:999px; background:#fffdfb; }
+  .tab { min-height:44px; padding:8px 14px; border:0; border-radius:999px; background:transparent; color:#241918; cursor:pointer; font:inherit; font-size:0.9rem; font-weight:800; }
+  .tab.active { background:#e5b0aa; color:#944a53; box-shadow:0 4px 10px rgba(148,74,83,.12); }
+  .tab:focus-visible { outline:3px solid rgba(148,74,83,.34); outline-offset:2px; }
   .panel { display:none; padding:20px; } .panel.active { display:block; }
 
   /* INVENTORY */
   .filters { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; }
   .filters input, .filters select { padding:7px 12px; border:1.5px solid #ccc; border-radius:6px; font-size:0.9rem; }
   .filters input { width:220px; }
-  .legend { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:12px; font-size:0.82rem; }
+  .inventory-summary-row { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:0.82rem; }
   .legend-item { display:flex; align-items:center; gap:5px; }
   .dot { width:13px; height:13px; border-radius:50%; display:inline-block; }
-  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:14px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(310px,1fr)); gap:14px; }
   .card { background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); transition:transform 0.15s; cursor:pointer; }
   .card:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,0.15); }
-  .card-img { width:100%; height:160px; object-fit:cover; background:#e8eef4; display:flex; align-items:center; justify-content:center; color:#888; font-size:0.8rem; }
+  .card-img { width:100%; height:160px; object-fit:cover; background:#f7e4df; display:flex; align-items:center; justify-content:center; color:#886d72; font-size:0.8rem; }
   .card-img img { width:100%; height:100%; object-fit:cover; }
   .card-body { padding:10px; }
   .card-name { font-weight:bold; font-size:0.88rem; margin-bottom:3px; }
   .card-company { font-size:0.75rem; color:#555; margin-bottom:6px; }
   .card-sizes { font-size:0.75rem; display:flex; gap:4px; flex-wrap:wrap; }
-  .size-chip { background:#e8eef4; border-radius:4px; padding:2px 6px; font-weight:bold; }
+  .size-chip { background:#f3dfdc; border-radius:4px; padding:2px 6px; font-weight:bold; }
   .status-bar { height:5px; }
-  .s-inventoried { background:#70ad47; }
-  .s-low { background:#ffc000; }
-  .s-unknown { background:#f4b942; }
+  .s-inventoried { background:#68775f; }
+  .s-low { background:#d58c24; }
+  .s-unknown { background:#dba9a1; }
   .card-location { font-size:0.72rem; color:#777; margin-top:5px; }
-  .total-badge { float:right; background:#1F4E79; color:white; border-radius:10px; padding:2px 8px; font-size:0.75rem; font-weight:bold; }
+  .total-badge { float:right; background:#944a53; color:white; border-radius:10px; padding:2px 8px; font-size:0.75rem; font-weight:bold; }
+  .inventory-size-table { width:100%; margin-top:9px; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid #f0c7c1; border-radius:12px; font-size:11px; text-align:center; }
+  .inventory-size-table th,.inventory-size-table td { padding:7px 5px; border-bottom:1px solid #f3dfdc; }
+  .inventory-size-table th { background:#f8e0dd; color:#674f4f; font-size:9px; text-transform:uppercase; }
+  .inventory-size-table th:first-child,.inventory-size-table td:first-child { text-align:left; font-weight:900; }
+  .inventory-size-table tbody tr:last-child td { border-bottom:0; }
+  .inventory-size-table tfoot td { border-top:2px solid #e5b0aa; border-bottom:0; background:#fffaf6; font-weight:900; }
+  .inventory-qty { display:inline-grid; place-items:center; min-width:28px; min-height:25px; padding:3px 7px; border-radius:999px; background:#f3dfdc; color:#674f4f; font-weight:900; }
+  .inventory-qty.available { background:#f5df9a; color:#765511; }
+  .inventory-qty.teacher-use { color:#241918; }
+  .inventory-qty.is-zero { background:#e6e6e6 !important; color:#777 !important; }
+  .inventory-count { color:#666; font-size:.85rem; font-weight:700; }
+  .inventory-actions { display:flex; gap:8px; margin-left:auto; }
+  .inventory-action { min-height:36px; padding:7px 16px; border:1px solid #944a53; border-radius:999px; background:#fff; color:#944a53; font:inherit; font-size:.88rem; font-weight:800; cursor:pointer; }
+  .inventory-action.primary { background:#944a53; color:#fff; }
 
   /* MODAL */
   .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center; }
   .modal-overlay.open { display:flex; }
   .modal { background:white; border-radius:14px; max-width:560px; width:95%; max-height:85vh; overflow-y:auto; padding:24px; position:relative; }
   .modal-close { position:absolute; top:12px; right:16px; font-size:1.4rem; cursor:pointer; color:#666; background:none; border:none; }
-  .modal img { width:100%; max-height:300px; object-fit:contain; border-radius:8px; margin-bottom:14px; background:#f0f4f8; padding:8px; }
-  .modal h2 { font-size:1.2rem; color:#1F4E79; margin-bottom:4px; }
-  .modal .company-tag { display:inline-block; background:#e8eef4; border-radius:6px; padding:3px 10px; font-size:0.8rem; margin-bottom:12px; }
+  .modal img { width:100%; max-height:300px; object-fit:contain; border-radius:8px; margin-bottom:14px; background:#fff4ef; padding:8px; }
+  .modal h2 { font-size:1.2rem; color:#944a53; margin-bottom:4px; }
+  .modal .company-tag { display:inline-block; background:#f3dfdc; border-radius:6px; padding:3px 10px; font-size:0.8rem; margin-bottom:12px; }
   .size-table { width:100%; border-collapse:collapse; font-size:0.85rem; margin-top:8px; }
-  .size-table th { background:#1F4E79; color:white; padding:6px 10px; }
+  .size-table th { background:#944a53; color:white; padding:6px 10px; }
   .size-table td { padding:5px 10px; border-bottom:1px solid #eee; text-align:center; }
-  .size-table tr:nth-child(even) td { background:#f5f8fc; }
+  .size-table tr:nth-child(even) td { background:#fff4ef; }
 
   /* PRINT */
   @media print {
-    header, .tabs, .filters, .legend, #panel-matcher, #panel-charts, .modal-overlay { display:none !important; }
+    .tabs, .filters, .legend, #panel-matcher, .modal-overlay { display:none !important; }
     #panel-inventory { display:block !important; padding:0; }
     body { background:white; }
     .print-header { display:block !important; }
     .print-table { display:table !important; width:100%; border-collapse:collapse; font-size:9pt; }
-    .print-table th { background:#1F4E79 !important; color:white !important; padding:5px 7px; text-align:left; font-size:8pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .print-table th { background:#944a53 !important; color:white !important; padding:5px 7px; text-align:left; font-size:8pt; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .print-table td { padding:4px 7px; border-bottom:1px solid #ddd; vertical-align:middle; }
-    .print-table tr.row-inventoried td:first-child { border-left:4px solid #70ad47; }
-    .print-table tr.row-low td:first-child { border-left:4px solid #ffc000; }
-    .print-table tr.row-unknown td:first-child { border-left:4px solid #bbb; }
-    .print-table tr:nth-child(even) td { background:#f5f8fc !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .print-table tr.row-inventoried td:first-child { border-left:4px solid #68775f; }
+    .print-table tr.row-low td:first-child { border-left:4px solid #d58c24; }
+    .print-table tr.row-unknown td:first-child { border-left:4px solid #dba9a1; }
+    .print-table tr:nth-child(even) td { background:#fff4ef !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
     .print-thumb { width:50px; height:50px; object-fit:cover; border-radius:4px; }
     .grid, .card { display:none !important; }
   }
@@ -72,23 +85,146 @@
   .print-table { display:none; }
 
   /* SIZE MATCHER */
-  .matcher-wrap { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
-  @media(max-width:700px){ .matcher-wrap { grid-template-columns:1fr; } }
-  .matcher-panel { background:white; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
-  .matcher-panel h3 { color:#1F4E79; font-size:1rem; margin-bottom:14px; border-bottom:2px solid #e8eef4; padding-bottom:8px; }
-  label { font-size:0.85rem; font-weight:bold; display:block; margin-bottom:4px; margin-top:10px; color:#444; }
-  input[type=number], select, textarea { width:100%; padding:8px 10px; border:1.5px solid #ccc; border-radius:6px; font-size:0.9rem; }
-  textarea { height:120px; resize:vertical; font-family:Arial; }
-  .btn { background:#1F4E79; color:white; border:none; padding:10px 22px; border-radius:8px; font-size:0.95rem; font-weight:bold; cursor:pointer; margin-top:12px; width:100%; }
-  .btn:hover { background:#2e75b6; }
-  .result-card { background:#f0f8ff; border-left:4px solid #1F4E79; border-radius:6px; padding:12px; margin-bottom:10px; }
-  .result-card h4 { font-size:0.95rem; color:#1F4E79; margin-bottom:4px; }
-  .result-card p { font-size:0.82rem; color:#444; }
-  .size-result-chip { display:inline-block; background:#1F4E79; color:white; border-radius:12px; padding:3px 10px; font-size:0.8rem; font-weight:bold; margin:2px; }
-  .no-results { color:#888; font-style:italic; font-size:0.9rem; text-align:center; padding:20px; }
-  .company-filter-wrap { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
-  .company-pill { padding:5px 12px; border-radius:16px; border:2px solid #ccc; background:white; cursor:pointer; font-size:0.8rem; font-weight:bold; transition:all 0.15s; }
-  .company-pill.active { border-color:#1F4E79; background:#1F4E79; color:white; }
+  .matcher-wizard { display:grid; gap:18px; }
+  .wizard-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:16px; border:1px solid #f0c7c1; border-radius:20px; background:#fff; }
+  .wizard-field { display:grid; gap:7px; color:#6f6260; font-size:11px; font-weight:850; letter-spacing:.04em; text-transform:uppercase; }
+  .wizard-field select { width:100%; min-height:48px; padding:9px 12px; border:1px solid #f0c7c1; border-radius:14px; background:#fffaf6; color:#241918; font:inherit; font-size:14px; font-weight:750; text-transform:none; }
+  .wizard-field select:focus { outline:3px solid rgba(148,74,83,.2); border-color:#944a53; }
+  .matcher-class-summary { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center; padding:18px 20px; border:1px solid #f0c7c1; border-radius:20px; background:linear-gradient(135deg,#fff,#f8e0dd); }
+  .matcher-class-summary h3,.matcher-class-summary p { margin:0; }
+  .matcher-class-summary h3 { color:#944a53; font-family:Georgia,serif; font-size:24px; }
+  .matcher-class-summary p { margin-top:5px; color:#6f6260; font-size:13px; }
+  .measurement-progress { min-width:150px; padding:10px 13px; border-radius:999px; background:#fff; color:#944a53; font-size:12px; font-weight:850; text-align:center; }
+  .measurement-progress.complete { background:#dce9d6; color:#36553a; }
+  .measurement-note { padding:11px 14px; border-radius:14px; background:#fff5cf; color:#704900; font-size:12px; line-height:1.45; }
+  .matcher-results-head { display:flex; justify-content:space-between; gap:12px; align-items:end; }
+  .matcher-results-head h3,.matcher-results-head p { margin:0; }
+  .matcher-results-head h3 { color:#944a53; font-family:Georgia,serif; font-size:23px; }
+  .matcher-results-head p { margin-top:4px; color:#6f6260; font-size:12px; }
+  .costume-match-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,320px)); gap:14px; align-items:start; justify-content:start; }
+  .costume-match-card { overflow:hidden; border:1px solid #f0c7c1; border-radius:18px; background:#fff; box-shadow:0 7px 20px rgba(78,39,41,.07); }
+  .costume-match-card[role="button"] { cursor:pointer; }
+  .costume-match-card[role="button"]:hover { transform:translateY(-2px); box-shadow:0 11px 26px rgba(78,39,41,.12); }
+  .costume-match-card.is-show-reserved { position:relative; border-color:#aaa; background:#eee; filter:grayscale(1); opacity:.72; cursor:not-allowed; }
+  .costume-match-card.is-show-reserved:hover { transform:none; box-shadow:0 7px 20px rgba(78,39,41,.07); }
+  .show-reserved-banner { padding:9px 12px; background:#666; color:#fff; font-size:11px; font-weight:900; letter-spacing:.06em; text-align:center; }
+  .costume-match-card[role="button"]:focus-visible { outline:3px solid rgba(148,74,83,.35); outline-offset:3px; }
+  .costume-match-card.is-ready { border-color:#9caf91; }
+  .costume-match-card.is-stranded { border:3px solid #944a53; }
+  .costume-match-card img { display:block; width:100%; height:190px; object-fit:cover; background:#f3dfdc; }
+  .costume-match-copy { display:grid; gap:9px; padding:14px; }
+  .costume-match-heading { display:flex; justify-content:space-between; gap:9px; align-items:start; }
+  .costume-match-heading h4 { margin:0; color:#241918; font-size:16px; }
+  .costume-match-heading small { display:block; margin-top:3px; color:#6f6260; }
+  .match-badge { flex:none; padding:5px 8px; border-radius:999px; background:#dce9d6; color:#36553a; font-size:10px; font-weight:900; }
+  .match-badge.partial { background:#fff1d0; color:#765511; }
+  .match-badge.last-resort { background:#944a53; color:#fff; }
+  .costume-size-table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid #eee1dc; border-radius:12px; font-size:11px; }
+  .costume-size-table th,.costume-size-table td { padding:7px 8px; text-align:right; border-bottom:1px solid #eee1dc; }
+  .costume-size-table th:first-child,.costume-size-table td:first-child { text-align:left; }
+  .costume-size-table thead th { background:#f8e0dd; color:#674f4f; font-size:10px; text-transform:uppercase; letter-spacing:.03em; }
+  .costume-size-table tbody tr:last-child td { border-bottom:0; }
+  .costume-size-table tfoot td { border-top:2px solid #e5b0aa; border-bottom:0; background:#fffaf6; color:#241918; font-weight:900; }
+  .costume-match-card .costume-size-table th,.costume-match-card .costume-size-table td { padding-left:6px; padding-right:6px; }
+  .size-number { display:inline-grid; place-items:center; min-width:30px; min-height:26px; padding:3px 8px; border-radius:999px; font-weight:900; }
+  .size-number.inventory { background:#f3dfdc; color:#674f4f; }
+  .size-number.needed { background:#dce9d6; color:#36553a; }
+  .size-number.leaves { background:#f5df9a; color:#765511; }
+  .size-number.is-zero { background:#e5e5e5; color:#777; }
+  .costume-match-meta { display:flex; justify-content:space-between; gap:8px; color:#6f6260; font-size:11px; }
+  .matcher-dancer-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; }
+  .matcher-dancer { padding:10px; border:1px solid #eee1dc; border-radius:13px; background:#fff; }
+  .matcher-dancer.is-boy { order:-1; border-color:#c9c9c9; background:#e8e8e8; color:#777; filter:grayscale(1); }
+  .matcher-dancer.is-boy small { color:#777; font-weight:800; }
+  .matcher-dancer strong,.matcher-dancer small { display:block; }
+  .matcher-dancer small { margin-top:4px; color:#6f6260; font-size:10px; }
+  .matcher-dancer.missing { background:#fff5cf; border-color:#dfae39; }
+  .selection-dialog { max-width:760px; }
+  .selection-head { display:grid; grid-template-columns:120px 1fr; gap:16px; align-items:center; margin-bottom:16px; }
+  .selection-head img { width:120px; height:120px; margin:0; padding:0; border-radius:16px; object-fit:cover; }
+  .selection-head h2,.selection-head p { margin:0; }
+  .selection-head p { margin-top:5px; color:#6f6260; }
+  .selection-warning { margin:12px 0; padding:12px 14px; border:2px solid #944a53; border-radius:14px; background:#f8e0dd; color:#6f3540; font-size:12px; font-weight:800; line-height:1.45; }
+  .selection-dancers { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px; margin:14px 0; }
+  .selection-dancer { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 11px; border:1px solid #eee1dc; border-radius:12px; background:#fffaf6; font-size:12px; }
+  .selection-dancer strong:last-child { display:grid; place-items:center; min-width:38px; min-height:30px; border-radius:999px; background:#dce9d6; color:#36553a; }
+  .selection-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px; }
+  .selection-actions button { min-height:48px; border-radius:999px; font:inherit; font-weight:850; cursor:pointer; }
+  .selection-actions .keep-looking { border:1px solid #f0c7c1; background:#fff; color:#944a53; }
+  .selection-actions .assign-costume { border:1px solid #944a53; background:#944a53; color:#fff; }
+  .matcher-assignment { grid-column:1/-1; padding:11px 14px; border-radius:14px; background:#dce9d6; color:#36553a; font-size:12px; font-weight:850; }
+  .assignments-page { display:grid; gap:14px; }
+  .assignments-page-head h2 { color:#944a53; font-family:Georgia,serif; font-size:27px; }
+  .assignments-page-head p { margin-top:5px; color:#6f6260; font-size:13px; }
+  .assignment-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+  .assignment-card { display:grid; gap:13px; padding:18px; border:1px solid #9caf91; border-radius:18px; background:#fff; box-shadow:0 7px 20px rgba(78,39,41,.07); }
+  .assignment-card-head { display:flex; justify-content:space-between; gap:12px; align-items:start; }
+  .assignment-status { display:grid; justify-items:center; gap:7px; flex:none; }
+  .assignment-total { width:58px; height:58px; display:grid; place-items:center; border-radius:50%; background:#944a53; color:#fff; font-size:22px; font-weight:900; box-shadow:0 5px 12px rgba(148,74,83,.22); }
+  .assignment-type { padding:6px 11px; border-radius:999px; font-size:11px; font-weight:900; }
+  .assignment-type.ballet { background:#f3dfdc; color:#944a53; }
+  .assignment-type.tap { background:#dce9d6; color:#36553a; }
+  .assignment-type.either { background:#f5df9a; color:#765511; }
+  .assignment-filters { display:grid; grid-template-columns:repeat(4,minmax(0,220px)); gap:10px; padding:14px; border:1px solid #f0c7c1; border-radius:16px; background:#fff; }
+  .assignment-filters select { min-height:42px; padding:8px 11px; border:1px solid #f0c7c1; border-radius:12px; background:#fffaf6; color:#241918; font:inherit; font-size:13px; font-weight:750; }
+  .assignment-card h3 { color:#944a53; font-family:Georgia,serif; font-size:20px; }
+  .assignment-show-time { margin-bottom:5px; color:#111; font-size:27px; font-weight:900; line-height:1; }
+  .assignment-card p { margin-top:4px; color:#6f6260; font-size:12px; }
+  .assignment-costume { display:grid; grid-template-columns:96px 1fr; gap:12px; align-items:center; padding:10px; border-radius:14px; background:#f8e0dd; }
+  .assignment-costume img { width:96px; height:96px; border-radius:11px; object-fit:cover; background:#fff; }
+  .assignment-costume strong,.assignment-costume small { display:block; }
+  .assignment-costume small { margin-top:4px; color:#6f6260; }
+  .assignment-size-list { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .assignment-needed-label { color:#944a53; font-size:12px; font-weight:900; }
+  .assignment-size { display:flex; align-items:center; gap:5px; padding:7px 11px; border:1px solid #9caf91; border-radius:999px; background:#dce9d6; color:#36553a; font-size:12px; font-weight:900; }
+  .assignment-size-groups { display:grid; gap:13px; }
+  .assignment-size-group { display:grid; gap:10px; }
+  .assignment-size-divider { display:flex; align-items:center; gap:10px; color:#944a53; font-size:18px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; }
+  .assignment-size-divider::after { content:""; height:1px; flex:1; background:#e5b0aa; }
+  .assignment-dancers { display:flex; flex-wrap:wrap; gap:14px; }
+  .assignment-dancer { width:72px; display:grid; justify-items:center; gap:6px; text-align:center; color:#241918; font-size:11px; font-weight:750; }
+  .assignment-dancer-avatar { width:54px; height:54px; display:grid; place-items:center; overflow:hidden; border:3px solid #dce9d6; border-radius:50%; background:#f3dfdc; color:#944a53; font-size:15px; font-weight:900; }
+  .assignment-dancer-avatar img { width:100%; height:100%; object-fit:cover; }
+  .assignment-teacher-sections { display:grid; gap:12px; }
+  .assignment-teacher-section { display:grid; gap:12px; padding:13px; border:3px solid var(--assignment-teacher-color,#dba9a1); border-radius:16px; background:#fffaf6; }
+  .assignment-teacher-section > h4 { color:#241918; font-size:14px; }
+  .assignment-dancer-school { color:#6f6260; font-size:9px; font-weight:700; line-height:1.15; }
+  .boys-class-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+  .boys-class-card { display:grid; gap:13px; padding:17px; border:1px solid #b9b9b9; border-radius:18px; background:#f3f3f3; box-shadow:0 7px 20px rgba(40,40,40,.07); }
+  .boys-class-card h3 { color:#241918; font-family:Georgia,serif; font-size:20px; }
+  .boys-class-card p { margin-top:4px; color:#6f6260; font-size:12px; }
+  .boys-girl-costume { display:grid; grid-template-columns:96px 1fr; gap:12px; align-items:center; padding:10px; border-radius:14px; background:#fff; }
+  .boys-girl-costume img { width:96px; height:96px; border-radius:11px; object-fit:cover; }
+  .boys-girl-costume strong,.boys-girl-costume small { display:block; }
+  .boys-girl-costume small { margin-top:4px; color:#777; }
+  .boys-dancers { display:flex; flex-wrap:wrap; gap:14px; }
+  .boys-dancer { width:78px; display:grid; justify-items:center; gap:5px; text-align:center; color:#555; font-size:11px; font-weight:800; }
+  .boys-dancer-avatar { width:54px; height:54px; display:grid; place-items:center; overflow:hidden; border:3px solid #aaa; border-radius:50%; background:#ddd; color:#555; font-size:15px; font-weight:900; filter:grayscale(1); }
+  .boys-dancer-avatar img { width:100%; height:100%; object-fit:cover; }
+  .boys-custom-reserve { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:8px; align-items:center; padding:11px; border:1px solid #d9ad3b; border-radius:13px; background:#fff7d8; }
+  .boys-custom-reserve strong { color:#765511; font-size:12px; }
+  .boys-custom-reserve select,.boys-custom-reserve button { min-height:38px; padding:7px 10px; border-radius:10px; font:inherit; font-size:12px; font-weight:850; }
+  .boys-custom-reserve select { border:1px solid #d9ad3b; background:#fff; }
+  .boys-custom-reserve button { border:1px solid #944a53; background:#944a53; color:#fff; cursor:pointer; }
+  .boys-custom-reserve.is-reserved { border-color:#9caf91; background:#dce9d6; }
+  .boys-custom-reserve.is-reserved strong { color:#36553a; }
+  .boys-catalog-heading { margin-top:10px; color:#944a53; font-family:Georgia,serif; font-size:23px; }
+  .outside-order-card { width:100%; height:auto; min-height:0; display:grid; grid-template-columns:48px minmax(0,1fr); gap:12px; align-items:center; padding:16px; overflow:visible; border:2px dashed #944a53; border-radius:17px; background:#fff; color:#241918; text-align:left; white-space:normal; cursor:pointer; }
+  .outside-order-card > span:first-child { width:48px; height:48px; display:grid; place-items:center; border-radius:50%; background:#f3dfdc; color:#944a53; font-size:28px; font-weight:900; }
+  .outside-order-card > span:last-child { min-width:0; }
+  .outside-order-card strong,.outside-order-card small { display:block; }
+  .outside-order-card strong { font-size:18px; line-height:1.15; }
+  .outside-order-card small { margin-top:5px; color:#6f6260; font-size:12px; line-height:1.35; }
+  .outside-orders-list { display:grid; gap:8px; }
+  .outside-order-saved { display:grid; grid-template-columns:62px 1fr; gap:10px; align-items:center; padding:10px; border:1px solid #f0c7c1; border-radius:13px; background:#fffaf6; }
+  .outside-order-saved img { width:62px; height:62px; border-radius:9px; object-fit:cover; }
+  .outside-order-form { display:grid; gap:12px; }
+  .outside-order-form label { display:grid; gap:5px; color:#674f4f; font-size:12px; font-weight:850; }
+  .outside-order-form input,.outside-order-form select { min-height:42px; padding:8px 10px; border:1px solid #f0c7c1; border-radius:10px; background:#fff; font:inherit; }
+  .outside-order-sizes { padding:11px; border-radius:12px; background:#dce9d6; color:#36553a; font-weight:850; }
+  .assignment-remaining { padding:10px 12px; border:1px solid #d9ad3b; border-radius:12px; background:#f5df9a; color:#765511 !important; font-size:12px !important; font-weight:900; text-align:center; }
+  .no-results { color:#888; font-size:0.9rem; text-align:center; padding:34px 20px; border:1px dashed #f0c7c1; border-radius:18px; background:#fff; }
+  @media(max-width:700px){ .wizard-steps,.assignment-filters { grid-template-columns:1fr; } .matcher-class-summary { grid-template-columns:1fr; } .measurement-progress { justify-self:start; } .costume-match-grid { grid-template-columns:1fr; } }
   .instr { font-size:0.82rem; color:#666; margin-bottom:8px; line-height:1.5; }
 
   /* SIZING CHARTS TAB */
@@ -98,30 +234,29 @@
   .chart-box table { width:100%; border-collapse:collapse; font-size:0.75rem; }
   .chart-box th { padding:4px 6px; text-align:center; color:white; }
   .chart-box td { padding:4px 6px; text-align:center; border-bottom:1px solid #eee; }
-  .chart-box tr:nth-child(even) td { background:#f5f8fc; }
+  .chart-box tr:nth-child(even) td { background:#fff4ef; }
+  .charts-dialog { max-width:1100px; width:96%; }
+  .charts-dialog h2 { margin:0 0 16px; color:#944a53; font-family:Georgia,serif; font-size:26px; }
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <h1>🎭 Dance Techniques LLC — Costume System</h1>
-    <p>79 costumes · Browse inventory · Match student sizes</p>
-  </div>
-</header>
-
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('inventory')">📦 Inventory</button>
-  <button class="tab" onclick="switchTab('matcher')">📏 Size Matcher</button>
-  <button class="tab" onclick="switchTab('charts')">📊 Sizing Charts</button>
+<div class="tabs" role="tablist" aria-label="Costume Catalog sections">
+  <button class="tab active" type="button" role="tab" aria-selected="true" onclick="switchTab('inventory', this)">Inventory</button>
+  <button class="tab" type="button" role="tab" aria-selected="false" onclick="switchTab('matcher', this)">Size Matcher</button>
+  <button class="tab" type="button" role="tab" aria-selected="false" onclick="switchTab('assignments', this)">Costume Assignments</button>
+  <button class="tab" type="button" role="tab" aria-selected="false" onclick="switchTab('boys', this)">Boys</button>
 </div>
 
 <!-- INVENTORY PANEL -->
 <div id="panel-inventory" class="panel active">
-  <div class="legend">
-    <div class="legend-item"><span class="dot" style="background:#70ad47"></span> Inventoried</div>
-    <div class="legend-item"><span class="dot" style="background:#ffc000"></span> Low Inventory (can't fill a class)</div>
-    <div class="legend-item"><span class="dot" style="background:#f4b942"></span> Not Yet Inventoried</div>
+  <div class="inventory-summary-row">
+    <div class="legend">
+      <div class="legend-item"><span class="dot" style="background:#68775f"></span> Inventoried</div>
+      <div class="legend-item"><span class="dot" style="background:#d58c24"></span> Low Inventory (can't fill a class)</div>
+      <div class="legend-item"><span class="dot" style="background:#dba9a1"></span> Not Yet Inventoried</div>
+    </div>
+    <span id="count-label" class="inventory-count"></span>
   </div>
   <div class="filters">
     <input type="text" id="search" placeholder="🔍 Search costume name..." oninput="renderGrid()">
@@ -143,19 +278,21 @@
       <option value="MC">MC</option>
       <option value="LC">LC</option>
     </select>
-    <span id="count-label" style="font-size:0.85rem;color:#666;margin-left:auto;"></span>
-    <button onclick="printInventory()" style="padding:7px 16px;background:#1F4E79;color:white;border:none;border-radius:7px;font-size:0.88rem;font-weight:bold;cursor:pointer;">🖨️ Print / PDF</button>
+    <div class="inventory-actions">
+      <button class="inventory-action" type="button" onclick="openSizingCharts()">Sizing Charts</button>
+      <button class="inventory-action primary" type="button" onclick="printInventory()">Print / PDF</button>
+    </div>
   </div>
   <div class="grid" id="costume-grid"></div>
 
   <!-- PRINT VIEW (hidden on screen, shown when printing) -->
   <div class="print-header" style="margin-bottom:12px;">
-    <h2 style="color:#1F4E79;font-size:14pt;">Dance Techniques LLC — Costume Inventory</h2>
+    <h2 style="color:#944a53;font-size:14pt;">Dance Techniques LLC — Costume Inventory</h2>
     <p style="font-size:9pt;color:#555;" id="print-date"></p>
     <div style="font-size:8pt;margin-top:6px;">
-      <span style="border-left:4px solid #70ad47;padding-left:6px;margin-right:14px;">✅ Inventoried</span>
-      <span style="border-left:4px solid #ffc000;padding-left:6px;margin-right:14px;">⚠️ Low Inventory</span>
-      <span style="border-left:4px solid #bbb;padding-left:6px;">❓ Not Inventoried</span>
+      <span style="border-left:4px solid #68775f;padding-left:6px;margin-right:14px;">✅ Inventoried</span>
+      <span style="border-left:4px solid #d58c24;padding-left:6px;margin-right:14px;">⚠️ Low Inventory</span>
+      <span style="border-left:4px solid #dba9a1;padding-left:6px;">❓ Not Inventoried</span>
     </div>
   </div>
   <table class="print-table" id="print-table">
@@ -176,50 +313,57 @@
 
 <!-- SIZE MATCHER PANEL -->
 <div id="panel-matcher" class="panel">
-  <div class="matcher-wrap">
-    <div class="matcher-panel">
-      <h3>👧 Enter Student Measurements</h3>
-      <p class="instr">Enter one student at a time, or paste a whole roster below.<br>
-      Use format: <strong>Name, Girth, Chest, Waist, Hips</strong> (one per line)</p>
-      <label>Student Name</label>
-      <input type="text" id="s-name" placeholder="e.g. Emma">
-      <label>Girth (inches) — most important!</label>
-      <input type="number" id="s-girth" placeholder="e.g. 42" step="0.5">
-      <label>Chest / Bust (inches)</label>
-      <input type="number" id="s-chest" placeholder="e.g. 24" step="0.5">
-      <label>Waist (inches)</label>
-      <input type="number" id="s-waist" placeholder="e.g. 22" step="0.5">
-      <label>Hips (inches)</label>
-      <input type="number" id="s-hips" placeholder="e.g. 25" step="0.5">
-      <label>Company to check (optional)</label>
-      <select id="s-company">
-        <option value="">All companies</option>
-        <option>Weissman</option>
-        <option>A WISH COME TRUE</option>
-        <option>Discount Dance (Toddler)</option>
-        <option>Discount Dance (No Toddler)</option>
-        <option>Revolution</option>
-        <option>Glamour</option>
-        <option>Costume Gallery</option>
-        <option>Layla's</option>
-      </select>
-      <button class="btn" onclick="matchSingle()">Find My Size →</button>
-      <hr style="margin:18px 0; border-color:#eee;">
-      <h3 style="color:#1F4E79;font-size:1rem;margin-bottom:8px;">📋 Paste Full Class Roster</h3>
-      <p class="instr">Format: Name, Girth, Chest, Waist, Hips (one student per line)</p>
-      <textarea id="roster-text" placeholder="Emma, 42, 24, 22, 25&#10;Sophia, 45, 26, 23, 27&#10;Olivia, 38, 21, 20, 22"></textarea>
-      <button class="btn" onclick="matchRoster()">Match Entire Class →</button>
+  <div class="matcher-wizard">
+    <button class="outside-order-card" type="button" onclick="openOutsideOrder('matcher')"><span>+</span><span><strong>Ordering Something?</strong><small>Paste the product link and calculate the sizes this class needs.</small></span></button>
+    <div class="outside-orders-list" id="matcher-outside-orders"></div>
+    <div class="wizard-steps">
+      <label class="wizard-field">1. Teacher<select id="matcher-teacher"></select></label>
+      <label class="wizard-field">2. School<select id="matcher-school" disabled></select></label>
+      <label class="wizard-field">3. Class<select id="matcher-class" disabled></select></label>
     </div>
-    <div class="matcher-panel">
-      <h3>📐 Size Results</h3>
-      <div id="match-results"><p class="no-results">Enter measurements and click "Find My Size" to see results.</p></div>
+    <section class="matcher-class-summary" id="matcher-class-summary" hidden></section>
+    <div class="measurement-note"><strong>Fit priority:</strong> Girth is the deciding measurement, followed by hips, then waist. Chest is used as the final fit check.</div>
+    <div class="matcher-results-head">
+      <div><h3>Costume Matches</h3><p>Only costumes with enough inventory in the calculated sizes appear as ready matches.</p></div>
     </div>
+    <div id="match-results"><p class="no-results">Choose a teacher, school, and class to see matching costumes.</p></div>
   </div>
 </div>
 
-<!-- CHARTS PANEL -->
-<div id="panel-charts" class="panel">
-  <div class="chart-grid" id="charts-grid"></div>
+<!-- COSTUME ASSIGNMENTS PANEL -->
+<div id="panel-assignments" class="panel">
+  <section class="assignments-page">
+    <div class="assignments-page-head"><h2>Costume Assignments</h2><p>Classes with confirmed costume selections appear here.</p></div>
+    <div class="assignment-filters">
+      <select id="assignment-teacher-filter" aria-label="Filter costume assignments by teacher" onchange="renderCostumeAssignments()"><option value="">All Teachers</option></select>
+      <select id="assignment-school-filter" aria-label="Filter costume assignments by school" onchange="renderCostumeAssignments()"><option value="">All Schools</option></select>
+      <select id="assignment-show-filter" aria-label="Filter costume assignments by show time" onchange="renderCostumeAssignments()"><option value="">All Show Times</option></select>
+      <select id="assignment-type-filter" aria-label="Filter costume assignments by recital type" onchange="renderCostumeAssignments()"><option value="">All Types</option><option value="ballet">Ballet</option><option value="tap">Tap</option><option value="either">Either</option></select>
+    </div>
+    <div class="assignment-grid" id="assignment-grid"></div>
+  </section>
+</div>
+
+<!-- BOYS COSTUME PANEL -->
+<div id="panel-boys" class="panel">
+  <section class="assignments-page">
+    <div class="assignments-page-head"><h2>Boys Costumes</h2><p>Each class with boys is handled separately from the girls’ measurement matching.</p></div>
+    <button class="outside-order-card" type="button" onclick="openOutsideOrder('boys')"><span>+</span><span><strong>Ordering Something?</strong><small>Paste the product link and calculate the boys’ sizes by company.</small></span></button>
+    <div class="outside-orders-list" id="boys-outside-orders"></div>
+    <div class="boys-class-grid" id="boys-class-grid"></div>
+    <h3 class="boys-catalog-heading">Boys Costume Inventory</h3>
+    <label class="wizard-field">Class<select id="boys-match-class" onchange="renderBoysCostumeMatches()"></select></label>
+    <div class="costume-match-grid" id="boys-costume-grid"></div>
+  </section>
+</div>
+
+<!-- SIZING CHARTS POPUP -->
+<div class="modal-overlay" id="charts-modal" onclick="closeSizingCharts(event)">
+  <div class="modal charts-dialog" role="dialog" aria-modal="true" aria-labelledby="charts-title">
+    <button class="modal-close" type="button" aria-label="Close sizing charts" onclick="closeSizingCharts()">&times;</button>
+    <h2 id="charts-title">Sizing Charts</h2>
+    <div class="chart-grid" id="charts-grid"></div>
+  </div>
 </div>
 
 <!-- DETAIL MODAL -->
@@ -227,6 +371,28 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal()">✕</button>
     <div id="modal-content"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="selection-modal" onclick="closeCostumeSelection(event)">
+  <div class="modal selection-dialog" role="dialog" aria-modal="true" aria-labelledby="selection-title">
+    <button class="modal-close" onclick="closeCostumeSelection()" aria-label="Close costume review">✕</button>
+    <div id="selection-content"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="outside-order-modal" onclick="closeOutsideOrder(event)">
+  <div class="modal selection-dialog" role="dialog" aria-modal="true" aria-labelledby="outside-order-title">
+    <button class="modal-close" type="button" aria-label="Close order form" onclick="closeOutsideOrder()">&times;</button>
+    <h2 id="outside-order-title">Ordering Something?</h2>
+    <div class="outside-order-form">
+      <label>Class<select id="outside-order-class" onchange="previewOutsideOrderSizes()"></select></label>
+      <label>Product link<input id="outside-order-link" type="url" placeholder="Paste the item link" oninput="previewOutsideOrderImage()"></label>
+      <label>Company<select id="outside-order-company" onchange="previewOutsideOrderSizes()"></select></label>
+      <label>Date ordered<input id="outside-order-date" type="date"></label>
+      <div class="outside-order-sizes" id="outside-order-sizes">Choose a class and company to calculate sizes.</div>
+      <div class="selection-actions"><button class="keep-looking" type="button" onclick="closeOutsideOrder()">Cancel</button><button class="assign-costume" type="button" onclick="saveOutsideOrder()">Save Order</button></div>
+    </div>
   </div>
 </div>
 
@@ -319,7 +485,7 @@ const COSTUMES = [
 
 const SIZING = {
   "Weissman": {
-    color:"#1F4E79",
+    color:"#944a53",
     sizes:["T","XXSC","XSC","SC","IC","MC","LC","XLC","XXLC"],
     sizeLabels:["2T/3T","3T","4/5","6/6X","7/8","10/12","14","16/18","20"],
     Girth:[[32,35],[35,38],[38,41],[41,44],[44,47],[47,51],[51,54],[54,57],[57,60]],
@@ -328,7 +494,7 @@ const SIZING = {
     Hips: [[20,22],[22,23],[23,25],[25,27],[27,29],[29,32],[32,36],[36,39],[39,41]]
   },
   "A WISH COME TRUE": {
-    color:"#C55A11",
+    color:"#b65d52",
     sizes:["2T","XXSC","XSC","SC","ISC","MC","IMC","LC","XLC","XXLC"],
     sizeLabels:["Toddler","XX-Small","X-Small","Small","Int. Small","Medium","Int. Med","Large","X-Large","XX-Large"],
     Girth:[[34,36],[36,38],[38,40],[40,44],[44,46],[46,48],[48,51],[51,54],[54,56],[56,59]],
@@ -337,7 +503,7 @@ const SIZING = {
     Hips: [[18,20],[19,21],[21,23],[23,27],[26,29],[28,30],[30,32],[32,34],[36,38],[38,40]]
   },
   "Discount Dance (Toddler)": {
-    color:"#375623",
+    color:"#68775f",
     sizes:["T/XS","S","I","M","L","XL"],
     sizeLabels:["Toddler/XS","Small","Interm.","Medium","Large","X-Large"],
     Girth:[[38,41],[41,44],[44,47],[47,50],[50,53],[53,56]],
@@ -346,7 +512,7 @@ const SIZING = {
     Hips: [[20,22],[22,24],[24,26],[26,28],[28,30],[30,32]]
   },
   "Discount Dance (No Toddler)": {
-    color:"#538135",
+    color:"#9aaa87",
     sizes:["S","I","M","L"],
     sizeLabels:["Small","Interm.","Medium","Large"],
     Girth:[[41,44],[45,47],[48,50],[51,53]],
@@ -355,7 +521,7 @@ const SIZING = {
     Hips: [[23,26],[24,27],[27,29],[30,32]]
   },
   "Revolution": {
-    color:"#7030A0",
+    color:"#9b687a",
     sizes:["XSC","SC","MC","LC","XLC","XXLC","PA"],
     sizeLabels:["X-Small","Small","Medium","Large","X-Large","XX-Large","Petite Adult"],
     Girth:[[37,39],[40,43],[44,48],[49,52],[53,55],[56,58],[53,57]],
@@ -364,7 +530,7 @@ const SIZING = {
     Hips: [[22,24],[25,27],[28,30],[31,33],[34,37],[38,40],[32,34]]
   },
   "Glamour": {
-    color:"#BF9000",
+    color:"#d58c24",
     sizes:["XSC","SC","MC"],
     sizeLabels:["X-Small","Small","Medium"],
     Girth:[[36,40],[41,44],[45,47]],
@@ -373,7 +539,7 @@ const SIZING = {
     Hips: [[20,22],[23,25],[25,27]]
   },
   "Costume Gallery": {
-    color:"#00B0F0",
+    color:"#c6d3b5",
     sizes:["XSC","SC","IC","MC","LC","XLC","XXLC"],
     sizeLabels:["2C-3C","4C-6C","6X-7","8-10","12-14","16-18","20-22"],
     Girth:[[34,37],[38,42],[43,45],[46,49],[50,54],[55,58],[56,59]],
@@ -382,7 +548,7 @@ const SIZING = {
     Hips: [[21,22],[23,25],[26,27],[28,31],[32,34],[36,38],[39,41]]
   },
   "Layla's": {
-    color:"#FF0066",
+    color:"#dba9a1",
     sizes:["XXSC","XSC","SC","MC","LC","XLC"],
     sizeLabels:["XX-Small","X-Small","Small","Medium","Large","X-Large"],
     Girth:[[34,37],[38,41],[42,44],[45,49],[50,54],[54,57]],
@@ -392,7 +558,7 @@ const SIZING = {
   }
 };
 
-const STATUS_COLOR = { inventoried:"#70ad47", low:"#ffc000", unknown:"#f4b942" };
+const STATUS_COLOR = { inventoried:"#68775f", low:"#d58c24", unknown:"#dba9a1" };
 const SIZE_KEYS = ["XXSC","XSC","SC","IC","MC","LC"];
 
 // Populate company filter
@@ -400,12 +566,28 @@ const companies = [...new Set(COSTUMES.map(c=>c.company))].sort();
 const sel = document.getElementById("filterCompany");
 companies.forEach(c => { const o=document.createElement("option"); o.value=c; o.textContent=c; sel.appendChild(o); });
 
-function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+function switchTab(tab, selectedButton) {
+  document.querySelectorAll('.tab').forEach(t=>{
+    t.classList.remove('active');
+    t.setAttribute('aria-selected','false');
+  });
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  event.target.classList.add('active');
+  selectedButton?.classList.add('active');
+  selectedButton?.setAttribute('aria-selected','true');
   document.getElementById('panel-'+tab).classList.add('active');
-  if(tab==='charts') renderCharts();
+  if(tab==='matcher') { populateMatcherWizard(); renderOutsideOrders('matcher'); }
+  if(tab==='assignments') renderCostumeAssignments();
+  if(tab==='boys') { renderBoysCatalog(); renderOutsideOrders('boys'); }
+}
+
+function openSizingCharts() {
+  renderCharts();
+  document.getElementById('charts-modal').classList.add('open');
+}
+
+function closeSizingCharts(event) {
+  if(event && event.target.id !== 'charts-modal') return;
+  document.getElementById('charts-modal').classList.remove('open');
 }
 
 function renderGrid() {
@@ -414,15 +596,70 @@ function renderGrid() {
   const st = document.getElementById("filterStatus").value;
   const sz = document.getElementById("filterSize").value;
   const grid = document.getElementById("costume-grid");
-  let filtered = COSTUMES.filter(c => {
+  const mainCostumes=COSTUMES.filter(c=>!(/boy/i.test(c.name)));
+  let filtered = mainCostumes.filter(c => {
     if(q && !c.name.toLowerCase().includes(q) && !c.company.toLowerCase().includes(q)) return false;
     if(co && c.company !== co) return false;
     if(st && c.status !== st) return false;
     if(sz && !c[sz]) return false;
     return true;
   });
-  document.getElementById("count-label").textContent = `Showing ${filtered.length} of ${COSTUMES.length} costumes`;
+  document.getElementById("count-label").textContent = `Showing ${filtered.length} of ${mainCostumes.length} costumes`;
   grid.innerHTML = filtered.map(c => cardHTML(c)).join('');
+}
+
+function renderBoysCatalog() {
+  matcherData=matcherSource();
+  const classes=matcherData.classes.filter(classInfo=>(classInfo.students||[]).some(student=>student.isBoy));
+  document.getElementById("boys-class-grid").innerHTML=classes.length?classes.map(classInfo=>{
+    const boys=(classInfo.students||[]).filter(student=>student.isBoy);
+    const selection=costumeAssignmentForClass(classInfo);
+    const girlCostume=selection?COSTUMES.find(costume=>costume.name===selection.costumeName&&(!selection.company||costume.company===selection.company)):null;
+    const currentReservation=boysCostumeReservations[String(classInfo.id)] || null;
+    const available=girlCostume?boysCustomMatchAvailability(girlCostume,classInfo.id):{};
+    const availableSizes=SIZE_KEYS.filter(size=>Number(available[size]||0)>0);
+    const reservationMatches=currentReservation&&girlCostume&&currentReservation.costumeName===girlCostume.name&&(!currentReservation.company||currentReservation.company===girlCostume.company);
+    const reserveMarkup=girlCostume&&availableSizes.length?`<div class="boys-custom-reserve ${reservationMatches?"is-reserved":""}"><strong>${reservationMatches?`Reserved ${htmlEscape(currentReservation.size)} to custom match`:`Reserve one to custom match?`}</strong><select aria-label="Choose a girls costume size to reserve">${availableSizes.map(size=>`<option value="${htmlEscape(size)}" ${reservationMatches&&currentReservation.size===size?"selected":""}>${htmlEscape(size)} · ${available[size]} available</option>`).join("")}</select><button type="button" onclick="reserveBoysCustomMatch(this,'${htmlEscape(classInfo.id)}')">${reservationMatches?"Change":"Reserve"}</button></div>`:"";
+    const dancerMarkup=boys.map(student=>{const initials=String(student.name||"B").split(/\s+/).map(part=>part[0]).join("").slice(0,2).toUpperCase();return `<div class="boys-dancer"><span class="boys-dancer-avatar">${student.photo?`<img src="${htmlEscape(student.photo)}" alt="">`:htmlEscape(initials)}</span><span>${htmlEscape(student.name)}</span></div>`}).join("");
+    return `<article class="boys-class-card"><div><h3>${htmlEscape(classInfo.schoolName)} · ${htmlEscape(classInfo.name)}</h3><p>${htmlEscape(classInfo.teacherName)}${classInfo.day?` · ${htmlEscape(classInfo.day)}`:""}${classInfo.time?` · ${htmlEscape(classInfo.time)}`:""}${classInfo.showTime?` · ${htmlEscape(classInfo.showTime)}`:""}</p></div><div class="boys-girl-costume">${girlCostume?.img?`<img src="${IMAGE_BASE}${encodeURIComponent(girlCostume.img)}" alt="${htmlEscape(girlCostume.name)}">`:`<span class="boys-dancer-avatar">—</span>`}<div><small>Girls’ assigned costume</small><strong>${htmlEscape(selection?.costumeName||"Not assigned yet")}</strong>${selection?.company?`<small>${htmlEscape(selection.company)}</small>`:""}</div></div>${reserveMarkup}<div><strong>${boys.length} boy${boys.length===1?"":"s"}</strong><div class="boys-dancers">${dancerMarkup}</div></div></article>`;
+  }).join(""):'<p class="no-results" style="grid-column:1/-1">No active classes currently include boys.</p>';
+  const classSelect=document.getElementById("boys-match-class");
+  const previous=classSelect.value;
+  classSelect.innerHTML=classes.map(classInfo=>`<option value="${htmlEscape(classInfo.id)}">${htmlEscape(classInfo.schoolName)} · ${htmlEscape(classInfo.name)}</option>`).join("");
+  if(classes.some(classInfo=>String(classInfo.id)===previous)) classSelect.value=previous;
+  classSelect.disabled=!classes.length;
+  renderBoysCostumeMatches();
+}
+
+function renderBoysCostumeMatches() {
+  const grid=document.getElementById("boys-costume-grid");
+  const classInfo=matcherData.classes.find(item=>String(item.id)===document.getElementById("boys-match-class")?.value);
+  if(!classInfo) { grid.innerHTML='<p class="no-results" style="grid-column:1/-1">Choose a class with boys to see matching costumes.</p>'; return; }
+  const boys=(classInfo.students||[]).filter(student=>student.isBoy);
+  const measured=boys.filter(hasPrimaryMeasurements);
+  if(!measured.length) { grid.innerHTML='<p class="no-results" style="grid-column:1/-1">Enter the boys’ measurements in Teacher Tools to see which boys costumes fit.</p>'; return; }
+  const matches=COSTUMES.filter(costume=>/boy/i.test(costume.name)).map(costume=>{const available=costumeAvailableBySize(costume,classInfo);return {costume,available,match:costumeClassMatch(costume,boys,available)}}).filter(item=>item.match).sort((a,b)=>Number(b.match.complete)-Number(a.match.complete)||b.costume.total-a.costume.total);
+  if(!matches.length) { grid.innerHTML='<p class="no-results" style="grid-column:1/-1">No boys costumes currently fit this class in the quantities available.</p>'; return; }
+  grid.innerHTML=matches.map(({costume,available,match})=>{
+    const stockedSizes=SIZE_KEYS.filter(size=>Number(costume[size]||0)>0);
+    const totalAvailable=stockedSizes.reduce((sum,size)=>sum+Number(available[size]||0),0);
+    const totalNeeded=Object.values(match.sizeNeeds).reduce((sum,count)=>sum+Number(count||0),0);
+    const bubble=(value,type)=>`<span class="size-number ${type} ${Number(value)===0?"is-zero":""}">${value}</span>`;
+    return `<article class="costume-match-card ${match.complete?"is-ready":""}">${costume.img?`<img src="${IMAGE_BASE}${encodeURIComponent(costume.img)}" alt="${htmlEscape(costume.name)}">`:""}<div class="costume-match-copy"><div class="costume-match-heading"><span><h4>${htmlEscape(costume.name)}</h4><small>${htmlEscape(costume.company)}</small></span><span class="match-badge ${match.complete?"":"partial"}">${match.complete?"Class Ready":"Preliminary"}</span></div><table class="costume-size-table"><thead><tr><th>Size</th><th>Available</th><th>Needed</th><th>Leaves</th></tr></thead><tbody>${stockedSizes.map(size=>{const availableCount=Number(available[size]||0),needed=Number(match.sizeNeeds[size]||0);return `<tr><td><strong>${htmlEscape(size)}</strong></td><td>${bubble(availableCount,"inventory")}</td><td>${bubble(needed,"needed")}</td><td>${bubble(availableCount-needed,"leaves")}</td></tr>`}).join("")}</tbody><tfoot><tr><td>Total</td><td>${bubble(totalAvailable,"inventory")}</td><td>${bubble(totalNeeded,"needed")}</td><td>${bubble(totalAvailable-totalNeeded,"leaves")}</td></tr></tfoot></table></div></article>`;
+  }).join("");
+}
+
+function reserveBoysCustomMatch(button,classId) {
+  const classInfo=matcherData.classes.find(item=>String(item.id)===String(classId));
+  const selection=classInfo?costumeAssignmentForClass(classInfo):null;
+  const size=button.closest(".boys-custom-reserve")?.querySelector("select")?.value;
+  if(!classInfo||!selection||!size) return;
+  const costume=COSTUMES.find(item=>item.name===selection.costumeName&&(!selection.company||item.company===selection.company));
+  if(!costume || Number(boysCustomMatchAvailability(costume,classId)[size]||0)<1) { window.alert("That size is no longer available to reserve."); renderBoysCatalog(); return; }
+  boysCostumeReservations[String(classId)]={costumeName:costume.name,company:costume.company,size,reservedAt:new Date().toISOString()};
+  localStorage.setItem(BOYS_RESERVATION_STORAGE_KEY,JSON.stringify(boysCostumeReservations));
+  renderBoysCatalog();
+  renderGrid();
 }
 
 function cardHTML(c) {
@@ -430,17 +667,46 @@ function cardHTML(c) {
   const imgHTML = c.img
     ? `<img src="${IMAGE_BASE}${encodeURIComponent(c.img)}" alt="${c.name}" onerror="this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;height:100%;color:#aaa;font-size:0.8rem;\\'>No Image</div>'">`
     : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#aaa;font-size:0.78rem;text-align:center;padding:8px;">📷 Tap to assign image</div>`;
-  const sizes = SIZE_KEYS.filter(s=>c[s]).map(s=>`<span class="size-chip">${s}:${c[s]}</span>`).join('');
+  const usage=inventoryUsageForCostume(c);
+  const stockedSizes=SIZE_KEYS.filter(size=>Number(c[size]||0)>0);
+  const numberBubble=(value,className,style="")=>`<span class="inventory-qty ${className} ${Number(value)===0?"is-zero":""}"${style?` style="${style}"`:""}>${value}</span>`;
+  const hasAssignments=usage.teachers.length>0;
+  const sizeTable=`<table class="inventory-size-table"><thead><tr><th>Size</th><th>Inventory</th>${usage.teachers.map(teacher=>`<th>${htmlEscape(teacher.name.replace(/^Ms\.\s*/i,""))}</th>`).join("")}${hasAssignments?"<th>Available</th>":""}</tr></thead><tbody>${stockedSizes.map(size=>{const inventory=Number(c[size]||0);const used=usage.teachers.reduce((sum,teacher)=>sum+Number(teacher.sizes[size]||0),0);return `<tr><td>${htmlEscape(size)}</td><td>${numberBubble(inventory,"inventory")}</td>${usage.teachers.map(teacher=>`<td>${numberBubble(teacher.sizes[size]||0,"teacher-use",`background:${teacher.color}`)}</td>`).join("")}${hasAssignments?`<td>${numberBubble(Math.max(0,inventory-used),"available")}</td>`:""}</tr>`}).join("")}</tbody><tfoot><tr><td>Total</td><td>${numberBubble(stockedSizes.reduce((sum,size)=>sum+Number(c[size]||0),0),"inventory")}</td>${usage.teachers.map(teacher=>`<td>${numberBubble(Object.values(teacher.sizes).reduce((sum,count)=>sum+Number(count||0),0),"teacher-use",`background:${teacher.color}`)}</td>`).join("")}${hasAssignments?`<td>${numberBubble(Math.max(0,stockedSizes.reduce((sum,size)=>sum+Number(c[size]||0),0)-usage.totalUsed),"available")}</td>`:""}</tr></tfoot></table>`;
   return `<div class="card" onclick="openModal(${COSTUMES.indexOf(c)})">
     <div class="status-bar" style="background:${sColor}"></div>
     <div class="card-img">${imgHTML}</div>
     <div class="card-body">
       <div class="card-name"><span class="total-badge">${c.total}</span>${c.name}</div>
       <div class="card-company">${c.company}</div>
-      <div class="card-sizes">${sizes}</div>
+      ${sizeTable}
       ${c.location ? `<div class="card-location">📍 ${c.location}</div>` : ''}
     </div>
   </div>`;
+}
+
+function inventoryUsageForCostume(costume) {
+  const data=matcherSource();
+  const teacherMap=new Map(data.teachers.map(teacher=>[String(teacher.id),teacher]));
+  const usageByTeacher=new Map();
+  data.classes.forEach(classInfo=>{
+    const selection=selectedCostumesByClass[String(classInfo.id)] || classInfo.costumeSelection || null;
+    if(!selection || selection.costumeName!==costume.name || (selection.company && selection.company!==costume.company)) return;
+    const teacher=teacherMap.get(String(classInfo.teacherId)) || {id:String(classInfo.teacherId||"unassigned"),name:classInfo.teacherName||"Unassigned",color:"#dba9a1"};
+    if(!usageByTeacher.has(String(teacher.id))) usageByTeacher.set(String(teacher.id),{...teacher,sizes:{}});
+    const record=usageByTeacher.get(String(teacher.id));
+    Object.entries(selection.sizeNeeds || {}).forEach(([size,count])=>{ record.sizes[size]=(record.sizes[size]||0)+Number(count||0); });
+  });
+  Object.entries(boysCostumeReservations).forEach(([classId,reservation])=>{
+    if(!reservation || reservation.costumeName!==costume.name || (reservation.company&&reservation.company!==costume.company)) return;
+    const classInfo=data.classes.find(item=>String(item.id)===String(classId));
+    if(!classInfo) return;
+    const teacher=teacherMap.get(String(classInfo.teacherId)) || {id:String(classInfo.teacherId||"unassigned"),name:classInfo.teacherName||"Unassigned",color:"#dba9a1"};
+    if(!usageByTeacher.has(String(teacher.id))) usageByTeacher.set(String(teacher.id),{...teacher,sizes:{}});
+    const record=usageByTeacher.get(String(teacher.id));
+    record.sizes[reservation.size]=(record.sizes[reservation.size]||0)+1;
+  });
+  const teachers=[...usageByTeacher.values()].sort((a,b)=>a.name.localeCompare(b.name));
+  return {teachers,totalUsed:teachers.reduce((total,teacher)=>total+Object.values(teacher.sizes).reduce((sum,count)=>sum+Number(count||0),0),0)};
 }
 
 function openModal(idx) {
@@ -466,77 +732,380 @@ function closeModal(e) {
     document.getElementById("modal").classList.remove("open");
 }
 
-function findSize(company, girth, chest, waist, hips) {
-  const chart = SIZING[company];
-  if(!chart) return null;
-  let best = null; let bestScore = 999;
-  chart.sizes.forEach((sz,i) => {
-    let score = 0; let checks = 0;
-    const check = (val, range) => { if(val && range) { checks++; const mid=(range[0]+range[1])/2; score+=Math.abs(val-mid); } };
-    check(girth, chart.Girth?.[i]);
-    check(chest, chart.Chest?.[i]);
-    check(waist, chart.Waist?.[i]);
-    check(hips,  chart.Hips?.[i]);
-    // Also check if measurements fit within range
-    const inRange = (val, range) => !val || !range || (val >= range[0]-1 && val <= range[1]+1);
-    const girthOk = inRange(girth, chart.Girth?.[i]);
-    const chestOk = inRange(chest, chart.Chest?.[i]);
-    const waistOk = inRange(waist, chart.Waist?.[i]);
-    const hipsOk  = inRange(hips,  chart.Hips?.[i]);
-    if(girthOk && chestOk && waistOk && hipsOk && checks>0 && score<bestScore) {
-      best=sz; bestScore=score;
+const MATCHER_PREVIEW_DATA = {
+  teachers:[{id:"preview-teacher",name:"Ms. Lexi",color:"#ec6b9b"}],
+  classes:[{id:"preview-class",teacherId:"preview-teacher",teacherName:"Ms. Lexi",schoolName:"Primrose Rowlett",name:"4s",day:"Thursday",time:"10:15 AM",showTime:"1:00 PM Show",performanceType:"ballet",combinedPerformanceId:"",students:[
+    {id:"preview-1",name:"Adeline",measurements:{girth:44,hips:27,waist:24,chest:26}},
+    {id:"preview-2",name:"Harper",measurements:{girth:43,hips:26,waist:23,chest:25}},
+    {id:"preview-3",name:"Maesyn",measurements:{girth:46,hips:29,waist:24,chest:27}},
+    {id:"preview-4",name:"Riley",measurements:{girth:45,hips:28,waist:24,chest:26}},
+    {id:"preview-boy",name:"Noah",isBoy:true,measurements:{girth:40,hips:24,waist:22,chest:23}}
+  ]}]
+};
+let matcherData = {teachers:[],classes:[]};
+const COSTUME_SELECTION_STORAGE_KEY="dt-costume-selections-v1";
+let selectedCostumesByClass=(()=>{ try { return JSON.parse(localStorage.getItem(COSTUME_SELECTION_STORAGE_KEY)||"{}"); } catch(error) { return {}; } })();
+const BOYS_RESERVATION_STORAGE_KEY="dt-boys-costume-reservations-v1";
+let boysCostumeReservations=(()=>{ try { return JSON.parse(localStorage.getItem(BOYS_RESERVATION_STORAGE_KEY)||"{}"); } catch(error) { return {}; } })();
+const OUTSIDE_ORDER_STORAGE_KEY="dt-costume-outside-orders-v1";
+let outsideCostumeOrders=(()=>{ try { return JSON.parse(localStorage.getItem(OUTSIDE_ORDER_STORAGE_KEY)||"[]"); } catch(error) { return []; } })();
+let outsideOrderMode="matcher";
+
+const htmlEscape = (value) => String(value ?? "").replace(/[&<>"']/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[character]);
+const dancerMeasurements = (student) => student?.measurements || student?.additionalInformation?.costume_measurements || {};
+const hasPrimaryMeasurements = (student) => Number(dancerMeasurements(student).girth) > 0;
+const previewMeasurements = (index) => [
+  {girth:39,hips:24,waist:22,chest:23},
+  {girth:40,hips:25,waist:22,chest:23},
+  {girth:41,hips:25,waist:23,chest:24},
+  {girth:42,hips:26,waist:23,chest:24},
+  {girth:43,hips:27,waist:24,chest:25},
+  {girth:44,hips:28,waist:24,chest:26},
+  {girth:45,hips:29,waist:25,chest:27},
+  {girth:46,hips:29,waist:25,chest:27}
+][index % 8];
+const matcherSource = () => {
+  try {
+    if(window.parent !== window && typeof window.parent.getCostumeMatcherData === "function") return window.parent.getCostumeMatcherData();
+  } catch(error) {}
+  try {
+    const saved = JSON.parse(localStorage.getItem("dt-teacher-tools-prototype-v1") || "null");
+    if(Array.isArray(saved?.rosterClasses) && Array.isArray(saved?.teachers)) {
+      const teacherNames = new Map(saved.teachers.map(teacher => [String(teacher.id), teacher.displayName || [teacher.firstName,teacher.lastName].filter(Boolean).join(" ") || "Teacher"]));
+      const classes = saved.rosterClasses.filter(item => item.sourceActive !== false).map(item => ({
+        id:item.id, teacherId:String(item.teacherId || ""), teacherName:teacherNames.get(String(item.teacherId || "")) || "Unassigned", schoolName:item.schoolName || "School", name:item.name || "Class", day:item.day || "", time:item.time || "", showTime:item.showTime || item.recitalShowTime || item.performanceTime || "", performanceType:String(item.recitalPerformance || item.performanceType || item.performanceRequirement || "either").toLowerCase(), combinedPerformanceId:String(item.combinedPerformanceId || item.combinedClassGroupId || item.recitalCombinedGroupId || item.performanceGroupId || ""), combinedPerformanceName:item.combinedPerformanceName || item.combinedClassName || item.recitalCombinedName || "", costumeSelection:item.costumeSelection || null,
+        students:(item.students || []).filter(student => student.status === "enrolled").map((student,index) => ({id:student.id,name:[student.firstName,student.lastName].filter(Boolean).join(" ") || "Dancer",photo:student.photo || student.photoUrl || "",isBoy:["male","boy","m"].includes(String(student.gender || "").trim().toLowerCase()),measurements:hasPrimaryMeasurements(student) ? dancerMeasurements(student) : previewMeasurements(index)}))
+      }));
+      return {teachers:saved.teachers.map(teacher => ({id:String(teacher.id),name:teacherNames.get(String(teacher.id)),color:teacher.color || "#dba9a1"})).filter(teacher => classes.some(item => item.teacherId === teacher.id)),classes};
     }
+  } catch(error) {}
+  return MATCHER_PREVIEW_DATA;
+};
+
+const inventorySizeKey = (company,size) => ({
+  "T":null,"2T":null,"T/XS":"XSC","S":"SC","I":"IC","M":"MC","L":"LC","XL":null,
+  "ISC":"IC","IMC":"MC","XLC":null,"XXLC":null,"PA":null
+}[size] ?? size);
+const sizingChartsForCostume = (costume) => costume.company === "Discount Dance"
+  ? ["Discount Dance (Toddler)","Discount Dance (No Toddler)"]
+  : SIZING[costume.company] ? [costume.company] : [];
+
+function findSizeDetailed(company, measurements) {
+  const chart = SIZING[company];
+  const girth = Number(measurements?.girth) || null;
+  if(!chart || !girth) return null;
+  let best = null;
+  chart.sizes.forEach((size,index) => {
+    const tests = [
+      {value:girth,range:chart.Girth?.[index],weight:10,tolerance:.5,required:true},
+      {value:Number(measurements?.hips)||null,range:chart.Hips?.[index],weight:4,tolerance:1},
+      {value:Number(measurements?.waist)||null,range:chart.Waist?.[index],weight:2,tolerance:1},
+      {value:Number(measurements?.chest)||null,range:chart.Chest?.[index],weight:1,tolerance:1}
+    ];
+    if(tests.some(test => test.required && !test.range)) return;
+    if(tests.some(test => test.value && test.range && (test.value < test.range[0]-test.tolerance || test.value > test.range[1]+test.tolerance))) return;
+    const score = tests.reduce((sum,test) => {
+      if(!test.value || !test.range) return sum;
+      const midpoint=(test.range[0]+test.range[1])/2;
+      const width=Math.max(1,test.range[1]-test.range[0]);
+      return sum + (Math.abs(test.value-midpoint)/width)*test.weight;
+    },0);
+    if(!best || score < best.score) best={size,inventorySize:inventorySizeKey(company,size),score,chart:company};
   });
   return best;
 }
 
-function matchSingle() {
-  const name  = document.getElementById("s-name").value || "Student";
-  const girth = parseFloat(document.getElementById("s-girth").value)||null;
-  const chest = parseFloat(document.getElementById("s-chest").value)||null;
-  const waist = parseFloat(document.getElementById("s-waist").value)||null;
-  const hips  = parseFloat(document.getElementById("s-hips").value)||null;
-  const co    = document.getElementById("s-company").value;
-  showResults([{name,girth,chest,waist,hips}], co);
-}
-
-function matchRoster() {
-  const text = document.getElementById("roster-text").value;
-  const co   = document.getElementById("s-company").value;
-  const students = text.trim().split('\n').map(line => {
-    const parts = line.split(',').map(s=>s.trim());
-    return { name: parts[0]||"Student", girth:parseFloat(parts[1])||null,
-             chest:parseFloat(parts[2])||null, waist:parseFloat(parts[3])||null, hips:parseFloat(parts[4])||null };
-  }).filter(s=>s.name);
-  showResults(students, co);
-}
-
-function showResults(students, filterCompany) {
-  const div = document.getElementById("match-results");
-  if(!students.length) { div.innerHTML='<p class="no-results">No students found.</p>'; return; }
-  const companies = filterCompany ? [filterCompany] : Object.keys(SIZING);
-  let html = '';
-  students.forEach(s => {
-    html += `<div class="result-card"><h4>👧 ${s.name}</h4>`;
-    html += `<p style="font-size:0.78rem;color:#666;margin-bottom:6px;">Girth:${s.girth||'?'}" · Chest:${s.chest||'?'}" · Waist:${s.waist||'?'}" · Hips:${s.hips||'?'}"</p>`;
-    companies.forEach(co => {
-      const sz = findSize(co, s.girth, s.chest, s.waist, s.hips);
-      if(sz) {
-        // Find matching costumes
-        const matches = COSTUMES.filter(c => {
-          if(c.status==='low') return false;
-          const companyMatch = c.company===co || (co.includes('Discount Dance') && c.company==='Discount Dance');
-          return companyMatch && c[sz] && c[sz]>0;
-        });
-        html += `<div style="margin-bottom:6px;"><span class="size-result-chip">${co}: ${sz}</span>`;
-        if(matches.length) html += ` <span style="font-size:0.75rem;color:#444;">→ ${matches.map(m=>m.name).join(', ')}</span>`;
-        else html += ` <span style="font-size:0.75rem;color:#999;">No available costumes in this size</span>`;
-        html += '</div>';
-      }
-    });
-    html += '</div>';
+function costumeAvailableBySize(costume,selectedClass) {
+  const available=Object.fromEntries(SIZE_KEYS.map(size=>[size,Number(costume[size]||0)]));
+  matcherData.classes.forEach(classInfo=>{
+    if(String(classInfo.id)===String(selectedClass?.id)) return;
+    const selection=costumeAssignmentForClass(classInfo);
+    if(!selection || selection.costumeName!==costume.name || (selection.company && selection.company!==costume.company)) return;
+    Object.entries(selection.sizeNeeds||{}).forEach(([size,count])=>{ available[size]=Math.max(0,Number(available[size]||0)-Number(count||0)); });
   });
-  div.innerHTML = html || '<p class="no-results">Could not determine sizes — check measurements.</p>';
+  Object.values(boysCostumeReservations).forEach(reservation=>{
+    if(!reservation || reservation.costumeName!==costume.name || (reservation.company&&reservation.company!==costume.company)) return;
+    available[reservation.size]=Math.max(0,Number(available[reservation.size]||0)-1);
+  });
+  return available;
+}
+
+function boysCustomMatchAvailability(costume,classId) {
+  const available=Object.fromEntries(SIZE_KEYS.map(size=>[size,Number(costume[size]||0)]));
+  matcherData.classes.forEach(classInfo=>{
+    const selection=costumeAssignmentForClass(classInfo);
+    if(!selection || selection.costumeName!==costume.name || (selection.company&&selection.company!==costume.company)) return;
+    Object.entries(selection.sizeNeeds||{}).forEach(([size,count])=>{available[size]=Math.max(0,Number(available[size]||0)-Number(count||0))});
+  });
+  Object.entries(boysCostumeReservations).forEach(([reservedClassId,reservation])=>{
+    if(String(reservedClassId)===String(classId) || !reservation || reservation.costumeName!==costume.name || (reservation.company&&reservation.company!==costume.company)) return;
+    available[reservation.size]=Math.max(0,Number(available[reservation.size]||0)-1);
+  });
+  return available;
+}
+
+function costumeClassMatch(costume,students,availableBySize=null) {
+  const measured=students.filter(hasPrimaryMeasurements);
+  if(!measured.length) return null;
+  const chartNames=sizingChartsForCostume(costume);
+  if(!chartNames.length) return null;
+  const sizeNeeds={};
+  const assignments=[];
+  for(const student of measured) {
+    const choices=chartNames.map(chart => findSizeDetailed(chart,dancerMeasurements(student))).filter(choice => choice?.inventorySize && Number((availableBySize||costume)[choice.inventorySize]||0) > 0).sort((a,b)=>a.score-b.score);
+    const choice=choices[0];
+    if(!choice) return null;
+    sizeNeeds[choice.inventorySize]=(sizeNeeds[choice.inventorySize]||0)+1;
+    assignments.push({studentId:student.id,name:student.name,size:choice.inventorySize,chart:choice.chart});
+  }
+  const enough=Object.entries(sizeNeeds).every(([size,count]) => Number((availableBySize||costume)[size]||0) >= count);
+  if(!enough) return null;
+  return {sizeNeeds,assignments,measuredCount:measured.length,complete:measured.length===students.length};
+}
+
+function selectedMatcherClass() {
+  return matcherData.classes.find(item => String(item.id) === document.getElementById("matcher-class")?.value);
+}
+
+function costumeAssignmentForClass(classInfo) {
+  return selectedCostumesByClass[String(classInfo.id)] || classInfo.costumeSelection || null;
+}
+
+function costumeIsReservedForShow(costume, selectedClass) {
+  if(!selectedClass?.showTime) return false;
+  const selectedCombinedId=String(selectedClass.combinedPerformanceId || "");
+  return matcherData.classes.some(classInfo=>{
+    if(String(classInfo.id)===String(selectedClass.id) || classInfo.showTime!==selectedClass.showTime) return false;
+    const assignment=costumeAssignmentForClass(classInfo);
+    if(!assignment || assignment.costumeName!==costume.name || (assignment.company && assignment.company!==costume.company)) return false;
+    const otherCombinedId=String(classInfo.combinedPerformanceId || "");
+    return !selectedCombinedId || !otherCombinedId || selectedCombinedId!==otherCombinedId;
+  });
+}
+
+function renderMatcherResults() {
+  const selectedClass=selectedMatcherClass();
+  const summary=document.getElementById("matcher-class-summary");
+  const results=document.getElementById("match-results");
+  if(!selectedClass) {
+    summary.hidden=true;
+    results.innerHTML='<p class="no-results">Choose a teacher, school, and class to see matching costumes.</p>';
+    return;
+  }
+  const allStudents=selectedClass.students || [];
+  const boys=allStudents.filter(student=>student.isBoy);
+  const students=allStudents.filter(student=>!student.isBoy);
+  const measured=students.filter(hasPrimaryMeasurements);
+  summary.hidden=false;
+  const selectedCostume=costumeAssignmentForClass(selectedClass);
+  summary.innerHTML=`<div><h3>${htmlEscape(selectedClass.schoolName)} · ${htmlEscape(selectedClass.name)}</h3><p>${htmlEscape(selectedClass.teacherName)}${selectedClass.day ? ` · ${htmlEscape(selectedClass.day)}` : ""}${selectedClass.time ? ` · ${htmlEscape(selectedClass.time)}` : ""} · ${allStudents.length} dancers</p></div><span class="measurement-progress ${measured.length===students.length&&students.length ? "complete" : ""}">${measured.length} of ${students.length} girls measured</span>${selectedCostume ? `<div class="matcher-assignment">Selected costume: ${htmlEscape(selectedCostume.costumeName)} · ${htmlEscape(selectedCostume.company)}</div>` : ""}<div class="matcher-dancer-list" style="grid-column:1/-1">${boys.map(student=>`<div class="matcher-dancer is-boy"><strong>${htmlEscape(student.name)}</strong><small>Boys costume handled separately</small></div>`).join("")}${students.map(student => { const m=dancerMeasurements(student); return `<div class="matcher-dancer ${hasPrimaryMeasurements(student)?"":"missing"}"><strong>${htmlEscape(student.name)}</strong><small>${hasPrimaryMeasurements(student) ? `Girth ${htmlEscape(m.girth)}\" · Hips ${htmlEscape(m.hips || "—")}\" · Waist ${htmlEscape(m.waist || "—")}\"` : "Girth measurement needed"}</small></div>`; }).join("")}</div>`;
+  if(!students.length) { results.innerHTML=`<p class="no-results">${boys.length?"This class only has boys. Use the Boys toggle for their separate costume process.":"This class does not have enrolled dancers yet."}</p>`; return; }
+  if(!measured.length) { results.innerHTML='<p class="no-results">No girth measurements have been entered for this class yet. Enter them in Teacher Tools to begin matching.</p>'; return; }
+  const matches=COSTUMES.filter(costume=>!(/boy/i.test(costume.name))).map(costume => {const available=costumeAvailableBySize(costume,selectedClass);const reserved=costumeIsReservedForShow(costume,selectedClass);return {costume,available,reserved,match:costumeClassMatch(costume,students,available)||(reserved?costumeClassMatch(costume,students):null)}}).filter(item=>item.match).sort((a,b)=>Number(a.reserved)-Number(b.reserved)||Number(b.match.complete)-Number(a.match.complete)||b.costume.total-a.costume.total);
+  const reservedCount=matches.filter(item=>item.reserved).length;
+  if(!matches.length) { results.innerHTML='<p class="no-results">No stocked costumes fit the measured dancers in this class yet.</p>'; return; }
+  results.innerHTML=`${reservedCount?`<div class="measurement-note" style="margin-bottom:12px">${reservedCount} costume${reservedCount===1?" is":"s are"} already being used in ${htmlEscape(selectedClass.showTime)} and ${reservedCount===1?"is":"are"} shown in gray. Combined classes performing together may share a costume.</div>`:""}${measured.length<students.length ? `<div class="measurement-note" style="margin-bottom:12px">${students.length-measured.length} dancer${students.length-measured.length===1?" is":"s are"} missing a girth measurement, so these are preliminary matches.</div>`:""}<div class="costume-match-grid">${matches.map(({costume,available,match,reserved}) => {
+    const stockedSizes=SIZE_KEYS.filter(size=>Number(costume[size]||0)>0);
+    const totalNeeded=Object.values(match.sizeNeeds).reduce((sum,count)=>sum+count,0);
+    const totalInventory=stockedSizes.reduce((sum,size)=>sum+Number(available[size]||0),0);
+    const numberBubble=(value,type)=>`<span class="size-number ${type} ${Number(value)===0?"is-zero":""}">${value}</span>`;
+    const totalLeaves=totalInventory-totalNeeded;
+    const isLastResort=totalLeaves>=3&&totalLeaves<=6;
+    const costumeIndex=COSTUMES.indexOf(costume);
+    return `<article class="costume-match-card ${match.complete?"is-ready":""} ${isLastResort?"is-stranded":""} ${reserved?"is-show-reserved":""}" role="button" tabindex="0" aria-disabled="${reserved?"true":"false"}" onclick="openCostumeSelection(${costumeIndex})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCostumeSelection(${costumeIndex})}">${reserved?`<div class="show-reserved-banner">BEING USED IN THIS SHOW</div>`:""}${costume.img ? `<img src="${IMAGE_BASE}${encodeURIComponent(costume.img)}" alt="${htmlEscape(costume.name)}">` : ""}<div class="costume-match-copy"><div class="costume-match-heading"><span><h4>${htmlEscape(costume.name)}</h4><small>${htmlEscape(costume.company)}</small></span><span class="match-badge ${isLastResort?"last-resort":match.complete?"":"partial"}">${isLastResort?"Last Resort":match.complete?"Class Ready":"Preliminary"}</span></div><table class="costume-size-table"><thead><tr><th>Size</th><th>Available</th><th>Needed</th><th>Leaves</th></tr></thead><tbody>${stockedSizes.map(size=>{ const inventory=Number(available[size]||0); const needed=Number(match.sizeNeeds[size]||0); const leaves=inventory-needed; return `<tr><td><strong>${htmlEscape(size)}</strong></td><td>${numberBubble(inventory,"inventory")}</td><td>${numberBubble(needed,"needed")}</td><td>${numberBubble(leaves,"leaves")}</td></tr>`; }).join("")}</tbody><tfoot><tr><td>Total</td><td>${numberBubble(totalInventory,"inventory")}</td><td>${numberBubble(totalNeeded,"needed")}</td><td>${numberBubble(totalLeaves,"leaves")}</td></tr></tfoot></table><div class="costume-match-meta"><span>${htmlEscape(costume.location || "Location not entered")}</span></div></div></article>`;
+  }).join("")}</div>`;
+}
+
+let pendingCostumeSelection=null;
+function openCostumeSelection(costumeIndex) {
+  const selectedClass=selectedMatcherClass();
+  const costume=COSTUMES[costumeIndex];
+  if(!selectedClass||!costume) return;
+  if(costumeIsReservedForShow(costume,selectedClass)) {
+    window.alert(`${costume.name} is already assigned to another class in ${selectedClass.showTime}. A costume may appear only once per show unless the classes are linked as one combined performance.`);
+    renderMatcherResults();
+    return;
+  }
+  const available=costumeAvailableBySize(costume,selectedClass);
+  const costumeStudents=(selectedClass.students||[]).filter(student=>!student.isBoy);
+  const match=costumeClassMatch(costume,costumeStudents,available);
+  if(!match) return;
+  const stockedSizes=SIZE_KEYS.filter(size=>Number(costume[size]||0)>0);
+  const totalInventory=stockedSizes.reduce((sum,size)=>sum+Number(available[size]||0),0);
+  const totalNeeded=Object.values(match.sizeNeeds).reduce((sum,count)=>sum+count,0);
+  const totalLeaves=totalInventory-totalNeeded;
+  const isLastResort=totalLeaves>=3&&totalLeaves<=6;
+  const sortedAssignments=[...match.assignments].sort((a,b)=>{
+    const sizeDifference=SIZE_KEYS.indexOf(a.size)-SIZE_KEYS.indexOf(b.size);
+    return sizeDifference || a.name.localeCompare(b.name);
+  });
+  pendingCostumeSelection={classId:String(selectedClass.id),costumeName:costume.name,company:costume.company,sizeNeeds:match.sizeNeeds,assignments:match.assignments,totalLeaves,showTime:selectedClass.showTime || "",combinedPerformanceId:selectedClass.combinedPerformanceId || "",selectedAt:new Date().toISOString()};
+  document.getElementById("selection-content").innerHTML=`<div class="selection-head">${costume.img?`<img src="${IMAGE_BASE}${encodeURIComponent(costume.img)}" alt="${htmlEscape(costume.name)}">`:""}<div><h2 id="selection-title">${htmlEscape(costume.name)}</h2><p>${htmlEscape(costume.company)}</p><p><strong>${htmlEscape(selectedClass.schoolName)} · ${htmlEscape(selectedClass.name)}</strong></p></div></div>${isLastResort?`<div class="selection-warning">Last Resort: this assignment leaves only ${totalLeaves} costumes total, which is unlikely to cover another class.</div>`:""}<h3 style="color:#944a53;margin:8px 0">Dancer Sizes</h3><div class="selection-dancers">${sortedAssignments.map(item=>`<div class="selection-dancer"><span>${htmlEscape(item.name)}</span><strong>${htmlEscape(item.size)}</strong></div>`).join("")}</div><table class="costume-size-table"><thead><tr><th>Size</th><th>Available</th><th>Needed</th><th>Leaves</th></tr></thead><tbody>${stockedSizes.map(size=>{const inventory=Number(available[size]||0);const needed=Number(match.sizeNeeds[size]||0);return `<tr><td><strong>${htmlEscape(size)}</strong></td><td><span class="size-number inventory">${inventory}</span></td><td><span class="size-number needed ${needed===0?"is-zero":""}">${needed}</span></td><td><span class="size-number leaves ${inventory-needed===0?"is-zero":""}">${inventory-needed}</span></td></tr>`}).join("")}</tbody><tfoot><tr><td>Total</td><td><span class="size-number inventory">${totalInventory}</span></td><td><span class="size-number needed">${totalNeeded}</span></td><td><span class="size-number leaves ${totalLeaves===0?"is-zero":""}">${totalLeaves}</span></td></tr></tfoot></table><div class="selection-actions"><button class="keep-looking" type="button" onclick="closeCostumeSelection()">Keep Looking</button><button class="assign-costume" type="button" onclick="confirmCostumeSelection()">Assign Costume</button></div>`;
+  document.getElementById("selection-modal").classList.add("open");
+}
+function closeCostumeSelection(event) {
+  if(event&&event.target.id!=="selection-modal") return;
+  document.getElementById("selection-modal").classList.remove("open");
+}
+function confirmCostumeSelection() {
+  if(!pendingCostumeSelection) return;
+  selectedCostumesByClass[pendingCostumeSelection.classId]=pendingCostumeSelection;
+  localStorage.setItem(COSTUME_SELECTION_STORAGE_KEY,JSON.stringify(selectedCostumesByClass));
+  try { if(window.parent!==window&&typeof window.parent.saveCostumeMatcherSelection==="function") window.parent.saveCostumeMatcherSelection(pendingCostumeSelection); } catch(error) {}
+  closeCostumeSelection();
+  renderMatcherResults();
+  pendingCostumeSelection=null;
+}
+
+function renderCostumeAssignments() {
+  matcherData=matcherSource();
+  const grid=document.getElementById("assignment-grid");
+  const teacherFilter=document.getElementById("assignment-teacher-filter");
+  const schoolFilter=document.getElementById("assignment-school-filter");
+  const showFilter=document.getElementById("assignment-show-filter");
+  const typeFilter=document.getElementById("assignment-type-filter");
+  const selectedTeacher=teacherFilter.value;
+  const selectedSchool=schoolFilter.value;
+  const selectedShow=showFilter.value;
+  const selectedType=typeFilter.value;
+  const allAssigned=matcherData.classes.map(item=>({
+    classInfo:item,
+    selection:selectedCostumesByClass[String(item.id)] || item.costumeSelection || null
+  })).filter(item=>item.selection?.costumeName);
+  const setFilterOptions=(select,values,allLabel,selected)=>{
+    select.innerHTML=`<option value="">${allLabel}</option>${values.map(value=>`<option value="${htmlEscape(value)}">${htmlEscape(value)}</option>`).join("")}`;
+    select.value=values.includes(selected)?selected:"";
+  };
+  setFilterOptions(teacherFilter,[...new Set(allAssigned.map(item=>item.classInfo.teacherName))].sort(),"All Teachers",selectedTeacher);
+  setFilterOptions(schoolFilter,[...new Set(allAssigned.map(item=>item.classInfo.schoolName))].sort(),"All Schools",selectedSchool);
+  setFilterOptions(showFilter,[...new Set(allAssigned.map(item=>item.classInfo.showTime).filter(Boolean))].sort(),"All Show Times",selectedShow);
+  const assigned=allAssigned.filter(item=>{
+    const type=["ballet","tap"].includes(item.classInfo.performanceType)?item.classInfo.performanceType:"either";
+    return (!teacherFilter.value || item.classInfo.teacherName===teacherFilter.value)
+      && (!schoolFilter.value || item.classInfo.schoolName===schoolFilter.value)
+      && (!showFilter.value || item.classInfo.showTime===showFilter.value)
+      && (!typeFilter.value || type===typeFilter.value);
+  }).sort((a,b)=>
+    a.classInfo.schoolName.localeCompare(b.classInfo.schoolName) || a.classInfo.name.localeCompare(b.classInfo.name)
+  );
+  if(!assigned.length) {
+    grid.innerHTML=`<p class="no-results" style="grid-column:1/-1">${allAssigned.length?"No costume assignments match these filters.":"No costumes have been assigned yet. Choose a class in Size Matcher to make the first assignment."}</p>`;
+    return;
+  }
+  const grouped=[...assigned.reduce((groups,item)=>{
+    const combinedId=String(item.classInfo.combinedPerformanceId || "");
+    const costumeKey=`${item.selection.company||""}::${item.selection.costumeName}`;
+    const key=combinedId?`combined::${combinedId}::${costumeKey}`:`class::${item.classInfo.id}`;
+    if(!groups.has(key)) groups.set(key,[]);
+    groups.get(key).push(item);
+    return groups;
+  },new Map()).values()];
+  const teacherById=new Map(matcherData.teachers.map(teacher=>[String(teacher.id),teacher]));
+  const sizeLabels={XXSC:"XXS",XSC:"XS",SC:"S",IC:"I",MC:"M",LC:"L"};
+  const dancerMarkup=(dancer,multipleSchools)=>{const student=(dancer.classInfo.students||[]).find(person=>String(person.id)===String(dancer.studentId));const initials=String(dancer.name||"D").split(/\s+/).map(part=>part[0]).join("").slice(0,2).toUpperCase();return `<div class="assignment-dancer"><span class="assignment-dancer-avatar">${student?.photo?`<img src="${htmlEscape(student.photo)}" alt="">`:htmlEscape(initials)}</span><span>${htmlEscape(dancer.name)}</span>${multipleSchools?`<small class="assignment-dancer-school">${htmlEscape(dancer.classInfo.schoolName)}</small>`:""}</div>`};
+  const sizeGroupsMarkup=(dancers,multipleSchools)=>SIZE_KEYS.map(size=>({size,dancers:dancers.filter(item=>item.size===size)})).filter(group=>group.dancers.length).map(group=>`<section class="assignment-size-group"><div class="assignment-size-divider"><span>${htmlEscape(sizeLabels[group.size] || group.size)}</span></div><div class="assignment-dancers">${group.dancers.map(item=>dancerMarkup(item,multipleSchools)).join("")}</div></section>`).join("");
+  grid.innerHTML=grouped.map(items=>{
+    const first=items[0], classInfo=first.classInfo, selection=first.selection;
+    const costume=COSTUMES.find(item=>item.name===selection.costumeName && (!selection.company || item.company===selection.company));
+    const schools=[...new Set(items.map(item=>item.classInfo.schoolName))];
+    const classNames=[...new Set(items.map(item=>item.classInfo.name))];
+    const dancers=items.flatMap(item=>(item.selection.assignments||[]).map(dancer=>({...dancer,classInfo:item.classInfo}))).sort((a,b)=>SIZE_KEYS.indexOf(a.size)-SIZE_KEYS.indexOf(b.size)||String(a.name||"").localeCompare(String(b.name||"")));
+    const neededMap={};items.forEach(item=>Object.entries(item.selection.sizeNeeds||{}).forEach(([size,count])=>{neededMap[size]=(neededMap[size]||0)+Number(count||0)}));
+    const needed=Object.entries(neededMap).filter(([,count])=>count>0).sort((a,b)=>SIZE_KEYS.indexOf(a[0])-SIZE_KEYS.indexOf(b[0]));
+    const totalNeeded=needed.reduce((sum,[,count])=>sum+count,0);
+    const totalInventory=SIZE_KEYS.reduce((sum,size)=>sum+Number(costume?.[size]||0),0);
+    const teacherGroups=[...items.reduce((groups,item)=>{const key=String(item.classInfo.teacherId||item.classInfo.teacherName);if(!groups.has(key))groups.set(key,{teacher:teacherById.get(String(item.classInfo.teacherId))||{name:item.classInfo.teacherName,color:"#dba9a1"},dancers:[]});groups.get(key).dancers.push(...(item.selection.assignments||[]).map(dancer=>({...dancer,classInfo:item.classInfo})));return groups},new Map()).values()];
+    const multipleTeachers=teacherGroups.length>1, multipleSchools=schools.length>1;
+    const performanceType=["ballet","tap"].includes(classInfo.performanceType)?classInfo.performanceType:"either";
+    const combinedTitle=classInfo.combinedPerformanceName || (items.length>1?classNames.join(" + "):classInfo.name);
+    const dancerContent=multipleTeachers?`<div class="assignment-teacher-sections">${teacherGroups.map(group=>`<section class="assignment-teacher-section" style="--assignment-teacher-color:${htmlEscape(group.teacher.color||"#dba9a1")}"><h4>${htmlEscape(group.teacher.name)}</h4><div class="assignment-size-groups">${sizeGroupsMarkup(group.dancers,multipleSchools)}</div></section>`).join("")}</div>`:`<div class="assignment-size-groups">${sizeGroupsMarkup(dancers,multipleSchools)}</div>`;
+    return `<article class="assignment-card"><div class="assignment-card-head"><div>${classInfo.showTime?`<div class="assignment-show-time">${htmlEscape(classInfo.showTime)}</div>`:""}<h3>${htmlEscape(items.length>1?combinedTitle:`${classInfo.schoolName} · ${classInfo.name}`)}</h3><p>${htmlEscape(items.length>1?schools.join(" + "):classInfo.teacherName)}${classInfo.day?` · ${htmlEscape(classInfo.day)}`:""}${classInfo.time?` · ${htmlEscape(classInfo.time)}`:""}</p></div><div class="assignment-status"><span class="assignment-type ${performanceType}">${performanceType[0].toUpperCase()+performanceType.slice(1)}</span><span class="assignment-total" aria-label="${totalNeeded} costumes needed">${totalNeeded}</span></div></div><div class="assignment-costume">${costume?.img?`<img src="${IMAGE_BASE}${encodeURIComponent(costume.img)}" alt="${htmlEscape(selection.costumeName)}">`:""}<div><strong>${htmlEscape(selection.costumeName)}</strong><small>${htmlEscape(selection.company || "")}</small></div></div><div class="assignment-size-list"><span class="assignment-needed-label">Needed:</span>${needed.map(([size,count])=>`<span class="assignment-size">${htmlEscape(sizeLabels[size] || size)} - ${count}</span>`).join("")}</div>${dancerContent}<p class="assignment-remaining">Another Use Possible: ${Math.max(0,totalInventory-totalNeeded)} Remaining</p></article>`;
+  }).join("");
+}
+
+function populateMatcherWizard() {
+  matcherData=matcherSource();
+  const teacherSelect=document.getElementById("matcher-teacher");
+  const schoolSelect=document.getElementById("matcher-school");
+  const classSelect=document.getElementById("matcher-class");
+  teacherSelect.innerHTML=matcherData.teachers.length ? matcherData.teachers.map(teacher=>`<option value="${htmlEscape(teacher.id)}">${htmlEscape(teacher.name)}</option>`).join("") : '<option value="">No teachers available</option>';
+  const populateSchools=()=>{
+    const classes=matcherData.classes.filter(item=>String(item.teacherId)===teacherSelect.value);
+    const schools=[...new Set(classes.map(item=>item.schoolName))];
+    schoolSelect.innerHTML=schools.length ? schools.map(school=>`<option value="${htmlEscape(school)}">${htmlEscape(school)}</option>`).join("") : '<option value="">No schools available</option>';
+    schoolSelect.disabled=!schools.length;
+    populateClasses();
+  };
+  const populateClasses=()=>{
+    const classes=matcherData.classes.filter(item=>String(item.teacherId)===teacherSelect.value&&item.schoolName===schoolSelect.value);
+    classSelect.innerHTML=classes.length ? classes.map(item=>`<option value="${htmlEscape(item.id)}">${htmlEscape(item.name)}</option>`).join("") : '<option value="">No classes available</option>';
+    classSelect.disabled=!classes.length;
+    renderMatcherResults();
+  };
+  teacherSelect.onchange=populateSchools;
+  schoolSelect.onchange=populateClasses;
+  classSelect.onchange=renderMatcherResults;
+  populateSchools();
+}
+
+function openOutsideOrder(mode) {
+  outsideOrderMode=mode;
+  matcherData=matcherSource();
+  const classes=mode==="boys"?matcherData.classes.filter(item=>(item.students||[]).some(student=>student.isBoy)):matcherData.classes;
+  const classSelect=document.getElementById("outside-order-class");
+  classSelect.innerHTML=classes.map(item=>`<option value="${htmlEscape(item.id)}">${htmlEscape(item.schoolName)} · ${htmlEscape(item.name)}</option>`).join("");
+  if(mode==="matcher"&&selectedMatcherClass()) classSelect.value=String(selectedMatcherClass().id);
+  document.getElementById("outside-order-company").innerHTML=Object.keys(SIZING).sort().map(company=>`<option value="${htmlEscape(company)}">${htmlEscape(company)}</option>`).join("");
+  document.getElementById("outside-order-link").value="";
+  document.getElementById("outside-order-date").value=new Date().toISOString().slice(0,10);
+  previewOutsideOrderSizes();
+  document.getElementById("outside-order-modal").classList.add("open");
+}
+
+function closeOutsideOrder(event) {
+  if(event&&event.target.id!=="outside-order-modal") return;
+  document.getElementById("outside-order-modal").classList.remove("open");
+}
+
+function outsideOrderCalculation() {
+  const classInfo=matcherData.classes.find(item=>String(item.id)===document.getElementById("outside-order-class").value);
+  const company=document.getElementById("outside-order-company").value;
+  const students=(classInfo?.students||[]).filter(student=>outsideOrderMode==="boys"?student.isBoy:!student.isBoy);
+  const counts={},unmeasured=[];
+  students.forEach(student=>{const choice=findSizeDetailed(company,dancerMeasurements(student));if(choice)counts[choice.size]=(counts[choice.size]||0)+1;else unmeasured.push(student.name)});
+  return {classInfo,company,students,counts,unmeasured};
+}
+
+function previewOutsideOrderSizes() {
+  const calculation=outsideOrderCalculation();
+  const sizes=Object.entries(calculation.counts);
+  document.getElementById("outside-order-sizes").innerHTML=sizes.length?`<strong>Sizes needed:</strong> ${sizes.map(([size,count])=>`${htmlEscape(size)} - ${count}`).join(" · ")}${calculation.unmeasured.length?`<br><small>Needs measurements: ${calculation.unmeasured.map(htmlEscape).join(", ")}</small>`:""}`:`No measurable ${outsideOrderMode==="boys"?"boys":"girls"} are available for this company’s chart yet.`;
+}
+
+function previewOutsideOrderImage() {}
+
+async function outsideOrderImage(link) {
+  if(/\.(png|jpe?g|webp|gif)(\?.*)?$/i.test(link)) return link;
+  try { const response=await fetch(link);const html=await response.text();const doc=new DOMParser().parseFromString(html,"text/html");const image=doc.querySelector('meta[property="og:image"],meta[name="twitter:image"]')?.content;return image?new URL(image,link).href:""; } catch(error) { return ""; }
+}
+
+async function saveOutsideOrder() {
+  const link=document.getElementById("outside-order-link").value.trim();
+  const date=document.getElementById("outside-order-date").value;
+  const calculation=outsideOrderCalculation();
+  if(!link||!calculation.classInfo||!date) return window.alert("Add the product link, class, company, and order date first.");
+  const image=await outsideOrderImage(link);
+  outsideCostumeOrders.push({id:Date.now(),mode:outsideOrderMode,classId:String(calculation.classInfo.id),schoolName:calculation.classInfo.schoolName,className:calculation.classInfo.name,company:calculation.company,link,image,date,sizes:calculation.counts,createdAt:new Date().toISOString()});
+  localStorage.setItem(OUTSIDE_ORDER_STORAGE_KEY,JSON.stringify(outsideCostumeOrders));
+  closeOutsideOrder();
+  renderOutsideOrders(outsideOrderMode);
+}
+
+function renderOutsideOrders(mode) {
+  const target=document.getElementById(`${mode}-outside-orders`);
+  if(!target) return;
+  const orders=outsideCostumeOrders.filter(order=>order.mode===mode);
+  target.innerHTML=orders.map(order=>`<article class="outside-order-saved">${order.image?`<img src="${htmlEscape(order.image)}" alt="Ordered costume">`:`<span class="boys-dancer-avatar">+</span>`}<div><strong>${htmlEscape(order.schoolName)} · ${htmlEscape(order.className)}</strong><small>${htmlEscape(order.company)} · Ordered ${htmlEscape(new Date(`${order.date}T12:00:00`).toLocaleDateString())}</small><small>${Object.entries(order.sizes||{}).map(([size,count])=>`${htmlEscape(size)} - ${count}`).join(" · ")||"Sizes pending measurements"}</small><a href="${htmlEscape(order.link)}" target="_blank" rel="noopener">Open product link</a></div></article>`).join("");
 }
 
 function renderCharts() {
@@ -576,7 +1145,7 @@ function printInventory() {
   tbody.innerHTML = filtered.map(c => {
     const thumb = c.img
       ? `<img class="print-thumb" src="${IMAGE_BASE}${encodeURIComponent(c.img)}" alt="${c.name}">`
-      : `<div style="width:50px;height:50px;background:#e8eef4;border-radius:4px;display:inline-block;"></div>`;
+      : `<div style="width:50px;height:50px;background:#f3dfdc;border-radius:4px;display:inline-block;"></div>`;
     const s = v => v != null ? v : '—';
     return `<tr class="row-${c.status||'unknown'}">
       <td>${thumb}</td>
