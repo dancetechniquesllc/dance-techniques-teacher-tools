@@ -16634,7 +16634,7 @@
               <div><h3>Costume Catalog</h3><p><em>Browse the complete Dance Techniques costume inventory and match dancer sizes.</em></p></div>
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
-            <iframe class="dt-tunes-embedded-frame" id="costume-catalog-frame" title="Dance Techniques Costume Catalog" data-src="costume-catalog.html?v=20261001-class-wizard" scrolling="no" style="min-height:1100px"></iframe>
+            <iframe class="dt-tunes-embedded-frame" id="costume-catalog-frame" title="Dance Techniques Costume Catalog" data-src="costume-catalog.html?v=20261003-four-column-scroll" scrolling="auto" style="min-height:1100px"></iframe>
           </section>
 
           <section class="admin-profile-card admin-section-page big-stage" id="admin-home-big-stage">
@@ -45468,6 +45468,28 @@
       }
       if (section === "costume-catalog") {
         const frame = document.getElementById("costume-catalog-frame");
+        if (frame && !frame.dataset.resizeReady) {
+          frame.dataset.resizeReady = "true";
+          frame.addEventListener("load", () => {
+            try {
+              const documentRoot = frame.contentDocument;
+              const resizeFrame = () => {
+                const contentHeight = Math.max(
+                  1100,
+                  documentRoot.documentElement.scrollHeight,
+                  documentRoot.body.scrollHeight
+                );
+                frame.style.height = `${contentHeight + 24}px`;
+              };
+              const scheduleResize = () => requestAnimationFrame(resizeFrame);
+              resizeFrame();
+              new ResizeObserver(scheduleResize).observe(documentRoot.body);
+              documentRoot.addEventListener("click", scheduleResize);
+              documentRoot.addEventListener("change", scheduleResize);
+              documentRoot.addEventListener("input", scheduleResize);
+            } catch (error) {}
+          });
+        }
         if (frame && !frame.getAttribute("src")) frame.setAttribute("src", frame.dataset.src);
       }
       if (section === "big-stage" && typeof window.renderBigStage === "function") window.renderBigStage();

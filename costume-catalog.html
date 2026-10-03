@@ -21,7 +21,7 @@
   .legend { display:flex; gap:14px; flex-wrap:wrap; font-size:0.82rem; }
   .legend-item { display:flex; align-items:center; gap:5px; }
   .dot { width:13px; height:13px; border-radius:50%; display:inline-block; }
-  .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(310px,1fr)); gap:14px; }
+  .grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
   .card { background:white; border-radius:10px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); transition:transform 0.15s; cursor:pointer; }
   .card:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,0.15); }
   .card-img { width:100%; height:160px; object-fit:cover; background:#f7e4df; display:flex; align-items:center; justify-content:center; color:#886d72; font-size:0.8rem; }
@@ -83,6 +83,10 @@
   }
   .print-header { display:none; }
   .print-table { display:none; }
+
+  @media(max-width:1180px){ .grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+  @media(max-width:860px){ .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @media(max-width:560px){ .grid { grid-template-columns:1fr; } }
 
   /* SIZE MATCHER */
   .matcher-wizard { display:grid; gap:18px; }
