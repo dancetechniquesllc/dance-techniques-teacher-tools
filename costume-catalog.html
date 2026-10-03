@@ -352,6 +352,12 @@
 <div id="panel-boys" class="panel">
   <section class="assignments-page">
     <div class="assignments-page-head"><h2>Boys Costumes</h2><p>Each class with boys is handled separately from the girls’ measurement matching.</p></div>
+    <div class="assignment-filters" aria-label="Boys costume filters">
+      <select id="boys-teacher-filter" aria-label="Filter boys costumes by teacher" onchange="renderBoysCatalog()"><option value="">All Teachers</option></select>
+      <select id="boys-school-filter" aria-label="Filter boys costumes by school" onchange="renderBoysCatalog()"><option value="">All Schools</option></select>
+      <select id="boys-class-filter" aria-label="Filter boys costumes by class" onchange="renderBoysCatalog()"><option value="">All Classes</option></select>
+      <select id="boys-show-filter" aria-label="Filter boys costumes by show time" onchange="renderBoysCatalog()"><option value="">All Show Times</option></select>
+    </div>
     <button class="outside-order-card" type="button" onclick="openOutsideOrder('boys')"><span>+</span><span><strong>Ordering Something?</strong><small>Paste the product link and calculate the boys’ sizes by company.</small></span></button>
     <div class="outside-orders-list" id="boys-outside-orders"></div>
     <div class="boys-class-grid" id="boys-class-grid"></div>
@@ -614,7 +620,25 @@ function renderGrid() {
 
 function renderBoysCatalog() {
   matcherData=matcherSource();
-  const classes=matcherData.classes.filter(classInfo=>(classInfo.students||[]).some(student=>student.isBoy));
+  const allClasses=matcherData.classes.filter(classInfo=>(classInfo.students||[]).some(student=>student.isBoy));
+  const filterDefinitions=[
+    ["boys-teacher-filter","All Teachers",classInfo=>classInfo.teacherName],
+    ["boys-school-filter","All Schools",classInfo=>classInfo.schoolName],
+    ["boys-class-filter","All Classes",classInfo=>classInfo.name],
+    ["boys-show-filter","All Show Times",classInfo=>classInfo.showTime]
+  ];
+  filterDefinitions.forEach(([id,label,getValue])=>{
+    const select=document.getElementById(id);
+    const previous=select.value;
+    const values=[...new Set(allClasses.map(getValue).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true}));
+    select.innerHTML=`<option value="">${label}</option>${values.map(value=>`<option value="${htmlEscape(value)}">${htmlEscape(value)}</option>`).join("")}`;
+    if(values.some(value=>String(value)===previous)) select.value=previous;
+  });
+  const teacherFilter=document.getElementById("boys-teacher-filter").value;
+  const schoolFilter=document.getElementById("boys-school-filter").value;
+  const classFilter=document.getElementById("boys-class-filter").value;
+  const showFilter=document.getElementById("boys-show-filter").value;
+  const classes=allClasses.filter(classInfo=>(!teacherFilter||classInfo.teacherName===teacherFilter)&&(!schoolFilter||classInfo.schoolName===schoolFilter)&&(!classFilter||classInfo.name===classFilter)&&(!showFilter||classInfo.showTime===showFilter));
   document.getElementById("boys-class-grid").innerHTML=classes.length?classes.map(classInfo=>{
     const boys=(classInfo.students||[]).filter(student=>student.isBoy);
     const selection=costumeAssignmentForClass(classInfo);
@@ -626,7 +650,7 @@ function renderBoysCatalog() {
     const reserveMarkup=girlCostume&&availableSizes.length?`<div class="boys-custom-reserve ${reservationMatches?"is-reserved":""}"><strong>${reservationMatches?`Reserved ${htmlEscape(currentReservation.size)} to custom match`:`Reserve one to custom match?`}</strong><select aria-label="Choose a girls costume size to reserve">${availableSizes.map(size=>`<option value="${htmlEscape(size)}" ${reservationMatches&&currentReservation.size===size?"selected":""}>${htmlEscape(size)} · ${available[size]} available</option>`).join("")}</select><button type="button" onclick="reserveBoysCustomMatch(this,'${htmlEscape(classInfo.id)}')">${reservationMatches?"Change":"Reserve"}</button></div>`:"";
     const dancerMarkup=boys.map(student=>{const initials=String(student.name||"B").split(/\s+/).map(part=>part[0]).join("").slice(0,2).toUpperCase();return `<div class="boys-dancer"><span class="boys-dancer-avatar">${student.photo?`<img src="${htmlEscape(student.photo)}" alt="">`:htmlEscape(initials)}</span><span>${htmlEscape(student.name)}</span></div>`}).join("");
     return `<article class="boys-class-card"><div><h3>${htmlEscape(classInfo.schoolName)} · ${htmlEscape(classInfo.name)}</h3><p>${htmlEscape(classInfo.teacherName)}${classInfo.day?` · ${htmlEscape(classInfo.day)}`:""}${classInfo.time?` · ${htmlEscape(classInfo.time)}`:""}${classInfo.showTime?` · ${htmlEscape(classInfo.showTime)}`:""}</p></div><div class="boys-girl-costume">${girlCostume?.img?`<img src="${IMAGE_BASE}${encodeURIComponent(girlCostume.img)}" alt="${htmlEscape(girlCostume.name)}">`:`<span class="boys-dancer-avatar">—</span>`}<div><small>Girls’ assigned costume</small><strong>${htmlEscape(selection?.costumeName||"Not assigned yet")}</strong>${selection?.company?`<small>${htmlEscape(selection.company)}</small>`:""}</div></div>${reserveMarkup}<div><strong>${boys.length} boy${boys.length===1?"":"s"}</strong><div class="boys-dancers">${dancerMarkup}</div></div></article>`;
-  }).join(""):'<p class="no-results" style="grid-column:1/-1">No active classes currently include boys.</p>';
+  }).join(""):'<p class="no-results" style="grid-column:1/-1">No boys classes match these filters.</p>';
   const classSelect=document.getElementById("boys-match-class");
   const previous=classSelect.value;
   classSelect.innerHTML=classes.map(classInfo=>`<option value="${htmlEscape(classInfo.id)}">${htmlEscape(classInfo.schoolName)} · ${htmlEscape(classInfo.name)}</option>`).join("");
