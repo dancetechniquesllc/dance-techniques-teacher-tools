@@ -3178,12 +3178,12 @@
     .student-library-card .student-library-teacher { color: var(--berry); font-weight: 700; }
     .student-library-card .student-library-age { color: color-mix(in oklch, var(--muted) 72%, white); font-size: 10px; font-weight: 450; }
     .student-library-day-bubble { position: absolute; top: 10px; right: 10px; min-width: 29px; height: 29px; display: grid; place-items: center; padding: 0 7px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 950; }
-    .enrollment-summary-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 4px 0 16px; }
+    .enrollment-summary-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 4px 0 16px; }
     .enrollment-summary-card { min-height: 86px; display: grid; place-content: center; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); color: inherit; font: inherit; text-align: center; cursor: pointer; }
     .enrollment-summary-card[aria-pressed="true"] { border-color: var(--berry); box-shadow: inset 0 0 0 1px var(--berry); }
     .enrollment-summary-card strong { color: var(--berry); font-size: 25px; line-height: 1; }
     .enrollment-summary-card small { color: var(--muted); font-size: 11px; font-weight: 700; }
-    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
+    .enrollment-student-view-toggle { width: 100%; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: -4px 0 14px; padding: 5px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
     .enrollment-student-view-toggle button { min-height: 48px; padding: 9px 14px; border-radius: 12px; background: transparent; color: var(--fg); font-family: var(--font-body); font-size: 16px; font-weight: 800; }
     .enrollment-student-view-toggle button.is-selected { background: var(--blush); color: var(--berry); box-shadow: 0 1px 3px oklch(35% 0.04 25 / .08); }
     .enrollment-checklist-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 7px; margin: 0 0 14px; }
@@ -3203,6 +3203,28 @@
     .dashboard-entity-summary-bubble img { width: 100%; height: 100%; object-fit: cover; }
     .dashboard-entity-summary-school { background: var(--ivory); border: 1px solid var(--blush); }
     .enrollment-student-view-panel[hidden] { display: none !important; }
+    .enrollment-change-list { display:grid; gap:12px; }
+    .enrollment-change-card { display:grid; gap:14px; padding:18px; border:1px solid var(--border); border-radius:18px; background:var(--surface); }
+    .enrollment-change-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .enrollment-change-heading h4 { margin:0 0 4px; color:var(--berry); font-size:20px; }
+    .enrollment-change-heading p,.enrollment-change-heading small { display:block; margin:0; color:var(--muted); font-size:11px; line-height:1.4; }
+    .enrollment-change-details { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+    .enrollment-change-value { display:grid; gap:3px; padding:10px; border-radius:11px; background:var(--surface-soft); }
+    .enrollment-change-value span { color:var(--muted); font-size:9px; font-weight:850; letter-spacing:.05em; text-transform:uppercase; }
+    .enrollment-change-value strong { font-size:13px; }
+    .enrollment-change-assignment { display:grid; grid-template-columns:minmax(220px,1fr) auto; gap:8px; align-items:end; }
+    .enrollment-change-assignment label { display:grid; gap:5px; color:var(--muted); font-size:10px; font-weight:850; text-transform:uppercase; }
+    .enrollment-change-assignment select { min-height:42px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--fg); font:inherit; }
+    .enrollment-change-school { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:8px; align-items:end; padding:12px; border:1px solid var(--sage); border-radius:13px; background:color-mix(in oklch,var(--sage) 14%,white); }
+    .enrollment-change-school label { display:grid; gap:5px; color:var(--muted); font-size:10px; font-weight:850; text-transform:uppercase; }
+    .enrollment-change-school select,.enrollment-change-school input { min-height:42px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--fg); font:inherit; }
+    .enrollment-change-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+    .enrollment-change-step { min-height:92px; display:grid; align-content:center; gap:6px; padding:10px; border:1px solid var(--border); border-radius:12px; background:var(--surface-soft); }
+    .enrollment-change-step strong { font-size:12px; }
+    .enrollment-change-step-actions { display:flex; gap:5px; flex-wrap:wrap; }
+    .enrollment-change-step-actions button { min-height:32px; padding:5px 8px; border-radius:8px; font-size:10px; }
+    .enrollment-change-step.is-complete { border-color:var(--sage); background:color-mix(in oklch,var(--sage) 24%,white); }
+    .enrollment-change-empty { padding:34px 18px; border:1px dashed var(--border); border-radius:16px; color:var(--muted); text-align:center; }
     .student-library-grid.is-grouped { display: block; }
     .student-library-school-section + .student-library-school-section { margin-top: 30px; }
     .student-library-school-section > h3 { margin: 0 0 4px; font-family: var(--font-body); font-size: 24px; font-weight: 850; }
@@ -3212,12 +3234,13 @@
     @media (max-width: 980px) { .student-library-grid, .student-library-class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
     @media (max-width: 560px) {
       .student-library-grid, .student-library-class-grid { grid-template-columns: 1fr; }
-      .enrollment-summary-row { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+      .enrollment-summary-row { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
       .enrollment-summary-card { min-height: 72px; padding: 8px 4px; }
       .enrollment-summary-card strong { font-size: 21px; }
       .enrollment-summary-card small { font-size: 9px; }
       .enrollment-student-view-toggle button { padding-inline: 5px; font-size: 12px; }
-      .enrollment-student-view-toggle { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .enrollment-student-view-toggle { grid-template-columns: 1fr; }
+      .enrollment-change-details,.enrollment-change-steps,.enrollment-change-assignment,.enrollment-change-school { grid-template-columns:1fr; }
       .enrollment-checklist-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .dashboard-entity-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
@@ -17368,6 +17391,7 @@
               <button class="is-selected" type="button" role="tab" aria-selected="true" data-enrollment-student-view="enrollments">New Enrollments</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="directory">Dancer Directory</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="future-dancers">Future Dancers</button>
+              <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="enrollment-changes">Enrollment Changes</button>
               <button type="button" role="tab" aria-selected="false" data-enrollment-student-view="rowlett-5-invites">Rowlett 5 Invites</button>
             </div>
             <div class="enrollment-checklist-summary" id="enrollment-checklist-summary" aria-label="New Enrollment next-step summary"></div>
@@ -17414,6 +17438,13 @@
               </div>
               <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="director-future-dancer-search,director-future-dancer-school,director-future-dancer-day">Reset Filter</button></div>
               <div class="teacher-future-prospect-grid" id="director-future-dancer-list"></div>
+            </div>
+            <div class="enrollment-student-view-panel" id="enrollment-changes-panel" data-enrollment-student-panel="enrollment-changes" hidden>
+              <div class="section-title" style="margin-top:8px">
+                <div><h3>Enrollment Changes</h3><p>Match each request to a dancer, resolve financial steps, stop billing, and then deactivate.</p></div>
+                <button class="secondary" type="button" id="refresh-enrollment-changes">Refresh Submissions</button>
+              </div>
+              <div class="enrollment-change-list" id="enrollment-change-list" aria-live="polite"></div>
             </div>
             <div class="enrollment-student-view-panel" id="rowlett-5-invites-panel" data-enrollment-student-panel="rowlett-5-invites" hidden>
               <div class="parent-portal-invite-workspace">
@@ -20033,6 +20064,9 @@
     let enrollmentReviewOpen = false;
     let enrollmentClassPreviewId = "";
     let enrollmentStudentsView = "enrollments";
+    let enrollmentChangeRequests = document.body.dataset.tourMode === "true" ? [{
+      id:"preview-enrollment-change", dancer_first_name:"Madison", dancer_last_name:"Dale", current_school:"Primrose Rowlett", last_day:"2026-10-30", request_type:"leaving our current school.", notes:"Moving to a new partner school.", status:"new", enrollment_fee_refund_status:"pending", brightwheel_refund_status:"pending", billing_plan_status:"pending", deactivation_status:"pending", submitted_at:new Date().toISOString()
+    }] : [];
     let parentPortalInvitationReadiness = [];
     let parentPortalInvitationLoaded = false;
     let parentPortalInvitationLoading = false;
@@ -20067,6 +20101,7 @@
     let officialClassroomManagerSchoolId = "";
     let officialClassroomManagerSource = "enrollment";
     let enrollmentIntakeSubscription = null;
+    let enrollmentChangeSubscription = null;
     let sharedRosterSubscription = null;
     let sharedRosterRefreshTimer = null;
     let teacherRosterNewEnrollments = document.body.dataset.tourMode === "true"
@@ -21872,6 +21907,59 @@
         .channel("director-enrollment-intake")
         .on("postgres_changes", { event: "*", schema: "public", table: "enrollments" }, () => loadEnrollmentIntakeQueue(profile))
         .subscribe();
+    };
+
+    const enrollmentChangeStudentRecords = () => rosterClasses.flatMap((rosterClass) => (rosterClass.students || [])
+      .filter((student) => student.status === "enrolled")
+      .map((student) => ({ rosterClass, student })))
+      .sort((left, right) => rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
+
+    const renderEnrollmentChanges = () => {
+      const list = document.getElementById("enrollment-change-list");
+      if (!list) return;
+      if (!enrollmentChangeRequests.length) {
+        list.innerHTML = `<div class="enrollment-change-empty">No enrollment change requests are waiting for review.</div>`;
+        return;
+      }
+      const studentRecords = enrollmentChangeStudentRecords();
+      list.innerHTML = enrollmentChangeRequests.map((item) => {
+        const assigned = studentRecords.find(({ student }) => String(student.id) === String(item.assigned_student_id));
+        const isSchoolChange = String(item.request_type || "").toLowerCase().includes("leaving our current school");
+        const financialReady = [item.enrollment_fee_refund_status,item.brightwheel_refund_status].every((status) => ["completed","not_needed"].includes(status));
+        const billingReady = item.billing_plan_status === "completed";
+        const step = (field, title, allowNotNeeded = false) => {
+          const status = item[field] || "pending";
+          return `<div class="enrollment-change-step ${status!=="pending"?"is-complete":""}"><strong>${escapeText(title)}</strong><small>${status==="completed"?"✓ Complete":status==="not_needed"?"Not Needed":"Pending"}</small><div class="enrollment-change-step-actions">${status==="pending"?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="completed" data-enrollment-change-id="${escapeText(item.id)}">Complete</button>${allowNotNeeded?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="not_needed" data-enrollment-change-id="${escapeText(item.id)}">Not Needed</button>`:""}`:""}</div></div>`;
+        };
+        const studentOptions = studentRecords.map(({ rosterClass, student }) => `<option value="${escapeText(student.id)}" ${String(item.assigned_student_id)===String(student.id)?"selected":""}>${escapeText(rosterStudentFullName(student))} · ${escapeText(rosterSchoolNickname(rosterClass.schoolName))} · ${escapeText(rosterClass.name)}</option>`).join("");
+        const schoolNames=[...new Set(rosterClasses.filter((rosterClass)=>rosterClass.sourceActive!==false).map((rosterClass)=>rosterClass.schoolName).filter(Boolean))].sort((left,right)=>left.localeCompare(right));
+        const targetSchool=item.target_school||"";
+        const schoolOptions=schoolNames.map((schoolName)=>`<option value="${escapeText(schoolName)}" ${schoolName===targetSchool?"selected":""}>${escapeText(rosterSchoolNickname(schoolName))}</option>`).join("");
+        const targetClasses=rosterClasses.filter((rosterClass)=>rosterClass.sourceActive!==false&&(!targetSchool||enrollmentSchoolNameMatches(rosterClass.schoolName,targetSchool)));
+        const classOptions=targetClasses.map((rosterClass)=>`<option value="${escapeText(rosterClass.id)}" ${String(item.target_class_id)===String(rosterClass.id)?"selected":""}>${escapeText(rosterClass.name)} · ${escapeText(rosterClass.day||"")} ${escapeText(friendlyScheduleTime(rosterClass.time))}</option>`).join("");
+        const workflowMarkup=isSchoolChange?`<div class="enrollment-change-school"><label>New School<select data-enrollment-change-target-school="${escapeText(item.id)}"><option value="">Choose a school…</option>${schoolOptions}</select></label><label>Official Classroom<input data-enrollment-change-target-classroom="${escapeText(item.id)}" value="${escapeText(item.target_classroom||"")}" placeholder="Classroom name"></label><label>Dance Class<select data-enrollment-change-target-class="${escapeText(item.id)}"><option value="">Choose a dance class…</option>${classOptions}</select></label><button class="primary" type="button" data-enrollment-change-move="${escapeText(item.id)}" ${!assigned||!item.target_school||!item.target_class_id?"disabled":""}>Process School Change</button></div>`:`<div class="enrollment-change-steps">${step("enrollment_fee_refund_status","Enrollment Fee Refund",true)}${step("brightwheel_refund_status","Brightwheel Refund",true)}${step("billing_plan_status","Stop Billing Plan")}<div class="enrollment-change-step ${item.deactivation_status==="completed"?"is-complete":""}"><strong>Deactivate</strong><small>${item.deactivation_status==="completed"?"✓ Complete":!assigned?"Assign dancer first":!financialReady?"Resolve refunds first":!billingReady?"Stop billing first":"Ready"}</small><div class="enrollment-change-step-actions"><button class="primary" type="button" data-enrollment-change-deactivate="${escapeText(item.id)}" ${!assigned||!financialReady||!billingReady||item.deactivation_status==="completed"?"disabled":""}>Deactivate</button></div></div></div>`;
+        return `<article class="enrollment-change-card">
+          <div class="enrollment-change-heading"><div><h4>${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"Dancer name not entered")}</h4><p>${escapeText(item.notes||"No additional message")}</p><small>Submitted ${escapeText(enrollmentDateLabel(item.submitted_at||item.created_at))}</small></div><span class="status ${assigned?"ok":"pending"}">${assigned?"Dancer Matched":"Needs Match"}</span></div>
+          <div class="enrollment-change-details"><div class="enrollment-change-value"><span>Current School</span><strong>${escapeText(item.current_school||"Not selected")}</strong></div><div class="enrollment-change-value"><span>Last Day</span><strong>${escapeText(item.last_day?new Date(`${item.last_day}T12:00:00`).toLocaleDateString():"Not entered")}</strong></div><div class="enrollment-change-value"><span>Request</span><strong>${escapeText(item.request_type||"Not selected")}</strong></div></div>
+          <div class="enrollment-change-assignment"><label>Assign Existing Student<select data-enrollment-change-student="${escapeText(item.id)}"><option value="">Choose a dancer…</option>${studentOptions}</select></label><button class="primary" type="button" data-enrollment-change-assign="${escapeText(item.id)}">${assigned?"Update Match":"Assign Dancer"}</button></div>
+          ${workflowMarkup}
+        </article>`;
+      }).join("");
+    };
+
+    const loadEnrollmentChanges = async (profile = window.dtCurrentProfile) => {
+      if (document.body.dataset.tourMode === "true") { renderEnrollmentChanges(); return; }
+      if (!window.dtSupabase || !["admin","director"].includes(profile?.role)) return;
+      const { data, error } = await window.dtSupabase.from("enrollment_change_requests").select("*").neq("status","archived").order("created_at",{ascending:false}).limit(100);
+      if (error) { console.error("Enrollment changes could not load",error); return; }
+      enrollmentChangeRequests=(data||[]).filter((item)=>item.status!=="completed");
+      renderEnrollmentChanges();
+      renderEnrollmentStudentSummary();
+    };
+
+    const subscribeEnrollmentChanges = (profile = window.dtCurrentProfile) => {
+      if (!window.dtSupabase || !["admin","director"].includes(profile?.role) || enrollmentChangeSubscription) return;
+      enrollmentChangeSubscription=window.dtSupabase.channel("director-enrollment-changes").on("postgres_changes",{event:"*",schema:"public",table:"enrollment_change_requests"},()=>loadEnrollmentChanges(profile)).subscribe();
     };
 
     const subscribeSharedRosterChanges = (profile = window.dtCurrentProfile) => {
@@ -38375,10 +38463,12 @@
       const futureDancers = activeClasses.reduce((count, rosterClass) => count + rosterProspects(rosterClass).length, 0);
       const incompleteEnrollmentCount = enrollmentIntakeQueue.filter((item) => enrollmentBelongsInWorkflow(item) && enrollmentNextChecklistStep(item) !== "complete").length;
       const dancerDirectoryCount = dashboardEntityUniqueCount(dashboardEntityStudentRecords());
+      const enrollmentChangeCount = enrollmentChangeRequests.filter((item) => !["completed","archived"].includes(item.status)).length;
       const metrics = [
         [incompleteEnrollmentCount, "New Enrollments", "enrollments"],
         [dancerDirectoryCount, "Dancer Directory", "directory"],
-        [futureDancers, "Future Dancers", "future-dancers"]
+        [futureDancers, "Future Dancers", "future-dancers"],
+        [enrollmentChangeCount, "Enrollment Changes", "enrollment-changes"]
       ];
       summary.innerHTML = metrics.map(([value, label, view]) => `<button class="enrollment-summary-card" type="button" data-enrollment-summary-view="${rosterSafe(view)}" aria-pressed="${enrollmentStudentsView === view ? "true" : "false"}"><strong>${rosterSafe(value)}</strong><small>${rosterSafe(label)}</small></button>`).join("");
     };
@@ -38590,6 +38680,7 @@
       if (enrollmentStudentsView === "enrollments") renderEnrollmentQueue();
       else if (enrollmentStudentsView === "active-enrollments") renderActiveEnrollments();
       else if (enrollmentStudentsView === "future-dancers") renderDirectorFutureDancers();
+      else if (enrollmentStudentsView === "enrollment-changes") renderEnrollmentChanges();
       else if (enrollmentStudentsView === "rowlett-5-invites") void renderRowlettParentPortalInvites();
       else renderStudentLibrary();
     };
@@ -49209,6 +49300,87 @@
     });
 
     document.getElementById("refresh-enrollment-queue")?.addEventListener("click", () => loadEnrollmentIntakeQueue(window.dtCurrentProfile));
+    document.getElementById("refresh-enrollment-changes")?.addEventListener("click", () => loadEnrollmentChanges(window.dtCurrentProfile));
+    document.getElementById("enrollment-change-list")?.addEventListener("change", (event) => {
+      const schoolSelect=event.target.closest("[data-enrollment-change-target-school]");
+      const classSelect=event.target.closest("[data-enrollment-change-target-class]");
+      if(schoolSelect){
+        const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(schoolSelect.dataset.enrollmentChangeTargetSchool));
+        if(!item)return;
+        item.target_school=schoolSelect.value;
+        item.target_class_id="";
+        renderEnrollmentChanges();
+      }
+      if(classSelect){
+        const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(classSelect.dataset.enrollmentChangeTargetClass));
+        if(!item)return;
+        item.target_class_id=classSelect.value;
+        renderEnrollmentChanges();
+      }
+    });
+    document.getElementById("enrollment-change-list")?.addEventListener("input", (event) => {
+      const classroomInput=event.target.closest("[data-enrollment-change-target-classroom]");
+      if(!classroomInput)return;
+      const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(classroomInput.dataset.enrollmentChangeTargetClassroom));
+      if(item)item.target_classroom=classroomInput.value;
+    });
+    document.getElementById("enrollment-change-list")?.addEventListener("click", async (event) => {
+      const assignmentButton=event.target.closest("[data-enrollment-change-assign]");
+      const stepButton=event.target.closest("[data-enrollment-change-step]");
+      const deactivateButton=event.target.closest("[data-enrollment-change-deactivate]");
+      const moveButton=event.target.closest("[data-enrollment-change-move]");
+      const requestId=assignmentButton?.dataset.enrollmentChangeAssign||stepButton?.dataset.enrollmentChangeId||deactivateButton?.dataset.enrollmentChangeDeactivate||moveButton?.dataset.enrollmentChangeMove;
+      const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(requestId));
+      if(!item)return;
+      const persist=async(payload)=>{
+        Object.assign(item,payload);
+        if(document.body.dataset.tourMode==="true"||!window.dtSupabase)return true;
+        const {error}=await window.dtSupabase.from("enrollment_change_requests").update(payload).eq("id",item.id);
+        if(error){console.error("Enrollment change could not save",error);showToast("Enrollment change could not be saved");return false;}
+        return true;
+      };
+      if(assignmentButton){
+        const select=document.querySelector(`[data-enrollment-change-student="${CSS.escape(String(item.id))}"]`);
+        const record=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(select?.value));
+        if(!record)return showToast("Choose an existing dancer first");
+        if(await persist({assigned_student_id:record.student.id,assigned_class_enrollment_id:record.student.enrollmentId||null,status:"reviewing",reviewed_by:window.dtCurrentProfile?.id||null,reviewed_at:new Date().toISOString()}))showToast("Dancer assigned to this request");
+      } else if(stepButton){
+        if(await persist({[stepButton.dataset.enrollmentChangeStep]:stepButton.dataset.enrollmentChangeValue}))showToast("Enrollment change step updated");
+      } else if(moveButton){
+        const source=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(item.assigned_student_id));
+        const target=rosterClasses.find((rosterClass)=>String(rosterClass.id)===String(item.target_class_id));
+        if(!source||!target)return showToast("Choose the dancer and new dance class first");
+        if(!(await moveSharedStudentEnrollment(source.student,target)))return;
+        source.rosterClass.students.splice(source.rosterClass.students.indexOf(source.student),1);
+        target.students.push(source.student);
+        source.student.classroom=item.target_classroom||"";
+        source.student.officialClassroom=item.target_classroom||"";
+        await saveSharedStudent(source.student,target);
+        await persist({target_school:target.schoolName,target_class_id:target.id,target_classroom:item.target_classroom||null,status:"completed",completed_at:new Date().toISOString()});
+        enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
+        showToast("School, classroom, and dance class updated");
+      } else if(deactivateButton){
+        if(!window.confirm("Deactivate this dancer after confirming refunds and billing are complete?"))return;
+        const source=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(item.assigned_student_id));
+        if(!source)return showToast("The assigned dancer could not be found");
+        if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){
+          const endedDate=item.last_day||new Date().toISOString().slice(0,10);
+          const [enrollmentResult,studentResult]=await Promise.all([
+            window.dtSupabase.from("class_enrollments").update({status:"withdrawn",ended_date:endedDate}).eq("id",item.assigned_class_enrollment_id||source.student.enrollmentId),
+            window.dtSupabase.from("students").update({status:"inactive"}).eq("id",source.student.id)
+          ]);
+          if(enrollmentResult.error||studentResult.error){showToast("The dancer could not be deactivated");return;}
+        }
+        source.student.status="inactive";
+        await persist({deactivation_status:"completed",status:"completed",completed_at:new Date().toISOString()});
+        enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
+        showToast("Enrollment deactivated");
+      }
+      renderEnrollmentChanges();
+      renderEnrollmentStudentSummary();
+      renderStudentLibrary();
+      renderClassesAndRosters();
+    });
 
     document.getElementById("teachers-list-link")?.addEventListener("click", () => {
       runGuardedNavigation(() => {
@@ -52648,11 +52820,13 @@
       subscribeSharedDirectMessages();
       subscribeSharedStaffAnnouncements();
       await loadEnrollmentIntakeQueue(profile);
+      await loadEnrollmentChanges(profile);
       await loadNotificationSystem(profile);
       refreshPushDeviceReadiness().catch(() => false);
       await loadStaffFeedbackInbox();
       await ensureEmailPlanUpgradeNotification(profile);
       subscribeEnrollmentIntakeQueue(profile);
+      subscribeEnrollmentChanges(profile);
       subscribeSharedRosterChanges(profile);
       subscribeNotificationSystem(profile);
       subscribeStaffFeedbackInbox(profile);

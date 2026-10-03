@@ -26,10 +26,12 @@ required_text=(
   'Costume Assignments'
   'Ordering Something?'
   'Boys Costume Inventory'
+  'Enrollment Changes'
+  '253005393017146'
 )
 
 for marker in "${required_text[@]}"; do
-  if ! rg -F --quiet "$marker" index.html costume-catalog.html; then
+  if ! rg -F --quiet "$marker" index.html costume-catalog.html supabase/functions/jotform-enrollment-change-webhook/index.ts; then
     echo "Publish stopped: a protected live feature is missing: $marker"
     exit 1
   fi
