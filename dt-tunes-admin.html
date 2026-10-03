@@ -166,6 +166,7 @@
             <div class="card-head">
               <div class="selected-playlist-head"><span id="selected-playlist-cover"></span><div><h3 id="selected-playlist-name">Choose a playlist</h3><p id="selected-playlist-count">Select a playlist to see its songs.</p></div></div>
               <div class="track-actions">
+                <button class="secondary small-button" type="button" id="rename-playlist" hidden>Rename</button>
                 <button class="secondary small-button" type="button" id="change-playlist-cover" hidden>Change Cover</button>
                 <button class="secondary small-button" type="button" id="open-add-tracks" hidden>+ Add Songs</button>
                 <button class="danger small-button" type="button" id="hide-playlist" hidden>Hide from Teachers</button>
@@ -381,6 +382,7 @@
       $("#hide-playlist").hidden = !playlist;
       $("#open-add-tracks").hidden = !playlist;
       $("#change-playlist-cover").hidden = !playlist;
+      $("#rename-playlist").hidden = !playlist;
       $("#selected-playlist-cover").innerHTML = playlist ? coverMarkup(playlist, playlist.name) : "";
       if (!playlist) { $("#add-tracks-panel").hidden = true; }
       if (!$("#add-tracks-panel").hidden) renderAddTracks();
@@ -628,6 +630,24 @@
       $("#hide-playlist").disabled = false;
       if (error) return alert("That playlist could not be hidden. Please try again.");
       await loadData("");
+    });
+
+    $("#rename-playlist").addEventListener("click", async () => {
+      const playlist = selectedPlaylist();
+      if (!playlist) return;
+      const input = prompt("Rename this playlist:", playlist.name);
+      if (input === null) return;
+      const name = input.trim();
+      if (!name || name === playlist.name) return;
+      if (name.length > 80) return alert("Please keep the playlist name under 80 characters.");
+      const button = $("#rename-playlist");
+      button.disabled = true;
+      const { error } = await state.client.from("music_playlists").update({ name, updated_at: new Date().toISOString() }).eq("id", playlist.id);
+      button.disabled = false;
+      if (error) return alert("That playlist could not be renamed. Please try again.");
+      playlist.name = name;
+      renderPlaylists();
+      setStatus("#playlist-cover-status", "Renamed. Teachers see the new name the next time DT Tunes opens.");
     });
 
     $("#change-playlist-cover").addEventListener("click", () => {

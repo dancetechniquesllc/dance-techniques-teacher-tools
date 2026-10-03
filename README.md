@@ -5,10 +5,6 @@
 
 This folder is the single source of truth for My Dance Techniques, including Teacher Tools and the Director Dashboard. All development starts here, and approved releases are published from here to the public deployment repository.
 
-## Safe Publishing
-
-Run `scripts/prepublish-check.sh` before publishing to `main`. The check refuses to publish from a checkout that does not include the latest live branch and verifies critical DD Live, Photo Frames, and Costume Catalog features so a later release cannot silently remove them.
-
 ## Open It
 
 Start the normal Dance Techniques local app server, open the Teacher Portal, then choose **Teacher Tools & Director Dashboard**. The local server now resolves this repository automatically instead of relying on a computer-specific folder.
