@@ -20,7 +20,7 @@ if rg -n '^(<<<<<<<|=======|>>>>>>>)' --glob '!scripts/prepublish-check.sh' . >/
 fi
 
 required_text=(
-  'admin-home-classes-rosters")?.addEventListener("click", async'
+  'admin-home-classes-rosters")?.addEventListener("click",'
   '["Group Photo", "assets/photo-frames/group-photo.png"]'
   '["Dance Day", "assets/photo-frames/dance-day.png"]'
   'Costume Assignments'
