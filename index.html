@@ -3106,6 +3106,9 @@
     .teacher-roster-check.is-absent { background: var(--berry); color: white; }
     .teacher-roster-student-tile strong { max-width: 100%; font-size: 12px; font-weight: 600; line-height: 1.15; }
     .teacher-roster-student-tile.is-absent { opacity: .56; }
+    .teacher-roster-student-tile.is-paused { opacity: .52; filter: grayscale(1); }
+    .teacher-roster-student-tile.is-paused .teacher-roster-profile-button { cursor: default; }
+    .student-paused-badge { display: inline-flex; align-items: center; justify-content: center; min-height: 21px; padding: 3px 8px; border-radius: 999px; background: #d8d8d8; color: #4f4f4f; font-size: 10px; font-weight: 850; letter-spacing: .04em; text-transform: uppercase; }
     .teacher-roster-student-tile.is-tardy .teacher-roster-profile-button { border-color: oklch(72% 0.12 80); }
     .teacher-roster-tile-actions { display: flex; gap: 3px; }
     .teacher-roster-tile-actions button { min-height: 28px; padding: 0 6px; border-radius: 999px; font-size: 9px; font-weight: 700; }
@@ -3177,6 +3180,7 @@
     .student-library-card small { display: block; color: var(--muted); font-size: 11px; font-weight: 500; line-height: 1.3; }
     .student-library-card .student-library-teacher { color: var(--berry); font-weight: 700; }
     .student-library-card .student-library-age { color: color-mix(in oklch, var(--muted) 72%, white); font-size: 10px; font-weight: 450; }
+    .student-library-card.is-paused, .roster-profile-student-card.is-paused, .roster-class-student.is-paused { opacity: .52; filter: grayscale(1); }
     .student-library-day-bubble { position: absolute; top: 10px; right: 10px; min-width: 29px; height: 29px; display: grid; place-items: center; padding: 0 7px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 950; }
     .enrollment-summary-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 4px 0 16px; }
     .enrollment-summary-card { min-height: 86px; display: grid; place-content: center; gap: 4px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); color: inherit; font: inherit; text-align: center; cursor: pointer; }
@@ -17428,7 +17432,7 @@
                   <select id="student-library-shoes"><option value="all">All Shoe Statuses</option><option value="has">Has Shoes</option><option value="needs-tap">Needs Tap</option><option value="needs-ballet">Needs Ballet</option><option value="needs-both">Needs Both</option><option value="small-tap">Too Small Tap</option><option value="small-ballet">Too Small Ballet</option></select>
                 </label>
                 <label>Student Status
-                  <select id="student-library-status"><option value="all">All enrolled dancers</option><option value="enrolled">Enrolled</option></select>
+                  <select id="student-library-status"><option value="all">All current dancers</option><option value="enrolled">Enrolled</option><option value="paused">Paused</option></select>
                 </label>
               </div>
               <div class="dashboard-filter-reset-row"><button class="dashboard-filter-reset" type="button" data-reset-dashboard-filters="student-library-search,student-library-school,student-library-teacher,student-library-day,student-library-status,student-library-gender,student-library-shoes">Reset Filter</button></div>
@@ -19173,6 +19177,7 @@
             <option value="trial-attended">Trial attended</option>
             <option value="ready-to-enroll">Ready to enroll</option>
             <option value="enrolled">Enrolled</option>
+            <option value="paused">Paused</option>
             <option value="inactive">Inactive</option>
           </select>
           </label>
@@ -21951,6 +21956,7 @@
       list.innerHTML = enrollmentChangeRequests.map((item) => {
         const assigned = studentRecords.find(({ student }) => String(student.id) === String(item.assigned_student_id));
         const isSchoolChange = String(item.request_type || "").toLowerCase().includes("leaving our current school");
+        const isPause = String(item.request_type || "").toLowerCase().includes("pause");
         const financialReady = [item.enrollment_fee_refund_status,item.brightwheel_refund_status].every((status) => ["completed","not_needed"].includes(status));
         const billingReady = item.billing_plan_status === "completed";
         const suggestions = enrollmentChangeSuggestedStudents(item, studentRecords);
@@ -21965,7 +21971,8 @@
         const schoolOptions=schoolNames.map((schoolName)=>`<option value="${escapeText(schoolName)}" ${schoolName===targetSchool?"selected":""}>${escapeText(rosterSchoolNickname(schoolName))}</option>`).join("");
         const targetClasses=rosterClasses.filter((rosterClass)=>rosterClass.sourceActive!==false&&(!targetSchool||enrollmentSchoolNameMatches(rosterClass.schoolName,targetSchool)));
         const classOptions=targetClasses.map((rosterClass)=>`<option value="${escapeText(rosterClass.id)}" ${String(item.target_class_id)===String(rosterClass.id)?"selected":""}>${escapeText(rosterClass.name)} · ${escapeText(rosterClass.day||"")} ${escapeText(friendlyScheduleTime(rosterClass.time))}</option>`).join("");
-        const workflowMarkup=isSchoolChange?`<div class="enrollment-change-school"><label>New School<select data-enrollment-change-target-school="${escapeText(item.id)}"><option value="">Choose a school…</option>${schoolOptions}</select></label><label>Official Classroom<input data-enrollment-change-target-classroom="${escapeText(item.id)}" value="${escapeText(item.target_classroom||"")}" placeholder="Classroom name"></label><label>Dance Class<select data-enrollment-change-target-class="${escapeText(item.id)}"><option value="">Choose a dance class…</option>${classOptions}</select></label><button class="primary" type="button" data-enrollment-change-move="${escapeText(item.id)}" ${!assigned||!item.target_school||!item.target_class_id?"disabled":""}>Process School Change</button></div>`:`<div class="enrollment-change-steps">${step("enrollment_fee_refund_status","Enrollment Fee Refund",true)}${step("brightwheel_refund_status","Brightwheel Refund",true)}${step("billing_plan_status","Stop Billing Plan")}<div class="enrollment-change-step ${item.deactivation_status==="completed"?"is-complete":""}"><strong>Deactivate</strong><small>${item.deactivation_status==="completed"?"✓ Complete":!assigned?"Assign dancer first":!financialReady?"Resolve refunds first":!billingReady?"Stop billing first":"Ready"}</small><div class="enrollment-change-step-actions"><button class="primary" type="button" data-enrollment-change-deactivate="${escapeText(item.id)}" ${!assigned||!financialReady||!billingReady||item.deactivation_status==="completed"?"disabled":""}>Deactivate</button></div></div></div>`;
+        const finalActionLabel=isPause?"Pause Student":"Deactivate";
+        const workflowMarkup=isSchoolChange?`<div class="enrollment-change-school"><label>New School<select data-enrollment-change-target-school="${escapeText(item.id)}"><option value="">Choose a school…</option>${schoolOptions}</select></label><label>Official Classroom<input data-enrollment-change-target-classroom="${escapeText(item.id)}" value="${escapeText(item.target_classroom||"")}" placeholder="Classroom name"></label><label>Dance Class<select data-enrollment-change-target-class="${escapeText(item.id)}"><option value="">Choose a dance class…</option>${classOptions}</select></label><button class="primary" type="button" data-enrollment-change-move="${escapeText(item.id)}" ${!assigned||!item.target_school||!item.target_class_id?"disabled":""}>Process School Change</button></div>`:`<div class="enrollment-change-steps">${step("enrollment_fee_refund_status","Enrollment Fee Refund",true)}${step("brightwheel_refund_status","Brightwheel Refund",true)}${step("billing_plan_status","Stop Billing Plan")}<div class="enrollment-change-step ${item.deactivation_status==="completed"?"is-complete":""}"><strong>${finalActionLabel}</strong><small>${item.deactivation_status==="completed"?"✓ Complete":!assigned?"Assign dancer first":!financialReady?"Resolve refunds first":!billingReady?"Stop billing first":"Ready"}</small><div class="enrollment-change-step-actions"><button class="primary" type="button" data-enrollment-change-deactivate="${escapeText(item.id)}" ${!assigned||!financialReady||!billingReady||item.deactivation_status==="completed"?"disabled":""}>${finalActionLabel}</button></div></div></div>`;
         return `<article class="enrollment-change-card">
           <div class="enrollment-change-heading"><div><h4>${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"Dancer name not entered")}</h4><p>${escapeText(item.notes||"No additional message")}</p><small>Submitted ${escapeText(enrollmentDateLabel(item.submitted_at||item.created_at))}</small></div><span class="status ${assigned?"ok":"pending"}">${assigned?"Dancer Matched":"Needs Match"}</span></div>
           <div class="enrollment-change-details"><div class="enrollment-change-value"><span>Current School</span><strong>${escapeText(item.current_school||"Not selected")}</strong></div><div class="enrollment-change-value"><span>Last Day</span><strong>${escapeText(item.last_day?new Date(`${item.last_day}T12:00:00`).toLocaleDateString():"Not entered")}</strong></div><div class="enrollment-change-value"><span>Request</span><strong>${escapeText(item.request_type||"Not selected")}</strong></div></div>
@@ -22200,8 +22207,8 @@
     };
 
     const dbTime = (value = "") => value ? String(value).slice(0, 5) : "";
-    const uiStudentStatus = (status) => status === "enrolled" ? "enrolled" : "trial-scheduled";
-    const dbEnrollmentStatus = (status) => status === "enrolled" ? "enrolled" : "trial";
+    const uiStudentStatus = (status) => status === "paused" ? "paused" : status === "enrolled" ? "enrolled" : "trial-scheduled";
+    const dbEnrollmentStatus = (status) => status === "paused" ? "paused" : status === "enrolled" ? "enrolled" : "trial";
 
     const loadSharedClassesAndRosters = async (profile = window.dtCurrentProfile) => {
       const client = window.dtSupabase;
@@ -22232,7 +22239,7 @@
         partnerSchoolsQuery,
         client.from("teacher_school_assignments").select("id, teacher_id, partner_school_id, active, created_at, updated_at").order("updated_at", { ascending: false }),
         client.from("dance_classes").select("*").eq("status", "active"),
-        client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled"]),
+        client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled", "paused"]),
         client.from("student_notes").select("id, student_id, note, created_at").order("created_at", { ascending: false }),
         client.from("class_enrollments").select("id, dance_class_id, student_id, ended_date, students(*)").eq("status", "withdrawn").order("ended_date", { ascending: false }),
         client.from("class_attendance_records").select("dance_class_id, student_id, attendance_date, status, check_in_at, check_out_at"),
@@ -36462,20 +36469,21 @@
       });
       return [...classrooms.entries()].map(([classroom, classroomStudents]) => {
         const studentTiles = classroomStudents.map((student) => {
+              const paused = student.status === "paused";
               const attendanceEntry = attendance[student.id];
               const status = teacherAttendanceStatus(attendanceEntry);
               const checkedOut = typeof attendanceEntry === "object" && Boolean(attendanceEntry?.checkOutAt);
               const checkedIn = ["present", "tardy"].includes(status);
-              const attendanceSelectable = checkInActive ? !status : (checkOutActive && status !== "absent" && !checkedOut);
+              const attendanceSelectable = !paused && (checkInActive ? !status : (checkOutActive && status !== "absent" && !checkedOut));
               const pendingKey = `${rosterClass.id}:${student.id}`;
-              const kitSelectable = kitDeliveryActive && student.kitPickedUp && !student.kitReceived;
-              const studentBoutiqueOrders = boutiqueDeliveryActive ? teacherBoutiqueDeliveryOrdersForStudent(rosterClass, student) : [];
+              const kitSelectable = !paused && kitDeliveryActive && student.kitPickedUp && !student.kitReceived;
+              const studentBoutiqueOrders = !paused && boutiqueDeliveryActive ? teacherBoutiqueDeliveryOrdersForStudent(rosterClass, student) : [];
               const boutiqueSelectable = studentBoutiqueOrders.length > 0;
               const selectable = boutiqueSelectable || kitSelectable || attendanceSelectable;
               const pending = boutiqueSelectable
                 ? studentBoutiqueOrders.every((order) => pendingTeacherBoutiqueDeliveries.has(String(order.id)))
                 : kitSelectable ? pendingTeacherKitDeliveries.has(pendingKey) : pendingTeacherRosterCheckIns.has(pendingKey);
-              return `<div class="teacher-roster-student-tile ${status ? `is-${status}` : ""}">
+              return `<div class="teacher-roster-student-tile ${paused ? "is-paused" : status ? `is-${status}` : ""}">
                 <button class="teacher-roster-profile-button ${pending ? "is-pending" : ""}" type="button" ${boutiqueSelectable ? `data-teacher-boutique-delivery-select="${rosterSafe(student.id)}"` : kitSelectable ? `data-teacher-kit-select="${rosterSafe(student.id)}"` : selectable ? `data-teacher-attendance-select="${rosterSafe(student.id)}"` : `data-teacher-roster-profile="${rosterSafe(student.id)}"`} data-teacher-attendance-class="${rosterSafe(rosterClass.id)}" aria-label="${selectable ? `${pending ? "Remove" : "Select"} ${rosterSafe(rosterStudentFullName(student))} for ${boutiqueSelectable ? "Boutique delivery" : kitSelectable ? "T-Shirt and bag delivery" : checkOutActive ? "check out" : "check in"}` : `Open ${rosterSafe(rosterStudentFullName(student))} profile`}">
                   <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
                   ${pending ? `<span class="teacher-roster-selection-check ${checkOutActive ? "is-safe" : ""}" aria-hidden="true">✓</span>` : ""}
@@ -36483,6 +36491,7 @@
                   ${attendanceFinalized && status === "absent" ? `<span class="teacher-roster-check is-absent" aria-label="Absent" title="Absent">×</span>` : ""}
                 </button>
                 <strong class="${weeklyHelperId === student.id ? "teacher-helper-name" : ""}">${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
+                ${paused ? `<span class="student-paused-badge">Paused</span>` : ""}
                 ${window.dtShoeIndicators?.(student) || ""}
               </div>`;
             }).join("");
@@ -36803,6 +36812,7 @@
         const enrolled = rosterEnrolled(rosterClass);
         if (enrolled.length) assignTeacherRosterHelper(rosterClass);
         const attendanceStudents = teacherRosterAttendanceStudents(rosterClass);
+        const displayedStudents = [...attendanceStudents, ...rosterPaused(rosterClass)];
         const prospects = rosterProspects(rosterClass).filter((student) => !student.additionalInformation?.trial_completed);
         const attendance = teacherAttendanceForClass(rosterClass);
         const unresolved = attendanceStudents.filter((student) => !teacherAttendanceStatus(attendance[student.id]));
@@ -36849,7 +36859,7 @@
           <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(classDisplayTitle)} class roster"><div class="teacher-roster-active-heading"><div><h3 class="${teacherRosterSchoolFilter === "all" ? "is-all-schools-title" : ""}">${rosterSafe(classDisplayTitle)}</h3><p><span>${rosterSafe(scheduledDay || "Day not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span>${rosterSafe(rosterClass.time || "Time not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span class="teacher-roster-duration ${durationClass}"><strong>${attendanceStudents.length} dancers</strong><span class="teacher-roster-heading-dot" aria-hidden="true"> • </span>${rosterSafe(duration).replace(" minutes", " min")}</span></p>${classTimingMarkup}</div>${classCanPostToParentPortal ? `<button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button>` : ""}</div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" ${readyBoutiqueOrders.length ? "" : "disabled"}>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}" aria-label="Class Star">${classActionContent("teacher-class-action-star.png", "Class Star")}</button><button class="teacher-class-action-photo-frames" type="button" data-teacher-photo-frames="${rosterSafe(rosterClass.id)}" aria-label="Photo Frames">${classActionContent("teacher-class-action-photo-frames.png", "Photo Frames")}</button></div></summary>
           <div class="teacher-roster-card-body">
             ${classComplete ? `<div class="teacher-attendance-complete">✓ Class attendance complete for today</div>` : checkInSubmitted ? `<div class="teacher-attendance-complete">✓ Check-in recorded</div>` : ""}
-            <div>${attendanceStudents.length ? teacherRosterClassroomMarkup(attendanceStudents, rosterClass) : `<div class="teacher-roster-empty">No dancers attending this class yet.</div>`}</div>
+            <div>${displayedStudents.length ? teacherRosterClassroomMarkup(displayedStudents, rosterClass) : `<div class="teacher-roster-empty">No dancers attending this class yet.</div>`}</div>
             ${attendanceStudents.length && !checkInSubmitted && checkInActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-attendance="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-attendance-finish="${rosterSafe(rosterClass.id)}">Check In</button></div>` : ""}
             ${checkInSubmitted && checkOutActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-attendance="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-attendance-checkout="${rosterSafe(rosterClass.id)}">Check Out</button></div>` : ""}
             ${kitDeliveryActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-kit-delivery="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-kit-delivery-finish="${rosterSafe(rosterClass.id)}">Mark as Delivered</button></div>` : ""}
@@ -38318,7 +38328,9 @@
       return school?.nickname?.trim() || schoolName;
     };
     const rosterEnrolled = (rosterClass) => rosterClass.students.filter((student) => student.status === "enrolled");
-    const rosterProspects = (rosterClass) => rosterClass.students.filter((student) => student.status !== "enrolled" && !student.additionalInformation?.future_dancer_archived);
+    const rosterPaused = (rosterClass) => rosterClass.students.filter((student) => student.status === "paused");
+    const rosterCurrentStudents = (rosterClass) => rosterClass.students.filter((student) => ["enrolled", "paused"].includes(student.status));
+    const rosterProspects = (rosterClass) => rosterClass.students.filter((student) => !["enrolled", "paused", "inactive"].includes(student.status) && !student.additionalInformation?.future_dancer_archived);
     const rosterClassAssignedDancers = (rosterClass) => {
       const rosterStudents = (rosterClass?.students || []).filter((student) => !student.additionalInformation?.future_dancer_archived);
       const queuedAssignments = enrollmentIntakeQueue.filter((item) => (
@@ -38342,7 +38354,8 @@
     const rosterStatusLabel = (status) => ({
       "trial-scheduled": "Trial scheduled",
       "trial-attended": "Trial attended",
-      "ready-to-enroll": "Ready to enroll"
+      "ready-to-enroll": "Ready to enroll",
+      "paused": "Paused"
     }[status] || "Future Dancer");
 
     const birthdayFallsThisWeek = (birthdate) => {
@@ -38378,12 +38391,13 @@
     const renderRosterStudentRows = (students, prospective = false) => {
       if (!students.length) return `<div class="roster-empty">${prospective ? "No future dancers right now." : "No enrolled dancers yet."}</div>`;
       return sortRosterStudents(students).map((student) => `
-        <article class="roster-profile-student-card ${student.gender === "male" ? "is-male" : ""}">
+        <article class="roster-profile-student-card ${student.gender === "male" ? "is-male" : ""} ${student.status === "paused" ? "is-paused" : ""}">
           <button class="roster-profile-student-card-main" type="button" data-roster-edit-student="${rosterSafe(student.id)}" aria-label="Open ${rosterSafe(rosterStudentFullName(student))}'s student profile">
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
             <strong>${rosterSafe(rosterStudentFullName(student))}</strong>
             <small>${rosterSafe(student.officialClassroom || student.classroom || "Classroom not assigned")}</small>
             <small>${rosterSafe(rosterAge(student.birthdate))}</small>
+            ${student.status === "paused" ? `<span class="student-paused-badge">Paused</span>` : ""}
           </button>
           ${prospective ? `<button class="primary" type="button" data-roster-enroll="${rosterSafe(student.id)}">Approve</button>` : ""}
         </article>
@@ -38421,7 +38435,8 @@
       teacherFilter.value = assignedTeacherIds.includes(currentTeacher) ? currentTeacher : "all";
       const term = search.value.trim().toLowerCase();
       const records = rosterClasses.filter((item) => item.sourceActive !== false).flatMap((rosterClass) => rosterClass.students.map((student) => ({ rosterClass, student }))).filter(({ rosterClass, student }) => {
-        if (student.status !== "enrolled") return false;
+        if (!["enrolled", "paused"].includes(student.status)) return false;
+        if (statusFilter.value !== "all" && student.status !== statusFilter.value) return false;
         if (schoolFilter.value !== "all" && rosterClass.schoolName !== schoolFilter.value) return false;
         if (teacherFilter.value !== "all" && rosterClass.teacherId !== teacherFilter.value) return false;
         if (dayFilter.value !== "all" && rosterClass.day !== dayFilter.value) return false;
@@ -38434,7 +38449,7 @@
       document.getElementById("admin-student-library-count").textContent = `${newEnrollmentCount} New · ${records.length} Student${records.length === 1 ? "" : "s"}`;
       const cardMarkup = ({ rosterClass, student }, { includeTeacher = true, includeSchoolClass = true } = {}) => {
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
-        return `<button class="student-library-card" type="button" data-student-library-open="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong>${includeTeacher ? `<small class="student-library-teacher">${rosterSafe(rosterTeacherName(rosterClass.teacherId))}</small>` : ""}${includeSchoolClass ? `<small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small>` : ""}<small class="student-library-age">${rosterSafe(rosterAge(student.birthdate))}</small>${window.dtShoeIndicators?.(student) || ""}</button>`;
+        return `<button class="student-library-card ${student.status === "paused" ? "is-paused" : ""}" type="button" data-student-library-open="${rosterSafe(rosterClass.id)}::${rosterSafe(student.id)}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${dayLabel}</span><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong>${student.status === "paused" ? `<span class="student-paused-badge">Paused</span>` : ""}${includeTeacher ? `<small class="student-library-teacher">${rosterSafe(rosterTeacherName(rosterClass.teacherId))}</small>` : ""}${includeSchoolClass ? `<small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small>` : ""}<small class="student-library-age">${rosterSafe(rosterAge(student.birthdate))}</small>${window.dtShoeIndicators?.(student) || ""}</button>`;
       };
       const groupedByTeacher = teacherFilter.value !== "all";
       list.classList.toggle("is-grouped", groupedByTeacher);
@@ -38504,7 +38519,7 @@
 
     const dashboardEntityStudentRecords = () => rosterClasses
       .filter((rosterClass) => rosterClass.sourceActive !== false)
-      .flatMap((rosterClass) => rosterEnrolled(rosterClass).map((student) => ({ rosterClass, student })));
+      .flatMap((rosterClass) => rosterCurrentStudents(rosterClass).map((student) => ({ rosterClass, student })));
     const dashboardEntityUniqueCount = (records) => new Set(records.map(({ student }) => student.id || student.enrollmentId || `${student.firstName || ""}:${student.lastName || ""}:${student.parentEmail || ""}`)).size;
     const dashboardEntitySummaryMarkup = (page) => {
       const records = dashboardEntityStudentRecords();
@@ -41306,6 +41321,7 @@
       const rosterClassCardMarkup = (item) => {
         const assignedTeacher = teachers.find((teacher) => teacher.id === item.teacherId);
         const enrolledStudents = rosterEnrolled(item);
+        const displayedStudents = rosterCurrentStudents(item);
         const enrolled = enrolledStudents.length;
         const datedStudents = enrolledStudents.filter((student) => student.birthdate).sort((left, right) => right.birthdate.localeCompare(left.birthdate));
         const ageRange = datedStudents.length
@@ -41323,9 +41339,9 @@
           <span class="roster-class-teacher-bubble teacher-identity-bubble ${teacherProfileColorClass(assignedTeacher || item.teacherId)}" title="${rosterSafe(assignedTeacher ? rosterTeacherName(item.teacherId) : "Teacher unassigned")}" aria-label="${rosterSafe(assignedTeacher ? `Assigned to ${rosterTeacherName(item.teacherId)}` : "Teacher unassigned")}">${assignedTeacher?.photo ? `<img src="${rosterSafe(assignedTeacher.photo)}" alt="">` : rosterSafe(assignedTeacher ? initialsFor(assignedTeacher) : "—")}</span>
           <strong>${rosterSafe(item.name)}</strong>
           <small class="roster-class-age-range">${rosterSafe(ageRange)}</small>
-          <span class="roster-class-students">${enrolledStudents.length ? enrolledStudents.map((student) => `<span class="roster-class-student">
+          <span class="roster-class-students">${displayedStudents.length ? displayedStudents.map((student) => `<span class="roster-class-student ${student.status === "paused" ? "is-paused" : ""}">
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
-            <span>${rosterSafe(`${rosterStudentFirstName(student)}${firstNameCounts.get(rosterStudentFirstName(student).trim().toLowerCase()) > 1 && student.lastName ? ` ${student.lastName.trim().charAt(0).toUpperCase()}.` : ""}`)}</span>
+            <span>${rosterSafe(`${rosterStudentFirstName(student)}${firstNameCounts.get(rosterStudentFirstName(student).trim().toLowerCase()) > 1 && student.lastName ? ` ${student.lastName.trim().charAt(0).toUpperCase()}.` : ""}`)}${student.status === "paused" ? " · Paused" : ""}</span>
           </span>`).join("") : `<span class="roster-class-no-students">No enrolled dancers yet</span>`}</span>
         </button>`;
       };
@@ -49394,21 +49410,27 @@
         enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
         showToast("School, classroom, and dance class updated");
       } else if(deactivateButton){
-        if(!window.confirm("Deactivate this dancer after confirming refunds and billing are complete?"))return;
+        const isPause=String(item.request_type||"").toLowerCase().includes("pause");
+        if(!window.confirm(isPause?"Pause this dancer after confirming refunds and billing are complete?":"Deactivate this dancer after confirming refunds and billing are complete?"))return;
         const source=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(item.assigned_student_id));
         if(!source)return showToast("The assigned dancer could not be found");
         if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){
-          const endedDate=item.last_day||new Date().toISOString().slice(0,10);
-          const [enrollmentResult,studentResult]=await Promise.all([
-            window.dtSupabase.from("class_enrollments").update({status:"withdrawn",ended_date:endedDate}).eq("id",item.assigned_class_enrollment_id||source.student.enrollmentId),
-            window.dtSupabase.from("students").update({status:"inactive"}).eq("id",source.student.id)
-          ]);
-          if(enrollmentResult.error||studentResult.error){showToast("The dancer could not be deactivated");return;}
+          if(isPause){
+            const {error}=await window.dtSupabase.from("class_enrollments").update({status:"paused",ended_date:null}).eq("id",item.assigned_class_enrollment_id||source.student.enrollmentId);
+            if(error){showToast("The dancer could not be paused");return;}
+          }else{
+            const endedDate=item.last_day||new Date().toISOString().slice(0,10);
+            const [enrollmentResult,studentResult]=await Promise.all([
+              window.dtSupabase.from("class_enrollments").update({status:"withdrawn",ended_date:endedDate}).eq("id",item.assigned_class_enrollment_id||source.student.enrollmentId),
+              window.dtSupabase.from("students").update({status:"inactive"}).eq("id",source.student.id)
+            ]);
+            if(enrollmentResult.error||studentResult.error){showToast("The dancer could not be deactivated");return;}
+          }
         }
-        source.student.status="inactive";
+        source.student.status=isPause?"paused":"inactive";
         await persist({deactivation_status:"completed",status:"completed",completed_at:new Date().toISOString()});
         enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
-        showToast("Enrollment deactivated");
+        showToast(isPause?"Student paused":"Enrollment deactivated");
       }
       renderEnrollmentChanges();
       renderEnrollmentStudentSummary();
