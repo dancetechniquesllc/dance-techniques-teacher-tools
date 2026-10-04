@@ -31,7 +31,7 @@ const parseDate=(value:string)=>{
 Deno.serve(async request=>{
   if(request.method!=="POST") return new Response(JSON.stringify({ok:false}),{status:405,headers:responseHeaders});
   const url=new URL(request.url);
-  const expectedSecret=Deno.env.get("JOTFORM_WEBHOOK_SECRET")||"";
+  const expectedSecret=Deno.env.get("JOTFORM_ENROLLMENT_CHANGE_WEBHOOK_SECRET")||"";
   const supplied=request.headers.get("x-jotform-webhook-secret")||url.searchParams.get("secret")||"";
   if(!expectedSecret||supplied!==expectedSecret) return new Response(JSON.stringify({ok:false}),{status:401,headers:responseHeaders});
   try{
