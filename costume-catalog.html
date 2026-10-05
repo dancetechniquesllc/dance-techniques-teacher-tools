@@ -899,16 +899,20 @@ function costumeAssignmentForClass(classInfo) {
   return selectedCostumesByClass[String(classInfo.id)] || classInfo.costumeSelection || null;
 }
 
-function costumeIsReservedForShow(costume, selectedClass) {
+function costumeShowConflict(costume, selectedClass) {
   if(!selectedClass?.showTime) return false;
   const selectedCombinedId=String(selectedClass.combinedPerformanceId || "");
-  return matcherData.classes.some(classInfo=>{
+  return matcherData.classes.find(classInfo=>{
     if(String(classInfo.id)===String(selectedClass.id) || classInfo.showTime!==selectedClass.showTime) return false;
     const assignment=costumeAssignmentForClass(classInfo);
     if(!assignment || assignment.costumeName!==costume.name || (assignment.company && assignment.company!==costume.company)) return false;
     const otherCombinedId=String(classInfo.combinedPerformanceId || "");
     return !selectedCombinedId || !otherCombinedId || selectedCombinedId!==otherCombinedId;
-  });
+  }) || null;
+}
+
+function costumeIsReservedForShow(costume, selectedClass) {
+  return Boolean(costumeShowConflict(costume,selectedClass));
 }
 
 function renderMatcherResults() {
@@ -977,6 +981,16 @@ function closeCostumeSelection(event) {
 }
 function confirmCostumeSelection() {
   if(!pendingCostumeSelection) return;
+  const selectedClass=matcherData.classes.find(item=>String(item.id)===String(pendingCostumeSelection.classId));
+  const costume=COSTUMES.find(item=>item.name===pendingCostumeSelection.costumeName&&(!pendingCostumeSelection.company||item.company===pendingCostumeSelection.company));
+  const conflict=costume&&selectedClass?costumeShowConflict(costume,selectedClass):null;
+  if(conflict) {
+    window.alert(`${pendingCostumeSelection.costumeName} is already assigned to ${conflict.schoolName} · ${conflict.name} in ${selectedClass.showTime}. Choose a different costume. The only exception is when both classes are linked as one combined performance.`);
+    closeCostumeSelection();
+    pendingCostumeSelection=null;
+    renderMatcherResults();
+    return;
+  }
   selectedCostumesByClass[pendingCostumeSelection.classId]=pendingCostumeSelection;
   localStorage.setItem(COSTUME_SELECTION_STORAGE_KEY,JSON.stringify(selectedCostumesByClass));
   try { if(window.parent!==window&&typeof window.parent.saveCostumeMatcherSelection==="function") window.parent.saveCostumeMatcherSelection(pendingCostumeSelection); } catch(error) {}

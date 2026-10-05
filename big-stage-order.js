@@ -241,6 +241,41 @@
       }
     });
   };
+  const syncCostumeConflicts = () => {
+    const rowsByCostume = new Map();
+    performanceRows().forEach((row) => {
+      const preview = row.querySelector("[data-stage-costume-preview]");
+      const costumeName = preview?.dataset.stageCostumeName?.trim()
+        || row.querySelector('.big-stage-costume strong')?.textContent?.trim()
+        || "";
+      if (!costumeName) return;
+      if (!rowsByCostume.has(costumeName)) rowsByCostume.set(costumeName, []);
+      rowsByCostume.get(costumeName).push(row);
+    });
+    performanceRows().forEach((row) => {
+      const preview = row.querySelector("[data-stage-costume-preview]");
+      const costumeName = preview?.dataset.stageCostumeName?.trim()
+        || row.querySelector('.big-stage-costume strong')?.textContent?.trim()
+        || "";
+      const isConflict = costumeName && (rowsByCostume.get(costumeName)?.length || 0) > 1;
+      row.classList.toggle("big-stage-costume-conflict-row", Boolean(isConflict));
+      const cell = row.querySelector('.big-stage-costume');
+      let warning = cell?.querySelector(".big-stage-costume-conflict");
+      if (!isConflict) {
+        warning?.remove();
+        return;
+      }
+      if (!warning) {
+        const warning = document.createElement("div");
+        warning.className = "big-stage-costume-conflict";
+        warning.setAttribute("role", "alert");
+        cell.appendChild(warning);
+      }
+      warning = cell.querySelector(".big-stage-costume-conflict");
+      const markup = `<strong>Costume conflict</strong><span>${safe(costumeName)} is already in this show.</span>`;
+      if (warning.innerHTML !== markup) warning.innerHTML = markup;
+    });
+  };
   const showChoices = () => {
     let planned = [];
     try { planned = JSON.parse(localStorage.getItem("dt-big-stage-planned-shows:v1") || "[]").map((show) => show.name); } catch { planned = []; }
@@ -330,6 +365,7 @@
         orderCell.prepend(handle);
       }
     });
+    syncCostumeConflicts();
     setEditing(false);
     if (new URLSearchParams(window.location.search).has("costume-detail-test") && root.dataset.costumeDetailTestOpened !== "true") {
       root.dataset.costumeDetailTestOpened = "true";
@@ -455,7 +491,7 @@
   });
   root.addEventListener("drop", (event) => { if (!draggedRow) return; event.preventDefault(); draggedRow.classList.remove("is-dragging"); draggedRow = null; renumber(); });
   root.addEventListener("dragend", () => { draggedRow?.classList.remove("is-dragging"); draggedRow = null; });
-  new MutationObserver(() => window.requestAnimationFrame(() => { enhance(); syncCombinedCapacityAlerts(); })).observe(root, { childList: true, subtree: true, characterData: true });
+  new MutationObserver(() => window.requestAnimationFrame(() => { enhance(); syncCombinedCapacityAlerts(); syncCostumeConflicts(); })).observe(root, { childList: true, subtree: true, characterData: true });
   enhance();
   loadRecitalPlaylist();
 })();
