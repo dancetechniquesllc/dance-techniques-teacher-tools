@@ -44,6 +44,7 @@
     return "Age range not entered";
   };
   const combinedLine = (content, color, detail = "") => `<div class="big-stage-combined-line" style="--combined-teacher-color:${color}">${content}${detail ? `<small>${detail}</small>` : ""}</div>`;
+  const combinedBand = ({ teacher, school, className, age, dancers, boys, color }) => `<div class="big-stage-combined-band" style="--combined-teacher-color:${color}"><div data-stage-column="teacher">${teacher}</div><div data-stage-column="school">${school}</div><div class="big-stage-class" data-stage-column="class">${className}${age ? `<small>${age}</small>` : ""}</div><div data-stage-column="students"><strong>${dancers}</strong>${boys ? `<span class="big-stage-boys-pill">${boys}</span>` : ""}</div></div>`;
   const addCombinedSamples = (table) => {
     if (!new URLSearchParams(window.location.search).has("big-stage-preview") || table.dataset.combinedSamplesReady === "true") return;
     const body = table.querySelector("tbody");
@@ -52,18 +53,14 @@
       {
         kind: "Same Teacher Combination",
         type: "Either",
-        teachers: combinedLine("<strong>Miss Lexi</strong>", teacherColors.lexi, "2 of her classes"),
-        schools: combinedLine("Primrose School of Wylie", teacherColors.lexi) + combinedLine("Primrose School of North", teacherColors.lexi),
-        classes: combinedLine("<strong>Ballet &amp; Tap · Pre-K</strong>", teacherColors.lexi, "4Y 0M - 5Y 0M") + combinedLine("<strong>Ballet &amp; Tap · Preschool</strong>", teacherColors.lexi, "3Y 0M - 4Y 0M"),
-        dancers: "25 Dancers", boys: "2 boys", song: "When I Grow Up", costume: "Blush Tutu · CC-104", props: "Stars · 25", instructions: "Both classes enter together; younger class begins in front."
+        bands: combinedBand({ teacher: "<strong>Miss Lexi</strong><small>2 of her classes</small>", school: "<span>Primrose School of Wylie</span><span>Primrose School of North</span>", className: "<strong>Ballet &amp; Tap · Pre-K</strong><strong>Ballet &amp; Tap · Preschool</strong>", age: "4Y 0M - 5Y 0M · 3Y 0M - 4Y 0M", dancers: "25 Dancers", boys: "2 boys", color: teacherColors.lexi }),
+        song: "When I Grow Up", costume: "Blush Tutu · CC-104", props: "Stars · 25", instructions: "Both classes enter together; younger class begins in front."
       },
       {
         kind: "Two Teacher Combination",
         type: "Ballet",
-        teachers: combinedLine("<strong>Miss Liv</strong>", teacherColors.liv) + combinedLine("<strong>Miss Megan</strong>", teacherColors.megan),
-        schools: combinedLine("Wylie Montessori Academy · Sachse", teacherColors.liv) + combinedLine("Primrose School of Rowlett", teacherColors.megan),
-        classes: combinedLine("<strong>Ballet · Preschool</strong>", teacherColors.liv, "3Y 0M - 4Y 0M") + combinedLine("<strong>Ballet · Pre-K</strong>", teacherColors.megan, "4Y 0M - 5Y 0M"),
-        dancers: "23 Dancers", boys: "1 boy", song: "Dream Together", costume: "Golden Tutu · CC-172", props: "None", instructions: "Miss Liv enters stage left; Miss Megan enters stage right."
+        bands: combinedBand({ teacher: "<strong>Miss Liv</strong>", school: "Wylie Montessori Academy · Sachse", className: "<strong>Ballet · Preschool</strong>", age: "3Y 0M - 4Y 0M", dancers: "11 Dancers", boys: "", color: teacherColors.liv }) + combinedBand({ teacher: "<strong>Miss Megan</strong>", school: "Primrose School of Rowlett", className: "<strong>Ballet · Pre-K</strong>", age: "4Y 0M - 5Y 0M", dancers: "12 Dancers", boys: "1 boy", color: teacherColors.megan }),
+        song: "Dream Together", costume: "Golden Tutu · CC-172", props: "None", instructions: "Miss Liv enters stage left; Miss Megan enters stage right."
       }
     ];
     sampleRows.forEach((sample) => {
@@ -72,7 +69,7 @@
       const options = ["Tap", "Ballet", "Either"].map((option) => `<option${option === sample.type ? " selected" : ""}>${option}</option>`).join("");
       row.className = "big-stage-combined-row";
       row.dataset.combinedSample = sample.kind;
-      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${sample.kind}">${options}</select><span class="big-stage-combined-badge">Combined</span></td><td data-stage-column="teacher"><div class="big-stage-combined-stack">${sample.teachers}</div></td><td data-stage-column="school"><div class="big-stage-combined-stack">${sample.schools}</div></td><td class="big-stage-class" data-stage-column="class"><div class="big-stage-combined-stack">${sample.classes}</div></td><td data-stage-column="students"><strong>${sample.dancers}</strong><span class="big-stage-boys-pill">${sample.boys}</span></td><td data-stage-column="song">${sample.song}</td><td class="big-stage-costume" data-stage-column="costume"><strong>${sample.costume}</strong><small>Catalog item</small></td><td data-stage-column="props">${sample.props}</td><td data-stage-column="instructions">${sample.instructions}</td>`;
+      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${sample.kind}">${options}</select><span class="big-stage-combined-badge">Combined</span></td><td class="big-stage-combined-area" colspan="4"><div class="big-stage-combined-stack">${sample.bands}</div></td><td data-stage-column="song">${sample.song}</td><td class="big-stage-costume" data-stage-column="costume"><strong>${sample.costume}</strong><small>Catalog item</small></td><td data-stage-column="props">${sample.props}</td><td data-stage-column="instructions">${sample.instructions}</td>`;
       body.appendChild(row);
     });
     table.dataset.combinedSamplesReady = "true";

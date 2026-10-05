@@ -27,20 +27,25 @@
 .big-stage-combined-stack { display: grid; gap: 7px; }
 .big-stage-combined-line { min-height: 42px; display: grid; align-content: center; gap: 3px; padding: 6px 7px; border-left: 4px solid var(--combined-teacher-color, var(--stage-berry)); border-radius: 7px; background: color-mix(in srgb, var(--combined-teacher-color, #dba9a1) 13%, white); }
 .big-stage-combined-line small { display: block; color: #6f6265; font-size: 9px; font-weight: 750; }
+.big-stage-combined-area { padding: 8px !important; }
+.big-stage-combined-band { min-height: 58px; display: grid; grid-template-columns: 7fr 12fr 11fr 9fr; align-items: stretch; gap: 12px; padding: 8px 10px; border-left: 5px solid var(--combined-teacher-color, var(--stage-berry)); border-radius: 10px; background: color-mix(in srgb, var(--combined-teacher-color, #dba9a1) 14%, white); }
+.big-stage-combined-band > div { min-width: 0; display: grid; align-content: center; gap: 4px; }
+.big-stage-combined-band > div > span, .big-stage-combined-band > div > strong { display: block; }
+.big-stage-combined-band small { display: block; color: #6f6265; font-size: 9px; font-weight: 750; }
 .big-stage-boys-pill { margin-top: 6px; background: #dbe7d6; color: #3f5c43; }
 .big-stage-class .big-stage-age-range { display: block; margin-top: 5px; color: #6f6265; font-size: 10px; font-weight: 750; white-space: nowrap; }
 .big-stage-table [data-stage-column="school"] { width: 152px; }
 .big-stage-table [data-stage-column="class"] { width: 142px; }
 .big-stage-table [data-stage-column="instructions"] { width: auto; min-width: 170px; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(1) { width: 6%; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(2) { width: 7%; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(3) { width: 12%; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(4) { width: 11%; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(5) { width: 9%; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(6) { width: 12%; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(7) { width: 7%; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(8) { width: 8%; }
-.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(9) { width: 28%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(1) { width: 6%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(2) { width: 7%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(3) { width: 12%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(4) { width: 11%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(5) { width: 9%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(6) { width: 12%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(7) { width: 7%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(8) { width: 8%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(thead th, tbody tr:not(.big-stage-combined-row) > td):nth-child(9) { width: 28%; }
 .is-editing-show-order .big-stage-drag-handle { display: inline-flex; }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable { cursor: grab; background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 20%, white); }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable:hover { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 28%, white); box-shadow: inset 4px 0 0 var(--stage-teacher-color, var(--stage-berry)); }
