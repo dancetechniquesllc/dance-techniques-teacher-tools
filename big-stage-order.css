@@ -105,6 +105,7 @@
 .big-stage-costume-needed { display: grid; gap: 4px; }.big-stage-costume-needed strong { font-size: 15px; }.big-stage-costume-needed strong::after { content: " Dancers"; }.big-stage-costume-needed small { color: #6f6265; font-size: 10px; font-weight: 800; line-height: 1.35; }
 .big-stage-costume-schools { display: grid; gap: 5px; }.big-stage-costume-schools span { display: block; }
 .big-stage-costume-teachers { display: grid; gap: 5px; }.big-stage-costume-teachers span { display: block; }
+.big-stage-costume-classes { display: grid; gap: 5px; }.big-stage-costume-classes span { display: block; }
 @media (max-width: 650px) { .big-stage-costume-detail-dialog { grid-template-columns: 1fr; } .big-stage-costume-detail-image { max-height: 320px; } .big-stage-costume-roster > div { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1320px) {
   .app:has(#admin-home-big-stage:not([hidden])) { width: min(1900px, calc(100% - 24px)); }
