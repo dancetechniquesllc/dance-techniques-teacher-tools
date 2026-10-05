@@ -13,10 +13,43 @@
     "Berry Sequin Set · CC-218": "Costume Images/La Vie En Rose-268.png",
     "Golden Tutu · CC-172": "Costume Images/Screenshot 2026-01-13 at 6.43.12 PM-461.png"
   };
+  const costumeSizeLabels = { XXSC: "XXS", XSC: "XS", SC: "S", IC: "I", MC: "M", LC: "L" };
+  const previewCostumeDancers = [
+    ["Ava Martinez", "XS"], ["Charlotte Reynolds", "S"], ["Ella Sullivan", "S"], ["Lily Johnson", "S"], ["Adeline Brooks", "XS"],
+    ["Harper Davis", "S"], ["Maesyn Clark", "I"], ["Riley Thompson", "S"], ["Emma Wilson", "XS"], ["Mia Anderson", "S"],
+    ["Sophia Carter", "I"], ["Olivia Lewis", "S"], ["Isabella Walker", "XS"], ["Amelia Hall", "S"], ["Evelyn Young", "I"],
+    ["Abigail King", "S"], ["Emily Wright", "XS"], ["Elizabeth Scott", "S"], ["Camila Green", "I"], ["Luna Baker", "S"],
+    ["Sofia Adams", "XS"], ["Avery Nelson", "S"], ["Mila Hill", "I"], ["Aria Campbell", "S"], ["Scarlett Mitchell", "XS"]
+  ].map(([name, size], index) => ({ id: `preview-costume-${index}`, name, size, photo: "" }));
   const safe = (value) => String(value || "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[character]));
   const teacherColor = (row) => {
     const teacher = String(row.querySelector('[data-stage-column="teacher"]')?.textContent || row.children[2]?.textContent || "").toLowerCase().replace(/^(miss|ms\.?|mrs\.?)\s+/, "").split(/\s+/)[0];
     return teacherColors[teacher] || "#dba9a1";
+  };
+  const costumeDancersForRow = (row, costumeName) => {
+    const classNames = [...row.querySelectorAll(".big-stage-class strong")].map((item) => item.textContent.trim());
+    try {
+      const selections = JSON.parse(localStorage.getItem("dt-costume-selections-v1") || "{}");
+      const appData = JSON.parse(localStorage.getItem("dt-teacher-tools-prototype-v1") || "null");
+      const classes = Array.isArray(appData?.rosterClasses) ? appData.rosterClasses.filter((classInfo) => classNames.includes(String(classInfo.name || "").trim())) : [];
+      const dancers = classes.flatMap((classInfo) => {
+        const selection = selections[String(classInfo.id)] || classInfo.costumeSelection;
+        if (!selection || selection.costumeName !== costumeName) return [];
+        return (selection.assignments || []).map((assignment) => {
+          const student = (classInfo.students || []).find((item) => String(item.id) === String(assignment.studentId));
+          return { id: assignment.studentId, name: assignment.name || [student?.firstName, student?.lastName].filter(Boolean).join(" ") || "Dancer", size: costumeSizeLabels[assignment.size] || assignment.size || "Size pending", photo: student?.photo || student?.photoUrl || "" };
+        });
+      });
+      if (dancers.length) return dancers;
+      const matching = Object.values(selections).filter((selection) => selection?.costumeName === costumeName).flatMap((selection) => selection.assignments || []).map((assignment) => ({ id: assignment.studentId, name: assignment.name || "Dancer", size: costumeSizeLabels[assignment.size] || assignment.size || "Size pending", photo: "" }));
+      if (matching.length) return matching;
+    } catch (error) {}
+    const total = Number.parseInt(row.querySelector('[data-stage-column="students"] strong')?.textContent || "", 10) || 4;
+    return previewCostumeDancers.slice(0, Math.min(total, previewCostumeDancers.length));
+  };
+  const costumeDancerMarkup = (dancer) => {
+    const initials = String(dancer.name || "D").split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+    return `<article class="big-stage-costume-dancer"><span class="big-stage-costume-dancer-avatar">${dancer.photo ? `<img src="${safe(dancer.photo)}" alt="">` : safe(initials)}</span><div><strong>${safe(dancer.name)}</strong><small>${safe(dancer.size)}</small></div></article>`;
   };
   const showKey = () => `dt-big-stage-order:${root.querySelector(".big-stage-view-title h4")?.textContent?.trim() || "show"}`;
   const performanceKey = () => `${showKey()}:performing`;
@@ -296,6 +329,10 @@
       }
     });
     setEditing(false);
+    if (new URLSearchParams(window.location.search).has("costume-detail-test") && root.dataset.costumeDetailTestOpened !== "true") {
+      root.dataset.costumeDetailTestOpened = "true";
+      window.requestAnimationFrame(() => root.querySelector("[data-stage-costume-preview]")?.click());
+    }
     enhancing = false;
   };
   root.addEventListener("click", (event) => {
@@ -308,17 +345,20 @@
     if (costume) {
       const row = costume.closest("tr");
       const costumeName = costume.dataset.stageCostumeName || "Assigned Costume";
-      const className = row?.querySelector(".big-stage-class strong")?.textContent?.trim() || "Class";
-      const school = row?.querySelector('[data-stage-column="school"]')?.textContent?.trim() || "School not entered";
-      const teacher = row?.querySelector('[data-stage-column="teacher"]')?.textContent?.trim() || "Teacher not assigned";
+      const className = [...(row?.querySelectorAll(".big-stage-class strong") || [])].map((item) => item.textContent.trim()).join(" + ") || "Class";
+      const schoolCells = row?.matches(".big-stage-combined-row") ? row.querySelectorAll('.big-stage-combined-band [data-stage-column="school"]') : row?.querySelectorAll(':scope > [data-stage-column="school"]');
+      const teacherCells = row?.matches(".big-stage-combined-row") ? row.querySelectorAll('.big-stage-combined-band [data-stage-column="teacher"] strong') : row?.querySelectorAll(':scope > [data-stage-column="teacher"] strong');
+      const school = [...(schoolCells || [])].map((item) => item.textContent.trim().replace(/\s+/g, " ")).join(" · ") || "School not entered";
+      const teacher = [...(teacherCells || [])].map((item) => item.textContent.trim()).join(" · ") || "Teacher not assigned";
       const roster = row?.querySelector('[data-stage-column="students"] strong')?.textContent?.trim() || "Roster not entered";
-      const song = row?.querySelector('[data-stage-column="song"]')?.textContent?.trim() || "Song not entered";
+      const song = row?.querySelector('[data-stage-song]')?.value || row?.querySelector('[data-stage-column="song"]')?.textContent?.trim() || "Song not entered";
       const image = costume.querySelector("img")?.src || "";
+      const dancers = costumeDancersForRow(row, costumeName);
       document.getElementById("big-stage-costume-detail-modal")?.remove();
       const modal = document.createElement("div");
       modal.id = "big-stage-costume-detail-modal";
       modal.className = "big-stage-costume-detail-modal";
-      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close costume details">×</button><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd>${className}</dd></div><div><dt>School</dt><dd>${school}</dd></div><div><dt>Teacher</dt><dd>${teacher}</dd></div><div><dt>Song</dt><dd>${song}</dd></div><div><dt>Participating</dt><dd>${roster}</dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
+      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close costume details">×</button><div class="big-stage-costume-detail-visual"><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><section class="big-stage-costume-roster"><h4>Dancer Sizes</h4><div>${dancers.map(costumeDancerMarkup).join("")}</div></section></div><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd>${className}</dd></div><div><dt>School</dt><dd>${school}</dd></div><div><dt>Teacher</dt><dd>${teacher}</dd></div><div><dt>Song</dt><dd>${song}</dd></div><div><dt>Participating</dt><dd>${roster}</dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
       document.body.appendChild(modal);
       const close = () => modal.remove();
       modal.querySelector(".big-stage-costume-detail-close").addEventListener("click", close);
