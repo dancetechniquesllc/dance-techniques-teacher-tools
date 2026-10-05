@@ -1,6 +1,16 @@
 .big-stage-drag-handle { display: none; margin-right: 7px; color: var(--stage-berry); font-size: 18px; font-weight: 900; line-height: 1; cursor: grab; user-select: none; }
 .big-stage-table tbody tr:has(.big-stage-class) { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 16%, white); }
 .big-stage-table tbody tr:has(.big-stage-class) td { border-top-color: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 34%, var(--border)); }
+.big-stage-table[data-stage-layout-ready="true"] { min-width: 1320px; }
+.big-stage-table [data-stage-column="teacher"] strong, .big-stage-table [data-stage-column="students"] strong { display: block; white-space: nowrap; }
+.big-stage-performing-pill, .big-stage-boys-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 24px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 900; white-space: nowrap; }
+.big-stage-performing-pill.is-ballet { background: #f2d9d7; color: #733246; }
+.big-stage-performing-pill.is-tap { background: #dbe7d6; color: #3f5c43; }
+.big-stage-performing-pill.is-either { background: #f4dfa1; color: #705615; }
+.big-stage-boys-pill { margin-top: 6px; background: #dbe7d6; color: #3f5c43; }
+.big-stage-table [data-stage-column="school"] { min-width: 170px; }
+.big-stage-table [data-stage-column="class"] { min-width: 145px; }
+.big-stage-table [data-stage-column="instructions"] { min-width: 230px; }
 .is-editing-show-order .big-stage-drag-handle { display: inline-flex; }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable { cursor: grab; background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 20%, white); }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable:hover { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 28%, white); box-shadow: inset 4px 0 0 var(--stage-teacher-color, var(--stage-berry)); }
