@@ -22,6 +22,11 @@
 .big-stage-order.is-either { background: #f4dfa1; color: #705615; }
 .big-stage-order-type { display: block; width: 58px; margin: 6px auto 0; padding: 2px 12px 2px 2px; border: 0; border-bottom: 1px solid #9f8e88; border-radius: 0; background-color: transparent; color: #211817; font-size: 10px; font-weight: 850; line-height: 1.2; text-align: center; cursor: pointer; }
 .big-stage-order-type:focus-visible { outline: 2px solid var(--stage-berry); outline-offset: 2px; }
+.big-stage-combined-badge { display: block; width: max-content; margin: 7px auto 0; color: var(--stage-berry); font-size: 8px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+.big-stage-combined-row { background: #fffaf6 !important; }
+.big-stage-combined-stack { display: grid; gap: 7px; }
+.big-stage-combined-line { min-height: 42px; display: grid; align-content: center; gap: 3px; padding: 6px 7px; border-left: 4px solid var(--combined-teacher-color, var(--stage-berry)); border-radius: 7px; background: color-mix(in srgb, var(--combined-teacher-color, #dba9a1) 13%, white); }
+.big-stage-combined-line small { display: block; color: #6f6265; font-size: 9px; font-weight: 750; }
 .big-stage-boys-pill { margin-top: 6px; background: #dbe7d6; color: #3f5c43; }
 .big-stage-class .big-stage-age-range { display: block; margin-top: 5px; color: #6f6265; font-size: 10px; font-weight: 750; white-space: nowrap; }
 .big-stage-table [data-stage-column="school"] { width: 152px; }

@@ -43,6 +43,40 @@
     if (value.includes("preschool")) return "3Y 0M - 4Y 0M";
     return "Age range not entered";
   };
+  const combinedLine = (content, color, detail = "") => `<div class="big-stage-combined-line" style="--combined-teacher-color:${color}">${content}${detail ? `<small>${detail}</small>` : ""}</div>`;
+  const addCombinedSamples = (table) => {
+    if (!new URLSearchParams(window.location.search).has("big-stage-preview") || table.dataset.combinedSamplesReady === "true") return;
+    const body = table.querySelector("tbody");
+    if (!body) return;
+    const sampleRows = [
+      {
+        kind: "Same Teacher Combination",
+        type: "Either",
+        teachers: combinedLine("<strong>Miss Lexi</strong>", teacherColors.lexi, "2 of her classes"),
+        schools: combinedLine("Primrose School of Wylie", teacherColors.lexi) + combinedLine("Primrose School of North", teacherColors.lexi),
+        classes: combinedLine("<strong>Ballet &amp; Tap · Pre-K</strong>", teacherColors.lexi, "4Y 0M - 5Y 0M") + combinedLine("<strong>Ballet &amp; Tap · Preschool</strong>", teacherColors.lexi, "3Y 0M - 4Y 0M"),
+        dancers: "25 Dancers", boys: "2 boys", song: "When I Grow Up", costume: "Blush Tutu · CC-104", props: "Stars · 25", instructions: "Both classes enter together; younger class begins in front."
+      },
+      {
+        kind: "Two Teacher Combination",
+        type: "Ballet",
+        teachers: combinedLine("<strong>Miss Liv</strong>", teacherColors.liv) + combinedLine("<strong>Miss Megan</strong>", teacherColors.megan),
+        schools: combinedLine("Wylie Montessori Academy · Sachse", teacherColors.liv) + combinedLine("Primrose School of Rowlett", teacherColors.megan),
+        classes: combinedLine("<strong>Ballet · Preschool</strong>", teacherColors.liv, "3Y 0M - 4Y 0M") + combinedLine("<strong>Ballet · Pre-K</strong>", teacherColors.megan, "4Y 0M - 5Y 0M"),
+        dancers: "23 Dancers", boys: "1 boy", song: "Dream Together", costume: "Golden Tutu · CC-172", props: "None", instructions: "Miss Liv enters stage left; Miss Megan enters stage right."
+      }
+    ];
+    sampleRows.forEach((sample) => {
+      const row = document.createElement("tr");
+      const performanceClass = sample.type.toLowerCase();
+      const options = ["Tap", "Ballet", "Either"].map((option) => `<option${option === sample.type ? " selected" : ""}>${option}</option>`).join("");
+      row.className = "big-stage-combined-row";
+      row.dataset.combinedSample = sample.kind;
+      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${sample.kind}">${options}</select><span class="big-stage-combined-badge">Combined</span></td><td data-stage-column="teacher"><div class="big-stage-combined-stack">${sample.teachers}</div></td><td data-stage-column="school"><div class="big-stage-combined-stack">${sample.schools}</div></td><td class="big-stage-class" data-stage-column="class"><div class="big-stage-combined-stack">${sample.classes}</div></td><td data-stage-column="students"><strong>${sample.dancers}</strong><span class="big-stage-boys-pill">${sample.boys}</span></td><td data-stage-column="song">${sample.song}</td><td class="big-stage-costume" data-stage-column="costume"><strong>${sample.costume}</strong><small>Catalog item</small></td><td data-stage-column="props">${sample.props}</td><td data-stage-column="instructions">${sample.instructions}</td>`;
+      body.appendChild(row);
+    });
+    table.dataset.combinedSamplesReady = "true";
+  };
   const reshapeTable = () => {
     const table = root.querySelector(".big-stage-table");
     if (!table || table.dataset.stageLayoutReady === "true") return;
@@ -68,6 +102,7 @@
       const performanceOptions = ["Tap", "Ballet", "Either"].map((option) => `<option${option === performance ? " selected" : ""}>${option}</option>`).join("");
       row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${safe(className)}">${performanceOptions}</select></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong><small class="big-stage-age-range">${safe(ageRange)}</small></td><td data-stage-column="students"><strong>${safe(students)} Dancers</strong>${boysPill}</td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
     });
+    addCombinedSamples(table);
     table.dataset.stageLayoutReady = "true";
     renumber();
   };
