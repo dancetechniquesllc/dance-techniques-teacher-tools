@@ -3,7 +3,7 @@
 .big-stage-table tbody tr:has(.big-stage-class) td { border-top-color: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 34%, var(--border)); }
 .big-stage-table[data-stage-layout-ready="true"] { width: 100%; min-width: 1180px; table-layout: fixed; }
 .big-stage-table[data-stage-layout-ready="true"] thead th { color: #211817; font-family: "Avenir Next Heavy", "Arial Black", var(--font-display), sans-serif; font-size: 12px; font-weight: 900 !important; letter-spacing: .035em; }
-.big-stage-table[data-stage-layout-ready="true"] th, .big-stage-table[data-stage-layout-ready="true"] td { padding-left: 9px; padding-right: 9px; overflow-wrap: anywhere; }
+.big-stage-table[data-stage-layout-ready="true"] th, .big-stage-table[data-stage-layout-ready="true"] td { padding-left: 12px; padding-right: 12px; overflow-wrap: anywhere; }
 .big-stage-table [data-stage-column="order"] { width: 56px; text-align: center; }
 .big-stage-table [data-stage-column="teacher"] { width: 88px; }
 .big-stage-table[data-stage-layout-ready="true"] .big-stage-order { width: 40px; height: 40px; margin-inline: auto; }
@@ -19,7 +19,8 @@
 .big-stage-order.is-ballet { background: #f2d9d7; color: #733246; }
 .big-stage-order.is-tap { background: #dbe7d6; color: #3f5c43; }
 .big-stage-order.is-either { background: #f4dfa1; color: #705615; }
-.big-stage-order-type { display: block; width: 40px; margin: 5px auto 0; color: #211817; font-size: 10px; font-weight: 850; line-height: 1; text-align: center; }
+.big-stage-order-type { display: block; width: 58px; margin: 6px auto 0; padding: 2px 12px 2px 2px; border: 0; border-bottom: 1px solid #9f8e88; border-radius: 0; background-color: transparent; color: #211817; font-size: 10px; font-weight: 850; line-height: 1.2; text-align: center; cursor: pointer; }
+.big-stage-order-type:focus-visible { outline: 2px solid var(--stage-berry); outline-offset: 2px; }
 .big-stage-boys-pill { margin-top: 6px; background: #dbe7d6; color: #3f5c43; }
 .big-stage-class .big-stage-age-range { display: block; margin-top: 5px; color: #6f6265; font-size: 10px; font-weight: 750; white-space: nowrap; }
 .big-stage-table [data-stage-column="school"] { width: 152px; }

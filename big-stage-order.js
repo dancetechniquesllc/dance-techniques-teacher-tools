@@ -16,10 +16,12 @@
     return teacherColors[teacher] || "#dba9a1";
   };
   const showKey = () => `dt-big-stage-order:${root.querySelector(".big-stage-view-title h4")?.textContent?.trim() || "show"}`;
+  const performanceKey = () => `${showKey()}:performing`;
   const rowKey = (row) => row.querySelector(".big-stage-class")?.textContent?.trim().replace(/\s+/g, " ") || "";
   const performanceRows = () => [...root.querySelectorAll(".big-stage-table tbody tr")].filter((row) => row.querySelector(".big-stage-class"));
   const renumber = () => performanceRows().forEach((row, index) => { const number = row.querySelector(".big-stage-order"); if (number) number.textContent = String(index + 1); });
   const savedOrder = () => { try { return JSON.parse(localStorage.getItem(showKey()) || "[]"); } catch { return []; } };
+  const savedPerformances = () => { try { return JSON.parse(localStorage.getItem(performanceKey()) || "{}"); } catch { return {}; } };
   const applySavedOrder = () => {
     const order = savedOrder();
     const body = root.querySelector(".big-stage-table tbody");
@@ -58,11 +60,13 @@
       const costume = cells[5]?.innerHTML || "";
       const props = cells[6]?.textContent?.trim() || "None";
       const instructions = cells[7]?.textContent?.trim() || "No special sections entered";
-      const performance = performingType(className);
+      const sharedPerformance = typeof window.getSharedRecitalPerformance === "function" ? window.getSharedRecitalPerformance({ className, schoolName: school }) : "";
+      const performance = sharedPerformance ? `${sharedPerformance[0].toUpperCase()}${sharedPerformance.slice(1)}` : savedPerformances()[className] || performingType(className);
       const performanceClass = performance.toLowerCase();
       const ageRange = row.dataset.ageRange || ageRangeFor(className);
       const boysPill = /^0\s+boys?$/i.test(boys) ? "" : `<span class="big-stage-boys-pill">${safe(boys)}</span>`;
-      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><small class="big-stage-order-type">${performance}</small></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong><small class="big-stage-age-range">${safe(ageRange)}</small></td><td data-stage-column="students"><strong>${safe(students)} Students</strong>${boysPill}</td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
+      const performanceOptions = ["Tap", "Ballet", "Either"].map((option) => `<option${option === performance ? " selected" : ""}>${option}</option>`).join("");
+      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${safe(className)}">${performanceOptions}</select></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong><small class="big-stage-age-range">${safe(ageRange)}</small></td><td data-stage-column="students"><strong>${safe(students)} Students</strong>${boysPill}</td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
     });
     table.dataset.stageLayoutReady = "true";
     renumber();
@@ -137,6 +141,36 @@
     event.preventDefault();
     event.stopPropagation();
     setEditing(!editing);
+  });
+  root.addEventListener("change", (event) => {
+    const select = event.target.closest("[data-stage-performance]");
+    if (!select) return;
+    const row = select.closest("tr");
+    const circle = row?.querySelector(".big-stage-order");
+    const className = row?.querySelector(".big-stage-class strong")?.textContent?.trim() || "Class";
+    const schoolName = row?.querySelector('[data-stage-column="school"]')?.textContent?.trim() || "School";
+    const performance = select.value;
+    if (circle) {
+      circle.classList.remove("is-tap", "is-ballet", "is-either");
+      circle.classList.add(`is-${performance.toLowerCase()}`);
+    }
+    const choices = savedPerformances();
+    choices[className] = performance;
+    localStorage.setItem(performanceKey(), JSON.stringify(choices));
+    if (typeof window.updateSharedRecitalPerformance === "function") window.updateSharedRecitalPerformance({ className, schoolName, performanceType: performance });
+    performanceRows().forEach((otherRow) => {
+      if (otherRow === row) return;
+      const sameClass = otherRow.querySelector(".big-stage-class strong")?.textContent?.trim() === className;
+      const sameSchool = otherRow.querySelector('[data-stage-column="school"]')?.textContent?.trim() === schoolName;
+      if (!sameClass || !sameSchool) return;
+      const otherSelect = otherRow.querySelector("[data-stage-performance]");
+      const otherCircle = otherRow.querySelector(".big-stage-order");
+      if (otherSelect) otherSelect.value = performance;
+      if (otherCircle) {
+        otherCircle.classList.remove("is-tap", "is-ballet", "is-either");
+        otherCircle.classList.add(`is-${performance.toLowerCase()}`);
+      }
+    });
   });
   root.addEventListener("dragstart", (event) => {
     const row = event.target.closest("tr.is-order-editable");

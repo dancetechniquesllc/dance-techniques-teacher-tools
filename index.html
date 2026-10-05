@@ -26508,6 +26508,31 @@
       scheduleCloudAppDataSave();
     };
 
+    const sharedRecitalClassMatch = (rosterClass, className, schoolName) => {
+      const normalize = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+      return normalize(rosterClass?.name) === normalize(className)
+        && normalize(rosterClass?.schoolName) === normalize(schoolName);
+    };
+    window.getSharedRecitalPerformance = ({ className = "", schoolName = "" } = {}) => {
+      const rosterClass = rosterClasses.find((item) => sharedRecitalClassMatch(item, className, schoolName));
+      const value = String(rosterClass?.recitalPerformance || rosterClass?.performanceType || rosterClass?.performanceRequirement || "").toLowerCase();
+      return ["tap", "ballet", "either"].includes(value) ? value : "";
+    };
+    window.updateSharedRecitalPerformance = ({ className = "", schoolName = "", performanceType = "either" } = {}) => {
+      const value = String(performanceType || "either").toLowerCase();
+      if (!["tap", "ballet", "either"].includes(value)) return false;
+      const matches = rosterClasses.filter((item) => sharedRecitalClassMatch(item, className, schoolName));
+      matches.forEach((item) => {
+        item.recitalPerformance = value;
+        item.performanceType = value;
+        item.performanceRequirement = value;
+      });
+      if (!matches.length) return false;
+      saveAppData();
+      window.dispatchEvent(new CustomEvent("dt:recital-performance-change", { detail: { className, schoolName, performanceType: value } }));
+      return true;
+    };
+
     const scheduleAppDataSave = () => {
       clearTimeout(persistenceSaveTimer);
       persistenceSaveTimer = window.setTimeout(saveAppData, 180);
@@ -53455,9 +53480,9 @@
     })();
   </script>
   <link rel="stylesheet" href="big-stage.css?v=20260911">
-<link rel="stylesheet" href="big-stage-order.css?v=20261004-centered-order-labels">
+<link rel="stylesheet" href="big-stage-order.css?v=20261004-editable-performance">
   <script src="big-stage.js?v=20260911"></script>
-<script src="big-stage-order.js?v=20261004-performance-under-order"></script>
+<script src="big-stage-order.js?v=20261004-shared-performance"></script>
   <script src="director-task-sync.js?v=20260908"></script>
   <script src="director-corner.js?v=20260908"></script>
   <script src="tulle.js?v=20260729-questions"></script>
