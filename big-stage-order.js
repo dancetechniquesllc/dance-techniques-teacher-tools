@@ -21,6 +21,7 @@
   const showKey = () => `dt-big-stage-order:${root.querySelector(".big-stage-view-title h4")?.textContent?.trim() || "show"}`;
   const performanceKey = () => `${showKey()}:performing`;
   const songKey = () => `${showKey()}:songs`;
+  const propsKey = () => `${showKey()}:props`;
   const combinedDecisionKey = () => `${showKey()}:combined-decisions`;
   const rowKey = (row) => row.querySelector(".big-stage-class")?.textContent?.trim().replace(/\s+/g, " ") || "";
   const performanceRows = () => [...root.querySelectorAll(".big-stage-table tbody tr")].filter((row) => row.querySelector(".big-stage-class"));
@@ -28,6 +29,7 @@
   const savedOrder = () => { try { return JSON.parse(localStorage.getItem(showKey()) || "[]"); } catch { return []; } };
   const savedPerformances = () => { try { return JSON.parse(localStorage.getItem(performanceKey()) || "{}"); } catch { return {}; } };
   const savedSongs = () => { try { return JSON.parse(localStorage.getItem(songKey()) || "{}"); } catch { return {}; } };
+  const savedProps = () => { try { return JSON.parse(localStorage.getItem(propsKey()) || "{}"); } catch { return {}; } };
   const savedCombinedDecisions = () => { try { return JSON.parse(localStorage.getItem(combinedDecisionKey()) || "{}"); } catch { return {}; } };
   const applySavedOrder = () => {
     const order = savedOrder();
@@ -95,6 +97,16 @@
       cell.innerHTML = `<select class="big-stage-song-select" data-stage-song aria-label="Song for ${safe(className)}">${options.map((song) => `<option${song === selected ? " selected" : ""}>${safe(song)}</option>`).join("")}</select><small class="big-stage-song-source">${safe(recitalPlaylistName)}</small>`;
     });
   };
+  const renderPropsInputs = () => {
+    performanceRows().forEach((row) => {
+      const cell = row.querySelector('[data-stage-column="props"]');
+      if (!cell || cell.querySelector("[data-stage-props]")) return;
+      const className = row.querySelector(".big-stage-class strong")?.textContent?.trim() || row.dataset.combinedSample || "Performance";
+      const initial = cell.textContent.trim() || "None";
+      const value = savedProps()[className] || initial;
+      cell.innerHTML = `<input class="big-stage-props-input" data-stage-props value="${safe(value)}" aria-label="Props for ${safe(className)}" placeholder="None">`;
+    });
+  };
   const refreshSongOptions = () => {
     root.querySelectorAll("[data-stage-song]").forEach((select) => {
       const row = select.closest("tr");
@@ -151,6 +163,7 @@
     });
     addCombinedSamples(table);
     renderSongDropdowns();
+    renderPropsInputs();
     table.dataset.stageLayoutReady = "true";
     renumber();
   };
@@ -320,6 +333,16 @@
     setEditing(!editing);
   });
   root.addEventListener("change", (event) => {
+    const propsInput = event.target.closest("[data-stage-props]");
+    if (propsInput) {
+      const row = propsInput.closest("tr");
+      const className = row?.querySelector(".big-stage-class strong")?.textContent?.trim() || row?.dataset.combinedSample || "Performance";
+      const choices = savedProps();
+      choices[className] = propsInput.value.trim() || "None";
+      propsInput.value = choices[className];
+      localStorage.setItem(propsKey(), JSON.stringify(choices));
+      return;
+    }
     const songSelect = event.target.closest("[data-stage-song]");
     if (songSelect) {
       const row = songSelect.closest("tr");

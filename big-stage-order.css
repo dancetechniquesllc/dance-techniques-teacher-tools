@@ -15,6 +15,8 @@
 .big-stage-song-source { display: block; margin-top: 5px; color: #78676a; font-size: 8px; font-weight: 850; line-height: 1.2; }
 .big-stage-table [data-stage-column="costume"] { width: 88px; text-align: center; }
 .big-stage-table [data-stage-column="props"] { width: 88px; }
+.big-stage-props-input { width: 100%; min-width: 0; padding: 8px 9px; border: 1px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 55%, white); border-radius: 9px; background: rgb(255 255 255 / .82); color: #211817; font-size: 11px; font-weight: 750; }
+.big-stage-props-input:focus { border-color: var(--stage-berry); background: white; outline: 2px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 45%, white); outline-offset: 1px; }
 .big-stage-table [data-stage-column="teacher"] strong, .big-stage-table [data-stage-column="students"] strong { display: block; white-space: nowrap; }
 .big-stage-performing-pill, .big-stage-boys-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 24px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 900; white-space: nowrap; }
 .big-stage-performing-pill.is-ballet { background: #f2d9d7; color: #733246; }
