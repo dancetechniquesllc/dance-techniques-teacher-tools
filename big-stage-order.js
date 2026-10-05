@@ -45,7 +45,7 @@
     const table = root.querySelector(".big-stage-table");
     if (!table || table.dataset.stageLayoutReady === "true") return;
     const heading = table.querySelector("thead tr");
-    if (heading) heading.innerHTML = "<th>Order</th><th>Teacher</th><th>Performing</th><th>School</th><th>Class</th><th>Students</th><th>Song</th><th>Costume</th><th>Props</th><th>Beginning Position &amp; Special Sections</th>";
+    if (heading) heading.innerHTML = "<th>Order</th><th>Teacher</th><th>School</th><th>Class</th><th>Students</th><th>Song</th><th>Costume</th><th>Props</th><th>Beginning Position &amp; Special Sections</th>";
     performanceRows().forEach((row) => {
       const cells = [...row.children];
       const className = cells[1]?.querySelector("strong")?.textContent?.trim() || "Class not entered";
@@ -62,7 +62,7 @@
       const performanceClass = performance.toLowerCase();
       const ageRange = row.dataset.ageRange || ageRangeFor(className);
       const boysPill = /^0\s+boys?$/i.test(boys) ? "" : `<span class="big-stage-boys-pill">${safe(boys)}</span>`;
-      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="performing"><span class="big-stage-performing-pill is-${performanceClass}">${performance}</span></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong><small class="big-stage-age-range">${safe(ageRange)}</small></td><td data-stage-column="students"><strong>${safe(students)} Students</strong>${boysPill}</td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
+      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><small class="big-stage-order-type">${performance}</small></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong><small class="big-stage-age-range">${safe(ageRange)}</small></td><td data-stage-column="students"><strong>${safe(students)} Students</strong>${boysPill}</td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
     });
     table.dataset.stageLayoutReady = "true";
     renumber();
