@@ -95,7 +95,7 @@
       const costumeCell = row.querySelector(".big-stage-costume");
       const costumeName = costumeCell?.querySelector("strong")?.textContent?.trim() || "";
       if (costumeCell && costumeName && !costumeCell.querySelector("[data-stage-costume-preview]")) {
-        costumeCell.innerHTML = `<button class="big-stage-costume-preview" type="button" data-stage-costume-preview aria-label="Open ${costumeName} costume details"><img src="${costumeImages[costumeName] || costumeImages["Blush Tutu · CC-104"]}" alt="${costumeName}"><span><strong>${costumeName}</strong><small>View full costume details</small></span></button>`;
+        costumeCell.innerHTML = `<button class="big-stage-costume-preview" type="button" data-stage-costume-preview data-stage-costume-name="${safe(costumeName)}" aria-label="Open ${safe(costumeName)} costume details"><img src="${costumeImages[costumeName] || costumeImages["Blush Tutu · CC-104"]}" alt="${safe(costumeName)}"></button>`;
       }
       const orderCell = row.firstElementChild;
       if (orderCell && !orderCell.querySelector(".big-stage-drag-handle")) {
@@ -113,7 +113,7 @@
     const costume = event.target.closest("[data-stage-costume-preview]");
     if (costume) {
       const row = costume.closest("tr");
-      const costumeName = costume.querySelector("strong")?.textContent?.trim() || "Assigned Costume";
+      const costumeName = costume.dataset.stageCostumeName || "Assigned Costume";
       const className = row?.querySelector(".big-stage-class strong")?.textContent?.trim() || "Class";
       const school = row?.querySelector('[data-stage-column="school"]')?.textContent?.trim() || "School not entered";
       const teacher = row?.querySelector('[data-stage-column="teacher"]')?.textContent?.trim() || "Teacher not assigned";

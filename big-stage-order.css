@@ -8,7 +8,7 @@
 .big-stage-table [data-stage-column="performing"] { width: 88px; }
 .big-stage-table [data-stage-column="students"] { width: 94px; }
 .big-stage-table [data-stage-column="song"] { width: 128px; }
-.big-stage-table [data-stage-column="costume"] { width: 178px; }
+.big-stage-table [data-stage-column="costume"] { width: 88px; text-align: center; }
 .big-stage-table [data-stage-column="props"] { width: 88px; }
 .big-stage-table [data-stage-column="teacher"] strong, .big-stage-table [data-stage-column="students"] strong { display: block; white-space: nowrap; }
 .big-stage-performing-pill, .big-stage-boys-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 24px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 900; white-space: nowrap; }
@@ -29,11 +29,9 @@
 .is-editing-show-order .big-stage-table tbody tr.is-dragging { opacity: .42; background: #f1dfd9; }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable td:first-child { white-space: nowrap; }
 .is-editing-show-order .big-stage-order { display: inline-grid; vertical-align: middle; }
-.big-stage-costume-preview { width: 100%; min-width: 0; display: grid; grid-template-columns: 50px minmax(0, 1fr); align-items: center; gap: 8px; padding: 7px; border: 1px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 52%, white); border-radius: 12px; background: rgb(255 255 255 / .68); color: inherit; text-align: left; cursor: pointer; }
+.big-stage-costume-preview { width: 66px; min-width: 0; display: grid; place-items: center; margin: 0 auto; padding: 7px; border: 1px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 52%, white); border-radius: 12px; background: rgb(255 255 255 / .68); color: inherit; cursor: pointer; }
 .big-stage-costume-preview:hover, .big-stage-costume-preview:focus-visible { border-color: var(--stage-berry); background: white; outline: 2px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 45%, white); }
 .big-stage-costume-preview img { width: 50px; height: 60px; display: block; border-radius: 9px; object-fit: cover; object-position: top center; background: white; }
-.big-stage-costume-preview strong, .big-stage-costume-preview small { display: block; }
-.big-stage-costume-preview small { margin-top: 4px; color: var(--muted); font-size: 10px; }
 .big-stage-costume-detail-modal { position: fixed; inset: 0; z-index: 10030; display: grid; place-items: center; padding: 20px; background: rgb(49 35 40 / .46); backdrop-filter: blur(3px); }
 .big-stage-costume-detail-dialog { position: relative; width: min(760px, 100%); max-height: 90vh; overflow: auto; display: grid; grid-template-columns: minmax(230px, .8fr) minmax(280px, 1.2fr); gap: 24px; padding: 24px; border-radius: 20px; background: #fffaf7; box-shadow: 0 24px 80px rgb(30 20 24 / .24); }
 .big-stage-costume-detail-close { position: absolute; top: 14px; right: 14px; z-index: 2; width: 38px; height: 38px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--blush); color: var(--berry); font-size: 24px; cursor: pointer; }
