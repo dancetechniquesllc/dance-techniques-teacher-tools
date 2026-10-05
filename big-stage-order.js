@@ -348,17 +348,27 @@
       const className = [...(row?.querySelectorAll(".big-stage-class strong") || [])].map((item) => item.textContent.trim()).join(" + ") || "Class";
       const schoolCells = row?.matches(".big-stage-combined-row") ? row.querySelectorAll('.big-stage-combined-band [data-stage-column="school"]') : row?.querySelectorAll(':scope > [data-stage-column="school"]');
       const teacherCells = row?.matches(".big-stage-combined-row") ? row.querySelectorAll('.big-stage-combined-band [data-stage-column="teacher"] strong') : row?.querySelectorAll(':scope > [data-stage-column="teacher"] strong');
-      const school = [...(schoolCells || [])].map((item) => item.textContent.trim().replace(/\s+/g, " ")).join(" · ") || "School not entered";
+      const school = [...(schoolCells || [])].flatMap((item) => {
+        const parts = [...item.querySelectorAll("span")].map((part) => part.textContent.trim().replace(/\s+/g, " ")).filter(Boolean);
+        return parts.length ? parts : [item.textContent.trim().replace(/\s+/g, " ")];
+      }).join(" · ") || "School not entered";
       const teacher = [...(teacherCells || [])].map((item) => item.textContent.trim()).join(" · ") || "Teacher not assigned";
       const roster = row?.querySelector('[data-stage-column="students"] strong')?.textContent?.trim() || "Roster not entered";
       const song = row?.querySelector('[data-stage-song]')?.value || row?.querySelector('[data-stage-column="song"]')?.textContent?.trim() || "Song not entered";
       const image = costume.querySelector("img")?.src || "";
       const dancers = costumeDancersForRow(row, costumeName);
+      const sizeOrder = ["XXS", "XS", "S", "I", "M", "L", "XL", "Size pending"];
+      const sizeCounts = dancers.reduce((counts, dancer) => { counts[dancer.size] = (counts[dancer.size] || 0) + 1; return counts; }, {});
+      const costumesNeeded = dancers.length || Number.parseInt(roster, 10) || 0;
+      const sizeBreakdown = Object.entries(sizeCounts).sort(([a], [b]) => {
+        const aIndex = sizeOrder.indexOf(a), bIndex = sizeOrder.indexOf(b);
+        return (aIndex < 0 ? 999 : aIndex) - (bIndex < 0 ? 999 : bIndex);
+      }).map(([size, count]) => `${safe(size)} - ${count}`).join(" · ") || "Sizes pending";
       document.getElementById("big-stage-costume-detail-modal")?.remove();
       const modal = document.createElement("div");
       modal.id = "big-stage-costume-detail-modal";
       modal.className = "big-stage-costume-detail-modal";
-      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close costume details">×</button><div class="big-stage-costume-detail-visual"><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><section class="big-stage-costume-roster"><h4>Dancer Sizes</h4><div>${dancers.map(costumeDancerMarkup).join("")}</div></section></div><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd>${className}</dd></div><div><dt>School</dt><dd>${school}</dd></div><div><dt>Teacher</dt><dd>${teacher}</dd></div><div><dt>Song</dt><dd>${song}</dd></div><div><dt>Participating</dt><dd>${roster}</dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
+      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close costume details">×</button><div class="big-stage-costume-detail-visual"><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><section class="big-stage-costume-roster"><h4>Dancer Sizes</h4><div>${dancers.map(costumeDancerMarkup).join("")}</div></section></div><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd>${className}</dd></div><div><dt>School</dt><dd>${school}</dd></div><div><dt>Teacher</dt><dd>${teacher}</dd></div><div><dt>Song</dt><dd>${safe(song)}</dd></div><div><dt>Costumes Needed</dt><dd class="big-stage-costume-needed"><strong>${costumesNeeded}</strong><small>${sizeBreakdown}</small></dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
       document.body.appendChild(modal);
       const close = () => modal.remove();
       modal.querySelector(".big-stage-costume-detail-close").addEventListener("click", close);
