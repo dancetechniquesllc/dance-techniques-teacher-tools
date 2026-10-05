@@ -2,7 +2,7 @@
 .big-stage-table tbody tr:has(.big-stage-class) { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 16%, white); }
 .big-stage-table tbody tr:has(.big-stage-class) td { border-top-color: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 34%, var(--border)); }
 .big-stage-table[data-stage-layout-ready="true"] { width: 100%; min-width: 1180px; table-layout: fixed; }
-.big-stage-table[data-stage-layout-ready="true"] th { font-weight: 900; }
+.big-stage-table[data-stage-layout-ready="true"] thead th { color: #211817; font-family: "Avenir Next Heavy", "Arial Black", var(--font-display), sans-serif; font-size: 12px; font-weight: 900 !important; letter-spacing: .035em; }
 .big-stage-table[data-stage-layout-ready="true"] th, .big-stage-table[data-stage-layout-ready="true"] td { padding-left: 9px; padding-right: 9px; overflow-wrap: anywhere; }
 .big-stage-table [data-stage-column="order"] { width: 64px; }
 .big-stage-table [data-stage-column="teacher"] { width: 96px; }
