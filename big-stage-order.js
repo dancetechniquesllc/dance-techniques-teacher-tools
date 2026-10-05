@@ -48,8 +48,10 @@
     return previewCostumeDancers.slice(0, Math.min(total, previewCostumeDancers.length));
   };
   const costumeDancerMarkup = (dancer) => {
-    const initials = String(dancer.name || "D").split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
-    return `<article class="big-stage-costume-dancer"><span class="big-stage-costume-dancer-avatar">${dancer.photo ? `<img src="${safe(dancer.photo)}" alt="">` : safe(initials)}</span><div><strong>${safe(dancer.name)}</strong><small>${safe(dancer.size)}</small></div></article>`;
+    const nameParts = String(dancer.name || "Dancer").trim().split(/\s+/).filter(Boolean);
+    const initials = nameParts.map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+    const shortName = nameParts.length > 1 ? `${nameParts[0]} ${nameParts[nameParts.length - 1][0]}.` : nameParts[0];
+    return `<article class="big-stage-costume-dancer"><span class="big-stage-costume-dancer-avatar">${dancer.photo ? `<img src="${safe(dancer.photo)}" alt="">` : safe(initials)}</span><div><strong>${safe(shortName)}</strong><small>${safe(dancer.size)}</small></div></article>`;
   };
   const showKey = () => `dt-big-stage-order:${root.querySelector(".big-stage-view-title h4")?.textContent?.trim() || "show"}`;
   const performanceKey = () => `${showKey()}:performing`;

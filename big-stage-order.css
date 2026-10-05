@@ -89,11 +89,11 @@
 .big-stage-costume-detail-image { width: 100%; max-height: 520px; border-radius: 16px; object-fit: contain; background: white; }
 .big-stage-costume-detail-visual { min-width: 0; display: grid; align-content: start; gap: 16px; }
 .big-stage-costume-roster h4 { margin: 0 0 10px; color: #6b173f; font-size: 14px; font-weight: 900; }
-.big-stage-costume-roster > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.big-stage-costume-dancer { min-width: 0; display: grid; grid-template-columns: 38px minmax(0, 1fr); align-items: center; gap: 8px; padding: 8px; border: 1px solid #edd4ce; border-radius: 12px; background: white; }
+.big-stage-costume-roster > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.big-stage-costume-dancer { min-width: 0; display: grid; justify-items: center; align-content: start; gap: 7px; padding: 10px 6px; border: 1px solid #edd4ce; border-radius: 12px; background: white; text-align: center; }
 .big-stage-costume-dancer-avatar { width: 38px; height: 38px; display: grid; place-items: center; overflow: hidden; border: 3px solid #dba8df; border-radius: 50%; background: #f3e6f6; color: #5e3e67; font-size: 11px; font-weight: 900; }
 .big-stage-costume-dancer-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.big-stage-costume-dancer > div { min-width: 0; display: grid; gap: 2px; }.big-stage-costume-dancer strong { overflow: hidden; color: #211817; font-size: 10px; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }.big-stage-costume-dancer small { color: #6f6265; font-size: 9px; font-weight: 800; }
+.big-stage-costume-dancer > div { min-width: 0; display: grid; justify-items: center; gap: 2px; }.big-stage-costume-dancer strong { color: #211817; font-size: 10px; font-weight: 900; white-space: nowrap; }.big-stage-costume-dancer small { color: #6f6265; font-size: 9px; font-weight: 800; }
 .big-stage-costume-detail-copy { align-self: center; }
 .big-stage-costume-detail-copy h3 { margin: 8px 0 18px; color: var(--stage-berry); font-family: Georgia, serif; font-size: 27px; }
 .big-stage-costume-detail-label { display: inline-flex; padding: 5px 9px; border-radius: 999px; background: var(--stage-sage); color: #405342; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
@@ -105,7 +105,7 @@
 .big-stage-costume-needed { display: grid; gap: 4px; }.big-stage-costume-needed strong { font-size: 15px; }.big-stage-costume-needed strong::after { content: " Dancers"; }.big-stage-costume-needed small { color: #6f6265; font-size: 10px; font-weight: 800; line-height: 1.35; }
 .big-stage-costume-schools { display: grid; gap: 5px; }.big-stage-costume-schools span { display: block; }
 .big-stage-costume-teachers { display: grid; gap: 5px; }.big-stage-costume-teachers span { display: block; }
-@media (max-width: 650px) { .big-stage-costume-detail-dialog { grid-template-columns: 1fr; } .big-stage-costume-detail-image { max-height: 320px; } .big-stage-costume-roster > div { grid-template-columns: 1fr; } }
+@media (max-width: 650px) { .big-stage-costume-detail-dialog { grid-template-columns: 1fr; } .big-stage-costume-detail-image { max-height: 320px; } .big-stage-costume-roster > div { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (min-width: 1320px) {
   .app:has(#admin-home-big-stage:not([hidden])) { width: min(1900px, calc(100% - 24px)); }
   .big-stage-table-wrap { overflow-x: visible; }
