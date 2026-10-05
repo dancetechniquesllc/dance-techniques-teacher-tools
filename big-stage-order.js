@@ -51,7 +51,9 @@
       const costume = cells[5]?.innerHTML || "";
       const props = cells[6]?.textContent?.trim() || "None";
       const instructions = cells[7]?.textContent?.trim() || "No special sections entered";
-      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order">1</span></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="performing"><span class="big-stage-performing-pill is-${performingType(className).toLowerCase()}">${performingType(className)}</span></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong></td><td data-stage-column="students"><strong>${safe(students)} Students</strong><span class="big-stage-boys-pill">${safe(boys)}</span></td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
+      const performance = performingType(className);
+      const performanceClass = performance.toLowerCase();
+      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="performing"><span class="big-stage-performing-pill is-${performanceClass}">${performance}</span></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong></td><td data-stage-column="students"><strong>${safe(students)} Students</strong><span class="big-stage-boys-pill">${safe(boys)}</span></td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
     });
     table.dataset.stageLayoutReady = "true";
     renumber();

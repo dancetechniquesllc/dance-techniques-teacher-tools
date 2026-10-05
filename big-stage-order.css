@@ -7,6 +7,9 @@
 .big-stage-performing-pill.is-ballet { background: #f2d9d7; color: #733246; }
 .big-stage-performing-pill.is-tap { background: #dbe7d6; color: #3f5c43; }
 .big-stage-performing-pill.is-either { background: #f4dfa1; color: #705615; }
+.big-stage-order.is-ballet { background: #f2d9d7; color: #733246; }
+.big-stage-order.is-tap { background: #dbe7d6; color: #3f5c43; }
+.big-stage-order.is-either { background: #f4dfa1; color: #705615; }
 .big-stage-boys-pill { margin-top: 6px; background: #dbe7d6; color: #3f5c43; }
 .big-stage-table [data-stage-column="school"] { min-width: 170px; }
 .big-stage-table [data-stage-column="class"] { min-width: 145px; }
