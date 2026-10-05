@@ -5,6 +5,11 @@
   let draggedRow = null;
   let enhancing = false;
   const teacherColors = { tiffany: "#dba8df", lexi: "#a9d9b8", judy: "#aacfe5", makayla: "#ead17e", erika: "#e7b493", kara: "#cbb7df", liv: "#d9c7a7", megan: "#deb1b8", maddie: "#b9d6d1", brynlee: "#dbc6e2" };
+  const costumeImages = {
+    "Blush Tutu · CC-104": "Costume Images/Screenshot 2025-01-27 at 1.12.58 PM-184.png",
+    "Berry Sequin Set · CC-218": "Costume Images/La Vie En Rose-268.png",
+    "Golden Tutu · CC-172": "Costume Images/Screenshot 2026-01-13 at 6.43.12 PM-461.png"
+  };
   const teacherColor = (row) => {
     const teacher = String(row.children[2]?.textContent || "").toLowerCase().replace(/^(miss|ms\.?|mrs\.?)\s+/, "").split(/\s+/)[0];
     return teacherColors[teacher] || "#dba9a1";
@@ -46,6 +51,11 @@
     applySavedOrder();
     performanceRows().forEach((row) => {
       row.style.setProperty("--stage-teacher-color", teacherColor(row));
+      const costumeCell = row.querySelector(".big-stage-costume");
+      const costumeName = costumeCell?.querySelector("strong")?.textContent?.trim() || "";
+      if (costumeCell && costumeName && !costumeCell.querySelector("[data-stage-costume-preview]")) {
+        costumeCell.innerHTML = `<button class="big-stage-costume-preview" type="button" data-stage-costume-preview aria-label="Open ${costumeName} costume details"><img src="${costumeImages[costumeName] || costumeImages["Blush Tutu · CC-104"]}" alt="${costumeName}"><span><strong>${costumeName}</strong><small>View full costume details</small></span></button>`;
+      }
       const orderCell = row.firstElementChild;
       if (orderCell && !orderCell.querySelector(".big-stage-drag-handle")) {
         const handle = document.createElement("span");
@@ -59,6 +69,29 @@
     enhancing = false;
   };
   root.addEventListener("click", (event) => {
+    const costume = event.target.closest("[data-stage-costume-preview]");
+    if (costume) {
+      const row = costume.closest("tr");
+      const cells = row?.children || [];
+      const costumeName = costume.querySelector("strong")?.textContent?.trim() || "Assigned Costume";
+      const className = row?.querySelector(".big-stage-class strong")?.textContent?.trim() || "Class";
+      const school = row?.querySelector(".big-stage-class small")?.textContent?.trim() || "School not entered";
+      const teacher = cells[2]?.textContent?.trim() || "Teacher not assigned";
+      const roster = cells[3]?.querySelector("strong")?.textContent?.trim() || "Roster not entered";
+      const song = cells[4]?.textContent?.trim() || "Song not entered";
+      const image = costume.querySelector("img")?.src || "";
+      document.getElementById("big-stage-costume-detail-modal")?.remove();
+      const modal = document.createElement("div");
+      modal.id = "big-stage-costume-detail-modal";
+      modal.className = "big-stage-costume-detail-modal";
+      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close costume details">×</button><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd>${className}</dd></div><div><dt>School</dt><dd>${school}</dd></div><div><dt>Teacher</dt><dd>${teacher}</dd></div><div><dt>Song</dt><dd>${song}</dd></div><div><dt>Participating</dt><dd>${roster}</dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
+      document.body.appendChild(modal);
+      const close = () => modal.remove();
+      modal.querySelector(".big-stage-costume-detail-close").addEventListener("click", close);
+      modal.querySelector("[data-stage-costume-detail-done]").addEventListener("click", close);
+      modal.addEventListener("click", (clickEvent) => { if (clickEvent.target === modal) close(); });
+      return;
+    }
     const button = event.target.closest("[data-stage-edit-order]");
     if (!button) return;
     event.preventDefault();
