@@ -4,6 +4,11 @@
   let editing = false;
   let draggedRow = null;
   let enhancing = false;
+  const teacherColors = { tiffany: "#dba8df", lexi: "#a9d9b8", judy: "#aacfe5", makayla: "#ead17e", erika: "#e7b493", kara: "#cbb7df", liv: "#d9c7a7", megan: "#deb1b8", maddie: "#b9d6d1", brynlee: "#dbc6e2" };
+  const teacherColor = (row) => {
+    const teacher = String(row.children[2]?.textContent || "").toLowerCase().replace(/^(miss|ms\.?|mrs\.?)\s+/, "").split(/\s+/)[0];
+    return teacherColors[teacher] || "#dba9a1";
+  };
   const showKey = () => `dt-big-stage-order:${root.querySelector(".big-stage-view-title h4")?.textContent?.trim() || "show"}`;
   const rowKey = (row) => row.querySelector(".big-stage-class")?.textContent?.trim().replace(/\s+/g, " ") || "";
   const performanceRows = () => [...root.querySelectorAll(".big-stage-table tbody tr")].filter((row) => row.querySelector(".big-stage-class"));
@@ -40,6 +45,7 @@
     }
     applySavedOrder();
     performanceRows().forEach((row) => {
+      row.style.setProperty("--stage-teacher-color", teacherColor(row));
       const orderCell = row.firstElementChild;
       if (orderCell && !orderCell.querySelector(".big-stage-drag-handle")) {
         const handle = document.createElement("span");

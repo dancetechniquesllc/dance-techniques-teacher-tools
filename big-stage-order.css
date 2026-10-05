@@ -1,7 +1,9 @@
 .big-stage-drag-handle { display: none; margin-right: 7px; color: var(--stage-berry); font-size: 18px; font-weight: 900; line-height: 1; cursor: grab; user-select: none; }
+.big-stage-table tbody tr:has(.big-stage-class) { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 16%, white); }
+.big-stage-table tbody tr:has(.big-stage-class) td { border-top-color: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 34%, var(--border)); }
 .is-editing-show-order .big-stage-drag-handle { display: inline-flex; }
-.is-editing-show-order .big-stage-table tbody tr.is-order-editable { cursor: grab; background: #fffaf7; }
-.is-editing-show-order .big-stage-table tbody tr.is-order-editable:hover { background: #f8eeea; box-shadow: inset 4px 0 0 var(--stage-berry); }
+.is-editing-show-order .big-stage-table tbody tr.is-order-editable { cursor: grab; background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 20%, white); }
+.is-editing-show-order .big-stage-table tbody tr.is-order-editable:hover { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 28%, white); box-shadow: inset 4px 0 0 var(--stage-teacher-color, var(--stage-berry)); }
 .is-editing-show-order .big-stage-table tbody tr.is-dragging { opacity: .42; background: #f1dfd9; }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable td:first-child { white-space: nowrap; }
 .is-editing-show-order .big-stage-order { display: inline-grid; vertical-align: middle; }
