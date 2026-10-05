@@ -34,6 +34,12 @@
 .big-stage-combined-band > div > span, .big-stage-combined-band > div > strong { display: block; }
 .big-stage-combined-band small { display: block; color: #6f6265; font-size: 9px; font-weight: 750; }
 .big-stage-combined-pair-layout { display: grid; grid-template-columns: 30fr 9fr; gap: 10px; align-items: stretch; }
+.big-stage-combined-content { display: grid; gap: 9px; }
+.big-stage-combined-capacity-alert { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 2px solid #a94f48; border-radius: 10px; background: #fff0ec; color: #6f241f; }
+.big-stage-combined-capacity-alert > span { width: 28px; height: 28px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #a94f48; color: white; font-size: 17px; font-weight: 950; }
+.big-stage-combined-capacity-alert > div { display: grid; gap: 2px; }
+.big-stage-combined-capacity-alert strong { font-size: 12px; font-weight: 950; }
+.big-stage-combined-capacity-alert small { color: #7e3d37; font-size: 10px; font-weight: 750; }
 .big-stage-combined-dancer-summary { display: grid; align-content: center; gap: 5px; padding: 9px; border-radius: 10px; background: linear-gradient(to bottom, color-mix(in srgb, #d9c7a7 14%, white) 0 50%, color-mix(in srgb, #deb1b8 14%, white) 50% 100%); }
 .big-stage-combined-dancer-summary > strong { font-size: 14px; font-weight: 900; }
 .big-stage-combined-dancer-summary > small { color: #5f5356; font-size: 9px; font-weight: 800; }

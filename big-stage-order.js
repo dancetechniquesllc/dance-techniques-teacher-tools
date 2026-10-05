@@ -71,7 +71,7 @@
       const options = ["Tap", "Ballet", "Either"].map((option) => `<option${option === sample.type ? " selected" : ""}>${option}</option>`).join("");
       row.className = "big-stage-combined-row";
       row.dataset.combinedSample = sample.kind;
-      const combinedArea = sample.dancerSummary ? `<div class="big-stage-combined-pair-layout"><div class="big-stage-combined-stack">${sample.bands}</div>${sample.dancerSummary}</div>` : `<div class="big-stage-combined-stack">${sample.bands}</div>`;
+      const combinedArea = sample.dancerSummary ? `<div class="big-stage-combined-content"><div class="big-stage-combined-pair-layout"><div class="big-stage-combined-stack">${sample.bands}</div>${sample.dancerSummary}</div></div>` : `<div class="big-stage-combined-stack">${sample.bands}</div>`;
       row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${sample.kind}">${options}</select><span class="big-stage-combined-badge">Combined</span></td><td class="big-stage-combined-area" colspan="4">${combinedArea}</td><td data-stage-column="song">${sample.song}</td><td class="big-stage-costume" data-stage-column="costume"><strong>${sample.costume}</strong><small>Catalog item</small></td><td data-stage-column="props">${sample.props}</td><td data-stage-column="instructions">${sample.instructions}</td>`;
       body.appendChild(row);
     });
@@ -106,6 +106,22 @@
     table.dataset.stageLayoutReady = "true";
     renumber();
   };
+  const syncCombinedCapacityAlerts = () => {
+    root.querySelectorAll(".big-stage-combined-content").forEach((content) => {
+      const totalText = content.querySelector(".big-stage-combined-dancer-summary > strong")?.textContent || "";
+      const total = Number.parseInt(totalText, 10) || 0;
+      let alert = content.querySelector(".big-stage-combined-capacity-alert");
+      if (total <= 12) { alert?.remove(); return; }
+      if (!alert) {
+        alert = document.createElement("div");
+        alert.className = "big-stage-combined-capacity-alert";
+        alert.setAttribute("role", "alert");
+        content.appendChild(alert);
+      }
+      const markup = `<span aria-hidden="true">!</span><div><strong>Combined class is over the 12-dancer limit</strong><small>${total} dancers total · These classes should no longer be combined.</small></div>`;
+      if (alert.innerHTML !== markup) alert.innerHTML = markup;
+    });
+  };
   const setEditing = (active) => {
     editing = active;
     root.classList.toggle("is-editing-show-order", active);
@@ -128,6 +144,7 @@
       actions.prepend(button);
     }
     reshapeTable();
+    syncCombinedCapacityAlerts();
     applySavedOrder();
     performanceRows().forEach((row) => {
       row.style.setProperty("--stage-teacher-color", teacherColor(row));
@@ -226,6 +243,6 @@
   });
   root.addEventListener("drop", (event) => { if (!draggedRow) return; event.preventDefault(); draggedRow.classList.remove("is-dragging"); draggedRow = null; renumber(); });
   root.addEventListener("dragend", () => { draggedRow?.classList.remove("is-dragging"); draggedRow = null; });
-  new MutationObserver(() => window.requestAnimationFrame(enhance)).observe(root, { childList: true, subtree: true });
+  new MutationObserver(() => window.requestAnimationFrame(() => { enhance(); syncCombinedCapacityAlerts(); })).observe(root, { childList: true, subtree: true, characterData: true });
   enhance();
 })();
