@@ -29,9 +29,14 @@
 .big-stage-combined-line small { display: block; color: #6f6265; font-size: 9px; font-weight: 750; }
 .big-stage-combined-area { padding: 8px !important; }
 .big-stage-combined-band { min-height: 58px; display: grid; grid-template-columns: 7fr 12fr 11fr 9fr; align-items: stretch; gap: 12px; padding: 8px 10px; border-left: 5px solid var(--combined-teacher-color, var(--stage-berry)); border-radius: 10px; background: color-mix(in srgb, var(--combined-teacher-color, #dba9a1) 14%, white); }
+.big-stage-combined-band.without-dancers { grid-template-columns: 7fr 12fr 11fr; }
 .big-stage-combined-band > div { min-width: 0; display: grid; align-content: center; gap: 4px; }
 .big-stage-combined-band > div > span, .big-stage-combined-band > div > strong { display: block; }
 .big-stage-combined-band small { display: block; color: #6f6265; font-size: 9px; font-weight: 750; }
+.big-stage-combined-pair-layout { display: grid; grid-template-columns: 30fr 9fr; gap: 10px; align-items: stretch; }
+.big-stage-combined-dancer-summary { display: grid; align-content: center; gap: 5px; padding: 9px; border-radius: 10px; background: linear-gradient(to bottom, color-mix(in srgb, #d9c7a7 14%, white) 0 50%, color-mix(in srgb, #deb1b8 14%, white) 50% 100%); }
+.big-stage-combined-dancer-summary > strong { font-size: 14px; font-weight: 900; }
+.big-stage-combined-dancer-summary > small { color: #5f5356; font-size: 9px; font-weight: 800; }
 .big-stage-boys-pill { margin-top: 6px; background: #dbe7d6; color: #3f5c43; }
 .big-stage-class .big-stage-age-range { display: block; margin-top: 5px; color: #6f6265; font-size: 10px; font-weight: 750; white-space: nowrap; }
 .big-stage-table [data-stage-column="school"] { width: 152px; }
