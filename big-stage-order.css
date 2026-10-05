@@ -1,7 +1,15 @@
 .big-stage-drag-handle { display: none; margin-right: 7px; color: var(--stage-berry); font-size: 18px; font-weight: 900; line-height: 1; cursor: grab; user-select: none; }
 .big-stage-table tbody tr:has(.big-stage-class) { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 16%, white); }
 .big-stage-table tbody tr:has(.big-stage-class) td { border-top-color: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 34%, var(--border)); }
-.big-stage-table[data-stage-layout-ready="true"] { min-width: 1320px; }
+.big-stage-table[data-stage-layout-ready="true"] { width: 100%; min-width: 1180px; table-layout: fixed; }
+.big-stage-table[data-stage-layout-ready="true"] th, .big-stage-table[data-stage-layout-ready="true"] td { padding-left: 9px; padding-right: 9px; overflow-wrap: anywhere; }
+.big-stage-table [data-stage-column="order"] { width: 64px; }
+.big-stage-table [data-stage-column="teacher"] { width: 96px; }
+.big-stage-table [data-stage-column="performing"] { width: 88px; }
+.big-stage-table [data-stage-column="students"] { width: 94px; }
+.big-stage-table [data-stage-column="song"] { width: 128px; }
+.big-stage-table [data-stage-column="costume"] { width: 178px; }
+.big-stage-table [data-stage-column="props"] { width: 88px; }
 .big-stage-table [data-stage-column="teacher"] strong, .big-stage-table [data-stage-column="students"] strong { display: block; white-space: nowrap; }
 .big-stage-performing-pill, .big-stage-boys-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 24px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 900; white-space: nowrap; }
 .big-stage-performing-pill.is-ballet { background: #f2d9d7; color: #733246; }
@@ -11,18 +19,18 @@
 .big-stage-order.is-tap { background: #dbe7d6; color: #3f5c43; }
 .big-stage-order.is-either { background: #f4dfa1; color: #705615; }
 .big-stage-boys-pill { margin-top: 6px; background: #dbe7d6; color: #3f5c43; }
-.big-stage-table [data-stage-column="school"] { min-width: 170px; }
-.big-stage-table [data-stage-column="class"] { min-width: 145px; }
-.big-stage-table [data-stage-column="instructions"] { min-width: 230px; }
+.big-stage-table [data-stage-column="school"] { width: 142px; }
+.big-stage-table [data-stage-column="class"] { width: 132px; }
+.big-stage-table [data-stage-column="instructions"] { width: auto; min-width: 170px; }
 .is-editing-show-order .big-stage-drag-handle { display: inline-flex; }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable { cursor: grab; background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 20%, white); }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable:hover { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 28%, white); box-shadow: inset 4px 0 0 var(--stage-teacher-color, var(--stage-berry)); }
 .is-editing-show-order .big-stage-table tbody tr.is-dragging { opacity: .42; background: #f1dfd9; }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable td:first-child { white-space: nowrap; }
 .is-editing-show-order .big-stage-order { display: inline-grid; vertical-align: middle; }
-.big-stage-costume-preview { width: 100%; min-width: 150px; display: grid; grid-template-columns: 58px minmax(0, 1fr); align-items: center; gap: 9px; padding: 7px; border: 1px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 52%, white); border-radius: 12px; background: rgb(255 255 255 / .68); color: inherit; text-align: left; cursor: pointer; }
+.big-stage-costume-preview { width: 100%; min-width: 0; display: grid; grid-template-columns: 50px minmax(0, 1fr); align-items: center; gap: 8px; padding: 7px; border: 1px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 52%, white); border-radius: 12px; background: rgb(255 255 255 / .68); color: inherit; text-align: left; cursor: pointer; }
 .big-stage-costume-preview:hover, .big-stage-costume-preview:focus-visible { border-color: var(--stage-berry); background: white; outline: 2px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 45%, white); }
-.big-stage-costume-preview img { width: 58px; height: 68px; display: block; border-radius: 9px; object-fit: cover; object-position: top center; background: white; }
+.big-stage-costume-preview img { width: 50px; height: 60px; display: block; border-radius: 9px; object-fit: cover; object-position: top center; background: white; }
 .big-stage-costume-preview strong, .big-stage-costume-preview small { display: block; }
 .big-stage-costume-preview small { margin-top: 4px; color: var(--muted); font-size: 10px; }
 .big-stage-costume-detail-modal { position: fixed; inset: 0; z-index: 10030; display: grid; place-items: center; padding: 20px; background: rgb(49 35 40 / .46); backdrop-filter: blur(3px); }
@@ -38,3 +46,7 @@
 .big-stage-costume-detail-copy dt { color: var(--muted); font-size: 11px; font-weight: 850; text-transform: uppercase; }
 .big-stage-costume-detail-copy dd { margin: 0; font-weight: 750; }
 @media (max-width: 650px) { .big-stage-costume-detail-dialog { grid-template-columns: 1fr; } .big-stage-costume-detail-image { max-height: 320px; } }
+@media (min-width: 1320px) {
+  .app:has(#admin-home-big-stage:not([hidden])) { width: min(1900px, calc(100% - 24px)); }
+  .big-stage-table-wrap { overflow-x: visible; }
+}
