@@ -25,6 +25,16 @@
 .big-stage-table [data-stage-column="school"] { width: 152px; }
 .big-stage-table [data-stage-column="class"] { width: 142px; }
 .big-stage-table [data-stage-column="instructions"] { width: auto; min-width: 170px; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(1) { width: 5%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(2) { width: 6%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(3) { width: 7%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(4) { width: 11%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(5) { width: 10%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(6) { width: 8%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(7) { width: 11%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(8) { width: 6%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(9) { width: 7%; }
+.big-stage-table[data-stage-layout-ready="true"] :is(th, td):nth-child(10) { width: 29%; }
 .is-editing-show-order .big-stage-drag-handle { display: inline-flex; }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable { cursor: grab; background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 20%, white); }
 .is-editing-show-order .big-stage-table tbody tr.is-order-editable:hover { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 28%, white); box-shadow: inset 4px 0 0 var(--stage-teacher-color, var(--stage-berry)); }
