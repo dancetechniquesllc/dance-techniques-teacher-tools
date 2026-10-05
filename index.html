@@ -20044,6 +20044,15 @@
         ]
       }
     ];
+    window.getBigStageRosterClasses = () => rosterClasses
+      .filter((rosterClass) => rosterClass?.sourceActive !== false)
+      .map((rosterClass) => ({
+        id: String(rosterClass.id || ""),
+        name: rosterClass.name || "Class",
+        schoolName: rosterClass.schoolName || "Partner School",
+        teacherId: String(rosterClass.teacherId || ""),
+        enrolledCount: (rosterClass.students || []).filter((student) => !["withdrawn", "inactive", "paused"].includes(String(student.status || "").toLowerCase())).length
+      }));
     let selectedRosterClassId = rosterClasses[0]?.id || "";
     let rosterClassProfileOpen = false;
     let rosterSchoolFilter = "all";
@@ -53499,7 +53508,7 @@
 <link rel="stylesheet" href="big-stage-matching.css?v=20261004-empty-shows">
   <script src="big-stage.js?v=20260911"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
-<script src="big-stage-wizard.js?v=20261004-show-planner-8"></script>
+<script src="big-stage-wizard.js?v=20261004-live-roster"></script>
 <script src="big-stage-matching.js?v=20261004-empty-shows"></script>
   <script src="director-task-sync.js?v=20260908"></script>
   <script src="director-corner.js?v=20260908"></script>

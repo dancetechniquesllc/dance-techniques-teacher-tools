@@ -4,13 +4,16 @@
 
   const STORAGE_KEY = "dt-big-stage-planned-shows:v1";
   const RECITAL_DATE_KEY = "dt-big-stage-recital-date:v1";
-  const schools = [
-    { name: "Primrose School of Wylie", classes: ["Ballet & Tap · Pre-K", "Ballet & Tap · Preschool"] },
-    { name: "Wylie Montessori Academy · Sachse", classes: ["Ballet · Preschool", "Ballet & Tap · Pre-K"] },
-    { name: "Primrose School of Rowlett", classes: ["Hip Hop · School Age", "Ballet & Tap · Preschool"] },
-    { name: "Kids 'R' Kids Learning Academy", classes: ["Ballet & Tap · Preschool", "Ballet · Pre-K"] },
-    { name: "Wylie Montessori Academy · Murphy", classes: ["Ballet · Pre-K", "Tap · Preschool"] }
-  ];
+  const liveSchools = () => {
+    const classes = typeof window.getBigStageRosterClasses === "function" ? window.getBigStageRosterClasses() : [];
+    const grouped = new Map();
+    classes.forEach((rosterClass) => {
+      const schoolName = rosterClass.schoolName || "Partner School";
+      if (!grouped.has(schoolName)) grouped.set(schoolName, []);
+      grouped.get(schoolName).push({ id: rosterClass.id, name: rosterClass.name, enrolledCount: rosterClass.enrolledCount || 0 });
+    });
+    return [...grouped].map(([name, schoolClasses]) => ({ name, classes: schoolClasses }));
+  };
   const sampleAssignments = new Map([
     ["Primrose School of Wylie|Ballet & Tap · Pre-K", "9:00 AM"],
     ["Wylie Montessori Academy · Sachse|Ballet · Preschool", "9:00 AM"],
@@ -30,7 +33,11 @@
   const nextName = () => `Show ${String.fromCharCode(65 + readShows().length)}`;
   const defaultDate = () => localStorage.getItem(RECITAL_DATE_KEY) || "2027-05-22";
   const selectionKey = (school, className) => `${school}|${className}`;
-  const selectedClasses = () => Object.entries(state.selections).flatMap(([school, selection]) => selection.whole ? schools.find((item) => item.name === school)?.classes.map((className) => ({ school, className })) || [] : [...selection.classes].map((className) => ({ school, className })));
+  const selectedClasses = () => Object.entries(state.selections).flatMap(([school, selection]) => {
+    const available = liveSchools().find((item) => item.name === school)?.classes || [];
+    const selected = selection.whole ? available : available.filter((item) => selection.classes.has(item.id));
+    return selected.map((item) => ({ school, classId: item.id, className: item.name }));
+  });
   const close = () => document.getElementById("big-stage-show-wizard")?.remove();
 
   function openWizard() {
@@ -85,17 +92,19 @@
   }
 
   function renderSchools(content) {
-    content.innerHTML = shell("Add schools", "Choose a school, then decide whether every class at that school belongs in this show.", `
-      <div class="big-stage-school-picker">${schools.map((school) => {
+    const schools = liveSchools();
+    content.innerHTML = shell("Add schools", "Choose schools now, or skip this step and assign them after the show is created.", `
+      <div class="big-stage-wizard-note"><strong>This step is optional.</strong> You can create an empty show and add schools or individual classes later.</div>
+      <div class="big-stage-school-picker">${schools.length ? schools.map((school) => {
         const selection = state.selections[school.name];
         return `<article class="big-stage-school-choice ${selection ? "selected" : ""}" data-school-card="${safe(school.name)}">
           <label class="big-stage-school-check"><input type="checkbox" data-school-toggle="${safe(school.name)}" ${selection ? "checked" : ""}><span><strong>${safe(school.name)}</strong><small>${school.classes.length} classes</small></span></label>
           <div class="big-stage-school-options" ${selection ? "" : "hidden"}>
             <fieldset><legend>Whole school on the same show?</legend><label><input type="radio" name="whole-${safe(school.name)}" value="yes" ${!selection || selection.whole ? "checked" : ""}> Yes</label><label><input type="radio" name="whole-${safe(school.name)}" value="no" ${selection && !selection.whole ? "checked" : ""}> No, choose classes</label></fieldset>
-            <div class="big-stage-class-checks" ${selection && !selection.whole ? "" : "hidden"}>${school.classes.map((className) => `<label><input type="checkbox" data-class-toggle="${safe(className)}" ${selection?.classes?.has(className) ? "checked" : ""}> ${safe(className)}</label>`).join("")}</div>
+            <div class="big-stage-class-checks" ${selection && !selection.whole ? "" : "hidden"}>${school.classes.map((classInfo) => `<label><input type="checkbox" data-class-toggle="${safe(classInfo.id)}" ${selection?.classes?.has(classInfo.id) ? "checked" : ""}> <span>${safe(classInfo.name)}<small>${classInfo.enrolledCount} dancers</small></span></label>`).join("")}</div>
           </div>
         </article>`;
-      }).join("")}</div>
+      }).join("") : '<div class="big-stage-wizard-empty"><strong>No live classes are available yet.</strong><span>You can continue and assign classes later.</span></div>'}</div>
     `);
     content.querySelectorAll("[data-school-toggle]").forEach((toggle) => toggle.addEventListener("change", () => {
       const school = toggle.dataset.schoolToggle;
@@ -114,8 +123,6 @@
       }));
     });
     content.querySelector("[data-wizard-next]").addEventListener("click", () => {
-      const chosen = selectedClasses();
-      if (!chosen.length) return content.querySelector(".big-stage-school-picker").classList.add("needs-selection");
       state.step = 3; render();
     });
   }
