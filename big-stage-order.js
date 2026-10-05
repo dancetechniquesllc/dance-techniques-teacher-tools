@@ -34,6 +34,13 @@
     if (value.includes("ballet") && !value.includes("tap")) return "Ballet";
     return "Either";
   };
+  const ageRangeFor = (className) => {
+    const value = String(className || "").toLowerCase();
+    if (value.includes("school age")) return "5Y 0M - 8Y 0M";
+    if (value.includes("pre-k")) return "4Y 0M - 5Y 0M";
+    if (value.includes("preschool")) return "3Y 0M - 4Y 0M";
+    return "Age range not entered";
+  };
   const reshapeTable = () => {
     const table = root.querySelector(".big-stage-table");
     if (!table || table.dataset.stageLayoutReady === "true") return;
@@ -53,7 +60,8 @@
       const instructions = cells[7]?.textContent?.trim() || "No special sections entered";
       const performance = performingType(className);
       const performanceClass = performance.toLowerCase();
-      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="performing"><span class="big-stage-performing-pill is-${performanceClass}">${performance}</span></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong></td><td data-stage-column="students"><strong>${safe(students)} Students</strong><span class="big-stage-boys-pill">${safe(boys)}</span></td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
+      const ageRange = row.dataset.ageRange || ageRangeFor(className);
+      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="performing"><span class="big-stage-performing-pill is-${performanceClass}">${performance}</span></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong><small class="big-stage-age-range">${safe(ageRange)}</small></td><td data-stage-column="students"><strong>${safe(students)} Students</strong><span class="big-stage-boys-pill">${safe(boys)}</span></td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
     });
     table.dataset.stageLayoutReady = "true";
     renumber();
