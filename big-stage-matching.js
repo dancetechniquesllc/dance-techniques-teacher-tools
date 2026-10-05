@@ -59,8 +59,28 @@
     root.querySelector(".big-stage-shell")?.prepend(toggle("matching"));
   };
 
+  const removePreviewShows = () => {
+    const grid = root.querySelector(".big-stage-show-grid");
+    if (!grid) return;
+    grid.querySelectorAll("[data-stage-show]").forEach((card) => card.remove());
+    let empty = grid.querySelector(".big-stage-empty-shows");
+    const hasPlannedShows = Boolean(grid.querySelector("[data-planned-show]"));
+    if (hasPlannedShows) {
+      empty?.remove();
+      return;
+    }
+    if (!empty) {
+      empty = document.createElement("div");
+      empty.className = "big-stage-empty-shows";
+      empty.innerHTML = "<strong>No shows planned yet.</strong><span>Choose + Add Show to begin with the show-planning wizard.</span>";
+      grid.appendChild(empty);
+    }
+  };
+
   const addToggle = () => {
-    if (root.dataset.stageView === "matching" || root.querySelector(".big-stage-view-toggle")) return;
+    if (root.dataset.stageView === "matching") return;
+    removePreviewShows();
+    if (root.querySelector(".big-stage-view-toggle")) return;
     const shell = root.querySelector(":scope > .big-stage-shell");
     if (shell) shell.prepend(toggle("shows"));
   };
