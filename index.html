@@ -22250,8 +22250,14 @@
         partnershipPreferencesQuery
       ]);
       const attendanceTableUnavailable = attendanceResult.error?.code === "42P01";
-      const failed = [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult,
-        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult].find((result) => result.error);
+      // Classes and enrollments are the shared roster. Supporting features such
+      // as guardian links, email history, attendance, and partnership payments
+      // must not prevent Curriculum Composer or Classes & Rosters from opening
+      // when one of those optional tables is unavailable or still migrating.
+      const failed = [profilesResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult].find((result) => result.error);
+      const ancillaryFailures = [guardianAccountsResult, notesResult, archivedResult,
+        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult].filter((result) => result.error);
+      ancillaryFailures.forEach((result) => console.warn("Optional shared roster data could not be loaded", result.error));
       if (failed) {
         sharedRosterReady = false;
         replaceCollection(rosterClasses, []);
