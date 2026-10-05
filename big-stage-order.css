@@ -1,4 +1,5 @@
 .big-stage-drag-handle { display: none; margin-right: 7px; color: var(--stage-berry); font-size: 18px; font-weight: 900; line-height: 1; cursor: grab; user-select: none; }
+.big-stage-dialog-head .subtle { display: none; }
 .big-stage-table tbody tr:has(.big-stage-class) { background: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 16%, white); }
 .big-stage-table tbody tr:has(.big-stage-class) td { border-top-color: color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 34%, var(--border)); }
 .big-stage-table[data-stage-layout-ready="true"] { width: 100%; min-width: 1180px; table-layout: fixed; }
