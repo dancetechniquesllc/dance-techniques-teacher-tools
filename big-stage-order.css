@@ -4,9 +4,9 @@
 .big-stage-table[data-stage-layout-ready="true"] { width: 100%; min-width: 1180px; table-layout: fixed; }
 .big-stage-table[data-stage-layout-ready="true"] thead th { color: #211817; font-family: "Avenir Next Heavy", "Arial Black", var(--font-display), sans-serif; font-size: 12px; font-weight: 900 !important; letter-spacing: .035em; }
 .big-stage-table[data-stage-layout-ready="true"] th, .big-stage-table[data-stage-layout-ready="true"] td { padding-left: 9px; padding-right: 9px; overflow-wrap: anywhere; }
-.big-stage-table [data-stage-column="order"] { width: 56px; }
+.big-stage-table [data-stage-column="order"] { width: 56px; text-align: center; }
 .big-stage-table [data-stage-column="teacher"] { width: 88px; }
-.big-stage-table[data-stage-layout-ready="true"] .big-stage-order { width: 40px; height: 40px; }
+.big-stage-table[data-stage-layout-ready="true"] .big-stage-order { width: 40px; height: 40px; margin-inline: auto; }
 .big-stage-table [data-stage-column="students"] { width: 94px; }
 .big-stage-table [data-stage-column="song"] { width: 138px; }
 .big-stage-table [data-stage-column="costume"] { width: 88px; text-align: center; }
