@@ -4,6 +4,9 @@
   let editing = false;
   let draggedRow = null;
   let enhancing = false;
+  const recitalPlaylistName = "Hottest Ticket in Town";
+  let recitalSongs = ["A Dream Is a Wish", "The Best Day Ever", "Better When I'm Dancin'", "You Are My Sunshine", "When I Grow Up", "Dream Together"];
+  let recitalPlaylistLoaded = false;
   const teacherColors = { tiffany: "#dba8df", lexi: "#a9d9b8", judy: "#aacfe5", makayla: "#ead17e", erika: "#e7b493", kara: "#cbb7df", liv: "#d9c7a7", megan: "#deb1b8", maddie: "#b9d6d1", brynlee: "#dbc6e2" };
   const costumeImages = {
     "Blush Tutu · CC-104": "Costume Images/Screenshot 2025-01-27 at 1.12.58 PM-184.png",
@@ -17,11 +20,13 @@
   };
   const showKey = () => `dt-big-stage-order:${root.querySelector(".big-stage-view-title h4")?.textContent?.trim() || "show"}`;
   const performanceKey = () => `${showKey()}:performing`;
+  const songKey = () => `${showKey()}:songs`;
   const rowKey = (row) => row.querySelector(".big-stage-class")?.textContent?.trim().replace(/\s+/g, " ") || "";
   const performanceRows = () => [...root.querySelectorAll(".big-stage-table tbody tr")].filter((row) => row.querySelector(".big-stage-class"));
   const renumber = () => performanceRows().forEach((row, index) => { const number = row.querySelector(".big-stage-order"); if (number) number.textContent = String(index + 1); });
   const savedOrder = () => { try { return JSON.parse(localStorage.getItem(showKey()) || "[]"); } catch { return []; } };
   const savedPerformances = () => { try { return JSON.parse(localStorage.getItem(performanceKey()) || "{}"); } catch { return {}; } };
+  const savedSongs = () => { try { return JSON.parse(localStorage.getItem(songKey()) || "{}"); } catch { return {}; } };
   const applySavedOrder = () => {
     const order = savedOrder();
     const body = root.querySelector(".big-stage-table tbody");
@@ -77,6 +82,46 @@
     });
     table.dataset.combinedSamplesReady = "true";
   };
+  const renderSongDropdowns = () => {
+    performanceRows().forEach((row) => {
+      const cell = row.querySelector('[data-stage-column="song"]');
+      if (!cell || cell.querySelector("[data-stage-song]")) return;
+      const className = row.querySelector(".big-stage-class strong")?.textContent?.trim() || row.dataset.combinedSample || "Performance";
+      const initial = cell.textContent.trim() || "Song not selected";
+      const selected = savedSongs()[className] || initial;
+      const options = [...new Set([selected, ...recitalSongs].filter(Boolean))];
+      cell.innerHTML = `<select class="big-stage-song-select" data-stage-song aria-label="Song for ${safe(className)}">${options.map((song) => `<option${song === selected ? " selected" : ""}>${safe(song)}</option>`).join("")}</select><small class="big-stage-song-source">${safe(recitalPlaylistName)}</small>`;
+    });
+  };
+  const refreshSongOptions = () => {
+    root.querySelectorAll("[data-stage-song]").forEach((select) => {
+      const row = select.closest("tr");
+      const className = row?.querySelector(".big-stage-class strong")?.textContent?.trim() || row?.dataset.combinedSample || "Performance";
+      const selected = savedSongs()[className] || select.value;
+      const options = [...new Set([selected, ...recitalSongs].filter(Boolean))];
+      select.innerHTML = options.map((song) => `<option${song === selected ? " selected" : ""}>${safe(song)}</option>`).join("");
+    });
+  };
+  const loadRecitalPlaylist = async (attempt = 0) => {
+    if (recitalPlaylistLoaded) return;
+    const client = window.dtSupabase;
+    if (!client) {
+      if (attempt < 12) window.setTimeout(() => loadRecitalPlaylist(attempt + 1), 500);
+      return;
+    }
+    try {
+      const playlistResult = await client.from("music_playlists").select("id,name").eq("name", recitalPlaylistName).eq("active", true).maybeSingle();
+      if (playlistResult.error || !playlistResult.data?.id) return;
+      const linkResult = await client.from("music_playlist_tracks").select("position,music_tracks(title)").eq("playlist_id", playlistResult.data.id).order("position");
+      if (linkResult.error) return;
+      const liveSongs = (linkResult.data || []).map((link) => link.music_tracks?.title).filter(Boolean);
+      if (liveSongs.length) recitalSongs = liveSongs;
+      recitalPlaylistLoaded = true;
+      refreshSongOptions();
+    } catch (error) {
+      console.warn("Hottest Ticket in Town playlist could not load", error);
+    }
+  };
   const reshapeTable = () => {
     const table = root.querySelector(".big-stage-table");
     if (!table || table.dataset.stageLayoutReady === "true") return;
@@ -103,6 +148,7 @@
       row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${safe(className)}">${performanceOptions}</select></td><td data-stage-column="teacher"><strong>${safe(teacher)}</strong></td><td data-stage-column="school">${safe(school)}</td><td class="big-stage-class" data-stage-column="class"><strong>${safe(className)}</strong><small class="big-stage-age-range">${safe(ageRange)}</small></td><td data-stage-column="students"><strong>${safe(students)} Dancers</strong>${boysPill}</td><td data-stage-column="song">${safe(song)}</td><td class="big-stage-costume" data-stage-column="costume">${costume}</td><td data-stage-column="props">${safe(props)}</td><td data-stage-column="instructions">${safe(instructions)}</td>`;
     });
     addCombinedSamples(table);
+    renderSongDropdowns();
     table.dataset.stageLayoutReady = "true";
     renumber();
   };
@@ -195,6 +241,15 @@
     setEditing(!editing);
   });
   root.addEventListener("change", (event) => {
+    const songSelect = event.target.closest("[data-stage-song]");
+    if (songSelect) {
+      const row = songSelect.closest("tr");
+      const className = row?.querySelector(".big-stage-class strong")?.textContent?.trim() || row?.dataset.combinedSample || "Performance";
+      const choices = savedSongs();
+      choices[className] = songSelect.value;
+      localStorage.setItem(songKey(), JSON.stringify(choices));
+      return;
+    }
     const select = event.target.closest("[data-stage-performance]");
     if (!select) return;
     const row = select.closest("tr");
@@ -245,4 +300,5 @@
   root.addEventListener("dragend", () => { draggedRow?.classList.remove("is-dragging"); draggedRow = null; });
   new MutationObserver(() => window.requestAnimationFrame(() => { enhance(); syncCombinedCapacityAlerts(); })).observe(root, { childList: true, subtree: true, characterData: true });
   enhance();
+  loadRecitalPlaylist();
 })();

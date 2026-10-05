@@ -10,6 +10,9 @@
 .big-stage-table[data-stage-layout-ready="true"] .big-stage-order { width: 40px; height: 40px; margin-inline: auto; }
 .big-stage-table [data-stage-column="students"] { width: 94px; }
 .big-stage-table [data-stage-column="song"] { width: 138px; }
+.big-stage-song-select { width: 100%; min-width: 0; padding: 8px 24px 8px 9px; border: 1px solid color-mix(in srgb, var(--stage-teacher-color, #dba9a1) 55%, white); border-radius: 9px; background: rgb(255 255 255 / .82); color: #211817; font-size: 11px; font-weight: 800; }
+.big-stage-song-select:focus-visible { outline: 2px solid var(--stage-berry); outline-offset: 2px; }
+.big-stage-song-source { display: block; margin-top: 5px; color: #78676a; font-size: 8px; font-weight: 850; line-height: 1.2; }
 .big-stage-table [data-stage-column="costume"] { width: 88px; text-align: center; }
 .big-stage-table [data-stage-column="props"] { width: 88px; }
 .big-stage-table [data-stage-column="teacher"] strong, .big-stage-table [data-stage-column="students"] strong { display: block; white-space: nowrap; }
