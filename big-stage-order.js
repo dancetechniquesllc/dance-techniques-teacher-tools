@@ -53,7 +53,8 @@
       {
         kind: "Same Teacher Combination",
         type: "Either",
-        bands: combinedBand({ teacher: "<strong>Miss Lexi</strong><small>2 of her classes</small>", school: "<span>Primrose School of Wylie</span><span>Primrose School of North</span>", className: "<strong>Ballet &amp; Tap · Pre-K</strong><strong>Ballet &amp; Tap · Preschool</strong>", age: "4Y 0M - 5Y 0M · 3Y 0M - 4Y 0M", dancers: "25 Dancers", boys: "2 boys", color: teacherColors.lexi }),
+        bands: combinedBand({ teacher: "<strong>Miss Lexi</strong><small>2 of her classes</small>", school: "<span>Primrose School of Wylie</span><span>Primrose School of North</span>", className: "<strong>Ballet &amp; Tap · Pre-K</strong><strong>Ballet &amp; Tap · Preschool</strong>", age: "4Y 0M - 5Y 0M · 3Y 0M - 4Y 0M", color: teacherColors.lexi, hideDancers: true }),
+        dancerSummary: `<div class="big-stage-combined-dancer-summary" data-stage-column="students" style="background:color-mix(in srgb, ${teacherColors.lexi} 14%, white)"><strong>25 Dancers</strong><small>Pre-K: 14</small><small>Preschool: 11</small><span class="big-stage-boys-pill">2 boys</span></div>`,
         song: "When I Grow Up", costume: "Blush Tutu · CC-104", props: "Stars · 25", instructions: "Both classes enter together; younger class begins in front."
       },
       {
