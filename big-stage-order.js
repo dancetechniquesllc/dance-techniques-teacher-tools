@@ -21,12 +21,14 @@
   const showKey = () => `dt-big-stage-order:${root.querySelector(".big-stage-view-title h4")?.textContent?.trim() || "show"}`;
   const performanceKey = () => `${showKey()}:performing`;
   const songKey = () => `${showKey()}:songs`;
+  const combinedDecisionKey = () => `${showKey()}:combined-decisions`;
   const rowKey = (row) => row.querySelector(".big-stage-class")?.textContent?.trim().replace(/\s+/g, " ") || "";
   const performanceRows = () => [...root.querySelectorAll(".big-stage-table tbody tr")].filter((row) => row.querySelector(".big-stage-class"));
   const renumber = () => performanceRows().forEach((row, index) => { const number = row.querySelector(".big-stage-order"); if (number) number.textContent = String(index + 1); });
   const savedOrder = () => { try { return JSON.parse(localStorage.getItem(showKey()) || "[]"); } catch { return []; } };
   const savedPerformances = () => { try { return JSON.parse(localStorage.getItem(performanceKey()) || "{}"); } catch { return {}; } };
   const savedSongs = () => { try { return JSON.parse(localStorage.getItem(songKey()) || "{}"); } catch { return {}; } };
+  const savedCombinedDecisions = () => { try { return JSON.parse(localStorage.getItem(combinedDecisionKey()) || "{}"); } catch { return {}; } };
   const applySavedOrder = () => {
     const order = savedOrder();
     const body = root.querySelector(".big-stage-table tbody");
@@ -154,18 +156,90 @@
   };
   const syncCombinedCapacityAlerts = () => {
     root.querySelectorAll(".big-stage-combined-content").forEach((content) => {
+      const row = content.closest("tr");
+      const decisionId = row?.dataset.combinedSample || rowKey(row);
+      const separationTestMode = new URLSearchParams(window.location.search).has("combined-separation-test");
+      if (separationTestMode && root.dataset.combinedSeparationTestCleaned !== "true") {
+        localStorage.removeItem(combinedDecisionKey());
+        root.dataset.combinedSeparationTestCleaned = "true";
+      }
+      const decision = savedCombinedDecisions()[decisionId];
       const totalText = content.querySelector(".big-stage-combined-dancer-summary > strong")?.textContent || "";
       const total = Number.parseInt(totalText, 10) || 0;
       let alert = content.querySelector(".big-stage-combined-capacity-alert");
       if (total <= 12) { alert?.remove(); return; }
       if (!alert) {
-        alert = document.createElement("div");
+        alert = document.createElement("button");
+        alert.type = "button";
         alert.className = "big-stage-combined-capacity-alert";
-        alert.setAttribute("role", "alert");
+        alert.dataset.stageCombinedCapacity = "true";
+        alert.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          openCombinedCapacityPlanner(alert.closest("tr"));
+        });
         content.appendChild(alert);
       }
-      const markup = `<span aria-hidden="true">!</span><div><strong>Combined class is over the 12-dancer limit</strong><small>${total} dancers total · These classes should no longer be combined.</small></div>`;
+      alert.classList.toggle("is-resolved", Boolean(decision));
+      const movedClass = decision?.movedClass || "The other class";
+      const destination = decision?.action === "current" ? "will receive its own spot in this show" : decision?.action === "other" ? `will move to ${decision.destination}` : "will be temporarily unassigned from all recitals";
+      const markup = decision
+        ? `<span aria-hidden="true">✓</span><div><strong>Separation planned</strong><small>${safe(movedClass)} ${safe(destination)}. Click to change this plan.</small></div>`
+        : `<span aria-hidden="true">!</span><div><strong>Combined class is over the 12-dancer limit</strong><small>${total} dancers total · Click to separate these classes.</small></div>`;
       if (alert.innerHTML !== markup) alert.innerHTML = markup;
+      if (separationTestMode && root.dataset.combinedSeparationTestOpened !== "true") {
+        root.dataset.combinedSeparationTestOpened = "true";
+        window.requestAnimationFrame(() => openCombinedCapacityPlanner(row));
+      }
+    });
+  };
+  const showChoices = () => {
+    let planned = [];
+    try { planned = JSON.parse(localStorage.getItem("dt-big-stage-planned-shows:v1") || "[]").map((show) => show.name); } catch { planned = []; }
+    return [...new Set(["11:30 AM Show", "2:30 PM Show", "4:45 PM Show", ...planned])];
+  };
+  const openCombinedCapacityPlanner = (row) => {
+    const decisionId = row.dataset.combinedSample || rowKey(row);
+    const classes = [...row.querySelectorAll(".big-stage-combined-band .big-stage-class strong")].map((item) => item.textContent.trim()).filter(Boolean);
+    if (classes.length < 2) return;
+    const existing = savedCombinedDecisions()[decisionId] || {};
+    const keepClass = existing.keepClass || classes[0];
+    const action = existing.action || "current";
+    const destination = existing.destination || showChoices()[0];
+    document.getElementById("big-stage-combined-capacity-modal")?.remove();
+    const modal = document.createElement("div");
+    modal.id = "big-stage-combined-capacity-modal";
+    modal.className = "big-stage-combined-capacity-modal";
+    modal.innerHTML = `<section class="big-stage-combined-capacity-dialog" role="dialog" aria-modal="true" aria-labelledby="combined-capacity-title">
+      <button class="big-stage-combined-capacity-close" type="button" aria-label="Close separation planner">×</button>
+      <span class="big-stage-combined-capacity-kicker">Combined class limit</span>
+      <h3 id="combined-capacity-title">Separate these classes</h3>
+      <p>Choose which class keeps this performance assignment. Then decide where the other class should go.</p>
+      <fieldset class="big-stage-combined-keep"><legend>Keep the current assignment for</legend>${classes.map((className) => `<label><input type="radio" name="combined-keep" value="${safe(className)}" ${className === keepClass ? "checked" : ""}><span><strong>${safe(className)}</strong><small>Stays in this performance spot</small></span></label>`).join("")}</fieldset>
+      <fieldset class="big-stage-combined-move"><legend>Move the other class</legend>
+        <label><input type="radio" name="combined-action" value="current" ${action === "current" ? "checked" : ""}><span><strong>Own spot on this recital</strong><small>Create a separate performance in the current show.</small></span></label>
+        <label><input type="radio" name="combined-action" value="other" ${action === "other" ? "checked" : ""}><span><strong>Move to another recital</strong><small>Choose an existing or newly planned show.</small></span></label>
+        <label><input type="radio" name="combined-action" value="unassign" ${action === "unassign" ? "checked" : ""}><span><strong>Temporarily unassign</strong><small>Remove it from every recital until a decision is made.</small></span></label>
+      </fieldset>
+      <label class="big-stage-combined-destination" ${action === "other" ? "" : "hidden"}>Choose recital<select>${showChoices().map((show) => `<option${show === destination ? " selected" : ""}>${safe(show)}</option>`).join("")}</select></label>
+      <div class="big-stage-combined-capacity-actions"><button class="secondary" type="button" data-combined-cancel>Cancel</button><button class="primary" type="button" data-combined-apply>Save Separation Plan</button></div>
+    </section>`;
+    document.body.appendChild(modal);
+    const close = () => modal.remove();
+    const destinationField = modal.querySelector(".big-stage-combined-destination");
+    modal.querySelectorAll('[name="combined-action"]').forEach((radio) => radio.addEventListener("change", () => { destinationField.hidden = radio.value !== "other"; }));
+    modal.querySelector(".big-stage-combined-capacity-close").addEventListener("click", close);
+    modal.querySelector("[data-combined-cancel]").addEventListener("click", close);
+    modal.addEventListener("click", (event) => { if (event.target === modal) close(); });
+    modal.querySelector("[data-combined-apply]").addEventListener("click", () => {
+      const chosenKeep = modal.querySelector('[name="combined-keep"]:checked')?.value || classes[0];
+      const chosenAction = modal.querySelector('[name="combined-action"]:checked')?.value || "current";
+      const movedClass = classes.find((className) => className !== chosenKeep) || classes[1];
+      const decisions = savedCombinedDecisions();
+      decisions[decisionId] = { keepClass: chosenKeep, movedClass, action: chosenAction, destination: chosenAction === "other" ? modal.querySelector("select").value : "", updatedAt: new Date().toISOString() };
+      localStorage.setItem(combinedDecisionKey(), JSON.stringify(decisions));
+      close();
+      syncCombinedCapacityAlerts();
     });
   };
   const setEditing = (active) => {
@@ -212,6 +286,11 @@
     enhancing = false;
   };
   root.addEventListener("click", (event) => {
+    const capacityAlert = event.target.closest("[data-stage-combined-capacity]");
+    if (capacityAlert) {
+      openCombinedCapacityPlanner(capacityAlert.closest("tr"));
+      return;
+    }
     const costume = event.target.closest("[data-stage-costume-preview]");
     if (costume) {
       const row = costume.closest("tr");

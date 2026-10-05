@@ -38,11 +38,23 @@
 .big-stage-combined-band small { display: block; color: #6f6265; font-size: 9px; font-weight: 750; }
 .big-stage-combined-pair-layout { display: grid; grid-template-columns: 30fr 9fr; gap: 10px; align-items: stretch; }
 .big-stage-combined-content { display: grid; gap: 9px; }
-.big-stage-combined-capacity-alert { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 2px solid #a94f48; border-radius: 10px; background: #fff0ec; color: #6f241f; }
+.big-stage-combined-capacity-alert { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 2px solid #a94f48; border-radius: 10px; background: #fff0ec; color: #6f241f; text-align: left; cursor: pointer; }
+.big-stage-combined-capacity-alert:hover, .big-stage-combined-capacity-alert:focus-visible { background: #ffe5df; outline: 2px solid #a94f48; outline-offset: 2px; }
 .big-stage-combined-capacity-alert > span { width: 28px; height: 28px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 50%; background: #a94f48; color: white; font-size: 17px; font-weight: 950; }
 .big-stage-combined-capacity-alert > div { display: grid; gap: 2px; }
 .big-stage-combined-capacity-alert strong { font-size: 12px; font-weight: 950; }
 .big-stage-combined-capacity-alert small { color: #7e3d37; font-size: 10px; font-weight: 750; }
+.big-stage-combined-capacity-alert.is-resolved { border-color: #6f8c69; background: #edf5e9; color: #355139; }
+.big-stage-combined-capacity-alert.is-resolved > span { background: #6f8c69; }.big-stage-combined-capacity-alert.is-resolved small { color: #4d684f; }
+.big-stage-combined-capacity-modal { position: fixed; inset: 0; z-index: 10060; display: grid; place-items: center; padding: 20px; background: rgb(49 35 40 / .5); backdrop-filter: blur(4px); }
+.big-stage-combined-capacity-dialog { position: relative; width: min(720px, 100%); max-height: 92vh; overflow: auto; padding: 27px; border-radius: 22px; background: #fffaf7; box-shadow: 0 26px 85px rgb(35 23 28 / .3); }
+.big-stage-combined-capacity-close { position: absolute; top: 16px; right: 16px; width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #f2d9d7; color: #6b173f; font-size: 24px; cursor: pointer; }
+.big-stage-combined-capacity-kicker { color: #a94f48; font-size: 10px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }.big-stage-combined-capacity-dialog h3 { margin: 5px 50px 7px 0; color: #211817; font-family: Georgia, serif; font-size: 28px; }.big-stage-combined-capacity-dialog > p { margin: 0 45px 20px 0; color: #6f6265; }
+.big-stage-combined-capacity-dialog fieldset { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 17px; padding: 0; border: 0; }.big-stage-combined-capacity-dialog fieldset legend { width: 100%; margin-bottom: 9px; color: #5d4b4f; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.big-stage-combined-capacity-dialog fieldset label { display: flex; align-items: flex-start; gap: 9px; padding: 13px; border: 1px solid #e8c9c2; border-radius: 13px; background: white; cursor: pointer; }.big-stage-combined-capacity-dialog fieldset label:has(input:checked) { border-color: #a94f48; background: #fff0ec; box-shadow: inset 3px 0 #a94f48; }.big-stage-combined-capacity-dialog fieldset input { margin-top: 3px; }.big-stage-combined-capacity-dialog fieldset span { display: grid; gap: 3px; }.big-stage-combined-capacity-dialog fieldset small { color: #77676a; font-size: 10px; }
+.big-stage-combined-capacity-dialog .big-stage-combined-move { grid-template-columns: repeat(3, 1fr); }.big-stage-combined-destination { display: grid; gap: 7px; margin-bottom: 18px; color: #5d4b4f; font-size: 11px; font-weight: 900; text-transform: uppercase; }.big-stage-combined-destination select { min-height: 44px; padding: 9px 12px; border: 1px solid #dcb9b2; border-radius: 10px; background: white; font: inherit; }
+.big-stage-combined-capacity-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 18px; border-top: 1px solid #edd4ce; }
+@media (max-width: 680px) { .big-stage-combined-capacity-dialog fieldset, .big-stage-combined-capacity-dialog .big-stage-combined-move { grid-template-columns: 1fr; } }
 .big-stage-combined-dancer-summary { display: grid; align-content: center; gap: 5px; padding: 9px; border-radius: 10px; background: linear-gradient(to bottom, color-mix(in srgb, #d9c7a7 14%, white) 0 50%, color-mix(in srgb, #deb1b8 14%, white) 50% 100%); }
 .big-stage-combined-dancer-summary > strong { font-size: 14px; font-weight: 900; }
 .big-stage-combined-dancer-summary > small { color: #5f5356; font-size: 9px; font-weight: 800; }
