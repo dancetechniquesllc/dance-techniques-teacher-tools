@@ -353,7 +353,8 @@
         return parts.length ? parts : [item.textContent.trim().replace(/\s+/g, " ")];
       }).filter(Boolean);
       const school = schoolParts.join(" · ") || "School not entered";
-      const teacher = [...(teacherCells || [])].map((item) => item.textContent.trim()).join(" · ") || "Teacher not assigned";
+      const teacherParts = [...new Set([...(teacherCells || [])].map((item) => item.textContent.trim()).filter(Boolean))];
+      const teacher = teacherParts.join(" · ") || "Teacher not assigned";
       const roster = row?.querySelector('[data-stage-column="students"] strong')?.textContent?.trim() || "Roster not entered";
       const song = row?.querySelector('[data-stage-song]')?.value || row?.querySelector('[data-stage-column="song"]')?.textContent?.trim() || "Song not entered";
       const image = costume.querySelector("img")?.src || "";
@@ -369,7 +370,7 @@
       const modal = document.createElement("div");
       modal.id = "big-stage-costume-detail-modal";
       modal.className = "big-stage-costume-detail-modal";
-      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close costume details">×</button><div class="big-stage-costume-detail-visual"><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><section class="big-stage-costume-roster"><h4>Dancer Sizes</h4><div>${dancers.map(costumeDancerMarkup).join("")}</div></section></div><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd>${className}</dd></div><div><dt>School</dt><dd class="big-stage-costume-schools">${(schoolParts.length ? schoolParts : [school]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>Teacher</dt><dd>${teacher}</dd></div><div><dt>Song</dt><dd>${safe(song)}</dd></div><div><dt>Costumes Needed</dt><dd class="big-stage-costume-needed"><strong>${costumesNeeded}</strong><small>${sizeBreakdown}</small></dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
+      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close costume details">×</button><div class="big-stage-costume-detail-visual"><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><section class="big-stage-costume-roster"><h4>Dancer Sizes</h4><div>${dancers.map(costumeDancerMarkup).join("")}</div></section></div><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd>${className}</dd></div><div><dt>School</dt><dd class="big-stage-costume-schools">${(schoolParts.length ? schoolParts : [school]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>Teacher</dt><dd class="big-stage-costume-teachers">${(teacherParts.length ? teacherParts : [teacher]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>Song</dt><dd>${safe(song)}</dd></div><div><dt>Costumes Needed</dt><dd class="big-stage-costume-needed"><strong>${costumesNeeded}</strong><small>${sizeBreakdown}</small></dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
       document.body.appendChild(modal);
       const close = () => modal.remove();
       modal.querySelector(".big-stage-costume-detail-close").addEventListener("click", close);
