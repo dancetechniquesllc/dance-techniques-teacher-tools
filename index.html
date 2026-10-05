@@ -22233,7 +22233,7 @@
       const partnershipPreferencesQuery = ["admin", "director"].includes(profile.role)
         ? client.from("partner_school_payment_preferences").select("*")
         : Promise.resolve({ data: [], error: null });
-      const [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult] = await Promise.all([
+      let [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("guardian_user_accounts").select("user_id, guardian_id, revoked_at"),
         partnerSchoolsQuery,
@@ -22249,6 +22249,14 @@
         partnershipPaymentsQuery,
         partnershipPreferencesQuery
       ]);
+      // Older production schemas may not have the new `paused` enrollment enum
+      // value yet. PostgreSQL rejects the entire `.in()` filter in that case,
+      // which used to make every class and Curriculum Composer look offline.
+      // Fall back to the established active statuses until that migration lands.
+      if (enrollmentsResult.error && /paused|enum|invalid input value/i.test(`${enrollmentsResult.error.message || ""} ${enrollmentsResult.error.details || ""}`)) {
+        console.warn("Paused enrollment status is not available yet; loading active rosters without paused students.", enrollmentsResult.error);
+        enrollmentsResult = await client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled"]);
+      }
       const attendanceTableUnavailable = attendanceResult.error?.code === "42P01";
       // Classes and enrollments are the shared roster. Supporting features such
       // as guardian links, email history, attendance, and partnership payments
