@@ -57,6 +57,34 @@
 .big-stage-combined-capacity-dialog .big-stage-combined-move { grid-template-columns: repeat(3, 1fr); }.big-stage-combined-destination { display: grid; gap: 7px; margin-bottom: 18px; color: #5d4b4f; font-size: 11px; font-weight: 900; text-transform: uppercase; }.big-stage-combined-destination select { min-height: 44px; padding: 9px 12px; border: 1px solid #dcb9b2; border-radius: 10px; background: white; font: inherit; }
 .big-stage-combined-capacity-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 18px; border-top: 1px solid #edd4ce; }
 @media (max-width: 680px) { .big-stage-combined-capacity-dialog fieldset, .big-stage-combined-capacity-dialog .big-stage-combined-move { grid-template-columns: 1fr; } }
+.big-stage-combined-capacity-dialog fieldset {
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid #e8c9c2;
+  border-radius: 16px;
+  background: #fff;
+}
+.big-stage-combined-capacity-dialog fieldset legend { padding: 0 0 4px; }
+.big-stage-combined-capacity-dialog fieldset label {
+  min-height: 72px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  text-align: center;
+}
+.big-stage-combined-capacity-dialog fieldset label:has(input:checked) {
+  border: 0;
+  background: #e1aaa1;
+  color: #6b173f;
+  box-shadow: none;
+}
+.big-stage-combined-capacity-dialog fieldset input { position: absolute; opacity: 0; pointer-events: none; }
+.big-stage-combined-capacity-dialog fieldset span { justify-items: center; }
+.big-stage-combined-capacity-dialog fieldset small { max-width: 190px; line-height: 1.3; }
+.big-stage-combined-capacity-dialog fieldset label:has(input:checked) small { color: #6b4549; }
 .big-stage-combined-dancer-summary { display: grid; align-content: center; gap: 5px; padding: 9px; border-radius: 10px; background: linear-gradient(to bottom, color-mix(in srgb, #d9c7a7 14%, white) 0 50%, color-mix(in srgb, #deb1b8 14%, white) 50% 100%); }
 .big-stage-combined-dancer-summary > strong { font-size: 14px; font-weight: 900; }
 .big-stage-combined-dancer-summary > small { color: #5f5356; font-size: 9px; font-weight: 800; }

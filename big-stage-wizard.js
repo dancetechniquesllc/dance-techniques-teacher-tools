@@ -10,7 +10,7 @@
     classes.forEach((rosterClass) => {
       const schoolName = rosterClass.schoolName || "Partner School";
       if (!grouped.has(schoolName)) grouped.set(schoolName, []);
-      grouped.get(schoolName).push({ id: rosterClass.id, name: rosterClass.name, enrolledCount: rosterClass.enrolledCount || 0 });
+      grouped.get(schoolName).push(rosterClass);
     });
     return [...grouped].map(([name, schoolClasses]) => ({ name, classes: schoolClasses }));
   };
@@ -97,11 +97,27 @@
       <div class="big-stage-wizard-note"><strong>This step is optional.</strong> You can create an empty show and add schools or individual classes later.</div>
       <div class="big-stage-school-picker">${schools.length ? schools.map((school) => {
         const selection = state.selections[school.name];
+        const dancerTotal = school.classes.reduce((total, classInfo) => total + classInfo.enrolledCount, 0);
         return `<article class="big-stage-school-choice ${selection ? "selected" : ""}" data-school-card="${safe(school.name)}">
-          <label class="big-stage-school-check"><input type="checkbox" data-school-toggle="${safe(school.name)}" ${selection ? "checked" : ""}><span><strong>${safe(school.name)}</strong><small>${school.classes.length} classes</small></span></label>
+          <label class="big-stage-school-check"><input type="checkbox" data-school-toggle="${safe(school.name)}" ${selection ? "checked" : ""}><span><strong>${safe(school.name)}</strong><small>${school.classes.length} classes <b>·</b> ${dancerTotal} dancers total</small></span><i aria-hidden="true"></i></label>
           <div class="big-stage-school-options" ${selection ? "" : "hidden"}>
-            <fieldset><legend>Whole school on the same show?</legend><label><input type="radio" name="whole-${safe(school.name)}" value="yes" ${!selection || selection.whole ? "checked" : ""}> Yes</label><label><input type="radio" name="whole-${safe(school.name)}" value="no" ${selection && !selection.whole ? "checked" : ""}> No, choose classes</label></fieldset>
-            <div class="big-stage-class-checks" ${selection && !selection.whole ? "" : "hidden"}>${school.classes.map((classInfo) => `<label><input type="checkbox" data-class-toggle="${safe(classInfo.id)}" ${selection?.classes?.has(classInfo.id) ? "checked" : ""}> <span>${safe(classInfo.name)}<small>${classInfo.enrolledCount} dancers</small></span></label>`).join("")}</div>
+            <fieldset><legend>Who should be included in this show?</legend><label><input type="radio" name="whole-${safe(school.name)}" value="yes" ${!selection || selection.whole ? "checked" : ""}> Entire school</label><label><input type="radio" name="whole-${safe(school.name)}" value="no" ${selection && !selection.whole ? "checked" : ""}> Choose classes</label></fieldset>
+            <div class="big-stage-entire-school-summary" ${selection?.whole ? "" : "hidden"}><span aria-hidden="true">✓</span><p><strong>${school.classes.length === 1 ? "1 class" : `All ${school.classes.length} classes`}</strong><b>·</b>${dancerTotal} dancers will be included.</p></div>
+            <div class="big-stage-class-checks" ${selection && !selection.whole ? "" : "hidden"}>${school.classes.map((classInfo) => {
+              const teacherInitials = classInfo.teacherName.split(/\s+/).filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "—";
+              const enrollmentState = classInfo.enrolledCount >= classInfo.capacity ? "full" : classInfo.enrolledCount >= 7 ? "ready" : "low";
+              return `<label class="big-stage-roster-class-card">
+                <input type="checkbox" data-class-toggle="${safe(classInfo.id)}" ${selection?.classes?.has(classInfo.id) ? "checked" : ""}>
+                <span class="big-stage-class-selected-mark" aria-hidden="true">✓</span>
+                <span class="big-stage-class-time">${safe([classInfo.day, classInfo.time].filter(Boolean).join(" · ") || "Schedule pending")}</span>
+                <span class="big-stage-class-level">Level ${safe(classInfo.level)}</span>
+                <small class="big-stage-class-enrollment ${enrollmentState}">${classInfo.enrolledCount}/${classInfo.capacity} Enrolled${enrollmentState === "full" ? " · Full" : ""}</small>
+                <span class="big-stage-class-teacher">${classInfo.teacherPhoto ? `<img src="${safe(classInfo.teacherPhoto)}" alt="">` : safe(teacherInitials)}</span>
+                <strong>${safe(classInfo.name)}</strong>
+                <small>${safe(classInfo.teacherName)}</small>
+                <span class="big-stage-class-students">${classInfo.students.length ? classInfo.students.map((student) => `<span><b>${student.photo ? `<img src="${safe(student.photo)}" alt="">` : safe(`${student.firstName[0] || ""}${student.lastName[0] || ""}`)}</b><small>${safe(student.firstName)}</small></span>`).join("") : '<em>No enrolled dancers yet</em>'}</span>
+              </label>`;
+            }).join("")}</div>
           </div>
         </article>`;
       }).join("") : '<div class="big-stage-wizard-empty"><strong>No live classes are available yet.</strong><span>You can continue and assign classes later.</span></div>'}</div>

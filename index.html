@@ -20046,13 +20046,28 @@
     ];
     window.getBigStageRosterClasses = () => rosterClasses
       .filter((rosterClass) => rosterClass?.sourceActive !== false)
-      .map((rosterClass) => ({
-        id: String(rosterClass.id || ""),
-        name: rosterClass.name || "Class",
-        schoolName: rosterClass.schoolName || "Partner School",
-        teacherId: String(rosterClass.teacherId || ""),
-        enrolledCount: (rosterClass.students || []).filter((student) => !["withdrawn", "inactive", "paused"].includes(String(student.status || "").toLowerCase())).length
-      }));
+      .map((rosterClass) => {
+        const activeStudents = (rosterClass.students || []).filter((student) => !["withdrawn", "inactive", "paused"].includes(String(student.status || "").toLowerCase()));
+        const assignedTeacher = teachers.find((teacher) => String(teacher.id) === String(rosterClass.teacherId));
+        return {
+          id: String(rosterClass.id || ""),
+          name: rosterClass.name || "Class",
+          schoolName: rosterClass.schoolName || "Partner School",
+          teacherId: String(rosterClass.teacherId || ""),
+          teacherName: assignedTeacher?.fullName || assignedTeacher?.name || assignedTeacher?.displayName || "Teacher",
+          teacherPhoto: assignedTeacher?.photo || "",
+          day: rosterClass.day || "",
+          time: rosterClass.time || "",
+          level: rosterClass.level || "—",
+          capacity: Number(rosterClass.capacity) || 12,
+          enrolledCount: activeStudents.length,
+          students: activeStudents.slice(0, 8).map((student) => ({
+            firstName: student.firstName || student.first_name || "Dancer",
+            lastName: student.lastName || student.last_name || "",
+            photo: student.photo || ""
+          }))
+        };
+      });
     let selectedRosterClassId = rosterClasses[0]?.id || "";
     let rosterClassProfileOpen = false;
     let rosterSchoolFilter = "all";
@@ -21964,8 +21979,10 @@
       const studentRecords = enrollmentChangeStudentRecords();
       list.innerHTML = enrollmentChangeRequests.map((item) => {
         const assigned = studentRecords.find(({ student }) => String(student.id) === String(item.assigned_student_id));
-        const isSchoolChange = String(item.request_type || "").toLowerCase().includes("leaving our current school");
-        const isPause = String(item.request_type || "").toLowerCase().includes("pause");
+        const requestType = String(item.request_type || "").toLowerCase();
+        const isSchoolChange = requestType.includes("school")
+          && (requestType.includes("chang") || requestType.includes("transfer"));
+        const isPause = requestType.includes("pause");
         const financialReady = [item.enrollment_fee_refund_status,item.brightwheel_refund_status].every((status) => ["completed","not_needed"].includes(status));
         const billingReady = item.billing_plan_status === "completed";
         const suggestions = enrollmentChangeSuggestedStudents(item, studentRecords);
@@ -53503,12 +53520,12 @@
     })();
   </script>
   <link rel="stylesheet" href="big-stage.css?v=20260911">
-<link rel="stylesheet" href="big-stage-order.css?v=20261004-class-rows">
-<link rel="stylesheet" href="big-stage-wizard.css?v=20261004-show-planner-2">
+<link rel="stylesheet" href="big-stage-order.css?v=20261005-compact-separation">
+<link rel="stylesheet" href="big-stage-wizard.css?v=20261006-roster-cards">
 <link rel="stylesheet" href="big-stage-matching.css?v=20261004-empty-shows">
   <script src="big-stage.js?v=20260911"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
-<script src="big-stage-wizard.js?v=20261004-live-roster"></script>
+<script src="big-stage-wizard.js?v=20261006-roster-cards"></script>
 <script src="big-stage-matching.js?v=20261004-empty-shows"></script>
   <script src="director-task-sync.js?v=20260908"></script>
   <script src="director-corner.js?v=20260908"></script>
