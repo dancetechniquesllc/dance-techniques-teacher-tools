@@ -22052,8 +22052,8 @@
 
     const enrollmentChangeCurrentSchool = (item) => String(item?.current_school || enrollmentChangeRawAnswer(item, 19) || enrollmentChangeRawAnswer(item, 4) || "").trim();
 
-    const enrollmentSquarePayerName = (enrollment) => {
-      if (!enrollment) return "Name not recorded";
+    const enrollmentSquarePayerName = (enrollment, fallbackParentName = "") => {
+      if (!enrollment) return String(fallbackParentName || "").trim() || "Name not recorded";
       const direct = enrollment.payment_payer_name || enrollment.payer_full_name || enrollment.payerFullName;
       if (String(direct || "").trim()) return String(direct).trim();
       let raw = enrollment.raw_submission?.rawRequest || enrollment.raw_submission?.raw_request || enrollment.raw_submission || {};
@@ -22072,7 +22072,7 @@
         Object.entries(record).forEach(([key, child]) => inspect(child, `${path}.${key}`));
       };
       inspect(raw);
-      return names[0] || enrollment.parent_name || [enrollment.parent_first_name, enrollment.parent_last_name].filter(Boolean).join(" ") || "Name not recorded";
+      return names[0] || enrollment.parent_name || [enrollment.parent_first_name, enrollment.parent_last_name].filter(Boolean).join(" ") || String(fallbackParentName || "").trim() || "Name not recorded";
     };
 
     const enrollmentChangeSuggestedStudents = (item, records) => {
@@ -22206,7 +22206,8 @@
         const assignedEnrollmentDate=assignedEnrollmentDateValue?enrollmentDateOnly(assignedEnrollmentDateValue):null;
         const assignedEnrollmentDateLabel=assignedEnrollmentDate&&!Number.isNaN(assignedEnrollmentDate.valueOf())?assignedEnrollmentDate.toLocaleDateString():"Enrollment date not recorded";
         const assignedEnrollmentRecord=assigned?enrollmentIntakeQueue.find((record)=>String(record.placed_student_id||"")===String(assigned.student.id)||String(record.placed_class_enrollment_id||"")===String(item.assigned_class_enrollment_id||assigned.student.enrollmentId||"")):null;
-        const enrollmentFeePaymentLabel=`Paid by ${enrollmentSquarePayerName(assignedEnrollmentRecord)} on ${assignedEnrollmentDateLabel}`;
+        const assignedParentName=assigned?.student?.parentName||assigned?.student?.parent_name||[assigned?.student?.parentFirstName||assigned?.student?.parent_first_name,assigned?.student?.parentLastName||assigned?.student?.parent_last_name].filter(Boolean).join(" ");
+        const enrollmentFeePaymentLabel=`Paid by ${enrollmentSquarePayerName(assignedEnrollmentRecord,assignedParentName)} on ${assignedEnrollmentDateLabel}`;
         const assignedTuitionType=String(assigned?.student?.tuitionDiscount||assigned?.student?.tuition_discount||"none").trim().toLowerCase();
         const assignedTuitionLabel=({none:"Regular",regular:"Regular",staff:"Staff",sibling:"Sibling",director:"Director",meadow_oaks:"Meadow Oaks Rate"})[assignedTuitionType]||assignedTuitionType.replaceAll("_"," ").replace(/\b\w/g,(letter)=>letter.toUpperCase());
         const step = (field, title, allowNotNeeded = false) => {
