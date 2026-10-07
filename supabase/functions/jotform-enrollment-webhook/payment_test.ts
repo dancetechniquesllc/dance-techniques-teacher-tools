@@ -3,14 +3,20 @@ import { parsePaymentDetails, shouldReplacePaymentStatus } from "./payment.ts";
 
 Deno.test("recognizes the legacy transaction summary", () => {
   assertEquals(parsePaymentDetails("Total: $35.00 Transaction ID: ch_123"), {
-    status: "paid", amount: "35.00", transactionId: "ch_123"
+    status: "paid", amount: "35.00", transactionId: "ch_123", payerName: ""
   });
 });
 
 Deno.test("recognizes Jotform structured successful payment fields", () => {
   assertEquals(parsePaymentDetails("Enrollment Fee", {
     q39_myProducts: { answer: { paymentStatus: "SUCCESSFUL", total: "35.00", transactionId: "txn_456" } }
-  }), { status: "paid", amount: "35.00", transactionId: "txn_456" });
+  }), { status: "paid", amount: "35.00", transactionId: "txn_456", payerName: "" });
+});
+
+Deno.test("reads the Square payer name from structured payment fields", () => {
+  assertEquals(parsePaymentDetails("Enrollment Fee", {
+    squarePayment: { status: "SUCCESSFUL", transactionId: "txn_789", cardholderName: "Jordan Sample" }
+  }).payerName, "Jordan Sample");
 });
 
 Deno.test("does not mark incomplete payments as paid", () => {

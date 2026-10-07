@@ -22052,6 +22052,29 @@
 
     const enrollmentChangeCurrentSchool = (item) => String(item?.current_school || enrollmentChangeRawAnswer(item, 19) || enrollmentChangeRawAnswer(item, 4) || "").trim();
 
+    const enrollmentSquarePayerName = (enrollment) => {
+      if (!enrollment) return "Name not recorded";
+      const direct = enrollment.payment_payer_name || enrollment.payer_full_name || enrollment.payerFullName;
+      if (String(direct || "").trim()) return String(direct).trim();
+      let raw = enrollment.raw_submission?.rawRequest || enrollment.raw_submission?.raw_request || enrollment.raw_submission || {};
+      if (typeof raw === "string") { try { raw = JSON.parse(raw); } catch { raw = {}; } }
+      const names = [];
+      const inspect = (value, path = "") => {
+        if (!value || typeof value !== "object") return;
+        if (Array.isArray(value)) return value.forEach((entry, index) => inspect(entry, `${path}.${index}`));
+        const record = value;
+        const normalizedPath = path.toLowerCase().replace(/[^a-z0-9]+/g, "");
+        if (/(square|payment|billing|cardholder|payer|customer)/.test(normalizedPath)) {
+          const full = record.full_name || record.fullName || record.cardholder_name || record.cardholderName || record.payer_name || record.payerName || record.name;
+          const composed = [record.first_name || record.firstName || record.first, record.last_name || record.lastName || record.last].filter(Boolean).join(" ");
+          [full, composed].map((name) => String(name || "").trim()).filter((name) => name && !/^\[object object\]$/i.test(name)).forEach((name) => names.push(name));
+        }
+        Object.entries(record).forEach(([key, child]) => inspect(child, `${path}.${key}`));
+      };
+      inspect(raw);
+      return names[0] || enrollment.parent_name || [enrollment.parent_first_name, enrollment.parent_last_name].filter(Boolean).join(" ") || "Name not recorded";
+    };
+
     const enrollmentChangeSuggestedStudents = (item, records) => {
       const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
       const requestedFirst = normalize(item.dancer_first_name);
@@ -22182,12 +22205,15 @@
         const assignedEnrollmentDateValue=assigned?.student?.enrolledDate||assigned?.student?.enrolled_date||"";
         const assignedEnrollmentDate=assignedEnrollmentDateValue?enrollmentDateOnly(assignedEnrollmentDateValue):null;
         const assignedEnrollmentDateLabel=assignedEnrollmentDate&&!Number.isNaN(assignedEnrollmentDate.valueOf())?assignedEnrollmentDate.toLocaleDateString():"Enrollment date not recorded";
+        const assignedEnrollmentRecord=assigned?enrollmentIntakeQueue.find((record)=>String(record.placed_student_id||"")===String(assigned.student.id)||String(record.placed_class_enrollment_id||"")===String(item.assigned_class_enrollment_id||assigned.student.enrollmentId||"")):null;
+        const enrollmentFeePaymentLabel=`Paid by ${enrollmentSquarePayerName(assignedEnrollmentRecord)} on ${assignedEnrollmentDateLabel}`;
         const assignedTuitionType=String(assigned?.student?.tuitionDiscount||assigned?.student?.tuition_discount||"none").trim().toLowerCase();
         const assignedTuitionLabel=({none:"Regular",regular:"Regular",staff:"Staff",sibling:"Sibling",director:"Director",meadow_oaks:"Meadow Oaks Rate"})[assignedTuitionType]||assignedTuitionType.replaceAll("_"," ").replace(/\b\w/g,(letter)=>letter.toUpperCase());
         const step = (field, title, allowNotNeeded = false) => {
           const status = item[field] || "pending";
-          const pendingLabel=!assigned?"Assign student first":field==="enrollment_fee_refund_status"?`Enrolled: ${assignedEnrollmentDateLabel}`:"Pending";
-          return `<div class="enrollment-change-step ${status!=="pending"?"is-complete":""}"><strong>${escapeText(title)}</strong><small>${status==="completed"?"✓ Complete":status==="not_needed"?"Not Needed":escapeText(pendingLabel)}</small><div class="enrollment-change-step-actions">${status==="pending"?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="completed" data-enrollment-change-id="${escapeText(item.id)}" ${!assigned?"disabled":""}>Complete</button>${allowNotNeeded?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="not_needed" data-enrollment-change-id="${escapeText(item.id)}" ${!assigned?"disabled":""}>Not Needed</button>`:""}`:""}</div></div>`;
+          const pendingLabel=!assigned?"Assign student first":field==="enrollment_fee_refund_status"?enrollmentFeePaymentLabel:"Pending";
+          const statusLabel=field==="enrollment_fee_refund_status"&&assigned?`${status==="completed"?"✓ Complete · ":status==="not_needed"?"Not Needed · ":""}${enrollmentFeePaymentLabel}`:status==="completed"?"✓ Complete":status==="not_needed"?"Not Needed":pendingLabel;
+          return `<div class="enrollment-change-step ${status!=="pending"?"is-complete":""}"><strong>${escapeText(title)}</strong><small>${escapeText(statusLabel)}</small><div class="enrollment-change-step-actions">${status==="pending"?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="completed" data-enrollment-change-id="${escapeText(item.id)}" ${!assigned?"disabled":""}>Complete</button>${allowNotNeeded?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="not_needed" data-enrollment-change-id="${escapeText(item.id)}" ${!assigned?"disabled":""}>Not Needed</button>`:""}`:""}</div></div>`;
         };
         const studentOptions = studentRecords.map(({ rosterClass, student }) => `<option value="${escapeText(student.id)}" ${String(item.assigned_student_id)===String(student.id)?"selected":""}>${escapeText(rosterStudentFullName(student))} · ${escapeText(rosterSchoolNickname(rosterClass.schoolName))} · ${escapeText(rosterClass.name)}</option>`).join("");
         const suggestionMarkup = !assigned && suggestions.length ? `<div class="enrollment-change-suggestions"><strong>Suggested Matches</strong><div class="enrollment-change-suggestion-list">${suggestions.map(({rosterClass,student,reasons})=>`<button class="enrollment-change-suggestion" type="button" data-enrollment-change-suggested-student="${escapeText(student.id)}" data-enrollment-change-id="${escapeText(item.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(rosterStudentInitials(student))}</span><span><strong>${escapeText(rosterStudentFullName(student))}</strong><small>${escapeText(rosterSchoolNickname(rosterClass.schoolName))} · ${escapeText(rosterClass.name)}</small></span><em>Suggested: ${escapeText(reasons.join(" + "))}</em></button>`).join("")}</div></div>` : "";

@@ -24,6 +24,10 @@ export const parsePaymentDetails = (paymentSummary: string, ...sources: unknown[
   const transactionId = paymentText.match(/(?:transaction(?:\s|[_.-])*id|transactionid|payment(?:\s|[_.-])*id)\s*["']?\s*[:=]\s*["']?([^\s,"'|}]+)/i)?.[1] || "";
   const amountMatch = paymentText.match(/(?:grand\s*total|total|amount)\s*["']?\s*[:=]\s*["']?\s*(?:USD\s*)?\$?\s*(\d+(?:\.\d{1,2})?)/i);
   const amount = amountMatch?.[1] || "";
+  const payerFullName = paymentText.match(/(?:cardholder|payer|customer|billing)(?:\s|[_.-])*(?:full(?:\s|[_.-])*)?name\s*["']?\s*[:=]\s*["']?([^|,"'}]+)/i)?.[1]?.trim() || "";
+  const payerFirstName = paymentText.match(/(?:payment|square|billing|cardholder|payer|customer)[^|:]{0,80}(?:first(?:\s|[_.-])*name|\.first)\s*:\s*([^|,"'}]+)/i)?.[1]?.trim() || "";
+  const payerLastName = paymentText.match(/(?:payment|square|billing|cardholder|payer|customer)[^|:]{0,80}(?:last(?:\s|[_.-])*name|\.last)\s*:\s*([^|,"'}]+)/i)?.[1]?.trim() || "";
+  const payerName = payerFullName || [payerFirstName, payerLastName].filter(Boolean).join(" ");
   const explicitlyUnpaid = /\b(?:not\s+paid|unpaid|pending|incomplete|cancelled|canceled)\b/i.test(paymentText);
   const status = !explicitlyUnpaid
     && !/\b(?:refund(?:ed)?|failed|declined|denied|error)\b/i.test(paymentText)
@@ -31,7 +35,7 @@ export const parsePaymentDetails = (paymentSummary: string, ...sources: unknown[
     ? "paid"
     : "unpaid";
 
-  return { status, amount, transactionId };
+  return { status, amount, transactionId, payerName };
 };
 
 export const shouldReplacePaymentStatus = (existing: string, incoming: string) => {

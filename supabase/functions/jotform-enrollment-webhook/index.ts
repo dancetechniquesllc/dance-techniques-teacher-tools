@@ -232,6 +232,7 @@ Deno.serve(async (request) => {
       },
       payment_status: payment.status,
       payment_transaction_id: payment.transactionId || null,
+      payment_payer_name: payment.payerName || parentName || null,
       registration_notes: mapped("registration_notes") || null
     };
 
@@ -267,7 +268,8 @@ Deno.serve(async (request) => {
       const duplicateUpdate = {
         ...(existing.status === "placed" ? protectedPlacedRefresh : jotformRefresh),
         payment_status: replaceStatus ? payment.status : existing.payment_status,
-        payment_transaction_id: payment.transactionId || existing.payment_transaction_id
+        payment_transaction_id: payment.transactionId || existing.payment_transaction_id,
+        payment_payer_name: payment.payerName || existing.payment_payer_name || parentName || null
       };
       const { error: updateError } = await supabase.from("enrollments").update(duplicateUpdate).eq("id", existing.id);
       if (updateError) throw new Error(`Enrollment intake refresh failed: ${updateError.code}`);
