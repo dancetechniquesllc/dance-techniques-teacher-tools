@@ -7,7 +7,7 @@
   const dateLabel = date => new Date(`${date}T12:00:00`).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
   const sum = rows => rows.reduce((n, row) => n + cents(row.held ? 0 : row.amount), 0) / 100;
   const group = (rows, key) => rows.reduce((result, row) => { (result[key(row)] ||= []).push(row); return result; }, {});
-  function snapshot({ teacher, month, payDate, sequence, lines, payment, firstPayment, advanceCredit = 0, paidToDate, ownStudents }) {
+  function snapshot({ teacher, month, payDate, sequence, lines, payment, firstPayment, advanceCredit = 0, paidToDate, ownStudents, proratedStudents = [] }) {
     if (!teacher.id || !teacher.name || !/^\d{4}-\d{2}$/.test(month)) throw new Error('Payroll statement is missing its teacher or period.');
     if (lines.some(row => !Number.isFinite(Number(row.amount)))) throw new Error('Payroll has an invalid amount.');
     const earnings = sum(lines);
@@ -23,7 +23,7 @@
       const { studentId, ...safe } = row; return safe;
     });
     return JSON.parse(JSON.stringify({ version: 1, teacher, month, payDate, sequence: Number(sequence), earnings,
-      payment, firstPayment: Number(firstPayment || 0), advanceCredit, paidToDate, commissions, lines: safeLines, ownStudents }));
+      payment, firstPayment: Number(firstPayment || 0), advanceCredit, paidToDate, commissions, lines: safeLines, ownStudents, proratedStudents }));
   }
   async function pdf(s, logoBytes) {
     const { PDFDocument, StandardFonts, rgb } = root.PDFLib;
@@ -87,7 +87,10 @@
       const sorted=Object.entries(grouped).sort(([a],[b])=>(categories.indexOf(a)<0?99:categories.indexOf(a))-(categories.indexOf(b)<0?99:categories.indexOf(b)));
       table(['Tuition Type','Enrolled','Included','Rate','Earnings'],sorted.map(([label,rs])=>[label,countLabel(rs.length),countLabel(rs.filter(r=>!r.held&&r.amount>0).length),[...new Set(rs.map(r=>dollars(r.rate)))].join(' / ')||'-',dollars(sum(rs))]).concat([['TOTAL',String(own.length),String(own.filter(r=>!r.held&&r.amount>0).length),'',dollars(sum(own))]]),[216,60,60,90,110]);
     }
-    if(founding){heading('Prorated Tuition');table(['Tuition Type','Included','Earnings'],[.25,.5,.75].map(f=>{const rs=own.filter(r=>r.fraction===f);return [`Prorated - ${f*100}%`,countLabel(rs.filter(r=>!r.held).length),dollars(sum(rs))]}),[366,70,100]);}
+    const proratedStudents=s.proratedStudents || [];
+    if(proratedStudents.length){heading('Prorated Tuition');table(['Dancer','School','Assignment','Reason'],proratedStudents.map(row=>[row.studentName,row.school,`${row.percentage}%`,String(row.reason||'Effective-date change').replaceAll('_',' ')]),[145,225,72,94]);}
+    const adjustments=s.lines.filter(row=>['Refund Deduction','Adjustment','Prior Payroll Credit'].includes(row.type));
+    if(adjustments.length){heading('Adjustments');table(['Type','Details','Amount'],adjustments.map(row=>[row.type,row.description||'Payroll adjustment',`${Number(row.amount)<0?'-':''}${dollars(Math.abs(Number(row.amount||0)))}`]),[125,321,90]);}
     table(['PAID TO DATE - RECORDED PAYMENTS','Amount'],[[`September 1, ${Number(s.month.slice(0,4))-(Number(s.month.slice(5))<9?1:0)} - ${dateLabel(s.payDate)}`,dollars(s.paidToDate)]],[400,136]);
     if ((!founding && own.length) || s.commissions.length) {
       newPage();

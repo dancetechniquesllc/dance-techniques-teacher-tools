@@ -105,6 +105,31 @@
   let teacherProfileResolutionTimer = 0;
   let profileRecoveryRefreshing = false;
 
+  const lockTeacherToTeacherTools = () => {
+    if (window.dtCurrentProfile?.role !== "teacher" || document.body.dataset.tourMode === "true") return;
+    if (document.body.dataset.mode !== "teacher") document.body.dataset.mode = "teacher";
+    if (document.body.dataset.adminPage) delete document.body.dataset.adminPage;
+    if (document.body.dataset.adminSection) delete document.body.dataset.adminSection;
+    document.querySelectorAll('[data-mode-btn="admin"]').forEach((button) => {
+      button.hidden = true;
+      button.setAttribute("aria-hidden", "true");
+      button.tabIndex = -1;
+    });
+  };
+
+  document.addEventListener("click", (event) => {
+    if (window.dtCurrentProfile?.role !== "teacher" || document.body.dataset.tourMode === "true") return;
+    if (!event.target.closest('[data-mode-btn="admin"], [data-admin-open-section], [data-admin-tools-home]')) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    lockTeacherToTeacherTools();
+  }, true);
+
+  new MutationObserver(lockTeacherToTeacherTools).observe(document.body, {
+    attributes: true,
+    attributeFilter: ["data-mode", "data-admin-page", "data-admin-section"]
+  });
+
   const waitForProfileRetry = (delay) => new Promise((resolve) => window.setTimeout(resolve, delay));
   const loadSignedInProfile = async (userId) => {
     let lastError = null;
@@ -214,6 +239,7 @@
       button.classList.toggle("active", button.dataset.modeBtn === landingMode);
     });
     window.dtCurrentProfile = profile;
+    lockTeacherToTeacherTools();
     // The authenticated, active profile above is the authorization boundary.
     // Open Teacher Tools immediately after that exact profile is verified.
     // Roster, message, attendance, and order queries are supplemental app data

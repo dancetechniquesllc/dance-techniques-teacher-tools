@@ -50,14 +50,27 @@ Deno.serve(async request=>{
     const nameValue=nameField?.answer&&typeof nameField.answer==="object"?nameField.answer as JsonRecord:null;
     const fullName=get("3","q3","dancer");
     const nameParts=fullName.split(/\s+/).filter(Boolean);
+    const parentNotes=[
+      ["How we can improve",get("11","q11","we are so sorry to hear this please let us know how we can improve")],
+      ["Misc. information",get("15","q15","any misc information message to your teacher etc")],
+      ["Reason for pause",get("18","q18","reason for pause")],
+      ["Teacher's reason",get("23","q23","teachers reason for unenrolling student")]
+    ].filter(([,value])=>value).map(([label,value])=>`${label}: ${value}`).join("\n");
     const row={
       jotform_submission_id:submissionId,jotform_form_id:formId,
       dancer_first_name:clean(nameValue?.first)||nameParts[0]||null,
       dancer_last_name:clean(nameValue?.last)||nameParts.slice(1).join(" ")||null,
-      current_school:get("4","q4","current school")||null,
+      current_school:get("19","q19","current school","4","q4")||null,
       last_day:parseDate(get("13","q13","last day")),
       request_type:get("5","q5","we are")||null,
-      notes:get("15","q15","any misc information message to your teacher etc")||null,
+      submitted_by_role:get("22","q22","i am this dancers")||null,
+      new_school_relationship:get("7","q7","our new school")||null,
+      requested_new_school:get("21","q21","8","q8","new school")||null,
+      new_school_classroom:get("25","q25","new school classroom")||null,
+      requested_start_date:parseDate(get("14","q14","start date")),
+      requested_return_date:parseDate(get("17","q17","date returning")),
+      teacher_reason:get("23","q23","teachers reason for unenrolling student")||null,
+      notes:parentNotes||null,
       policy_acknowledged:Boolean(get("16","q16","i understand that after february 1st no refunds will be issued for costume or recital fees")),
       raw_submission:{envelope,rawRequest:raw},submitted_at:clean(envelope.created_at||raw.created_at)||null
     };

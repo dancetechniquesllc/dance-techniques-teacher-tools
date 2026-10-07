@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>My Dance Techniques</title>
   <script src="vendor/pdf-lib-1.17.1.min.js"></script>
-<script src="payroll-statements.js"></script>
+<script src="payroll-statements.js?v=20261007-effective-date-proration"></script>
 <script src="teacher-work-clock.js"></script>
 <script src="enrollment-tuition-confirmation.js"></script>
 <script>
@@ -3210,12 +3210,40 @@
     .enrollment-change-list { display:grid; gap:12px; }
     .enrollment-change-card { display:grid; gap:14px; padding:18px; border:1px solid var(--border); border-radius:18px; background:var(--surface); }
     .enrollment-change-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+    .enrollment-change-heading > div { min-width:0; flex:1; }
     .enrollment-change-heading h4 { margin:0 0 4px; color:var(--berry); font-size:20px; }
+    .enrollment-change-identity { display:flex; align-items:center; gap:11px; }
+    .enrollment-change-identity > .roster-student-photo { width:48px; height:48px; flex:0 0 48px; font-size:12px; }
+    .enrollment-change-title { display:flex; align-items:center; gap:6px; flex-wrap:nowrap; white-space:nowrap; }
+    .enrollment-change-title select { width:auto; min-width:250px; max-width:100%; padding:3px 28px 3px 7px; border:1px solid var(--border); border-radius:8px; background:var(--surface); color:var(--berry); font-family:inherit; font-size:16px; font-weight:850; line-height:1.25; }
+    .enrollment-change-assign-open { flex:0 0 auto; min-height:39px; padding:7px 13px; border:1px solid var(--sage); border-radius:9px; background:var(--sage); color:var(--fg); font-family:inherit; font-size:12px; font-weight:900; white-space:nowrap; }
+    .enrollment-change-assign-open.is-assigned { border-color:#b8b4b2; background:#d8d5d3; color:#514d4b; }
     .enrollment-change-heading p,.enrollment-change-heading small { display:block; margin:0; color:var(--muted); font-size:11px; line-height:1.4; }
+    .enrollment-change-heading-badges { flex:0 0 auto !important; display:grid; justify-items:center; gap:6px; }
+    .enrollment-change-submitted-date { padding:5px 10px; border-radius:999px; background:var(--blush); color:var(--berry); font-size:10px; font-weight:850; white-space:nowrap; }
+    .enrollment-change-request-source { padding:6px 11px; border:1px solid #b8b4b2; border-radius:999px; background:#d8d5d3; color:#514d4b; font-size:10px; font-weight:900; white-space:nowrap; }
     .enrollment-change-details { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px; }
+    .enrollment-change-details.is-two-column { grid-template-columns:repeat(2,minmax(0,1fr)); }
     .enrollment-change-value { display:grid; gap:3px; padding:10px; border-radius:11px; background:var(--surface-soft); }
     .enrollment-change-value span { color:var(--muted); font-size:9px; font-weight:850; letter-spacing:.05em; text-transform:uppercase; }
     .enrollment-change-value strong { font-size:13px; }
+    .enrollment-change-value select { width:100%; min-height:36px; padding:7px 30px 7px 9px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--fg); font-family:inherit; font-size:13px; font-weight:700; line-height:1.25; }
+    .enrollment-change-last-day-banner { padding:15px 17px; border:1px solid color-mix(in oklch,var(--brick) 38%,white); border-radius:12px; background:color-mix(in oklch,var(--brick) 16%,white); color:var(--fg); font-size:18px; font-weight:750; line-height:1.35; }
+    .enrollment-change-last-day-banner strong { color:var(--brick); font-weight:900; }
+    .enrollment-change-first-day-banner { padding:15px 17px; border:1px solid color-mix(in oklch,var(--gold) 42%,white); border-radius:12px; background:color-mix(in oklch,var(--gold) 13%,white); color:var(--fg); font-size:18px; font-weight:750; line-height:1.35; }
+    .enrollment-change-first-day-banner strong { color:color-mix(in oklch,var(--gold) 66%,black); font-weight:900; }
+    .enrollment-change-parent-note { display:grid; gap:6px; padding:13px 15px; border:1px solid color-mix(in oklch,var(--sage) 48%,white); border-radius:12px; background:color-mix(in oklch,var(--sage) 18%,white); color:var(--fg); font-size:14px; font-weight:650; line-height:1.4; }
+    .enrollment-change-parent-note span { display:block; }
+    .enrollment-change-parent-note strong { color:color-mix(in oklch,var(--sage) 60%,black); font-weight:900; }
+    .enrollment-change-transition-details { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:11px 14px; border:1px solid color-mix(in oklch,var(--gold) 42%,white); border-radius:12px; background:color-mix(in oklch,var(--gold) 13%,white); font-size:12px; font-weight:750; }
+    .enrollment-change-transition-details span + span::before { content:"•"; margin-right:8px; color:var(--gold); }
+    .enrollment-change-submitter { padding:5px 10px; border-radius:999px; background:var(--surface-soft); color:var(--muted); font-size:9px; font-weight:850; white-space:nowrap; }
+    .enrollment-change-assignment-overlay { position:fixed; inset:0; z-index:1200; display:grid; place-items:center; padding:24px; background:rgb(32 22 24 / .5); }
+    .enrollment-change-assignment-dialog { width:min(760px,100%); max-height:min(760px,90vh); overflow:auto; display:grid; gap:16px; padding:22px; border:1px solid var(--border); border-radius:20px; background:var(--surface); box-shadow:var(--shadow); }
+    .enrollment-change-assignment-dialog-header { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+    .enrollment-change-assignment-dialog-header h4 { margin:0; color:var(--berry); font-size:22px; }
+    .enrollment-change-assignment-dialog-header p { margin:3px 0 0; color:var(--muted); font-size:12px; }
+    .enrollment-change-assignment-close { width:38px; height:38px; display:grid; place-items:center; padding:0; border:0; border-radius:50%; background:var(--blush); color:var(--berry); font-size:23px; font-weight:800; }
     .enrollment-change-assignment { display:grid; grid-template-columns:minmax(220px,1fr) auto; gap:8px; align-items:end; }
     .enrollment-change-assignment label { display:grid; gap:5px; color:var(--muted); font-size:10px; font-weight:850; text-transform:uppercase; }
     .enrollment-change-assignment select { min-height:42px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--fg); font:inherit; }
@@ -3228,15 +3256,51 @@
     .enrollment-change-suggestion strong,.enrollment-change-suggestion small { display:block; }
     .enrollment-change-suggestion small { margin-top:2px; color:var(--muted); font-size:9px; line-height:1.25; }
     .enrollment-change-suggestion em { grid-column:2; color:var(--berry); font-size:8px; font-style:normal; font-weight:850; }
-    .enrollment-change-school { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto; gap:8px; align-items:end; padding:12px; border:1px solid var(--sage); border-radius:13px; background:color-mix(in oklch,var(--sage) 14%,white); }
+    .enrollment-change-school { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) auto auto; gap:8px; align-items:end; padding:12px; border:1px solid var(--sage); border-radius:13px; background:color-mix(in oklch,var(--sage) 14%,white); }
     .enrollment-change-school label { display:grid; gap:5px; color:var(--muted); font-size:10px; font-weight:850; text-transform:uppercase; }
     .enrollment-change-school select,.enrollment-change-school input { min-height:42px; padding:8px 10px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--fg); font:inherit; }
+    .enrollment-change-class-dialog { width:min(1040px,100%); }
+    .enrollment-change-class-dialog .enrollment-placement-class-grid { max-height:62vh; overflow:auto; padding:2px; }
+    .enrollment-change-timing-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+    .enrollment-change-timing-options label { display:grid; grid-template-columns:auto 1fr; align-items:center; gap:10px; min-height:72px; padding:14px; border:1px solid var(--border); border-radius:14px; background:var(--surface-soft); font-weight:850; }
+    .enrollment-change-timing-options input[type="radio"] { width:22px; height:22px; accent-color:var(--brick); }
+    .enrollment-change-effective-date { display:grid; gap:6px; font-weight:850; }
+    .enrollment-change-effective-date input { min-height:44px; padding:9px 11px; border:1px solid var(--border); border-radius:10px; background:var(--surface); font:inherit; }
     .enrollment-change-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
-    .enrollment-change-step { min-height:92px; display:grid; align-content:center; gap:6px; padding:10px; border:1px solid var(--border); border-radius:12px; background:var(--surface-soft); }
-    .enrollment-change-step strong { font-size:12px; }
-    .enrollment-change-step-actions { display:flex; gap:5px; flex-wrap:wrap; }
+    .enrollment-change-step { min-height:92px; display:grid; justify-items:center; align-content:center; gap:6px; padding:10px; border:1px solid var(--border); border-radius:12px; background:var(--surface-soft); text-align:center; }
+    .enrollment-change-step > strong { font-size:17px; font-weight:900; line-height:1.2; }
+    .enrollment-change-step-actions { display:flex; justify-content:center; gap:5px; flex-wrap:wrap; }
     .enrollment-change-step-actions button { min-height:32px; padding:5px 8px; border-radius:8px; font-size:10px; }
     .enrollment-change-step.is-complete { border-color:var(--sage); background:color-mix(in oklch,var(--sage) 24%,white); }
+    .enrollment-change-deactivate { border-color:var(--brick) !important; background:var(--brick) !important; color:white !important; }
+    .enrollment-change-refund-dialog { width:min(780px,100%); }
+    .enrollment-change-refund-months { display:grid; gap:8px; }
+    .enrollment-change-refund-month { display:grid; grid-template-columns:auto minmax(130px,1fr) minmax(120px,.7fr) minmax(120px,.7fr); align-items:center; gap:9px; padding:10px; border:1px solid var(--border); border-radius:11px; background:var(--surface-soft); }
+    .enrollment-change-refund-month input[type="checkbox"] { appearance:none; box-sizing:border-box; width:24px !important; min-width:24px !important; max-width:24px; height:24px !important; min-height:24px !important; max-height:24px; aspect-ratio:1; padding:0 !important; border:2px solid #8f8986; border-radius:50% !important; background:white; }
+    .enrollment-change-refund-month input[type="checkbox"]:checked { border-color:var(--brick); background:var(--brick); box-shadow:inset 0 0 0 4px white; }
+    .enrollment-change-refund-month strong { font-size:12px; }
+    .enrollment-change-refund-type-toggle { display:grid; grid-template-columns:1fr 1fr; overflow:hidden; border:1px solid var(--border); border-radius:999px; background:var(--surface); }
+    .enrollment-change-refund-type-toggle label { min-width:0; }
+    .enrollment-change-refund-type-toggle input { position:absolute; opacity:0; pointer-events:none; }
+    .enrollment-change-refund-type-toggle span { display:block; padding:8px 9px; font-size:10px; font-weight:850; text-align:center; white-space:nowrap; }
+    .enrollment-change-refund-type-toggle input:checked + span { background:var(--brick); color:white; }
+    .enrollment-change-refund-month:has(input[type="number"][hidden]) .enrollment-change-refund-type-toggle { grid-column:3 / 5; }
+    .enrollment-change-refund-month input[type="number"] { width:100%; min-height:38px; padding:7px 9px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--fg); font:inherit; }
+    .enrollment-change-refund-month input[type="number"][hidden] { display:none; }
+    .enrollment-change-refund-actions { display:flex; justify-content:flex-end; gap:8px; }
+    .enrollment-change-pause-dates { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+    .enrollment-change-pause-date { display:grid; gap:4px; padding:13px 15px; border:1px solid var(--gold); border-radius:12px; background:color-mix(in oklch,var(--gold) 16%,white); text-align:center; }
+    .enrollment-change-pause-date small { color:var(--muted); font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:.05em; }
+    .enrollment-change-pause-date strong { font-size:18px; }
+    .enrollment-change-pause-actions { display:flex; justify-content:center; gap:9px; flex-wrap:wrap; }
+    .enrollment-change-pause-actions button { min-width:112px; min-height:42px; border-radius:10px; font-weight:900; }
+    .enrollment-change-pause-actions .is-approve { border-color:var(--sage); background:var(--sage); color:#263a2a; }
+    .enrollment-change-pause-actions .is-adjust { border-color:var(--gold); background:var(--gold); color:#4e3d17; }
+    .enrollment-change-pause-actions .is-deny { border-color:var(--brick); background:var(--brick); color:white; }
+    .enrollment-change-no-class-list { display:grid; gap:7px; margin-top:4px; }
+    .enrollment-change-no-class-item { display:flex; justify-content:space-between; gap:12px; padding:9px 11px; border-radius:9px; background:var(--surface-soft); }
+    .teacher-student-resume-classes { width:100%; min-height:52px; margin:12px 0 2px; border:1px solid var(--sage-dark); border-radius:13px; background:var(--sage); color:#263a2a; font:inherit; font-size:17px; font-weight:900; }
+    @media (max-width: 620px) { .enrollment-change-refund-month { grid-template-columns:auto 1fr; } .enrollment-change-refund-month select,.enrollment-change-refund-month input[type="number"] { grid-column:2; } }
     .enrollment-change-empty { padding:34px 18px; border:1px dashed var(--border); border-radius:16px; color:var(--muted); text-align:center; }
     .student-library-grid.is-grouped { display: block; }
     .student-library-school-section + .student-library-school-section { margin-top: 30px; }
@@ -3253,6 +3317,8 @@
       .enrollment-summary-card small { font-size: 9px; }
       .enrollment-student-view-toggle button { padding-inline: 5px; font-size: 12px; }
       .enrollment-student-view-toggle { grid-template-columns: 1fr; }
+      .enrollment-change-title { align-items:flex-start; flex-wrap:wrap; white-space:normal; }
+      .enrollment-change-title select { width:100%; min-width:0; }
       .enrollment-change-details,.enrollment-change-steps,.enrollment-change-assignment,.enrollment-change-school,.enrollment-change-suggestion-list { grid-template-columns:1fr; }
       .enrollment-checklist-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .dashboard-entity-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -7887,6 +7953,34 @@
     .payroll-table-row span > small { margin-top: 3px; color: var(--muted); font-family: "Avenir Next", sans-serif; font-size: 10px; font-weight: 400; }
     .payroll-table-row.is-header { background: var(--surface-soft); color: var(--muted); font-size: 10px; font-weight: 800; }
     .payroll-table-row input { min-height: 36px; }
+    .payroll-adjustment-row { grid-template-columns:max-content minmax(170px,.8fr) minmax(260px,2fr) 40px; }
+    .payroll-adjustment-remove { width:34px; height:34px; min-width:34px; min-height:34px; justify-self:end; padding:0; border:0; border-radius:50%; background:#090707; color:#fff; font-size:22px; font-weight:800; line-height:1; display:inline-grid; place-items:center; }
+    .payroll-adjustment-remove:hover { background:#2d2526; }
+    .payroll-adjustment-signs { display:grid; grid-template-rows:repeat(2,16px); gap:3px; align-self:center; }
+    .payroll-adjustment-signs label { display:block; margin:0; }
+    .payroll-adjustment-signs input { position:absolute; opacity:0; pointer-events:none; }
+    .payroll-adjustment-signs span { width:16px; height:16px; display:grid; place-items:center; border-radius:50%; border:1px solid transparent; font-size:12px; font-weight:900; line-height:1; transition:transform .15s ease,box-shadow .15s ease; }
+    .payroll-adjustment-signs .is-addition span { background:color-mix(in oklch,var(--sage) 30%,white); color:color-mix(in oklch,var(--sage) 65%,black); border-color:color-mix(in oklch,var(--sage) 52%,white); }
+    .payroll-adjustment-signs .is-deduction span { background:color-mix(in oklch,var(--brick) 20%,white); color:var(--brick); border-color:color-mix(in oklch,var(--brick) 46%,white); }
+    .payroll-adjustment-signs input:checked + span { box-shadow:0 0 0 2px currentColor; transform:scale(1.04); }
+    .payroll-adjustment-value { display:grid; grid-template-columns:16px minmax(0,1fr); gap:8px; align-items:center; }
+    .payroll-adjustment-teacher { width:auto; min-width:0; max-width:100%; field-sizing:content; justify-self:start; }
+    .payroll-proration-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-top:24px; }
+    .payroll-proration-heading h3,.payroll-proration-heading p { margin:0; }
+    .payroll-proration-heading p { margin-top:5px; }
+    .payroll-preview-controls { display:flex; align-items:center; justify-content:flex-end; gap:10px; margin-left:auto; flex-wrap:wrap; }
+    .payroll-preview-controls select { width:auto; field-sizing:content; }
+    .payroll-preview-button { border:1px solid color-mix(in oklch,var(--blush) 58%,white); background:var(--blush); color:color-mix(in oklch,var(--brick) 72%,black); }
+    .payroll-preview-button:hover { background:color-mix(in oklch,var(--blush) 84%,var(--brick)); }
+    #current-statement-preview { width:min(920px,94vw); max-height:90vh; padding:0; border:0; border-radius:20px; background:var(--surface); color:var(--fg); box-shadow:0 24px 70px rgba(25,15,17,.28); }
+    #current-statement-preview::backdrop { background:rgba(24,18,19,.52); }
+    .current-statement-preview-shell { padding:24px; }
+    .current-statement-preview-header { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; padding-bottom:18px; border-bottom:1px solid var(--border); }
+    .current-statement-preview-header h3,.current-statement-preview-header p { margin:0; }
+    .current-statement-preview-header p { color:var(--muted); margin-top:4px; }
+    .current-statement-preview-close { width:38px; height:38px; min-width:38px; border:0; border-radius:50%; background:#090707; color:#fff; font-size:22px; display:grid; place-items:center; }
+    .current-statement-preview-section { margin-top:22px; }
+    .current-statement-preview-section h4 { margin:0 0 9px; }
     .payroll-commission-control { display: grid; gap: 4px; color: var(--muted); font: 600 10px/1.2 "Avenir Next", sans-serif; }
     .payroll-commission-control select { width: 100%; min-height: 36px; padding: 7px 28px 7px 9px; font: 600 11px/1.2 "Avenir Next", sans-serif; }
     .payroll-explanation { padding: 11px 12px; border-left: 4px solid var(--berry); border-radius: 8px; background: var(--blush); font-family: "Avenir Next", sans-serif; font-size: 12px; }
@@ -15306,13 +15400,7 @@
       .auth-gate[data-state="login"] .auth-back { top: 89%; font-size: 11px; }
     }
 
-    @media (min-width: 1100px) {
-      body[data-mode="teacher"] .admin-shell {
-        display: grid;
-        opacity: .92;
-      }
-      body[data-mode="teacher"] .admin-shell .admin-grid { display: none; }
-    }
+    body[data-user-role="teacher"] .admin-shell { display: none !important; }
 
     .tt-feedback-launcher-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: center; justify-items: center; gap: 12px; padding: 18px; }
     body[data-user-role="teacher"] #roster-parent-portal-access { display: none; }
@@ -19701,7 +19789,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20260830-teacher-open-after-profile-v7"></script>
+  <script src="supabase-auth.js?v=20261007-desktop-role-lock"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <script src="/teacher-music-data.js?v=20260826-playlist-workshop"></script>
   <script src="roster-care.js?v=20260908"></script>
@@ -20077,6 +20165,7 @@
     let editingRosterClassId = "";
     let rosterProfileNavigationClassId = "";
     let archivedRosterStudents = [];
+    let payrollEnrollmentEvents = [];
     let pendingRosterStudentPhoto = "";
     let rosterStudentProfileDirty = false;
     let sharedRosterReady = false;
@@ -20093,8 +20182,13 @@
     let enrollmentReviewOpen = false;
     let enrollmentClassPreviewId = "";
     let enrollmentStudentsView = "enrollments";
+    let enrollmentChangeAssignmentOpenId = "";
+    let enrollmentChangeBrightwheelRefundOpenId = "";
+    let enrollmentChangeClassOpenId = "";
+    let enrollmentChangeMoveOpenId = "";
+    let enrollmentChangePauseOpenId = "";
     let enrollmentChangeRequests = document.body.dataset.tourMode === "true" ? [{
-      id:"preview-enrollment-change", dancer_first_name:"Madison", dancer_last_name:"Dale", current_school:"Primrose Rowlett", last_day:"2026-10-30", request_type:"leaving our current school.", notes:"Moving to a new partner school.", status:"new", enrollment_fee_refund_status:"pending", brightwheel_refund_status:"pending", billing_plan_status:"pending", deactivation_status:"pending", submitted_at:new Date().toISOString()
+      id:"preview-enrollment-change", dancer_first_name:"Madison", dancer_last_name:"Dale", current_school:"Primrose Rowlett", last_day:"2026-10-30", request_type:"leaving our current school.", requested_new_school:"Primrose North Rockwall", new_school_classroom:"Preschool 2", requested_start_date:"2026-11-02", notes:"Moving to a new partner school.", status:"new", enrollment_fee_refund_status:"pending", brightwheel_refund_status:"pending", billing_plan_status:"pending", deactivation_status:"pending", submitted_at:new Date().toISOString()
     }] : [];
     let parentPortalInvitationReadiness = [];
     let parentPortalInvitationLoaded = false;
@@ -20547,7 +20641,7 @@
 
     const openNotificationAction = (item) => {
       if (!item) return;
-      const isLeader = ["admin", "director"].includes(window.dtCurrentProfile?.role) || document.body.dataset.mode === "admin";
+      const isLeader = ["admin", "director"].includes(window.dtCurrentProfile?.role) || document.body.dataset.tourMode === "true";
       const target = notificationActionTarget(item);
       closeNotificationPanels();
       if (target.open === "notifications") {
@@ -21943,12 +22037,27 @@
       .map((student) => ({ rosterClass, student })))
       .sort((left, right) => rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
 
+    const enrollmentChangeRawAnswer = (item, id) => {
+      const answerText = (value) => {
+        if (Array.isArray(value)) return value.map(answerText).filter(Boolean).join(", ");
+        if (value && typeof value === "object") return answerText(value.answer ?? value.value ?? "");
+        return String(value ?? "").trim();
+      };
+      let raw = item?.raw_submission?.rawRequest || item?.raw_submission?.raw_request || {};
+      if (typeof raw === "string") {
+        try { raw = JSON.parse(raw); } catch { raw = {}; }
+      }
+      return answerText(raw?.[`q${id}`] ?? raw?.[String(id)]);
+    };
+
+    const enrollmentChangeCurrentSchool = (item) => String(item?.current_school || enrollmentChangeRawAnswer(item, 19) || enrollmentChangeRawAnswer(item, 4) || "").trim();
+
     const enrollmentChangeSuggestedStudents = (item, records) => {
       const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
       const requestedFirst = normalize(item.dancer_first_name);
       const requestedLast = normalize(item.dancer_last_name);
       const requestedName = normalize(`${item.dancer_first_name || ""} ${item.dancer_last_name || ""}`);
-      const requestedSchool = normalize(item.current_school);
+      const requestedSchool = normalize(enrollmentChangeCurrentSchool(item));
       const unique = new Map();
       records.forEach((record) => {
         const studentFirst = normalize(record.student.firstName || record.student.preferredName);
@@ -21969,6 +22078,76 @@
       return [...unique.values()].filter((record) => record.score > 0).sort((left, right) => right.score - left.score || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student))).slice(0, 3);
     };
 
+    const enrollmentChangeParentNotes = (item) => {
+      const responses = [
+        ["How we can improve", enrollmentChangeRawAnswer(item, 11)],
+        ["Misc. information", enrollmentChangeRawAnswer(item, 15)],
+        ["Reason for pause", enrollmentChangeRawAnswer(item, 18)],
+        ["Teacher's reason", item?.teacher_reason || enrollmentChangeRawAnswer(item, 23)]
+      ].filter(([, value]) => value);
+      if (responses.length) return responses;
+      const fallback = String(item?.notes || "").trim();
+      return fallback ? [["Parent note", fallback]] : [];
+    };
+
+    const enrollmentChangeRefundMonths = () => {
+      const earliest = new Date(2026, 8, 1, 12);
+      const cursor = new Date();
+      cursor.setDate(1);
+      cursor.setHours(12, 0, 0, 0);
+      const months = [];
+      while (cursor >= earliest) {
+        months.push({
+          value: `${cursor.getFullYear()}-${String(cursor.getMonth() + 1).padStart(2, "0")}`,
+          label: cursor.toLocaleDateString("en-US", { month: "long", year: "numeric" })
+        });
+        cursor.setMonth(cursor.getMonth() - 1);
+      }
+      return months;
+    };
+
+    const enrollmentChangePauseDates = (item) => ({
+      stop: item.approved_pause_stop_date || item.last_day || item.requested_start_date || "",
+      resume: item.approved_pause_resume_date || item.requested_return_date || ""
+    });
+    const enrollmentChangePauseDays = (stop, resume) => {
+      const start = enrollmentDateOnly(stop);
+      const end = enrollmentDateOnly(resume);
+      return start && end && !Number.isNaN(start.valueOf()) && !Number.isNaN(end.valueOf())
+        ? Math.round((end - start) / 86400000)
+        : 0;
+    };
+    const enrollmentChangePauseClosures = (item, stop, resume) => {
+      const source = enrollmentChangeStudentRecords().find(({ student }) => String(student.id) === String(item.assigned_student_id));
+      if (!source || !stop || !resume || typeof allClosureMarkers !== "function") return [];
+      const school = schoolProfileByName(source.rosterClass.schoolName);
+      return allClosureMarkers().filter((closure) => closure.date >= stop && closure.date < resume &&
+        (!closure.school || enrollmentSchoolNameMatches(closure.school, source.rosterClass.schoolName)) &&
+        (!closure.isd || isdNameMatches(closure.isd, school?.isd || source.rosterClass.isd || "")))
+        .filter((closure, index, values) => values.findIndex((candidate) => candidate.date === closure.date && closureDisplayName(candidate) === closureDisplayName(closure)) === index)
+        .sort((left, right) => left.date.localeCompare(right.date));
+    };
+    const enrollmentChangePauseProration = (item, stop, resume) => {
+      const source = enrollmentChangeStudentRecords().find(({ student }) => String(student.id) === String(item.assigned_student_id));
+      const dayIndex = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"].indexOf(String(source?.rosterClass?.day || "").trim().toLowerCase());
+      if (!source || dayIndex < 0 || !stop || !resume) return { scheduled: 0, noClass: 0, payable: 0, percent: 0 };
+      const closureDates = new Set(enrollmentChangePauseClosures(item, stop, resume).map((closure) => closure.date));
+      let scheduled = 0;
+      let noClass = 0;
+      const cursor = enrollmentDateOnly(stop);
+      const end = enrollmentDateOnly(resume);
+      while (cursor && end && cursor < end) {
+        if (cursor.getDay() === dayIndex) {
+          scheduled += 1;
+          const key = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,"0")}-${String(cursor.getDate()).padStart(2,"0")}`;
+          if (closureDates.has(key)) noClass += 1;
+        }
+        cursor.setDate(cursor.getDate() + 1);
+      }
+      const payable = Math.max(0, scheduled - noClass);
+      return { scheduled, noClass, payable, percent: scheduled ? Math.round((payable / scheduled) * 100) : 0 };
+    };
+
     const renderEnrollmentChanges = () => {
       const list = document.getElementById("enrollment-change-list");
       if (!list) return;
@@ -21981,32 +22160,129 @@
         const assigned = studentRecords.find(({ student }) => String(student.id) === String(item.assigned_student_id));
         const requestType = String(item.request_type || "").toLowerCase();
         const isSchoolChange = requestType.includes("school")
-          && (requestType.includes("chang") || requestType.includes("transfer"));
+          && (requestType.includes("chang") || requestType.includes("switch") || requestType.includes("transfer"));
         const isPause = requestType.includes("pause");
+        const currentSchool=enrollmentChangeCurrentSchool(item);
+        const submittedBy=String(item.submitted_by_role||enrollmentChangeRawAnswer(item,22)||"").trim();
+        const teacherRequest=/teacher/i.test(submittedBy);
+        const requestSchoolClass=assigned?.rosterClass||rosterClasses.find((rosterClass)=>rosterClass.sourceActive!==false&&currentSchool&&enrollmentSchoolNameMatches(rosterClass.schoolName,currentSchool)&&rosterClass.teacherId);
+        const requestSchoolTeacher=teachers.find((teacher)=>String(teacher.id)===String(requestSchoolClass?.teacherId));
+        const requestSourceColor=teacherRequest?teacherProfileColor(requestSchoolTeacher):"";
+        const requestSourceStyle=teacherRequest?` style="border-color:${escapeText(requestSourceColor)};background:${escapeText(requestSourceColor)};color:${escapeText(coordinatedInitialColor(requestSourceColor))}"`:"";
+        const requestSourceLabel=teacherRequest?"Teacher Request":"Parent Request";
+        const newSchoolRelationship=String(item.new_school_relationship||enrollmentChangeRawAnswer(item,7)||"").trim();
+        const requestedNewSchool=String(item.requested_new_school||enrollmentChangeRawAnswer(item,21)||enrollmentChangeRawAnswer(item,8)||"").trim();
+        const newSchoolClassroom=String(item.new_school_classroom||enrollmentChangeRawAnswer(item,25)||"").trim();
+        const requestedStartDate=item.requested_start_date||enrollmentChangeRawAnswer(item,14);
+        const requestedReturnDate=item.requested_return_date||enrollmentChangeRawAnswer(item,17);
+        const requestDateLabel=(value)=>{const date=value?enrollmentDateOnly(value):null;return date&&!Number.isNaN(date.valueOf())?date.toLocaleDateString():"";};
         const financialReady = [item.enrollment_fee_refund_status,item.brightwheel_refund_status].every((status) => ["completed","not_needed"].includes(status));
         const billingReady = item.billing_plan_status === "completed";
         const suggestions = enrollmentChangeSuggestedStudents(item, studentRecords);
+        const assignedEnrollmentDateValue=assigned?.student?.enrolledDate||assigned?.student?.enrolled_date||"";
+        const assignedEnrollmentDate=assignedEnrollmentDateValue?enrollmentDateOnly(assignedEnrollmentDateValue):null;
+        const assignedEnrollmentDateLabel=assignedEnrollmentDate&&!Number.isNaN(assignedEnrollmentDate.valueOf())?assignedEnrollmentDate.toLocaleDateString():"Enrollment date not recorded";
+        const assignedTuitionType=String(assigned?.student?.tuitionDiscount||assigned?.student?.tuition_discount||"none").trim().toLowerCase();
+        const assignedTuitionLabel=({none:"Regular",regular:"Regular",staff:"Staff",sibling:"Sibling",director:"Director",meadow_oaks:"Meadow Oaks Rate"})[assignedTuitionType]||assignedTuitionType.replaceAll("_"," ").replace(/\b\w/g,(letter)=>letter.toUpperCase());
         const step = (field, title, allowNotNeeded = false) => {
           const status = item[field] || "pending";
-          return `<div class="enrollment-change-step ${status!=="pending"?"is-complete":""}"><strong>${escapeText(title)}</strong><small>${status==="completed"?"✓ Complete":status==="not_needed"?"Not Needed":"Pending"}</small><div class="enrollment-change-step-actions">${status==="pending"?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="completed" data-enrollment-change-id="${escapeText(item.id)}">Complete</button>${allowNotNeeded?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="not_needed" data-enrollment-change-id="${escapeText(item.id)}">Not Needed</button>`:""}`:""}</div></div>`;
+          const pendingLabel=!assigned?"Assign student first":field==="enrollment_fee_refund_status"?`Enrolled: ${assignedEnrollmentDateLabel}`:"Pending";
+          return `<div class="enrollment-change-step ${status!=="pending"?"is-complete":""}"><strong>${escapeText(title)}</strong><small>${status==="completed"?"✓ Complete":status==="not_needed"?"Not Needed":escapeText(pendingLabel)}</small><div class="enrollment-change-step-actions">${status==="pending"?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="completed" data-enrollment-change-id="${escapeText(item.id)}" ${!assigned?"disabled":""}>Complete</button>${allowNotNeeded?`<button class="secondary" type="button" data-enrollment-change-step="${field}" data-enrollment-change-value="not_needed" data-enrollment-change-id="${escapeText(item.id)}" ${!assigned?"disabled":""}>Not Needed</button>`:""}`:""}</div></div>`;
         };
         const studentOptions = studentRecords.map(({ rosterClass, student }) => `<option value="${escapeText(student.id)}" ${String(item.assigned_student_id)===String(student.id)?"selected":""}>${escapeText(rosterStudentFullName(student))} · ${escapeText(rosterSchoolNickname(rosterClass.schoolName))} · ${escapeText(rosterClass.name)}</option>`).join("");
         const suggestionMarkup = !assigned && suggestions.length ? `<div class="enrollment-change-suggestions"><strong>Suggested Matches</strong><div class="enrollment-change-suggestion-list">${suggestions.map(({rosterClass,student,reasons})=>`<button class="enrollment-change-suggestion" type="button" data-enrollment-change-suggested-student="${escapeText(student.id)}" data-enrollment-change-id="${escapeText(item.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(rosterStudentInitials(student))}</span><span><strong>${escapeText(rosterStudentFullName(student))}</strong><small>${escapeText(rosterSchoolNickname(rosterClass.schoolName))} · ${escapeText(rosterClass.name)}</small></span><em>Suggested: ${escapeText(reasons.join(" + "))}</em></button>`).join("")}</div></div>` : "";
         const schoolNames=[...new Set(rosterClasses.filter((rosterClass)=>rosterClass.sourceActive!==false).map((rosterClass)=>rosterClass.schoolName).filter(Boolean))].sort((left,right)=>left.localeCompare(right));
-        const targetSchool=item.target_school||"";
-        const schoolOptions=schoolNames.map((schoolName)=>`<option value="${escapeText(schoolName)}" ${schoolName===targetSchool?"selected":""}>${escapeText(rosterSchoolNickname(schoolName))}</option>`).join("");
+        const submittedSchoolMatch=requestedNewSchool?schoolNames
+          .map((schoolName)=>({schoolName,score:enrollmentSchoolMatchScore(schoolName,requestedNewSchool)}))
+          .sort((left,right)=>right.score-left.score)[0]:null;
+        const matchedSubmittedSchool=submittedSchoolMatch?.score>=0.7?submittedSchoolMatch.schoolName:"";
+        const targetSchool=item.target_school||matchedSubmittedSchool||requestedNewSchool||"";
+        const submittedSchoolOption=targetSchool&&!schoolNames.includes(targetSchool)?`<option value="${escapeText(targetSchool)}" selected>${escapeText(targetSchool)} · Submitted New School Data</option>`:"";
+        const schoolOptions=submittedSchoolOption+schoolNames.map((schoolName)=>`<option value="${escapeText(schoolName)}" ${schoolName===targetSchool?"selected":""}>${escapeText(rosterSchoolNickname(schoolName))}</option>`).join("");
         const targetClasses=rosterClasses.filter((rosterClass)=>rosterClass.sourceActive!==false&&(!targetSchool||enrollmentSchoolNameMatches(rosterClass.schoolName,targetSchool)));
-        const classOptions=targetClasses.map((rosterClass)=>`<option value="${escapeText(rosterClass.id)}" ${String(item.target_class_id)===String(rosterClass.id)?"selected":""}>${escapeText(rosterClass.name)} · ${escapeText(rosterClass.day||"")} ${escapeText(friendlyScheduleTime(rosterClass.time))}</option>`).join("");
+        const targetSchoolProfile=schoolProfileByName(targetSchool);
+        const officialClassrooms=[...new Set([...(targetSchoolProfile?.classroomOptions||[]),...targetClasses.flatMap((rosterClass)=>rosterClass.students||[]).map((student)=>student.officialClassroom).filter(Boolean)].map((value)=>String(value).trim()).filter(Boolean))].sort((left,right)=>left.localeCompare(right,undefined,{numeric:true}));
+        const matchedOfficialClassroom=officialClassrooms.find((classroom)=>normalizedClassroomName(classroom).toLowerCase()===normalizedClassroomName(newSchoolClassroom).toLowerCase())||"";
+        const targetClassroom=item.target_classroom||matchedOfficialClassroom||"";
+        const officialClassroomOptions=officialClassrooms.map((classroom)=>`<option value="${escapeText(classroom)}" ${classroom===targetClassroom?"selected":""}>${escapeText(classroom)}</option>`).join("");
+        const selectedTargetClass=targetClasses.find((rosterClass)=>String(rosterClass.id)===String(item.target_class_id));
+        const classSelectionModalOpen=String(enrollmentChangeClassOpenId)===String(item.id);
+        const classCardMarkup=targetClasses.map((rosterClass)=>{const students=rosterEnrolled(rosterClass);const selected=String(rosterClass.id)===String(item.target_class_id);return `<article class="roster-class-card enrollment-placement-class-card ${selected?"is-assigned":""}"><div class="enrollment-class-compare-heading"><strong>${escapeText(rosterClass.name)}</strong><small>${escapeText(rosterClass.day||"Day not set")} · ${escapeText(friendlyScheduleTime(rosterClass.time)||"Time not set")}</small></div><div class="enrollment-class-compare-bubbles"><span>${students.length}/${classRecommendedCapacity(rosterClass)} Enrolled${students.length>=classRecommendedCapacity(rosterClass)?" · Full":""}</span></div><div class="enrollment-class-compare-students">${students.map((student)=>`<div class="enrollment-class-compare-student"><span class="roster-student-photo">${student.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(rosterStudentInitials(student))}</span><strong>${escapeText(`${student.preferredName||student.firstName||"Dancer"} ${(student.lastName||"").charAt(0)}.`)}</strong><small>${escapeText(student.officialClassroom||student.classroom||"Classroom not entered")}</small><small>${escapeText(rosterAge(student.birthdate))}</small></div>`).join("")||`<div class="enrollment-class-empty-roster">No dancers assigned yet.</div>`}</div><span class="enrollment-class-card-actions"><button class="enrollment-class-card-assign ${selected?"is-selected":""}" type="button" data-enrollment-change-select-class="${escapeText(rosterClass.id)}" data-enrollment-change-id="${escapeText(item.id)}">${selected?"Class Selected":"Assign Class"}</button></span></article>`;}).join("");
+        const classSelectionModalMarkup=classSelectionModalOpen?`<div class="enrollment-change-assignment-overlay" data-enrollment-change-class-overlay="${escapeText(item.id)}" role="presentation"><section class="enrollment-change-assignment-dialog enrollment-change-class-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-change-class-title-${escapeText(item.id)}"><div class="enrollment-change-assignment-dialog-header"><div><h4 id="enrollment-change-class-title-${escapeText(item.id)}">Assign to Class · ${escapeText(rosterSchoolNickname(targetSchool))}</h4><p>Choose from the classes assigned to this school.</p></div><button class="enrollment-change-assignment-close" type="button" data-enrollment-change-close-class aria-label="Close class assignment">×</button></div><div class="enrollment-placement-class-grid">${classCardMarkup||`<div class="enrollment-change-empty">No active classes are assigned to this school.</div>`}</div></section></div>`:"";
+        const moveModalOpen=String(enrollmentChangeMoveOpenId)===String(item.id);
+        const savedMoveTiming=item.school_change_timing==="scheduled"?"scheduled":"immediate";
+        const moveDate=item.school_change_effective_date||requestedStartDate||new Date().toISOString().slice(0,10);
+        const moveModalMarkup=moveModalOpen?`<div class="enrollment-change-assignment-overlay" data-enrollment-change-move-overlay="${escapeText(item.id)}" role="presentation"><section class="enrollment-change-assignment-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-change-move-title-${escapeText(item.id)}"><div class="enrollment-change-assignment-dialog-header"><div><h4 id="enrollment-change-move-title-${escapeText(item.id)}">When should this school change happen?</h4><p>The specific date defaults to the Start Date submitted through Jotform.</p></div><button class="enrollment-change-assignment-close" type="button" data-enrollment-change-close-move aria-label="Close school change timing">×</button></div><div class="enrollment-change-timing-options"><label><input type="radio" name="school-change-timing-${escapeText(item.id)}" value="immediate" data-enrollment-change-timing ${savedMoveTiming==="immediate"?"checked":""}><span>Implement Immediately</span></label><label><input type="radio" name="school-change-timing-${escapeText(item.id)}" value="scheduled" data-enrollment-change-timing ${savedMoveTiming==="scheduled"?"checked":""}><span>Use a Specific Date</span></label></div><label class="enrollment-change-effective-date" ${savedMoveTiming==="scheduled"?"":"hidden"}>Effective Date<input type="date" data-enrollment-change-effective-date value="${escapeText(moveDate)}"></label><div class="enrollment-change-refund-actions"><button class="secondary" type="button" data-enrollment-change-close-move>Cancel</button><button class="primary" type="button" data-enrollment-change-confirm-move="${escapeText(item.id)}">${savedMoveTiming==="scheduled"?"Schedule School Change":"Implement School Change"}</button></div></section></div>`:"";
+        const pauseDates=enrollmentChangePauseDates(item);
+        const pauseClosures=enrollmentChangePauseClosures(item,pauseDates.stop,pauseDates.resume);
+        const pauseProration=enrollmentChangePauseProration(item,pauseDates.stop,pauseDates.resume);
+        const pauseModalOpen=String(enrollmentChangePauseOpenId)===String(item.id);
+        const pauseModalMarkup=pauseModalOpen?`<div class="enrollment-change-assignment-overlay" data-enrollment-change-pause-overlay="${escapeText(item.id)}" role="presentation"><section class="enrollment-change-assignment-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-change-pause-title-${escapeText(item.id)}"><div class="enrollment-change-assignment-dialog-header"><div><h4 id="enrollment-change-pause-title-${escapeText(item.id)}">Adjust Tuition Pause</h4><p>A pause must be longer than four weeks. No Class dates are excluded from the tuition calculation.</p></div><button class="enrollment-change-assignment-close" type="button" data-enrollment-change-close-pause aria-label="Close tuition pause dates">×</button></div><div class="enrollment-change-pause-dates"><label class="enrollment-change-effective-date">Requested Stop Date<input type="date" data-enrollment-change-pause-stop value="${escapeText(pauseDates.stop)}"></label><label class="enrollment-change-effective-date">Requested Start Date<input type="date" data-enrollment-change-pause-resume value="${escapeText(pauseDates.resume)}"></label></div><div><strong>No Class dates during this break</strong><div class="enrollment-change-no-class-list" data-enrollment-change-pause-closures>${pauseClosures.length?pauseClosures.map((closure)=>`<div class="enrollment-change-no-class-item"><strong>${escapeText(requestDateLabel(closure.date))}</strong><span>${escapeText(closureDisplayName(closure))}</span></div>`).join(""):`<small>None fall within these dates.</small>`}</div></div><div class="enrollment-change-parent-note" data-enrollment-change-pause-proration><span><strong>Tuition proration:</strong> ${pauseProration.payable} payable class${pauseProration.payable===1?"":"es"} paused out of ${pauseProration.scheduled} scheduled · ${pauseProration.percent}%</span></div><div class="enrollment-change-refund-actions"><button class="secondary" type="button" data-enrollment-change-close-pause>Cancel</button><button class="primary" type="button" data-enrollment-change-save-pause="${escapeText(item.id)}">Save Dates</button></div></section></div>`:"";
         const finalActionLabel=isPause?"Pause Student":"Deactivate";
-        const workflowMarkup=isSchoolChange?`<div class="enrollment-change-school"><label>New School<select data-enrollment-change-target-school="${escapeText(item.id)}"><option value="">Choose a school…</option>${schoolOptions}</select></label><label>Official Classroom<input data-enrollment-change-target-classroom="${escapeText(item.id)}" value="${escapeText(item.target_classroom||"")}" placeholder="Classroom name"></label><label>Dance Class<select data-enrollment-change-target-class="${escapeText(item.id)}"><option value="">Choose a dance class…</option>${classOptions}</select></label><button class="primary" type="button" data-enrollment-change-move="${escapeText(item.id)}" ${!assigned||!item.target_school||!item.target_class_id?"disabled":""}>Process School Change</button></div>`:`<div class="enrollment-change-steps">${step("enrollment_fee_refund_status","Enrollment Fee Refund",true)}${step("brightwheel_refund_status","Brightwheel Refund",true)}${step("billing_plan_status","Stop Billing Plan")}<div class="enrollment-change-step ${item.deactivation_status==="completed"?"is-complete":""}"><strong>${finalActionLabel}</strong><small>${item.deactivation_status==="completed"?"✓ Complete":!assigned?"Assign dancer first":!financialReady?"Resolve refunds first":!billingReady?"Stop billing first":"Ready"}</small><div class="enrollment-change-step-actions"><button class="primary" type="button" data-enrollment-change-deactivate="${escapeText(item.id)}" ${!assigned||!financialReady||!billingReady||item.deactivation_status==="completed"?"disabled":""}>${finalActionLabel}</button></div></div></div>`;
+        const parentNotes=enrollmentChangeParentNotes(item);
+        const requestTypeChoices=["switching schools.","requesting a tuition pause.","unenrolling from dance."];
+        const requestTypeOptions=[...new Set([item.request_type,...requestTypeChoices].filter(Boolean))].map((choice)=>`<option value="${escapeText(choice)}" ${choice===item.request_type?"selected":""}>${escapeText(choice)}</option>`).join("");
+        const transitionDetails=[
+          isSchoolChange&&newSchoolRelationship?`New school ${newSchoolRelationship}`:"",
+          isPause&&requestDateLabel(requestedReturnDate)?`Expected return: ${requestDateLabel(requestedReturnDate)}`:""
+        ].filter(Boolean);
+        const firstDayBanner=isSchoolChange&&requestedNewSchool
+          ?`<div class="enrollment-change-first-day-banner">First Day at <strong>${escapeText(requestedNewSchool)}</strong> is <strong>${escapeText(requestDateLabel(requestedStartDate)||"not entered")}</strong>.</div>`
+          :"";
+        const assignmentModalOpen=String(enrollmentChangeAssignmentOpenId)===String(item.id);
+        const assignmentModalMarkup=assignmentModalOpen?`<div class="enrollment-change-assignment-overlay" data-enrollment-change-assignment-overlay="${escapeText(item.id)}" role="presentation"><section class="enrollment-change-assignment-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-change-assignment-title-${escapeText(item.id)}"><div class="enrollment-change-assignment-dialog-header"><div><h4 id="enrollment-change-assignment-title-${escapeText(item.id)}">Assign ${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"Student")}</h4><p>Choose a suggested match or search the complete dancer list.</p></div><button class="enrollment-change-assignment-close" type="button" data-enrollment-change-close-assignment aria-label="Close student assignment">×</button></div>${suggestionMarkup}<div class="enrollment-change-assignment"><label>Assign Existing Student<select data-enrollment-change-student="${escapeText(item.id)}"><option value="">Choose a dancer…</option>${studentOptions}</select></label><button class="primary" type="button" data-enrollment-change-assign="${escapeText(item.id)}">${assigned?"Update Match":"Assign Student"}</button></div></section></div>`:"";
+        const savedRefundDetails=Array.isArray(item.brightwheel_refund_details)?item.brightwheel_refund_details:[];
+        const refundModalOpen=String(enrollmentChangeBrightwheelRefundOpenId)===String(item.id);
+        const refundModalMarkup=refundModalOpen?`<div class="enrollment-change-assignment-overlay" data-enrollment-change-refund-overlay="${escapeText(item.id)}" role="presentation"><section class="enrollment-change-assignment-dialog enrollment-change-refund-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-change-refund-title-${escapeText(item.id)}"><div class="enrollment-change-assignment-dialog-header"><div><h4 id="enrollment-change-refund-title-${escapeText(item.id)}">Brightwheel Refunds · ${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" "))}${assigned?` · ${escapeText(assignedTuitionLabel)}`:""}</h4><p>Select every refunded month. Full Refund uses the dancer’s recorded monthly tuition; Partial Refund opens an amount field.</p></div><button class="enrollment-change-assignment-close" type="button" data-enrollment-change-close-refund aria-label="Close Brightwheel refund details">×</button></div><div class="enrollment-change-refund-months">${enrollmentChangeRefundMonths().map((month)=>{const saved=savedRefundDetails.find((detail)=>detail.month===month.value)||{};const partial=saved.type==="partial";return `<div class="enrollment-change-refund-month"><input type="checkbox" aria-label="Refund ${escapeText(month.label)}" data-enrollment-change-refund-month="${escapeText(month.value)}" ${saved.month?"checked":""}><strong>${escapeText(month.label)}</strong><div class="enrollment-change-refund-type-toggle" role="group" aria-label="Refund type for ${escapeText(month.label)}"><label><input type="radio" name="refund-type-${escapeText(item.id)}-${escapeText(month.value)}" value="full" data-enrollment-change-refund-kind="${escapeText(month.value)}" ${!partial?"checked":""}><span>Full Refund</span></label><label><input type="radio" name="refund-type-${escapeText(item.id)}-${escapeText(month.value)}" value="partial" data-enrollment-change-refund-kind="${escapeText(month.value)}" ${partial?"checked":""}><span>Partial Refund</span></label></div><input type="number" min="0.01" step="0.01" inputmode="decimal" data-enrollment-change-refund-amount="${escapeText(month.value)}" value="${escapeText(partial?saved.amount||"":"")}" placeholder="Partial refund amount" ${partial?"":"hidden"}></div>`;}).join("")}</div><div class="enrollment-change-refund-actions"><button class="secondary" type="button" data-enrollment-change-close-refund>Cancel</button><button class="primary" type="button" data-enrollment-change-save-refunds="${escapeText(item.id)}">Save Refunds</button></div></section></div>`:"";
+        const pauseWorkflowMarkup=`<div class="enrollment-change-pause-dates"><div class="enrollment-change-pause-date"><small>Requested Stop Date</small><strong>${escapeText(requestDateLabel(pauseDates.stop)||"Not entered")}</strong></div><div class="enrollment-change-pause-date"><small>Requested Start Date</small><strong>${escapeText(requestDateLabel(pauseDates.resume)||"Not entered")}</strong></div></div><div class="enrollment-change-pause-actions"><button class="is-approve" type="button" data-enrollment-change-approve-pause="${escapeText(item.id)}" ${!assigned?"disabled":""}>Approve</button><button class="is-adjust" type="button" data-enrollment-change-open-pause="${escapeText(item.id)}" ${!assigned?"disabled":""}>Adjust</button><button class="is-deny" type="button" data-enrollment-change-deny-pause="${escapeText(item.id)}" ${!assigned?"disabled":""}>Deny</button></div>`;
+        const workflowMarkup=isSchoolChange?`<div class="enrollment-change-school"><label>New School<select data-enrollment-change-target-school="${escapeText(item.id)}"><option value="">Choose a school…</option>${schoolOptions}</select></label><label>New School Classroom<input value="${escapeText(newSchoolClassroom)}" readonly aria-label="Submitted new school classroom"></label><label>Official Classroom<select data-enrollment-change-target-classroom="${escapeText(item.id)}"><option value="">Choose an official classroom…</option>${officialClassroomOptions}</select></label><button class="secondary" type="button" data-enrollment-change-open-class="${escapeText(item.id)}" ${!targetSchool?"disabled":""}>${selectedTargetClass?`✓ ${escapeText(selectedTargetClass.name)}`:"Assign to Class"}</button><button class="primary" type="button" data-enrollment-change-open-move="${escapeText(item.id)}" ${!assigned||!targetSchool||!targetClassroom||!item.target_class_id?"disabled":""}>${item.status==="scheduled"&&item.school_change_effective_date?`Scheduled · ${escapeText(requestDateLabel(item.school_change_effective_date))}`:"Process School Change"}</button></div>`:isPause?pauseWorkflowMarkup:`<div class="enrollment-change-steps">${step("enrollment_fee_refund_status","Enrollment Fee Refund",true)}${step("brightwheel_refund_status","Brightwheel Refund",true)}${step("billing_plan_status","Stop Billing Plan")}<div class="enrollment-change-step ${item.deactivation_status==="completed"?"is-complete":""}"><strong>${finalActionLabel}</strong><small>${item.deactivation_status==="completed"?"✓ Complete":!assigned?"Assign dancer first":!financialReady?"Resolve refunds first":!billingReady?"Stop billing first":"Ready"}</small><div class="enrollment-change-step-actions"><button class="primary enrollment-change-deactivate" type="button" data-enrollment-change-deactivate="${escapeText(item.id)}" ${!assigned||!financialReady||!billingReady||item.deactivation_status==="completed"?"disabled":""}>${finalActionLabel}</button></div></div></div>`;
         return `<article class="enrollment-change-card">
-          <div class="enrollment-change-heading"><div><h4>${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"Dancer name not entered")}</h4><p>${escapeText(item.notes||"No additional message")}</p><small>Submitted ${escapeText(enrollmentDateLabel(item.submitted_at||item.created_at))}</small></div><span class="status ${assigned?"ok":"pending"}">${assigned?"Dancer Matched":"Needs Match"}</span></div>
-          <div class="enrollment-change-details"><div class="enrollment-change-value"><span>Current School</span><strong>${escapeText(item.current_school||"Not selected")}</strong></div><div class="enrollment-change-value"><span>Last Day</span><strong>${escapeText(item.last_day?new Date(`${item.last_day}T12:00:00`).toLocaleDateString():"Not entered")}</strong></div><div class="enrollment-change-value"><span>Request</span><strong>${escapeText(item.request_type||"Not selected")}</strong></div></div>
-          ${suggestionMarkup}
-          <div class="enrollment-change-assignment"><label>Assign Existing Student<select data-enrollment-change-student="${escapeText(item.id)}"><option value="">Choose a dancer…</option>${studentOptions}</select></label><button class="primary" type="button" data-enrollment-change-assign="${escapeText(item.id)}">${assigned?"Update Match":"Assign Dancer"}</button></div>
+          <div class="enrollment-change-heading"><div class="enrollment-change-identity">${assigned?`<span class="roster-student-photo ${rosterStudentBadgeClasses(assigned.student)}">${assigned.student.photo?`<img src="${escapeText(assigned.student.photo)}" alt="">`:escapeText(rosterStudentInitials(assigned.student))}</span>`:""}<h4 class="enrollment-change-title"><span>${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"Dancer name not entered")} is</span><select data-enrollment-change-request-type="${escapeText(item.id)}" aria-label="Request type for ${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"this dancer")}">${requestTypeOptions}</select><button class="enrollment-change-assign-open ${assigned?"is-assigned":""}" type="button" data-enrollment-change-open-assignment="${escapeText(item.id)}">Assign Student ${assigned?"✓":"+"}</button></h4></div><div class="enrollment-change-heading-badges"><span class="enrollment-change-request-source"${requestSourceStyle}>${escapeText(requestSourceLabel)}</span><span class="enrollment-change-submitted-date">${escapeText(new Date(item.submitted_at||item.created_at||Date.now()).toLocaleDateString())}</span></div></div>
+          ${isPause?"":`<div class="enrollment-change-last-day-banner">Last day at <strong>${escapeText(currentSchool||"the current school")}</strong> is <strong>${escapeText(item.last_day?new Date(`${item.last_day}T12:00:00`).toLocaleDateString():"not entered")}</strong>.</div>`}
+          ${firstDayBanner}
+          ${parentNotes.length?`<div class="enrollment-change-parent-note">${parentNotes.map(([label,value])=>`<span><strong>${escapeText(label)}:</strong> ${escapeText(value)}</span>`).join("")}</div>`:""}
+          ${transitionDetails.length?`<div class="enrollment-change-transition-details">${transitionDetails.map((detail)=>`<span>${escapeText(detail)}</span>`).join("")}</div>`:""}
           ${workflowMarkup}
+          ${assignmentModalMarkup}
+          ${refundModalMarkup}
+          ${classSelectionModalMarkup}
+          ${moveModalMarkup}
+          ${pauseModalMarkup}
         </article>`;
       }).join("");
+    };
+
+    const executeEnrollmentSchoolChange = async (item, { quiet = false } = {}) => {
+      const source=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(item.assigned_student_id));
+      const target=rosterClasses.find((rosterClass)=>String(rosterClass.id)===String(item.target_class_id));
+      if(!source||!target){if(!quiet)showToast("Choose the dancer and new dance class first");return false;}
+      const effectiveDate=item.school_change_effective_date||new Date().toISOString().slice(0,10);
+      if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){
+        const {error:eventError}=await window.dtSupabase.from("payroll_enrollment_events").upsert({
+          student_id:source.student.id,
+          from_class_id:source.rosterClass.id,
+          to_class_id:target.id,
+          event_type:"school_change",
+          effective_date:effectiveDate,
+          source_request_id:item.id
+        },{onConflict:"source_request_id,event_type"});
+        if(eventError){console.error("Payroll enrollment history could not save",eventError);if(!quiet)showToast("The dated payroll history could not be saved, so the school change was stopped");return false;}
+      }
+      if(!(await moveSharedStudentEnrollment(source.student,target)))return false;
+      source.rosterClass.students.splice(source.rosterClass.students.indexOf(source.student),1);
+      target.students.push(source.student);
+      source.student.classroom=item.new_school_classroom||item.target_classroom||"";
+      source.student.officialClassroom=item.target_classroom||"";
+      await saveSharedStudent(source.student,target);
+      const payload={target_school:target.schoolName,target_class_id:target.id,target_classroom:item.target_classroom||null,school_change_timing:item.school_change_timing||"immediate",school_change_effective_date:effectiveDate,status:"completed",completed_at:new Date().toISOString()};
+      Object.assign(item,payload);
+      if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){
+        const {error}=await window.dtSupabase.from("enrollment_change_requests").update(payload).eq("id",item.id);
+        if(error){console.error("School change completion could not save",error);showToast("The dancer moved, but the request status could not be saved");return false;}
+      }
+      enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
+      if(!quiet)showToast("School, classroom, and dance class updated");
+      return true;
     };
 
     const loadEnrollmentChanges = async (profile = window.dtCurrentProfile) => {
@@ -22259,7 +22535,10 @@
       const partnershipPreferencesQuery = ["admin", "director"].includes(profile.role)
         ? client.from("partner_school_payment_preferences").select("*")
         : Promise.resolve({ data: [], error: null });
-      let [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult] = await Promise.all([
+      const payrollEventsQuery = ["admin", "director"].includes(profile.role)
+        ? client.from("payroll_enrollment_events").select("id,student_id,from_class_id,to_class_id,event_type,effective_date,source_request_id,students(*)").order("effective_date", { ascending: true })
+        : Promise.resolve({ data: [], error: null });
+      let [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, payrollEventsResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("guardian_user_accounts").select("user_id, guardian_id, revoked_at"),
         partnerSchoolsQuery,
@@ -22273,7 +22552,8 @@
         familyLinksQuery,
         newsletterArchiveQuery,
         partnershipPaymentsQuery,
-        partnershipPreferencesQuery
+        partnershipPreferencesQuery,
+        payrollEventsQuery
       ]);
       // Older production schemas may not have the new `paused` enrollment enum
       // value yet. PostgreSQL rejects the entire `.in()` filter in that case,
@@ -22289,7 +22569,7 @@
       // must not prevent Curriculum Composer or Classes & Rosters from opening
       // when one of those optional tables is unavailable or still migrating.
       const failed = [profilesResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult].find((result) => result.error);
-      const ancillaryFailures = [guardianAccountsResult, notesResult, archivedResult,
+      const ancillaryFailures = [guardianAccountsResult, notesResult, archivedResult, payrollEventsResult,
         attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult].filter((result) => result.error);
       ancillaryFailures.forEach((result) => console.warn("Optional shared roster data could not be loaded", result.error));
       if (failed) {
@@ -22342,6 +22622,13 @@
       let recoverInactiveAssignments = false;
       try { recoverInactiveAssignments = !window.localStorage?.getItem(operationalRecoveryCompletedKey); } catch (error) {}
       const classes = classesResult.data || [];
+      payrollEnrollmentEvents = (payrollEventsResult.data || []).map((event) => ({
+        ...event,
+        effectiveDate: event.effective_date || "",
+        fromClassId: event.from_class_id || "",
+        toClassId: event.to_class_id || "",
+        studentId: event.student_id || ""
+      }));
       archivedRosterStudents = (archivedResult.data || []).map((enrollment) => ({
         id: enrollment.students?.id || enrollment.student_id,
         enrollmentId: enrollment.id,
@@ -23249,6 +23536,11 @@
     document.querySelectorAll("[data-mode-btn]").forEach((button) => {
       button.addEventListener("click", () => {
         const nextMode = button.dataset.modeBtn;
+        if (nextMode === "admin" && window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
+          document.body.dataset.mode = "teacher";
+          showToast("Director Dashboard access is limited to directors and administrators");
+          return;
+        }
         if (document.body.dataset.mode === nextMode) return;
         runGuardedNavigation(() => {
           const leavingTeacherPreview = document.body.dataset.tourMode === "true" && document.body.dataset.mode === "teacher" && nextMode === "admin";
@@ -29996,6 +30288,11 @@
     };
 
     const openTeacherProfile = (teacherId = profileTeacher.id) => {
+      if (window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
+        document.body.dataset.mode = "teacher";
+        showToast("Director Dashboard access is limited to directors and administrators");
+        return;
+      }
       if (!navigationGuardBypass && hasUnsavedEdits && (document.body.dataset.adminPage !== "profile" || profileTeacher.id !== teacherId)) {
         runGuardedNavigation(() => openTeacherProfile(teacherId));
         return;
@@ -37419,6 +37716,7 @@
           <input type="file" accept="image/*" hidden data-teacher-student-photo="${rosterSafe(student.id)}" data-teacher-student-photo-class="${rosterSafe(rosterClass.id)}">
         </label>
         <h3 id="teacher-student-profile-title">${rosterSafe(rosterStudentFullName(student))}</h3>
+        ${student.status === "paused" ? `<button class="teacher-student-resume-classes" type="button" data-teacher-resume-student="${rosterSafe(student.id)}" data-teacher-resume-student-class="${rosterSafe(rosterClass.id)}">Resume Classes</button>` : ""}
         ${String(student.medicalNotes || "").trim() ? `<p class="teacher-student-medical-alert"><span aria-hidden="true">+</span><span class="teacher-student-medical-alert-copy">${rosterSafe(String(student.medicalNotes).trim())}</span></p>` : ""}
         <div class="teacher-student-profile-details">
           <span><small>Official Classroom</small><strong>${rosterSafe(student.officialClassroom || student.classroom || "Not entered")}</strong></span>
@@ -38014,6 +38312,31 @@
       if (event.target.id === "teacher-student-profile-overlay") setTeacherRosterOverlay("teacher-student-profile-overlay", false);
     });
     document.getElementById("teacher-student-profile-overlay")?.addEventListener("click", async (event) => {
+      const resumeButton = event.target.closest("[data-teacher-resume-student]");
+      if (resumeButton) {
+        const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(resumeButton.dataset.teacherResumeStudentClass));
+        const student = rosterClass?.students.find((item) => String(item.id) === String(resumeButton.dataset.teacherResumeStudent));
+        if (!rosterClass || !student) return showToast("This dancer is not available in your roster");
+        resumeButton.disabled = true;
+        resumeButton.textContent = "Resuming…";
+        if (document.body.dataset.tourMode !== "true" && window.dtSupabase) {
+          const { error } = await window.dtSupabase.rpc("resume_paused_student", { target_student_id: student.id, target_class_id: rosterClass.id });
+          if (error) {
+            console.error("Paused dancer could not resume", error);
+            resumeButton.disabled = false;
+            resumeButton.textContent = "Resume Classes";
+            return showToast("Classes could not be resumed");
+          }
+        }
+        student.status = "enrolled";
+        scheduleAppDataSave();
+        renderTeacherRosters();
+        renderClassesAndRosters();
+        renderEnrollmentStudentsView();
+        openTeacherStudentProfile(rosterClass, student);
+        showToast(`${rosterStudentFirstName(student)} resumed classes today`);
+        return;
+      }
       const editButton = event.target.closest("[data-teacher-edit-student]");
       if (editButton) {
         const form = document.querySelector(`[data-teacher-student-edit-form="${CSS.escape(editButton.dataset.teacherEditStudent || "")}"][data-teacher-student-edit-class="${CSS.escape(editButton.dataset.teacherEditStudentClass || "")}"]`);
@@ -44258,6 +44581,120 @@
       });
     };
 
+    const payrollEventStudent = (event) => {
+      const student = event?.students || {};
+      return {
+        id: student.id || event?.studentId || event?.student_id || "",
+        firstName: student.first_name || "Student",
+        lastName: student.last_name || "",
+        preferredName: student.preferred_name || "",
+        tuitionDiscount: student.tuition_discount || "none",
+        enrolledDate: student.created_at ? String(student.created_at).slice(0, 10) : "",
+        status: "enrolled"
+      };
+    };
+    const payrollStudentsForClassOnDate = (rosterClass, dateKey) => {
+      const studentsById = new Map((rosterClass.students || []).map((student) => [String(student.id), student]));
+      [...payrollEnrollmentEvents].sort((left,right)=>String(left.effectiveDate||"").localeCompare(String(right.effectiveDate||""))).forEach((event) => {
+        if (!event.effectiveDate || !event.studentId) return;
+        const studentId = String(event.studentId);
+        if (String(event.toClassId) === String(rosterClass.id)) {
+          if (dateKey < event.effectiveDate) studentsById.delete(studentId);
+          else studentsById.set(studentId, studentsById.get(studentId) || payrollEventStudent(event));
+        }
+        if (String(event.fromClassId) === String(rosterClass.id)) {
+          if (dateKey < event.effectiveDate) studentsById.set(studentId, studentsById.get(studentId) || payrollEventStudent(event));
+          else studentsById.delete(studentId);
+        }
+      });
+      return [...studentsById.values()].filter((student) => {
+        const status = String(student.status || "").toLowerCase();
+        return ["enrolled", "active", "inactive", "withdrawn", "paused"].includes(status)
+          && (!student.enrolledDate || student.enrolledDate <= dateKey);
+      });
+    };
+    const payrollStudentsForClassMonth = (rosterClass) => {
+      const start = payrollMonthDate();
+      const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 12);
+      const totals = new Map();
+      let days = 0;
+      for (const date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+        days += 1;
+        payrollStudentsForClassOnDate(rosterClass, payrollDateKey(date)).forEach((student) => {
+          const key = String(student.id);
+          const record = totals.get(key) || { student, activeDays: 0 };
+          record.activeDays += 1;
+          totals.set(key, record);
+        });
+      }
+      return [...totals.values()].map((record) => ({ ...record, membershipFraction: days ? record.activeDays / days : 0 }));
+    };
+    const payrollMonthlyActiveStudentTotal = () => {
+      const fractions = new Map();
+      rosterClasses.forEach((rosterClass) => payrollStudentsForClassMonth(rosterClass).forEach(({student,membershipFraction}) => {
+        fractions.set(String(student.id), Math.max(fractions.get(String(student.id)) || 0, membershipFraction));
+      }));
+      return Math.round([...fractions.values()].reduce((sum, fraction) => sum + fraction, 0) * 100) / 100;
+    };
+    const payrollTeacherSplitRows = () => rosterClasses.flatMap((rosterClass) => {
+      const payableDates=payrollClassDates(rosterClass).filter((entry)=>entry.status==="payable").map((entry)=>entry.date);
+      const firstClassDate=payableDates[0]||"";
+      return payrollStudentsForClassMonth(rosterClass).flatMap(({student,membershipFraction}) => {
+        const event=payrollEnrollmentEvents.find((candidate)=>String(candidate.studentId)===String(student.id)&&(String(candidate.fromClassId)===String(rosterClass.id)||String(candidate.toClassId)===String(rosterClass.id)));
+        const startDate=String(student.enrolledDate||"").slice(0,10);
+        const lateStart=Boolean(!event&&startDate&&firstClassDate&&startDate>firstClassDate&&startDate.slice(0,7)===payrollState.month);
+        if(!(membershipFraction>0&&membershipFraction<0.9999&&(event||lateStart)))return [];
+        const confirmed=payrollConfirmedTuition[`${payrollState.month}:${student.id}`];
+        const remainingClasses=lateStart?payableDates.filter((date)=>date>=startDate).length:0;
+        const sessionPercentage=payableDates.length?remainingClasses/payableDates.length*100:membershipFraction*100;
+        return [{
+          studentId:student.id,
+          studentName:rosterStudentFullName(student),
+          teacherId:rosterClass.teacherId,
+          teacherName:rosterTeacherName(rosterClass.teacherId),
+          school:rosterClass.schoolName,
+          className:rosterClass.name,
+          percentage:Math.round((lateStart&&confirmed?DTEnrollmentTuition.percentage(Number(confirmed.full_tuition),Number(confirmed.recorded_tuition)):lateStart?sessionPercentage:membershipFraction*100)*10)/10,
+          reason:lateStart?`Started ${new Date(`${startDate}T12:00:00`).toLocaleDateString()} after first class`:String(event.event_type||"effective date change").replaceAll("_"," "),
+          automaticType:lateStart?"new_enrollment":"assignment_change"
+        }];
+      });
+    });
+    const payrollAutomaticMembershipFraction = (student, rosterClass, membershipFraction) => {
+      const hasAssignmentEvent=payrollEnrollmentEvents.some((event)=>String(event.studentId)===String(student.id)&&(String(event.fromClassId)===String(rosterClass.id)||String(event.toClassId)===String(rosterClass.id)));
+      if(hasAssignmentEvent)return membershipFraction;
+      const startDate=String(student.enrolledDate||"").slice(0,10);
+      if(!startDate||startDate.slice(0,7)!==payrollState.month)return membershipFraction;
+      if(payrollConfirmedTuition[`${payrollState.month}:${student.id}`])return 1;
+      const payableDates=payrollClassDates(rosterClass).filter((entry)=>entry.status==="payable").map((entry)=>entry.date);
+      if(!payableDates.length||startDate<=payableDates[0])return 1;
+      return payableDates.filter((date)=>date>=startDate).length/payableDates.length;
+    };
+
+    const payrollRefundTeacherDeduction = ({ student, rosterClass, month, refundAmount, fullTuition }) => {
+      const teacher = teachers.find((candidate) => candidate.id === rosterClass?.teacherId);
+      if (!teacher || !month) return 0;
+      const ratio = Math.max(0, Math.min(1, Number(refundAmount || 0) / Math.max(1, Number(fullTuition || refundAmount || 1))));
+      const discount = payrollDiscountFor(student);
+      if (teacher.payTier === "tier_a_founding_teacher") return Math.round(((discount === "director" ? 0 : discount === "none" ? 40 : 30) * ratio) * 100) / 100;
+      if (teacher.payTier === "tier_b_teacher") {
+        const start = new Date(`${month}-01T12:00:00`);
+        const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 12);
+        const dates = payrollClassDatesBetween(rosterClass, start, end, "Refunded month").filter((entry) => entry.status === "payable");
+        const amount = dates.reduce((sum, occurrence) => {
+          const count = payrollStudentsForClassOnDate(rosterClass, occurrence.date).filter((candidate) => payrollDiscountFor(candidate) !== "director").length;
+          return sum + Math.max(0, payrollTierBClassRate(count, teacher.id) - payrollTierBClassRate(Math.max(0, count - 1), teacher.id));
+        }, 0);
+        return Math.round(amount * ratio * 100) / 100;
+      }
+      if (["tier_c_administrator", "tier_d_director"].includes(teacher.payTier)) {
+        const vendor = payrollSchoolVendor(rosterClass.schoolName);
+        const rate = vendor ? (discount === "none" ? 46.8 : 37.8) : (discount === "none" ? 52 : 42);
+        return Math.round((discount === "director" ? 0 : rate * ratio) * 100) / 100;
+      }
+      return 0;
+    };
+
     const calculatePayrollPreview = () => {
       const lines = [];
       const teachersByTier = Object.fromEntries(payrollTeachers().map((teacher) => [teacher.id, payrollTierIsAssigned(teacher.payTier) ? teacher.payTier : ""]));
@@ -44269,15 +44706,15 @@
         if (!teacher || !tier) return;
         const payableDates = (tier === "tier_b_teacher" ? payrollTeacherClassDates(rosterClass) : payrollClassDates(rosterClass))
           .filter((entry) => entry.status === "payable");
-        const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()) && (!student.enrolledDate || !payrollState.month || student.enrolledDate.slice(0,7) <= payrollState.month));
+        const monthlyStudents = payrollStudentsForClassMonth(rosterClass);
         if (tier === "tier_a_founding_teacher") {
-          students.forEach((student) => {
+          monthlyStudents.forEach(({student,membershipFraction}) => {
             const discount = payrollDiscountFor(student);
-            const studentKey = `${teacher.id}:${student.id}`;
+            const studentKey = `${teacher.id}:${student.id}:${rosterClass.id}`;
             if (foundingSeen.has(studentKey)) return;
             foundingSeen.add(studentKey);
             const count = 1;
-            const fraction = payrollProrationFraction(student.id);
+            const fraction = payrollProrationFraction(student.id) * payrollAutomaticMembershipFraction(student,rosterClass,membershipFraction);
             const rate = (discount === "director" ? 0 : discount === "none" ? 40 : 30) * fraction;
             const amount = Math.round(rate * 100) / 100;
             lines.push({ teacherId: teacher.id, studentId: student.id, type: "Student Pay", studentName: rosterStudentFullName(student), school: rosterClass.schoolName, category: discount, fraction, rate, vendor: false, description: `${rosterStudentFullName(student)} · ${rosterClass.schoolName} · ${count} classes`, amount, held: outstanding.has(student.id) });
@@ -44285,7 +44722,8 @@
         }
         if (tier === "tier_b_teacher") {
           payableDates.forEach((occurrence) => {
-            const count = students.filter((student) => payrollDiscountFor(student) !== "director" && (!student.enrolledDate || student.enrolledDate <= occurrence.date)).length;
+            const occurrenceStudents = payrollStudentsForClassOnDate(rosterClass, occurrence.date);
+            const count = occurrenceStudents.filter((student) => payrollDiscountFor(student) !== "director").length;
             if (!count) return;
             const commissionRate = payrollTeacherCommissionRate(teacher.id);
             const commissionDetail = count >= 8 ? ` · ${payrollCurrency(commissionRate)} commission for students 8–12` : "";
@@ -44297,13 +44735,14 @@
         const leaderSeen = new Set();
         rosterClasses.forEach((rosterClass) => {
           const sourceTier = teachersByTier[rosterClass.teacherId];
-          const students = (rosterClass.students || []).filter((student) => ["enrolled", "active"].includes(String(student.status || "").toLowerCase()) && (!student.enrolledDate || !payrollState.month || student.enrolledDate.slice(0,7) <= payrollState.month));
-          students.forEach((student) => {
+          const monthlyStudents = payrollStudentsForClassMonth(rosterClass);
+          monthlyStudents.forEach(({student,membershipFraction}) => {
             const discount = payrollDiscountFor(student);
             if (discount === "director" && rosterClass.teacherId !== leader.id) return;
-            if (leaderSeen.has(student.id)) return;
-            leaderSeen.add(student.id);
-            const fraction = payrollProrationFraction(student.id);
+            const studentClassKey = `${student.id}:${rosterClass.id}`;
+            if (leaderSeen.has(studentClassKey)) return;
+            leaderSeen.add(studentClassKey);
+            const fraction = payrollProrationFraction(student.id) * payrollAutomaticMembershipFraction(student,rosterClass,membershipFraction);
             let amount = 0;
             let type = "Commission";
             if (rosterClass.teacherId === leader.id) {
@@ -44319,7 +44758,10 @@
             if (amount || type === "Own Student Pay") lines.push({ teacherId: leader.id, studentId: student.id, type, studentName: rosterStudentFullName(student), school: rosterClass.schoolName, category: discount, fraction, rate, vendor: payrollSchoolVendor(rosterClass.schoolName), sourceTier, sourceTeacherName: fullName(teachers.find(t => t.id === rosterClass.teacherId)), description: `${rosterStudentFullName(student)} · ${rosterClass.schoolName}`, amount, held: outstanding.has(student.id) });
           });
         });
-        if (leader.payTier === "tier_c_administrator") lines.push({ teacherId: leader.id, type: "Enrollment Fee Bonus", description: `${payrollAllStudents().length} active students`, amount: payrollAllStudents().filter(({student}) => !student?.enrolledDate || !payrollState.month || student.enrolledDate.slice(0,7) <= payrollState.month).length, held: false });
+        if (leader.payTier === "tier_c_administrator") {
+          const activeStudentTotal=payrollMonthlyActiveStudentTotal();
+          lines.push({ teacherId: leader.id, type: "Enrollment Fee Bonus", description: `${activeStudentTotal} prorated active students`, amount: activeStudentTotal, held: false });
+        }
         const lateFees = leader.payTier === "tier_c_administrator"
           ? Object.values(payrollState.outstandingStudents || {}).filter((item) => item.status === "paid_late_fee" && payrollBalanceResolvedThisRun(item)).length
           : 0;
@@ -44354,7 +44796,9 @@
       });
       (payrollState.adjustments || []).forEach((entry) => {
         if (!entry.teacherId || !Number(entry.amount)) return;
-        lines.push({ teacherId: entry.teacherId, type: "Adjustment", description: entry.reason || "Manual adjustment", amount: Number(entry.amount), held: false });
+        const kind=entry.kind||(Number(entry.amount)<0?"deduction":"addition");
+        const amount=(kind==="deduction"?-1:1)*Math.abs(Number(entry.amount));
+        lines.push({ teacherId: entry.teacherId, type: "Adjustment", description: `${kind==="deduction"?"Deduction":"Addition"} · ${entry.reason||"Manual adjustment"}`, amount, held: false });
       });
       lines.push(...(typeof tiffanyWylieSeptemberVendorCreditLines === "function" ? tiffanyWylieSeptemberVendorCreditLines() : []));
       const summaries = payrollTeachers().map((teacher) => {
@@ -44396,13 +44840,18 @@
     };
 
     const payrollStubLibraryMarkup = () => teachers
-      .filter((teacher) => teacher.status !== "inactive" && String(teacher.id || "") !== "dance-techniques" && fullName(teacher).trim().toLowerCase() !== "dance techniques")
+      .filter((teacher) => {
+        const hasIssuedStubs = Array.isArray(teacher.payStubs) && teacher.payStubs.length > 0;
+        const isStudioProfile = String(teacher.id || "") === "dance-techniques" || fullName(teacher).trim().toLowerCase() === "dance techniques";
+        return !isStudioProfile && (teacher.status !== "inactive" || hasIssuedStubs);
+      })
       .sort((a, b) => fullName(a).localeCompare(fullName(b)))
       .map((teacher) => {
         const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
         const initials = `${teacher.firstName?.[0] || ""}${teacher.lastName?.[0] || ""}`.toUpperCase();
         const stubLabel = stubs.length ? `${stubs.length} finalized pay stub${stubs.length === 1 ? "" : "s"}` : "No finalized pay stubs yet";
-        return `<button class="payroll-stub-teacher-card" type="button" data-open-teacher-pay-stubs="${escapeText(teacher.id)}"><span class="payroll-stub-teacher-heading"><span class="roster-student-photo teacher-identity-bubble ${teacherProfileColorClass(teacher)}">${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(initials)}</span><span><strong>${escapeText(fullName(teacher))}</strong><small>${escapeText(payrollTierLabels[teacher.payTier] || "Payment tier not assigned")}</small></span></span><span class="payroll-stub-teacher-hint">${escapeText(stubLabel)} · Open</span></button>`;
+        const teacherStatus = teacher.status === "inactive" ? "Former Teacher" : (payrollTierLabels[teacher.payTier] || "Payment tier not assigned");
+        return `<button class="payroll-stub-teacher-card" type="button" data-open-teacher-pay-stubs="${escapeText(teacher.id)}"><span class="payroll-stub-teacher-heading"><span class="roster-student-photo teacher-identity-bubble ${teacherProfileColorClass(teacher)}">${teacher.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(initials)}</span><span><strong>${escapeText(fullName(teacher))}</strong><small>${escapeText(teacherStatus)}</small></span></span><span class="payroll-stub-teacher-hint">${escapeText(stubLabel)} · Open</span></button>`;
       }).join("");
 
     const renderPayrollStubLibrary = () => {
@@ -44416,14 +44865,15 @@
       const subtitle = document.getElementById("teacher-pay-stubs-subtitle");
       const body = document.getElementById("teacher-pay-stubs-body");
       if (!overlay || !body) return;
-      const teacher = payrollTeachers().find((item) => String(item.id) === String(teacherId));
+      const teacher = teachers.find((item) => String(item.id) === String(teacherId)
+        && (item.status !== "inactive" || (Array.isArray(item.payStubs) && item.payStubs.length > 0)));
       const open = Boolean(teacher);
       overlay.classList.toggle("active", open);
       overlay.setAttribute("aria-hidden", open ? "false" : "true");
       if (!teacher) { body.innerHTML = ""; return; }
       const stubs = Array.isArray(teacher.payStubs) ? teacher.payStubs.slice().sort((a, b) => String(b.payDate || "").localeCompare(String(a.payDate || ""))) : [];
       if (title) title.textContent = `${fullName(teacher)} Pay Stubs`;
-      if (subtitle) subtitle.textContent = payrollTierLabels[teacher.payTier] || "Finalized payroll records";
+      if (subtitle) subtitle.textContent = teacher.status === "inactive" ? "Former Teacher · Finalized payroll records" : (payrollTierLabels[teacher.payTier] || "Finalized payroll records");
       body.innerHTML = stubs.length ? stubs.map((stub) => `<div class="payroll-stub-record"><span><strong>${escapeText(formatPayDate(stub.payDate))}</strong><small>${stub.amount != null ? `${payrollCurrency(stub.amount)} · ` : ""}${escapeText(stub.filename || "Pay stub")}</small></span><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}">View</button><button class="secondary" type="button" data-director-download-stub="${escapeText(teacher.id)}" data-director-stub-date="${escapeText(stub.payDate)}" data-save-pdf="true">Download</button></div>`).join("") : `<div class="payroll-placeholder">No finalized pay stubs yet.</div>`;
     };
 
@@ -44450,9 +44900,7 @@
     const payrollProrationFraction = (studentId) => {
       const confirmed=payrollConfirmedTuition[`${payrollState.month}:${studentId}`];
       if(confirmed)return DTEnrollmentTuition.percentage(Number(confirmed.full_tuition),Number(confirmed.recorded_tuition))/100;
-      const value = Number(payrollState.prorations?.[payrollState.month]?.[studentId] ?? 100);
-      if (!Number.isFinite(value) || value<0 || value>100) throw new Error("Choose a valid tuition percentage.");
-      return value / 100;
+      return 1;
     };
     const payrollStatementBatch = () => {
       const preview = calculatePayrollPreview();
@@ -44464,6 +44912,7 @@
           month: payrollState.month, payDate: payrollDateKey(payrollPayday()), sequence: payrollState.sequence,
           advanceCredit: officialPayrollPayments.filter(r => r.payroll_teacher_summaries?.teacher_id===item.teacher.id && String(r.payroll_teacher_summaries?.payroll_periods?.period_month||" ").slice(0,7)===payrollState.month).reduce((n,r)=>n+Number(r.payroll_teacher_summaries?.calculation_snapshot?.advance_credit||0),0),
           lines: item.lines, payment: item.payment, firstPayment: item.recordedFirstPayment || 0, paidToDate: 0,
+          proratedStudents: payrollTeacherSplitRows().filter(row => row.teacherId === item.teacher.id),
           ownStudents: studentLines.map(line => ({ name: line.studentName, school: line.school, category: line.category,
             rate: line.rate, amount: line.amount, held: line.held, vendor: line.vendor, fraction: line.fraction }))
         });
@@ -44502,6 +44951,21 @@
         }
         if(download)setTimeout(()=>URL.revokeObjectURL(url),60000);
       } catch(error) { showToast(error.message || "The statement could not open."); }
+    };
+    const previewCurrentPayrollStatement = async (teacherId) => {
+      try {
+        const statement=payrollStatementBatch().find((record)=>String(record.teacher?.id)===String(teacherId));
+        if(!statement)throw new Error("That teacher’s current pay statement could not be calculated.");
+        if(document.body.dataset.tourMode==="true"&&!(statement.proratedStudents||[]).length)statement.proratedStudents=[{studentName:"Ella Sullivan · Sample",school:"Primrose North Rockwall",className:"Ballet & Tap · Preschool",percentage:75,reason:"Started 9/8/2026 after first class"}];
+        const adjustments=(statement.lines||[]).filter((line)=>["Refund Deduction","Adjustment","Prior Payroll Credit"].includes(line.type));
+        const adjustmentRows=adjustments.length?adjustments.map((line)=>`<div class="payroll-table-row"><strong>${escapeText(line.type)}</strong><span>${escapeText(line.description||"Payroll adjustment")}</span><span></span><strong>${Number(line.amount)<0?"−":"+"}${payrollCurrency(Math.abs(Number(line.amount||0)))}</strong></div>`).join(""):`<div class="payroll-placeholder">No adjustments on this statement.</div>`;
+        const prorationRows=(statement.proratedStudents||[]).length?statement.proratedStudents.map((row)=>`<div class="payroll-table-row"><strong>${escapeText(row.studentName)}</strong><span>${escapeText(row.school)}</span><strong>${escapeText(row.percentage)}%</strong><span>${escapeText(row.reason||"Effective-date change")}</span></div>`).join(""):`<div class="payroll-placeholder">No prorated tuition on this statement.</div>`;
+        let dialog=document.getElementById("current-statement-preview");
+        if(!dialog){dialog=document.createElement("dialog");dialog.id="current-statement-preview";document.body.append(dialog);}
+        dialog.innerHTML=`<div class="current-statement-preview-shell"><header class="current-statement-preview-header"><div><p>DANCE TECHNIQUES · PAY STATEMENT PREVIEW</p><h3>${escapeText(statement.teacher.name)}</h3><p>${escapeText(payrollMonthLabel())} · Pay date ${escapeText(new Date(`${statement.payDate}T12:00:00`).toLocaleDateString())}</p></div><button class="current-statement-preview-close" type="button" aria-label="Close pay statement preview">×</button></header><section class="current-statement-preview-section"><h4>Payment Summary</h4><div class="payroll-table"><div class="payroll-table-row is-header"><span>Monthly earnings</span><span>Current payment</span><span>Previously paid</span><span>Remaining</span></div><div class="payroll-table-row"><strong>${payrollCurrency(statement.earnings)}</strong><strong>${payrollCurrency(statement.payment)}</strong><span>${payrollCurrency(statement.firstPayment)}</span><strong>${payrollCurrency(Math.max(0,statement.earnings-statement.payment-Number(statement.firstPayment||0)))}</strong></div></div></section><section class="current-statement-preview-section"><h4>Adjustments</h4><div class="payroll-table"><div class="payroll-table-row is-header"><span>Type</span><span>Details</span><span></span><span>Amount</span></div>${adjustmentRows}</div></section><section class="current-statement-preview-section"><h4>Prorated Tuition</h4><div class="payroll-table"><div class="payroll-table-row is-header"><span>Dancer</span><span>School</span><span>Prorated</span><span>Reason</span></div>${prorationRows}</div></section></div>`;
+        dialog.querySelector(".current-statement-preview-close").onclick=()=>dialog.close();
+        dialog.showModal();
+      }catch(error){showToast(error.message||"The pay statement preview could not open.");}
     };
     const finalizePayrollPayStubs = async () => {
       if (!window.dtSupabase || document.body.dataset.tourMode === "true") throw new Error("Sign in to finalize payroll. Tour mode cannot issue pay statements.");
@@ -44577,12 +45041,33 @@
       }
       if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${DTWorkClock.reviewMarkup()}<div class="payroll-explanation">Approved recorded hours are included automatically at $20 per hour. Use manual hours only for work not already recorded.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
       if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[teacher.payTier])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
-      if (step === 6) { const refundDeductions = (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth); const wylieCredits = tiffanyWylieSeptemberVendorCreditLines(); const wylieCreditTotal = wylieCredits.reduce((sum, entry) => sum + entry.amount, 0); body = `<div class="payroll-explanation">Refund deductions are added automatically when a family refund records that the teacher was already paid. Every manual adjustment also requires a teacher, amount, and reason.</div>${wylieCredits.length ? `<div class="payroll-explanation"><strong>Tiffany’s Primrose Wylie credit: ${payrollCurrency(wylieCreditTotal)}</strong><br>${wylieCredits.length} September paid dancer${wylieCredits.length === 1 ? "" : "s"} · the former 10% vendor fee is restored in full on the October 1 paycheck. Each dancer appears separately on the pay stub.</div>` : ""}${refundDeductions.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Deduction</span><span>Refund</span><span>Reason</span></div>${refundDeductions.map((entry) => `<div class="payroll-table-row"><strong>${escapeText(fullName(payrollTeachers().find((teacher) => teacher.id === entry.teacherId)))}</strong><strong>−${payrollCurrency(entry.payrollDeductionAmount)}</strong><span>${escapeText(entry.dancerName)} · ${payrollCurrency(entry.refundAmount)}</span><span>${escapeText(entry.refundReason || "Family refund")}</span></div>`).join("")}</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Amount</span><span>Reason</span><span></span></div>${(payrollState.adjustments || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="number" step="0.01" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(entry.amount || "")}"><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason || "")}"><button class="secondary" type="button" data-remove-payroll-adjustment="${index}">Remove</button></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`; }
+      if (step === 6) {
+        const refundDeductions=(payrollState.refundRecords||[]).filter((entry)=>entry.teacherAlreadyPaid&&Number(entry.payrollDeductionAmount)>0&&!entry.appliedPayrollMonth);
+        const wylieCredits=tiffanyWylieSeptemberVendorCreditLines();
+        const wylieCreditTotal=wylieCredits.reduce((sum,entry)=>sum+entry.amount,0);
+        const refundMarkup=refundDeductions.length?`<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Deduction</span><span>Refund</span><span>Reason</span></div>${refundDeductions.map((entry)=>`<div class="payroll-table-row"><strong>${escapeText(fullName(payrollTeachers().find((teacher)=>teacher.id===entry.teacherId)))}</strong><strong>−${payrollCurrency(entry.payrollDeductionAmount)}</strong><span>${escapeText(entry.dancerName)} · ${payrollCurrency(entry.refundAmount)}</span><span>${escapeText(entry.refundReason||"Family refund")}</span></div>`).join("")}</div>`:"";
+        const manualMarkup=(payrollState.adjustments||[]).map((entry,index)=>{
+          const kind=entry.kind||(Number(entry.amount)<0?"deduction":"addition");
+          entry.kind=kind;
+          if(Number(entry.amount)<0)entry.amount=Math.abs(Number(entry.amount));
+          return `<div class="payroll-table-row payroll-adjustment-row"><select class="payroll-adjustment-teacher" data-payroll-adjustment-field="teacherId" data-payroll-adjustment-index="${index}">${payrollTeachers().map((teacher)=>`<option value="${escapeText(teacher.id)}" ${teacher.id===entry.teacherId?"selected":""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><span class="payroll-adjustment-value"><span class="payroll-adjustment-signs" role="group" aria-label="Adjustment type"><label class="is-addition" aria-label="Addition"><input type="radio" name="payroll-adjustment-kind-${index}" value="addition" data-payroll-adjustment-field="kind" data-payroll-adjustment-index="${index}" ${kind==="addition"?"checked":""}><span aria-hidden="true">+</span></label><label class="is-deduction" aria-label="Deduction"><input type="radio" name="payroll-adjustment-kind-${index}" value="deduction" data-payroll-adjustment-field="kind" data-payroll-adjustment-index="${index}" ${kind==="deduction"?"checked":""}><span aria-hidden="true">−</span></label></span><input type="number" min="0.01" step="0.01" inputmode="decimal" data-payroll-adjustment-field="amount" data-payroll-adjustment-index="${index}" value="${escapeText(Math.abs(Number(entry.amount||0))||"")}" placeholder="Amount"></span><input data-payroll-adjustment-field="reason" data-payroll-adjustment-index="${index}" value="${escapeText(entry.reason||"")}" placeholder="Reason"><button class="payroll-adjustment-remove" type="button" data-remove-payroll-adjustment="${index}" aria-label="Remove adjustment">−</button></div>`;
+        }).join("");
+        body=`<div class="payroll-explanation">Refund deductions are added automatically when a family refund records that the teacher was already paid. For a manual adjustment, choose Addition or Deduction and enter a positive amount.</div>${wylieCredits.length?`<div class="payroll-explanation"><strong>Tiffany’s Primrose Wylie credit: ${payrollCurrency(wylieCreditTotal)}</strong><br>${wylieCredits.length} September paid dancer${wylieCredits.length===1?"":"s"} · the former 10% vendor fee is restored in full on the October 1 paycheck. Each dancer appears separately on the pay stub.</div>`:""}${refundMarkup}<div class="payroll-table"><div class="payroll-table-row payroll-adjustment-row is-header"><span>Teacher</span><span>Addition / Deduction</span><span>Reason</span><span></span></div>${manualMarkup}</div><button class="secondary" type="button" id="add-payroll-adjustment">Add Adjustment</button>`;
+      }
       if (step === 7) body = `<div class="payroll-choice-grid"><article class="payroll-choice-card"><strong>${payrollCurrency(preview.total)}</strong><small>Total payment for this payroll.</small></article><article class="payroll-choice-card"><strong>${preview.issues}</strong><small>Unresolved issue${preview.issues === 1 ? "" : "s"}. Payment tiers must be assigned before approval.</small></article></div><div class="payroll-explanation">Approval freezes the rates, rosters, class dates, balances, calculations, and explanations used for this payroll. Reopening creates an audit entry.</div><button class="primary" type="button" id="approve-payroll" ${preview.issues ? "disabled" : ""}>Approve &amp; Lock Payroll</button>`;
       if (step === 6) {
         const confirmedRows=Object.entries(payrollConfirmedTuition).filter(([key])=>key.startsWith(payrollState.month+":"));
-        const prorations = {...(payrollState.prorations?.[payrollState.month] || {}),...Object.fromEntries(confirmedRows.map(([key,row])=>[key.slice(8),DTEnrollmentTuition.percentage(Number(row.full_tuition),Number(row.recorded_tuition))]))};
-        body += `<h3>Prorated Tuition</h3><p>Choose the percentage of monthly tuition charged. Student pay and commissions use the same percentage.</p><div>${payrollAllStudents().filter(({student})=>prorations[student.id]!=null).map(({student,rosterClass})=>`<label>${escapeText(rosterStudentFullName(student))} · ${escapeText(rosterClass.schoolName)} <select data-payroll-proration="${escapeText(student.id)}" ${payrollConfirmedTuition[`${payrollState.month}:${student.id}`]?'disabled title="Confirmed during enrollment"':""}>${[...new Set([0,25,50,75,100,Number(prorations[student.id])])].sort((a,b)=>a-b).map(n=>`<option value="${n}" ${Number(prorations[student.id])===n?'selected':''}>${n}%</option>`).join('')}</select></label>`).join('')}</div><select id="payroll-proration-student"><option value="">Choose student to prorate</option>${payrollAllStudents().map(({student})=>`<option value="${escapeText(student.id)}">${escapeText(rosterStudentFullName(student))}</option>`).join('')}</select><button type="button" class="secondary" id="add-payroll-proration">Add Prorated Tuition</button>`;
+        const assignmentSplits=payrollTeacherSplitRows();
+        const tuitionProrations=confirmedRows.map(([key,row])=>{const studentId=key.slice(payrollState.month.length+1);const record=payrollAllStudents().find(({student})=>String(student.id)===String(studentId));return record?{studentId,studentName:rosterStudentFullName(record.student),school:record.rosterClass.schoolName,teacherName:rosterTeacherName(record.rosterClass.teacherId),percentage:DTEnrollmentTuition.percentage(Number(row.full_tuition),Number(row.recorded_tuition)),reason:record.student.enrolledDate?`Started ${new Date(`${record.student.enrolledDate}T12:00:00`).toLocaleDateString()} · recorded tuition`:"Recorded tuition"}:null;}).filter(Boolean);
+        const confirmedStudentIds=new Set(tuitionProrations.map((row)=>String(row.studentId)));
+        const automaticProrations=[...tuitionProrations,...assignmentSplits.filter((row)=>row.automaticType!=="new_enrollment"||!confirmedStudentIds.has(String(row.studentId)))];
+        if(document.body.dataset.tourMode==="true"&&!automaticProrations.length)automaticProrations.push(
+          {studentName:"Ella Sullivan · Sample",school:"Primrose North Rockwall",className:"Ballet & Tap · Preschool",teacherName:"Ms. Makayla",percentage:75,reason:"Started 9/8/2026 after first class"},
+          {studentName:"Riley Thompson · Sample",school:"Primrose Rowlett",className:"Ballet · Pre-K",teacherName:"Ms. Tiffany",percentage:50,reason:"Last day 9/15/2026"},
+          {studentName:"Madison Dale · Sample",school:"Primrose Rowlett",className:"Ballet & Tap · Pre-K",teacherName:"Ms. Tiffany",percentage:50,reason:"Teacher assignment through 9/15/2026"},
+          {studentName:"Madison Dale · Sample",school:"Primrose North Rockwall",className:"Ballet & Tap · Pre-K",teacherName:"Ms. Lexi",percentage:50,reason:"Teacher assignment beginning 9/16/2026"}
+        );
+        body += `<div class="payroll-proration-heading"><div><h3>Prorated Tuition</h3><p>Calculated automatically from recorded tuition and effective enrollment, unenrollment, pause, school-change, and teacher-change dates.</p></div><span class="payroll-preview-controls"><select id="payroll-preview-teacher" aria-label="Teacher pay statement to preview">${payrollTeachers().map((teacher)=>`<option value="${escapeText(teacher.id)}">${escapeText(fullName(teacher))}</option>`).join("")}</select><button class="payroll-preview-button" type="button" id="preview-current-pay-statement">Preview Pay Statement</button></span></div>${automaticProrations.length?`<div class="payroll-table"><div class="payroll-table-row is-header"><span>Dancer</span><span>Teacher</span><span>Prorated</span><span>Reason</span></div>${automaticProrations.map(row=>`<div class="payroll-table-row"><span><strong>${escapeText(row.studentName)}</strong><small>${escapeText(row.school)}</small></span><strong>${escapeText(row.teacherName)}</strong><strong>${escapeText(Math.round(Number(row.percentage)*10)/10)}%</strong><span>${escapeText(row.reason)}</span></div>`).join("")}</div>`:`<div class="payroll-placeholder">No prorated tuition applies to this payroll.</div>`}`;
       }
       if (step === 8) body = payrollState.status === "approved" || payrollState.status === "paid" ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment</span><span>Pay Stub</span><span>Status</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><strong>${escapeText(fullName(item.teacher))}</strong><span>${payrollCurrency(item.payment)}</span><span>Detailed PDF ready</span><span class="status ${payrollState.status === "paid" ? "ok" : "pending"}">${payrollState.status === "paid" ? "Paid" : "Approved"}</span></div>`).join("")}</div><button class="primary" type="button" id="mark-payroll-paid" ${payrollState.status === "paid" ? "disabled" : ""}>${payrollState.status === "paid" ? "Payroll Paid" : "Mark Payroll Paid"}</button>${payrollState.status === "paid" && String(payrollState.month || "").slice(5, 7) === "06" && String(payrollState.sequence) === "1" && !payrollState.yearEndPromotionReviews?.[String(payrollState.month || "").slice(0, 4)] ? `<button class="secondary" type="button" id="review-payroll-promotions">Review Year-End Raises</button>` : ""}` : `<div class="payroll-placeholder">Approve payroll before recording payments or finalizing pay stubs.</div>`;
       if ([0, 5, 7, 8].includes(step)) {
@@ -44746,13 +45231,11 @@
           : { ...(existing || {}), selected: false, status: "", markedAt: "", heldPayLines: [] };
         renderPayrollWizard(); scheduleAppDataSave(); return;
       }
-      if (event.target.closest("#add-payroll-proration")) {
-        const id=document.getElementById("payroll-proration-student")?.value;if(!id)return;
-        payrollState.prorations ||= {};payrollState.prorations[payrollState.month] ||= {};payrollState.prorations[payrollState.month][id]=100;
-        renderPayrollWizard();scheduleAppDataSave();return;
-      }
       if (event.target.closest("#add-payroll-hours")) { const teacher = payrollTeachers().find((item) => item.payTier === "tier_b_teacher"); payrollState.workingHours.push({ teacherId: teacher?.id || "", date: payrollDateKey(new Date()), hours: "", description: "" }); renderPayrollWizard(); return; }
-      if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", amount: "", reason: "" }); renderPayrollWizard(); return; }
+      const adjustedStatementPreview=event.target.closest("[data-preview-adjusted-statement]");
+      if(adjustedStatementPreview){await previewCurrentPayrollStatement(adjustedStatementPreview.dataset.previewAdjustedStatement);return;}
+      if(event.target.closest("#preview-current-pay-statement")){const teacherId=document.getElementById("payroll-preview-teacher")?.value;if(teacherId)await previewCurrentPayrollStatement(teacherId);return;}
+      if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", kind:"addition", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
       if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(payrollState.month); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
@@ -44766,9 +45249,6 @@
       if (event.target.closest("#finish-payroll-review")) document.getElementById("close-payroll-workspace")?.click();
     });
     document.getElementById("payroll-workspace")?.addEventListener("input", (event) => {
-      const proration=event.target.closest("[data-payroll-proration]");
-      if(proration){payrollState.prorations[payrollState.month][proration.dataset.payrollProration]=Number(proration.value);scheduleAppDataSave();return;}
-
       const filter = event.target.closest("[data-payroll-filter-type][data-payroll-filter-field]");
       if (filter) { payrollFilterState(filter.dataset.payrollFilterType)[filter.dataset.payrollFilterField] = filter.value; scheduleAppDataSave(); return; }
       const hours = event.target.closest("[data-payroll-hours-field]");
@@ -45574,6 +46054,13 @@
     };
 
     function openAdminSection(section) {
+      if (window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
+        document.body.dataset.mode = "teacher";
+        delete document.body.dataset.adminPage;
+        delete document.body.dataset.adminSection;
+        showToast("Director Dashboard access is limited to directors and administrators");
+        return;
+      }
       if (!navigationGuardBypass && hasUnsavedEdits && (document.body.dataset.adminPage !== "home" || document.body.dataset.adminSection !== section)) {
         runGuardedNavigation(() => openAdminSection(section));
         return;
@@ -45648,6 +46135,13 @@
     }
 
     function openAdminToolsHome() {
+      if (window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
+        document.body.dataset.mode = "teacher";
+        delete document.body.dataset.adminPage;
+        delete document.body.dataset.adminSection;
+        showToast("Director Dashboard access is limited to directors and administrators");
+        return;
+      }
       if (!navigationGuardBypass && hasUnsavedEdits && (document.body.dataset.adminPage !== "home" || document.body.dataset.adminSection)) {
         runGuardedNavigation(openAdminToolsHome);
         return;
@@ -49411,20 +49905,77 @@
 
     document.getElementById("refresh-enrollment-queue")?.addEventListener("click", () => loadEnrollmentIntakeQueue(window.dtCurrentProfile));
     document.getElementById("refresh-enrollment-changes")?.addEventListener("click", () => loadEnrollmentChanges(window.dtCurrentProfile));
-    document.getElementById("enrollment-change-list")?.addEventListener("change", (event) => {
+    document.getElementById("enrollment-change-list")?.addEventListener("change", async (event) => {
+      const requestTypeSelect=event.target.closest("[data-enrollment-change-request-type]");
       const schoolSelect=event.target.closest("[data-enrollment-change-target-school]");
-      const classSelect=event.target.closest("[data-enrollment-change-target-class]");
+      const classroomSelect=event.target.closest("[data-enrollment-change-target-classroom]");
+      const refundKind=event.target.closest("[data-enrollment-change-refund-kind]");
+      const moveTiming=event.target.closest("[data-enrollment-change-timing]");
+      const pauseDateInput=event.target.closest("[data-enrollment-change-pause-stop],[data-enrollment-change-pause-resume]");
+      if(pauseDateInput){
+        const overlay=pauseDateInput.closest("[data-enrollment-change-pause-overlay]");
+        const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(overlay?.dataset.enrollmentChangePauseOverlay));
+        const list=overlay?.querySelector("[data-enrollment-change-pause-closures]");
+        if(item&&list){
+          const stop=overlay.querySelector("[data-enrollment-change-pause-stop]")?.value||"";
+          const resume=overlay.querySelector("[data-enrollment-change-pause-resume]")?.value||"";
+          const closures=enrollmentChangePauseClosures(item,stop,resume);
+          list.innerHTML=closures.length?closures.map((closure)=>`<div class="enrollment-change-no-class-item"><strong>${escapeText(new Date(`${closure.date}T12:00:00`).toLocaleDateString())}</strong><span>${escapeText(closureDisplayName(closure))}</span></div>`).join(""):`<small>None fall within these dates.</small>`;
+          const proration=enrollmentChangePauseProration(item,stop,resume);
+          const summary=overlay.querySelector("[data-enrollment-change-pause-proration]");
+          if(summary)summary.innerHTML=`<span><strong>Tuition proration:</strong> ${proration.payable} payable class${proration.payable===1?"":"es"} paused out of ${proration.scheduled} scheduled · ${proration.percent}%</span>`;
+        }
+        return;
+      }
+      if(moveTiming){
+        const overlay=moveTiming.closest("[data-enrollment-change-move-overlay]");
+        const dateField=overlay?.querySelector(".enrollment-change-effective-date");
+        const confirmButton=overlay?.querySelector("[data-enrollment-change-confirm-move]");
+        if(dateField)dateField.hidden=moveTiming.value!=="scheduled";
+        if(confirmButton)confirmButton.textContent=moveTiming.value==="scheduled"?"Schedule School Change":"Implement School Change";
+        return;
+      }
+      if(refundKind){
+        const dialog=refundKind.closest("[data-enrollment-change-refund-overlay]");
+        const amountInput=dialog?.querySelector(`[data-enrollment-change-refund-amount="${CSS.escape(refundKind.dataset.enrollmentChangeRefundKind)}"]`);
+        if(amountInput){
+          amountInput.hidden=refundKind.value!=="partial";
+          if(amountInput.hidden)amountInput.value="";
+          else amountInput.focus();
+        }
+        return;
+      }
+      if(requestTypeSelect){
+        const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(requestTypeSelect.dataset.enrollmentChangeRequestType));
+        if(!item)return;
+        const previousRequestType=item.request_type;
+        item.request_type=requestTypeSelect.value;
+        renderEnrollmentChanges();
+        if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){
+          const {error}=await window.dtSupabase.from("enrollment_change_requests").update({request_type:item.request_type}).eq("id",item.id);
+          if(error){
+            console.error("Enrollment request type could not save",error);
+            item.request_type=previousRequestType;
+            renderEnrollmentChanges();
+            showToast("The request type could not be saved");
+            return;
+          }
+        }
+        showToast("Request type updated");
+        return;
+      }
       if(schoolSelect){
         const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(schoolSelect.dataset.enrollmentChangeTargetSchool));
         if(!item)return;
         item.target_school=schoolSelect.value;
         item.target_class_id="";
+        item.target_classroom="";
         renderEnrollmentChanges();
       }
-      if(classSelect){
-        const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(classSelect.dataset.enrollmentChangeTargetClass));
+      if(classroomSelect){
+        const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(classroomSelect.dataset.enrollmentChangeTargetClassroom));
         if(!item)return;
-        item.target_class_id=classSelect.value;
+        item.target_classroom=classroomSelect.value;
         renderEnrollmentChanges();
       }
     });
@@ -49435,12 +49986,51 @@
       if(item)item.target_classroom=classroomInput.value;
     });
     document.getElementById("enrollment-change-list")?.addEventListener("click", async (event) => {
+      const pauseOverlay=event.target.closest("[data-enrollment-change-pause-overlay]");
+      if(event.target.closest("[data-enrollment-change-close-pause]")||(pauseOverlay&&event.target===pauseOverlay)){
+        enrollmentChangePauseOpenId="";
+        renderEnrollmentChanges();
+        return;
+      }
+      const moveOverlay=event.target.closest("[data-enrollment-change-move-overlay]");
+      if(event.target.closest("[data-enrollment-change-close-move]")||(moveOverlay&&event.target===moveOverlay)){
+        enrollmentChangeMoveOpenId="";
+        renderEnrollmentChanges();
+        return;
+      }
+      const classOverlay=event.target.closest("[data-enrollment-change-class-overlay]");
+      if(event.target.closest("[data-enrollment-change-close-class]")||(classOverlay&&event.target===classOverlay)){
+        enrollmentChangeClassOpenId="";
+        renderEnrollmentChanges();
+        return;
+      }
+      const refundOverlay=event.target.closest("[data-enrollment-change-refund-overlay]");
+      if(event.target.closest("[data-enrollment-change-close-refund]")||(refundOverlay&&event.target===refundOverlay)){
+        enrollmentChangeBrightwheelRefundOpenId="";
+        renderEnrollmentChanges();
+        return;
+      }
+      const assignmentOverlay=event.target.closest("[data-enrollment-change-assignment-overlay]");
+      if(event.target.closest("[data-enrollment-change-close-assignment]")||(assignmentOverlay&&event.target===assignmentOverlay)){
+        enrollmentChangeAssignmentOpenId="";
+        renderEnrollmentChanges();
+        return;
+      }
+      const openAssignmentButton=event.target.closest("[data-enrollment-change-open-assignment]");
+      const openClassButton=event.target.closest("[data-enrollment-change-open-class]");
+      const selectClassButton=event.target.closest("[data-enrollment-change-select-class]");
+      const openMoveButton=event.target.closest("[data-enrollment-change-open-move]");
+      const confirmMoveButton=event.target.closest("[data-enrollment-change-confirm-move]");
+      const saveRefundsButton=event.target.closest("[data-enrollment-change-save-refunds]");
       const assignmentButton=event.target.closest("[data-enrollment-change-assign]");
       const suggestionButton=event.target.closest("[data-enrollment-change-suggested-student]");
       const stepButton=event.target.closest("[data-enrollment-change-step]");
       const deactivateButton=event.target.closest("[data-enrollment-change-deactivate]");
-      const moveButton=event.target.closest("[data-enrollment-change-move]");
-      const requestId=assignmentButton?.dataset.enrollmentChangeAssign||suggestionButton?.dataset.enrollmentChangeId||stepButton?.dataset.enrollmentChangeId||deactivateButton?.dataset.enrollmentChangeDeactivate||moveButton?.dataset.enrollmentChangeMove;
+      const openPauseButton=event.target.closest("[data-enrollment-change-open-pause]");
+      const savePauseButton=event.target.closest("[data-enrollment-change-save-pause]");
+      const approvePauseButton=event.target.closest("[data-enrollment-change-approve-pause]");
+      const denyPauseButton=event.target.closest("[data-enrollment-change-deny-pause]");
+      const requestId=savePauseButton?.dataset.enrollmentChangeSavePause||openPauseButton?.dataset.enrollmentChangeOpenPause||approvePauseButton?.dataset.enrollmentChangeApprovePause||denyPauseButton?.dataset.enrollmentChangeDenyPause||confirmMoveButton?.dataset.enrollmentChangeConfirmMove||openMoveButton?.dataset.enrollmentChangeOpenMove||selectClassButton?.dataset.enrollmentChangeId||openClassButton?.dataset.enrollmentChangeOpenClass||saveRefundsButton?.dataset.enrollmentChangeSaveRefunds||openAssignmentButton?.dataset.enrollmentChangeOpenAssignment||assignmentButton?.dataset.enrollmentChangeAssign||suggestionButton?.dataset.enrollmentChangeId||stepButton?.dataset.enrollmentChangeId||deactivateButton?.dataset.enrollmentChangeDeactivate;
       const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(requestId));
       if(!item)return;
       const persist=async(payload)=>{
@@ -49450,36 +50040,138 @@
         if(error){console.error("Enrollment change could not save",error);showToast("Enrollment change could not be saved");return false;}
         return true;
       };
-      if(suggestionButton){
+      if(openPauseButton){
+        enrollmentChangePauseOpenId=item.id;
+      } else if(savePauseButton){
+        const overlay=savePauseButton.closest("[data-enrollment-change-pause-overlay]");
+        const stop=overlay.querySelector("[data-enrollment-change-pause-stop]")?.value||"";
+        const resume=overlay.querySelector("[data-enrollment-change-pause-resume]")?.value||"";
+        if(!stop||!resume)return showToast("Enter both pause dates");
+        if(enrollmentChangePauseDays(stop,resume)<=28)return showToast("A tuition pause must be longer than four weeks");
+        if(!(await persist({approved_pause_stop_date:stop,approved_pause_resume_date:resume})))return;
+        enrollmentChangePauseOpenId="";
+        showToast("Tuition pause dates adjusted");
+      } else if(approvePauseButton){
+        const {stop,resume}=enrollmentChangePauseDates(item);
+        if(!stop||!resume)return showToast("Enter both pause dates before approving");
+        if(enrollmentChangePauseDays(stop,resume)<=28)return showToast("A tuition pause must be longer than four weeks");
+        const closures=enrollmentChangePauseClosures(item,stop,resume);
+        const proration=enrollmentChangePauseProration(item,stop,resume);
+        if(!window.confirm(`Approve this tuition pause from ${new Date(`${stop}T12:00:00`).toLocaleDateString()} through ${new Date(`${resume}T12:00:00`).toLocaleDateString()}?\n\n${closures.length?`${closures.length} No Class date${closures.length===1?"":"s"} will be excluded from tuition proration.`:"No No Class dates fall within this break."}\n\nTuition proration: ${proration.payable} of ${proration.scheduled} scheduled classes (${proration.percent}%).`))return;
+        if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){
+          const {error}=await window.dtSupabase.rpc("approve_tuition_pause",{target_request_id:item.id,target_stop_date:stop,target_resume_date:resume});
+          if(error){console.error("Tuition pause could not be approved",error);return showToast(error.message||"Tuition pause could not be approved");}
+        }
+        await persist({approved_pause_stop_date:stop,approved_pause_resume_date:resume,pause_decision:"approved",status:"scheduled",reviewed_at:new Date().toISOString()});
+        enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
+        showToast("Tuition pause approved and scheduled");
+      } else if(denyPauseButton){
+        if(!window.confirm("Deny and close this tuition pause request?"))return;
+        if(!(await persist({pause_decision:"denied",status:"completed",completed_at:new Date().toISOString()})))return;
+        enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
+        showToast("Tuition pause request denied");
+      } else if(openMoveButton){
+        enrollmentChangeMoveOpenId=item.id;
+      } else if(confirmMoveButton){
+        const overlay=confirmMoveButton.closest("[data-enrollment-change-move-overlay]");
+        const timing=overlay.querySelector("[data-enrollment-change-timing]:checked")?.value||"immediate";
+        const effectiveDate=overlay.querySelector("[data-enrollment-change-effective-date]")?.value||"";
+        if(timing==="scheduled"&&!effectiveDate)return showToast("Choose the date for this school change");
+        const today=new Date().toISOString().slice(0,10);
+        if(timing==="scheduled"&&effectiveDate>today){
+          const scheduledClass=rosterClasses.find((candidate)=>String(candidate.id)===String(item.target_class_id));
+          if(!(await persist({target_school:scheduledClass?.schoolName||item.target_school||null,target_class_id:item.target_class_id||null,target_classroom:item.target_classroom||null,school_change_timing:"scheduled",school_change_effective_date:effectiveDate,school_change_processing_error:null,status:"scheduled"})))return;
+          enrollmentChangeMoveOpenId="";
+          showToast(`School change scheduled for ${new Date(`${effectiveDate}T12:00:00`).toLocaleDateString()}`);
+        }else{
+          item.school_change_timing=timing;
+          item.school_change_effective_date=timing==="scheduled"?effectiveDate:today;
+          enrollmentChangeMoveOpenId="";
+          if(!(await executeEnrollmentSchoolChange(item)))return;
+        }
+      } else if(openClassButton){
+        enrollmentChangeClassOpenId=item.id;
+      } else if(selectClassButton){
+        const rosterClass=rosterClasses.find((candidate)=>String(candidate.id)===String(selectClassButton.dataset.enrollmentChangeSelectClass));
+        if(!rosterClass)return showToast("That class could not be found");
+        item.target_class_id=rosterClass.id;
+        enrollmentChangeClassOpenId="";
+        showToast(`${rosterClass.name} selected`);
+      } else if(openAssignmentButton){
+        enrollmentChangeAssignmentOpenId=item.id;
+      } else if(saveRefundsButton){
+        const dialog=saveRefundsButton.closest("[data-enrollment-change-refund-overlay]");
+        const source=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(item.assigned_student_id));
+        const refundSchool=source?schoolProfileByName(source.rosterClass.schoolName):null;
+        const discount=source?payrollDiscountFor(source.student):"none";
+        const isMeadowOaks=Boolean(source&&enrollmentSchoolNameMatches(source.rosterClass.schoolName,"Meadow Oaks"));
+        const fullRefundAmount=isMeadowOaks?65:monthlyTuitionForCircumstance(discount,refundSchool);
+        const details=[...dialog.querySelectorAll("[data-enrollment-change-refund-month]:checked")].map((checkbox)=>{
+          const month=checkbox.dataset.enrollmentChangeRefundMonth;
+          const type=dialog.querySelector(`[data-enrollment-change-refund-kind="${CSS.escape(month)}"]:checked`)?.value||"full";
+          const amount=type==="partial"?Number(dialog.querySelector(`[data-enrollment-change-refund-amount="${CSS.escape(month)}"]`)?.value||0):Number(fullRefundAmount||0);
+          return {month,type,amount};
+        });
+        if(!details.length)return showToast("Select at least one refunded month");
+        if(details.some((detail)=>detail.type==="full"&&(!Number.isFinite(detail.amount)||detail.amount<=0)))return showToast("The monthly tuition could not be found. Choose Partial Refund and enter the amount.");
+        if(details.some((detail)=>detail.type==="partial"&&(!Number.isFinite(detail.amount)||detail.amount<=0)))return showToast("Enter the partial refund amount beside every selected month");
+        if(!(await persist({brightwheel_refund_status:"completed",brightwheel_refund_details:details})))return;
+        payrollState.refundRecords=(payrollState.refundRecords||[]).filter((record)=>String(record.sourceRequestId||"")!==String(item.id));
+        details.slice().reverse().forEach((detail)=>{
+          const payrollDeductionAmount=source?payrollRefundTeacherDeduction({student:source.student,rosterClass:source.rosterClass,month:detail.month,refundAmount:detail.amount,fullTuition:fullRefundAmount}):0;
+          payrollState.refundRecords.unshift({
+          id:`enrollment-change-refund-${item.id}-${detail.month}`,
+          sourceRequestId:item.id,
+          actionType:"enrollment_change_brightwheel_refund",
+          enrollmentId:item.assigned_class_enrollment_id||source?.student?.enrollmentId||"",
+          studentId:item.assigned_student_id||"",
+          dancerName:[item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"Dancer",
+          refundIssued:true,
+          refundAmount:detail.amount,
+          refundDate:new Date().toISOString().slice(0,10),
+          refundReason:`Brightwheel ${detail.type} refund · ${detail.month}`,
+          refundMonth:detail.month,
+          refundType:detail.type,
+          teacherAlreadyPaid:payrollDeductionAmount>0,
+          teacherId:source?.rosterClass?.teacherId||"",
+          payrollDeductionAmount,
+          createdAt:new Date().toISOString(),
+          appliedPayrollMonth:"",
+          appliedPayrollSequence:""
+        });});
+        scheduleAppDataSave();
+        enrollmentChangeBrightwheelRefundOpenId="";
+        showToast("Brightwheel refunds saved and added to payroll review");
+      } else if(suggestionButton){
         const record=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(suggestionButton.dataset.enrollmentChangeSuggestedStudent));
         if(!record)return showToast("That suggested dancer could not be found");
-        if(await persist({assigned_student_id:record.student.id,assigned_class_enrollment_id:record.student.enrollmentId||null,status:"reviewing",reviewed_by:window.dtCurrentProfile?.id||null,reviewed_at:new Date().toISOString()}))showToast("Suggested dancer assigned");
+        if(await persist({assigned_student_id:record.student.id,assigned_class_enrollment_id:record.student.enrollmentId||null,status:"reviewing",reviewed_by:window.dtCurrentProfile?.id||null,reviewed_at:new Date().toISOString()})){enrollmentChangeAssignmentOpenId="";showToast("Suggested dancer assigned");}
       } else if(assignmentButton){
         const select=document.querySelector(`[data-enrollment-change-student="${CSS.escape(String(item.id))}"]`);
         const record=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(select?.value));
         if(!record)return showToast("Choose an existing dancer first");
-        if(await persist({assigned_student_id:record.student.id,assigned_class_enrollment_id:record.student.enrollmentId||null,status:"reviewing",reviewed_by:window.dtCurrentProfile?.id||null,reviewed_at:new Date().toISOString()}))showToast("Dancer assigned to this request");
+        if(await persist({assigned_student_id:record.student.id,assigned_class_enrollment_id:record.student.enrollmentId||null,status:"reviewing",reviewed_by:window.dtCurrentProfile?.id||null,reviewed_at:new Date().toISOString()})){enrollmentChangeAssignmentOpenId="";showToast("Dancer assigned to this request");}
       } else if(stepButton){
-        if(await persist({[stepButton.dataset.enrollmentChangeStep]:stepButton.dataset.enrollmentChangeValue}))showToast("Enrollment change step updated");
-      } else if(moveButton){
-        const source=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(item.assigned_student_id));
-        const target=rosterClasses.find((rosterClass)=>String(rosterClass.id)===String(item.target_class_id));
-        if(!source||!target)return showToast("Choose the dancer and new dance class first");
-        if(!(await moveSharedStudentEnrollment(source.student,target)))return;
-        source.rosterClass.students.splice(source.rosterClass.students.indexOf(source.student),1);
-        target.students.push(source.student);
-        source.student.classroom=item.target_classroom||"";
-        source.student.officialClassroom=item.target_classroom||"";
-        await saveSharedStudent(source.student,target);
-        await persist({target_school:target.schoolName,target_class_id:target.id,target_classroom:item.target_classroom||null,status:"completed",completed_at:new Date().toISOString()});
-        enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
-        showToast("School, classroom, and dance class updated");
+        if(!enrollmentChangeStudentRecords().some(({student})=>String(student.id)===String(item.assigned_student_id)))return showToast("Assign this request to a student before completing any steps");
+        if(stepButton.dataset.enrollmentChangeStep==="brightwheel_refund_status"&&stepButton.dataset.enrollmentChangeValue==="completed"){
+          enrollmentChangeBrightwheelRefundOpenId=item.id;
+        }else if(await persist({[stepButton.dataset.enrollmentChangeStep]:stepButton.dataset.enrollmentChangeValue}))showToast("Enrollment change step updated");
       } else if(deactivateButton){
         const isPause=String(item.request_type||"").toLowerCase().includes("pause");
         if(!window.confirm(isPause?"Pause this dancer after confirming refunds and billing are complete?":"Deactivate this dancer after confirming refunds and billing are complete?"))return;
         const source=enrollmentChangeStudentRecords().find(({student})=>String(student.id)===String(item.assigned_student_id));
         if(!source)return showToast("The assigned dancer could not be found");
         if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){
+          const effectiveDate=isPause?(item.last_day||new Date().toISOString().slice(0,10)):(item.last_day||new Date().toISOString().slice(0,10));
+          const {error:eventError}=await window.dtSupabase.from("payroll_enrollment_events").upsert({
+            student_id:source.student.id,
+            from_class_id:source.rosterClass.id,
+            to_class_id:null,
+            event_type:isPause?"pause":"unenrollment",
+            effective_date:effectiveDate,
+            source_request_id:item.id
+          },{onConflict:"source_request_id,event_type"});
+          if(eventError){console.error("Payroll enrollment history could not save",eventError);showToast("The dated payroll history could not be saved, so no roster changes were made");return;}
           if(isPause){
             const {error}=await window.dtSupabase.from("class_enrollments").update({status:"paused",ended_date:null}).eq("id",item.assigned_class_enrollment_id||source.student.enrollmentId);
             if(error){showToast("The dancer could not be paused");return;}
