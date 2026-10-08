@@ -44416,6 +44416,7 @@
       tier_d_director: "Director"
     };
     const payrollTierIsAssigned = (tier) => Boolean(payrollTierLabels[tier]);
+    const payrollEffectiveTier = (teacher) => knownPayrollTiers.get(String(fullName(teacher) || "").trim().toLowerCase()) || teacher?.payTier || "";
     const payrollTeachers = () => teachers.filter((teacher) => {
       if (teacher.status === "inactive") return false;
       return fullName(teacher).trim().toLowerCase() !== "dance techniques";
@@ -44579,7 +44580,7 @@
     };
     const payrollTeacherTierClasses = () => rosterClasses.filter((rosterClass) => {
       const teacher = teachers.find((item) => item.id === rosterClass.teacherId);
-      return teacher?.payTier === "tier_b_teacher";
+      return payrollEffectiveTier(teacher) === "tier_b_teacher";
     });
     const payrollTaylorCoverageSchools = new Set([
       "Arka Montessori Lavon",
@@ -44619,7 +44620,7 @@
       const commissionStudents = Math.min(5, enrolled - 7);
       return 30 + (commissionStudents * payrollTeacherCommissionRate(teacherId));
     };
-    const teacherReceivesEventHourlyPay = (teacher) => teacher?.payTier === "tier_b_teacher";
+    const teacherReceivesEventHourlyPay = (teacher) => payrollEffectiveTier(teacher) === "tier_b_teacher";
     const payrollScheduledEventLines = () => payrollTeachers().flatMap((teacher) => {
       return (teacher.scheduleEvents || [])
         .filter((event) => teacherReceivesEventHourlyPay(teacher, event) && !DTWorkClock.hasEventRecord(event, teacher.id) && event.paidEvent !== false && String(event.date || "").slice(0, 7) === payrollState.month && Number(event.paidHours) > 0)
@@ -44781,8 +44782,8 @@
       if (!teacher || !month) return 0;
       const ratio = Math.max(0, Math.min(1, Number(refundAmount || 0) / Math.max(1, Number(fullTuition || refundAmount || 1))));
       const discount = payrollDiscountFor(student);
-      if (teacher.payTier === "tier_a_founding_teacher") return Math.round(((discount === "director" ? 0 : discount === "none" ? 40 : 30) * ratio) * 100) / 100;
-      if (teacher.payTier === "tier_b_teacher") {
+      if (payrollEffectiveTier(teacher) === "tier_a_founding_teacher") return Math.round(((discount === "director" ? 0 : discount === "none" ? 40 : 30) * ratio) * 100) / 100;
+      if (payrollEffectiveTier(teacher) === "tier_b_teacher") {
         const start = new Date(`${month}-01T12:00:00`);
         const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 12);
         const dates = payrollClassDatesBetween(rosterClass, start, end, "Refunded month").filter((entry) => entry.status === "payable");
@@ -44792,7 +44793,7 @@
         }, 0);
         return Math.round(amount * ratio * 100) / 100;
       }
-      if (["tier_c_administrator", "tier_d_director"].includes(teacher.payTier)) {
+      if (["tier_c_administrator", "tier_d_director"].includes(payrollEffectiveTier(teacher))) {
         const vendor = payrollSchoolVendor(rosterClass.schoolName);
         const rate = vendor ? (discount === "none" ? 46.8 : 37.8) : (discount === "none" ? 52 : 42);
         return Math.round((discount === "director" ? 0 : rate * ratio) * 100) / 100;
@@ -44802,7 +44803,7 @@
 
     const calculatePayrollPreview = () => {
       const lines = [];
-      const teachersByTier = Object.fromEntries(payrollTeachers().map((teacher) => [teacher.id, payrollTierIsAssigned(teacher.payTier) ? teacher.payTier : ""]));
+      const teachersByTier = Object.fromEntries(payrollTeachers().map((teacher) => [teacher.id, payrollTierIsAssigned(payrollEffectiveTier(teacher)) ? payrollEffectiveTier(teacher) : ""]));
       const outstanding = new Set(Object.keys(payrollState.outstandingStudents || {}).filter((id) => payrollBalanceIsUnresolved(payrollState.outstandingStudents[id])));
       const foundingSeen = new Set();
       rosterClasses.forEach((rosterClass) => {
@@ -44836,7 +44837,7 @@
           });
         }
       });
-      payrollTeachers().filter((teacher) => ["tier_c_administrator", "tier_d_director"].includes(teacher.payTier)).forEach((leader) => {
+      payrollTeachers().filter((teacher) => ["tier_c_administrator", "tier_d_director"].includes(payrollEffectiveTier(teacher))).forEach((leader) => {
         const leaderSeen = new Set();
         rosterClasses.forEach((rosterClass) => {
           const sourceTier = teachersByTier[rosterClass.teacherId];
@@ -44863,11 +44864,11 @@
             if (amount || type === "Own Student Pay") lines.push({ teacherId: leader.id, studentId: student.id, type, studentName: rosterStudentFullName(student), school: rosterClass.schoolName, category: discount, fraction, rate, vendor: payrollSchoolVendor(rosterClass.schoolName), sourceTier, sourceTeacherName: fullName(teachers.find(t => t.id === rosterClass.teacherId)), description: `${rosterStudentFullName(student)} · ${rosterClass.schoolName}`, amount, held: outstanding.has(student.id) });
           });
         });
-        if (leader.payTier === "tier_c_administrator") {
+        if (payrollEffectiveTier(leader) === "tier_c_administrator") {
           const activeStudentTotal=payrollMonthlyActiveStudentTotal();
           lines.push({ teacherId: leader.id, type: "Enrollment Fee Bonus", description: `${activeStudentTotal} prorated active students`, amount: activeStudentTotal, held: false });
         }
-        const lateFees = leader.payTier === "tier_c_administrator"
+        const lateFees = payrollEffectiveTier(leader) === "tier_c_administrator"
           ? Object.values(payrollState.outstandingStudents || {}).filter((item) => item.status === "paid_late_fee" && payrollBalanceResolvedThisRun(item)).length
           : 0;
         if (lateFees) lines.push({ teacherId: leader.id, type: "Late Fee Bonus", description: `${lateFees} paid late fee${lateFees === 1 ? "" : "s"} · $4 each`, amount: lateFees * 4, held: false });
@@ -44917,14 +44918,14 @@
         const currentPeriodPay = Math.max(0, final - immediateFirstPaymentCredits);
         const estimatedHalf = currentPeriodPay / 2;
         const recordedFirstPayment = payrollRecordedFirstPayment(teacher.id);
-        const payment = teacher.payTier === "tier_b_teacher"
+        const payment = payrollEffectiveTier(teacher) === "tier_b_teacher"
           ? final
           : recordedFirstPayment !== null
           ? (payrollState.sequence === "1" ? recordedFirstPayment : Math.max(0, final - recordedFirstPayment))
           : payrollState.sequence === "1"
             ? estimatedHalf + immediateFirstPaymentCredits
             : Math.max(0, currentPeriodPay - estimatedHalf);
-        return { teacher, lines: teacherLines, gross, held, final, payment, recordedFirstPayment, issues: officialPayrollPaymentsError ? 1 : payrollTierIsAssigned(teacher.payTier) ? 0 : 1 };
+        return { teacher, tier: payrollEffectiveTier(teacher), lines: teacherLines, gross, held, final, payment, recordedFirstPayment, issues: officialPayrollPaymentsError ? 1 : payrollTierIsAssigned(payrollEffectiveTier(teacher)) ? 0 : 1 };
       });
       return { lines, summaries, total: summaries.reduce((sum, item) => sum + item.payment, 0), issues: summaries.reduce((sum, item) => sum + item.issues, 0) };
     };
@@ -45013,7 +45014,7 @@
       return preview.summaries.map(item => {
         const studentLines = item.lines.filter(line => ["Own Student Pay", "Student Pay"].includes(line.type));
         return DTPayrollStatements.snapshot({
-          teacher: { id: item.teacher.id, name: fullName(item.teacher), tier: item.teacher.payTier },
+          teacher: { id: item.teacher.id, name: fullName(item.teacher), tier: item.tier || payrollEffectiveTier(item.teacher) },
           month: payrollState.month, payDate: payrollDateKey(payrollPayday()), sequence: payrollState.sequence,
           advanceCredit: officialPayrollPayments.filter(r => r.payroll_teacher_summaries?.teacher_id===item.teacher.id && String(r.payroll_teacher_summaries?.payroll_periods?.period_month||" ").slice(0,7)===payrollState.month).reduce((n,r)=>n+Number(r.payroll_teacher_summaries?.calculation_snapshot?.advance_credit||0),0),
           lines: item.lines, payment: item.payment, firstPayment: item.recordedFirstPayment || 0, paidToDate: 0,
@@ -45077,9 +45078,9 @@
       let batch = payrollState.approvedStatements;
       if (!batch?.length || batch.some(s => s.month !== payrollState.month || s.sequence !== Number(payrollState.sequence))) throw new Error("Review and approve payroll before issuing statements.");
       const currentBatch = payrollStatementBatch();
-      if (Number(payrollState.approvedCalculationVersion || 0) < 3) {
+      if (Number(payrollState.approvedCalculationVersion || 0) < 4) {
         payrollState.approvedStatements = currentBatch;
-        payrollState.approvedCalculationVersion = 3;
+        payrollState.approvedCalculationVersion = 4;
         batch = currentBatch;
         savePayrollProgress();
         scheduleAppDataSave();
@@ -45161,8 +45162,8 @@
         const outstanding = Object.entries(payrollState.outstandingStudents || {}).filter(([id, item]) => item.selected && visibleIds.has(id) && (payrollBalanceIsUnresolved(item) || payrollBalanceResolvedThisRun(item)));
         body = `${payrollFilterRowMarkup("cleared")}${outstanding.length ? `<div class="payroll-explanation">Review each outstanding balance. Unpaid balances carry forward to the next 1st payroll with their original month. A paid late fee adds $4 to the Admin-tier paycheck.</div><div class="payroll-student-grid">${outstanding.map(([id, item]) => { const record = payrollAllStudents().find(({ student }) => student.id === id); if (!record) return ""; const status = item.status || "still_unpaid"; return `<article class="payroll-student-card ${["paid", "paid_late_fee"].includes(status) ? "is-selected" : ""}"><span class="roster-student-photo">${escapeText(rosterStudentInitials(record.student))}</span><strong>${escapeText(rosterStudentFullName(record.student))}</strong><small>${escapeText(record.rosterClass.schoolName)} · ${escapeText(rosterTeacherName(record.rosterClass.teacherId))}</small><small>Past due: ${escapeText(payrollBalanceMonthLabel(item.month))}</small><label>Status<select data-payroll-balance-status="${escapeText(id)}"><option value="still_unpaid" ${status === "still_unpaid" ? "selected" : ""}>Still unpaid</option><option value="unpaid_late_fee" ${status === "unpaid_late_fee" ? "selected" : ""}>Unpaid with late fee</option><option value="paid" ${status === "paid" ? "selected" : ""}>Paid</option><option value="paid_late_fee" ${status === "paid_late_fee" ? "selected" : ""}>Paid with late fee</option></select></label></article>`; }).join("")}</div>` : `<div class="payroll-placeholder">No outstanding balances match these filters.</div>`}`;
       }
-      if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${DTWorkClock.reviewMarkup()}<div class="payroll-explanation">Approved recorded hours are included automatically at $20 per hour. Use manual hours only for work not already recorded.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
-      if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[teacher.payTier])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.teacher.payTier] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
+      if (step === 4) { const tierBTeachers = payrollTeachers().filter((teacher) => payrollEffectiveTier(teacher) === "tier_b_teacher"); body = `${DTWorkClock.reviewMarkup()}<div class="payroll-explanation">Approved recorded hours are included automatically at $20 per hour. Use manual hours only for work not already recorded.</div>${tierBTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Date</span><span>Hours</span><span>Description</span></div>${(payrollState.workingHours || []).map((entry, index) => `<div class="payroll-table-row"><select data-payroll-hours-field="teacherId" data-payroll-hours-index="${index}">${tierBTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${teacher.id === entry.teacherId ? "selected" : ""}>${escapeText(fullName(teacher))}</option>`).join("")}</select><input type="date" data-payroll-hours-field="date" data-payroll-hours-index="${index}" value="${escapeText(entry.date || "")}"><input type="number" min="0" step="0.25" data-payroll-hours-field="hours" data-payroll-hours-index="${index}" value="${escapeText(entry.hours || "")}"><input data-payroll-hours-field="description" data-payroll-hours-index="${index}" value="${escapeText(entry.description || "")}"></div>`).join("")}</div><button class="secondary" type="button" id="add-payroll-hours">Add Working Hours</button>` : `<div class="payroll-placeholder">Assign a Tier B teacher in the official DD to enter working hours.</div>`}`; }
+      if (step === 5) { const commissionTeachers = payrollTeachers().filter((teacher) => payrollEffectiveTier(teacher) === "tier_b_teacher"); body = `${commissionTeachers.length ? `<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Payment Tier</span><span>Students 8–12</span><span>Rate Status</span></div>${commissionTeachers.map((teacher) => `<div class="payroll-table-row"><strong>${escapeText(fullName(teacher))}</strong><span>${escapeText(payrollTierLabels[payrollEffectiveTier(teacher)])}</span><label class="payroll-commission-control"><select data-payroll-commission-teacher="${escapeText(teacher.id)}" aria-label="Commission rate for ${escapeText(fullName(teacher))}">${payrollTeacherCommissionOptionsMarkup(teacher.id)}</select></label><span class="status ok">Assigned</span></div>`).join("")}</div><div class="payroll-explanation"><strong>Teacher class pay:</strong> 6 or fewer enrolled students = $20; 7 students = $30; students 8–12 add the selected per-student commission. Permanent payment tiers stay in Teaching Team profiles.</div>` : ""}<div class="payroll-table"><div class="payroll-table-row is-header"><span>Teacher</span><span>Gross</span><span>Held</span><span>${payrollState.sequence === "1" ? "Estimated Half" : "True-Up"}</span></div>${preview.summaries.map((item) => `<div class="payroll-table-row"><span><strong>${escapeText(fullName(item.teacher))}</strong><small>${escapeText(payrollTierLabels[item.tier || payrollEffectiveTier(item.teacher)] || "Payment tier needed")}</small></span><span>${payrollCurrency(item.gross)}</span><span>${payrollCurrency(item.held)}</span><strong>${payrollCurrency(item.payment)}</strong></div>`).join("")}</div><div class="payroll-explanation">Director-discount students produce no student pay, commission, or Tier B headcount. They still count toward the Tier C active-student bonus.</div>`; }
       if (step === 6) {
         const refundDeductions=(payrollState.refundRecords||[]).filter((entry)=>entry.teacherAlreadyPaid&&Number(entry.payrollDeductionAmount)>0&&!entry.appliedPayrollMonth);
         const wylieCredits=tiffanyWylieSeptemberVendorCreditLines();
@@ -45203,7 +45204,7 @@
 
     const payrollPromotionReviewKey = () => String(payrollState.month || defaultPayrollMonth()).slice(0, 4);
     const payrollIsJuneFirstPayroll = () => String(payrollState.month || "").slice(5, 7) === "06" && String(payrollState.sequence) === "1";
-    const payrollPromotionTeachers = () => payrollTeachers().filter((teacher) => teacher.payTier === "tier_b_teacher");
+    const payrollPromotionTeachers = () => payrollTeachers().filter((teacher) => payrollEffectiveTier(teacher) === "tier_b_teacher");
     const setPayrollPromotionReviewOpen = (open) => {
       const overlay = document.getElementById("payroll-promotion-overlay");
       if (!overlay) return;
@@ -45367,7 +45368,7 @@
       if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", kind:"addition", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
-      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(payrollState.month); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; payrollState.approvedCalculationVersion = 3; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
+      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(payrollState.month); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; payrollState.approvedCalculationVersion = 4; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
       if (event.target.closest("#mark-payroll-paid")) {
         const button=event.target.closest("#mark-payroll-paid");button.disabled=true;
         try { await finalizePayrollPayStubs(); payrollState.status="paid";payrollState.paidAt=new Date().toISOString();renderPayrollWizard();scheduleAppDataSave();showToast("Payroll marked paid - statements posted to Teacher Tools"); }
