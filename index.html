@@ -44507,7 +44507,7 @@
           <div class="payroll-school-class-heading">${escapeText(schoolName)}</div>
           <div class="payroll-table">
             <div class="payroll-table-row is-header"><span>Class</span><span>Payable</span><span>Excluded</span><span>Reason Recorded</span></div>
-            ${classes.map((rosterClass) => { const dates = payrollTeacherClassDates(rosterClass); const payable = dates.filter((item) => item.status === "payable"); const excluded = dates.filter((item) => item.status === "excluded"); return `<div class="payroll-table-row"><span><strong>${escapeText(rosterClass.name)}</strong></span><span>${payable.length}</span><span>${excluded.length}</span><span>${escapeText(excluded[0]?.reason || payable[0]?.reason || "Schedule needed")}</span></div>`; }).join("")}
+            ${classes.map((rosterClass) => { const dates = payrollTeacherClassDates(rosterClass); const payable = dates.filter((item) => item.status === "payable"); const excluded = dates.filter((item) => item.status === "excluded"); return `<div class="payroll-table-row"><span><strong>${escapeText(rosterClass.name)}</strong></span><span>${payable.length}</span><span>${excluded.length}</span><span>${excluded.length ? escapeText(excluded.map((item) => item.reason).filter(Boolean).join(" · ") || "Reason needed") : ""}</span></div>`; }).join("")}
           </div>
         </section>`).join("");
         return `<section class="payroll-teacher-class-group" style="--payroll-teacher-color:${escapeText(color)}"><div class="payroll-teacher-class-heading"><strong>${escapeText(rosterTeacherName(teacherId))}</strong></div>${schoolMarkup}</section>`;
