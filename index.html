@@ -7957,8 +7957,7 @@
     .payroll-table-row input { min-height: 36px; }
     .payroll-class-groups { display:grid; gap:14px; }
     .payroll-teacher-class-group { overflow:hidden; border:2px solid color-mix(in srgb,var(--payroll-teacher-color,var(--border)) 70%,white); border-radius:14px; background:color-mix(in srgb,var(--payroll-teacher-color,var(--surface-soft)) 12%,white); }
-    .payroll-teacher-class-heading { display:flex; align-items:center; gap:10px; padding:12px 14px; background:color-mix(in srgb,var(--payroll-teacher-color,var(--blush)) 28%,white); border-bottom:1px solid color-mix(in srgb,var(--payroll-teacher-color,var(--border)) 48%,white); }
-    .payroll-teacher-class-heading .teacher-identity-bubble { width:38px; height:38px; min-width:38px; font-size:13px; }
+    .payroll-teacher-class-heading { display:flex; align-items:center; padding:12px 14px; background:color-mix(in srgb,var(--payroll-teacher-color,var(--blush)) 28%,white); border-bottom:1px solid color-mix(in srgb,var(--payroll-teacher-color,var(--border)) 48%,white); }
     .payroll-teacher-class-heading strong { font-size:17px; }
     .payroll-school-class-group + .payroll-school-class-group { border-top:2px solid color-mix(in srgb,var(--payroll-teacher-color,var(--border)) 36%,white); }
     .payroll-school-class-heading { padding:9px 14px; background:color-mix(in srgb,var(--payroll-teacher-color,var(--surface-soft)) 18%,white); font-size:13px; font-weight:900; }
@@ -44504,7 +44503,6 @@
       return `<div class="payroll-class-groups">${[...teacherGroups.entries()].map(([teacherId, schools]) => {
         const teacher = teachers.find((item) => item.id === teacherId);
         const color = teacherProfileColor(teacher);
-        const initials = teacher ? initialsFor(teacher) : "—";
         const schoolMarkup = [...schools.entries()].map(([schoolName, classes]) => `<section class="payroll-school-class-group">
           <div class="payroll-school-class-heading">${escapeText(schoolName)}</div>
           <div class="payroll-table">
@@ -44512,7 +44510,7 @@
             ${classes.map((rosterClass) => { const dates = payrollTeacherClassDates(rosterClass); const payable = dates.filter((item) => item.status === "payable"); const excluded = dates.filter((item) => item.status === "excluded"); return `<div class="payroll-table-row"><span><strong>${escapeText(rosterClass.name)}</strong></span><span>${payable.length}</span><span>${excluded.length}</span><span>${escapeText(excluded[0]?.reason || payable[0]?.reason || "Schedule needed")}</span></div>`; }).join("")}
           </div>
         </section>`).join("");
-        return `<section class="payroll-teacher-class-group" style="--payroll-teacher-color:${escapeText(color)}"><div class="payroll-teacher-class-heading"><span class="teacher-identity-bubble ${teacherProfileColorClass(teacherId)}">${teacher?.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(initials)}</span><strong>${escapeText(rosterTeacherName(teacherId))}</strong></div>${schoolMarkup}</section>`;
+        return `<section class="payroll-teacher-class-group" style="--payroll-teacher-color:${escapeText(color)}"><div class="payroll-teacher-class-heading"><strong>${escapeText(rosterTeacherName(teacherId))}</strong></div>${schoolMarkup}</section>`;
       }).join("")}</div>`;
     };
     const payrollDiscountFor = (student) => ["sibling", "staff", "director"].includes(student.tuitionDiscount) ? student.tuitionDiscount : "none";
