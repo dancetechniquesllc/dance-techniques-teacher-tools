@@ -27049,8 +27049,7 @@
             .map((step) => Number(step) > 1 ? Number(step) - 1 : Number(step)))];
         }
         const dedicatedProgress = readSavedPayrollProgress();
-        const useDedicatedProgress = dedicatedProgress?.savedAt && (!persisted.savedAt || Date.parse(dedicatedProgress.savedAt) > Date.parse(persisted.savedAt));
-        payrollState = { ...payrollState, ...restoredPayrollState, ...(useDedicatedProgress ? dedicatedProgress.payrollState : {}), workflowVersion: 2 };
+        payrollState = { ...payrollState, ...restoredPayrollState, ...(dedicatedProgress?.payrollState || {}), workflowVersion: 2 };
       }
       if (persisted.schoolPartnershipPaymentState && typeof persisted.schoolPartnershipPaymentState === "object") {
         schoolPartnershipPaymentState = { ...schoolPartnershipPaymentState, ...JSON.parse(JSON.stringify(persisted.schoolPartnershipPaymentState)) };
@@ -44907,10 +44906,10 @@
         const currentPeriodPay = Math.max(0, final - immediateFirstPaymentCredits);
         const estimatedHalf = currentPeriodPay / 2;
         const recordedFirstPayment = payrollRecordedFirstPayment(teacher.id);
-        const payment = recordedFirstPayment !== null
-          ? (payrollState.sequence === "1" ? recordedFirstPayment : Math.max(0, final - recordedFirstPayment))
-          : teacher.payTier === "tier_b_teacher"
+        const payment = teacher.payTier === "tier_b_teacher"
           ? final
+          : recordedFirstPayment !== null
+          ? (payrollState.sequence === "1" ? recordedFirstPayment : Math.max(0, final - recordedFirstPayment))
           : payrollState.sequence === "1"
             ? estimatedHalf + immediateFirstPaymentCredits
             : Math.max(0, currentPeriodPay - estimatedHalf);
@@ -45064,8 +45063,23 @@
     };
     const finalizePayrollPayStubs = async () => {
       if (!window.dtSupabase || document.body.dataset.tourMode === "true") throw new Error("Sign in to finalize payroll. Tour mode cannot issue pay statements.");
-      const batch = payrollState.approvedStatements;
+      let batch = payrollState.approvedStatements;
       if (!batch?.length || batch.some(s => s.month !== payrollState.month || s.sequence !== Number(payrollState.sequence))) throw new Error("Review and approve payroll before issuing statements.");
+      const currentBatch = payrollStatementBatch();
+      if (Number(payrollState.approvedCalculationVersion || 0) < 3) {
+        payrollState.approvedStatements = currentBatch;
+        payrollState.approvedCalculationVersion = 3;
+        batch = currentBatch;
+        savePayrollProgress();
+        scheduleAppDataSave();
+      } else if (JSON.stringify(batch) !== JSON.stringify(currentBatch)) {
+        payrollState.status = "in_progress";
+        payrollState.currentStep = 5;
+        payrollState.approvedStatements = null;
+        scheduleAppDataSave();
+        renderPayrollWizard();
+        throw new Error("Payroll totals changed. Review Makayla and Taylor’s restored class pay, then approve payroll again.");
+      }
       // Generate all PDFs before committing; layout failures cannot leave a half-issued run.
       const logo = await fetch("assets/dance-techniques-logo-only.png").then(r=>r.arrayBuffer());
       for (const statement of batch) await DTPayrollStatements.pdf(statement, logo);
@@ -45332,6 +45346,7 @@
         payrollState.outstandingStudents[id] = selected
           ? { selected: true, month: payrollState.month, status: "still_unpaid", markedAt: new Date().toISOString(), heldPayLines }
           : { ...(existing || {}), selected: false, status: "", markedAt: "", heldPayLines: [] };
+        savePayrollProgress();
         renderPayrollWizard(); scheduleAppDataSave(); return;
       }
       if (event.target.closest("#add-payroll-hours")) { const teacher = payrollTeachers().find((item) => item.payTier === "tier_b_teacher"); payrollState.workingHours.push({ teacherId: teacher?.id || "", date: payrollDateKey(new Date()), hours: "", description: "" }); renderPayrollWizard(); return; }
@@ -45341,7 +45356,7 @@
       if (event.target.closest("#add-payroll-adjustment")) { payrollState.adjustments.push({ teacherId: payrollTeachers()[0]?.id || "", kind:"addition", amount: "", reason: "" }); renderPayrollWizard(); return; }
       const removeAdjustment = event.target.closest("[data-remove-payroll-adjustment]");
       if (removeAdjustment) { payrollState.adjustments.splice(Number(removeAdjustment.dataset.removePayrollAdjustment), 1); renderPayrollWizard(); scheduleAppDataSave(); return; }
-      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(payrollState.month); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
+      if (event.target.closest("#approve-payroll")) { try { const reviewed=JSON.stringify(payrollStatementBatch()); if(!await DTWorkClock.load()) throw new Error("Working hours could not refresh. Please try again."); await loadConfirmedEnrollmentTuition(payrollState.month); const refreshed=payrollStatementBatch(); if(reviewed!==JSON.stringify(refreshed)){payrollState.currentStep=5;renderPayrollWizard();showToast("Tuition or working hours changed. Please review the updated payroll before approving.");return;} payrollState.approvedStatements = refreshed; payrollState.approvedCalculationVersion = 3; (payrollState.refundRecords || []).filter((entry) => entry.teacherAlreadyPaid && Number(entry.payrollDeductionAmount) > 0 && !entry.appliedPayrollMonth).forEach((entry) => { entry.appliedPayrollMonth = payrollState.month; entry.appliedPayrollSequence = payrollState.sequence; entry.appliedAt = new Date().toISOString(); }); } catch(error) { showToast(error.message); return; } payrollState.status = "approved"; payrollState.approvedAt = new Date().toISOString(); payrollState.currentStep = 8; renderPayrollWizard(); scheduleAppDataSave(); showToast("Payroll approved and locked"); return; }
       if (event.target.closest("#mark-payroll-paid")) {
         const button=event.target.closest("#mark-payroll-paid");button.disabled=true;
         try { await finalizePayrollPayStubs(); payrollState.status="paid";payrollState.paidAt=new Date().toISOString();renderPayrollWizard();scheduleAppDataSave();showToast("Payroll marked paid - statements posted to Teacher Tools"); }
