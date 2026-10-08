@@ -44448,9 +44448,12 @@
       return payrollState.filters[type];
     };
     const payrollFilterOptions = (values, selected, labelFor = (value) => value) => [...new Set(values.filter(Boolean))].sort((a, b) => labelFor(a).localeCompare(labelFor(b))).map((value) => `<option value="${escapeText(value)}" ${selected === value ? "selected" : ""}>${escapeText(labelFor(value))}</option>`).join("");
+    const payrollClassHasEligibleStudentsInPeriod = (rosterClass) => payrollTeacherClassDates(rosterClass).some((entry) => (
+      payrollStudentsForClassOnDate(rosterClass, entry.date).some((student) => payrollDiscountFor(student) !== "director")
+    ));
     const payrollFilterRowMarkup = (type, { includeStatus = false } = {}) => {
       const filters = payrollFilterState(type);
-      const sourceClasses = type === "classes" ? payrollTeacherTierClasses() : rosterClasses;
+      const sourceClasses = type === "classes" ? payrollTeacherTierClasses().filter(payrollClassHasEligibleStudentsInPeriod) : rosterClasses;
       const teacherIds = [...new Set(sourceClasses.map((item) => item.teacherId).filter((id) => id && teacherFilterIdIsVisible(id)))];
       const schoolNames = sourceClasses.map((item) => item.schoolName);
       const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].filter((day) => sourceClasses.some((item) => item.day === day));
@@ -44467,6 +44470,7 @@
       return payrollTeacherTierClasses().filter((rosterClass) => {
         const dates = payrollTeacherClassDates(rosterClass);
         if (!dates.length) return false;
+        if (!payrollClassHasEligibleStudentsInPeriod(rosterClass)) return false;
         if (filters.teacher !== "all" && rosterClass.teacherId !== filters.teacher) return false;
         if (filters.school !== "all" && rosterClass.schoolName !== filters.school) return false;
         if (filters.day !== "all" && rosterClass.day !== filters.day) return false;
