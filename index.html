@@ -8210,6 +8210,7 @@
     .enrollment-queue-item strong { font-family: var(--font-body); font-size: 17px; font-weight: 800 !important; line-height: 1.15; }
     .enrollment-queue-item small { color: var(--muted); font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; font-size: 11px; font-weight: 400 !important; }
     .enrollment-queue-item .enrollment-card-age { color: color-mix(in oklch, var(--muted) 72%, white); font-size: 10px; font-weight: 400 !important; }
+    .enrollment-queue-item .enrollment-card-class { color:var(--berry); font-size:11px; font-weight:800; }
     .enrollment-queue-item .enrollment-priority-bubble,
     .enrollment-queue-item .enrollment-stage-bubble { position: absolute; top: 10px; right: 10px; max-width: calc(100% - 20px); margin: 0; font-size: 9px; }
     .enrollment-card-billing-bubbles { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; margin-top: 2px; }
@@ -21690,6 +21691,9 @@
         const billingTuition = enrollmentChecklistFilter === "implement-billing"
           ? enrollmentSuggestedTuitionLabel(suggestedEnrollmentTuition(item, suggestEnrollmentClass(item)))
           : "";
+        const brightwheelClass = enrollmentChecklistFilter === "assign-brightwheel"
+          ? rosterClasses.find((rosterClass) => String(rosterClass.id) === String(item.matched_dance_class_id))
+          : null;
         return `
         <div class="enrollment-queue-item ${batchConfig ? "is-batchable" : ""} ${item.id === selectedEnrollmentIntakeId && enrollmentReviewOpen ? "is-selected" : ""}">
           ${batchConfig ? `<input class="enrollment-queue-select" type="checkbox" data-enrollment-batch-select="${escapeText(item.id)}" aria-label="Select ${escapeText([firstName, lastName].filter(Boolean).join(" ") || "enrollment")} for batch completion" ${enrollmentBatchSelected.has(item.id) ? "checked" : ""}>` : ""}
@@ -21697,6 +21701,7 @@
           <span class="enrollment-card-avatar ${teacherProfileColorClass(assignedTeacherId)}">${escapeText(initials)}</span>
           <strong>${escapeText([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "Unnamed dancer")}</strong>
           <small>${escapeText(enrollmentDisplaySchoolName(item))}</small>
+          ${brightwheelClass ? `<small class="enrollment-card-class">${escapeText(brightwheelClass.name)}</small>` : ""}
           <small class="enrollment-card-age">${escapeText(item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided")}</small>
           ${enrollmentChecklistFilter === "implement-billing" ? `<span class="enrollment-card-billing-bubbles">
             ${billingDiscount ? `<span class="enrollment-card-billing-bubble discount" aria-label="Tuition Circumstances: ${escapeText(billingDiscount)}"><span>Tuition Circumstances</span><b>${escapeText(billingDiscount)}</b></span>` : ""}

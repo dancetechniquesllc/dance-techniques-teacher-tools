@@ -21,13 +21,13 @@ alter table public.payroll_enrollment_events enable row level security;
 drop policy if exists payroll_enrollment_events_director_read on public.payroll_enrollment_events;
 create policy payroll_enrollment_events_director_read
 on public.payroll_enrollment_events for select to authenticated
-using (public.current_profile_role() in ('admin','director'));
+using (public.is_director_or_admin());
 
 drop policy if exists payroll_enrollment_events_director_write on public.payroll_enrollment_events;
 create policy payroll_enrollment_events_director_write
 on public.payroll_enrollment_events for all to authenticated
-using (public.current_profile_role() in ('admin','director'))
-with check (public.current_profile_role() in ('admin','director'));
+using (public.is_director_or_admin())
+with check (public.is_director_or_admin());
 
 grant select, insert, update on public.payroll_enrollment_events to authenticated;
 
