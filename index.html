@@ -9,7 +9,7 @@
   <title>My Dance Techniques</title>
   <script src="vendor/pdf-lib-1.17.1.min.js"></script>
 <script src="payroll-statements.js?v=20261007-effective-date-proration"></script>
-<script src="teacher-work-clock.js"></script>
+<script src="teacher-work-clock.js?v=20261007-2020"></script>
 <script src="enrollment-tuition-confirmation.js"></script>
 <script>
     document.documentElement.dataset.localPreview = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname) ? "true" : "false";
@@ -26349,6 +26349,18 @@
       approvedAt: "",
       paidAt: ""
     };
+    const payrollProgressStorageKey = "dt-payroll-progress-v1";
+    const readSavedPayrollProgress = () => {
+      try {
+        const saved = JSON.parse(window.localStorage?.getItem(payrollProgressStorageKey) || "null");
+        return saved?.payrollState && typeof saved.payrollState === "object" ? saved : null;
+      } catch (error) { return null; }
+    };
+    const savePayrollProgress = () => {
+      try { window.localStorage?.setItem(payrollProgressStorageKey, JSON.stringify({ savedAt: new Date().toISOString(), payrollState })); } catch (error) {}
+    };
+    const initialPayrollProgress = readSavedPayrollProgress();
+    if (initialPayrollProgress) payrollState = { ...payrollState, ...initialPayrollProgress.payrollState };
     let schoolPartnershipPaymentState = {
       month: defaultPayrollMonth(),
       search: "",
@@ -26914,6 +26926,7 @@
     };
 
     const scheduleAppDataSave = () => {
+      savePayrollProgress();
       clearTimeout(persistenceSaveTimer);
       persistenceSaveTimer = window.setTimeout(saveAppData, 180);
     };
@@ -27035,7 +27048,9 @@
             .filter((step) => Number(step) !== 1)
             .map((step) => Number(step) > 1 ? Number(step) - 1 : Number(step)))];
         }
-        payrollState = { ...payrollState, ...restoredPayrollState, workflowVersion: 2 };
+        const dedicatedProgress = readSavedPayrollProgress();
+        const useDedicatedProgress = dedicatedProgress?.savedAt && (!persisted.savedAt || Date.parse(dedicatedProgress.savedAt) > Date.parse(persisted.savedAt));
+        payrollState = { ...payrollState, ...restoredPayrollState, ...(useDedicatedProgress ? dedicatedProgress.payrollState : {}), workflowVersion: 2 };
       }
       if (persisted.schoolPartnershipPaymentState && typeof persisted.schoolPartnershipPaymentState === "object") {
         schoolPartnershipPaymentState = { ...schoolPartnershipPaymentState, ...JSON.parse(JSON.stringify(persisted.schoolPartnershipPaymentState)) };
@@ -45089,6 +45104,8 @@
       if (month) month.innerHTML = payrollMonthOptionsMarkup(payrollState.month);
       if (sequence) sequence.value = payrollState.sequence || "1";
       if (summary) summary.innerHTML = payrollSummaryMarkup();
+      const beginButton = document.getElementById("begin-payroll");
+      if (beginButton) beginButton.textContent = payrollState.status === "not_started" ? "Begin Payroll" : "Resume Payroll";
       renderPayrollStubLibrary();
     };
 
@@ -45235,11 +45252,17 @@
     document.getElementById("begin-payroll")?.addEventListener("click", async () => {
       if (!await loadOfficialPayrollPayments()) return;
       if (!await DTWorkClock.load()) { showToast("Working hours could not load. Try again before starting payroll."); return; }
-      payrollState.month = document.getElementById("payroll-month")?.value || defaultPayrollMonth();
+      const selectedMonth = document.getElementById("payroll-month")?.value || defaultPayrollMonth();
+      const selectedSequence = document.getElementById("payroll-sequence")?.value || "1";
+      const resuming = payrollState.status !== "not_started" && payrollState.month === selectedMonth && String(payrollState.sequence) === String(selectedSequence);
+      payrollState.month = selectedMonth;
       try { await loadConfirmedEnrollmentTuition(payrollState.month); } catch(error) { showToast(error.message); return; }
-      payrollState.sequence = document.getElementById("payroll-sequence")?.value || "1";
-      payrollState.status = "in_progress";
-      payrollState.currentStep = 0;
+      payrollState.sequence = selectedSequence;
+      if (!resuming) {
+        payrollState.status = "in_progress";
+        payrollState.currentStep = 0;
+        payrollState.completedSteps = [];
+      }
       renderPayrollWizard();
       scheduleAppDataSave();
     });
