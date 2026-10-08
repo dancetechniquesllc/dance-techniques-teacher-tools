@@ -27049,7 +27049,18 @@
             .map((step) => Number(step) > 1 ? Number(step) - 1 : Number(step)))];
         }
         const dedicatedProgress = readSavedPayrollProgress();
-        payrollState = { ...payrollState, ...restoredPayrollState, ...(dedicatedProgress?.payrollState || {}), workflowVersion: 2 };
+        const dedicatedPayrollState = dedicatedProgress?.payrollState || {};
+        const restoredOutstanding = restoredPayrollState.outstandingStudents || {};
+        const dedicatedOutstanding = dedicatedPayrollState.outstandingStudents || {};
+        const outstandingStudents = {};
+        new Set([...Object.keys(restoredOutstanding), ...Object.keys(dedicatedOutstanding)]).forEach((studentId) => {
+          const restoredRecord = restoredOutstanding[studentId];
+          const dedicatedRecord = dedicatedOutstanding[studentId];
+          const restoredTime = Date.parse(restoredRecord?.resolvedAt || restoredRecord?.markedAt || "") || 0;
+          const dedicatedTime = Date.parse(dedicatedRecord?.resolvedAt || dedicatedRecord?.markedAt || "") || 0;
+          outstandingStudents[studentId] = !dedicatedRecord || restoredTime > dedicatedTime ? restoredRecord : dedicatedRecord;
+        });
+        payrollState = { ...payrollState, ...restoredPayrollState, ...dedicatedPayrollState, outstandingStudents, workflowVersion: 2 };
       }
       if (persisted.schoolPartnershipPaymentState && typeof persisted.schoolPartnershipPaymentState === "object") {
         schoolPartnershipPaymentState = { ...schoolPartnershipPaymentState, ...JSON.parse(JSON.stringify(persisted.schoolPartnershipPaymentState)) };
