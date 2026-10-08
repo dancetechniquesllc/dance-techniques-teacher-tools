@@ -35,6 +35,11 @@
     } catch(error) { api.ready=false; return false; }
   };
   const clockTime = value => new Date(value).toLocaleTimeString('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit'});
+  const clockInputTime = value => {
+    const parts=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(new Date(value));
+    const part=type=>parts.find(item=>item.type===type)?.value || '00';
+    return `${part('hour')}:${part('minute')}`;
+  };
   const durationLabel = row => {
     const seconds=Math.max(0,Math.floor(((row.ended_at ? Date.parse(row.ended_at) : Date.now())-Date.parse(row.started_at))/1000));
     return [Math.floor(seconds/3600),Math.floor(seconds%3600/60),seconds%60].map(value=>String(value).padStart(2,'0')).join(':');
@@ -71,7 +76,7 @@
           <span class="work-review-avatar" style="border-color:${esc(color)}">${teacher.photo ? `<img src="${esc(teacher.photo)}" alt="${esc(name)}">` : esc(initialsFor(teacher) || 'T')}</span>
           <div><h4>${esc(name)}</h4><p class="work-review-title">${esc(row.description)}</p><p class="work-review-date">${esc(date)}</p>${row.school_name ? `<p class="work-review-school">${esc(row.school_name)}</p>` : ''}</div>
         </header>
-        <div class="work-review-times"><div><span>Clocked In</span><strong>${esc(clockTime(row.started_at))}</strong></div><span class="work-review-arrow" aria-hidden="true">→</span><div><span>Clocked Out</span><strong>${row.ended_at ? esc(clockTime(row.ended_at)) : '—'}</strong></div></div>
+        <div class="work-review-times"><div><span>Clocked In</span><strong>${esc(clockTime(row.started_at))}</strong></div><span class="work-review-arrow" aria-hidden="true">→</span><label class="work-review-end-time"><span>Clocked Out</span>${row.ended_at ? `<input type="time" value="${esc(clockInputTime(row.ended_at))}" data-work-end-time-input="${esc(row.id)}" aria-label="Correct clock-out time for ${esc(name)}"><button type="button" class="secondary" data-work-end-time="${esc(row.id)}">Update</button><small>Edit before approving</small>` : '<strong>—</strong>'}</label></div>
         <div class="work-review-duration"><span class="work-review-label">Working Time</span><div><strong data-work-elapsed="${esc(row.id)}">${durationLabel(row)}</strong><span class="work-review-badge is-${status}">${labels[status]}</span></div></div>
       </div>
       <div class="work-review-actions">${row.ended_at ? `<button type="button" class="primary" data-work-review="${esc(row.id)}" data-work-approve="true" ${row.status==='approved' ? 'disabled' : ''}>Approve Working Hours</button><button type="button" class="secondary" data-work-review="${esc(row.id)}" data-work-approve="false" ${row.status==='denied' ? 'disabled' : ''}>Do Not Include</button>` : '<p>Still running — not included in payroll.</p>'}</div>
@@ -100,12 +105,15 @@
     const start=event.target.closest('[data-work-start]');
     const end=event.target.closest('[data-work-end]');
     const review=event.target.closest('[data-work-review]');
+    const correctedEnd=event.target.closest('[data-work-end-time]');
     const confirm=event.target.closest('[data-work-confirm]');
     if(event.target.closest('[data-work-cancel]')) { document.getElementById('work-checkout-dialog')?.close();checkoutDraft=null;return; }
-    const button=start || end || review || confirm;
+    const button=start || end || review || confirm || correctedEnd;
     if(!button || api.busy) return;
     const description=document.getElementById('work-clock-description')?.value.trim() || '';
     const notes=document.getElementById('work-checkout-notes')?.value || '';
+    const correctedEndValue=correctedEnd ? document.querySelector(`[data-work-end-time-input="${CSS.escape(correctedEnd.dataset.workEndTime)}"]`)?.value : '';
+    if(correctedEnd && !correctedEndValue) { showToast('Choose a corrected clock-out time');return; }
     if(start && !start.dataset.workStart && !description) { showToast('Add a short description of your work');return; }
     if(start && !api.canClock()) { showToast('Working hours are available only on the Teacher pay tier');return; }
     if(confirm && !checkoutDraft) return;
@@ -118,12 +126,14 @@
           row=active() || {id:`preview-work-${Date.now()}`,teacher_id:profileTeacher.id,event_id:start.dataset.workStart || null,work_date:today(),description:item?.title || description,school_name:item?.schoolName || '',started_at:new Date().toISOString(),ended_at:null,status:'running'};
         } else {
           row=api.entries.find(item=>item.id===(end?.dataset.workEnd || review?.dataset.workReview || checkoutDraft?.id));
+          if(correctedEnd) row=api.entries.find(item=>item.id===correctedEnd.dataset.workEndTime);
           if(!row) throw new Error('The clock could not be found.');
-          row={...row,...(end ? {checkout_requested_at:new Date().toISOString()} : confirm ? {ended_at:checkoutDraft.checkout_requested_at,notes,status:'pending'} : {status:review.dataset.workApprove==='true' ? 'approved' : 'denied'})};
+          row={...row,...(end ? {checkout_requested_at:new Date().toISOString()} : confirm ? {ended_at:checkoutDraft.checkout_requested_at,notes,status:'pending'} : correctedEnd ? {ended_at:new Date(`${row.work_date}T${correctedEndValue}:00`).toISOString(),status:'pending'} : {status:review.dataset.workApprove==='true' ? 'approved' : 'denied'})};
         }
       } else {
-        const name=start ? 'start_teacher_work' : end ? 'prepare_teacher_work_checkout' : confirm ? 'end_teacher_work' : 'review_teacher_work';
-        const args=start ? {target_event_id:start.dataset.workStart || null,work_description:description || null} : end ? {session_id:end.dataset.workEnd} : confirm ? {session_id:checkoutDraft.id,work_notes:notes,expected_checkout_at:checkoutDraft.checkout_requested_at} : {session_id:review.dataset.workReview,approve:review.dataset.workApprove==='true'};
+        const name=start ? 'start_teacher_work' : end ? 'prepare_teacher_work_checkout' : confirm ? 'end_teacher_work' : correctedEnd ? 'adjust_teacher_work_end_time' : 'review_teacher_work';
+        const correctedEndedAt=correctedEnd ? new Date(`${api.entries.find(item=>item.id===correctedEnd.dataset.workEndTime)?.work_date}T${correctedEndValue}:00`).toISOString() : null;
+        const args=start ? {target_event_id:start.dataset.workStart || null,work_description:description || null} : end ? {session_id:end.dataset.workEnd} : confirm ? {session_id:checkoutDraft.id,work_notes:notes,expected_checkout_at:checkoutDraft.checkout_requested_at} : correctedEnd ? {session_id:correctedEnd.dataset.workEndTime,corrected_ended_at:correctedEndedAt} : {session_id:review.dataset.workReview,approve:review.dataset.workApprove==='true'};
         const {data,error}=await root.dtSupabase.rpc(name,args);
         if(error) throw error;
         row=data;
@@ -133,7 +143,7 @@
       if(confirm) {document.getElementById('work-checkout-dialog')?.close();checkoutDraft=null;}
       renderMyDay();renderTeacherEventApprovals();
       if(typeof payrollState!=='undefined' && document.getElementById('payroll-workspace')?.hidden===false) renderPayrollWizard();
-      showToast(start ? 'Checked in — your time is being recorded' : confirm ? 'Checked out — time and notes saved for director review' : 'Working hours review saved');
+      showToast(start ? 'Checked in — your time is being recorded' : confirm ? 'Checked out — time and notes saved for director review' : correctedEnd ? 'Clock-out time updated — review the new total before approving' : 'Working hours review saved');
     } catch(error) { showToast(error.message || 'Could not save your clock. Please try again.'); }
     finally {api.busy=false;button.disabled=false;}
   });

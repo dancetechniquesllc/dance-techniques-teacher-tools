@@ -15478,6 +15478,11 @@
     .work-clock-status { line-height:1.6; font-size:14px; }
     .work-clock-review { margin-bottom:20px; }
     .work-clock-notes { white-space:pre-wrap; }
+    .work-review-end-time { display:grid; grid-template-columns:minmax(120px,150px) auto; gap:6px; align-items:end; }
+    .work-review-end-time > span,.work-review-end-time > small { grid-column:1/-1; }
+    .work-review-end-time input { width:150px; min-height:46px; padding:8px 12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--fg); font:800 18px/1 "Avenir Next",sans-serif; }
+    .work-review-end-time button { min-height:46px; padding:8px 14px; border-radius:10px; }
+    .work-review-end-time small { color:var(--muted); font-size:10px; font-weight:700; }
     .work-review-card { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(210px,1fr); gap:24px; padding:26px; margin:18px 0; border:1px solid var(--border); border-radius:20px; background:#fffdfb; }
     .work-review-heading { display:flex; align-items:center; gap:18px; margin-bottom:22px; }
     .work-review-heading > div { min-width:0; }
