@@ -16,50 +16,44 @@
   const classSignature = (classInfo) => String(classInfo?.name || "")
     .toLowerCase()
     .replace(/\bpre[\s-]?k\b/g, "preschool")
+    .replace(/\b(?:all students|all dancers)\b/g, "all")
     .replace(/\bages?\b/g, "")
     .replace(/\b(beginner|beginners|class|dance|level)\b/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+  const schoolSignature = (classInfo) => String(classInfo?.schoolName || "")
+    .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
   const buildMatches = () => {
     const classes = liveClasses();
     const suggestions = [];
-    const byTeacher = new Map();
 
-    classes.forEach((classInfo) => {
-      const key = String(classInfo.teacherId);
-      if (!byTeacher.has(key)) byTeacher.set(key, []);
-      byTeacher.get(key).push(classInfo);
-    });
-
-    byTeacher.forEach((teacherClasses) => {
-      if (teacherClasses.length < 2) return;
-      suggestions.push({
-        label: "Same teacher",
-        teacher: teacherClasses[0].teacherName || "Assigned teacher",
-        classes: teacherClasses
+    // A recital combination is a pair of compatible classes from different schools.
+    // Keeping suggestions as pairs prevents one teacher's entire schedule from being
+    // collapsed into a single performance and makes each proposed combination clear.
+    classes.forEach((firstClass, firstIndex) => {
+      classes.slice(firstIndex + 1).forEach((secondClass) => {
+        if (!schoolSignature(firstClass) || schoolSignature(firstClass) === schoolSignature(secondClass)) return;
+        if (!classSignature(firstClass) || classSignature(firstClass) !== classSignature(secondClass)) return;
+        const sameTeacher = String(firstClass.teacherId) === String(secondClass.teacherId);
+        suggestions.push({
+          label: sameTeacher ? "Same teacher" : "Two teachers",
+          teacher: sameTeacher
+            ? (firstClass.teacherName || "Assigned teacher")
+            : [...new Set([firstClass.teacherName, secondClass.teacherName].filter(Boolean))].join(" + "),
+          classes: [firstClass, secondClass]
+        });
       });
     });
 
-    const byClassType = new Map();
-    classes.forEach((classInfo) => {
-      const key = classSignature(classInfo);
-      if (!key) return;
-      if (!byClassType.has(key)) byClassType.set(key, []);
-      byClassType.get(key).push(classInfo);
-    });
-
-    byClassType.forEach((compatibleClasses) => {
-      const teacherIds = new Set(compatibleClasses.map((classInfo) => classInfo.teacherId));
-      if (compatibleClasses.length < 2 || teacherIds.size < 2) return;
-      suggestions.push({
-        label: "Same class type",
-        teacher: [...new Set(compatibleClasses.map((classInfo) => classInfo.teacherName || "Assigned teacher"))].join(" + "),
-        classes: compatibleClasses
-      });
-    });
-
-    return suggestions;
+    return suggestions.sort((left, right) => (
+      left.label.localeCompare(right.label)
+      || left.teacher.localeCompare(right.teacher)
+      || String(left.classes[0]?.name || "").localeCompare(String(right.classes[0]?.name || ""), undefined, { numeric: true })
+    ));
   };
 
   const toggle = (active) => {
@@ -89,9 +83,9 @@
               <header><span class="big-stage-pill">${escapeText(match.label)}</span><h4>${escapeText(match.teacher)}</h4><strong>${total} dancers total</strong></header>
               <div class="big-stage-match-classes">${match.classes.map((classInfo) => `
                 <div><strong>${escapeText(classInfo.name)}</strong><span>${escapeText(classInfo.schoolName)}</span><small>${Number(classInfo.enrolledCount || 0)} dancers</small></div>`).join("")}</div>
-              <button class="secondary" type="button" data-stage-new>Plan in a Show</button>
+              <button class="secondary" type="button" data-stage-new>Combine Classes</button>
             </article>`;
-          }).join("") : `<div class="big-stage-empty-shows"><strong>No matching classes yet.</strong><span>Suggestions will appear when two or more live classes share a teacher or class type.</span></div>`}
+          }).join("") : `<div class="big-stage-empty-shows"><strong>No matching classes yet.</strong><span>Suggestions appear for compatible live classes at different schools.</span></div>`}
         </div>
       </div>`;
     root.querySelector(".big-stage-shell")?.prepend(toggle("matching"));
