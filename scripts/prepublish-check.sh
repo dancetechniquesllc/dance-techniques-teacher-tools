@@ -28,6 +28,11 @@ required_text=(
   'Boys Costume Inventory'
   'Enrollment Changes'
   '253005393017146'
+  'data-recital-suggest-split'
+  'data-recital-edit-groups'
+  'data-recital-performance-select'
+  'class_recital_performance_groups'
+  'class_recital_performance_group_members'
 )
 
 for marker in "${required_text[@]}"; do
@@ -40,6 +45,7 @@ done
 required_files=(
   assets/photo-frames/group-photo.png
   assets/photo-frames/dance-day.png
+  supabase/migrations/20260930165000_class_recital_performance_groups.sql
 )
 
 for path in "${required_files[@]}"; do
