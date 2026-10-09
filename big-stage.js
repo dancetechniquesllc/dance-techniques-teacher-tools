@@ -11,6 +11,10 @@
   const root = () => document.getElementById("big-stage-app");
   const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[c]));
   const title = (value) => String(value || "").replace(/\b\w/g, (c) => c.toUpperCase());
+  const ageLabel = (months) => {
+    const total = Math.max(0, Math.round(Number(months) || 0));
+    return `${Math.floor(total / 12)}Y ${total % 12}M`;
+  };
   const activeRosterClasses = () => typeof rosterClasses === "undefined" ? [] : rosterClasses.filter((item) => item.sourceActive !== false);
   const teacherName = (id) => typeof rosterTeacherName === "function" ? rosterTeacherName(id) : "Teacher";
   const teacherColor = (name) => typeof messageAssignedColor === "function" ? messageAssignedColor(name, "Teacher") : "#dba9a1";
@@ -213,7 +217,7 @@
     const cardColor=group.crossTeacher?"":group.classes[0]?.teacherColor||"#dba9a1";
     return `<article class="stage-match-card ${group.crossTeacher?"cross-teacher":""}" data-stage-group="${esc(group.id)}" ${cardColor?`style="--stage-teacher-color:${esc(cardColor)}"`:""}>
       <div class="stage-match-head"><div><span class="stage-status ${group.quality}">${esc(title(group.quality))} Match</span><h5>${esc(group.name)}</h5><p>${esc(relationLabel)} · ${total} dancer${total===1?"":"s"}${spread==null?"":` · ${spread}-month age span`}</p></div><span class="stage-decision ${group.decision}">${esc(title(group.decision))}</span></div>
-      <div class="stage-class-list">${group.classes.map((item)=>`<div class="stage-class-row"><span><strong>${esc(item.school)} · ${esc(item.name)}</strong><small>${esc(item.teacher)} · ${item.count} dancers · ${item.ageData?`${item.minAge}–${item.maxAge} months`:`Birthdates needed`}</small></span><span>${esc(title(item.requirement))}</span></div>`).join("")}</div>
+      <div class="stage-class-list">${group.classes.map((item)=>`<div class="stage-class-row"><span><strong>${esc(item.school)} · ${esc(item.name)}</strong><small>${esc(item.teacher)} · ${item.count} dancers · ${item.ageData?`${ageLabel(item.minAge)} – ${ageLabel(item.maxAge)}`:`Birthdates needed`}</small></span><span>${esc(title(item.requirement))}</span></div>`).join("")}</div>
       <div class="stage-reasons">${(group.analysis.reasons||[]).map((reason)=>`<span>✓ ${esc(reason)}</span>`).join("")}</div>
       ${group.stageSets.length>1?`<div class="stage-combine-plan"><strong>Efficient stage plan</strong>${group.stageSets.map((set,index)=>`<span>Number ${index+1}: ${set.map((item)=>esc(item.school)).join(" + ")} · ${set.reduce((sum,item)=>sum+item.count,0)} dancers</span>`).join("")}</div>`:""}
       <div class="stage-card-actions"><label>Plan<select data-stage-relation><option value="combine" ${group.relationship==="combine"?"selected":""}>Combine & Perform Together</option><option value="share" ${group.relationship==="share"?"selected":""}>Share Choreography — Perform Separately</option><option value="separate" ${group.relationship==="separate"?"selected":""}>Keep Separate</option></select></label><label>Routine Owner<select data-stage-owner><option value="lead_teacher" ${group.owner==="lead_teacher"?"selected":""}>Lead Teacher / Choreographer</option><option value="shared" ${group.owner==="shared"?"selected":""}>Shared Choreography</option><option value="dt_standard" ${group.owner==="dt_standard"?"selected":""}>DT Standard Routine</option></select></label><button class="primary" data-stage-approve>${group.decision==="approved"?"Approved ✓":"Approve"}</button><button class="secondary" data-stage-lock>${group.decision==="locked"?"Locked 🔒":"Lock"}</button><button class="secondary" data-stage-reject>Keep Separate</button></div>
