@@ -2873,6 +2873,15 @@
     .teacher-class-action-kit.is-active { box-shadow: inset 0 0 0 2px var(--sage); }
     .teacher-roster-class-actions button:disabled { cursor: default; opacity: .46; }
     .teacher-roster-class-actions .teacher-class-action-boutique:disabled { opacity: 1; }
+    .teacher-offday-confirm { position:fixed; inset:0; z-index:12500; display:grid; place-items:center; padding:20px; background:rgb(35 25 24 / .62); }
+    .teacher-offday-confirm-card { width:min(430px,100%); padding:24px; border:1px solid var(--line); border-radius:24px; background:var(--paper,#fffaf7); box-shadow:0 20px 60px rgb(35 25 24 / .3); text-align:center; }
+    .teacher-offday-confirm-card h2 { margin:0 0 10px; color:var(--berry); font-size:27px; }
+    .teacher-offday-confirm-card p { margin:0; font-size:17px; line-height:1.45; }
+    .teacher-offday-confirm-actions { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:22px; }
+    .teacher-offday-confirm-actions button { min-height:52px; border:0; border-radius:999px; color:white; font-size:16px; font-weight:850; }
+    .teacher-offday-confirm-start { background:var(--sage); color:#253424 !important; }
+    .teacher-offday-confirm-cancel { background:var(--brick); }
+    @media (max-width:430px) { .teacher-offday-confirm-actions { grid-template-columns:1fr; } }
     .photo-frame-modal { position: fixed; inset: 0; z-index: 12000; display: grid; place-items: center; padding: 14px; background: rgb(35 25 24 / .72); }
     .photo-frame-modal[hidden] { display: none; }
     .photo-frame-dialog { width: min(520px, 100%); max-height: calc(100dvh - 28px); overflow: auto; border: 1px solid var(--line); border-radius: 28px; background: var(--paper, #fffaf7); box-shadow: 0 20px 60px rgb(35 25 24 / .28); }
@@ -22869,7 +22878,7 @@
         return {
           id: item.id, assignmentId: item.teacher_school_assignment_id, name: item.name, ageGroup: item.age_group, level: String(item.level),
           time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", partnerSchoolId: school.id || assignment?.partner_school_id || "", schoolName: school.name || "Partner School",
-          day: weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
+          day: weekdayNames[Number(item.schedule_day)] || weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
           updatedAt: item.updated_at || "",
           helperHistory: Array.isArray(item.helper_history) ? item.helper_history : [],
           attendance: attendanceByClass.get(item.id) || {},
@@ -23150,13 +23159,15 @@
       };
       let studentId = student.id;
       if (!student.enrollmentId) {
-        const { data, error } = await window.dtSupabase.from("students").insert(studentPayload).select("id").single();
-        if (error) return sharedRosterError("The dancer was not shared.", error);
-        studentId = data.id;
+        const { data, error } = await window.dtSupabase.rpc("create_prospect_dancer", {
+          target_class_id: rosterClass.id,
+          dancer: studentPayload,
+          target_trial_date: student.trialDate || null
+        }).single();
+        if (error || !data?.student_id || !data?.enrollment_id) return sharedRosterError("The prospect dancer was not shared.", error || new Error("The prospect record was incomplete."));
+        studentId = data.student_id;
         student.id = studentId;
-        const enrollment = await window.dtSupabase.from("class_enrollments").insert({ dance_class_id: rosterClass.id, student_id: studentId, status: dbEnrollmentStatus(student.status), trial_date: student.trialDate || null }).select("id").single();
-        if (enrollment.error) return sharedRosterError("The class enrollment was not shared.", enrollment.error);
-        student.enrollmentId = enrollment.data.id;
+        student.enrollmentId = data.enrollment_id;
       } else {
         const updated = await window.dtSupabase.from("students").update(studentPayload).eq("id", studentId);
         if (updated.error) return sharedRosterError("The dancer change was not shared.", updated.error);
@@ -36960,13 +36971,34 @@
     };
 
     const teacherRosterScheduledDay = (rosterClass) => {
+      if (teacherRosterDayKey(rosterClass?.day)) return rosterClass.day;
       const assignedSchool = assignedTeacherSchools().find((school) => (
         (rosterClass?.partnerSchoolId && school.id && String(rosterClass.partnerSchoolId) === String(school.id))
         || enrollmentSchoolNameMatches(school.name, rosterClass?.schoolName)
         || enrollmentSchoolNameMatches(school.nickname, rosterClass?.schoolName)
       ));
-      return weekdayNames[Number(assignedSchool?.dayOfWeek)] || rosterClass?.day || "";
+      return weekdayNames[Number(assignedSchool?.dayOfWeek)] || "";
     };
+
+    const confirmTeacherOffDayStart = (rosterClass) => new Promise((resolve) => {
+      const scheduledDay = teacherRosterScheduledDay(rosterClass) || "another day";
+      const schoolName = rosterSchoolNickname(rosterClass?.schoolName || "This class");
+      const modal = document.createElement("div");
+      modal.className = "teacher-offday-confirm";
+      modal.innerHTML = `<section class="teacher-offday-confirm-card" role="dialog" aria-modal="true" aria-labelledby="teacher-offday-confirm-title"><h2 id="teacher-offday-confirm-title">Start class anyway?</h2><p><strong>${rosterSafe(schoolName)}</strong> is listed for ${rosterSafe(scheduledDay)}, not today.</p><div class="teacher-offday-confirm-actions"><button class="teacher-offday-confirm-start" type="button">Start Class Anyways</button><button class="teacher-offday-confirm-cancel" type="button">Cancel</button></div></section>`;
+      document.body.appendChild(modal);
+      const finish = (answer) => {
+        document.removeEventListener("keydown", onKeyDown);
+        modal.remove();
+        resolve(answer);
+      };
+      const onKeyDown = (event) => { if (event.key === "Escape") finish(false); };
+      document.addEventListener("keydown", onKeyDown);
+      modal.querySelector(".teacher-offday-confirm-start")?.addEventListener("click", () => finish(true));
+      modal.querySelector(".teacher-offday-confirm-cancel")?.addEventListener("click", () => finish(false));
+      modal.addEventListener("click", (event) => { if (event.target === modal) finish(false); });
+      modal.querySelector(".teacher-offday-confirm-start")?.focus();
+    });
 
     const teacherRosterClassIsToday = (rosterClass) => {
       const todayKey = isoDate(homeWidgetDate);
@@ -37931,7 +37963,7 @@
       const selectedClass = schoolClasses.find((rosterClass) => rosterClass.id === selectedTeacherRosterClassId) || schoolClasses[0];
       openRosterPrintDialog(selectedClass, schoolClasses);
     });
-    document.getElementById("teacher-roster-list")?.addEventListener("click", (event) => {
+    document.getElementById("teacher-roster-list")?.addEventListener("click", async (event) => {
       const newEnrollmentButton = event.target.closest("[data-teacher-new-enrollment]");
       if (newEnrollmentButton) {
         event.preventDefault();
@@ -38018,8 +38050,8 @@
         const classId = startClassButton.dataset.teacherStartClass;
         const rosterClass = teacherRosterClasses().find((item) => item.id === classId);
         if (startClassButton.dataset.teacherOffDay === "true") {
-          window.alert(`${rosterSchoolNickname(rosterClass?.schoolName || "This school")} isn't scheduled for class today.`);
-          return;
+          const startAnyway = await confirmTeacherOffDayStart(rosterClass);
+          if (!startAnyway) return;
         }
         const mode = startClassButton.dataset.teacherStartMode || "checkin";
         activeTeacherBoutiqueDeliveryClassIds.delete(classId);
@@ -53186,11 +53218,21 @@
       window.setTimeout(() => loadSharedMusicLibrary(window.dtCurrentProfile), 0);
     }
 
+    const normalizeMusicPlayback = (audio = document.getElementById("dt-tunes-audio")) => {
+      if (!audio) return;
+      audio.defaultPlaybackRate = 1;
+      if (!Number.isFinite(audio.playbackRate) || Math.abs(audio.playbackRate - 1) > 0.001) audio.playbackRate = 1;
+      try { audio.preservesPitch = true; } catch (_) {}
+      try { audio.webkitPreservesPitch = true; } catch (_) {}
+      try { audio.mozPreservesPitch = true; } catch (_) {}
+    };
+
     const playMusicTrack = async (trackId) => {
       const client = window.dtSupabase;
       const audio = document.getElementById("dt-tunes-audio");
       const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === trackId);
       if (!audio || !track) return;
+      normalizeMusicPlayback(audio);
       const isSameTrack = musicLibraryState.currentTrackId === track.id;
       if (isSameTrack && track.workshop_preview) {
         musicLibraryState.previewPlaying = !musicLibraryState.previewPlaying;
@@ -53231,6 +53273,7 @@
       }
       if (playbackRequestId !== musicPlaybackRequestId || musicLibraryState.currentTrackId !== track.id) return;
       audio.src = signedUrl;
+      normalizeMusicPlayback(audio);
       audio.load();
       try {
         await audio.play();
@@ -53248,7 +53291,7 @@
         const registerMediaAction = (action, handler) => {
           try { navigator.mediaSession.setActionHandler(action, handler); } catch (_) { /* Unsupported by this iPhone version. */ }
         };
-        registerMediaAction("play", () => audio.play());
+        registerMediaAction("play", () => { normalizeMusicPlayback(audio); return audio.play(); });
         registerMediaAction("pause", () => audio.pause());
         registerMediaAction("previoustrack", () => playAdjacentMusicTrack(-1));
         registerMediaAction("nexttrack", () => playAdjacentMusicTrack(1));
@@ -53396,6 +53439,14 @@
     };
 
     const dtTunesAudio = document.getElementById("dt-tunes-audio");
+
+    ["loadedmetadata", "canplay", "play", "ratechange"].forEach((eventName) => {
+      dtTunesAudio?.addEventListener(eventName, () => normalizeMusicPlayback(dtTunesAudio));
+    });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) normalizeMusicPlayback(dtTunesAudio);
+    });
+    window.addEventListener("pageshow", () => normalizeMusicPlayback(dtTunesAudio));
 
     const updateMusicMediaPosition = () => {
       if (!("mediaSession" in navigator) || !dtTunesAudio || !Number.isFinite(dtTunesAudio.duration) || dtTunesAudio.duration <= 0) return;
