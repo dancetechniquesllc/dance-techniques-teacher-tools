@@ -189,6 +189,17 @@
       };
     });
   });
+  const enforceStageCapacity = (groups) => groups.map((group) => {
+    const total = group.classes.reduce((sum, item) => sum + item.count, 0);
+    if (group.relationship !== "combine" || total <= STAGE_CAP) return group;
+    return {
+      ...group,
+      relationship: "share",
+      stageSets: bestCombineSets(group.classes),
+      decision: group.decision === "suggested" ? "suggested" : "modified",
+      analysis: analysisFor(group.classes, group.crossTeacher)
+    };
+  });
   const teacherLoad = () => {
     const map=new Map();
     state.classes.forEach((item)=>{if(!map.has(item.teacherId))map.set(item.teacherId,{id:item.teacherId,name:item.teacher,classes:0,groups:new Set()});map.get(item.teacherId).classes+=1;});
@@ -213,6 +224,7 @@
   };
   const groupCard = (group) => {
     const total=group.classes.reduce((sum,item)=>sum+item.count,0), spread=ageSpread(group.classes);
+    const canCombine=total<=STAGE_CAP;
     const relationLabel=group.relationship==="combine"?(group.crossTeacher?"Cross-Teacher Combine Suggested":"Combine Suggested"):group.relationship==="share"?"Share Choreography":"Keep Separate";
     const cardColor=group.crossTeacher?"":group.classes[0]?.teacherColor||"#dba9a1";
     return `<article class="stage-match-card ${group.crossTeacher?"cross-teacher":""}" data-stage-group="${esc(group.id)}" ${cardColor?`style="--stage-teacher-color:${esc(cardColor)}"`:""}>
@@ -220,7 +232,7 @@
       <div class="stage-class-list">${group.classes.map((item)=>`<div class="stage-class-row"><span><strong>${esc(item.school)} · ${esc(item.name)}</strong><small>${esc(item.teacher)} · ${item.count} dancers · ${item.ageData?`${ageLabel(item.minAge)} – ${ageLabel(item.maxAge)}`:`Birthdates needed`}</small></span><span>${esc(title(item.requirement))}</span></div>`).join("")}</div>
       <div class="stage-reasons">${(group.analysis.reasons||[]).map((reason)=>`<span>✓ ${esc(reason)}</span>`).join("")}</div>
       ${group.stageSets.length>1?`<div class="stage-combine-plan"><strong>Efficient stage plan</strong>${group.stageSets.map((set,index)=>`<span>Number ${index+1}: ${set.map((item)=>esc(item.school)).join(" + ")} · ${set.reduce((sum,item)=>sum+item.count,0)} dancers</span>`).join("")}</div>`:""}
-      <div class="stage-card-actions"><label>Plan<select data-stage-relation><option value="combine" ${group.relationship==="combine"?"selected":""}>Combine & Perform Together</option><option value="share" ${group.relationship==="share"?"selected":""}>Share Choreography — Perform Separately</option><option value="separate" ${group.relationship==="separate"?"selected":""}>Keep Separate</option></select></label><label>Routine Owner<select data-stage-owner><option value="lead_teacher" ${group.owner==="lead_teacher"?"selected":""}>Lead Teacher / Choreographer</option><option value="shared" ${group.owner==="shared"?"selected":""}>Shared Choreography</option><option value="dt_standard" ${group.owner==="dt_standard"?"selected":""}>DT Standard Routine</option></select></label><button class="primary" data-stage-approve>${group.decision==="approved"?"Approved ✓":"Approve"}</button><button class="secondary" data-stage-lock>${group.decision==="locked"?"Locked 🔒":"Lock"}</button><button class="secondary" data-stage-reject>Keep Separate</button></div>
+      <div class="stage-card-actions"><label>Plan<select data-stage-relation><option value="combine" ${group.relationship==="combine"?"selected":""} ${canCombine?"":"disabled"}>Combine & Perform Together${canCombine?"":" — Over 12"}</option><option value="share" ${group.relationship==="share"?"selected":""}>Share Choreography — Perform Separately</option><option value="separate" ${group.relationship==="separate"?"selected":""}>Keep Separate</option></select></label><label>Routine Owner<select data-stage-owner><option value="lead_teacher" ${group.owner==="lead_teacher"?"selected":""}>Lead Teacher / Choreographer</option><option value="shared" ${group.owner==="shared"?"selected":""}>Shared Choreography</option><option value="dt_standard" ${group.owner==="dt_standard"?"selected":""}>DT Standard Routine</option></select></label><button class="primary" data-stage-approve>${group.decision==="approved"?"Approved ✓":"Approve"}</button><button class="secondary" data-stage-lock>${group.decision==="locked"?"Locked 🔒":"Lock"}</button><button class="secondary" data-stage-reject>Keep Separate</button></div>
     </article>`;
   };
   const teacherView = () => { const groups=filteredGroups(); return `<div class="stage-load-grid">${teacherLoad().map((item)=>`<button class="stage-load-card ${item.status.startsWith("Above")?"above":item.status.startsWith("Ideal")?"ideal":"under"}" data-stage-teacher="${esc(item.id)}"><strong>${esc(item.name)}</strong><span>${item.classes} Classes</span><b>${item.routines} Unique Recital Dances</b><small>${esc(item.status)}</small></button>`).join("")}</div><div class="stage-match-grid">${groups.filter((group)=>!group.crossTeacher).map(groupCard).join("")}</div>${groups.some((group)=>group.crossTeacher)?`<section class="stage-cross-section"><h4>Cross-Teacher Young-Class Opportunities</h4><p>Exceptions only. Every suggestion requires director approval.</p><div class="stage-match-grid">${groups.filter((group)=>group.crossTeacher).map(groupCard).join("")}</div></section>`:""}`; };
@@ -272,7 +284,7 @@
     const persisted=force?state.groups.filter((group)=>["approved","modified","locked"].includes(group.decision)):await loadPersisted();
     const generated=generatedGroups(state.classes);const assigned=new Set(generated.flatMap((group)=>group.classes.map((item)=>item.id)));
     const cross=crossTeacherSuggestions(state.classes.filter((item)=>assigned.has(item.id)));
-    state.groups=enforceUniqueRoutinePerSchool(mergePlans([...generated,...cross],persisted));state.persisted=true;state.loading=false;
+    state.groups=enforceStageCapacity(enforceUniqueRoutinePerSchool(mergePlans([...generated,...cross],persisted)));state.persisted=true;state.loading=false;
     const adjusted=state.groups.some((group)=>group.schoolRuleAdjusted);
     state.notice=adjusted?"Classes at the same school were separated into different routines.":force?"Suggestions recalculated. Approved, modified, and locked decisions were preserved.":`${state.classes.length} active classes analyzed. No show assignments have been made yet.`;render();
   };
