@@ -15,14 +15,15 @@
 
   const classSignature = (classInfo) => String(classInfo?.name || "")
     .toLowerCase()
-    .replace(/\b(beginner|beginners|class|dance)\b/g, "")
+    .replace(/\bpre[\s-]?k\b/g, "preschool")
+    .replace(/\bages?\b/g, "")
+    .replace(/\b(beginner|beginners|class|dance|level)\b/g, "")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 
   const buildMatches = () => {
     const classes = liveClasses();
     const suggestions = [];
-    const included = new Set();
     const byTeacher = new Map();
 
     classes.forEach((classInfo) => {
@@ -38,11 +39,10 @@
         teacher: teacherClasses[0].teacherName || "Assigned teacher",
         classes: teacherClasses
       });
-      teacherClasses.forEach((classInfo) => included.add(classInfo.id));
     });
 
     const byClassType = new Map();
-    classes.filter((classInfo) => !included.has(classInfo.id)).forEach((classInfo) => {
+    classes.forEach((classInfo) => {
       const key = classSignature(classInfo);
       if (!key) return;
       if (!byClassType.has(key)) byClassType.set(key, []);
@@ -53,7 +53,7 @@
       const teacherIds = new Set(compatibleClasses.map((classInfo) => classInfo.teacherId));
       if (compatibleClasses.length < 2 || teacherIds.size < 2) return;
       suggestions.push({
-        label: "Compatible classes",
+        label: "Same class type",
         teacher: [...new Set(compatibleClasses.map((classInfo) => classInfo.teacherName || "Assigned teacher"))].join(" + "),
         classes: compatibleClasses
       });
