@@ -3434,6 +3434,9 @@
     .teacher-future-prospect-card .roster-student-photo { width: 58px; height: 58px; flex-basis: 58px; }
     .teacher-future-prospect-card strong { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
     .teacher-future-prospect-card small { color: var(--muted); font-size: 10px; font-weight: 800; }
+    .future-waitlist-card { display: grid; gap: 8px; min-width: 0; padding: 8px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+    .future-waitlist-card .teacher-future-prospect-card { border: 0; padding-bottom: 6px; }
+    .future-waitlist-action { min-height: 38px; border: 1px solid color-mix(in srgb, var(--sage) 68%, #526650); border-radius: 999px; background: var(--sage); color: #2f422f; font-weight: 900; }
 
     @media (max-width: 460px) {
       .teacher-roster-form { grid-template-columns: 1fr; }
@@ -39029,7 +39032,10 @@
         const timingLabel = student.status === "waitlisted"
           ? "Waitlist · Waiting for an opening"
           : `Trial Date: ${student.trialDate ? new Date(`${student.trialDate}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Not entered"}`;
-        return `<button class="teacher-future-prospect-card" type="button" data-director-future-student="${rosterSafe(student.id)}" data-director-future-class="${rosterSafe(rosterClass.id)}" aria-label="Open ${rosterSafe(rosterStudentFullName(student))}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${rosterSafe(dayLabel)}</span><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>${rosterSafe(timingLabel)}</small></button>`;
+        const profileButton = `<button class="teacher-future-prospect-card" type="button" data-director-future-student="${rosterSafe(student.id)}" data-director-future-class="${rosterSafe(rosterClass.id)}" aria-label="Open ${rosterSafe(rosterStudentFullName(student))}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${rosterSafe(dayLabel)}</span><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>${rosterSafe(timingLabel)}</small></button>`;
+        return student.status === "waitlisted"
+          ? `<article class="future-waitlist-card">${profileButton}<button class="future-waitlist-action" type="button" data-director-waitlist-offer="${rosterSafe(student.id)}" data-director-waitlist-class="${rosterSafe(rosterClass.id)}">Offer a Trial Spot</button></article>`
+          : profileButton;
       };
       const trialRecords = records.filter(({ student }) => student.status !== "waitlisted");
       const waitlistRecords = records.filter(({ student }) => student.status === "waitlisted");
@@ -48990,6 +48996,21 @@
       if (rosterClass && student) openRosterStudentEditor(rosterClass, student, { navigationScope: "directory" });
     });
     document.getElementById("director-future-dancer-list")?.addEventListener("click", (event) => {
+      const offerButton = event.target.closest("[data-director-waitlist-offer]");
+      if (offerButton) {
+        const rosterClass = rosterClasses.find((item) => item.id === offerButton.dataset.directorWaitlistClass);
+        const student = rosterClass?.students.find((item) => item.id === offerButton.dataset.directorWaitlistOffer);
+        if (!rosterClass || !student) return;
+        openRosterStudentEditor(rosterClass, student, { navigationScope: "directory" });
+        const statusSelect = document.getElementById("roster-edit-status");
+        const trialDate = document.getElementById("roster-edit-trial-date");
+        if (statusSelect) statusSelect.value = "trial-scheduled";
+        const trialDetails = trialDate?.closest("details");
+        if (trialDetails) trialDetails.open = true;
+        showToast("Choose the trial date, then Save Dancer to move this child into Trial Classes");
+        window.setTimeout(() => trialDate?.focus(), 60);
+        return;
+      }
       const button = event.target.closest("[data-director-future-student]");
       if (!button) return;
       const rosterClass = rosterClasses.find((item) => item.id === button.dataset.directorFutureClass);
