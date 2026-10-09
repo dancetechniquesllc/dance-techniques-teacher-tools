@@ -3434,8 +3434,9 @@
     .teacher-future-prospect-card .roster-student-photo { width: 58px; height: 58px; flex-basis: 58px; }
     .teacher-future-prospect-card strong { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
     .teacher-future-prospect-card small { color: var(--muted); font-size: 10px; font-weight: 800; }
-    .future-waitlist-card { display: grid; gap: 8px; min-width: 0; padding: 8px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+    .future-waitlist-card { position: relative; display: grid; gap: 8px; min-width: 0; padding: 8px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
     .future-waitlist-card .teacher-future-prospect-card { border: 0; padding-bottom: 6px; }
+    .future-waitlist-order { position: absolute; z-index: 2; top: 10px; left: 10px; display: grid; min-width: 34px; height: 34px; place-items: center; padding: 0 7px; border: 1px solid #b88a2d; border-radius: 999px; background: #d7af58; color: #3f2a06; box-shadow: 0 2px 7px rgb(89 58 9 / .18); font-size: 11px; font-weight: 950; }
     .future-waitlist-action { min-height: 38px; border: 1px solid color-mix(in srgb, var(--sage) 68%, #526650); border-radius: 999px; background: var(--sage); color: #2f422f; font-weight: 900; }
 
     @media (max-width: 460px) {
@@ -27229,6 +27230,7 @@
           additionalInformation: {
             waitlist: true,
             waitlist_submission_id: "tour-waitlist-submission",
+            waitlist_submitted_at: "2026-10-08T14:00:00-05:00",
             requested_school: "Primrose Rowlett",
             requested_classroom: "Preschool 1"
           }
@@ -39027,21 +39029,30 @@
       })
         .sort((left, right) => new Date(right.student.additionalInformation?.trial_completed_at || 0) - new Date(left.student.additionalInformation?.trial_completed_at || 0)
           || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
-      const cardMarkup = ({ rosterClass, student }) => {
+      const ordinalLabel = (position) => {
+        const remainder = position % 100;
+        const suffix = remainder >= 11 && remainder <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" })[position % 10] || "th";
+        return `${position}${suffix}`;
+      };
+      const cardMarkup = ({ rosterClass, student }, waitlistPosition = 0) => {
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
         const timingLabel = student.status === "waitlisted"
           ? "Waitlist · Waiting for an opening"
           : `Trial Date: ${student.trialDate ? new Date(`${student.trialDate}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Not entered"}`;
         const profileButton = `<button class="teacher-future-prospect-card" type="button" data-director-future-student="${rosterSafe(student.id)}" data-director-future-class="${rosterSafe(rosterClass.id)}" aria-label="Open ${rosterSafe(rosterStudentFullName(student))}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${rosterSafe(dayLabel)}</span><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>${rosterSafe(timingLabel)}</small></button>`;
         return student.status === "waitlisted"
-          ? `<article class="future-waitlist-card">${profileButton}<button class="future-waitlist-action" type="button" data-director-waitlist-offer="${rosterSafe(student.id)}" data-director-waitlist-class="${rosterSafe(rosterClass.id)}">Offer a Trial Spot</button></article>`
+          ? `<article class="future-waitlist-card"><span class="future-waitlist-order" title="${rosterSafe(ordinalLabel(waitlistPosition))} in line">${rosterSafe(ordinalLabel(waitlistPosition))}</span>${profileButton}<button class="future-waitlist-action" type="button" data-director-waitlist-offer="${rosterSafe(student.id)}" data-director-waitlist-class="${rosterSafe(rosterClass.id)}">Offer a Trial Spot</button></article>`
           : profileButton;
       };
       const trialRecords = records.filter(({ student }) => student.status !== "waitlisted");
-      const waitlistRecords = records.filter(({ student }) => student.status === "waitlisted");
+      const waitlistRecords = records.filter(({ student }) => student.status === "waitlisted").sort((left, right) => {
+        const leftSubmitted = new Date(left.student.additionalInformation?.waitlist_submitted_at || left.student.createdAt || 0).valueOf();
+        const rightSubmitted = new Date(right.student.additionalInformation?.waitlist_submitted_at || right.student.createdAt || 0).valueOf();
+        return leftSubmitted - rightSubmitted || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student));
+      });
       const groupMarkup = (title, groupRecords, emptyCopy, className = "") => `<section class="director-future-dancer-group ${className}">
         <div class="director-future-dancer-group-header"><h4>${title}</h4><span class="director-future-dancer-group-count">${groupRecords.length}</span></div>
-        <div class="teacher-future-prospect-grid">${groupRecords.length ? groupRecords.map(cardMarkup).join("") : `<div class="roster-empty" style="grid-column:1/-1">${emptyCopy}</div>`}</div>
+        <div class="teacher-future-prospect-grid">${groupRecords.length ? groupRecords.map((record, index) => cardMarkup(record, className === "is-waitlist" ? index + 1 : 0)).join("") : `<div class="roster-empty" style="grid-column:1/-1">${emptyCopy}</div>`}</div>
       </section>`;
       list.innerHTML = [
         groupMarkup("Trial Classes", trialRecords, "No trial dancers match these filters."),
