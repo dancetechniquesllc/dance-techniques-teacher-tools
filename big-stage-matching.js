@@ -2,28 +2,65 @@
   const root = document.getElementById("big-stage-app");
   if (!root) return;
 
-  const matches = [
-    {
-      label: "Same teacher",
-      teacher: "Miss Lexi",
-      classes: [
-        ["Ballet & Tap · Pre-K", "Primrose School of Wylie", 7],
-        ["Ballet & Tap · Preschool", "Primrose School of North", 5]
-      ]
-    },
-    {
-      label: "Two teachers",
-      teacher: "Miss Liv + Miss Megan",
-      classes: [
-        ["Ballet · Preschool", "Wylie Montessori Academy · Sachse", 6],
-        ["Ballet · Pre-K", "Primrose School of Rowlett", 6]
-      ]
-    }
-  ];
-
   const escapeText = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
   }[character]));
+
+  const liveClasses = () => {
+    if (typeof window.getBigStageRosterClasses !== "function") return [];
+    return window.getBigStageRosterClasses().filter((classInfo) => (
+      classInfo?.id && classInfo?.teacherId && Number(classInfo?.enrolledCount) > 0
+    ));
+  };
+
+  const classSignature = (classInfo) => String(classInfo?.name || "")
+    .toLowerCase()
+    .replace(/\b(beginner|beginners|class|dance)\b/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+  const buildMatches = () => {
+    const classes = liveClasses();
+    const suggestions = [];
+    const included = new Set();
+    const byTeacher = new Map();
+
+    classes.forEach((classInfo) => {
+      const key = String(classInfo.teacherId);
+      if (!byTeacher.has(key)) byTeacher.set(key, []);
+      byTeacher.get(key).push(classInfo);
+    });
+
+    byTeacher.forEach((teacherClasses) => {
+      if (teacherClasses.length < 2) return;
+      suggestions.push({
+        label: "Same teacher",
+        teacher: teacherClasses[0].teacherName || "Assigned teacher",
+        classes: teacherClasses
+      });
+      teacherClasses.forEach((classInfo) => included.add(classInfo.id));
+    });
+
+    const byClassType = new Map();
+    classes.filter((classInfo) => !included.has(classInfo.id)).forEach((classInfo) => {
+      const key = classSignature(classInfo);
+      if (!key) return;
+      if (!byClassType.has(key)) byClassType.set(key, []);
+      byClassType.get(key).push(classInfo);
+    });
+
+    byClassType.forEach((compatibleClasses) => {
+      const teacherIds = new Set(compatibleClasses.map((classInfo) => classInfo.teacherId));
+      if (compatibleClasses.length < 2 || teacherIds.size < 2) return;
+      suggestions.push({
+        label: "Compatible classes",
+        teacher: [...new Set(compatibleClasses.map((classInfo) => classInfo.teacherName || "Assigned teacher"))].join(" + "),
+        classes: compatibleClasses
+      });
+    });
+
+    return suggestions;
+  };
 
   const toggle = (active) => {
     const nav = document.createElement("div");
@@ -37,6 +74,7 @@
   };
 
   const renderMatching = () => {
+    const matches = buildMatches();
     root.dataset.stageView = "matching";
     root.innerHTML = `
       <div class="big-stage-shell big-stage-matching-view">
@@ -45,15 +83,15 @@
           <button class="primary" type="button" data-stage-new>+ Add Show</button>
         </div>
         <div class="big-stage-matching-grid">
-          ${matches.map((match) => {
-            const total = match.classes.reduce((sum, item) => sum + item[2], 0);
+          ${matches.length ? matches.map((match) => {
+            const total = match.classes.reduce((sum, item) => sum + Number(item.enrolledCount || 0), 0);
             return `<article class="big-stage-match-card">
               <header><span class="big-stage-pill">${escapeText(match.label)}</span><h4>${escapeText(match.teacher)}</h4><strong>${total} dancers total</strong></header>
-              <div class="big-stage-match-classes">${match.classes.map(([name, school, dancers]) => `
-                <div><strong>${escapeText(name)}</strong><span>${escapeText(school)}</span><small>${dancers} dancers</small></div>`).join("")}</div>
+              <div class="big-stage-match-classes">${match.classes.map((classInfo) => `
+                <div><strong>${escapeText(classInfo.name)}</strong><span>${escapeText(classInfo.schoolName)}</span><small>${Number(classInfo.enrolledCount || 0)} dancers</small></div>`).join("")}</div>
               <button class="secondary" type="button" data-stage-new>Plan in a Show</button>
             </article>`;
-          }).join("")}
+          }).join("") : `<div class="big-stage-empty-shows"><strong>No matching classes yet.</strong><span>Suggestions will appear when two or more live classes share a teacher or class type.</span></div>`}
         </div>
       </div>`;
     root.querySelector(".big-stage-shell")?.prepend(toggle("matching"));

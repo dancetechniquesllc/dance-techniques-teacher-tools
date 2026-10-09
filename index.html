@@ -20159,8 +20159,8 @@
         ]
       }
     ];
-    window.getBigStageRosterClasses = () => rosterClasses
-      .filter((rosterClass) => rosterClass?.sourceActive !== false)
+    window.getBigStageRosterClasses = () => (sharedRosterReady ? rosterClasses : [])
+      .filter((rosterClass) => rosterClass?.sourceActive === true)
       .map((rosterClass) => {
         const activeStudents = (rosterClass.students || []).filter((student) => !["withdrawn", "inactive", "paused"].includes(String(student.status || "").toLowerCase()));
         const assignedTeacher = teachers.find((teacher) => String(teacher.id) === String(rosterClass.teacherId));
@@ -54413,11 +54413,11 @@
   <link rel="stylesheet" href="big-stage.css?v=20260911">
 <link rel="stylesheet" href="big-stage-order.css?v=20261005-compact-separation">
 <link rel="stylesheet" href="big-stage-wizard.css?v=20261006-roster-cards">
-<link rel="stylesheet" href="big-stage-matching.css?v=20261004-empty-shows">
+<link rel="stylesheet" href="big-stage-matching.css?v=20261008-live-classes">
   <script src="big-stage.js?v=20260911"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
 <script src="big-stage-wizard.js?v=20261006-roster-cards"></script>
-<script src="big-stage-matching.js?v=20261004-empty-shows"></script>
+<script src="big-stage-matching.js?v=20261008-live-classes"></script>
   <script src="director-task-sync.js?v=20260908"></script>
   <script src="director-corner.js?v=20260908"></script>
   <script src="tulle.js?v=20260729-questions"></script>
