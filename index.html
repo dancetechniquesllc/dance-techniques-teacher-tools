@@ -19288,6 +19288,7 @@
         <div class="roster-profile-two-row roster-profile-divider-before">
           <label id="roster-edit-status-wrap">Dancer Status
           <select id="roster-edit-status">
+            <option value="waitlisted">Waitlisted</option>
             <option value="trial-scheduled">Trial scheduled</option>
             <option value="trial-attended">Trial attended</option>
             <option value="ready-to-enroll">Ready to enroll</option>
@@ -22567,8 +22568,8 @@
     };
 
     const dbTime = (value = "") => value ? String(value).slice(0, 5) : "";
-    const uiStudentStatus = (status) => status === "paused" ? "paused" : status === "enrolled" ? "enrolled" : "trial-scheduled";
-    const dbEnrollmentStatus = (status) => status === "paused" ? "paused" : status === "enrolled" ? "enrolled" : "trial";
+    const uiStudentStatus = (status) => status === "paused" ? "paused" : status === "enrolled" ? "enrolled" : status === "waitlisted" ? "waitlisted" : "trial-scheduled";
+    const dbEnrollmentStatus = (status) => status === "paused" ? "paused" : status === "enrolled" ? "enrolled" : status === "waitlisted" ? "waitlisted" : "trial";
 
     const loadSharedClassesAndRosters = async (profile = window.dtCurrentProfile) => {
       const client = window.dtSupabase;
@@ -22602,7 +22603,7 @@
         partnerSchoolsQuery,
         client.from("teacher_school_assignments").select("id, teacher_id, partner_school_id, active, created_at, updated_at").order("updated_at", { ascending: false }),
         client.from("dance_classes").select("*").eq("status", "active"),
-        client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled", "paused"]),
+        client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled", "paused", "waitlisted"]),
         client.from("student_notes").select("id, student_id, note, created_at").order("created_at", { ascending: false }),
         client.from("class_enrollments").select("id, dance_class_id, student_id, ended_date, students(*)").eq("status", "withdrawn").order("ended_date", { ascending: false }),
         client.from("class_attendance_records").select("dance_class_id, student_id, attendance_date, status, check_in_at, check_out_at"),
@@ -38849,6 +38850,7 @@
       "trial-scheduled": "Trial scheduled",
       "trial-attended": "Trial attended",
       "ready-to-enroll": "Ready to enroll",
+      "waitlisted": "Waitlisted",
       "paused": "Paused"
     }[status] || "Future Dancer");
 
@@ -38990,7 +38992,10 @@
           || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
       list.innerHTML = records.length ? records.map(({ rosterClass, student }) => {
         const dayLabel = ({ Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th", Friday: "F" })[rosterClass.day] || "—";
-        return `<button class="teacher-future-prospect-card" type="button" data-director-future-student="${rosterSafe(student.id)}" data-director-future-class="${rosterSafe(rosterClass.id)}" aria-label="Open ${rosterSafe(rosterStudentFullName(student))}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${rosterSafe(dayLabel)}</span><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>Trial Date: ${rosterSafe(student.trialDate ? new Date(`${student.trialDate}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Not entered")}</small></button>`;
+        const timingLabel = student.status === "waitlisted"
+          ? "Waitlist · Waiting for an opening"
+          : `Trial Date: ${student.trialDate ? new Date(`${student.trialDate}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }) : "Not entered"}`;
+        return `<button class="teacher-future-prospect-card" type="button" data-director-future-student="${rosterSafe(student.id)}" data-director-future-class="${rosterSafe(rosterClass.id)}" aria-label="Open ${rosterSafe(rosterStudentFullName(student))}"><span class="student-library-day-bubble" title="${rosterSafe(rosterClass.day || "Dance day not set")}">${rosterSafe(dayLabel)}</span><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</small><small>${rosterSafe(timingLabel)}</small></button>`;
       }).join("") : `<div class="roster-empty" style="grid-column:1/-1">No future dancers match these filters.</div>`;
     };
 

@@ -388,6 +388,9 @@ verify_jwt = false
 [functions.jotform-enrollment-change-webhook]
 verify_jwt = false
 
+[functions.jotform-waitlist-webhook]
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
