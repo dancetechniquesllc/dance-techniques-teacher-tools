@@ -27204,6 +27204,33 @@
     loadPersistedAppData();
 
     if (document.body.dataset.tourMode === "true") {
+      const previewWaitlistClass = rosterClasses.find((rosterClass) => (
+        rosterClass.id === "rowlett-beginners"
+        || enrollmentSchoolNameMatches(rosterClass.schoolName, "Primrose Rowlett")
+      ));
+      if (previewWaitlistClass && !previewWaitlistClass.students.some((student) => student.id === "tour-waitlist-dancer")) {
+        previewWaitlistClass.students.push({
+          id: "tour-waitlist-dancer",
+          firstName: "Maya",
+          lastName: "Sample",
+          classroom: "Preschool 1",
+          officialClassroom: "Preschool 1",
+          birthdate: "2022-06-14",
+          status: "waitlisted",
+          parentName: "Jordan Sample",
+          parentFirstName: "Jordan",
+          parentLastName: "Sample",
+          parentPhone: "(972) 555-0142",
+          parentEmail: "waitlist.sample@example.com",
+          notes: "Sample waitlist submission for preview only.",
+          additionalInformation: {
+            waitlist: true,
+            waitlist_submission_id: "tour-waitlist-submission",
+            requested_school: "Primrose Rowlett",
+            requested_classroom: "Preschool 1"
+          }
+        });
+      }
       const previewMadeline = {
         id: "madeline-spataro-preview",
         firstName: "Madeline",
