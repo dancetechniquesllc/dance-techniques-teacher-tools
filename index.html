@@ -20186,10 +20186,10 @@
         ]
       }
     ];
-    window.getBigStageRosterClasses = () => (sharedRosterReady ? rosterClasses : [])
-      .filter((rosterClass) => rosterClass?.sourceActive === true)
+    window.getBigStageRosterClasses = () => (sharedRosterReady || document.body.dataset.tourMode === "true" ? rosterClasses : [])
+      .filter((rosterClass) => rosterClass?.sourceActive !== false)
       .map((rosterClass) => {
-        const activeStudents = (rosterClass.students || []).filter((student) => !["withdrawn", "inactive", "paused"].includes(String(student.status || "").toLowerCase()));
+        const activeStudents = (rosterClass.students || []).filter((student) => String(student.status || "").toLowerCase() === "enrolled");
         const assignedTeacher = teachers.find((teacher) => String(teacher.id) === String(rosterClass.teacherId));
         return {
           id: String(rosterClass.id || ""),
