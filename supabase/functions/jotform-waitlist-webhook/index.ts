@@ -27,7 +27,20 @@ const flattenAnswers = (rawRequest: JsonRecord) => {
     if (answer) answers.set(normalizedKey(key), answer);
     if (value && typeof value === "object" && !Array.isArray(value)) {
       const record = value as JsonRecord;
-      if ("answer" in record) visit(key, record.answer);
+      const questionId = clean(record.qid) || clean(key).match(/^q?(\d+)/i)?.[1] || "";
+      const questionName = clean(record.name);
+      const aliases = [
+        questionName,
+        questionId && questionName ? `q${questionId}_${questionName}` : "",
+        questionId ? `q${questionId}` : ""
+      ].filter(Boolean);
+      aliases.forEach((alias) => {
+        if (answer) answers.set(normalizedKey(alias), answer);
+      });
+      if ("answer" in record) {
+        visit(key, record.answer);
+        aliases.forEach((alias) => visit(alias, record.answer));
+      }
       Object.entries(record)
         .filter(([childKey]) => !["name", "text", "label", "question", "qid", "answer"].includes(childKey))
         .forEach(([childKey, childValue]) => visit(`${key}${childKey}`, childValue));
@@ -46,9 +59,9 @@ const answerFor = (answers: Map<string, string>, ...aliases: string[]) => {
 };
 
 const waitlistBirthDate = (answers: Map<string, string>) => {
-  const month = answerFor(answers, "q6_dancersBirthday_month", "q6dancersBirthdaymonth");
-  const day = answerFor(answers, "q6_dancersBirthday_day", "q6dancersBirthdayday");
-  const year = answerFor(answers, "q6_dancersBirthday_year", "q6dancersBirthdayyear");
+  const month = answerFor(answers, "q6_dancersBirthday_month", "q6dancersBirthdaymonth", "dancersBirthdaymonth");
+  const day = answerFor(answers, "q6_dancersBirthday_day", "q6dancersBirthdayday", "dancersBirthdayday");
+  const year = answerFor(answers, "q6_dancersBirthday_year", "q6dancersBirthdayyear", "dancersBirthdayyear");
   if (!month || !day || !year) return null;
   const value = `${year.padStart(4, "0")}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
   const parsed = new Date(`${value}T00:00:00Z`);
@@ -98,14 +111,14 @@ Deno.serve(async (request) => {
     if (formId !== expectedFormId) return new Response(JSON.stringify({ ok: false }), { status: 403, headers: responseHeaders });
 
     const answers = flattenAnswers(rawRequest);
-    const firstName = answerFor(answers, "q3_dancer_first", "q3dancerfirst");
-    const lastName = answerFor(answers, "q3_dancer_last", "q3dancerlast");
-    const schoolName = answerFor(answers, "q4_school", "q4school");
-    const classroom = answerFor(answers, "q5_classroom", "q5classroom");
-    const parentFirstName = answerFor(answers, "q8_parentguardian_first", "q8parentguardianfirst");
-    const parentLastName = answerFor(answers, "q8_parentguardian_last", "q8parentguardianlast");
-    const parentEmail = answerFor(answers, "q9_email", "q9email").toLowerCase();
-    const parentPhone = answerFor(answers, "q10_phoneNumber_full", "q10phonenumberfull");
+    const firstName = answerFor(answers, "q3_dancer_first", "q3dancerfirst", "dancerfirst");
+    const lastName = answerFor(answers, "q3_dancer_last", "q3dancerlast", "dancerlast");
+    const schoolName = answerFor(answers, "q4_school", "q4school", "school");
+    const classroom = answerFor(answers, "q5_classroom", "q5classroom", "classroom");
+    const parentFirstName = answerFor(answers, "q8_parentguardian_first", "q8parentguardianfirst", "parentguardianfirst");
+    const parentLastName = answerFor(answers, "q8_parentguardian_last", "q8parentguardianlast", "parentguardianlast");
+    const parentEmail = answerFor(answers, "q9_email", "q9email", "email").toLowerCase();
+    const parentPhone = answerFor(answers, "q10_phoneNumber_full", "q10phonenumberfull", "phonenumberfull");
     const birthDate = waitlistBirthDate(answers);
     if (!firstName || !lastName || !schoolName || !classroom) throw new Error("Required waitlist fields are missing");
 
@@ -141,7 +154,7 @@ Deno.serve(async (request) => {
 
     const classIds = danceClasses.map((item) => item.id);
     const { data: rosterRecords, error: rosterError } = await supabase.from("class_enrollments")
-      .select("dance_class_id,students(classroom,official_classroom)").in("dance_class_id", classIds).in("status", ["trial", "enrolled", "paused", "waitlisted"]);
+      .select("dance_class_id,students(classroom,official_classroom)").in("dance_class_id", classIds).in("status", ["trial", "enrolled", "waitlisted"]);
     if (rosterError) throw new Error(`Classroom matches could not be read: ${rosterError.code}`);
     const classroomKey = normalizedKey(classroom);
     const hint = classroomClassHint(classroom);
