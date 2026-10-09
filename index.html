@@ -8260,6 +8260,11 @@
     .enrollment-card-billing-bubble > span { color: var(--muted); font-size: 8px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
     .enrollment-card-billing-bubble > b { overflow: hidden; font-size: 10px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
     .enrollment-future-match-heart { position: absolute; top: 36px; right: 13px; width: 22px; height: 20px; display: grid; place-items: center; background: var(--blush); color: var(--berry); font-size: 11px; line-height: 1; clip-path: path("M11 19C9 16 1 12 1 6 1 2 4 0 7 0c2 0 3 1 4 3 1-2 2-3 4-3 3 0 6 2 6 6 0 6-8 10-10 13Z"); filter: drop-shadow(0 1px 1px rgb(91 45 55 / .16)); }
+    .enrollment-future-merge-suggestion { display: grid; grid-template-columns: auto 1fr; gap: 10px 13px; align-items: center; margin-bottom: 14px; padding: 14px 16px; border: 1px solid color-mix(in srgb, var(--gold) 58%, var(--border)); border-radius: 14px; background: color-mix(in srgb, var(--gold) 14%, white); }
+    .enrollment-future-merge-suggestion .roster-student-photo { grid-row: 1 / span 2; width: 52px; height: 52px; }
+    .enrollment-future-merge-suggestion strong, .enrollment-future-merge-suggestion small { display: block; }
+    .enrollment-future-merge-suggestion small { color: var(--muted); }
+    .enrollment-future-merge-suggestion em { grid-column: 1 / -1; color: var(--berry); font-size: 11px; font-style: normal; font-weight: 800; }
     .enrollment-priority-bubble { display: inline-flex; width: fit-content; align-items: center; margin-top: 3px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1; }
     .enrollment-priority-bubble.today { background: oklch(91% 0.09 25); color: oklch(43% 0.16 25); }
     .enrollment-priority-bubble.tomorrow { background: oklch(93% 0.11 92); color: oklch(43% 0.1 72); }
@@ -21630,17 +21635,20 @@
     const enrollmentRelatedDancerBubbles = (item) => enrollmentRelatedDancerNames(item).map((name) => `<span class="enrollment-related-bubble">${escapeText(name)}<button type="button" data-enrollment-related-remove="${escapeText(name)}" aria-label="Remove ${escapeText(name)}">×</button></span>`).join("");
     const relatedDancerNamesFromValue = (value) => String(value || "").split(" • ").map((name) => name.trim()).filter(Boolean);
     const enrollmentPersonMatchKey = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const enrollmentMatchEmail = (value) => String(value || "").trim().toLowerCase();
+    const enrollmentMatchPhone = (value) => String(value || "").replace(/\D/g, "").slice(-10);
     const futureDancerMatchForEnrollment = (item) => {
       const enrollmentNames = [
         [item?.student_first_name, item?.student_last_name].filter(Boolean).join(" "),
         [item?.student_preferred_name, item?.student_last_name].filter(Boolean).join(" ")
       ].map(enrollmentPersonMatchKey).filter(Boolean);
       if (!enrollmentNames.length) return null;
-      return rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).flatMap((rosterClass) => rosterClass.students
-        .filter((student) => student.status !== "enrolled"
-          && student.additionalInformation?.trial_completed
-          && !student.additionalInformation?.future_dancer_archived)
-        .map((student) => ({ rosterClass, student }))).find(({ rosterClass, student }) => {
+      const enrollmentEmail = enrollmentMatchEmail(item?.parent_email);
+      const enrollmentPhone = enrollmentMatchPhone(item?.parent_phone);
+      const enrollmentBirthdate = String(item?.student_birth_date || "").slice(0, 10);
+      const candidates = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).flatMap((rosterClass) => rosterClass.students
+        .filter((student) => !["enrolled", "paused", "inactive"].includes(student.status) && !student.additionalInformation?.future_dancer_archived)
+        .map((student) => ({ rosterClass, student }))).map(({ rosterClass, student }) => {
           const futureNames = [
             rosterStudentFullName(student),
             [student.firstName, student.lastName].filter(Boolean).join(" "),
@@ -21650,8 +21658,16 @@
           const schoolMatches = !item?.requested_school_name
             || enrollmentSchoolNameMatches(rosterClass.schoolName, item.requested_school_name)
             || enrollmentSchoolNameMatches(rosterSchoolNickname(rosterClass.schoolName), item.requested_school_name);
-          return nameMatches && schoolMatches;
-        }) || null;
+          const birthdateMatches = Boolean(enrollmentBirthdate && enrollmentBirthdate === String(student.birthdate || "").slice(0, 10));
+          const emailMatches = Boolean(enrollmentEmail && enrollmentEmail === enrollmentMatchEmail(student.parentEmail));
+          const phoneMatches = Boolean(enrollmentPhone && enrollmentPhone === enrollmentMatchPhone(student.parentPhone));
+          const identityMatches = [birthdateMatches, emailMatches, phoneMatches].filter(Boolean).length;
+          const score = (nameMatches ? 5 : 0) + (birthdateMatches ? 4 : 0) + (emailMatches ? 3 : 0) + (phoneMatches ? 3 : 0) + (schoolMatches ? 2 : 0);
+          const reasons = [nameMatches ? "same dancer name" : "", birthdateMatches ? "same birthday" : "", emailMatches ? "same parent email" : "", phoneMatches ? "same parent phone" : "", schoolMatches ? "same school" : ""].filter(Boolean);
+          return { rosterClass, student, score, reasons, strong: nameMatches && identityMatches > 0 && score >= 9 };
+        }).filter((candidate) => candidate.strong)
+        .sort((left, right) => right.score - left.score || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
+      return candidates[0] || null;
     };
     const rosterStudentRecordByName = (name) => {
       const normalized = String(name || "").trim().toLowerCase();
@@ -21859,6 +21875,7 @@
         </article>`;
       }).join("");
       const placed = item.status === "placed";
+      const futureDancerMatch = futureDancerMatchForEnrollment(item);
       const historyBadge = enrollmentHistoryBadge(item.enrollment_history);
       const tuition = suggestedEnrollmentTuition(item, suggestion);
       const enrollmentStudentName = [item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "Enrollment Review";
@@ -21974,6 +21991,11 @@
             <button class="${item.parent_invited_at ? "primary" : "secondary"}" type="button" data-enrollment-welcome-email ${item.parent_invited_at || enrollmentWelcomeSending.has(item.id) ? "disabled" : ""}>${enrollmentWelcomeSending.has(item.id) ? "Sending… " : item.parent_invited_at ? "✓ " : "○ "}Welcome Email</button>
           </div>` : `
           <section class="enrollment-placement-class-section">
+            ${futureDancerMatch ? `<div class="enrollment-future-merge-suggestion">
+              <span class="roster-student-photo is-prospect-heart">${futureDancerMatch.student.photo ? `<img src="${escapeText(futureDancerMatch.student.photo)}" alt="">` : ""}</span>
+              <span><strong>Suggested Merge: ${escapeText(rosterStudentFullName(futureDancerMatch.student))}</strong><small>${escapeText(futureDancerMatch.student.status === "waitlisted" ? "Waitlist" : "Prospective Dancer")} · ${escapeText(rosterSchoolNickname(futureDancerMatch.rosterClass.schoolName))} · ${escapeText(futureDancerMatch.rosterClass.name)}</small></span>
+              <em>${escapeText(futureDancerMatch.reasons.join(" + "))}. Approving this enrollment will merge the records.${futureDancerMatch.student.trialDate ? ` Trial: ${escapeText(new Date(`${futureDancerMatch.student.trialDate}T12:00:00`).toLocaleDateString())}.` : ""}</em>
+            </div>` : ""}
             <div class="enrollment-placement-class-grid">
               ${enrollmentClassCards || `<div class="roster-empty">Choose an Official School to see its available classes.</div>`}
             </div>
@@ -22398,6 +22420,14 @@
         .subscribe();
     };
 
+    const trialFallsWithinEnrollmentWindow = (trialDate, enrollmentDate) => {
+      const trial = new Date(`${String(trialDate || "").slice(0, 10)}T12:00:00`);
+      const enrolled = new Date(enrollmentDate || "");
+      if (Number.isNaN(trial.valueOf()) || Number.isNaN(enrolled.valueOf())) return false;
+      const daysBeforeEnrollment = Math.floor((enrolled.valueOf() - trial.valueOf()) / 86400000);
+      return daysBeforeEnrollment >= 0 && daysBeforeEnrollment <= 28;
+    };
+
     const transferFutureDancerEnrollment = async (item, match) => {
       if (!item || !match) return;
       const futureRecord = rosterClasses.flatMap((rosterClass) => rosterClass.students.map((student) => ({ rosterClass, student })))
@@ -22406,10 +22436,17 @@
         .find(({ student }) => student.id === item.placed_student_id);
       if (!futureRecord || !placedRecord) return;
       if (match.trialDate) placedRecord.student.trialDate = match.trialDate;
+      const trialOccurred = Boolean(futureRecord.student.additionalInformation?.trial_completed || futureRecord.student.additionalInformation?.trial_completed_at);
+      const trialCountsAsReceivedClass = trialOccurred && trialFallsWithinEnrollmentWindow(match.trialDate, item.submitted_at || item.created_at || item.placed_at);
       placedRecord.student.additionalInformation = {
         ...(placedRecord.student.additionalInformation || {}),
         matched_future_dancer_id: futureRecord.student.id,
-        original_trial_date: match.trialDate || null
+        original_trial_date: match.trialDate || null,
+        ...(trialCountsAsReceivedClass ? {
+          trial_counted_as_received_class: true,
+          trial_received_class_date: match.trialDate,
+          trial_received_class_id: futureRecord.rosterClass.id
+        } : {})
       };
       futureRecord.student.additionalInformation = {
         ...(futureRecord.student.additionalInformation || {}),
@@ -22419,6 +22456,21 @@
         archived_for_student_id: placedRecord.student.id
       };
       scheduleAppDataSave();
+      if (trialCountsAsReceivedClass) {
+        futureRecord.rosterClass.attendance ||= {};
+        futureRecord.rosterClass.attendance[match.trialDate] ||= {};
+        futureRecord.rosterClass.attendance[match.trialDate][placedRecord.student.id] = { status: "present", checkInAt: "", checkOutAt: "" };
+        if (document.body.dataset.tourMode !== "true" && window.dtSupabase) {
+          const { error: attendanceError } = await window.dtSupabase.from("class_attendance_records").upsert({
+            dance_class_id: futureRecord.rosterClass.id,
+            student_id: placedRecord.student.id,
+            attendance_date: match.trialDate,
+            status: "present",
+            marked_by: window.dtCurrentProfile?.id
+          }, { onConflict: "dance_class_id,student_id,attendance_date" });
+          if (attendanceError) console.error("The matched trial class could not be added to attendance history", attendanceError);
+        }
+      }
       await Promise.all([
         saveSharedStudent(placedRecord.student, placedRecord.rosterClass),
         saveSharedStudent(futureRecord.student, futureRecord.rosterClass)
