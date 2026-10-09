@@ -2882,10 +2882,11 @@
     .photo-frame-body { display: grid; gap: 10px; padding: 4px 16px 14px; }
     .photo-frame-picker { display:grid; gap:6px; font-size:13px; font-weight:800; }
     .photo-frame-picker select { width:100%; min-height:44px; border:1px solid var(--brick); border-radius:12px; padding:10px 12px; background:white; color:var(--fg); font:inherit; }
-    .photo-frame-stage { position: relative; width: min(100%, 250px); aspect-ratio: 2 / 3; margin-inline: auto; overflow: hidden; border-radius: 18px; background: #181515; touch-action: none; }
+    .photo-frame-stage { position: relative; width: min(100%, 250px); aspect-ratio: 2 / 3; margin-inline: auto; overflow: hidden; border-radius: 18px; background: #181515; touch-action: none; transition: width .2s ease, aspect-ratio .2s ease; }
+    .photo-frame-stage.is-landscape { width: min(100%, 460px); aspect-ratio: 3 / 2; }
     .photo-frame-stage video, .photo-frame-stage > img { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .photo-frame-stage video { object-fit: contain; background: #181515; }
-    .photo-frame-stage > img { z-index: 1; object-fit: fill; pointer-events: none; }
+    .photo-frame-stage video { object-fit: cover; background: #181515; }
+    .photo-frame-stage > img { z-index: 1; object-fit: contain; pointer-events: none; }
     .photo-frame-stage .photo-frame-result { z-index: 2; object-fit: cover; }
     .photo-frame-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
     .photo-frame-actions.is-result { display: grid; grid-template-columns: 54px 104px 54px; align-items: end; justify-content: space-between; width: 100%; }
@@ -54088,6 +54089,11 @@
       const anotherButton = modal.querySelector(".photo-frame-another");
       const saveButton = modal.querySelector(".photo-frame-save");
 
+      const selectedFrameIsLandscape = () => selectedFrame[1].endsWith("/group-photo.png");
+      const updateFrameLayout = () => {
+        stage.classList.toggle("is-landscape", selectedFrameIsLandscape());
+      };
+
       const stopCamera = () => {
         stream?.getTracks().forEach((track) => track.stop());
         stream = null;
@@ -54136,13 +54142,14 @@
         startButton.querySelector(".photo-frame-action-label").textContent = "Camera";
         status.textContent = "Opening camera…";
         try {
+          const landscapeFrame = selectedFrameIsLandscape();
           stream = await navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
               facingMode: { ideal: facingMode },
-              width: { ideal: 4096 },
-              height: { ideal: 6144 },
-              aspectRatio: { ideal: 2 / 3 }
+              width: { ideal: landscapeFrame ? 6144 : 4096 },
+              height: { ideal: landscapeFrame ? 4096 : 6144 },
+              aspectRatio: { ideal: landscapeFrame ? 3 / 2 : 2 / 3 }
             }
           });
           video.srcObject = stream;
@@ -54175,7 +54182,8 @@
         let photoSource = source;
         let photoSourceWidth = width;
         let photoSourceHeight = height;
-        const portraitCameraCapture = source === video
+        const portraitCameraCapture = !selectedFrameIsLandscape()
+          && source === video
           && window.matchMedia?.("(orientation: portrait)").matches
           && width > height;
         if (portraitCameraCapture) {
@@ -54191,8 +54199,9 @@
           photoSourceHeight = orientedCanvas.height;
         }
         const canvas = document.createElement("canvas");
-        canvas.width = 2048;
-        canvas.height = 3072;
+        const landscapeFrame = selectedFrameIsLandscape();
+        canvas.width = landscapeFrame ? 3072 : 2048;
+        canvas.height = landscapeFrame ? 2048 : 3072;
         const context = canvas.getContext("2d");
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
@@ -54321,12 +54330,14 @@
 
       document.addEventListener("click", (event) => {
         if (event.target.closest("[data-teacher-photo-frames]")) {
+          updateFrameLayout();
           modal.hidden = false;
           document.body.style.overflow = "hidden";
         }
       });
       modal.querySelector(".photo-frame-select").addEventListener("change", (event) => {
         selectedFrame = frames[Number(event.target.value)] || frames[0];
+        updateFrameLayout();
         overlay.src = selectedFrame[1];
         overlay.alt = `${selectedFrame[0]} frame preview`;
         resetResult();
