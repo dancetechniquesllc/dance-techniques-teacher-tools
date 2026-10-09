@@ -22361,6 +22361,7 @@
         if(error){console.error("School change completion could not save",error);showToast("The dancer moved, but the request status could not be saved");return false;}
       }
       enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
+      await showSchoolChangeWaitlistOpportunity(item, source);
       if(!quiet)showToast("School, classroom, and dance class updated");
       return true;
     };
@@ -39091,7 +39092,7 @@
       const schoolWaitlist = waitlistRecordsForSchool(rosterClass.schoolName);
       const eligible = schoolWaitlist.map((record, index) => ({ ...record, position: index + 1 }))
         .filter(({ student }) => dancerAgeDifferenceMonths(departingStudent.birthdate, student.birthdate) <= 12);
-      if (!eligible.length) return;
+      if (!eligible.length) return false;
       document.getElementById("waitlist-opening-overlay")?.remove();
       const ordinal = (position) => {
         const remainder = position % 100;
@@ -39157,6 +39158,47 @@
           showToast(error.message || "The spot-available email could not be sent.");
         }
       });
+      return true;
+    };
+
+    const markSchoolChangeWaitlistPromptHandled = async (requestId) => {
+      if (!requestId || document.body.dataset.tourMode === "true" || !window.dtSupabase) return;
+      const { error } = await window.dtSupabase.from("enrollment_change_requests")
+        .update({ waitlist_prompted_at: new Date().toISOString() })
+        .eq("id", requestId);
+      if (error) console.error("School-change waitlist prompt status could not save", error);
+    };
+
+    const showSchoolChangeWaitlistOpportunity = async (item, source = null) => {
+      let opening = source;
+      if (!opening && item?.assigned_student_id && window.dtSupabase) {
+        const { data: event, error } = await window.dtSupabase.from("payroll_enrollment_events")
+          .select("from_class_id")
+          .eq("source_request_id", item.id)
+          .eq("event_type", "school_change")
+          .maybeSingle();
+        if (error) console.error("School-change opening could not load", error);
+        const rosterClass = rosterClasses.find((candidate) => String(candidate.id) === String(event?.from_class_id));
+        const student = enrollmentChangeStudentRecords().find(({ student: candidate }) => String(candidate.id) === String(item.assigned_student_id))?.student;
+        if (rosterClass && student) opening = { rosterClass, student };
+      }
+      if (!opening) return false;
+      openWaitlistOpportunityPrompt(opening);
+      await markSchoolChangeWaitlistPromptHandled(item?.id);
+      return true;
+    };
+
+    const loadPendingSchoolChangeWaitlistPrompts = async (profile = window.dtCurrentProfile) => {
+      if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !["admin", "director"].includes(profile?.role)) return;
+      const { data, error } = await window.dtSupabase.from("enrollment_change_requests")
+        .select("id,assigned_student_id")
+        .eq("status", "completed")
+        .not("target_class_id", "is", null)
+        .is("waitlist_prompted_at", null)
+        .order("completed_at", { ascending: true })
+        .limit(10);
+      if (error) { console.error("Completed school-change openings could not load", error); return; }
+      if (data?.[0]) await showSchoolChangeWaitlistOpportunity(data[0]);
     };
 
     const renderEnrollmentStudentSummary = () => {
@@ -54004,6 +54046,7 @@
       subscribeSharedStaffAnnouncements();
       await loadEnrollmentIntakeQueue(profile);
       await loadEnrollmentChanges(profile);
+      await loadPendingSchoolChangeWaitlistPrompts(profile);
       await loadNotificationSystem(profile);
       refreshPushDeviceReadiness().catch(() => false);
       await loadStaffFeedbackInbox();
