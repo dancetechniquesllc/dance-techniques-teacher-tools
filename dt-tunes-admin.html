@@ -51,10 +51,15 @@
     .card-head p, .help, .empty { margin: 5px 0 0; color: var(--muted); font-size: .9rem; }
     .playlist-layout { display: grid; grid-template-columns: minmax(235px, .72fr) minmax(0, 1.55fr); gap: 16px; }
     .playlist-list { display: grid; gap: 8px; align-content: start; }
-    .playlist-choice { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 3px 10px; text-align: left; padding: 13px 14px; border: 1px solid var(--line); border-radius: 14px; background: #fffafa; color: var(--ink); }
+    .playlist-choice { width: 100%; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 3px 10px; align-items: center; text-align: left; padding: 13px 14px; border: 1px solid var(--line); border-radius: 14px; background: #fffafa; color: var(--ink); }
     .playlist-choice strong { overflow-wrap: anywhere; }
-    .playlist-choice small { grid-column: 1 / -1; color: var(--muted); }
+    .playlist-choice small { grid-column: 2 / -1; color: var(--muted); }
     .playlist-choice.selected { border-color: var(--burgundy); background: var(--blush); box-shadow: inset 4px 0 var(--burgundy); }
+    .playlist-choice.is-dragging { opacity: .45; }
+    .playlist-choice.is-drop-target { border-color: #4b9b78; box-shadow: 0 0 0 3px rgb(75 155 120 / .2); }
+    .playlist-drag-handle { grid-row: 1 / span 2; display: grid; place-items: center; width: 28px; min-height: 38px; margin-left: -7px; border-radius: 999px; color: var(--muted); font-size: 20px; line-height: 1; cursor: grab; touch-action: none; user-select: none; }
+    .playlist-drag-handle:active { cursor: grabbing; background: rgb(75 155 120 / .14); color: var(--burgundy); }
+    .playlist-order-status { min-height: 20px; margin: 8px 4px 0; color: var(--muted); font-size: .82rem; font-weight: 650; }
     .teacher-dot { align-self: center; width: 9px; height: 9px; border-radius: 50%; background: #4b9b78; }
     .track-list { display: grid; gap: 8px; }
     .track-row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 10px; border: 1px solid #f0e1e4; border-radius: 14px; background: #fff; }
@@ -160,6 +165,7 @@
         <div class="playlist-layout">
           <div>
             <div class="playlist-list" id="playlist-list"></div>
+            <p class="playlist-order-status" id="playlist-order-status">Drag playlists to choose the order teachers see.</p>
             <p class="hidden-summary" id="hidden-summary"></p>
           </div>
           <div>
@@ -371,7 +377,7 @@
       const active = state.playlists.filter((playlist) => playlist.active);
       $("#playlist-list").innerHTML = active.length ? active.map((playlist) => {
         const count = tracksForPlaylist(playlist.id).length;
-        return `<button class="playlist-choice ${playlist.id === state.selectedPlaylistId ? "selected" : ""}" type="button" data-playlist-id="${escapeText(playlist.id)}"><strong>${escapeText(playlist.name)}</strong><span class="teacher-dot" title="Visible to teachers"></span><small>${count} song${count === 1 ? "" : "s"} · Visible to teachers</small></button>`;
+        return `<button class="playlist-choice ${playlist.id === state.selectedPlaylistId ? "selected" : ""}" type="button" draggable="true" data-playlist-id="${escapeText(playlist.id)}"><span class="playlist-drag-handle" aria-hidden="true" title="Drag to reorder">⋮⋮</span><strong>${escapeText(playlist.name)}</strong><span class="teacher-dot" title="Visible to teachers"></span><small>${count} song${count === 1 ? "" : "s"} · Visible to teachers</small></button>`;
       }).join("") : `<p class="empty">No teacher playlists yet.</p>`;
       const hiddenCount = state.playlists.length - active.length;
       $("#hidden-summary").textContent = hiddenCount ? `${hiddenCount} older playlist${hiddenCount === 1 ? " is" : "s are"} safely hidden from teachers.` : "";
@@ -447,6 +453,93 @@
       return null;
     }
 
+    async function savePlaylistOrder(orderedPlaylistIds) {
+      const previousOrder = new Map(state.playlists.map((playlist) => [playlist.id, playlist.sort_order]));
+      const activeById = new Map(state.playlists.filter((playlist) => playlist.active).map((playlist) => [playlist.id, playlist]));
+      orderedPlaylistIds.forEach((id, index) => { if (activeById.has(id)) activeById.get(id).sort_order = index; });
+      state.playlists.sort((left, right) => Number(left.sort_order) - Number(right.sort_order));
+      setStatus("#playlist-order-status", "Saving playlist order…");
+      for (let index = 0; index < orderedPlaylistIds.length; index += 1) {
+        const { error } = await state.client.from("music_playlists").update({ sort_order: index, updated_at: new Date().toISOString() }).eq("id", orderedPlaylistIds[index]);
+        if (error) {
+          state.playlists.forEach((playlist) => { if (previousOrder.has(playlist.id)) playlist.sort_order = previousOrder.get(playlist.id); });
+          state.playlists.sort((left, right) => Number(left.sort_order) - Number(right.sort_order));
+          renderPlaylists();
+          setStatus("#playlist-order-status", "That order could not be saved. Please try again.", true);
+          return false;
+        }
+      }
+      setStatus("#playlist-order-status", "Playlist order saved for teachers.");
+      return true;
+    }
+
+    let draggedPlaylistId = "";
+    let playlistPointerDrag = null;
+    let suppressPlaylistClick = false;
+    const playlistOrderFromDom = () => [...document.querySelectorAll("#playlist-list [data-playlist-id]")].map((item) => item.dataset.playlistId);
+    const clearPlaylistDropState = () => document.querySelectorAll("#playlist-list .playlist-choice").forEach((item) => item.classList.remove("is-dragging", "is-drop-target"));
+    const movePlaylistCardTowardPointer = (card, clientY) => {
+      if (!card || !playlistPointerDrag?.card || card === playlistPointerDrag.card) return;
+      const rect = card.getBoundingClientRect();
+      document.querySelectorAll("#playlist-list .playlist-choice").forEach((item) => item.classList.toggle("is-drop-target", item === card));
+      card.parentElement.insertBefore(playlistPointerDrag.card, clientY < rect.top + rect.height / 2 ? card : card.nextSibling);
+    };
+
+    $("#playlist-list").addEventListener("dragstart", (event) => {
+      const card = event.target.closest("[data-playlist-id]");
+      if (!card) return;
+      draggedPlaylistId = card.dataset.playlistId;
+      playlistPointerDrag = { card };
+      card.classList.add("is-dragging");
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", draggedPlaylistId);
+    });
+    $("#playlist-list").addEventListener("dragover", (event) => {
+      if (!draggedPlaylistId) return;
+      event.preventDefault();
+      movePlaylistCardTowardPointer(event.target.closest("[data-playlist-id]"), event.clientY);
+    });
+    $("#playlist-list").addEventListener("drop", async (event) => {
+      if (!draggedPlaylistId) return;
+      event.preventDefault();
+      const order = playlistOrderFromDom();
+      draggedPlaylistId = "";
+      playlistPointerDrag = null;
+      clearPlaylistDropState();
+      suppressPlaylistClick = true;
+      await savePlaylistOrder(order);
+    });
+    $("#playlist-list").addEventListener("dragend", () => {
+      draggedPlaylistId = "";
+      playlistPointerDrag = null;
+      clearPlaylistDropState();
+    });
+    $("#playlist-list").addEventListener("pointerdown", (event) => {
+      const handle = event.target.closest(".playlist-drag-handle");
+      const card = handle?.closest("[data-playlist-id]");
+      if (!card || event.pointerType === "mouse") return;
+      event.preventDefault();
+      handle.setPointerCapture?.(event.pointerId);
+      playlistPointerDrag = { card, pointerId: event.pointerId, moved: false };
+      card.classList.add("is-dragging");
+    });
+    $("#playlist-list").addEventListener("pointermove", (event) => {
+      if (!playlistPointerDrag || playlistPointerDrag.pointerId !== event.pointerId) return;
+      event.preventDefault();
+      playlistPointerDrag.moved = true;
+      movePlaylistCardTowardPointer(document.elementFromPoint(event.clientX, event.clientY)?.closest?.("[data-playlist-id]"), event.clientY);
+    });
+    $("#playlist-list").addEventListener("pointerup", async (event) => {
+      if (!playlistPointerDrag || playlistPointerDrag.pointerId !== event.pointerId) return;
+      const moved = playlistPointerDrag.moved;
+      const order = playlistOrderFromDom();
+      playlistPointerDrag = null;
+      clearPlaylistDropState();
+      if (!moved) return;
+      suppressPlaylistClick = true;
+      await savePlaylistOrder(order);
+    });
+
     function renderPlaylistChecks() {
       const active = state.playlists.filter((playlist) => playlist.active);
       $("#song-playlist-checks").innerHTML = active.length ? active.map((playlist) => `<label class="playlist-check"><input type="checkbox" value="${escapeText(playlist.id)}">${escapeText(playlist.name)}</label>`).join("") : `<p class="empty">Create a teacher playlist first.</p>`;
@@ -514,7 +607,11 @@
       if (tab) showTab(tab.dataset.tab);
       if (event.target.closest("[data-jump-add]")) showTab("add-song");
       const playlistButton = event.target.closest("[data-playlist-id]");
-      if (playlistButton) { state.selectedPlaylistId = playlistButton.dataset.playlistId; renderPlaylists(); }
+      if (playlistButton) {
+        if (suppressPlaylistClick) { suppressPlaylistClick = false; return; }
+        state.selectedPlaylistId = playlistButton.dataset.playlistId;
+        renderPlaylists();
+      }
       const sectionButton = event.target.closest("[data-catalog-section]");
       if (sectionButton) { state.catalogSection = sectionButton.dataset.catalogSection; renderCatalog(); }
       const moveButton = event.target.closest("[data-move-track]");
