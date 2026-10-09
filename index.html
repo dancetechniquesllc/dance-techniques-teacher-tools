@@ -8807,7 +8807,14 @@
     .recital-add-to-group { padding: 10px; border: 1px dashed color-mix(in srgb,var(--recital-group-tone) 75%,var(--berry)); border-radius: 11px; }
     .recital-add-performance-group { grid-column: 1/-1; display: grid; justify-items: center; gap: 3px; min-height: 76px; border: 1px dashed var(--brick); border-radius: 15px; background: transparent; color: var(--berry); font-size: 14px; font-weight: 900; }
     .recital-add-performance-group small { color: var(--muted); font-size: 9px; font-weight: 650; }
-    .recital-unassigned-warning { grid-column: 1/-1; padding: 12px; border: 1px solid #d8a447; border-radius: 12px; background: #fff5d8; color: #6b4d12; }
+    .recital-unassigned-warning { grid-column: 1/-1; display: grid; gap: 10px; padding: 12px; border: 1px solid #d8a447; border-radius: 12px; background: #fff5d8; color: #6b4d12; }
+    .recital-unassigned-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(230px,1fr)); gap: 10px; }
+    .recital-unassigned-dancer { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 10px; padding: 10px; border: 1px solid color-mix(in srgb,#d8a447 55%,white); border-radius: 12px; background: rgb(255 255 255 / .72); }
+    .recital-unassigned-dancer > div { min-width: 0; }
+    .recital-unassigned-dancer strong,.recital-unassigned-dancer small { display: block; }
+    .recital-unassigned-dancer small { margin-top: 2px; color: #78612d; }
+    .recital-unassigned-actions { grid-column: 1/-1; display: flex; flex-wrap: wrap; gap: 7px; }
+    .recital-unassigned-actions button { min-height: 34px; padding: 6px 10px; border-color: #d8a447; background: white; color: #6b4d12; font-size: 10px; }
     .recital-performance-groups.is-editing [draggable="true"] { cursor: grab; }
     .recital-performance-groups.is-editing [draggable="true"].is-dragging { opacity: .45; }
     .recital-split-alert { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 12px; margin: 16px 0; padding: 14px 16px; border: 1px solid color-mix(in srgb,var(--brick) 46%,var(--border)); border-radius: 16px; background: color-mix(in srgb,var(--blush) 24%,white); }
@@ -39210,7 +39217,7 @@
           <div class="recital-group-classrooms">${classrooms.map((classroom)=>{const classroomStudents=students.filter((student)=>String(student.officialClassroom||student.classroom||"Classroom Not Assigned").trim()===classroom);return `<section class="roster-classroom-group"><h5>${rosterSafe(classroom)} <small>${classroomStudents.length} dancer${classroomStudents.length===1?"":"s"}</small></h5><div class="roster-student-list">${classroomStudents.map((student)=>recitalGroupStudentMarkup(student,rosterClass,group,groups,editing)).join("")}</div></section>`;}).join("")}${editing&&!students.length?`<div class="recital-empty-classroom">Drop a dancer here</div>`:""}</div>
           <div class="roster-recital-planning is-${rosterSafe(group.requirement)}"><strong>Needs to Perform</strong><select class="roster-recital-select" data-recital-group-requirement="${rosterSafe(group.id)}"><option value="tap" ${group.requirement==="tap"?"selected":""}>Tap</option><option value="ballet" ${group.requirement==="ballet"?"selected":""}>Ballet</option><option value="either" ${group.requirement==="either"?"selected":""}>Either</option></select><span class="roster-recital-need">Ballet <strong>${needs.ballet}</strong></span><span class="roster-recital-need">Tap <strong>${needs.tap}</strong></span><span class="roster-recital-need">Either <strong>${needs.either}</strong></span></div>
         </section>`;
-      }).join("")}${editing?`<button class="recital-add-performance-group" type="button" data-recital-add-performance-group>＋ Add Performance Group<small>For larger classes, create another recital-only group.</small></button>`:""}${unassigned.length?`<div class="recital-unassigned-warning"><strong>${unassigned.length} dancer${unassigned.length===1?" needs":"s need"} a recital group:</strong> ${unassigned.map(rosterStudentFullName).map(rosterSafe).join(", ")}</div>`:""}</div>`;
+      }).join("")}${editing?`<button class="recital-add-performance-group" type="button" data-recital-add-performance-group>＋ Add Performance Group<small>For larger classes, create another recital-only group.</small></button>`:""}${unassigned.length?`<div class="recital-unassigned-warning"><strong>${unassigned.length} dancer${unassigned.length===1?" needs":"s need"} a recital group</strong><div class="recital-unassigned-list">${unassigned.map((student)=>`<article class="recital-unassigned-dancer"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${rosterSafe(student.photo)}" alt="">`:rosterSafe(rosterStudentInitials(student))}</span><div><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterAge(student.birthdate))}</small></div><div class="recital-unassigned-actions">${groups.map((group,index)=>`<button type="button" data-recital-assign-unassigned="${rosterSafe(student.id)}" data-recital-target-group="${rosterSafe(group.id)}">Add to ${String.fromCharCode(65+index)} · ${rosterSafe(group.name)}</button>`).join("")}</div></article>`).join("")}</div></div>`:""}</div>`;
     };
     const recitalSuggestionMarkup = (rosterClass) => {
       const suggestion = pendingRecitalGroupSuggestion;
@@ -52461,6 +52468,12 @@
       const rosterClass = rosterClasses.find((item) => item.id === selectedRosterClassId);
       if (!rosterClass) return;
       const recitalGroups = recitalPerformanceGroupsByClass.get(String(rosterClass.id)) || [];
+      const assignUnassigned = event.target.closest("[data-recital-assign-unassigned]");
+      if (assignUnassigned) {
+        void moveStudentToRecitalGroup(rosterClass, assignUnassigned.dataset.recitalAssignUnassigned, assignUnassigned.dataset.recitalTargetGroup)
+          .then((saved) => showToast(saved ? "Dancer added to the recital group" : "That recital assignment could not be saved."));
+        return;
+      }
       if (event.target.closest("[data-recital-suggest-split]")) {
         const suggested = buildSuggestedRecitalGroups(rosterClass);
         if (suggested.length < 2) return showToast("This class does not currently need more than one recital group.");

@@ -31,6 +31,7 @@ required_text=(
   'data-recital-suggest-split'
   'data-recital-edit-groups'
   'data-recital-performance-select'
+  'data-recital-assign-unassigned'
   'class_recital_performance_groups'
   'class_recital_performance_group_members'
 )
