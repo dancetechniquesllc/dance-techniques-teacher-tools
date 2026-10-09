@@ -22771,7 +22771,10 @@
       const payrollEventsQuery = ["admin", "director"].includes(profile.role)
         ? client.from("payroll_enrollment_events").select("id,student_id,from_class_id,to_class_id,event_type,effective_date,source_request_id,students(*)").order("effective_date", { ascending: true })
         : Promise.resolve({ data: [], error: null });
-      let [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, payrollEventsResult, recitalGroupsResult, recitalMembersResult] = await Promise.all([
+      const recitalHistoryQuery = ["admin", "director"].includes(profile.role)
+        ? client.from("enrollments").select("placed_student_id,placed_class_enrollment_id,requested_dance_style,created_at").not("placed_student_id", "is", null).order("created_at", { ascending: true })
+        : Promise.resolve({ data: [], error: null });
+      let [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, payrollEventsResult, recitalGroupsResult, recitalMembersResult, recitalHistoryResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
         client.from("guardian_user_accounts").select("user_id, guardian_id, revoked_at"),
         partnerSchoolsQuery,
@@ -22788,7 +22791,8 @@
         partnershipPreferencesQuery,
         payrollEventsQuery,
         ["admin", "director"].includes(profile.role) ? client.from("class_recital_performance_groups").select("*").order("position") : Promise.resolve({ data: [], error: null }),
-        ["admin", "director"].includes(profile.role) ? client.from("class_recital_performance_group_members").select("*") : Promise.resolve({ data: [], error: null })
+        ["admin", "director"].includes(profile.role) ? client.from("class_recital_performance_group_members").select("*") : Promise.resolve({ data: [], error: null }),
+        recitalHistoryQuery
       ]);
       // Older production schemas may not have the new `paused` enrollment enum
       // value yet. PostgreSQL rejects the entire `.in()` filter in that case,
@@ -22805,7 +22809,7 @@
       // when one of those optional tables is unavailable or still migrating.
       const failed = [profilesResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult].find((result) => result.error);
       const ancillaryFailures = [guardianAccountsResult, notesResult, archivedResult, payrollEventsResult,
-        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, recitalGroupsResult, recitalMembersResult].filter((result) => result.error);
+        attendanceTableUnavailable ? { error: null } : attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, recitalGroupsResult, recitalMembersResult, recitalHistoryResult].filter((result) => result.error);
       ancillaryFailures.forEach((result) => console.warn("Optional shared roster data could not be loaded", result.error));
       if (failed) {
         sharedRosterReady = false;
@@ -22991,6 +22995,9 @@
         console.error("The shared partner-school table is empty; the preserved directory remains visible and will not be overwritten.");
       }
       const enrollments = enrollmentsResult.data || [];
+      const recitalHistoryByStudentId = new Map((recitalHistoryResult.data || [])
+        .filter((record) => record.placed_student_id && String(record.requested_dance_style || "").trim())
+        .map((record) => [String(record.placed_student_id), String(record.requested_dance_style).trim()]));
       const emailHistoryByStudent = new Map();
       (emailHistoryResult.data || []).forEach((entry) => {
         if (!emailHistoryByStudent.has(entry.student_id)) emailHistoryByStudent.set(entry.student_id, []);
@@ -23082,6 +23089,7 @@
               systemEntryDate: student.created_at || "", createdAt: student.created_at || "", enrolledAt: student.created_at || "",
               parentFirstName: student.parent_first_name || "", parentLastName: student.parent_last_name || "", parentPhone: student.parent_phone || "",
               parentEmail: student.parent_email || "", tuitionDiscount: student.tuition_discount || "none", medicalNotes: student.medical_notes || "", registrationNotes: student.registration_notes || "",
+              requestedDanceStyle: recitalHistoryByStudentId.get(String(student.id)) || "",
               notes: note?.note || student.registration_notes || "", parentPortalConnected: connectedParentPortalStudentIds.has(String(student.id)), additionalInformation: student.additional_information && typeof student.additional_information === "object" ? { ...student.additional_information } : {},
               teacherFeedback: student.additional_information?.teacher_feedback || "", newsletterHistory: emailHistoryByStudent.get(student.id) || [], linkedFamilyEmails: (familyLinksByStudent.get(student.id) || []).map((link) => { const adult = Array.isArray(link.guardians) ? link.guardians[0] : link.guardians; return adult?.email || ""; }).filter(Boolean), photoPath: student.photo_path || "", photo: "" };
           })
@@ -39141,6 +39149,13 @@
       if (prior === "tap") counts.ballet += 1; else if (prior === "ballet") counts.tap += 1; else counts.either += 1;
       return counts;
     }, { ballet: 0, tap: 0, either: 0 });
+    const recitalPriorDanceLabel = (student) => {
+      const intakeRecord = enrollmentIntakeQueue.find((entry) => String(entry.placed_student_id || "") === String(student.id));
+      const prior = String(student.requestedDanceStyle || student.requested_dance_style || intakeRecord?.requested_dance_style || "").trim();
+      if (/^ballet$/i.test(prior)) return "Ballet";
+      if (/^tap$/i.test(prior)) return "Tap";
+      return prior || "Not recorded";
+    };
     const suggestedRequirementForStudents = (students) => {
       const needs = recitalNeedsForStudents(students);
       if (needs.ballet >= needs.either && needs.ballet >= needs.tap) return "ballet";
@@ -39202,7 +39217,7 @@
       return true;
     };
     const recitalGroupStudentMarkup = (student, rosterClass, group, groups, editing) => `<article class="roster-profile-student-card ${student.gender === "male" ? "is-male" : ""}" ${editing?`draggable="true" data-recital-drag-student="${rosterSafe(student.id)}" data-recital-source-group="${rosterSafe(group.id)}" title="Drag ${rosterSafe(rosterStudentFullName(student))} to another performance group"`:""}>
-      <button class="roster-profile-student-card-main" type="button" data-roster-edit-student="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${rosterSafe(student.photo)}" alt="">`:rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterAge(student.birthdate))}</small></button>
+      <button class="roster-profile-student-card-main" type="button" data-roster-edit-student="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${student.photo?`<img src="${rosterSafe(student.photo)}" alt="">`:rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterAge(student.birthdate))}</small><small>Last year: ${rosterSafe(recitalPriorDanceLabel(student))}</small></button>
     </article>`;
     const renderRecitalPerformanceGroups = (rosterClass, groups) => {
       const editing = recitalGroupEditClassId === String(rosterClass.id);

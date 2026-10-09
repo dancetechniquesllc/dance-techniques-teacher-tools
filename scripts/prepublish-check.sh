@@ -32,6 +32,7 @@ required_text=(
   'data-recital-edit-groups'
   'data-recital-performance-select'
   'data-recital-assign-unassigned'
+  'recitalHistoryByStudentId'
   'class_recital_performance_groups'
   'class_recital_performance_group_members'
 )
