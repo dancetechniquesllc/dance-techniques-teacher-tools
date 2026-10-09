@@ -3438,6 +3438,16 @@
     .future-waitlist-card .teacher-future-prospect-card { border: 0; padding-bottom: 6px; }
     .future-waitlist-order { position: absolute; z-index: 2; top: 10px; left: 10px; display: grid; min-width: 34px; height: 34px; place-items: center; padding: 0 7px; border: 1px solid #b88a2d; border-radius: 999px; background: #d7af58; color: #3f2a06; box-shadow: 0 2px 7px rgb(89 58 9 / .18); font-size: 11px; font-weight: 950; }
     .future-waitlist-action { min-height: 38px; border: 1px solid color-mix(in srgb, var(--sage) 68%, #526650); border-radius: 999px; background: var(--sage); color: #2f422f; font-weight: 900; }
+    .waitlist-opening-dialog { width: min(760px, calc(100vw - 28px)); }
+    .waitlist-opening-class { margin: 10px 0 14px; padding: 12px 14px; border-left: 5px solid #d7af58; border-radius: 12px; background: #fff7df; }
+    .waitlist-opening-class strong, .waitlist-opening-class span { display: block; }
+    .waitlist-opening-options { display: grid; gap: 9px; max-height: min(430px, 55vh); overflow: auto; }
+    .waitlist-opening-option { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 11px; padding: 12px; border: 1px solid var(--border); border-radius: 13px; background: var(--surface); cursor: pointer; }
+    .waitlist-opening-option:has(input:checked) { border-color: #71846a; background: color-mix(in srgb, var(--sage) 22%, white); box-shadow: 0 0 0 2px color-mix(in srgb, var(--sage) 45%, transparent); }
+    .waitlist-opening-option input { width: 20px; height: 20px; accent-color: #71846a; }
+    .waitlist-opening-position { display: grid; min-width: 40px; height: 40px; place-items: center; border-radius: 999px; background: #d7af58; color: #3f2a06; font-size: 12px; font-weight: 950; }
+    .waitlist-opening-copy { display: grid; gap: 3px; }
+    .waitlist-opening-copy small { color: var(--muted); }
 
     @media (max-width: 460px) {
       .teacher-roster-form { grid-template-columns: 1fr; }
@@ -39060,6 +39070,95 @@
       ].join("");
     };
 
+    const dancerAgeDifferenceMonths = (leftBirthdate, rightBirthdate) => {
+      const left = new Date(`${leftBirthdate || ""}T12:00:00`);
+      const right = new Date(`${rightBirthdate || ""}T12:00:00`);
+      if (Number.isNaN(left.valueOf()) || Number.isNaN(right.valueOf())) return Infinity;
+      return Math.abs((left.getFullYear() - right.getFullYear()) * 12 + left.getMonth() - right.getMonth()
+        + (left.getDate() - right.getDate()) / 31);
+    };
+
+    const waitlistRecordsForSchool = (schoolName) => rosterClasses
+      .filter((rosterClass) => rosterClass.sourceActive !== false && enrollmentSchoolNameMatches(rosterClass.schoolName, schoolName))
+      .flatMap((rosterClass) => rosterProspects(rosterClass).filter((student) => student.status === "waitlisted").map((student) => ({ rosterClass, student })))
+      .sort((left, right) => {
+        const leftSubmitted = new Date(left.student.additionalInformation?.waitlist_submitted_at || left.student.createdAt || 0).valueOf();
+        const rightSubmitted = new Date(right.student.additionalInformation?.waitlist_submitted_at || right.student.createdAt || 0).valueOf();
+        return leftSubmitted - rightSubmitted || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student));
+      });
+
+    const openWaitlistOpportunityPrompt = ({ rosterClass, student: departingStudent }) => {
+      const schoolWaitlist = waitlistRecordsForSchool(rosterClass.schoolName);
+      const eligible = schoolWaitlist.map((record, index) => ({ ...record, position: index + 1 }))
+        .filter(({ student }) => dancerAgeDifferenceMonths(departingStudent.birthdate, student.birthdate) <= 12);
+      if (!eligible.length) return;
+      document.getElementById("waitlist-opening-overlay")?.remove();
+      const ordinal = (position) => {
+        const remainder = position % 100;
+        return `${position}${remainder >= 11 && remainder <= 13 ? "th" : ({ 1: "st", 2: "nd", 3: "rd" })[position % 10] || "th"}`;
+      };
+      const overlay = document.createElement("div");
+      overlay.id = "waitlist-opening-overlay";
+      overlay.className = "confirm-overlay active";
+      overlay.setAttribute("aria-hidden", "false");
+      overlay.innerHTML = `<div class="confirm-dialog waitlist-opening-dialog" role="dialog" aria-modal="true" aria-labelledby="waitlist-opening-title">
+        <h3 id="waitlist-opening-title">A Class Spot Just Opened</h3>
+        <p>${rosterSafe(rosterStudentFullName(departingStudent))} left this class. These same-school waitlist dancers are within 12 months of their age.</p>
+        <div class="waitlist-opening-class"><strong>${rosterSafe(rosterClass.name)}</strong><span>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.day || "Dance day not set")} ${rosterSafe(rosterClass.time || "")}</span></div>
+        <div class="waitlist-opening-options">${eligible.map(({ student, position }) => `<label class="waitlist-opening-option">
+          <input type="radio" name="waitlist-opening-student" value="${rosterSafe(student.id)}">
+          <span class="waitlist-opening-position">${rosterSafe(ordinal(position))}</span>
+          <span class="waitlist-opening-copy"><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(rosterAge(student.birthdate))} · ${rosterSafe(student.officialClassroom || student.classroom || "Classroom not entered")}</small><small>${rosterSafe(student.parentEmail || "Parent email not entered")}</small></span>
+        </label>`).join("")}</div>
+        <div class="confirm-actions"><button class="secondary" type="button" data-waitlist-opening-cancel>Not Now</button><button class="primary" type="button" data-waitlist-opening-email disabled>Email Spot Available</button></div>
+      </div>`;
+      document.body.appendChild(overlay);
+      document.body.style.overflow = "hidden";
+      const close = () => { overlay.remove(); document.body.style.overflow = ""; };
+      overlay.addEventListener("click", async (event) => {
+        if (event.target === overlay || event.target.closest("[data-waitlist-opening-cancel]")) return close();
+        if (event.target.matches('input[name="waitlist-opening-student"]')) {
+          overlay.querySelector("[data-waitlist-opening-email]").disabled = false;
+          return;
+        }
+        const emailButton = event.target.closest("[data-waitlist-opening-email]");
+        if (!emailButton) return;
+        const selectedId = overlay.querySelector('input[name="waitlist-opening-student"]:checked')?.value;
+        const selected = eligible.find(({ student }) => String(student.id) === String(selectedId));
+        if (!selected) return;
+        const recipient = String(selected.student.parentEmail || "").trim().toLowerCase();
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) return showToast("Add a valid parent email before sending this offer.");
+        emailButton.disabled = true;
+        emailButton.textContent = "Sending…";
+        const dancerName = rosterStudentFirstName(selected.student);
+        const parentFirstName = selected.student.parentFirstName || String(selected.student.parentName || "").split(" ")[0] || "there";
+        const subject = `A dance spot is available for ${dancerName}`;
+        const html = `<div style="max-width:640px;margin:auto;padding:28px;background:#fffaf6;color:#271e1c;font-family:Arial,sans-serif;line-height:1.55"><h1 style="color:#65103f;font-size:26px">A Spot Is Available!</h1><p>Hi ${escapeText(parentFirstName)},</p><p>A space has opened in <strong>${escapeText(rosterClass.name)}</strong> at <strong>${escapeText(rosterSchoolNickname(rosterClass.schoolName))}</strong>, and we would love to offer it to ${escapeText(dancerName)}.</p><p>Please reply to let us know if you would like to schedule a trial class. We will keep ${escapeText(dancerName)}'s place on the waitlist until you respond.</p><p>Warmly,<br><strong>Dance Techniques</strong></p></div>`;
+        if (document.body.dataset.tourMode === "true") {
+          close();
+          showToast(`Sample email ready for ${recipient}. Preview mode did not send it.`);
+          return;
+        }
+        try {
+          await sendNewsletterMessages({
+            mode: "send",
+            confirmed: true,
+            sendId: `waitlist-opening-${selected.student.id}-${crypto.randomUUID()}`,
+            messages: [{ to: recipient, name: selected.student.parentName || "", subject, html, studentId: selected.student.id, enrollmentId: selected.student.enrollmentId || null, emailKind: "waitlist_spot_available", title: "Waitlist Spot Available" }]
+          });
+          selected.student.additionalInformation = { ...(selected.student.additionalInformation || {}), waitlist_spot_offered_at: new Date().toISOString(), waitlist_spot_offered_class: rosterClass.name };
+          if (window.dtSupabase) await window.dtSupabase.from("students").update({ additional_information: selected.student.additionalInformation }).eq("id", selected.student.id);
+          close();
+          showToast(`Spot-available email sent to ${recipient}`);
+        } catch (error) {
+          console.error("Waitlist spot email failed", error);
+          emailButton.disabled = false;
+          emailButton.textContent = "Email Spot Available";
+          showToast(error.message || "The spot-available email could not be sent.");
+        }
+      });
+    };
+
     const renderEnrollmentStudentSummary = () => {
       const summary = document.getElementById("enrollment-student-summary");
       if (!summary) return;
@@ -50439,6 +50538,7 @@
         await persist({deactivation_status:"completed",status:"completed",completed_at:new Date().toISOString()});
         enrollmentChangeRequests=enrollmentChangeRequests.filter((entry)=>entry!==item);
         showToast(isPause?"Student paused":"Enrollment deactivated");
+        if(!isPause)window.setTimeout(()=>openWaitlistOpportunityPrompt(source),0);
       }
       renderEnrollmentChanges();
       renderEnrollmentStudentSummary();
