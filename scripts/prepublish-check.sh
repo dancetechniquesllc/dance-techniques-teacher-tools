@@ -14,35 +14,31 @@ fi
 
 git diff --check
 
+node_bin="$(command -v node || true)"
+if [[ -z "$node_bin" ]]; then
+  bundled_node="/Users/lexiking/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node"
+  [[ -x "$bundled_node" ]] && node_bin="$bundled_node"
+fi
+if [[ -z "$node_bin" ]]; then
+  echo "Publish stopped: Node.js is required to validate the app's JavaScript."
+  exit 1
+fi
+"$node_bin" scripts/check-inline-scripts.js index.html
+
 if rg -n '^(<<<<<<<|=======|>>>>>>>)' --glob '!scripts/prepublish-check.sh' . >/dev/null; then
   echo "Publish stopped: unresolved merge markers were found."
   exit 1
 fi
 
-required_text=(
-  'admin-home-classes-rosters")?.addEventListener("click",'
-  '["Group Photo", "assets/photo-frames/group-photo.png"]'
-  '["Dance Day", "assets/photo-frames/dance-day.png"]'
-  'Costume Assignments'
-  'Ordering Something?'
-  'Boys Costume Inventory'
-  'Enrollment Changes'
-  '253005393017146'
-  'data-recital-suggest-split'
-  'data-recital-edit-groups'
-  'data-recital-performance-select'
-  'data-recital-assign-unassigned'
-  'recitalHistoryByStudentId'
-  'class_recital_performance_groups'
-  'class_recital_performance_group_members'
-)
-
-for marker in "${required_text[@]}"; do
-  if ! rg -F --quiet "$marker" index.html costume-catalog.html supabase/functions/jotform-enrollment-change-webhook/index.ts; then
-    echo "Publish stopped: a protected live feature is missing: $marker"
+while IFS='|' read -r marker files feature; do
+  [[ -z "$marker" || "$marker" == \#* ]] && continue
+  read -r -a search_files <<< "$files"
+  if ! rg -F --quiet "$marker" "${search_files[@]}"; then
+    echo "Publish stopped: protected feature is missing: $feature"
+    echo "Expected marker: $marker"
     exit 1
   fi
-done
+done < scripts/protected-features.txt
 
 required_files=(
   assets/photo-frames/group-photo.png

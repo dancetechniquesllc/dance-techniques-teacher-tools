@@ -44,3 +44,20 @@ For an in-person walkthrough before accounts are ready, append `?tour=1` to the 
 Do not develop directly in a separate deployment checkout. Changes are reviewed and committed in this folder first, then published with `tools/publish-teacher-tools-site.sh`. The public repository is a deployment mirror, not a second development source.
 
 The July 23, 2026 public release was reconciled back into this folder after development had temporarily drifted into the deployment repository. Git history preserves the earlier app; no old prototype should be used as a working source.
+
+## Safe Publishing
+
+Every release uses one path:
+
+1. Commit the intended changes on `main`.
+2. Run `scripts/publish.sh`.
+
+The publish command refuses to continue when the checkout is behind live `main`, tracked changes are uncommitted, JavaScript is invalid, merge markers remain, a required database migration or asset is missing, or an established feature in `scripts/protected-features.txt` has disappeared.
+
+Direct pushes use the same checks after enabling the repository hook once:
+
+```sh
+git config core.hooksPath .githooks
+```
+
+Completed features are additive by default. Add a feature marker to `scripts/protected-features.txt` when it is accepted. Remove or replace a protected marker only when the requested change explicitly removes or replaces that feature.

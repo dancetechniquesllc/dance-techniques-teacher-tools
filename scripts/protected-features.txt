@@ -1,0 +1,20 @@
+# Protected feature contract
+#
+# Format: marker|files to search (space separated)|plain-language feature name
+# A release is stopped when any marker can no longer be found in its files.
+
+admin-home-classes-rosters")?.addEventListener("click",|index.html|Classes and Rosters interactions
+["Group Photo", "assets/photo-frames/group-photo.png"]|index.html|Group photo frame
+["Dance Day", "assets/photo-frames/dance-day.png"]|index.html|Dance Day photo frame
+Costume Assignments|costume-catalog.html|Costume assignments
+Ordering Something?|costume-catalog.html|Costume ordering workflow
+Boys Costume Inventory|costume-catalog.html|Boys costume inventory
+Enrollment Changes|index.html|Enrollment Changes workflow
+253005393017146|index.html supabase/functions/jotform-enrollment-change-webhook/index.ts|Jotform enrollment-change connection
+data-recital-suggest-split|index.html|Suggested recital groups
+data-recital-edit-groups|index.html|Recital group editing
+data-recital-performance-select|index.html|Class Tap Ballet or Either assignment
+data-recital-assign-unassigned|index.html|Assign ungrouped recital dancers
+recitalHistoryByStudentId|index.html|Complete prior-recital history in Dance Decider
+class_recital_performance_groups|index.html|Saved recital performance groups
+class_recital_performance_group_members|index.html|Saved recital group members
