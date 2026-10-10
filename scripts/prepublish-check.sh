@@ -24,6 +24,10 @@ if [[ -z "$node_bin" ]]; then
   exit 1
 fi
 "$node_bin" scripts/check-inline-scripts.js index.html
+for script in big-stage.js big-stage-order.js big-stage-wizard.js; do
+  "$node_bin" --check "$script"
+done
+echo "JavaScript check passed: recital planner scripts are valid."
 
 if rg -n '^(<<<<<<<|=======|>>>>>>>)' --glob '!scripts/prepublish-check.sh' . >/dev/null; then
   echo "Publish stopped: unresolved merge markers were found."

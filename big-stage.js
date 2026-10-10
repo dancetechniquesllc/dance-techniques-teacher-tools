@@ -1,7 +1,7 @@
 (() => {
   const SEASON = "2027";
   const STAGE_CAP = 12;
-  const state = { section: "shows", view: "teacher", loading: false, groups: [], classes: [], persisted: false, showPlan: null, notice: "", productionShow: "", filters: { teacher: "", school: "", requirement: "" } };
+  const state = { section: "shows", view: "board", boardTeacher: "", loading: false, groups: [], classes: [], persisted: false, showPlan: null, notice: "", productionShow: "", filters: { teacher: "", school: "", requirement: "" } };
   const productionShows = [
     { id:"s9", time:"9:00 AM", drop:"8:20 AM", schools:3, dancers:48, ready:88, performances:3 },
     { id:"s1130", time:"11:30 AM", drop:"10:50 AM", schools:4, dancers:61, ready:76, performances:1 },
@@ -204,7 +204,36 @@
     const map=new Map();
     state.classes.forEach((item)=>{if(!map.has(item.teacherId))map.set(item.teacherId,{id:item.teacherId,name:item.teacher,classes:0,groups:new Set()});map.get(item.teacherId).classes+=1;});
     state.groups.filter((group)=>group.decision!=="rejected").forEach((group)=>group.teacherIds.forEach((id)=>map.get(id)?.groups.add(group.id)));
-    return [...map.values()].map((item)=>({...item,routines:item.groups.size,status:item.groups.size<4?"Under Target":item.groups.size<=6?"Ideal — 4–6":"Above Target"})).sort((a,b)=>a.name.localeCompare(b.name));
+    return [...map.values()].map((item)=>({...item,routines:item.groups.size,status:item.groups.size<3?"Under Preferred Range":item.groups.size<=7?"Within Preferred Range":"Above Preferred Range"})).sort((a,b)=>a.name.localeCompare(b.name));
+  };
+  const boardAgeStatus = (classes) => {
+    const spread=ageSpread(classes);
+    if(spread==null)return {tone:"review",label:"Birthdates needed"};
+    if(spread<=12)return {tone:"strong",label:"Strong age match"};
+    if(spread<=18)return {tone:"review",label:`Review · ${spread}-month range`};
+    return {tone:"wide",label:`Wider age range · ${spread} months`};
+  };
+  const boardClassCard = (item) => `<article class="stage-board-class" data-stage-board-class="${esc(item.id)}">
+    <div><strong>${esc(item.name)}</strong><span>${item.count} dancer${item.count===1?"":"s"}</span></div>
+    <small>${item.ageData?`${ageLabel(item.minAge)}–${ageLabel(item.maxAge)} · Avg ${ageLabel(item.avgAge)}`:"Birthdates needed"}</small>
+    <span class="stage-board-style is-${esc(item.requirement)}">${item.requirement==="either"?"Undecided":title(item.requirement)}</span>
+    ${item.count<=4?`<span class="stage-board-small">Small Class · Combine?</span>`:""}
+  </article>`;
+  const teacherPlanningBoard = () => {
+    const loads=teacherLoad();
+    if(!loads.length)return `<div class="stage-empty"><h4>No active recital classes yet.</h4><p>The board will populate from Classes & Rosters.</p></div>`;
+    if(!state.boardTeacher||!loads.some((item)=>item.id===state.boardTeacher))state.boardTeacher=loads[0].id;
+    const load=loads.find((item)=>item.id===state.boardTeacher);
+    const classes=state.classes.filter((item)=>item.teacherId===state.boardTeacher).sort((a,b)=>(a.avgAge??999)-(b.avgAge??999)||a.name.localeCompare(b.name,undefined,{numeric:true}));
+    const schools=[...new Set(classes.map((item)=>item.school))].sort((a,b)=>a.localeCompare(b));
+    const routines=state.groups.filter((group)=>group.decision!=="rejected"&&group.classes.some((item)=>item.teacherId===state.boardTeacher)&&!group.crossTeacher);
+    return `<section class="stage-teacher-board" data-stage-teacher-planning-board>
+      <nav class="stage-teacher-tabs" aria-label="Teacher planning boards">${loads.map((item)=>`<button type="button" data-stage-board-teacher="${esc(item.id)}" aria-pressed="${item.id===state.boardTeacher}">${esc(item.name)}<small>${item.routines} routine${item.routines===1?"":"s"}</small></button>`).join("")}</nav>
+      <header class="stage-board-header" style="--stage-teacher-color:${esc(classes[0]?.teacherColor||"#dba9a1")}"><div><span>TEACHER PLANNING BOARD</span><h4>${esc(load.name)}</h4><p>${schools.length} School${schools.length===1?"":"s"} · ${classes.length} Planning Class${classes.length===1?"":"es"}</p></div><div class="stage-board-total"><strong>${classes.length} classes → ${routines.length} dances</strong><span class="${load.routines>7?"warning":""}">${esc(load.status)} · Goal 3–7</span></div></header>
+      <div class="stage-school-columns">${schools.map((school)=>{const schoolClasses=classes.filter((item)=>item.school===school);return `<section class="stage-school-column"><header><h5>${esc(school)}</h5><span>${schoolClasses.length} class${schoolClasses.length===1?"":"es"}</span></header><div>${schoolClasses.map(boardClassCard).join("")}</div></section>`;}).join("")}</div>
+      <section class="stage-routine-board"><header><div><h4>Routine Rows</h4><p>Replicate means share choreography. Combine means share the stage.</p></div><button class="secondary" type="button" disabled title="Enabled after the board layout is approved">＋ New Routine · Next Step</button></header>${routines.length?`<div class="stage-routine-rows">${routines.map((group,index)=>{const teacherClasses=group.classes.filter((item)=>item.teacherId===state.boardTeacher);const status=boardAgeStatus(teacherClasses);const total=teacherClasses.reduce((sum,item)=>sum+item.count,0);const relationship=group.relationship==="combine"?"Combine":teacherClasses.length>1?"Replicate":"Own Routine";return `<article class="stage-routine-row" data-stage-group="${esc(group.id)}"><div class="stage-routine-name"><span>ROUTINE ${index+1}</span><strong>${esc(group.name)}</strong><small>${esc(title(group.requirement==="either"?"Undecided":group.requirement))} · ${relationship}</small></div><div class="stage-routine-slots">${schools.map((school)=>{const matches=teacherClasses.filter((item)=>item.school===school);return `<div class="stage-routine-slot"><small>${esc(school)}</small>${matches.length?matches.map(boardClassCard).join(""):`<span class="stage-routine-empty">No class</span>`}</div>`;}).join("")}</div><footer><span class="stage-board-age ${status.tone}">${status.tone==="strong"?"✓":"⚠"} ${esc(status.label)}</span><span>${total} dancers total${group.relationship==="combine"?total<=STAGE_CAP?" · Stage safe":" · Over 12 — rethink":" · Perform separately"}</span><button class="secondary" type="button" data-stage-board-details>Why this match?</button></footer></article>`;}).join("")}</div>`:`<div class="stage-empty"><h4>No routine rows yet.</h4><p>Recalculate suggestions to create a starting plan.</p></div>`}</section>
+      <div class="big-stage-note"><strong>Phase 1 preview:</strong> Review this teacher-first layout before routine dragging and saved approval gates are enabled. Your existing recital planner and saved decisions remain available in Detailed Matching.</div>
+    </section>`;
   };
   const filteredGroups = () => state.groups.filter((group) => (
     (!state.filters.teacher || group.classes.some((item) => item.teacherId === state.filters.teacher))
@@ -274,8 +303,8 @@
   };
   const render = () => {
     if(!root())return;
-    const body=state.view==="teacher"?teacherView():state.view==="school"?schoolView():state.view==="routine"?routineView():showView();
-    const matching=`<div class="stage-master-toolbar"><div><h4>2027 Recital Matching</h4><p>Match choreography first. Build four mirrored shows second.</p></div><div class="big-stage-actions"><button class="secondary" data-stage-recalculate>Recalculate Suggestions</button>${state.view!=="show"?`<button class="primary" data-stage-build-shows>Build Four Shows</button>`:""}</div></div>${state.notice?`<div class="big-stage-note">${esc(state.notice)}</div>`:""}${filterMarkup()}<nav class="stage-view-tabs" aria-label="Recital planning views">${[["teacher","Teacher View"],["school","School View"],["routine","Routine View"],["show","Show View"]].map(([key,label])=>`<button data-stage-view="${key}" aria-pressed="${state.view===key}">${label}</button>`).join("")}</nav>${state.loading?`<div class="stage-empty">Analyzing current classes, ages, recital needs, and family links…</div>`:body}`;
+    const body=state.view==="board"?teacherPlanningBoard():state.view==="teacher"?teacherView():state.view==="school"?schoolView():state.view==="routine"?routineView():showView();
+    const matching=`<div class="stage-master-toolbar"><div><h4>2027 Recital Planning</h4><p>Plan by teacher first, then build four balanced official shows.</p></div><div class="big-stage-actions"><button class="secondary" data-stage-recalculate>Refresh Suggestions</button>${state.view==="show"?"":`<button class="primary" data-stage-build-shows>Preview Four Shows</button>`}</div></div>${state.notice?`<div class="big-stage-note">${esc(state.notice)}</div>`:""}${state.view==="board"?"":filterMarkup()}<nav class="stage-view-tabs" aria-label="Recital planning views">${[["board","Teacher Planning Board"],["teacher","Detailed Matching"],["school","School Check"],["show","Four Shows"]].map(([key,label])=>`<button data-stage-view="${key}" aria-pressed="${state.view===key}">${label}</button>`).join("")}</nav>${state.loading?`<div class="stage-empty">Analyzing current classes, ages, recital needs, and family links…</div>`:body}`;
     root().innerHTML=`<div class="big-stage-shell"><nav class="stage-section-toggle" aria-label="The Big Stage sections"><button data-stage-section="shows" aria-pressed="${state.section==="shows"}">Show Production</button><button data-stage-section="matching" aria-pressed="${state.section==="matching"}">Recital Matching</button></nav>${state.section==="shows"?productionView():matching}</div>`;
   };
   const initialize = async (force=false) => {
@@ -301,6 +330,7 @@
     const view=event.target.closest("[data-stage-view]");if(view){state.view=view.dataset.stageView;render();return;}
     if(event.target.closest("[data-stage-clear-filters]")){state.filters={teacher:"",school:"",requirement:""};render();return;}
     const teacherFilter=event.target.closest("[data-stage-teacher]");if(teacherFilter){state.filters.teacher=teacherFilter.dataset.stageTeacher;render();return;}
+    const boardTeacher=event.target.closest("[data-stage-board-teacher]");if(boardTeacher){state.boardTeacher=boardTeacher.dataset.stageBoardTeacher;render();return;}
     if(event.target.closest("[data-stage-recalculate]")){await initialize(true);return;}
     if(event.target.closest("[data-stage-build-shows]")){buildShows();state.view="show";render();return;}
     const card=event.target.closest("[data-stage-group]");if(!card)return;const group=state.groups.find((item)=>item.id===card.dataset.stageGroup);if(!group)return;
