@@ -15,7 +15,7 @@
     const total = Math.max(0, Math.round(Number(months) || 0));
     return `${Math.floor(total / 12)}Y ${total % 12}M`;
   };
-  const activeRosterClasses = () => typeof rosterClasses === "undefined" ? [] : rosterClasses.filter((item) => item.sourceActive !== false);
+  const activeRosterClasses = () => typeof rosterClasses === "undefined" ? [] : rosterClasses.filter((item) => item.sourceActive !== false && String(item.teacherId || "").trim());
   const teacherName = (id) => typeof rosterTeacherName === "function" ? rosterTeacherName(id) : "Teacher";
   const teacherColor = (name) => typeof messageAssignedColor === "function" ? messageAssignedColor(name, "Teacher") : "#dba9a1";
   const enrolled = (item) => (item.students || []).filter((student) => student.status === "enrolled");

@@ -22888,7 +22888,8 @@
       const notesByStudent = new Map();
       (notesResult.data || []).forEach((note) => { if (!notesByStudent.has(note.student_id)) notesByStudent.set(note.student_id, note); });
       const schoolById = new Map(schools.map((school) => [school.id, school]));
-      const assignmentById = new Map(assignments.map((assignment) => [assignment.id, assignment]));
+      const assignmentById = new Map(activeAssignments.map((assignment) => [assignment.id, assignment]));
+      const assignmentHistoryById = new Map(assignments.map((assignment) => [assignment.id, assignment]));
       const localSchoolAssignmentsById = new Map();
       schoolLibrary.forEach((school) => {
         if (school?.id) {
@@ -23066,10 +23067,11 @@
       });
       const liveRosterClasses = classes.map((item) => {
         const assignment = assignmentById.get(item.teacher_school_assignment_id);
-        const school = schoolById.get(assignment?.partner_school_id) || {};
+        const assignmentHistory = assignmentHistoryById.get(item.teacher_school_assignment_id);
+        const school = schoolById.get(assignment?.partner_school_id || assignmentHistory?.partner_school_id) || {};
         return {
           id: item.id, assignmentId: item.teacher_school_assignment_id, name: item.name, ageGroup: item.age_group, level: String(item.level),
-          time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", partnerSchoolId: school.id || assignment?.partner_school_id || "", schoolName: school.name || "Partner School",
+          time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", partnerSchoolId: school.id || assignment?.partner_school_id || assignmentHistory?.partner_school_id || "", schoolName: school.name || "Partner School",
           day: weekdayNames[Number(item.schedule_day)] || weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, sourceActive: true,
           updatedAt: item.updated_at || "",
           helperHistory: Array.isArray(item.helper_history) ? item.helper_history : [],

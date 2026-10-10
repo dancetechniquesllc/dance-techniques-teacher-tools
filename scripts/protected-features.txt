@@ -20,3 +20,4 @@ class_recital_performance_groups|index.html|Saved recital performance groups
 class_recital_performance_group_members|index.html|Saved recital group members
 data-stage-teacher-planning-board|big-stage.js|Teacher-first recital planning board
 tourPlanningClasses|big-stage.js|Rich recital planning tour data
+assignmentHistoryById|index.html|Inactive teacher assignments cannot reassign live classes
