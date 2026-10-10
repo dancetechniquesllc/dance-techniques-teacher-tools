@@ -45,6 +45,29 @@
       ageData: ages.length, day: item.day || "", time: item.time || ""
     };
   };
+  const tourBirthdateForMonths = (months, offset = 0) => {
+    const date = new Date();
+    date.setDate(15 - (offset % 9));
+    date.setMonth(date.getMonth() - months);
+    return date.toISOString().slice(0,10);
+  };
+  const tourPlanningClasses = () => {
+    const teachers = [
+      { id:"tour-lexi", name:"Ms. Lexi", schools:["Primrose Rockwall","Primrose North Rockwall","Primrose Rowlett","Highview Learning Center"], classes:[["Tots",7,20,31,"either"],["2s",5,25,35,"tap"],["Preschool",9,36,47,"ballet"],["Pre-K",8,48,59,"either"]] },
+      { id:"tour-taylor", name:"Ms. Taylor", schools:["Celebree Plano Los Rios","Children's Lighthouse Rockwall","Kids Unlimited"], classes:[["Tots",4,19,29,"ballet"],["Young 2s",6,25,34,"either"],["Preschool",8,37,48,"tap"]] },
+      { id:"tour-tiffany", name:"Ms. Tiffany", schools:["Children's Lighthouse Fate","Cotton Mill Rowlett","Primrose Wylie"], classes:[["2s",3,25,36,"either"],["Preschool",10,37,49,"ballet"],["Pre-K",7,49,60,"tap"]] },
+      { id:"tour-erika", name:"Ms. Erika", schools:["Kiddie Academy Murphy","Oakhill Day School"], classes:[["Tots",5,18,28,"tap"],["2s",4,26,36,"either"],["Preschool",6,38,50,"ballet"]] }
+    ];
+    let sequence=0;
+    return teachers.flatMap((teacher)=>teacher.schools.flatMap((school,schoolIndex)=>teacher.classes
+      .filter((_,classIndex)=>teacher.id!=="tour-lexi"||schoolIndex<3||classIndex<2)
+      .map(([name,count,minAge,maxAge,requirement],classIndex)=>{
+        sequence+=1;
+        const ages=Array.from({length:count},(_,studentIndex)=>Math.round(minAge+((maxAge-minAge)*studentIndex/Math.max(1,count-1))));
+        const students=ages.map((age,studentIndex)=>({id:`tour-student-${sequence}-${studentIndex}`,firstName:`Dancer ${studentIndex+1}`,lastName:school.split(" ")[0],birthdate:tourBirthdateForMonths(age,studentIndex),status:"enrolled",relatedDancerName:""}));
+        return {id:`tour-class-${sequence}`,source:{},name,school,teacherId:teacher.id,teacher:teacher.name,teacherColor:teacherColor(teacher.name),requirement,level:classIndex+1,count,students,related:[],minAge,maxAge,avgAge:ages.reduce((sum,age)=>sum+age,0)/ages.length,ageData:ages.length,day:["Monday","Tuesday","Wednesday","Thursday"][schoolIndex%4],time:`${15+classIndex}:30`};
+      })));
+  };
   const ageSpread = (classes) => {
     const ages = classes.flatMap((item) => item.students.map((student) => monthsOld(student.birthdate)).filter(Number.isFinite));
     return ages.length ? Math.max(...ages) - Math.min(...ages) : null;
@@ -309,7 +332,7 @@
   };
   const initialize = async (force=false) => {
     if(state.loading)return;state.loading=true;render();
-    state.classes=activeRosterClasses().map(classRecord).filter((item)=>item.id);
+    state.classes=document.body.dataset.tourMode==="true"?tourPlanningClasses():activeRosterClasses().map(classRecord).filter((item)=>item.id);
     const persisted=force?state.groups.filter((group)=>["approved","modified","locked"].includes(group.decision)):await loadPersisted();
     const generated=generatedGroups(state.classes);const assigned=new Set(generated.flatMap((group)=>group.classes.map((item)=>item.id)));
     const cross=crossTeacherSuggestions(state.classes.filter((item)=>assigned.has(item.id)));
