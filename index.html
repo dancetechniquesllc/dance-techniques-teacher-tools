@@ -22772,7 +22772,7 @@
         ? client.from("payroll_enrollment_events").select("id,student_id,from_class_id,to_class_id,event_type,effective_date,source_request_id,students(*)").order("effective_date", { ascending: true })
         : Promise.resolve({ data: [], error: null });
       const recitalHistoryQuery = ["admin", "director"].includes(profile.role)
-        ? client.from("enrollments").select("placed_student_id,placed_class_enrollment_id,requested_dance_style,created_at").not("placed_student_id", "is", null).order("created_at", { ascending: true })
+        ? client.from("enrollments").select("placed_student_id,placed_class_enrollment_id,requested_dance_style,raw_submission,created_at").not("placed_student_id", "is", null).order("created_at", { ascending: true })
         : Promise.resolve({ data: [], error: null });
       let [profilesResult, guardianAccountsResult, schoolsResult, assignmentsResult, classesResult, enrollmentsResult, notesResult, archivedResult, attendanceResult, emailHistoryResult, familyLinksResult, newsletterArchiveResult, partnershipPaymentsResult, partnershipPreferencesResult, payrollEventsResult, recitalGroupsResult, recitalMembersResult, recitalHistoryResult] = await Promise.all([
         client.from("profiles").select("id, full_name, role, color, phone, active"),
@@ -22996,9 +22996,16 @@
         console.error("The shared partner-school table is empty; the preserved directory remains visible and will not be overwritten.");
       }
       const enrollments = enrollmentsResult.data || [];
+      const recitalHistoryValue = (record) => {
+        const saved = String(record?.requested_dance_style || "").trim();
+        if (saved) return saved;
+        const original = record?.raw_submission?.rawRequest || record?.raw_submission || {};
+        const recovered = String(original?.q78_inLast || "").trim();
+        return /^(ballet|tap|i can['’]?t remember)$/i.test(recovered) ? recovered : "";
+      };
       const recitalHistoryByStudentId = new Map((recitalHistoryResult.data || [])
-        .filter((record) => record.placed_student_id && String(record.requested_dance_style || "").trim())
-        .map((record) => [String(record.placed_student_id), String(record.requested_dance_style).trim()]));
+        .filter((record) => record.placed_student_id && recitalHistoryValue(record))
+        .map((record) => [String(record.placed_student_id), recitalHistoryValue(record)]));
       const emailHistoryByStudent = new Map();
       (emailHistoryResult.data || []).forEach((entry) => {
         if (!emailHistoryByStudent.has(entry.student_id)) emailHistoryByStudent.set(entry.student_id, []);
