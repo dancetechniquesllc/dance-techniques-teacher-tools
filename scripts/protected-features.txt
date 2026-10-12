@@ -36,6 +36,7 @@ siblingSplitFor|big-stage.js|Separating a class across shows is blocked when sib
 linkedCombinedSchools|big-stage.js|Combined classes keep their schools under the same teacher-show topper
 normalizeCombinedShowAssignments|big-stage.js|Stale class-level assignments cannot split a combined school pair
 data-stage-enter-fullscreen|big-stage.js|Teacher planning board has an enlarged fullscreen workspace
+projectedRoutineTotal|big-stage.js|Cross-teacher suggestions respect the 15-routine recital ceiling
 dt-big-stage-recital-reset:2026-10-12|big-stage-wizard.js|Legacy recital cards are cleared once without affecting dancers or classes
 stage-show-bands|big-stage.js|Show headers spanning assigned school columns
 stage-board-dancers|big-stage.js|Collapsible four-across dancer details on planning cards
