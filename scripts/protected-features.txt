@@ -25,6 +25,8 @@ data-stage-combine-class|big-stage.js|Routine-row stage combination suggestions
 data-stage-uncombine-class|big-stage.js|Combined classes toggle back to individual dragging
 data-stage-show-color|big-stage.js|Show color controls and school column tinting
 data-stage-add-routine|big-stage.js|Brick plus button adds another routine row
+data-stage-remove-routine|big-stage.js|Black minus button safely removes an empty routine row
+data-stage-undo|big-stage.js|Planner toolbar can undo the latest planning change
 data-stage-show-resize|big-stage.js|Show topper edges resize school membership
 buildShows(false)|big-stage.js|Suggested show toppers populate automatically
 data-stage-planning-layer|big-stage.js|Teacher shows combine separately into recitals
@@ -33,6 +35,8 @@ data-stage-unplaced-show|big-stage.js|Next unused teacher-show topper drags onto
 data-stage-routine-song|big-stage.js|Routine title assigns songs from Recital Playlist
 data-stage-routine-type|big-stage.js|Routine dance type changes independently from class cards
 data-stage-school-header][draggable|big-stage.js|School columns can be dragged onto teacher shows
+data-stage-school-show|big-stage.js|School headers include a reliable show assignment selector
+data-stage-class-show-handle|big-stage.js|Gray four-way handle moves a class or combined stage group to another show
 siblingSplitFor|big-stage.js|Separating a class across shows is blocked when siblings would split
 linkedCombinedSchools|big-stage.js|Combined classes keep their schools under the same teacher-show topper
 normalizeCombinedShowAssignments|big-stage.js|Stale class-level assignments cannot split a combined school pair
