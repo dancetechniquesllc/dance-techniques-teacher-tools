@@ -27125,6 +27125,19 @@
       const value = String(rosterClass?.recitalPerformance || rosterClass?.performanceType || rosterClass?.performanceRequirement || "").toLowerCase();
       return ["tap", "ballet", "either"].includes(value) ? value : "";
     };
+    window.getSharedRecitalPerformanceGroups = (danceClassId) => {
+      const rosterClass = rosterClasses.find((item) => String(item.id) === String(danceClassId));
+      if (!rosterClass) return [];
+      return (recitalPerformanceGroupsByClass.get(String(danceClassId)) || []).map((group) => ({
+        id: String(group.id),
+        classId: String(danceClassId),
+        name: group.name,
+        position: group.position,
+        requirement: group.requirement || "either",
+        studentIds: group.studentIds.map(String),
+        students: rosterClass.students.filter((student) => group.studentIds.map(String).includes(String(student.id)))
+      }));
+    };
     window.updateSharedRecitalPerformance = ({ className = "", schoolName = "", performanceType = "either" } = {}) => {
       const value = String(performanceType || "either").toLowerCase();
       if (!["tap", "ballet", "either"].includes(value)) return false;
@@ -55158,11 +55171,11 @@
       });
     })();
   </script>
-  <link rel="stylesheet" href="big-stage.css?v=20261012-visible-combined-controls">
+  <link rel="stylesheet" href="big-stage.css?v=20261012-centered-planning-toggle">
 <link rel="stylesheet" href="big-stage-order.css?v=20261005-compact-separation">
 <link rel="stylesheet" href="big-stage-wizard.css?v=20261012-recital-reset">
 <link rel="stylesheet" href="big-stage-matching.css?v=20261008-live-classes">
-  <script src="big-stage.js?v=20261012-combined-header-row"></script>
+  <script src="big-stage.js?v=20261012-recital-split-card-names"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
 <script src="big-stage-wizard.js?v=20261012-recital-reset"></script>
   <script src="director-task-sync.js?v=20260908"></script>

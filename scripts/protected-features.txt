@@ -20,6 +20,9 @@ recitalHistoryValue|index.html|Recover prior recital answers from original submi
 recital_performance:[|index.html|Saved Ballet Tap or Either class assignments load and persist
 class_recital_performance_groups|index.html|Saved recital performance groups
 class_recital_performance_group_members|index.html|Saved recital group members
+getSharedRecitalPerformanceGroups|index.html|Saved recital groups feed separate cards into the planner
+planningClassRecords|big-stage.js|Split recital groups become independent planning classes
+recital_performance_group_id|big-stage.js supabase/migrations/20261013024500_recital_split_groups_in_planner.sql|Planner saves split recital groups independently
 data-stage-teacher-planning-board|big-stage.js|Teacher-first recital planning board
 data-stage-combine-class|big-stage.js|Routine-row stage combination suggestions
 data-stage-uncombine-class|big-stage.js|Combined classes toggle back to individual dragging

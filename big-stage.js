@@ -36,9 +36,9 @@
   const requirementFor = (item) => {
     const saved=String(item.recitalPerformance||item.recital_performance||"").toLowerCase();
     if(["ballet","tap","either"].includes(saved))return saved;
-    const needs=enrolled(item).reduce((counts,student)=>{const prior=String(student.requestedDanceStyle||student.requested_dance_style||"").trim().toLowerCase();if(prior==="tap")counts.ballet+=1;else if(prior==="ballet")counts.tap+=1;else counts.either+=1;return counts;},{ballet:0,tap:0,either:0});
-    if(needs.ballet>=needs.either&&needs.ballet>=needs.tap)return "ballet";
-    if(needs.tap>=needs.either&&needs.tap>=needs.ballet)return "tap";
+    const needs=enrolled(item).reduce((counts,student)=>{const prior=String(student.requestedDanceStyle||student.requested_dance_style||"").trim().toLowerCase();if(prior==="tap")counts.ballet+=1;else if(prior==="ballet")counts.tap+=1;return counts;},{ballet:0,tap:0});
+    if(needs.ballet>needs.tap)return "ballet";
+    if(needs.tap>needs.ballet)return "tap";
     return "either";
   };
   const classRecord = (item) => {
@@ -46,12 +46,17 @@
     const ages = students.map((student) => monthsOld(student.birthdate)).filter(Number.isFinite).sort((a,b) => a-b);
     const related = students.flatMap((student) => String(student.relatedDancerName || "").split(" • ").map((name) => name.trim()).filter(Boolean));
     return {
-      id: String(item.id), source: item, name: item.name || "Class", school: item.schoolName || "School",
+      id: String(item.id), sourceClassId:String(item.sourceClassId||item.id), recitalGroupId:String(item.recitalGroupId||""), source: item, name: item.name || "Class", school: item.schoolName || "School",
       teacherId: String(item.teacherId || ""), teacher: teacherName(item.teacherId), teacherColor: teacherColor(teacherName(item.teacherId)), requirement: requirementFor(item),
       level: Number(item.level || 1), count: students.length, students, related,
       minAge: ages[0] ?? null, maxAge: ages.at(-1) ?? null, avgAge: ages.length ? ages.reduce((a,b)=>a+b,0)/ages.length : null,
       ageData: ages.length, day: item.day || "", time: item.time || ""
     };
+  };
+  const planningClassRecords = (item) => {
+    const groups=typeof window.getSharedRecitalPerformanceGroups==="function"?window.getSharedRecitalPerformanceGroups(item.id):[];
+    if(groups.length<=1)return [classRecord(item)];
+    return groups.map((group,index)=>{const letter=String.fromCharCode(64+(Number(group.position)||index+1)),nickname=String(group.name||`Group ${letter}`).replace(new RegExp(`^${letter}\\s*[·.:-]?\\s*`,"i"),"").trim()||`Group ${letter}`;return classRecord({...item,id:`${item.id}::recital-group::${group.id}`,sourceClassId:String(item.id),recitalGroupId:group.id,name:`${item.name} - ${letter} - ${nickname}`,recitalPerformance:group.requirement||item.recitalPerformance,students:group.students});});
   };
   const tourBirthdateForMonths = (months, offset = 0) => {
     const date = new Date();
@@ -166,14 +171,14 @@
   const rebuildCrossTeacherSuggestions = () => {
     const internal=state.groups.filter((group)=>!group.crossTeacher),fixed=state.groups.filter((group)=>group.crossTeacher&&group.decision!=="suggested"),reserved=new Set(fixed.flatMap((group)=>group.classes.map((item)=>item.id))),suggestions=crossTeacherSuggestions(state.classes.filter((item)=>!reserved.has(item.id)),internal);state.groups=[...internal,...fixed,...suggestions];
   };
-  const snapshot = (item) => ({ name:item.name, school:item.school, teacher:item.teacher, count:item.count, minAge:item.minAge, maxAge:item.maxAge, requirement:item.requirement });
+  const snapshot = (item) => ({ planningClassId:item.id, sourceClassId:item.sourceClassId||item.id, recitalGroupId:item.recitalGroupId||null, name:item.name, school:item.school, teacher:item.teacher, count:item.count, minAge:item.minAge, maxAge:item.maxAge, requirement:item.requirement });
   const loadPersisted = async () => {
     if (!window.dtSupabase || !["admin","director"].includes(window.dtCurrentProfile?.role || "")) return [];
     const { data, error } = await window.dtSupabase.from("recital_routine_groups").select("*,recital_routine_group_classes(*)").eq("season",SEASON).neq("decision_state","rejected");
     if (error) { console.error("Big Stage plans could not load",error); return []; }
     return (data||[]).map((row)=>{
       const links=row.recital_routine_group_classes||[];
-      const linkedClasses=links.map((link)=>state.classes.find((item)=>item.id===String(link.dance_class_id))).filter(Boolean);
+      const linkedClasses=links.map((link)=>state.classes.find((item)=>item.id===String(link.class_snapshot?.planningClassId||"")||(String(item.sourceClassId||item.id)===String(link.dance_class_id)&&String(item.recitalGroupId||"")===String(link.recital_performance_group_id||"")))).filter(Boolean);
       const stageKeys=[...new Set(links.map((link)=>link.stage_group_key||link.dance_class_id))];
       return { id:row.id,name:row.name,requirement:row.recital_requirement,relationship:row.relationship_type,quality:row.match_quality,decision:row.decision_state,owner:row.routine_owner_type,teacherIds:[...new Set(linkedClasses.map((item)=>item.teacherId))],crossTeacher:row.cross_teacher,classes:linkedClasses,stageSets:stageKeys.map((key)=>links.filter((link)=>(link.stage_group_key||link.dance_class_id)===key).map((link)=>state.classes.find((item)=>item.id===String(link.dance_class_id))).filter(Boolean)),analysis:row.analysis||analysisFor(linkedClasses),songId:row.analysis?.songId||"",songTitle:row.analysis?.songTitle||"",links};
     }).filter((group)=>group.classes.length);
@@ -184,7 +189,7 @@
     const { error }=await window.dtSupabase.from("recital_routine_groups").upsert(payload);
     if(error){ console.error(error); state.notice="That recital decision could not be saved."; return; }
     await window.dtSupabase.from("recital_routine_group_classes").delete().eq("group_id",group.id);
-    const links=group.stageSets.flatMap((set,setIndex)=>set.map((item)=>({group_id:group.id,dance_class_id:item.id,stage_group_key:`${group.id}-${setIndex+1}`,show_number:group.showAssignments?.[item.id]||null,class_snapshot:snapshot(item)})));
+    const links=group.stageSets.flatMap((set,setIndex)=>set.map((item)=>({group_id:group.id,dance_class_id:item.sourceClassId||item.id,recital_performance_group_id:item.recitalGroupId||null,stage_group_key:`${group.id}-${setIndex+1}`,show_number:group.showAssignments?.[item.id]||null,class_snapshot:snapshot(item)})));
     if(links.length){const result=await window.dtSupabase.from("recital_routine_group_classes").insert(links);if(result.error)console.error(result.error);}
   };
   const mergePlans = (generated,persisted) => {
@@ -446,7 +451,7 @@
   };
   const initialize = async (force=false) => {
     if(state.loading)return;state.loading=true;render();
-    state.classes=document.body.dataset.tourMode==="true"?tourPlanningClasses():activeRosterClasses().map(classRecord).filter((item)=>item.id);
+    state.classes=document.body.dataset.tourMode==="true"?tourPlanningClasses():activeRosterClasses().flatMap(planningClassRecords).filter((item)=>item.id);
     const persisted=force?state.groups.filter((group)=>["approved","modified","locked"].includes(group.decision)):await loadPersisted();
     const generated=generatedGroups(state.classes);
     state.groups=enforceStageCapacity(enforceUniqueRoutinePerSchool(mergePlans(generated,persisted)));state.persisted=true;state.loading=false;
