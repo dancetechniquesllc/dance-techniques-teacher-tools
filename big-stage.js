@@ -30,7 +30,14 @@
     const today = new Date();
     return (today.getFullYear() - born.getFullYear()) * 12 + today.getMonth() - born.getMonth() - (today.getDate() < born.getDate() ? 1 : 0);
   };
-  const requirementFor = (item) => ["ballet", "tap", "either"].includes(String(item.recitalPerformance || "").toLowerCase()) ? String(item.recitalPerformance).toLowerCase() : "either";
+  const requirementFor = (item) => {
+    const saved=String(item.recitalPerformance||item.recital_performance||"").toLowerCase();
+    if(["ballet","tap","either"].includes(saved))return saved;
+    const needs=enrolled(item).reduce((counts,student)=>{const prior=String(student.requestedDanceStyle||student.requested_dance_style||"").trim().toLowerCase();if(prior==="tap")counts.ballet+=1;else if(prior==="ballet")counts.tap+=1;else counts.either+=1;return counts;},{ballet:0,tap:0,either:0});
+    if(needs.ballet>=needs.either&&needs.ballet>=needs.tap)return "ballet";
+    if(needs.tap>=needs.either&&needs.tap>=needs.ballet)return "tap";
+    return "either";
+  };
   const classRecord = (item) => {
     const students = enrolled(item);
     const ages = students.map((student) => monthsOld(student.birthdate)).filter(Number.isFinite).sort((a,b) => a-b);
