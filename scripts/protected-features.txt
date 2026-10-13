@@ -34,7 +34,6 @@ data-stage-undo|big-stage.js|Planner toolbar can undo the latest planning change
 data-stage-save-work|big-stage.js|Save Work preserves the complete recital planning workspace across refreshes
 data-stage-show-resize|big-stage.js|Show topper edges resize school membership
 buildShows(false)|big-stage.js|Suggested show toppers populate automatically
-data-stage-planning-layer|big-stage.js|Teacher shows combine separately into recitals
 data-stage-add-show|big-stage.js|White circular plus adds another teacher show
 data-stage-unplaced-show|big-stage.js|Next unused teacher-show topper drags onto a school
 data-stage-routine-song|big-stage.js|Routine title assigns songs from Recital Playlist
@@ -47,6 +46,22 @@ linkedCombinedSchools|big-stage.js|Combined classes keep their schools under the
 normalizeCombinedShowAssignments|big-stage.js|Stale class-level assignments cannot split a combined school pair
 data-stage-enter-fullscreen|big-stage.js|Teacher planning board has an enlarged fullscreen workspace
 projectedRoutineTotal|big-stage.js|Cross-teacher suggestions respect the 15-routine recital ceiling
+item.requirement!==seed.requirement|big-stage.js|Cross-teacher suggestions require the same dance type
+priorityMatchCount|big-stage.js|Teacher-show pairs with multiple compatible routines rank first
+targetFourPriority|big-stage.js|Cross-teacher matches prioritize completing a routine used across four teacher shows
+cross-tour-example|big-stage.js|Tour mode always demonstrates a compatible two-teacher class combination
+stage-cross-show-comparison|big-stage.js|Cross-teacher suggestions compare both teachers' complete shows side by side
+data-stage-link-shows|big-stage.js|Directors can link two teacher shows into the same recital
+stage-comparison-type|big-stage.js|Side-by-side shows label routines as school and class with colored type bubbles
+stage-proposed-classes|big-stage.js|Cross-teacher proposals show full class cards and student profile details
+completes-routine-use|big-stage.js|Brick outline marks a one-use routine that completes a three-use routine across four shows
+data-stage-recital-teacher-show|big-stage.js|Each recital has teacher show dropdowns defaulting to None
+linkedTeacherShowsFor|big-stage.js|Selecting one linked teacher show automatically selects its partner
+recital-routine-background|big-stage.js|Recital routine cards use teacher colors and ombre for cross-teacher routines
+Cross-Teacher Combined|big-stage.js|Linked matching routines merge into one ombre recital row with both teachers
+tapCount|big-stage.js|Recital summary includes live Tap and Ballet routine counters
+stage-recital-column-heads|big-stage.js|Recital builder uses production-style columns without costume or prop fields
+data-stage-recital-lock|big-stage.js|Teacher show dropdowns can be locked to a recital
 dt-big-stage-recital-reset:2026-10-12|big-stage-wizard.js|Legacy recital cards are cleared once without affecting dancers or classes
 stage-show-bands|big-stage.js|Show headers spanning assigned school columns
 stage-board-dancers|big-stage.js|Collapsible four-across dancer details on planning cards
