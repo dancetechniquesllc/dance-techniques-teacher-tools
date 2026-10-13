@@ -30,6 +30,7 @@ data-stage-show-color|big-stage.js|Show color controls and school column tinting
 data-stage-add-routine|big-stage.js|Brick plus button adds another routine row
 data-stage-remove-routine|big-stage.js|Black minus button safely removes an empty routine row
 data-stage-undo|big-stage.js|Planner toolbar can undo the latest planning change
+data-stage-save-work|big-stage.js|Save Work preserves the complete recital planning workspace across refreshes
 data-stage-show-resize|big-stage.js|Show topper edges resize school membership
 buildShows(false)|big-stage.js|Suggested show toppers populate automatically
 data-stage-planning-layer|big-stage.js|Teacher shows combine separately into recitals

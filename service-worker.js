@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v298-recital-split-planner";
+const CACHE_NAME = "my-dance-techniques-v299-save-planning-workspace";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
