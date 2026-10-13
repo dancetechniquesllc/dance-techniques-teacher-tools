@@ -25,6 +25,7 @@ planningClassRecords|big-stage.js|Split recital groups become independent planni
 recital_performance_group_id|big-stage.js supabase/migrations/20261013024500_recital_split_groups_in_planner.sql|Planner saves split recital groups independently
 data-stage-teacher-planning-board|big-stage.js|Teacher-first recital planning board
 data-stage-combine-class|big-stage.js|Routine-row stage combination suggestions
+Classes can combine only when both schools are assigned to the same teacher show.|big-stage.js|Combine actions cannot cross teacher-show boundaries
 data-stage-uncombine-class|big-stage.js|Combined classes toggle back to individual dragging
 data-stage-show-color|big-stage.js|Show color controls and school column tinting
 data-stage-add-routine|big-stage.js|Brick plus button adds another routine row

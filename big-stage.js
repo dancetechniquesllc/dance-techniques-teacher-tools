@@ -284,7 +284,7 @@
     while(remaining.size){const start=[...remaining].sort((a,b)=>(adjacency.get(b)?.size||0)-(adjacency.get(a)?.size||0)||a.localeCompare(b))[0];const queue=[start];while(queue.length){const school=queue.shift();if(!remaining.has(school))continue;remaining.delete(school);ordered.push(school);[...(adjacency.get(school)||[])].sort().forEach((next)=>{if(remaining.has(next))queue.push(next);});}}
     return ordered.map((school,index)=>({school,index,show:showForSchool(school)||99})).sort((a,b)=>a.show-b.show||a.index-b.index).map((item)=>item.school);
   };
-  const combineOptionsFor = (group,item) => group.classes.filter((candidate)=>candidate.id!==item.id&&candidate.school!==item.school&&compatibleRequirement(candidate.requirement,item.requirement)&&item.count+candidate.count<=STAGE_CAP&&(ageSpread([item,candidate])??0)<=18&&!group.stageSets.some((set)=>set.length>1&&set.some((member)=>member.id===item.id||member.id===candidate.id))).sort((a,b)=>(item.count+a.count)-(item.count+b.count));
+  const combineOptionsFor = (group,item) => {const itemShow=showForSchool(item.school);return group.classes.filter((candidate)=>candidate.id!==item.id&&candidate.school!==item.school&&showForSchool(candidate.school)===itemShow&&compatibleRequirement(candidate.requirement,item.requirement)&&item.count+candidate.count<=STAGE_CAP&&(ageSpread([item,candidate])??0)<=18&&!group.stageSets.some((set)=>set.length>1&&set.some((member)=>member.id===item.id||member.id===candidate.id))).sort((a,b)=>(item.count+a.count)-(item.count+b.count));};
   const schoolPairKey = (left,right) => [left,right].map((value)=>schoolKey(value)).sort().join("::");
   const confirmedSchoolPairKeys = () => new Set(combinedSchoolPairs(state.groups).map(([left,right])=>schoolPairKey(left,right)));
   const isConfirmedSchoolPair = (left,right) => confirmedSchoolPairKeys().has(schoolPairKey(left,right));
@@ -476,6 +476,7 @@
   };
   const combineBoardClasses = async (group,leftId,rightId) => {
     const left=group.classes.find((item)=>item.id===leftId),right=group.classes.find((item)=>item.id===rightId);if(!left||!right)return;
+    if(showForSchool(left.school)!==showForSchool(right.school)){state.notice="Classes can combine only when both schools are assigned to the same teacher show.";render();return;}
     if(left.school===right.school){state.notice="Classes at the same school cannot share choreography or the stage.";render();return;}
     if(left.count+right.count>STAGE_CAP){state.notice="That combination exceeds the 12-dancer stage limit.";render();return;}
     const sharedShow=showForSchool(left.school)||showForSchool(right.school)||state.showPlan?.classShow?.[left.id]||state.showPlan?.classShow?.[right.id];group.stageSets=group.stageSets.map((set)=>set.filter((item)=>item.id!==left.id&&item.id!==right.id)).filter((set)=>set.length);group.stageSets.push([left,right]);refreshBoardGroup(group);if(sharedShow)setSchoolShow(left.school,sharedShow);await persistGroup(group);
