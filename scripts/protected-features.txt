@@ -62,6 +62,10 @@ Cross-Teacher Combined|big-stage.js|Linked matching routines merge into one ombr
 tapCount|big-stage.js|Recital summary includes live Tap and Ballet routine counters
 stage-recital-column-heads|big-stage.js|Recital builder uses production-style columns without costume or prop fields
 data-stage-recital-lock|big-stage.js|Teacher show dropdowns can be locked to a recital
+decorateLockedRecitalOptions|big-stage.js|Shows locked to another recital are disabled and labeled in dropdowns
+resolvedRequirement=decidedRequirements.length===1|big-stage.js|Cross-teacher recital rows inherit the current decided type from their source routines
+stage-cross-match-grid|big-stage.css|Cross-teacher suggestion cards display no more than three across
+routines=teacherRoutines.filter|big-stage.js|Matched routines sort to the top of each teacher show comparison
 dt-big-stage-recital-reset:2026-10-12|big-stage-wizard.js|Legacy recital cards are cleared once without affecting dancers or classes
 stage-show-bands|big-stage.js|Show headers spanning assigned school columns
 stage-board-dancers|big-stage.js|Collapsible four-across dancer details on planning cards
