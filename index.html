@@ -8151,6 +8151,13 @@
     .enrollment-editor-hero-actions .enrollment-editor-void:focus-visible { background: #9b3e49; color: white; }
     #enrollment-data-edit-form { display: grid; gap: 14px; }
     .enrollment-editor-section { display: grid; gap: 18px; padding: 22px 24px; border: 1px solid color-mix(in srgb, var(--border) 72%, white); border-radius: 13px; background: white; box-shadow: 0 4px 18px rgb(68 48 42 / .07); }
+    .enrollment-editor-section.is-student-information { position: relative; padding-top: 82px; }
+    .enrollment-no-recital-control { position: absolute; top: 18px; right: 22px; z-index: 2; display: flex; align-items: center; gap: 7px; }
+    .enrollment-no-recital-info { width: 27px; height: 27px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #a94b55; color: #fff; font-size: 14px; font-weight: 950; line-height: 1; box-shadow: 0 2px 5px rgb(81 32 38 / .2); }
+    .enrollment-no-recital-info[hidden] { display: none; }
+    .enrollment-no-recital-info-dialog { width: min(560px,calc(100% - 28px)); padding: 0; overflow: hidden; }
+    .enrollment-no-recital-info-dialog > label { display: grid; gap: 7px; margin: 20px 24px; font-weight: 850; }
+    .enrollment-no-recital-info-dialog textarea { min-height: 130px; resize: vertical; }
     .enrollment-editor-section-heading { display: grid; grid-template-columns: auto 1fr; gap: 13px; align-items: center; }
     .enrollment-editor-section-icon { width: 38px; height: 38px; display: grid; place-items: center; color: var(--rose); }
     .enrollment-editor-section-icon svg { width: 31px; height: 31px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
@@ -8220,6 +8227,8 @@
       .enrollment-editor-fields .span-6,
       .enrollment-editor-fields .span-7,
       .enrollment-editor-fields .span-8 { grid-column: 1 / -1; }
+      .enrollment-editor-section.is-student-information { padding-top: 78px; }
+      .enrollment-no-recital-control { top: 14px; right: 14px; }
     }
 
     .enrollment-queue-item {
@@ -17569,6 +17578,13 @@
                     <div class="enrollment-review-card" id="enrollment-review-detail"></div>
                   </div>
                 </div>
+                <div class="confirm-overlay" id="enrollment-no-recital-info-overlay" aria-hidden="true">
+                  <div class="confirm-dialog enrollment-no-recital-info-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-no-recital-info-title">
+                    <div class="roster-profile-header"><div><h3 id="enrollment-no-recital-info-title">Additional Information</h3><p class="subtle">Add the reason or any helpful notes for this dancer’s No Recital status.</p></div><button class="roster-profile-close" type="button" id="enrollment-no-recital-info-close" aria-label="Close No Recital information">×</button></div>
+                    <label>Reason or note<textarea id="enrollment-no-recital-note" rows="5" maxlength="500" placeholder="Family request, out of town, graduation, or another reason…"></textarea></label>
+                    <div class="confirm-actions"><button class="secondary" type="button" id="enrollment-no-recital-info-cancel">Cancel</button><button class="primary" type="button" id="enrollment-no-recital-info-save">Save Information</button></div>
+                  </div>
+                </div>
     <div class="confirm-overlay" id="enrollment-class-preview-overlay" aria-hidden="true">
                   <div class="confirm-dialog enrollment-class-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-class-preview-title">
                     <div id="enrollment-class-preview-detail"></div>
@@ -22034,7 +22050,11 @@
           </header>
         </div>
         <form id="enrollment-data-edit-form">
-          <section class="enrollment-editor-section">
+          <section class="enrollment-editor-section is-student-information">
+            <div class="enrollment-no-recital-control">
+              <label class="roster-no-recital-toggle"><input data-enrollment-no-recital type="checkbox" ${item.additional_information?.no_recital ? "checked" : ""}><span aria-hidden="true"><i>✓</i></span><strong>NO Recital</strong></label>
+              <button class="enrollment-no-recital-info" data-enrollment-no-recital-info type="button" aria-label="View No Recital information" title="View No Recital information" ${item.additional_information?.no_recital ? "" : "hidden"}>?</button>
+            </div>
             <div class="enrollment-editor-section-heading">
               <span class="enrollment-editor-section-icon"><svg viewBox="0 0 32 32"><circle cx="16" cy="9" r="5"></circle><path d="M7 27v-4c0-5 4-8 9-8s9 3 9 8v4z"></path></svg></span>
               <div><h4>Student Information</h4><p>Basic details about your dancer.</p></div>
@@ -53129,6 +53149,44 @@
     ["roster-no-recital-info-close","roster-no-recital-info-cancel"].forEach((id)=>document.getElementById(id)?.addEventListener("click",()=>setRosterNoRecitalInfoOpen(false)));
     document.getElementById("roster-no-recital-info-overlay")?.addEventListener("click",(event)=>{if(event.target.id==="roster-no-recital-info-overlay")setRosterNoRecitalInfoOpen(false);});
     document.getElementById("roster-no-recital-info-save")?.addEventListener("click",async()=>{const {rosterClass,student}=currentEditingRosterStudent();if(!rosterClass||!student)return;const notes=document.getElementById("roster-no-recital-note").value.trim();student.additionalInformation={...(student.additionalInformation||{}),no_recital:true,no_recital_note:notes};dancerNoRecitalAssignments.set(String(student.id),{action:"profile",notes,paidAmount:dancerNoRecitalAssignments.get(String(student.id))?.paidAmount||0,assignedAt:dancerNoRecitalAssignments.get(String(student.id))?.assignedAt||new Date().toISOString()});scheduleAppDataSave();await saveSharedStudent(student,rosterClass);rosterStudentProfileDirty=true;setRosterNoRecitalInfoOpen(false);showToast("No Recital information saved");});
+    const setEnrollmentNoRecitalInfoOpen=(open)=>{
+      const overlay=document.getElementById("enrollment-no-recital-info-overlay");
+      if(!overlay)return;
+      overlay.classList.toggle("active",open);overlay.setAttribute("aria-hidden",open?"false":"true");
+      if(open)window.setTimeout(()=>document.getElementById("enrollment-no-recital-note")?.focus(),40);
+    };
+    const selectedEnrollmentNoRecitalItem=()=>enrollmentIntakeQueue.find((entry)=>entry.id===selectedEnrollmentIntakeId);
+    const persistEnrollmentNoRecital=async(item)=>{
+      if(!item)return false;
+      scheduleAppDataSave();
+      await syncEnrollmentIntakeToStudent(item);
+      if(document.body.dataset.tourMode==="true"||!window.dtSupabase||!item.id)return true;
+      const {error}=await window.dtSupabase.from("enrollments").update({additional_information:item.additional_information||{}}).eq("id",item.id);
+      if(error){console.error("No Recital enrollment information could not be saved.",error);showToast("No Recital information could not be saved");return false;}
+      return true;
+    };
+    document.getElementById("enrollment-review-detail")?.addEventListener("change",async(event)=>{
+      const toggle=event.target.closest("[data-enrollment-no-recital]");if(!toggle)return;
+      const item=selectedEnrollmentNoRecitalItem();if(!item)return;
+      item.additional_information={...(item.additional_information||{}),no_recital:Boolean(toggle.checked)};
+      const info=toggle.closest(".enrollment-no-recital-control")?.querySelector("[data-enrollment-no-recital-info]");if(info)info.hidden=!toggle.checked;
+      if(toggle.checked){document.getElementById("enrollment-no-recital-note").value=item.additional_information.no_recital_note||"";setEnrollmentNoRecitalInfoOpen(true);}
+      else{item.additional_information.no_recital_note="";await persistEnrollmentNoRecital(item);showToast("No Recital removed");}
+    });
+    document.getElementById("enrollment-review-detail")?.addEventListener("click",(event)=>{
+      if(!event.target.closest("[data-enrollment-no-recital-info]"))return;
+      const item=selectedEnrollmentNoRecitalItem();if(!item)return;
+      document.getElementById("enrollment-no-recital-note").value=item.additional_information?.no_recital_note||"";setEnrollmentNoRecitalInfoOpen(true);
+    });
+    ["enrollment-no-recital-info-close","enrollment-no-recital-info-cancel"].forEach((id)=>document.getElementById(id)?.addEventListener("click",()=>setEnrollmentNoRecitalInfoOpen(false)));
+    document.getElementById("enrollment-no-recital-info-overlay")?.addEventListener("click",(event)=>{if(event.target.id==="enrollment-no-recital-info-overlay")setEnrollmentNoRecitalInfoOpen(false);});
+    document.getElementById("enrollment-no-recital-info-save")?.addEventListener("click",async()=>{
+      const item=selectedEnrollmentNoRecitalItem();if(!item)return;
+      const note=document.getElementById("enrollment-no-recital-note").value.trim();
+      item.additional_information={...(item.additional_information||{}),no_recital:true,no_recital_note:note};
+      const saved=await persistEnrollmentNoRecital(item);if(!saved)return;
+      setEnrollmentNoRecitalInfoOpen(false);renderEnrollmentQueue();showToast("No Recital information saved");
+    });
     document.getElementById("roster-student-edit-form")?.addEventListener("change", (event) => {
       if (event.target.id !== "roster-edit-photo") rosterStudentProfileDirty = true;
     });
