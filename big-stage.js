@@ -487,7 +487,7 @@
     state.classes=document.body.dataset.tourMode==="true"?tourPlanningClasses():activeRosterClasses().flatMap(planningClassRecords).filter((item)=>item.id);
     const workspace=force?null:await loadPlannerWorkspace(),persisted=force?state.groups.filter((group)=>["approved","modified","locked"].includes(group.decision)):workspace||await loadPersisted();
     const generated=generatedGroups(state.classes);
-    state.groups=workspace?enforceStageCapacity(enforceUniqueRoutinePerSchool(workspace)):enforceStageCapacity(enforceUniqueRoutinePerSchool(mergePlans(generated,persisted)));state.persisted=true;state.loading=false;
+    state.groups=enforceStageCapacity(enforceUniqueRoutinePerSchool(mergePlans(generated,workspace||persisted)));state.persisted=true;state.loading=false;
     const adjusted=state.groups.some((group)=>group.schoolRuleAdjusted);
     state.notice=adjusted?"Classes at the same school were separated into different routines.":force?"Suggestions recalculated. Approved, modified, and locked decisions were preserved.":"";if(!state.showPlan||!Object.keys(state.showPlan.classShow||{}).length)buildShows(false);rebuildCrossTeacherSuggestions();if(!adjusted&&!force)state.notice="";render();
   };

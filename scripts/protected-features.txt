@@ -92,6 +92,7 @@ background:#e3bd74;color:#5b4214|big-stage.css|Selected teacher toggle visibly u
 .stage-section-toggle button{height:58px|big-stage.css|Toggle rows use explicit heights so top middle and teacher levels visibly step down
 stage-board-show-help|big-stage.js|Teacher-specific show-number guidance sits beneath the Show 1–4 legend
 stage-board-dance-total|big-stage.js|Class-to-dance total appears in a centered bubble beneath the teacher title
+mergePlans(generated,workspace|big-stage.js|Newly active classes are merged into a restored teacher-planner workspace
 All ${sameShow.length} schools in this row assigned to Show|big-stage.js|Combine merges every eligible school in the routine row assigned to the same teacher show
 font-size:clamp(40px,4.2vw,64px)|big-stage.css|The Big Stage uses a prominent title without the Recital Planner eyebrow bubble
 .stage-section-toggle button[aria-pressed="true"]{background:#dba9a1|big-stage.css|Show Production and Recital Matching use the blush segmented-toggle reference format
