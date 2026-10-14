@@ -25,7 +25,7 @@ planningClassRecords|big-stage.js|Split recital groups become independent planni
 recital_performance_group_id|big-stage.js supabase/migrations/20261013024500_recital_split_groups_in_planner.sql|Planner saves split recital groups independently
 data-stage-teacher-planning-board|big-stage.js|Teacher-first recital planning board
 data-stage-combine-class|big-stage.js|Routine-row stage combination suggestions
-Classes can combine only when both schools are assigned to the same teacher show.|big-stage.js|Combine actions cannot cross teacher-show boundaries
+const sameShow=group.classes.filter((item)=>showForSchool(item.school)===sharedShow)|big-stage.js|Combine actions cannot cross teacher-show boundaries
 data-stage-uncombine-class|big-stage.js|Combined classes toggle back to individual dragging
 data-stage-show-color|big-stage.js|Show color controls and school column tinting
 data-stage-add-routine|big-stage.js|Brick plus button adds another routine row
@@ -64,8 +64,38 @@ stage-recital-column-heads|big-stage.js|Recital builder uses production-style co
 data-stage-recital-lock|big-stage.js|Teacher show dropdowns can be locked to a recital
 decorateLockedRecitalOptions|big-stage.js|Shows locked to another recital are disabled and labeled in dropdowns
 resolvedRequirement=decidedRequirements.length===1|big-stage.js|Cross-teacher recital rows inherit the current decided type from their source routines
-stage-cross-match-grid|big-stage.css|Cross-teacher suggestion cards display no more than three across
+stage-cross-match-grid|big-stage.css|Cross-teacher suggestion cards display no more than two across
 routines=teacherRoutines.filter|big-stage.js|Matched routines sort to the top of each teacher show comparison
+crossTeacherProposedCards(group)}${crossTeacherShowComparison(group)|big-stage.js|Proposed combined classes display above the teacher show comparison
+group.crossTeacher?"":`<div class="stage-reasons"|big-stage.js|Cross-teacher cards omit the internal explanation checklist
+data-stage-link-shows-choice|big-stage.js|Together-on-stage cross-teacher matches use a Link Shows checkbox opposite Approve
+stage-link-shows-check input:checked|big-stage.css|Only the circular Link Shows control darkens when selected
+width:20px!important;height:20px!important|big-stage.css|Link Shows control remains a true circle with a white selected check
+group.decision==="approved"&&group.relationship==="separate"|big-stage.js|Approved different-dance cross-teacher suggestions leave the visible suggestion list
+stage-cross-show-comparison p>small.stage-comparison-type|big-stage.css|Dance-type bubbles stay anchored at the top-right of comparison routines
+stage-cross-title-row|big-stage.js|Cross-teacher cards center their title, teacher names, combined dancer count, and age span
+stage-cross-title-row>.stage-status|big-stage.css|Cross-teacher match and status badges stay anchored to opposite header corners
+stage-match-card.cross-teacher{position:relative}|big-stage.css|Cross-teacher header badges anchor to the full card width in the two-column layout
+grid-template-columns:minmax(0,1fr);justify-self:stretch|big-stage.css|All Cross-Teacher header titles center across the full card width
+.stage-teacher-tabs{display:grid;width:100%|big-stage.css|Teacher Planning Board uses a full-width evenly spaced segmented toggle
+background:#dba9a1;box-shadow:none;color:#6b0d42|big-stage.css|Teacher toggle matches the blush and burgundy reference style
+stage-filter-actions|big-stage.js|Match count sits above Clear Filters and matches the dropdown-title styling
+stage-match-filters select:focus-visible|big-stage.css|Filter focus uses the brand burgundy and blush palette instead of browser blue
+font-size:16px;font-weight:750|big-stage.css|Filter dropdown choices use readable type without increasing control thickness
+Compatible Combos|big-stage.js|Cross-teacher matching is presented as Compatible Combos with balanced-show guidance
+if(!adjusted&&!force)state.notice=""|big-stage.js|The planner omits the unnecessary initial classes-analyzed banner
+stage-board-header-controls|big-stage.js|Workspace controls sit inside the active teacher header at top-right
+stage-board-age{display:inline-flex;align-items:center|big-stage.css|Age-match bubble text and icon stay vertically centered
+stage-board-primary-controls|big-stage.js|Fullscreen Undo and Save anchor top-left while the teacher title remains centered
+background:#a94b55;color:#fff}.stage-view-tabs|big-stage.css|Selected toggle hierarchy uses brick then blush then gold
+background:#e3bd74;color:#5b4214|big-stage.css|Selected teacher toggle visibly uses the gold hierarchy color
+.stage-section-toggle button{height:58px|big-stage.css|Toggle rows use explicit heights so top middle and teacher levels visibly step down
+stage-board-show-help|big-stage.js|Teacher-specific show-number guidance sits beneath the Show 1–4 legend
+stage-board-dance-total|big-stage.js|Class-to-dance total appears in a centered bubble beneath the teacher title
+All ${sameShow.length} schools in this row assigned to Show|big-stage.js|Combine merges every eligible school in the routine row assigned to the same teacher show
+font-size:clamp(40px,4.2vw,64px)|big-stage.css|The Big Stage uses a prominent title without the Recital Planner eyebrow bubble
+.stage-section-toggle button[aria-pressed="true"]{background:#dba9a1|big-stage.css|Show Production and Recital Matching use the blush segmented-toggle reference format
+align-content:start;gap:10px|big-stage.css|Proposed class cards keep age and dance type aligned together near the top
 dt-big-stage-recital-reset:2026-10-12|big-stage-wizard.js|Legacy recital cards are cleared once without affecting dancers or classes
 stage-show-bands|big-stage.js|Show headers spanning assigned school columns
 stage-board-dancers|big-stage.js|Collapsible four-across dancer details on planning cards
