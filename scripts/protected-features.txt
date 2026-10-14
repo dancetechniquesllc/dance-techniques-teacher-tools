@@ -93,6 +93,8 @@ background:#e3bd74;color:#5b4214|big-stage.css|Selected teacher toggle visibly u
 stage-board-show-help|big-stage.js|Teacher-specific show-number guidance sits beneath the Show 1–4 legend
 stage-board-dance-total|big-stage.js|Class-to-dance total appears in a centered bubble beneath the teacher title
 mergePlans(generated,workspace|big-stage.js|Newly active classes are merged into a restored teacher-planner workspace
+tourPlannerClasses|big-stage.js|Classes created in preview mode also appear on the teacher planning board
+matchedRoutine?.requirement|big-stage.js|Proposed-class dance bubbles match the highlighted teacher routines below
 All ${sameShow.length} schools in this row assigned to Show|big-stage.js|Combine merges every eligible school in the routine row assigned to the same teacher show
 font-size:clamp(40px,4.2vw,64px)|big-stage.css|The Big Stage uses a prominent title without the Recital Planner eyebrow bubble
 .stage-section-toggle button[aria-pressed="true"]{background:#dba9a1|big-stage.css|Show Production and Recital Matching use the blush segmented-toggle reference format
