@@ -95,6 +95,12 @@ stage-board-dance-total|big-stage.js|Class-to-dance total appears in a centered 
 mergePlans(generated,workspace|big-stage.js|Newly active classes are merged into a restored teacher-planner workspace
 tourPlannerClasses|big-stage.js|Classes created in preview mode also appear on the teacher planning board
 matchedRoutine?.requirement|big-stage.js|Proposed-class dance bubbles match the highlighted teacher routines below
+enrolled.length}/${classRecommendedCapacity(selected)|index.html|Tots class profiles display the standard eight-dancer capacity
+roster-edit-no-recital|index.html|Dancer Information includes a brick No Recital slide toggle
+roster-no-recital-info-button|index.html|Selected No Recital status exposes a question bubble with saved notes
+const isNoRecital|big-stage.js|No Recital dancers are excluded from recital counts and matching
+roster-no-recital-badge|index.html|No Recital roster cards are greyed out and carry an NR corner bubble
+stage-dancer-no-recital|big-stage.css|No Recital dancers remain visible in planning details as muted X avatars
 All ${sameShow.length} schools in this row assigned to Show|big-stage.js|Combine merges every eligible school in the routine row assigned to the same teacher show
 font-size:clamp(40px,4.2vw,64px)|big-stage.css|The Big Stage uses a prominent title without the Recital Planner eyebrow bubble
 .stage-section-toggle button[aria-pressed="true"]{background:#dba9a1|big-stage.css|Show Production and Recital Matching use the blush segmented-toggle reference format
