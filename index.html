@@ -22625,7 +22625,10 @@
       window.alert(`This dancer can’t be placed yet.\n\nPlease complete: ${missing.join(", ")}.`);
       return true;
     };
-    const isTotsAgeClass = (rosterClass) => String(rosterClass?.ageGroup || rosterClass?.age_group || "").trim().toLowerCase() === "tots";
+    const isTotsAgeClass = (rosterClass) => {
+      const age=String(rosterClass?.ageGroup||rosterClass?.age_group||"").trim().toLowerCase(),name=String(rosterClass?.name||"").trim().toLowerCase();
+      return ["tots","2s","young 2s","under 3"].includes(age)||/\btots?\b/.test(name);
+    };
     const classRecommendedCapacity = (rosterClass) => isTotsAgeClass(rosterClass) ? 8 : Number(rosterClass?.capacity || 12);
     const showFullClassCelebration = (rosterClass, dancerName) => {
       const overlay = document.getElementById("full-class-celebration-overlay");
