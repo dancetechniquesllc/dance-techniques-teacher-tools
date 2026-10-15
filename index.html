@@ -143,7 +143,7 @@
 
     .switcher {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       padding: 3px;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -749,7 +749,7 @@
       color: var(--fg);
     }
 
-    @media (max-width: 560px) {
+    @media (max-width: 1200px) {
       .os-widget { padding: 30px 27px 32px; }
     }
 
@@ -2381,8 +2381,133 @@
     }
     .teacher-home-my-day-badge:hover { filter: brightness(.985); }
     .teacher-home-my-day-badge:focus-visible { outline: 3px solid var(--brick); outline-offset: 3px; }
+    .teacher-home-big-stage-badge {
+      display: block;
+      width: calc(66.666667% + 67.333333px);
+      max-width: 100%;
+      min-height: 0;
+      margin: 18px auto 10px;
+      padding: 0;
+      border: 0;
+      border-radius: 18px;
+      background: transparent;
+      cursor: pointer;
+    }
+    .teacher-home-big-stage-badge img {
+      display: block;
+      width: 105.5%;
+      max-width: none;
+      height: auto;
+      margin-left: -2.75%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    .teacher-home-big-stage-badge:hover { filter: brightness(.985); }
+    .teacher-home-big-stage-badge:focus-visible { outline: 3px solid var(--brick); outline-offset: 3px; }
+    .teacher-stage-board { display: grid; gap: 14px; }
+    .teacher-stage-board-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px; border: 1px solid var(--border); border-radius: 14px; background: linear-gradient(135deg,#fff6f2,#fff); }
+    .teacher-stage-board-head h3,.teacher-stage-board-head p { margin: 0; }
+    .teacher-stage-board-head p { margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .teacher-stage-board-head span { padding: 7px 11px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 11px; font-weight: 900; white-space: nowrap; }
+    .teacher-stage-routine-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(250px,1fr)); gap: 12px; }
+    .teacher-stage-routine-card { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); box-shadow: 0 5px 16px rgb(72 41 48 / .06); }
+    .teacher-stage-routine-card header { display: flex; align-items: start; justify-content: space-between; gap: 10px; }
+    .teacher-stage-routine-card h4,.teacher-stage-routine-card p { margin: 0; }
+    .teacher-stage-routine-card h4 { color: var(--berry); font-family: Georgia,"Times New Roman",serif; font-size: 19px; }
+    .teacher-stage-routine-card p { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .teacher-stage-status { padding: 5px 8px; border-radius: 999px; background: #f6e4b2; color: #684f1b; font-size: 9px; font-weight: 900; white-space: nowrap; }
+    .teacher-stage-meta { display: flex; gap: 7px; flex-wrap: wrap; }
+    .teacher-stage-meta span { padding: 6px 8px; border-radius: 999px; background: #f7efeb; color: #5f5053; font-size: 9px; font-weight: 850; }
+    .teacher-stage-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .teacher-stage-actions button { min-height: 40px; border: 1px solid color-mix(in srgb,var(--berry) 24%,var(--border)); border-radius: 10px; background: #fff; color: var(--berry); font: inherit; font-size: 11px; font-weight: 900; cursor: pointer; }
+    .teacher-stage-actions button:last-child { border-color: var(--berry); background: var(--berry); color: white; }
+    .teacher-stage-mirrored-board .stage-board-header { display: grid!important; gap: 12px; min-height: 0!important; padding: 15px!important; }
+    .teacher-stage-mirrored-board .stage-board-primary-controls,
+    .teacher-stage-mirrored-board .stage-board-teacher-title,
+    .teacher-stage-mirrored-board .stage-board-header-controls,
+    .teacher-stage-mirrored-board .stage-board-show-help { position: static!important; width: auto!important; max-width: none!important; transform: none!important; }
+    .teacher-stage-mirrored-board .stage-board-teacher-title { order: -1; }
+    .teacher-stage-mirrored-board .stage-board-teacher-title h4,
+    .teacher-stage-mirrored-board .stage-board-teacher-title p { text-align: left!important; }
+    .teacher-stage-mirrored-board .stage-board-teacher-title h4 { font-size: 25px!important; }
+    .teacher-stage-mirrored-board .stage-board-dance-total { margin-inline: 0!important; }
+    .teacher-stage-mirrored-board .stage-board-primary-controls { display: grid!important; grid-template-columns: 1fr 1fr; }
+    .teacher-stage-mirrored-board .stage-board-primary-controls button { width: 100%; }
+    .teacher-stage-mirrored-board .stage-show-color-key { display: grid!important; grid-template-columns: repeat(4,1fr); gap: 5px; }
+    .teacher-stage-mirrored-board .stage-board-show-help { margin: 0!important; text-align: left!important; }
+    .teacher-stage-mirrored-board .stage-routine-matrix { width: 100%; overflow: visible!important; border: 0; background: transparent; }
+    .teacher-stage-mirrored-board .stage-routine-column-heads { display: none!important; }
+    .teacher-stage-mirrored-board .stage-routine-row { display: grid!important; grid-template-columns: 1fr!important; width: 100%!important; min-width: 0!important; margin-bottom: 12px; overflow: hidden; border: 1px solid var(--border)!important; border-radius: 15px!important; background: #fff; }
+    .teacher-stage-mirrored-board .stage-routine-name { position: static!important; width: auto!important; padding: 13px!important; border-right: 0!important; border-bottom: 1px solid var(--border); }
+    .teacher-stage-mirrored-board .stage-routine-slots { display: grid!important; grid-template-columns: 1fr!important; width: 100%; min-width: 0; }
+    .teacher-stage-mirrored-board .stage-routine-slot { display: none!important; min-height: 0!important; padding: 11px!important; border-right: 0!important; }
+    .teacher-stage-mirrored-board .stage-routine-slot:has(.stage-board-class) { display: block!important; }
+    .teacher-stage-mirrored-board .stage-board-class { width: auto; min-width: 0; padding: 12px!important; }
+    .teacher-stage-mirrored-board .teacher-stage-actions { grid-column: 1/-1; margin-top: 7px; }
+    .teacher-stage-phone-board { display: grid; gap: 12px; }
+    .teacher-stage-phone-board>header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px; border-left: 7px solid var(--brick); border-radius: 15px; background: #fff4f0; }
+    .teacher-stage-phone-board>header small,.teacher-stage-phone-board>header h3,.teacher-stage-phone-board>header p { margin: 0; }
+    .teacher-stage-phone-board>header small { color: var(--berry); font-size: 9px; font-weight: 900; letter-spacing: .08em; }
+    .teacher-stage-phone-board>header h3 { margin-top: 3px; color: var(--berry); font-family: Georgia,"Times New Roman",serif; font-size: 25px; }
+    .teacher-stage-phone-board>header p { margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .teacher-stage-phone-board>header button { min-height: 40px; padding: 8px 13px; border: 0; border-radius: 999px; background: #111; color: white; font: inherit; font-size: 10px; font-weight: 900; white-space: nowrap; }
+    .teacher-stage-show-strip { display: grid; grid-template-columns: repeat(4,minmax(105px,1fr)); gap: 7px; overflow-x: auto; padding-bottom: 3px; }
+    .teacher-stage-show-strip button { display: grid; gap: 2px; min-height: 58px; padding: 9px; border: 2px solid var(--teacher-show-color); border-radius: 13px; background: color-mix(in srgb,var(--teacher-show-color) 22%,white); color: var(--fg); text-align: left; font: inherit; }
+    .teacher-stage-show-strip strong { font-size: 13px; }.teacher-stage-show-strip small { color: var(--muted); font-size: 8px; }
+    .teacher-stage-phone-routines { display: grid; gap: 12px; }
+    .teacher-stage-phone-routine { overflow: hidden; border: 1px solid var(--border); border-radius: 16px; background: #fff; }
+    .teacher-stage-phone-routine>header { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 13px 14px; border-bottom: 1px solid var(--border); }
+    .teacher-stage-phone-routine>header span:first-child { color: var(--berry); font-size: 10px; font-weight: 900; text-transform: uppercase; }
+    .teacher-stage-phone-routine h4 { margin: 3px 0 0; font-size: 22px; }
+    .teacher-stage-style { padding: 7px 10px; border-radius: 999px; font-size: 9px; font-weight: 900; }.teacher-stage-style.is-either{background:#f8e2b1;color:#6e511c}.teacher-stage-style.is-ballet{background:#f2d8d4;color:#764050}.teacher-stage-style.is-tap{background:#dce5dc;color:#36553a}
+    .teacher-stage-routine-status { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px; }
+    .teacher-stage-routine-status strong { font-size: 12px; }.teacher-stage-routine-status span { padding: 6px 9px; border-radius: 999px; background:#dce9d6;color:#36553a;font-size:9px;font-weight:900; }
+    .teacher-stage-phone-show { padding: 0 11px 12px; }
+    .teacher-stage-phone-show-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-radius: 12px 12px 0 0; background: color-mix(in srgb,var(--teacher-show-color) 30%,white); }
+    .teacher-stage-phone-show-title strong { font-size: 16px; }.teacher-stage-phone-show-title small { max-width: 68%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; font-weight: 800; }
+    .teacher-stage-phone-class { display: grid; gap: 9px; padding: 12px; border: 1px solid color-mix(in srgb,var(--teacher-show-color) 55%,var(--border)); border-radius: 0 0 12px 12px; background: color-mix(in srgb,var(--teacher-show-color) 10%,white); }
+    .teacher-stage-phone-class>div { display: flex; align-items: center; justify-content: space-between; gap: 8px; }.teacher-stage-phone-class>div strong{font-size:15px}.teacher-stage-phone-class>div span,.teacher-stage-phone-class p{color:var(--muted);font-size:9px}.teacher-stage-phone-class p{margin:0}
+    .teacher-stage-phone-class details { border-top: 1px solid var(--border); }.teacher-stage-phone-class summary { display:flex;align-items:center;gap:7px;padding:9px 0 2px;color:var(--berry);font-size:10px;font-weight:900;list-style:none;cursor:pointer}.teacher-stage-phone-class summary::before{content:"›";font-size:16px}.teacher-stage-phone-class details[open] summary::before{transform:rotate(90deg)}.teacher-stage-phone-class summary span{margin-left:auto;padding:3px 7px;border-radius:999px;background:#f3e4e1}
+    .teacher-stage-phone-class details>div { display:grid;grid-template-columns:repeat(4,1fr);gap:7px;padding-top:8px }.teacher-stage-phone-class details>div>span{display:grid;justify-items:center;gap:3px;font-size:9px;font-weight:900}.teacher-stage-phone-class details img,.teacher-stage-phone-class details>div>span{min-width:0}.teacher-stage-phone-class details>div>span{width:100%}.teacher-stage-phone-class details>div>span:not(:has(img)){padding-top:8px}.teacher-stage-phone-class details img{width:34px;height:34px;border-radius:50%;object-fit:cover}.teacher-stage-phone-class details small{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:7px}
+    .teacher-stage-phone-class footer { display:grid;grid-template-columns:1fr 1fr;gap:8px }.teacher-stage-phone-class footer button{min-height:42px;border:1px solid var(--berry);border-radius:10px;background:#fff;color:var(--berry);font:inherit;font-size:10px;font-weight:900}.teacher-stage-phone-class footer button:last-child{background:var(--berry);color:#fff}
+    .teacher-stage-view-toggle{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border:1px solid #ead3ce;border-radius:14px;background:#f7ece8}.teacher-stage-view-toggle button{min-height:42px;border:0;border-radius:10px;background:transparent;color:var(--berry);font:inherit;font-size:12px;font-weight:900}.teacher-stage-view-toggle button[aria-pressed="true"]{background:#fff;box-shadow:0 3px 12px rgb(76 40 50 / .12)}
+    .teacher-stage-my-shows{display:grid;gap:12px}.teacher-stage-my-shows[hidden]{display:none}.teacher-stage-my-shows>article{overflow:hidden;border:2px solid var(--teacher-show-color);border-radius:15px;background:color-mix(in srgb,var(--teacher-show-color) 10%,white)}.teacher-stage-my-shows>article>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 15px;background:color-mix(in srgb,var(--teacher-show-color) 28%,white)}.teacher-stage-my-shows h3,.teacher-stage-my-shows small,.teacher-stage-my-shows p{margin:0}.teacher-stage-my-shows h3{font-size:21px}.teacher-stage-my-shows header small{font-size:8px;font-weight:900;letter-spacing:.08em}.teacher-stage-my-shows header>span{padding:6px 9px;border-radius:999px;background:#fff;font-size:9px;font-weight:900}.teacher-stage-my-shows>article>div{display:grid;gap:8px;padding:11px}.teacher-stage-my-shows>article>div button{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--border);border-radius:11px;background:#fff;color:var(--fg);font:inherit;text-align:left}.teacher-stage-my-shows>article>div strong,.teacher-stage-my-shows>article>div small{display:block}.teacher-stage-my-shows>article>div small{margin-top:3px;color:var(--muted);font-size:8px}.teacher-stage-my-shows>article>div em{color:var(--berry);font-size:9px;font-style:normal;font-weight:900;white-space:nowrap}.teacher-stage-my-shows>article>p{padding:16px;color:var(--muted);font-size:11px;text-align:center}
     @media (max-width: 560px) {
-      .teacher-home-my-day-badge { width: calc(66.666667% + 81.333333px); }
+      .teacher-stage-board { gap: 10px; }
+      .teacher-stage-mirrored-board { gap: 11px; }
+      .teacher-stage-mirrored-board .stage-board-header { display: grid; gap: 12px; min-height: 0; padding: 15px; }
+      .teacher-stage-mirrored-board .stage-board-primary-controls,
+      .teacher-stage-mirrored-board .stage-board-teacher-title,
+      .teacher-stage-mirrored-board .stage-board-header-controls,
+      .teacher-stage-mirrored-board .stage-board-show-help { position: static; width: auto; max-width: none; transform: none; }
+      .teacher-stage-mirrored-board .stage-board-teacher-title { order: -1; }
+      .teacher-stage-mirrored-board .stage-board-teacher-title h4,
+      .teacher-stage-mirrored-board .stage-board-teacher-title p { text-align: left; }
+      .teacher-stage-mirrored-board .stage-board-teacher-title h4 { font-size: 25px; }
+      .teacher-stage-mirrored-board .stage-board-dance-total { margin-inline: 0; }
+      .teacher-stage-mirrored-board .stage-board-primary-controls { display: grid; grid-template-columns: 1fr 1fr; }
+      .teacher-stage-mirrored-board .stage-board-primary-controls button { width: 100%; }
+      .teacher-stage-mirrored-board .stage-show-color-key { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; }
+      .teacher-stage-mirrored-board .stage-show-color-key span { justify-content: center; padding: 6px 3px; font-size: 8px; }
+      .teacher-stage-mirrored-board .stage-board-show-help { margin: 0; text-align: left; }
+      .teacher-stage-mirrored-board .stage-routine-board>header { align-items: start; }
+      .teacher-stage-mirrored-board .stage-routine-matrix { overflow: visible; border: 0; background: transparent; }
+      .teacher-stage-mirrored-board .stage-routine-column-heads { display: none; }
+      .teacher-stage-mirrored-board .stage-routine-row { display: grid; width: auto!important; min-width: 0!important; margin-bottom: 12px; overflow: hidden; border: 1px solid var(--border); border-radius: 15px; background: #fff; }
+      .teacher-stage-mirrored-board .stage-routine-name { position: static; width: auto; padding: 13px; border-right: 0; border-bottom: 1px solid var(--border); }
+      .teacher-stage-mirrored-board .stage-routine-slots { display: grid; grid-template-columns: 1fr!important; }
+      .teacher-stage-mirrored-board .stage-routine-slot { display: none; min-height: 0; padding: 11px; border-right: 0; }
+      .teacher-stage-mirrored-board .stage-routine-slot:has(.stage-board-class) { display: block; }
+      .teacher-stage-mirrored-board .stage-board-class { padding: 12px; }
+      .teacher-stage-mirrored-board .stage-board-class>div { display: grid; gap: 3px; }
+      .teacher-stage-mirrored-board .stage-board-class>div strong,
+      .teacher-stage-mirrored-board .stage-board-class>div span { min-width: 0; overflow-wrap: anywhere; }
+      .teacher-stage-mirrored-board .stage-board-dancers>div { grid-template-columns: repeat(3,minmax(0,1fr)); }
+      .teacher-stage-mirrored-board .teacher-stage-actions { grid-column: 1/-1; margin-top: 7px; }
+    }
+    @media (max-width: 560px) {
+      .teacher-home-my-day-badge,
+      .teacher-home-big-stage-badge { width: calc(66.666667% + 81.333333px); }
     }
 
     .teacher-roster-toolbar { display: none; }
@@ -8965,6 +9090,50 @@
     .prospect-followup-card strong, .prospect-followup-card small { display: block; }
     .prospect-contact-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 9px; }
     .confirm-dialog.roster-edit-dialog { width: min(1120px, 100%); max-height: calc(100vh - 36px); overflow: auto; padding: 0; border-radius: 22px; background: #fbfaf7; }
+    #teacher-new-enrollment-overlay { padding: 24px; }
+    #teacher-new-enrollment-overlay .confirm-dialog {
+      width: min(980px, calc(100vw - 48px));
+      max-height: min(86vh, 780px);
+      padding: 26px;
+      overflow: auto;
+      border-radius: 24px;
+      background: #fffdfb;
+    }
+    #teacher-new-enrollment-overlay .confirm-dialog > h3 { margin: 0; font-size: clamp(25px, 3vw, 34px); }
+    #teacher-new-enrollment-dialog-summary { margin: 5px 0 20px; color: var(--muted); font-size: 15px; }
+    #teacher-new-enrollment-form { display: block; }
+    #teacher-new-enrollment-class-options {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 300px));
+      justify-content: start;
+      gap: 16px;
+    }
+    #teacher-new-enrollment-class-options .enrollment-placement-class-card {
+      width: 100%;
+      min-height: 290px;
+      padding: 20px 18px;
+      border-radius: 18px;
+    }
+    #teacher-new-enrollment-dialog-detail { margin: 18px 0 0; padding: 14px 16px; border-radius: 13px; background: #f8eeeb; line-height: 1.45; }
+    #teacher-new-enrollment-overlay .confirm-actions {
+      position: sticky;
+      bottom: -26px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(150px, 220px));
+      justify-content: end;
+      gap: 12px;
+      margin: 22px -26px -26px;
+      padding: 16px 26px 22px;
+      border-top: 1px solid #ecd8d2;
+      background: rgb(255 253 251 / 96%);
+      backdrop-filter: blur(10px);
+    }
+    #teacher-new-enrollment-overlay .confirm-actions button { min-height: 48px; border-radius: 999px; }
+    @media (max-width: 640px) {
+      #teacher-new-enrollment-overlay { padding: 10px; }
+      #teacher-new-enrollment-overlay .confirm-dialog { width: 100%; max-height: calc(100dvh - 20px); padding: 18px; border-radius: 18px; }
+      #teacher-new-enrollment-class-options { grid-template-columns: 1fr; }
+      #teacher-new-enrollment-overlay .confirm-actions { bottom: -18px; grid-template-columns: 1fr; margin: 18px -18px -18px; padding: 14px 18px 18px; }
+    }
     .roster-edit-form { display: grid; grid-template-columns: 1fr; gap: 14px; margin: 0; padding: 0 24px 24px; }
     .roster-edit-form .full-field { grid-column: 1 / -1; }
     .roster-edit-form textarea { min-height: 100px; resize: vertical; }
@@ -15108,6 +15277,199 @@
     }
 
     body[data-mode="teacher"] .admin-shell { display: none; }
+    .teacher-desktop-stage { display: none; }
+    body:not([data-tour-mode="true"]) [data-mode-btn="teacher-desktop"] { display: none !important; }
+    body:not([data-tour-mode="true"]) .switcher { grid-template-columns: 1fr 1fr; }
+    body[data-mode="teacher-desktop"] .phone-stage,
+    body[data-mode="teacher-desktop"] .admin-shell { display: none; }
+    body[data-mode="teacher-desktop"] .workspace { grid-template-columns: 1fr; }
+    body[data-mode="teacher-desktop"] .teacher-desktop-stage { display: grid; }
+    .teacher-desktop-stage { min-height: calc(100vh - 112px); grid-template-columns: 238px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--border); border-radius: 24px; background: #fffaf7; box-shadow: var(--shadow); }
+    .teacher-desktop-sidebar { display: flex; max-height: calc(100vh - 112px); flex-direction: column; gap: 5px; padding: 26px 18px; overflow-y: auto; border-right: 1px solid #efcbc5; background: #f8e4df; }
+    .teacher-desktop-brand { margin: 0 10px 24px; }
+    .teacher-desktop-brand strong { display: block; font-family: var(--font-display); font-size: 25px; }
+    .teacher-desktop-brand span { color: var(--muted); font-size: 13px; font-weight: 750; }
+    .teacher-desktop-nav { display: flex; min-height: 46px; align-items: center; gap: 11px; padding: 0 14px; border: 0; border-radius: 13px; color: #493d3b; background: transparent; font: inherit; font-weight: 800; text-align: left; }
+    .teacher-desktop-nav.active { color: #722940; background: #fff; box-shadow: 0 7px 18px rgb(91 49 51 / 9%); }
+    .teacher-desktop-nav span:first-child { width: 25px; font-size: 20px; text-align: center; }
+    .teacher-desktop-profile { margin-top: auto; padding: 14px; border-radius: 15px; background: rgb(255 255 255 / 68%); }
+    .teacher-desktop-main { min-width: 0; padding: clamp(26px, 4vw, 54px); }
+    .teacher-desktop-head { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .teacher-desktop-head h2 { margin: 0; font-family: var(--font-display); font-size: clamp(30px, 4vw, 48px); }
+    .teacher-desktop-head p { margin: 5px 0 0; color: var(--muted); font-weight: 700; }
+    .teacher-desktop-avatar { display: grid; width: 54px; height: 54px; place-items: center; border-radius: 50%; background: #a9ddbd; font-size: 19px; font-weight: 900; }
+    .teacher-desktop-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin-top: 34px; }
+    .teacher-desktop-card { min-height: 150px; padding: 22px; border: 1px solid #efcbc5; border-radius: 20px; background: #fff; box-shadow: 0 10px 25px rgb(86 52 49 / 7%); }
+    .teacher-desktop-card.wide { grid-column: span 2; }
+    .teacher-desktop-card h3 { margin: 0 0 8px; font-family: var(--font-display); font-size: 22px; }
+    .teacher-desktop-card p { margin: 0; color: var(--muted); font-weight: 650; line-height: 1.5; }
+    .teacher-desktop-card .status { display: inline-flex; margin-top: 18px; }
+    .teacher-desktop-view { display: none; }
+    .teacher-desktop-view.active { display: block; }
+    .teacher-desktop-section-head { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
+    .teacher-desktop-section-head h2 { margin: 0; font-family: var(--font-display); font-size: clamp(30px, 4vw, 46px); }
+    .teacher-desktop-section-head p { margin: 6px 0 0; color: var(--muted); font-weight: 680; }
+    .teacher-desktop-action { min-height: 42px; padding: 0 18px; border: 0; border-radius: 999px; color: #fff; background: var(--rose); font: inherit; font-weight: 850; }
+    .teacher-desktop-list { display: grid; gap: 12px; }
+    .teacher-desktop-list article { display: grid; grid-template-columns: minmax(170px, 1.2fr) minmax(120px, .8fr) auto; align-items: center; gap: 18px; padding: 18px 20px; border: 1px solid #efcbc5; border-radius: 17px; background: #fff; }
+    .teacher-desktop-list strong { font-size: 17px; }
+    .teacher-desktop-list small { color: var(--muted); font-weight: 700; }
+    .teacher-desktop-list button { justify-self: end; }
+    .teacher-desktop-split { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(280px, .7fr); gap: 18px; }
+    .teacher-desktop-panel { padding: 22px; border: 1px solid #efcbc5; border-radius: 20px; background: #fff; }
+    .teacher-desktop-panel h3 { margin: 0 0 16px; font-family: var(--font-display); font-size: 22px; }
+    .teacher-desktop-chips { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+    .teacher-desktop-chips span { padding: 7px 12px; border-radius: 999px; background: #f7e8e4; font-size: 13px; font-weight: 800; }
+    .teacher-desktop-app-host:not(:empty) ~ .teacher-desktop-view { display: none !important; }
+    .teacher-desktop-app-host .phone-screen { min-height: 0; padding: 0 !important; overflow: visible; background: transparent; }
+    .teacher-desktop-app-host .tabbar,
+    .teacher-desktop-app-host .nav-menu-wrap { display: none !important; }
+    .teacher-desktop-app-host .view { width: 100%; max-width: none; min-height: 0; padding: 0; }
+    .teacher-desktop-app-host .view > .mobile-head { display: flex; margin: 0 0 26px; padding: 0; }
+    .teacher-desktop-app-host .view > .mobile-head h2 { font-size: clamp(30px, 4vw, 46px); }
+    .teacher-desktop-app-host #today-view.active {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        "teacher-home-head teacher-home-head"
+        "teacher-home-widget teacher-home-my-day"
+        "teacher-home-widget teacher-home-stage"
+        "teacher-home-apps teacher-home-apps"
+        "teacher-home-tempo teacher-home-tempo";
+      align-items: center;
+      gap: 22px 28px;
+    }
+    .teacher-desktop-app-host #today-view > .mobile-head {
+      grid-area: teacher-home-head;
+      margin-bottom: 0;
+    }
+    .teacher-desktop-app-host #today-view > .os-widget {
+      grid-area: teacher-home-widget;
+      align-self: stretch;
+      min-height: 100%;
+      margin: 0;
+    }
+    .teacher-desktop-app-host #today-view > .teacher-home-my-day-badge {
+      grid-area: teacher-home-my-day;
+    }
+    .teacher-desktop-app-host #today-view > .teacher-home-big-stage-badge {
+      grid-area: teacher-home-stage;
+    }
+    .teacher-desktop-app-host #today-view > :is(.teacher-home-my-day-badge, .teacher-home-big-stage-badge) {
+      width: 100%;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .teacher-desktop-app-host #today-view > .app-grid {
+      grid-area: teacher-home-apps;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      width: 100%;
+      margin: 4px 0 0;
+      padding: 18px 0 0;
+      border-top: 1px solid var(--border);
+    }
+    .teacher-desktop-app-host #today-view > .home-tempo-panel {
+      grid-area: teacher-home-tempo;
+      margin-top: 0;
+    }
+    .teacher-desktop-app-host :is(.panel, .teacher-card, .school-card, .class-card, .order-card) { border-radius: 18px; }
+    .teacher-desktop-app-host :is(.roster-list, .schools-list, .orders-list, .curriculum-grid, .dancer-grid) { gap: 16px; }
+    .teacher-desktop-app-host #music-view,
+    .teacher-desktop-app-host #teacher-stage-view { max-width: none; }
+    .teacher-desktop-app-host #teacher-stage-view .teacher-stage-phone-board { display: none !important; }
+    .teacher-desktop-app-host .teacher-shared-planner { min-width: 0; }
+    .teacher-desktop-app-host .teacher-shared-planner #big-stage-app { width: 100%; }
+    .teacher-desktop-app-host .teacher-shared-planner .stage-section-toggle { display: none; }
+    .teacher-desktop-app-host .teacher-shared-planner .stage-teacher-tabs { display: none; }
+    .teacher-desktop-app-host .teacher-shared-planner .stage-view-tabs { display: none; }
+    .teacher-desktop-app-host .teacher-stage-phone-board { overflow-x: auto; }
+    .teacher-desktop-app-host .teacher-stage-phone-routines { min-width: 760px; }
+    .teacher-desktop-app-host .teacher-stage-phone-routine { grid-template-columns: 190px minmax(0, 1fr); }
+    .teacher-stage-desktop-board { display: grid; gap: 18px; min-width: 920px; }
+    .teacher-stage-desktop-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 20px 22px; border-left: 8px solid var(--brick); border-radius: 18px; background: #fff4f0; }
+    .teacher-stage-desktop-head small,.teacher-stage-desktop-head h3,.teacher-stage-desktop-head p { margin: 0; }
+    .teacher-stage-desktop-head h3 { margin-top: 3px; color: var(--berry); font-family: Georgia,"Times New Roman",serif; font-size: 31px; }
+    .teacher-stage-desktop-head p { margin-top: 4px; color: var(--muted); font-weight: 700; }
+    .teacher-stage-desktop-head button { min-height: 44px; padding: 0 20px; border: 0; border-radius: 999px; color: #fff; background: #111; font: inherit; font-weight: 850; }
+    .teacher-stage-desktop-scroll { overflow-x: auto; padding-bottom: 10px; }
+    .teacher-stage-desktop-matrix { min-width: max(100%, calc(190px + var(--teacher-school-count) * 260px)); overflow: hidden; border: 1px solid #edc8c1; border-radius: 18px; background: #fff; }
+    .teacher-stage-desktop-show-bands { display: grid; grid-template-columns: 190px repeat(var(--teacher-school-count), minmax(260px,1fr)); }
+    .teacher-stage-desktop-show-bands > span:first-child { padding: 14px 18px; color: #fff; background: #2c2526; font-weight: 850; }
+    .teacher-stage-desktop-show-band { display: grid; justify-items: center; padding: 11px; border-left: 1px solid rgb(0 0 0 / 8%); background: var(--teacher-show-color); }
+    .teacher-stage-desktop-show-band strong { font-size: 18px; }
+    .teacher-stage-desktop-show-band small { font-weight: 750; }
+    .teacher-stage-desktop-columns,.teacher-stage-desktop-row { display: grid; grid-template-columns: 190px repeat(var(--teacher-school-count), minmax(260px,1fr)); }
+    .teacher-stage-desktop-columns { border-bottom: 1px solid #edc8c1; }
+    .teacher-stage-desktop-columns > * { padding: 14px; border-left: 1px solid #edc8c1; background: #fbf0ed; text-align: center; }
+    .teacher-stage-desktop-columns > *:first-child { border-left: 0; text-align: left; }
+    .teacher-stage-desktop-row { min-height: 220px; border-bottom: 1px solid #edc8c1; }
+    .teacher-stage-desktop-row:last-child { border-bottom: 0; }
+    .teacher-stage-desktop-routine { display: grid; align-content: start; gap: 8px; padding: 20px 16px; background: #fffafa; }
+    .teacher-stage-desktop-routine strong { color: var(--berry); font-size: 23px; }
+    .teacher-stage-desktop-routine span { width: fit-content; padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 850; }
+    .teacher-stage-desktop-routine .is-ballet { background: #f2d9d6; }.teacher-stage-desktop-routine .is-tap { background: #dce8dc; }.teacher-stage-desktop-routine .is-either { background: #f9e4af; }
+    .teacher-stage-desktop-slot { display: grid; align-content: start; gap: 10px; padding: 14px; border-left: 1px solid #edc8c1; background: color-mix(in srgb,var(--teacher-show-color) 12%,white); }
+    .teacher-stage-desktop-empty { place-self: center; color: #aa9691; font-weight: 750; }
+    .teacher-stage-desktop-class { display: grid; gap: 8px; padding: 14px; border: 1px solid #e7c6c0; border-radius: 15px; background: #fff; box-shadow: 0 7px 18px rgb(77 50 48 / 7%); }
+    .teacher-stage-desktop-class header { display: flex; justify-content: space-between; gap: 10px; }
+    .teacher-stage-desktop-class header strong { font-size: 16px; }.teacher-stage-desktop-class header span { font-size: 12px; font-weight: 800; }
+    .teacher-stage-desktop-class p { margin: 0; font-size: 12px; font-weight: 700; }
+    .teacher-stage-desktop-class footer { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 8px; border-top: 1px solid #eedbd7; }
+    .teacher-stage-desktop-class footer button { min-height: 36px; border: 1px solid #d9a9a2; border-radius: 10px; color: var(--berry); background: #fff; font: inherit; font-size: 11px; font-weight: 850; }
+    .teacher-desktop-app-host .teacher-dancer-directory { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+    .teacher-desktop-app-host .teacher-dancer-card { min-height: 190px; padding: 20px 12px 16px; }
+    .school-card-summary { display: none; }
+    .teacher-desktop-app-host .school-directory { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .teacher-desktop-app-host .school-card { min-height: 210px; padding: 22px; border-radius: 20px; cursor: pointer; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+    .teacher-desktop-app-host .school-card:hover { transform: translateY(-2px); border-color: var(--brick); box-shadow: 0 15px 32px rgb(81 48 48 / 11%); }
+    .teacher-desktop-app-host .school-card-head { margin-bottom: 18px; }
+    .teacher-desktop-app-host .school-card-head h3 { font-size: 20px; white-space: normal; }
+    .teacher-desktop-app-host .school-card-summary { display: grid; gap: 12px; }
+    .teacher-desktop-app-host .school-card-summary-stats { display: flex; flex-wrap: wrap; gap: 8px; }
+    .teacher-desktop-app-host .school-card-summary-stats span { padding: 7px 10px; border-radius: 999px; background: #f5e5e1; color: var(--berry); font-size: 12px; font-weight: 800; }
+    .teacher-desktop-app-host .school-card-summary > small { margin-top: auto; color: var(--brick); font-weight: 800; }
+    .teacher-desktop-app-host .school-card > .school-contact-list { display: none; }
+    .teacher-desktop-app-host .school-card.is-open { grid-column: 1 / -1; min-height: 0; cursor: default; transform: none; }
+    .teacher-desktop-app-host .school-card.is-open > .school-contact-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .teacher-desktop-app-host .school-card.is-open .school-card-summary { display: none; }
+    .teacher-desktop-app-host .school-card.is-open .school-important-notes,
+    .teacher-desktop-app-host .school-card.is-open .school-card-action-row { grid-column: 1 / -1; }
+    @media (max-width: 1500px) {
+      .teacher-desktop-app-host .teacher-dancer-directory { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .teacher-desktop-app-host .school-directory { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 1120px) {
+      .teacher-desktop-app-host #today-view > .app-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .teacher-desktop-app-host .teacher-dancer-directory { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .teacher-desktop-app-host .teacher-dancer-filter-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .teacher-desktop-app-host .school-card.is-open > .school-contact-list { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 720px) {
+      .teacher-desktop-app-host .teacher-dancer-directory,
+      .teacher-desktop-app-host .teacher-dancer-filter-row,
+      .teacher-desktop-app-host .school-directory { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 900px) {
+      .teacher-desktop-app-host #today-view.active {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "teacher-home-head"
+          "teacher-home-widget"
+          "teacher-home-my-day"
+          "teacher-home-stage"
+          "teacher-home-apps"
+          "teacher-home-tempo";
+      }
+      .teacher-desktop-app-host #today-view > .app-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .teacher-desktop-stage { grid-template-columns: 86px minmax(0, 1fr); }
+      .teacher-desktop-brand span, .teacher-desktop-nav span:last-child, .teacher-desktop-profile { display: none; }
+      .teacher-desktop-brand strong { font-size: 17px; text-align: center; }
+      .teacher-desktop-nav { justify-content: center; padding: 0; }
+      .teacher-desktop-grid { grid-template-columns: 1fr 1fr; }
+      .teacher-desktop-split { grid-template-columns: 1fr; }
+      .teacher-desktop-list article { grid-template-columns: 1fr auto; }
+      .teacher-desktop-list article > small { grid-column: 1; }
+    }
     body[data-mode="teacher"] .session-strip,
     body[data-mode="teacher"] > .app > .topbar { display: none !important; }
     body[data-mode="teacher"] > .app { padding-top: 0; }
@@ -15829,6 +16191,7 @@
       </div>
       <nav class="switcher" aria-label="Prototype mode">
         <button data-mode-btn="teacher">Teacher Tools</button>
+        <button data-mode-btn="teacher-desktop">TT Desktop</button>
         <button class="active" data-mode-btn="admin">Director Dashboard</button>
       </nav>
     </header>
@@ -15968,7 +16331,7 @@
                 <button class="app-tile curriculum-tile" data-tab-jump="curriculum" aria-label="Open Curriculum">
                   <span class="app-icon image-icon curriculum" aria-hidden="true">
                     <img src="assets/app-icon-curriculum.png" alt="">
-                    <span class="app-badge" id="curriculum-home-badge">1</span>
+                    <span class="app-badge cleared" id="curriculum-home-badge" hidden></span>
                   </span>
                   <span class="app-label">My Curriculum</span>
                 </button>
@@ -15987,6 +16350,10 @@
                 </button>
               </div>
 
+              <button class="teacher-home-big-stage-badge" type="button" data-tab-jump="teacher-stage" aria-label="Open The Big Stage">
+                <img src="assets/teacher-home-big-stage.png" alt="" aria-hidden="true">
+              </button>
+
               <section class="home-tempo-panel" aria-label="Today’s Tempo">
                 <!-- Brand copy: Today's Tempo encouragement. Admin library prototype lives in the Director Dashboard area. -->
                 <div class="tempo-card" id="home-tempo-card">
@@ -15994,6 +16361,18 @@
                   <small>Dance Day is someone’s favorite day of the week. Let’s make it magical.</small>
                 </div>
               </section>
+            </section>
+
+            <section class="view" id="teacher-stage-view">
+              <div class="mobile-head page-head">
+                <button class="back-btn" data-tab-jump="today" aria-label="Back to Today">&larr;</button>
+                <div class="mobile-title">
+                  <h2>The Big Stage</h2>
+                  <p class="subtle">Plan your recital routines and stage sheets.</p>
+                </div>
+                <button class="avatar" data-tab-jump="profile" data-profile-avatar aria-label="Open profile">T</button>
+              </div>
+              <div class="teacher-stage-board" id="teacher-stage-board"></div>
             </section>
 
             <section class="view" id="my-day-view">
@@ -16762,6 +17141,39 @@
         </article>
       </div>
 
+      <section class="teacher-desktop-stage" aria-label="Teacher Tools desktop planning canvas">
+        <aside class="teacher-desktop-sidebar">
+          <div class="teacher-desktop-brand"><strong>Teacher Tools</strong><span>Desktop Preview</span></div>
+          <button class="teacher-desktop-nav active" type="button" data-teacher-desktop-view="home"><span>⌂</span><span>Home</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="day"><span>☀</span><span>My Day</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="rosters"><span>☷</span><span>My Rosters</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="dancers"><span>◉</span><span>My Dancers</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="orders"><span>♡</span><span>My Orders</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="music"><span>♬</span><span>My Music</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="schedule"><span>▣</span><span>My Schedule</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="messages"><span>✉</span><span>My Messages</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="curriculum"><span>♢</span><span>My Curriculum</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="schools"><span>⌂</span><span>My Schools</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="pay"><span>$</span><span>My Payday</span></button>
+          <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="stage"><span>★</span><span>The Big Stage</span></button>
+          <div class="teacher-desktop-profile"><strong>Lexi</strong><br><small>Teacher workspace</small></div>
+        </aside>
+        <div class="teacher-desktop-main">
+          <div class="teacher-desktop-app-host" id="teacher-desktop-app-host"></div>
+          <section class="teacher-desktop-view active" data-teacher-desktop-panel="home"><header class="teacher-desktop-head"><div><h2>Good afternoon, Lexi!</h2><p>Your Teacher Tools desktop planning space.</p></div><div class="teacher-desktop-avatar" aria-label="Lexi profile">L</div></header><div class="teacher-desktop-grid"><article class="teacher-desktop-card wide"><h3>My Day</h3><p>See today’s classes, school stops, lesson plans, and important reminders in one desktop view.</p><span class="status ok">Today at a glance</span></article><article class="teacher-desktop-card"><h3>Messages</h3><p>Keep teacher conversations and updates easy to find.</p><span class="status pending">4 unread</span></article><article class="teacher-desktop-card"><h3>My Classes</h3><p>Open rosters, dancers, and class details without leaving the dashboard.</p></article><article class="teacher-desktop-card"><h3>My Music</h3><p>Build playlists and prepare music with more room to work.</p></article><article class="teacher-desktop-card"><h3>The Big Stage</h3><p>Plan Lexi’s assigned recital routines and stage sheets.</p><span class="status private">Planning Board</span></article></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="day"><header class="teacher-desktop-section-head"><div><h2>My Day</h2><p>Monday, September 14 · Lexi’s teaching route and lesson details.</p></div><button class="teacher-desktop-action" type="button">Open Full Day</button></header><div class="teacher-desktop-split"><div class="teacher-desktop-list"><article><strong>Highview Learning Center</strong><small>9:00 AM · 3 classes · Tap Week 2</small><span class="status ok">Ready</span></article><article><strong>Primrose North Rockwall</strong><small>11:30 AM · 2 classes · Ballet Week 2</small><span class="status private">Bean bags</span></article><article><strong>Primrose Rowlett</strong><small>2:15 PM · 3 classes · Tap Week 2</small><span class="status pending">Review roster</span></article></div><aside class="teacher-desktop-panel"><h3>Coming Up Next</h3><strong>Highview · Tots</strong><p>Tap: Flat Foot, Stomps &amp; Body Parts</p><div class="teacher-desktop-chips"><span>Playlist ready</span><span>8 dancers</span></div></aside></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="rosters"><header class="teacher-desktop-section-head"><div><h2>My Rosters</h2><p>Lexi’s active classes and attendance lists.</p></div><button class="teacher-desktop-action" type="button">Print Rosters</button></header><div class="teacher-desktop-list"><article><strong>Tots · Highview</strong><small>Mondays 9:00 AM</small><span class="status ok">8 dancers</span></article><article><strong>2s · Primrose North</strong><small>Mondays 11:30 AM</small><span class="status ok">10 dancers</span></article><article><strong>3s · Primrose Rowlett</strong><small>Mondays 2:15 PM</small><span class="status pending">1 update</span></article></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="dancers"><header class="teacher-desktop-section-head"><div><h2>My Dancers</h2><p>Search every dancer currently assigned to Lexi.</p></div><button class="teacher-desktop-action" type="button">Search Dancers</button></header><div class="teacher-desktop-grid"><article class="teacher-desktop-card"><h3>A–H</h3><p>18 dancer profiles</p></article><article class="teacher-desktop-card"><h3>I–P</h3><p>16 dancer profiles</p></article><article class="teacher-desktop-card"><h3>Q–Z</h3><p>14 dancer profiles</p></article></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="orders"><header class="teacher-desktop-section-head"><div><h2>My Orders</h2><p>Costume, boutique, and classroom supply orders.</p></div><button class="teacher-desktop-action" type="button">View Order History</button></header><div class="teacher-desktop-list"><article><strong>Recital Costume Order</strong><small>Submitted September 10</small><span class="status ok">Confirmed</span></article><article><strong>Classroom Teaching Tools</strong><small>Bean bags and floor dots</small><span class="status pending">Processing</span></article></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="music"><header class="teacher-desktop-section-head"><div><h2>My Music</h2><p>Teacher playlists, recital songs, and class-ready tracks.</p></div><button class="teacher-desktop-action" type="button">New Playlist</button></header><div class="teacher-desktop-grid"><article class="teacher-desktop-card wide"><h3>Today’s Class Playlist</h3><p>12 tracks · 34 minutes · downloaded for today</p><span class="status ok">Ready to play</span></article><article class="teacher-desktop-card"><h3>Recital Music</h3><p>4 assigned routines</p></article><article class="teacher-desktop-card"><h3>Favorites</h3><p>26 saved tracks</p></article></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="schedule"><header class="teacher-desktop-section-head"><div><h2>My Schedule</h2><p>Weekly teaching schedule, closures, and substitutions.</p></div><button class="teacher-desktop-action" type="button">Request Change</button></header><div class="teacher-desktop-list"><article><strong>Monday</strong><small>Highview · Primrose North · Primrose Rowlett</small><span class="status ok">8 classes</span></article><article><strong>Tuesday</strong><small>Primrose Rockwall · Kiddie Academy</small><span class="status ok">6 classes</span></article><article><strong>Wednesday</strong><small>No classes assigned</small><span class="status private">Available</span></article></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="messages"><header class="teacher-desktop-section-head"><div><h2>My Messages</h2><p>Conversations with the Dance Techniques team.</p></div><button class="teacher-desktop-action" type="button">New Message</button></header><div class="teacher-desktop-split"><div class="teacher-desktop-list"><article><strong>Director Team</strong><small>Recital planning update · 10:42 AM</small><span class="status pending">2 new</span></article><article><strong>Tiffany</strong><small>Shared playlist · Yesterday</small><span class="status ok">Read</span></article></div><aside class="teacher-desktop-panel"><h3>Team Talk</h3><p>Studio announcements and teacher-wide conversations will stay visible here.</p></aside></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="curriculum"><header class="teacher-desktop-section-head"><div><h2>My Curriculum</h2><p>Week-by-week plans for Lexi’s assigned class styles.</p></div><button class="teacher-desktop-action" type="button">Open Week 2</button></header><div class="teacher-desktop-grid"><article class="teacher-desktop-card"><h3>Tap · Week 2</h3><p>Flat foot, stomps, and body parts.</p><span class="status ok">Current</span></article><article class="teacher-desktop-card"><h3>Ballet · Week 2</h3><p>First position, plié, and port de bras.</p></article><article class="teacher-desktop-card"><h3>Teaching Tools</h3><p>Bean bags · floor dots · scarves</p></article></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="schools"><header class="teacher-desktop-section-head"><div><h2>My Schools</h2><p>Contacts, arrival notes, and class locations.</p></div><button class="teacher-desktop-action" type="button">View Map</button></header><div class="teacher-desktop-list"><article><strong>Highview Learning Center</strong><small>Enter through the front office · Gym</small><span class="status ok">3 classes</span></article><article><strong>Primrose North Rockwall</strong><small>Side entrance · Multipurpose room</small><span class="status ok">2 classes</span></article><article><strong>Primrose Rowlett</strong><small>Front office check-in · Room 104</small><span class="status ok">3 classes</span></article></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="pay"><header class="teacher-desktop-section-head"><div><h2>My Payday</h2><p>Pay periods, class totals, and available statements.</p></div><button class="teacher-desktop-action" type="button">Download Statement</button></header><div class="teacher-desktop-split"><div class="teacher-desktop-panel"><h3>Current Pay Period</h3><p>September 1–15 · 42 classes completed</p><div class="teacher-desktop-chips"><span>Submitted</span><span>Direct deposit</span></div></div><div class="teacher-desktop-panel"><h3>Latest Pay Stub</h3><p>September 1 · Viewed</p></div></div></section>
+          <section class="teacher-desktop-view" data-teacher-desktop-panel="stage"><header class="teacher-desktop-section-head"><div><h2>The Big Stage</h2><p>Lexi’s teacher-specific recital Planning Board.</p></div><button class="teacher-desktop-action" type="button">Preview Stage Sheet</button></header><div class="teacher-desktop-grid"><article class="teacher-desktop-card wide"><h3>Planning Board</h3><p>2 shows · 4 schools · 4 assigned routines</p><span class="status ok">Ready to plan</span></article><article class="teacher-desktop-card"><h3>My Shows</h3><p>Show 3 and Show 4</p></article><article class="teacher-desktop-card"><h3>Stage Sheets</h3><p>Assign dancers, tape marks, props, and reminders.</p></article></div></section>
+        </div>
+      </section>
       <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;overflow:hidden">
         <symbol id="icon-dd-home" viewBox="0 0 32 32"><rect x="5" y="5" width="9" height="9" rx="1"/><rect x="18" y="5" width="9" height="9" rx="1"/><rect x="5" y="18" width="9" height="9" rx="1"/><rect x="18" y="18" width="9" height="9" rx="1"/></symbol>
         <symbol id="icon-teaching-team" viewBox="0 0 320 320"><image href="assets/dd-icons/teaching-team.png" width="320" height="320" preserveAspectRatio="xMidYMid meet"/></symbol>
@@ -23848,9 +24260,40 @@
       event.returnValue = "";
     });
 
+    const teacherDesktopTabs = {
+      home: "today",
+      day: "my-day",
+      rosters: "rosters",
+      dancers: "dancers",
+      orders: "orders",
+      music: "music",
+      schedule: "classes",
+      messages: "messages",
+      curriculum: "curriculum",
+      schools: "schools",
+      pay: "pay",
+      stage: "teacher-stage"
+    };
+    const mountTeacherDesktopApp = (view = "home") => {
+      const host = document.getElementById("teacher-desktop-app-host");
+      const screen = document.querySelector(".phone-screen");
+      if (!host || !screen) return;
+      if (screen.parentElement !== host) host.append(screen);
+      const tab = teacherDesktopTabs[view] || "today";
+      setTab(tab);
+      document.querySelectorAll("[data-teacher-desktop-view]").forEach((item) => item.classList.toggle("active", item.dataset.teacherDesktopView === view));
+    };
+    const unmountTeacherDesktopApp = () => {
+      window.unmountTeacherBigStagePlanner?.();
+      const phone = document.querySelector(".phone");
+      const screen = document.querySelector("#teacher-desktop-app-host > .phone-screen");
+      if (phone && screen) phone.append(screen);
+    };
+
     document.querySelectorAll("[data-mode-btn]").forEach((button) => {
       button.addEventListener("click", () => {
         const nextMode = button.dataset.modeBtn;
+        if (nextMode === "teacher-desktop" && document.body.dataset.tourMode !== "true") return;
         if (nextMode === "admin" && window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
           document.body.dataset.mode = "teacher";
           showToast("Director Dashboard access is limited to directors and administrators");
@@ -23858,20 +24301,23 @@
         }
         if (document.body.dataset.mode === nextMode) return;
         runGuardedNavigation(() => {
-          const leavingTeacherPreview = document.body.dataset.tourMode === "true" && document.body.dataset.mode === "teacher" && nextMode === "admin";
+          if (document.body.dataset.mode === "teacher-desktop" && nextMode !== "teacher-desktop") unmountTeacherDesktopApp();
+          const teacherPreviewModes = ["teacher", "teacher-desktop"];
+          const leavingTeacherPreview = document.body.dataset.tourMode === "true" && teacherPreviewModes.includes(document.body.dataset.mode) && nextMode === "admin";
           if (leavingTeacherPreview && teacherToolsPreviewSnapshot) {
             applyPersistedAppData(JSON.parse(JSON.stringify(teacherToolsPreviewSnapshot)));
             teacherToolsPreviewSnapshot = null;
           }
           document.body.dataset.mode = nextMode;
           if (nextMode === "admin") document.body.dataset.adminPage = "home";
-          if (nextMode === "teacher") {
+          if (teacherPreviewModes.includes(nextMode)) {
             if (document.body.dataset.tourMode === "true") {
-              teacherToolsPreviewSnapshot = JSON.parse(JSON.stringify(appDataPayload()));
+              if (!teacherToolsPreviewSnapshot) teacherToolsPreviewSnapshot = JSON.parse(JSON.stringify(appDataPayload()));
               profileTeacher = teachers.find((teacher) => teacher.firstName?.trim().toLowerCase() === "lexi") || teachers[0] || profileTeacher;
               renderCloudSyncedAppData();
             }
-            setTab("today");
+            if (nextMode === "teacher") setTab("today");
+            if (nextMode === "teacher-desktop") mountTeacherDesktopApp("home");
           } else if (leavingTeacherPreview) {
             renderCloudSyncedAppData();
           }
@@ -23884,8 +24330,49 @@
     let curriculumReturnTab = "curriculum";
     let enrollmentTempoRosterVisit = 0;
     let enrollmentTempoCelebrationKey = "";
+    let teacherStageMode = "planning";
+
+    function renderTeacherStageBoard() {
+      const board = document.getElementById("teacher-stage-board");
+      if (!board) return;
+      window.unmountTeacherBigStagePlanner?.();
+      const teacherId = window.dtCurrentProfile?.id || profileTeacher?.id;
+      let assigned = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false && String(rosterClass.teacherId) === String(teacherId));
+      const teacherName = profileTeacher?.firstName || teacherNickname(profileTeacher) || "Teacher";
+      if(document.body.dataset.tourMode==="true"&&String(teacherName).toLowerCase()==="lexi"){
+        const sampleStudents=(prefix,count)=>Array.from({length:count},(_,index)=>({id:`${prefix}-${index+1}`,firstName:["Ava","Mia","Nora","Ella","Lily","Sofia","Aria","Emma","Zoe"][index%9],lastName:String.fromCharCode(65+index),status:"enrolled",photo:""}));
+        assigned=[
+          {...assigned[0],id:"lexi-tots-north",name:"Tots",routineName:"Routine 1",schoolName:"Primrose North Rockwall",recitalShow:3,recitalRequirement:"either",students:sampleStudents("north-tots",7)},
+          {...assigned[1],id:"lexi-tots-rockwall",name:"Tots",routineName:"Routine 1",schoolName:"Primrose Rockwall",recitalShow:3,recitalRequirement:"either",students:sampleStudents("rockwall-tots",7)},
+          {...assigned[0],id:"lexi-2s-north",name:"2s",routineName:"Routine 2",schoolName:"Primrose North Rockwall",recitalShow:3,recitalRequirement:"tap",students:sampleStudents("north-2s",5)},
+          {...assigned[1],id:"lexi-2s-highview",name:"2s",routineName:"Routine 2",schoolName:"Highview Learning Center",recitalShow:4,recitalRequirement:"tap",students:sampleStudents("highview-2s",5)},
+          {...assigned[0],id:"lexi-preschool-rockwall",name:"Preschool",routineName:"Routine 3",schoolName:"Primrose Rockwall",recitalShow:3,recitalRequirement:"ballet",students:sampleStudents("rockwall-preschool",9)},
+          {...assigned[1],id:"lexi-preschool-rowlett",name:"Preschool",routineName:"Routine 3",schoolName:"Primrose Rowlett",recitalShow:4,recitalRequirement:"ballet",students:sampleStudents("rowlett-preschool",9)},
+          {...assigned[0],id:"lexi-prek-north",name:"Pre-K",routineName:"Routine 4",schoolName:"Primrose North Rockwall",recitalShow:3,recitalRequirement:"either",students:sampleStudents("north-prek",8)},
+          {...assigned[1],id:"lexi-prek-rowlett",name:"Pre-K",routineName:"Routine 4",schoolName:"Primrose Rowlett",recitalShow:4,recitalRequirement:"either",students:sampleStudents("rowlett-prek",8)}
+        ];
+      }
+      const shows=[1,2,3,4],showColors=["#dba9a1","#b8c8aa","#e3bd74","#aebfd3"];
+      const desktopMode=document.body.dataset.mode==="teacher-desktop";
+      const desktopSchools=[...new Set(assigned.map((item)=>item.schoolName||"Partner School"))];
+      const desktopGroups=[];
+      assigned.forEach((item,index)=>{const key=String(item.routineName||`class:${item.id||index}`),existing=desktopGroups.find((group)=>group.key===key);if(existing)existing.classes.push(item);else desktopGroups.push({key,classes:[item]});});
+      const desktopPlanning=desktopMode?`<div class="teacher-shared-planner" id="teacher-shared-planner" ${teacherStageMode==="planning"?"":"hidden"}><div class="stage-empty">Opening your live planning board…</div></div>`:"";
+      board.dataset.stageMode=teacherStageMode;
+      board.innerHTML = `<nav class="teacher-stage-view-toggle" aria-label="Big Stage teacher views"><button type="button" data-teacher-stage-mode="planning" aria-pressed="${teacherStageMode==="planning"}">Planning Board</button><button type="button" data-teacher-stage-mode="shows" aria-pressed="${teacherStageMode==="shows"}">My Shows</button></nav>${desktopPlanning}<div class="teacher-stage-phone-board" ${teacherStageMode==="planning"&&!desktopMode?"":"hidden"}>
+        <header><div><small>MY RECITAL PLANNER</small><h3>${escapeText(teacherName)}’s Planning Board</h3><p>${assigned.length} routine${assigned.length===1?"":"s"} assigned to you</p></div><button type="button" data-teacher-stage-save>Save Work</button></header>
+        <nav class="teacher-stage-show-strip" aria-label="Teacher recital shows">${shows.map((show,index)=>`<button type="button" style="--teacher-show-color:${showColors[index]}" data-teacher-stage-show="${show}"><strong>Show ${show}</strong><small>${assigned.filter((item)=>Number(item.recitalShow||1)===show).length} routines</small></button>`).join("")}</nav>
+        <section class="teacher-stage-phone-routines">${assigned.length?assigned.map((rosterClass,index)=>{const dancers=(rosterClass.students||[]).filter((student)=>String(student.status||"").toLowerCase()==="enrolled"),style=String(rosterClass.recitalRequirement||"either").toLowerCase(),show=Number(rosterClass.recitalShow)||1,color=showColors[show-1];return `<article class="teacher-stage-phone-routine" data-teacher-stage-class="${escapeText(rosterClass.id)}" style="--teacher-show-color:${color}">
+          <header><div><span>Routine ${index+1}</span><h4>${escapeText(rosterClass.routineName||rosterClass.name||`Routine ${index+1}`)}</h4></div><span class="teacher-stage-style is-${escapeText(style)}">${style==="either"?"Undecided":escapeText(style)}</span></header>
+          <div class="teacher-stage-routine-status"><strong>Using 1 Time</strong><span>✓ Strong Match</span></div>
+          <section class="teacher-stage-phone-show"><div class="teacher-stage-phone-show-title"><strong>Show ${show}</strong><small>${escapeText(rosterClass.schoolName||"Partner School")}</small></div>
+            <article class="teacher-stage-phone-class"><div><strong>${escapeText(rosterClass.name||"Class")}</strong><span>${dancers.length} dancers</span></div><p>${escapeText(rosterClass.day||"Day TBD")} · ${escapeText(rosterClass.time||"Time TBD")}</p><details><summary>Dancers <span>${dancers.length}</span></summary><div>${dancers.map((student)=>`<span>${student.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(`${student.firstName?.[0]||"D"}${student.lastName?.[0]||""}`)}<small>${escapeText(student.firstName||"Dancer")}</small></span>`).join("")}</div></details><footer><button type="button" data-teacher-stage-plan="${escapeText(rosterClass.id)}">Plan Routine</button><button type="button" data-teacher-stage-sheet="${escapeText(rosterClass.id)}">Stage Sheet</button></footer></article>
+          </section></article>`;}).join(""):'<div class="empty-state"><strong>No assigned recital classes yet.</strong><small>Classes will appear here as soon as the director assigns them to you.</small></div>'}</section></div><section class="teacher-stage-my-shows" ${teacherStageMode==="shows"?"":"hidden"}>${shows.map((show,index)=>{const routines=assigned.filter((item)=>Number(item.recitalShow||1)===show);return `<article style="--teacher-show-color:${showColors[index]}"><header><div><small>RECITAL</small><h3>Show ${show}</h3></div><span>${routines.length} Routine${routines.length===1?"":"s"}</span></header>${routines.length?`<div>${routines.map((item)=>`<button type="button" data-teacher-stage-plan="${escapeText(item.id)}"><span><strong>${escapeText(item.routineName||item.name||"Routine")}</strong><small>${escapeText(item.schoolName||"Partner School")}</small></span><em>${(item.students||[]).filter((student)=>String(student.status||"").toLowerCase()==="enrolled").length} dancers</em></button>`).join("")}</div>`:'<p>No routines assigned to this show yet.</p>'}</article>`;}).join("")}</section>`;
+      if(desktopMode&&teacherStageMode==="planning") setTimeout(()=>window.mountTeacherBigStagePlanner?.(document.getElementById("teacher-shared-planner"),teacherName),0);
+    }
 
     function setTab(tab) {
+      if (tab !== "teacher-stage") window.unmountTeacherBigStagePlanner?.();
       if(tab === "pay") setTimeout(() => loadIssuedPayrollStatements().then(() => { renderPaydaySummary();renderPayArchive(); }).catch(error => showToast(error.message)),0);
       if (!navigationGuardBypass && currentViewTab !== tab && hasUnsavedEdits) {
         runGuardedNavigation(() => setTab(tab));
@@ -23912,18 +24399,22 @@
       }
       if (tab === "dancers") renderTeacherDancers();
       if (tab === "orders") renderTeacherOrders();
+      if (tab === "teacher-stage") renderTeacherStageBoard();
       if (tab === "music" && (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1")) loadSharedMusicLibrary(window.dtCurrentProfile);
-      if (tab === "pay") {
-        document.getElementById("pay-home-badge")?.classList.add("cleared");
-        const payAlert = document.getElementById("pay-home-alert");
-        if (payAlert) payAlert.style.display = "none";
-      }
     }
 
     // Keep the installed DD and TT shells navigable even if a later feature
     // initialization fails. Core navigation must be wired before the heavier
     // dashboard renderers and live-data loaders run.
     document.addEventListener("click", (event) => {
+      const desktopViewButton = event.target.closest("[data-teacher-desktop-view]");
+      if (desktopViewButton) {
+        event.preventDefault();
+        mountTeacherDesktopApp(desktopViewButton.dataset.teacherDesktopView || "home");
+        return;
+      }
+      const teacherStageToggle=event.target.closest("[data-teacher-stage-mode]");
+      if(teacherStageToggle){teacherStageMode=teacherStageToggle.dataset.teacherStageMode;renderTeacherStageBoard();return;}
       const navToggle = event.target.closest("#teacher-nav-button");
       if (navToggle) {
         const menu = document.getElementById("teacher-nav-menu");
@@ -24952,11 +25443,14 @@
       const payStubs = Array.isArray(profileTeacher.payStubs) ? profileTeacher.payStubs.slice().sort((a, b) => b.payDate.localeCompare(a.payDate)) : [];
       const payBadge = document.getElementById("pay-home-badge");
       const payAlert = document.getElementById("pay-home-alert");
+      let viewedPayStub="";try{viewedPayStub=localStorage.getItem(`dt-viewed-pay-stub:${profileTeacher.id}`)||"";}catch{}
+      const hasUnseenPayStub=Boolean(payStubs.length&&payStubs[0].payDate!==viewedPayStub);
       if (payBadge) {
-        payBadge.textContent = String(payStubs.length);
-        payBadge.hidden = payStubs.length === 0;
+        payBadge.textContent = hasUnseenPayStub ? "1" : "";
+        payBadge.hidden = !hasUnseenPayStub;
+        payBadge.classList.toggle("cleared",!hasUnseenPayStub);
       }
-      if (payAlert) payAlert.hidden = payStubs.length === 0;
+      if (payAlert) payAlert.hidden = !hasUnseenPayStub;
       const stubList = document.getElementById("stub-list");
       if (stubList) {
         stubList.innerHTML = payStubs.length ? payStubs.map((stub, index) => `
@@ -25520,10 +26014,18 @@
       return `<button class="payday-marker" type="button" data-payday-date="${escapeText(dateKey)}" aria-label="${escapeText(label)}">$</button>`;
     };
 
+    const clearPayStubNotification = () => {
+      const latest=[...(profileTeacher.payStubs||[])].sort((a,b)=>String(b.payDate||"").localeCompare(String(a.payDate||"")))[0]?.payDate||"viewed";
+      try{localStorage.setItem(`dt-viewed-pay-stub:${profileTeacher.id}`,latest);}catch{}
+      const badge=document.getElementById("pay-home-badge");if(badge){badge.hidden=true;badge.classList.add("cleared");badge.textContent="";}
+      const alert=document.getElementById("pay-home-alert");if(alert)alert.hidden=true;
+    };
+
     const openPaydayStub = (payDate) => {
       const stub = profileTeacher.payStubs.find((item) => item.payDate === payDate);
-      if (stub?.statement) { openIssuedPayStatement(profileTeacher.id, payDate); return; }
+      if (stub?.statement) { clearPayStubNotification();openIssuedPayStatement(profileTeacher.id, payDate); return; }
       if (stub?.fileUrl && stub.fileUrl !== "#") {
+        clearPayStubNotification();
         window.open(stub.fileUrl, "_blank", "noopener");
         return;
       }
@@ -25928,14 +26430,21 @@
       if (!list) return;
       list.innerHTML = profileTeacher.schools.map((school, index) => {
         const nickname = school.name;
+        const classCount = teacherRosterClasses().filter((rosterClass) => String(rosterClass.schoolName || "") === String(school.name || "")).length;
+        const danceDay = school.dayOfWeek ? (weekdayNames[Number(school.dayOfWeek)] || "Day set") : "Day not set";
         return `
-          <article class="school-card">
+          <article class="school-card" data-teacher-desktop-school-card="${index}" tabindex="0" role="button" aria-expanded="false">
             <div class="school-card-head">
               <div>
                 <h3>${escapeText(nickname)}</h3>
                 <small>${escapeText(school.isd || "School")}</small>
               </div>
               <button class="school-card-edit-button" type="button" data-partner-school-contact-edit="${index}" aria-label="Edit contact information for ${escapeText(nickname)}">${pencilIcon}</button>
+            </div>
+            <div class="school-card-summary">
+              <div class="school-card-summary-stats"><span>${classCount} ${classCount === 1 ? "Class" : "Classes"}</span><span>${escapeText(danceDay)}</span><span>${escapeText(school.timeBlock === "AM" ? "Morning" : school.timeBlock === "PM" ? "Afternoon" : "Time not set")}</span></div>
+              <p>${escapeText(school.address || "Address not entered")}</p>
+              <small>Open school details &amp; edit →</small>
             </div>
             <div class="school-contact-list">
               <div data-partner-school-contact-display="${index}">
@@ -33968,6 +34477,17 @@
       if (event.target.closest("[data-partner-school-schedule]")) updatePartnerSchoolCard(event);
     });
     document.getElementById("school-directory-list")?.addEventListener("click", (event) => {
+      const desktopSchoolCard = event.target.closest("[data-teacher-desktop-school-card]");
+      const desktopInteractiveTarget = event.target.closest("button, a, input, select, textarea, label");
+      if (document.body.dataset.mode === "teacher-desktop" && desktopSchoolCard && !desktopInteractiveTarget) {
+        const willOpen = !desktopSchoolCard.classList.contains("is-open");
+        document.querySelectorAll("[data-teacher-desktop-school-card].is-open").forEach((card) => {
+          if (card !== desktopSchoolCard) { card.classList.remove("is-open"); card.setAttribute("aria-expanded", "false"); }
+        });
+        desktopSchoolCard.classList.toggle("is-open", willOpen);
+        desktopSchoolCard.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        return;
+      }
       const roomNamesButton = event.target.closest("[data-teacher-official-room-names]");
       if (roomNamesButton) {
         event.preventDefault();
@@ -34000,6 +34520,10 @@
       }
       const editButton = event.target.closest("[data-partner-school-contact-edit]");
       const cancelButton = event.target.closest("[data-partner-school-contact-cancel]");
+      if (document.body.dataset.mode === "teacher-desktop" && editButton && desktopSchoolCard) {
+        desktopSchoolCard.classList.add("is-open");
+        desktopSchoolCard.setAttribute("aria-expanded", "true");
+      }
       const index = Number(editButton?.dataset.partnerSchoolContactEdit ?? cancelButton?.dataset.partnerSchoolContactCancel);
       if (!Number.isInteger(index)) return;
       const card = event.target.closest(".school-card");
@@ -34011,6 +34535,12 @@
       displayRows.forEach((row) => { row.hidden = isEditing; });
       editButton?.setAttribute("aria-expanded", "true");
       if (isEditing) form.elements.directorName?.focus();
+    });
+    document.getElementById("school-directory-list")?.addEventListener("keydown", (event) => {
+      const card = event.target.closest("[data-teacher-desktop-school-card]");
+      if (document.body.dataset.mode !== "teacher-desktop" || !card || event.target !== card || !["Enter", " "].includes(event.key)) return;
+      event.preventDefault();
+      card.click();
     });
     document.getElementById("school-directory-list")?.addEventListener("submit", async (event) => {
       const form = event.target.closest("[data-partner-school-contact-form]");
@@ -45706,6 +46236,7 @@
     };
     const openIssuedPayStatement = async (teacherId, payDate, download = false) => {
       try {
+        if(!download&&String(teacherId)===String(profileTeacher.id))clearPayStubNotification();
         const teacher = teachers.find(t => t.id === teacherId);
         const stub = teacher?.payStubs?.find(s => s.payDate === payDate);
         if (!stub?.statement) { showToast("This older entry has no issued PDF. Please ask the director."); return; }
@@ -55280,11 +55811,11 @@
       });
     })();
   </script>
-  <link rel="stylesheet" href="big-stage.css?v=20261015-official-brick">
+  <link rel="stylesheet" href="big-stage.css?v=20261015-preview-crossouts">
 <link rel="stylesheet" href="big-stage-order.css?v=20261005-compact-separation">
 <link rel="stylesheet" href="big-stage-wizard.css?v=20261012-recital-reset">
 <link rel="stylesheet" href="big-stage-matching.css?v=20261008-live-classes">
-<script src="big-stage.js?v=20261015-five-resolutions"></script>
+<script src="big-stage.js?v=20261015-preview-crossouts"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
 <script src="big-stage-wizard.js?v=20261012-recital-reset"></script>
   <script src="director-task-sync.js?v=20260908"></script>
