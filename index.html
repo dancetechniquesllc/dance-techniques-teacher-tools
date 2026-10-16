@@ -15865,6 +15865,11 @@
     .teacher-desktop-task-note-add { position:absolute; right:10px; bottom:10px; width:30px; height:30px; display:grid; place-items:center; padding:0 !important; border:1px solid #78906f; border-radius:50%; color:#40533a !important; background:#e0eee2 !important; font-size:21px; }
     .teacher-desktop-task-remove { position:absolute; right:10px; top:8px; padding:3px 6px !important; color:var(--muted) !important; background:transparent !important; }
     .teacher-desktop-task-item.is-complete .teacher-desktop-task-copy { color: var(--muted); text-decoration: line-through; }
+    .teacher-task-note-dialog { width:min(420px,calc(100vw - 32px)); padding:0; border:0; border-radius:20px; background:transparent; box-shadow:0 24px 70px rgb(56 34 38 / 28%); }
+    .teacher-task-note-dialog::backdrop { background:rgb(37 25 28 / 42%); backdrop-filter:blur(3px); }
+    .teacher-task-note-form { display:grid; gap:13px; padding:22px; border:1px solid var(--border); border-radius:20px; background:#fffaf7; }
+    .teacher-task-note-form h3 { margin:0; font-size:21px; }.teacher-task-note-form textarea { width:100%; min-height:110px; box-sizing:border-box; padding:12px; border:1px solid var(--border); border-radius:13px; resize:vertical; font:inherit; }
+    .teacher-task-note-actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; }.teacher-task-note-actions button { min-height:42px; border-radius:12px; font-weight:850; }.teacher-task-note-save { color:#fff; background:var(--berry); }
     .teacher-mobile-task-button { position: relative; display: grid; width: 42px; height: 42px; place-items: center; padding: 0; border: 1px solid #9fc5aa; border-radius: 50%; color: #48614c; background: #bfe1c7; box-shadow: 0 6px 14px rgb(67 104 75 / 13%); }
     .teacher-mobile-task-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
     @media (max-width: 520px) { .teacher-desktop-task-form { grid-template-columns:1fr 1fr; }.teacher-desktop-task-form button { width:100%; max-width:none; } }
@@ -16337,6 +16342,7 @@
     </div>
     <dialog class="director-task-student-dialog" id="director-task-student-dialog" aria-labelledby="director-task-student-title"><header class="director-task-student-head"><div><h3 id="director-task-student-title">Assign Student</h3><small id="director-task-student-subtitle">Choose a student</small></div><button type="button" data-close-director-task-students aria-label="Close">×</button></header><div class="director-task-student-filters"><input id="director-task-student-search" type="search" placeholder="Search students" aria-label="Search students"><select id="director-task-student-school" aria-label="Sort by school"><option value="all">All Schools</option></select></div><div class="director-task-student-list" id="director-task-student-list"></div></dialog>
     <dialog class="teacher-desktop-task-dialog" id="teacher-desktop-task-dialog" aria-labelledby="teacher-desktop-task-title"><section class="teacher-desktop-task-card"><header class="teacher-desktop-task-head"><div><h2 id="teacher-desktop-task-title">My Tasks</h2><p>Private to your Teacher Tools account.</p></div><button type="button" data-close-tt-tasks aria-label="Close">×</button></header><form class="teacher-desktop-task-form" id="teacher-desktop-task-form"><input id="teacher-task-student-id" name="studentId" type="hidden"><input id="teacher-task-student-name" name="studentName" type="hidden"><button class="teacher-task-student-picker" type="button" data-open-tt-task-students>+Student</button><input id="teacher-desktop-task-input" maxlength="160" placeholder="Task Details" aria-label="Task details" required><button type="submit">Add Task</button></form><div class="teacher-desktop-task-list" id="teacher-desktop-task-list"></div></section></dialog>
+    <dialog class="teacher-task-note-dialog" id="teacher-task-note-dialog" aria-labelledby="teacher-task-note-title"><form class="teacher-task-note-form" id="teacher-task-note-form"><h3 id="teacher-task-note-title">Add Note</h3><textarea id="teacher-task-note-input" maxlength="300" placeholder="Note details" aria-label="Note details" required></textarea><div class="teacher-task-note-actions"><button type="button" data-cancel-tt-task-note>Cancel</button><button class="teacher-task-note-save" type="submit">Save Note</button></div></form></dialog>
     <header class="topbar">
       <div class="brand">
         <div class="mark"><img src="assets/dtllc-d-dancer-white-v3.png" alt="" aria-hidden="true"></div>
@@ -24487,6 +24493,7 @@
       if (!Array.isArray(profileTeacher?.personalTasks)) profileTeacher.personalTasks = [];
       return profileTeacher.personalTasks;
     };
+    let pendingTeacherTaskNoteId = "";
     const renderTeacherPersonalTasks = () => {
       const tasks = teacherPersonalTasks();
       const openCount = tasks.filter((task) => !task.complete).length;
@@ -24539,11 +24546,16 @@
       if (taskNote) {
         const task = teacherPersonalTasks().find((item) => String(item.id) === String(taskNote.dataset.ttTaskNote));
         if (!task) return;
-        const text = window.prompt("Add a note")?.trim();
-        if (!text) return;
-        task.notes = Array.isArray(task.notes) ? task.notes : [];
-        task.notes.push({ id:crypto.randomUUID(), text, createdAt:new Date().toISOString(), addedBy:"Teacher" });
-        saveTeacherPersonalTasks();
+        pendingTeacherTaskNoteId = String(task.id);
+        const input = document.getElementById("teacher-task-note-input");
+        if (input) input.value = "";
+        document.getElementById("teacher-task-note-dialog")?.showModal();
+        window.setTimeout(() => input?.focus(), 0);
+        return;
+      }
+      if (event.target.closest("[data-cancel-tt-task-note]")) {
+        pendingTeacherTaskNoteId = "";
+        document.getElementById("teacher-task-note-dialog")?.close();
         return;
       }
       const taskRemove = event.target.closest("[data-tt-task-remove]");
@@ -24587,6 +24599,20 @@
       saveTeacherPersonalTasks();
       input.focus();
     });
+    document.getElementById("teacher-task-note-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = document.getElementById("teacher-task-note-input");
+      const text = input?.value.trim() || "";
+      const task = teacherPersonalTasks().find((item) => String(item.id) === pendingTeacherTaskNoteId);
+      if (!text || !task) return;
+      task.notes = Array.isArray(task.notes) ? task.notes : [];
+      task.notes.push({ id:crypto.randomUUID(), text, createdAt:new Date().toISOString(), addedBy:"Teacher" });
+      pendingTeacherTaskNoteId = "";
+      if (input) input.value = "";
+      document.getElementById("teacher-task-note-dialog")?.close();
+      saveTeacherPersonalTasks();
+    });
+    document.getElementById("teacher-task-note-dialog")?.addEventListener("close", () => { pendingTeacherTaskNoteId = ""; });
     document.getElementById("teacher-desktop-task-list")?.addEventListener("change", (event) => {
       const checkbox = event.target.closest("[data-tt-task-complete]");
       if (!checkbox) return;
