@@ -105,9 +105,12 @@
   let teacherProfileResolutionTimer = 0;
   let profileRecoveryRefreshing = false;
 
+  const preferredTeacherToolsMode = () => window.matchMedia("(min-width: 768px)").matches ? "teacher-desktop" : "teacher";
+
   const lockTeacherToTeacherTools = () => {
     if (window.dtCurrentProfile?.role !== "teacher" || document.body.dataset.tourMode === "true") return;
-    if (document.body.dataset.mode !== "teacher") document.body.dataset.mode = "teacher";
+    const teacherMode = preferredTeacherToolsMode();
+    if (document.body.dataset.mode !== teacherMode) document.body.dataset.mode = teacherMode;
     if (document.body.dataset.adminPage) delete document.body.dataset.adminPage;
     if (document.body.dataset.adminSection) delete document.body.dataset.adminSection;
     document.querySelectorAll('[data-mode-btn="admin"]').forEach((button) => {
@@ -233,7 +236,7 @@
     sessionName.textContent = profile.full_name ? `${profile.full_name} · ${profile.role}` : `Signed in · ${profile.role}`;
     profile.email = session.user.email || "";
     document.body.dataset.userRole = profile.role;
-    const landingMode = profile.role === "teacher" ? "teacher" : "admin";
+    const landingMode = profile.role === "teacher" ? preferredTeacherToolsMode() : "admin";
     document.body.dataset.mode = landingMode;
     document.querySelectorAll("[data-mode-btn]").forEach((button) => {
       button.classList.toggle("active", button.dataset.modeBtn === landingMode);
