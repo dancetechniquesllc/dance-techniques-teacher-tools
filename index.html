@@ -15803,6 +15803,17 @@
 
     .session-brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .session-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .teacher-desktop-session-actions { display: none; align-items: center; gap: 9px; }
+    .teacher-desktop-quick-link { min-height: 40px; padding: 0 15px !important; border: 1px solid var(--border); border-radius: 999px; color: var(--berry); background: #fff; font-weight: 850; }
+    .teacher-desktop-leader { position: relative; display: grid; width: 46px; height: 46px; place-items: center; padding: 0 !important; border: 2px solid #d8c5bf; border-radius: 50%; color: var(--berry); background: #f6e7e3; font-size: 12px; font-weight: 900; }
+    .teacher-desktop-leader img,.teacher-desktop-profile-shortcut img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
+    .teacher-desktop-leader::after { content: ""; position: absolute; right: -1px; bottom: 1px; width: 10px; height: 10px; border: 2px solid #fff; border-radius: 50%; background: #aaa; }
+    .teacher-desktop-leader.is-working { border-color: #78a382; box-shadow: 0 0 0 5px rgb(120 163 130 / 16%),0 0 20px rgb(120 163 130 / 36%); }
+    .teacher-desktop-leader.is-working::after { background: #5f906b; }
+    .teacher-desktop-profile-shortcut { display: grid; width: 48px; height: 48px; place-items: center; padding: 0 !important; border: 3px solid #ef78a4; border-radius: 50%; color: var(--berry); background: #f2d7d1; font-weight: 900; }
+    body[data-mode="teacher-desktop"] .session-actions > :not(.teacher-desktop-session-actions) { display: none !important; }
+    body[data-mode="teacher-desktop"] .teacher-desktop-session-actions { display: flex; }
+    body[data-mode="teacher-desktop"] > .app > .topbar { display: none !important; }
     .session-actions .teacher-notifications > summary {
       width: 38px;
       height: 38px;
@@ -16233,6 +16244,13 @@
       </div>
       <span id="session-name" hidden>Signed in</span>
       <div class="session-actions">
+        <div class="teacher-desktop-session-actions" aria-label="Teacher Tools shortcuts">
+          <button class="teacher-desktop-quick-link" type="button" data-tt-desktop-tab="my-day">My Day</button>
+          <button class="teacher-desktop-quick-link" type="button" data-tt-desktop-tab="messages">Messages <span class="notification-unread-count" id="tt-desktop-message-count" aria-hidden="true"></span></button>
+          <button class="teacher-desktop-leader" type="button" data-tt-message-leader="lexi" aria-label="Message Lexi" title="Message Lexi"><span>L</span></button>
+          <button class="teacher-desktop-leader" type="button" data-tt-message-leader="tiffany" aria-label="Message Tiffany" title="Message Tiffany"><span>T</span></button>
+          <button class="teacher-desktop-profile-shortcut" type="button" data-tt-desktop-tab="profile" aria-label="Open my profile" title="My Profile"><span>Me</span></button>
+        </div>
         <details class="teacher-notifications director-session-notifications">
           <summary aria-label="Show Director Dashboard notifications" title="Notifications">
             <svg class="teacher-notification-bell" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>
@@ -24343,6 +24361,7 @@
       curriculum: "curriculum",
       schools: "schools",
       pay: "pay",
+      profile: "profile",
       stage: "teacher-stage"
     };
     const mountTeacherDesktopApp = (view = "home") => {
@@ -24371,6 +24390,43 @@
       else setTab(tab);
     };
     window.dtOpenTeacherToolsForViewport = openTeacherToolsForViewport;
+    const renderTeacherDesktopSessionActions = () => {
+      const currentTeacherId = String(window.dtCurrentProfile?.id || profileTeacher?.id || "");
+      const currentTeacher = teachers.find((teacher) => String(teacher.id) === currentTeacherId) || profileTeacher;
+      const profileButton = document.querySelector(".teacher-desktop-profile-shortcut");
+      if (profileButton) profileButton.innerHTML = currentTeacher?.photo ? `<img src="${escapeText(currentTeacher.photo)}" alt="">` : `<span>${escapeText(initialsFor(currentTeacher) || "Me")}</span>`;
+      document.querySelectorAll("[data-tt-message-leader]").forEach((button) => {
+        const leaderName = button.dataset.ttMessageLeader;
+        const leader = teachers.find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === leaderName);
+        if (leader) button.innerHTML = leader.photo ? `<img src="${escapeText(leader.photo)}" alt="">` : `<span>${escapeText(initialsFor(leader) || leaderName.charAt(0).toUpperCase())}</span>`;
+        const working = Boolean(leader && DTWorkClock.entries?.some((entry) => String(entry.teacher_id) === String(leader.id) && !entry.ended_at));
+        button.classList.toggle("is-working", working);
+        button.title = working ? `${leader?.firstName || leaderName} is working — send a message` : `Leave ${leader?.firstName || leaderName} a message`;
+        button.setAttribute("aria-label", button.title);
+      });
+      const unread = notificationCenterItems.filter((item) => item.notification_type === "direct_message" && !item.read_at).length;
+      const bubble = document.getElementById("tt-desktop-message-count");
+      if (bubble) { bubble.textContent = unread ? String(unread) : ""; bubble.classList.toggle("active", unread > 0); }
+    };
+
+    document.addEventListener("click", (event) => {
+      const quickLink = event.target.closest("[data-tt-desktop-tab]");
+      if (quickLink) {
+        const tab = quickLink.dataset.ttDesktopTab;
+        setTab(tab);
+        document.querySelectorAll("[data-teacher-desktop-view]").forEach((item) => item.classList.toggle("active", item.dataset.teacherDesktopView === teacherDesktopViewForTab(tab)));
+        return;
+      }
+      const leaderButton = event.target.closest("[data-tt-message-leader]");
+      if (!leaderButton) return;
+      const leaderName = leaderButton.dataset.ttMessageLeader;
+      const recipient = staffMessageRecipients.find((item) => String(item.full_name || "").trim().toLowerCase().includes(leaderName));
+      if (!recipient) { setTab("messages"); showToast(`${leaderName.charAt(0).toUpperCase()+leaderName.slice(1)} is not available in Messages yet`); return; }
+      selectedTeacherMessageThreadId = `direct-${recipient.id}`;
+      renderTeacherMessages();
+      setTab("teacher-conversation");
+      document.querySelectorAll("[data-teacher-desktop-view]").forEach((item) => item.classList.toggle("active", item.dataset.teacherDesktopView === "messages"));
+    });
 
     const teacherToolsViewport = window.matchMedia("(min-width: 768px)");
     teacherToolsViewport.addEventListener("change", () => {
@@ -55365,6 +55421,7 @@
         }
       }
       await DTWorkClock.load();
+      renderTeacherDesktopSessionActions();
       syncAllPartnerSchoolScheduleReferences();
       const removedDemoContent = stripLegacyProductionDemoContent();
       if (data?.payload || isLeader || removedDemoContent || durableIsdLoaded) {
