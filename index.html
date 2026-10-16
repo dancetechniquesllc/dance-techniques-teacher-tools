@@ -24456,7 +24456,8 @@
       window.unmountTeacherBigStagePlanner?.();
       const teacherId = window.dtCurrentProfile?.id || profileTeacher?.id;
       let assigned = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false && String(rosterClass.teacherId) === String(teacherId));
-      const teacherName = profileTeacher?.firstName || teacherNickname(profileTeacher) || "Teacher";
+      const signedInTeacher = teachers.find((teacher) => String(teacher.id) === String(teacherId)) || profileTeacher;
+      const teacherName = signedInTeacher?.firstName || teacherNickname(signedInTeacher) || String(window.dtCurrentProfile?.full_name || "").trim().split(/\s+/)[0] || "Teacher";
       if(document.body.dataset.tourMode==="true"&&String(teacherName).toLowerCase()==="lexi"){
         const sampleStudents=(prefix,count)=>Array.from({length:count},(_,index)=>({id:`${prefix}-${index+1}`,firstName:["Ava","Mia","Nora","Ella","Lily","Sofia","Aria","Emma","Zoe"][index%9],lastName:String.fromCharCode(65+index),status:"enrolled",photo:""}));
         assigned=[
