@@ -15850,23 +15850,24 @@
     .teacher-desktop-task-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
     .teacher-desktop-task-head h2,.teacher-desktop-task-head p { margin: 0; }.teacher-desktop-task-head p { margin-top: 3px; color: var(--muted); font-size: 12px; }
     .teacher-desktop-task-head button { width: 36px; height: 36px; padding: 0 !important; border-radius: 50%; background: var(--blush); color: var(--berry); font-size: 22px; }
-    .teacher-desktop-task-form { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 9px; }
-    .teacher-desktop-task-form input { min-width: 0; min-height: 44px; padding: 9px 13px; border: 1px solid var(--border); border-radius: 13px; background: #fff; }
-    .teacher-desktop-task-form button { min-height: 44px; padding: 0 18px !important; border-radius: 13px; color: #fff; background: var(--berry); font-weight: 850; }
-    .teacher-desktop-task-form .teacher-task-student-picker { max-width:160px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid #c69084; color:var(--berry); background:#fff; }
+    .teacher-desktop-task-form { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas:"details details" "student submit"; gap: 9px; }
+    .teacher-desktop-task-form input { grid-area:details; min-width: 0; min-height: 44px; padding: 9px 13px; border: 1px solid var(--border); border-radius: 13px; background: #fff; }
+    .teacher-desktop-task-form button { grid-area:submit; width:100%; min-height: 44px; padding: 0 18px !important; border-radius: 13px; color: #fff; background: var(--berry); font-weight: 850; }
+    .teacher-desktop-task-form .teacher-task-student-picker { grid-area:student; width:100%; max-width:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:1px solid #c69084; color:var(--berry); background:#fff; }
     .teacher-desktop-task-list { display: grid; gap: 8px; max-height: 360px; overflow-y: auto; }
     .teacher-desktop-task-item { position:relative; display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 11px; min-height:92px; padding:14px 48px 14px 13px; border: 2px solid var(--border); border-radius: 16px; background: #fff; }
     .teacher-desktop-task-item>input { width:21px; height:21px; accent-color:#6f8c70; }
     .teacher-desktop-task-person { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:11px; min-width:0; }
     .teacher-desktop-task-person .roster-student-photo { width:52px; height:52px; font-size:14px; border-color:#98b49c; }
     .teacher-desktop-task-copy { display:grid; gap:3px; min-width:0; }.teacher-desktop-task-copy>strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }.teacher-desktop-task-copy small { color:var(--muted); }
+    .teacher-desktop-task-copy .teacher-task-school { font-size:10px; }.teacher-desktop-task-copy .teacher-task-details { color:var(--fg); font-size:12px; font-weight:700; }
     .teacher-desktop-task-notes { display:grid; gap:2px; margin-top:3px; color:#55735a; font-size:10px; font-weight:750; }
     .teacher-desktop-task-note-add { position:absolute; right:10px; bottom:10px; width:30px; height:30px; display:grid; place-items:center; padding:0 !important; border:1px solid #78906f; border-radius:50%; color:#40533a !important; background:#e0eee2 !important; font-size:21px; }
     .teacher-desktop-task-remove { position:absolute; right:10px; top:8px; padding:3px 6px !important; color:var(--muted) !important; background:transparent !important; }
     .teacher-desktop-task-item.is-complete .teacher-desktop-task-copy { color: var(--muted); text-decoration: line-through; }
     .teacher-mobile-task-button { position: relative; display: grid; width: 42px; height: 42px; place-items: center; padding: 0; border: 1px solid #9fc5aa; border-radius: 50%; color: #48614c; background: #bfe1c7; box-shadow: 0 6px 14px rgb(67 104 75 / 13%); }
     .teacher-mobile-task-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    @media (max-width: 520px) { .teacher-desktop-task-form { grid-template-columns: 1fr; }.teacher-desktop-task-form button { width: 100%; max-width:none; } }
+    @media (max-width: 520px) { .teacher-desktop-task-form { grid-template-columns:1fr 1fr; }.teacher-desktop-task-form button { width:100%; max-width:none; } }
     .teacher-desktop-leader { position: relative; display: grid; width: 46px; height: 46px; place-items: center; padding: 0 !important; border: 2px solid #d8c5bf; border-radius: 50%; color: var(--berry); background: #f6e7e3; font-size: 12px; font-weight: 900; }
     .teacher-desktop-leader img,.teacher-desktop-profile-shortcut img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
     .teacher-desktop-leader::after { content: ""; position: absolute; right: -1px; bottom: 1px; width: 10px; height: 10px; border: 2px solid #fff; border-radius: 50%; background: #aaa; }
@@ -24501,10 +24502,9 @@
       list.innerHTML = tasks.length ? tasks.map((task) => {
         const record = studentRecords.find((item) => String(item.student.id || "") === String(task.studentId || ""));
         const studentName = task.studentName || (record ? `${record.student.preferredName || record.student.firstName || "Student"} ${record.student.lastName || ""}`.trim() : "General Task");
-        const title = record ? `${studentName} - ${record.school}` : studentName;
         const initials = record ? `${String(record.student.preferredName || record.student.firstName || "S").charAt(0)}${String(record.student.lastName || "").charAt(0)}`.toUpperCase() : "GT";
         const notes = Array.isArray(task.notes) ? task.notes : [];
-        return `<article class="teacher-desktop-task-item ${task.complete?"is-complete":""}"><input type="checkbox" data-tt-task-complete="${escapeText(task.id)}" ${task.complete?"checked":""} aria-label="Complete task"><div class="teacher-desktop-task-person"><span class="roster-student-photo">${record?.student.photo?`<img src="${escapeText(record.student.photo)}" alt="">`:escapeText(initials)}</span><span class="teacher-desktop-task-copy"><strong>${escapeText(title)}</strong><small>${escapeText(task.text)}</small>${notes.length?`<span class="teacher-desktop-task-notes">${notes.map((note)=>`<span>+ ${escapeText(note.text||note)}</span>`).join("")}</span>`:""}</span></div><button class="teacher-desktop-task-remove" type="button" data-tt-task-remove="${escapeText(task.id)}" aria-label="Remove task">×</button><button class="teacher-desktop-task-note-add" type="button" data-tt-task-note="${escapeText(task.id)}" aria-label="Add note" title="Add Note">+</button></article>`;
+        return `<article class="teacher-desktop-task-item ${task.complete?"is-complete":""}"><input type="checkbox" data-tt-task-complete="${escapeText(task.id)}" ${task.complete?"checked":""} aria-label="Complete task"><div class="teacher-desktop-task-person"><span class="roster-student-photo">${record?.student.photo?`<img src="${escapeText(record.student.photo)}" alt="">`:escapeText(initials)}</span><span class="teacher-desktop-task-copy"><strong>${escapeText(studentName)}</strong>${record?`<small class="teacher-task-school">${escapeText(record.school)}</small>`:""}<small class="teacher-task-details">${escapeText(task.text)}</small>${notes.length?`<span class="teacher-desktop-task-notes">${notes.map((note)=>`<span>+ ${escapeText(note.text||note)}</span>`).join("")}</span>`:""}</span></div><button class="teacher-desktop-task-remove" type="button" data-tt-task-remove="${escapeText(task.id)}" aria-label="Remove task">×</button><button class="teacher-desktop-task-note-add" type="button" data-tt-task-note="${escapeText(task.id)}" aria-label="Add note" title="Add Note">+</button></article>`;
       }).join("") : '<p class="subtle">No tasks yet. Add anything you want to remember.</p>';
     };
     const saveTeacherPersonalTasks = () => {
