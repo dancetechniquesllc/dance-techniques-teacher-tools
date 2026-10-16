@@ -3321,6 +3321,9 @@
     .teacher-roster-profile-button { position: relative; width: 62px; height: 62px; padding: 0; border: 2px solid transparent; border-radius: 50%; background: transparent; color: inherit; }
     .teacher-roster-profile-button .roster-student-photo { width: 58px; height: 58px; font-size: 17px; }
     .teacher-roster-profile-button.is-pending { border-color: var(--berry); }
+    .teacher-roster-profile-button.has-open-task .roster-student-photo { border-color:#6f8c70; }
+    .teacher-roster-task-overlay { position:absolute; inset:2px; z-index:2; display:grid; place-items:center; border-radius:50%; background:rgb(174 215 183 / .88); color:#38563d; }
+    .teacher-roster-task-overlay svg { width:27px; height:27px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .teacher-roster-selection-check {
       position: absolute;
       inset: 2px;
@@ -24491,6 +24494,7 @@
     };
     const saveTeacherPersonalTasks = () => {
       renderTeacherPersonalTasks();
+      if (typeof renderTeacherRosters === "function") renderTeacherRosters();
       scheduleAppDataSave();
       scheduleCloudAppDataSave();
     };
@@ -38261,6 +38265,8 @@
       </div>`;
     };
     const teacherFutureProspectCardMarkup = (student, rosterClass) => `<button class="teacher-future-prospect-card" type="button" data-teacher-edit-prospect="${rosterSafe(student.id)}" data-teacher-prospect-class="${rosterSafe(rosterClass.id)}" aria-label="Edit ${rosterSafe(rosterStudentFullName(student))}"><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong>${rosterTrialAttendancePending(student) ? `<small>Trial in progress</small>` : ""}</button>`;
+    const teacherStudentHasOpenTask = (student) => (profileTeacher?.personalTasks || []).some((task) => !task.complete && String(task.studentId || "") === String(student?.id || ""));
+    const teacherRosterTaskOverlayMarkup = (student) => teacherStudentHasOpenTask(student) ? '<span class="teacher-roster-task-overlay" aria-label="Open task assigned" title="Open task assigned"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="12" height="15" rx="2"></rect><path d="M9 3h6v4H9zM9 11l1.5 1.5L14 9M9 16h6"></path></svg></span>' : "";
 
     const teacherRosterClassroomMarkup = (students, rosterClass) => {
       const attendance = teacherAttendanceForClass(rosterClass);
@@ -38293,9 +38299,11 @@
               const pending = boutiqueSelectable
                 ? studentBoutiqueOrders.every((order) => pendingTeacherBoutiqueDeliveries.has(String(order.id)))
                 : kitSelectable ? pendingTeacherKitDeliveries.has(pendingKey) : pendingTeacherRosterCheckIns.has(pendingKey);
+              const hasOpenTask = teacherStudentHasOpenTask(student);
               return `<div class="teacher-roster-student-tile ${paused ? "is-paused" : status ? `is-${status}` : ""}">
-                <button class="teacher-roster-profile-button ${pending ? "is-pending" : ""}" type="button" ${boutiqueSelectable ? `data-teacher-boutique-delivery-select="${rosterSafe(student.id)}"` : kitSelectable ? `data-teacher-kit-select="${rosterSafe(student.id)}"` : selectable ? `data-teacher-attendance-select="${rosterSafe(student.id)}"` : `data-teacher-roster-profile="${rosterSafe(student.id)}"`} data-teacher-attendance-class="${rosterSafe(rosterClass.id)}" aria-label="${selectable ? `${pending ? "Remove" : "Select"} ${rosterSafe(rosterStudentFullName(student))} for ${boutiqueSelectable ? "Boutique delivery" : kitSelectable ? "T-Shirt and bag delivery" : checkOutActive ? "check out" : "check in"}` : `Open ${rosterSafe(rosterStudentFullName(student))} profile`}">
+                <button class="teacher-roster-profile-button ${pending ? "is-pending" : ""} ${hasOpenTask ? "has-open-task" : ""}" type="button" ${boutiqueSelectable ? `data-teacher-boutique-delivery-select="${rosterSafe(student.id)}"` : kitSelectable ? `data-teacher-kit-select="${rosterSafe(student.id)}"` : selectable ? `data-teacher-attendance-select="${rosterSafe(student.id)}"` : `data-teacher-roster-profile="${rosterSafe(student.id)}"`} data-teacher-attendance-class="${rosterSafe(rosterClass.id)}" aria-label="${selectable ? `${pending ? "Remove" : "Select"} ${rosterSafe(rosterStudentFullName(student))} for ${boutiqueSelectable ? "Boutique delivery" : kitSelectable ? "T-Shirt and bag delivery" : checkOutActive ? "check out" : "check in"}` : `Open ${rosterSafe(rosterStudentFullName(student))} profile`}">
                   <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
+                  ${teacherRosterTaskOverlayMarkup(student)}
                   ${pending ? `<span class="teacher-roster-selection-check ${checkOutActive ? "is-safe" : ""}" aria-hidden="true">✓</span>` : ""}
                   ${!pending && checkedIn && (checkInSubmitted || checkOutActive || checkedOut) ? `<span class="teacher-roster-selection-check ${checkedOut ? "is-safe" : ""}" aria-label="${checkedOut ? "Safely returned to classroom" : "Checked in"}" title="${checkedOut ? "Safely returned to classroom" : "Checked in"}">✓</span>` : ""}
                   ${attendanceFinalized && status === "absent" ? `<span class="teacher-roster-check is-absent" aria-label="Absent" title="Absent">×</span>` : ""}
