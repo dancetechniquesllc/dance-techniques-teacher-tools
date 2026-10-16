@@ -435,7 +435,11 @@
     .director-task-view-toggle { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin:12px 20px 4px; padding:5px; border-radius:15px; background:#f3e7e3; }
     .director-task-view-toggle button { min-height:38px; border-radius:11px; color:var(--berry); background:transparent; font-size:12px; font-weight:900; }
     .director-task-view-toggle button[aria-pressed="true"] { background:#fff; box-shadow:0 5px 14px rgb(71 42 47 / 10%); }
-    .director-task-dialog[data-task-view="teacher"] :is(.director-task-sort,.director-task-history-button,.director-task-add) { display:none !important; }
+    .director-task-dialog[data-task-view="teacher"] :is(.director-task-sort,.director-task-history-button) { display:none !important; }
+    .director-teacher-task-compose { display:grid; grid-template-columns:minmax(130px,.65fr) minmax(180px,1.35fr) auto; gap:8px; padding:14px; margin-bottom:12px; border:1px solid #ead2cc; border-radius:14px; background:#fffaf8; }
+    .director-teacher-task-compose :is(select,input) { min-height:42px; padding:0 12px; border:1px solid #dfb9b0; border-radius:10px; background:#fff; color:#241c1e; font:inherit; font-weight:700; }
+    .director-teacher-task-compose button { min-height:42px; padding:0 16px; border-radius:10px; background:var(--berry); color:#fff; font-weight:900; }
+    @media (max-width:640px) { .director-teacher-task-compose { grid-template-columns:1fr; } }
     .director-teacher-task-group { display:grid; gap:8px; padding:13px; border:1px solid var(--border); border-radius:16px; background:#fff; }
     .director-teacher-task-group>header { display:flex; align-items:center; justify-content:space-between; gap:10px; }.director-teacher-task-group>header h3,.director-teacher-task-group>header small { margin:0; }.director-teacher-task-group>header small { color:var(--muted); font-size:10px; font-weight:800; }
     .director-teacher-task-row { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:9px; padding:9px 0; border-top:1px solid #f0deda; }.director-teacher-task-row:first-of-type { border-top:0; }.director-teacher-task-row.is-complete strong { color:var(--muted); text-decoration:line-through; }.director-teacher-task-row span { display:grid; gap:2px; }.director-teacher-task-row small { color:var(--muted); font-size:9px; }
@@ -27752,6 +27756,30 @@
       return true;
     };
 
+    const saveTeacherPersonalTasksToCloud = async (teacher) => {
+      const client = window.dtSupabase;
+      const profile = window.dtCurrentProfile;
+      if (!teacher) return false;
+      if (!client || !profile || document.body.dataset.tourMode === "true" || !isUuid(teacher.id)) {
+        scheduleAppDataSave();
+        return true;
+      }
+      if (!["admin", "director"].includes(String(profile.role || "").toLowerCase()) && String(profile.id) !== String(teacher.id)) return false;
+      const { data: currentState, error: readError } = await client.from("teacher_portal_state").select("payload").eq("teacher_id", teacher.id).maybeSingle();
+      if (readError) { console.error("Teacher tasks could not be opened", readError); return false; }
+      const payload = currentState?.payload && typeof currentState.payload === "object" ? clonePayload(currentState.payload) : {};
+      payload.savedAt = new Date().toISOString();
+      payload.teacher = {
+        ...(payload.teacher && typeof payload.teacher === "object" ? payload.teacher : {}),
+        id: teacher.id,
+        personalTasks: clonePayload(Array.isArray(teacher.personalTasks) ? teacher.personalTasks : [])
+      };
+      const { error } = await client.from("teacher_portal_state").upsert({ teacher_id: teacher.id, payload }, { onConflict: "teacher_id" });
+      if (error) { console.error("Teacher tasks could not be synchronized", error); return false; }
+      scheduleAppDataSave();
+      return true;
+    };
+
     const saveTeacherRecordToCloud = async (teacher = profileTeacher) => {
       const client = window.dtSupabase;
       const profile = window.dtCurrentProfile;
@@ -33159,15 +33187,18 @@
       const syncPanel = document.getElementById("director-task-sync-status")?.parentElement;
       if (syncPanel) syncPanel.hidden = directorTaskView === "teacher";
       if (directorTaskView === "teacher") {
-        const taskTeachers = teachers.filter((teacher) => !isCompanyTeacherProfile(teacher) && Array.isArray(teacher.personalTasks) && teacher.personalTasks.length);
+        const availableTaskTeachers = teachers.filter((teacher) => !isCompanyTeacherProfile(teacher) && String(teacher.status || "").toLowerCase() !== "inactive");
+        const taskTeachers = availableTaskTeachers.filter((teacher) => Array.isArray(teacher.personalTasks) && teacher.personalTasks.length);
         const teacherOpenCount = taskTeachers.reduce((sum, teacher) => sum + teacher.personalTasks.filter((task) => !task.complete).length, 0);
         setText("director-task-title", `${teacherOpenCount} Teacher Task${teacherOpenCount === 1 ? "" : "s"}`);
-        setText("director-task-subtitle", "Teacher-created lists from Teacher Tools");
-        if (list) list.innerHTML = taskTeachers.length ? taskTeachers.map((teacher) => {
+        setText("director-task-subtitle", "Assign work directly to each teacher's Teacher Tools");
+        const composer = `<form class="director-teacher-task-compose" data-director-teacher-task-form><select name="teacherId" aria-label="Teacher" required><option value="">Choose teacher</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(fullName(teacher)||teacherNickname(teacher)||"Teacher")}</option>`).join("")}</select><input name="taskText" type="text" placeholder="What does this teacher need to do?" aria-label="Task" required><button type="submit">Assign Task</button></form>`;
+        const groups = taskTeachers.length ? taskTeachers.map((teacher) => {
           const tasks = [...teacher.personalTasks].sort((left,right) => Number(Boolean(left.complete))-Number(Boolean(right.complete)) || String(right.createdAt||"").localeCompare(String(left.createdAt||"")));
           const teacherOpen = tasks.filter((task) => !task.complete).length;
-          return `<section class="director-teacher-task-group"><header><h3>${escapeText(fullName(teacher)||teacherNickname(teacher)||"Teacher")}</h3><small>${teacherOpen} open · ${tasks.length} total</small></header>${tasks.map((task) => `<article class="director-teacher-task-row ${task.complete?"is-complete":""}"><span aria-hidden="true">${task.complete?"✓":"○"}</span><span><strong>${escapeText(task.text)}</strong><small>${task.complete?`Completed${task.completedAt?` · ${escapeText(new Date(task.completedAt).toLocaleDateString())}`:""}`:"Open task"}</small></span></article>`).join("")}</section>`;
-        }).join("") : '<p class="admin-parent-message-preview-empty">No teachers have created tasks yet.</p>';
+          return `<section class="director-teacher-task-group"><header><h3>${escapeText(fullName(teacher)||teacherNickname(teacher)||"Teacher")}</h3><small>${teacherOpen} open · ${tasks.length} total</small></header>${tasks.map((task) => `<article class="director-teacher-task-row ${task.complete?"is-complete":""}"><span aria-hidden="true">${task.complete?"✓":"○"}</span><span><strong>${escapeText(task.text)}</strong><small>${task.complete?`Completed${task.completedAt?` · ${escapeText(new Date(task.completedAt).toLocaleDateString())}`:""}`:`${task.assignedByDirector?"Assigned by DD · ":""}Open task`}</small></span></article>`).join("")}</section>`;
+        }).join("") : '<p class="admin-parent-message-preview-empty">No teacher tasks yet. Assign the first one above.</p>';
+        if (list) list.innerHTML = composer + groups;
         return;
       }
       setText("director-task-title", directorTaskHistoryOpen ? `Task History · ${directorParentTasks.filter((task) => task.complete).length}` : `${openCount} Task${openCount === 1 ? "" : "s"}`);
@@ -34484,10 +34515,28 @@
     document.querySelector("[data-director-task-history]")?.addEventListener("click", () => { directorTaskHistoryOpen = !directorTaskHistoryOpen; renderDirectorParentTasks(); });
     document.getElementById("director-task-sort")?.addEventListener("change", (event) => { directorTaskSort = event.target.value || "priority"; renderDirectorParentTasks(); });
     document.querySelector("[data-director-task-add]")?.addEventListener("click", () => {
+      if (directorTaskView === "teacher") {
+        document.querySelector("[data-director-teacher-task-form] input[name='taskText']")?.focus();
+        return;
+      }
       const message = window.prompt("What needs to be done?")?.trim();
       if (!message) return;
       directorParentTasks.unshift({ id: `manual-${crypto.randomUUID()}`, complete: false, priority: false, createdAtMs: Date.now(), message, sender: "", studentName: "", teacherName: "", school: "", className: "", danceDay: "", assignee: "Ms. Lexi", notes: [] });
       saveDirectorParentTasks(); renderDirectorParentTasks();
+    });
+    document.getElementById("director-task-list")?.addEventListener("submit", async (event) => {
+      const form = event.target.closest("[data-director-teacher-task-form]");
+      if (!form) return;
+      event.preventDefault();
+      const formData = new FormData(form);
+      const teacher = teachers.find((item) => String(item.id) === String(formData.get("teacherId") || ""));
+      const text = String(formData.get("taskText") || "").trim();
+      if (!teacher || !text) return;
+      if (!Array.isArray(teacher.personalTasks)) teacher.personalTasks = [];
+      teacher.personalTasks.unshift({ id: crypto.randomUUID(), text, complete: false, createdAt: new Date().toISOString(), assignedByDirector: true });
+      renderDirectorParentTasks();
+      const saved = await saveTeacherPersonalTasksToCloud(teacher);
+      showToast(saved ? `Task sent to ${fullName(teacher) || teacherNickname(teacher) || "Teacher"}'s Teacher Tools.` : "That task could not be sent. Please try again.");
     });
     document.getElementById("director-task-list")?.addEventListener("change", (event) => {
       const assigneeSelect = event.target.closest("[data-director-task-assignee]");
