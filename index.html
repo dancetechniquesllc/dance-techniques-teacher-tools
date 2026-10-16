@@ -457,6 +457,16 @@
     .director-teacher-task-group { display:grid; gap:8px; padding:13px; border:1px solid var(--border); border-radius:16px; background:#fff; }
     .director-teacher-task-group>header { display:flex; align-items:center; justify-content:space-between; gap:10px; }.director-teacher-task-group>header h3,.director-teacher-task-group>header small { margin:0; }.director-teacher-task-group>header small { color:var(--muted); font-size:10px; font-weight:800; }
     .director-teacher-task-row { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:9px; padding:9px 0; border-top:1px solid #f0deda; }.director-teacher-task-row:first-of-type { border-top:0; }.director-teacher-task-row.is-complete strong { color:var(--muted); text-decoration:line-through; }.director-teacher-task-row span { display:grid; gap:2px; }.director-teacher-task-row small { color:var(--muted); font-size:9px; }
+    .director-teacher-task-card { --teacher-task-color:var(--berry); position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:13px; min-height:116px; padding:42px 16px 18px; border:3px solid var(--teacher-task-color); border-radius:18px; background:#fff; }
+    .director-teacher-task-card.is-complete { opacity:.58; }
+    .director-teacher-task-card>input { width:22px; height:22px; margin:0; accent-color:var(--teacher-task-color); }
+    .director-teacher-task-name { position:absolute; top:13px; right:16px; color:var(--teacher-task-color); font-size:12px; font-weight:900; }
+    .director-teacher-task-person { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:12px; min-width:0; }
+    .director-teacher-task-person .roster-student-photo { width:54px; height:54px; font-size:15px; border-color:color-mix(in srgb,var(--teacher-task-color) 55%,white); }
+    .director-teacher-task-copy { display:grid; gap:5px; min-width:0; }
+    .director-teacher-task-copy strong { overflow:hidden; text-overflow:ellipsis; font-size:14px; white-space:nowrap; }
+    .director-teacher-task-copy small { color:#594b4f; font-size:12px; line-height:1.35; }
+    .director-teacher-task-card.is-complete .director-teacher-task-copy { text-decoration:line-through; }
     .director-task-close { width:var(--director-task-control-size); min-width:var(--director-task-control-size); height:var(--director-task-control-size); min-height:var(--director-task-control-size); aspect-ratio:1 / 1; padding:0; border:0; border-radius:50%; background:var(--blush); color:var(--brick); font-size:21px; }
     .director-task-list { display:grid; gap:11px; padding:16px 20px 22px; }
     .director-task-item { position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:start; padding:48px 13px 42px; border:3px solid var(--task-assignee-color,var(--border)); border-radius:15px; background:color-mix(in srgb,var(--surface) 92%,var(--blush)); cursor:pointer; }
@@ -33236,12 +33246,20 @@
         setText("director-task-title", `${teacherOpenCount} Teacher Task${teacherOpenCount === 1 ? "" : "s"}`);
         setText("director-task-subtitle", "Assign work directly to each teacher's Teacher Tools");
         const composer = `<form class="director-teacher-task-compose" data-director-teacher-task-form><select name="teacherId" aria-label="Teacher" required><option value="">Teacher</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherTaskFirstName(teacher))}</option>`).join("")}</select><input name="studentId" type="hidden"><input name="studentName" type="hidden"><button class="director-task-student-picker" type="button" data-open-director-task-students disabled>+ Assign Student</button><input name="taskText" type="text" placeholder="What needs to be done?" aria-label="Task" required><button type="submit">Assign Task</button></form>`;
-        const groups = taskTeachers.length ? taskTeachers.map((teacher) => {
-          const tasks = [...teacher.personalTasks].sort((left,right) => Number(Boolean(left.complete))-Number(Boolean(right.complete)) || String(right.createdAt||"").localeCompare(String(left.createdAt||"")));
-          const teacherOpen = tasks.filter((task) => !task.complete).length;
-          return `<section class="director-teacher-task-group"><header><h3>${escapeText(teacherTaskFirstName(teacher))}</h3><small>${teacherOpen} open · ${tasks.length} total</small></header>${tasks.map((task) => `<article class="director-teacher-task-row ${task.complete?"is-complete":""}"><span aria-hidden="true">${task.complete?"✓":"○"}</span><span><strong>${escapeText(task.text)}</strong>${task.studentName?`<small><strong>${escapeText(task.studentName)}</strong></small>`:""}<small>${task.complete?`Completed${task.completedAt?` · ${escapeText(new Date(task.completedAt).toLocaleDateString())}`:""}`:`${task.assignedByDirector?"Assigned by DD · ":""}Open task`}</small></span></article>`).join("")}</section>`;
-        }).join("") : '<p class="admin-parent-message-preview-empty">No teacher tasks yet. Assign the first one above.</p>';
-        if (list) list.innerHTML = composer + groups;
+        const cards = taskTeachers.flatMap((teacher) => {
+          const students = directorTeacherTaskStudents(teacher.id);
+          return [...teacher.personalTasks]
+            .sort((left,right) => Number(Boolean(left.complete))-Number(Boolean(right.complete)) || String(right.createdAt||"").localeCompare(String(left.createdAt||"")))
+            .map((task) => {
+              const student = students.find((item) => String(item.id) === String(task.studentId || ""));
+              const studentName = task.studentName || student?.name || "General Task";
+              const title = student ? `${studentName} - ${student.school}` : studentName;
+              const initials = student?.initials || studentName.split(/\s+/).map((part) => part.charAt(0)).slice(0,2).join("").toUpperCase() || "DT";
+              const color = teacherColorValue(teacher) || "#a95a70";
+              return `<article class="director-teacher-task-card ${task.complete?"is-complete":""}" style="--teacher-task-color:${escapeText(color)}"><span class="director-teacher-task-name">${escapeText(teacherTaskFirstName(teacher))}</span><input type="checkbox" data-director-teacher-task-complete="${escapeText(task.id)}" data-director-teacher-task-teacher="${escapeText(teacher.id)}" ${task.complete?"checked":""} aria-label="Mark task complete"><div class="director-teacher-task-person"><span class="roster-student-photo">${student?.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(initials)}</span><span class="director-teacher-task-copy"><strong>${escapeText(title)}</strong><small>${escapeText(task.text)}</small></span></div></article>`;
+            });
+        }).join("");
+        if (list) list.innerHTML = composer + (cards || '<p class="admin-parent-message-preview-empty">No teacher tasks yet. Assign the first one above.</p>');
         return;
       }
       setText("director-task-title", directorTaskHistoryOpen ? `Task History · ${directorParentTasks.filter((task) => task.complete).length}` : `${openCount} Task${openCount === 1 ? "" : "s"}`);
@@ -34615,7 +34633,19 @@
       const saved = await saveTeacherPersonalTasksToCloud(teacher);
       showToast(saved ? `Task sent to ${fullName(teacher) || teacherNickname(teacher) || "Teacher"}'s Teacher Tools.` : "That task could not be sent. Please try again.");
     });
-    document.getElementById("director-task-list")?.addEventListener("change", (event) => {
+    document.getElementById("director-task-list")?.addEventListener("change", async (event) => {
+      const teacherTaskCheckbox = event.target.closest("[data-director-teacher-task-complete]");
+      if (teacherTaskCheckbox) {
+        const teacher = teachers.find((item) => String(item.id) === String(teacherTaskCheckbox.dataset.directorTeacherTaskTeacher || ""));
+        const task = teacher?.personalTasks?.find((item) => String(item.id) === String(teacherTaskCheckbox.dataset.directorTeacherTaskComplete || ""));
+        if (!teacher || !task) return;
+        task.complete = teacherTaskCheckbox.checked;
+        task.completedAt = task.complete ? new Date().toISOString() : "";
+        renderDirectorParentTasks();
+        const saved = await saveTeacherPersonalTasksToCloud(teacher);
+        if (!saved) showToast("That task update could not be saved. Please try again.");
+        return;
+      }
       const teacherPicker = event.target.closest("[data-director-teacher-task-form] select[name='teacherId']");
       if (teacherPicker) {
         const form = teacherPicker.form;
