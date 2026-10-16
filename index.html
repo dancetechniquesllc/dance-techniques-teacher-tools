@@ -16335,7 +16335,7 @@
         <button class="secondary" id="auth-sign-out" type="button">Sign Out</button>
       </div>
     </div>
-    <dialog class="teacher-desktop-task-dialog" id="teacher-desktop-task-dialog" aria-labelledby="teacher-desktop-task-title"><section class="teacher-desktop-task-card"><header class="teacher-desktop-task-head"><div><h2 id="teacher-desktop-task-title">My Tasks</h2><p>Private to your Teacher Tools account.</p></div><button type="button" data-close-tt-tasks aria-label="Close">×</button></header><form class="teacher-desktop-task-form" id="teacher-desktop-task-form"><input id="teacher-task-student-id" name="studentId" type="hidden"><input id="teacher-task-student-name" name="studentName" type="hidden"><button class="teacher-task-student-picker" type="button" data-open-tt-task-students>+ Student</button><input id="teacher-desktop-task-input" maxlength="160" placeholder="Add something you need to remember" aria-label="New task" required><button type="submit">Add Task</button></form><div class="teacher-desktop-task-list" id="teacher-desktop-task-list"></div></section></dialog>
+    <dialog class="teacher-desktop-task-dialog" id="teacher-desktop-task-dialog" aria-labelledby="teacher-desktop-task-title"><section class="teacher-desktop-task-card"><header class="teacher-desktop-task-head"><div><h2 id="teacher-desktop-task-title">My Tasks</h2><p>Private to your Teacher Tools account.</p></div><button type="button" data-close-tt-tasks aria-label="Close">×</button></header><form class="teacher-desktop-task-form" id="teacher-desktop-task-form"><input id="teacher-task-student-id" name="studentId" type="hidden"><input id="teacher-task-student-name" name="studentName" type="hidden"><button class="teacher-task-student-picker" type="button" data-open-tt-task-students>+Student</button><input id="teacher-desktop-task-input" maxlength="160" placeholder="Add something you need to remember" aria-label="New task" required><button type="submit">Add Task</button></form><div class="teacher-desktop-task-list" id="teacher-desktop-task-list"></div></section></dialog>
     <header class="topbar">
       <div class="brand">
         <div class="mark"><img src="assets/dtllc-d-dancer-white-v3.png" alt="" aria-hidden="true"></div>
@@ -24583,7 +24583,7 @@
       const studentButton = document.querySelector("[data-open-tt-task-students]");
       if (studentIdInput) studentIdInput.value = "";
       if (studentNameInput) studentNameInput.value = "";
-      if (studentButton) studentButton.textContent = "+ Student";
+      if (studentButton) studentButton.textContent = "+Student";
       saveTeacherPersonalTasks();
       input.focus();
     });
@@ -33316,7 +33316,7 @@
           sortSelect.innerHTML = `<option value="all">All Teachers</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherTaskFirstName(teacher))}</option>`).join("")}`;
           sortSelect.value = availableTaskTeachers.some((teacher) => String(teacher.id) === String(directorTeacherTaskFilter)) ? directorTeacherTaskFilter : "all";
         }
-        const composer = `<form class="director-teacher-task-compose" data-director-teacher-task-form><select name="teacherId" aria-label="Teacher" required><option value="">Teacher</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherTaskFirstName(teacher))}</option>`).join("")}</select><input name="studentId" type="hidden"><input name="studentName" type="hidden"><button class="director-task-student-picker" type="button" data-open-director-task-students disabled>+ Student</button><input name="taskText" type="text" placeholder="What needs to be done?" aria-label="Task" required><button type="submit">Assign</button></form>`;
+        const composer = `<form class="director-teacher-task-compose" data-director-teacher-task-form><select name="teacherId" aria-label="Teacher" required><option value="">Teacher</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherTaskFirstName(teacher))}</option>`).join("")}</select><input name="studentId" type="hidden"><input name="studentName" type="hidden"><button class="director-task-student-picker" type="button" data-open-director-task-students disabled>+Student</button><input name="taskText" type="text" placeholder="What needs to be done?" aria-label="Task" required><button type="submit">Assign</button></form>`;
         const cards = taskTeachers.filter((teacher) => directorTeacherTaskFilter === "all" || String(teacher.id) === String(directorTeacherTaskFilter)).flatMap((teacher) => {
           const students = directorTeacherTaskStudents(teacher.id);
           return [...teacher.personalTasks]
@@ -34681,7 +34681,7 @@
         const button = document.querySelector("[data-open-tt-task-students]");
         if (studentId) studentId.value = choice.dataset.directorTaskStudentId || "";
         if (studentName) studentName.value = choice.dataset.directorTaskStudentName || "";
-        if (button) button.textContent = choice.dataset.directorTaskStudentName || "+ Student";
+        if (button) button.textContent = choice.dataset.directorTaskStudentName || "+Student";
         document.getElementById("director-task-student-dialog")?.close();
         document.getElementById("teacher-desktop-task-input")?.focus();
         return;
@@ -34752,7 +34752,7 @@
         if (form?.elements?.studentId) form.elements.studentId.value = "";
         if (form?.elements?.studentName) form.elements.studentName.value = "";
         const pickerButton = form?.querySelector("[data-open-director-task-students]");
-        if (pickerButton) { pickerButton.disabled = !teacherPicker.value; pickerButton.textContent = "+ Student"; }
+        if (pickerButton) { pickerButton.disabled = !teacherPicker.value; pickerButton.textContent = "+Student"; }
         return;
       }
       const assigneeSelect = event.target.closest("[data-director-task-assignee]");
