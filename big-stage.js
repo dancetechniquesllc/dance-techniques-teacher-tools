@@ -897,15 +897,15 @@
     if(directorRootParent){if(directorRootNextSibling?.parentElement===directorRootParent)directorRootParent.insertBefore(app,directorRootNextSibling);else directorRootParent.append(app);}
     render();
   };
-  window.openTeacherStageSheetEditor=async({classId="",teacherLabel="",school="",className=""}={})=>{
+  window.openTeacherStageSheetEditor=async({classId="",teacherLabel="",school="",className="",allowStandalone=false}={})=>{
     if(!state.classes.length)await initialize(false);
-    const normalizedTeacher=String(teacherLabel).replace(/^ms\.?\s*/i,"").trim().toLowerCase(),candidate=state.classes.find((item)=>String(item.id)===String(classId))||state.classes.find((item)=>String(item.teacher||"").replace(/^ms\.?\s*/i,"").trim().toLowerCase()===normalizedTeacher&&String(item.school)===String(school)&&String(item.name)===String(className));
+    const normalizedTeacher=String(teacherLabel).replace(/^ms\.?\s*/i,"").trim().toLowerCase(),lexiStandalone=allowStandalone&&normalizedTeacher==="lexi",candidate=state.classes.find((item)=>String(item.id)===String(classId)||String(item.sourceClassId)===String(classId))||state.classes.find((item)=>(lexiStandalone||String(item.teacher||"").replace(/^ms\.?\s*/i,"").trim().toLowerCase()===normalizedTeacher)&&String(item.school)===String(school)&&String(item.name)===String(className));
     if(!candidate)return false;
     const normalizedSchool=String(school||candidate.school||"").trim().toLowerCase(),normalizedClass=String(className||candidate.name||"").trim().toLowerCase();
     const match=["A","B","C","D"].map((recital)=>({recital,index:recitalUnits(recital).findIndex((unit)=>unit.classes.some((item)=>item.id===candidate.id||(String(item.school||"").trim().toLowerCase()===normalizedSchool&&String(item.name||"").trim().toLowerCase()===normalizedClass)))})).find((entry)=>entry.index>=0);
     if(!match){
       const candidateTeacher=String(candidate.teacher||"").replace(/^ms\.?\s*/i,"").trim().toLowerCase();
-      if(normalizedTeacher!=="lexi"&&candidateTeacher!=="lexi")return false;
+      if(!lexiStandalone&&normalizedTeacher!=="lexi"&&candidateTeacher!=="lexi")return false;
       state.section="matching";state.view="show";state.stageSheetIndex=`standalone:${candidate.id}`;state.stageSheetPreview=false;render();return true;
     }
     state.section="matching";state.view="show";state.activeRecital=match.recital;state.stageSheetIndex=String(match.index);state.stageSheetPreview=false;render();return true;
