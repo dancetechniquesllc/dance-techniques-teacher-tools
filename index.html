@@ -23753,6 +23753,7 @@
         ...liveRosterClasses,
         ...pendingLocalClasses.filter((rosterClass) => !liveClassIds.has(String(rosterClass.id)))
       ]);
+      await window.refreshTeacherRecitalPlanner?.();
       selectedRosterClassId = rosterClasses[0]?.id || "";
       sharedRosterReady = true;
       setSharedRosterState("ready");

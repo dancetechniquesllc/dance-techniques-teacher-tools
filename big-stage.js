@@ -917,6 +917,10 @@
     const group=matches[0],plannerClass=group.classes.find((item)=>String(item.id)===id||String(item.sourceClassId)===id),show=group.showAssignments?.[plannerClass?.id]||state.showPlan?.classShow?.[plannerClass?.id]||state.schoolShows[`${plannerClass?.teacherId}::${plannerClass?.school}`]||null;
     return {requirement:requirements.length===1?requirements[0]:"either",show:Number(show)||null,routineName:plannerRoutineLabel(group,[plannerClass].filter(Boolean))};
   };
+  window.refreshTeacherRecitalPlanner=async()=>{
+    while(state.loading)await new Promise((resolve)=>setTimeout(resolve,50));
+    await initialize(false);
+  };
   window.renderBigStage=()=>initialize(false);
   initialize(false);
 })();
