@@ -38266,7 +38266,7 @@
     };
     const teacherFutureProspectCardMarkup = (student, rosterClass) => `<button class="teacher-future-prospect-card" type="button" data-teacher-edit-prospect="${rosterSafe(student.id)}" data-teacher-prospect-class="${rosterSafe(rosterClass.id)}" aria-label="Edit ${rosterSafe(rosterStudentFullName(student))}"><span class="roster-student-photo is-prospect-heart">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : ""}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong>${rosterTrialAttendancePending(student) ? `<small>Trial in progress</small>` : ""}</button>`;
     const teacherStudentHasOpenTask = (student) => (profileTeacher?.personalTasks || []).some((task) => !task.complete && String(task.studentId || "") === String(student?.id || ""));
-    const teacherRosterTaskOverlayMarkup = (student) => teacherStudentHasOpenTask(student) ? '<span class="teacher-roster-task-overlay" aria-label="Open task assigned" title="Open task assigned"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="12" height="15" rx="2"></rect><path d="M9 3h6v4H9zM9 11l1.5 1.5L14 9M9 16h6"></path></svg></span>' : "";
+    const teacherRosterTaskOverlayMarkup = (student) => teacherStudentHasOpenTask(student) ? '<span class="teacher-roster-task-overlay" aria-label="Open task assigned" title="Open task assigned"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="3"></rect><path d="m8.5 12 2 2 5-5"></path></svg></span>' : "";
 
     const teacherRosterClassroomMarkup = (students, rosterClass) => {
       const attendance = teacherAttendanceForClass(rosterClass);
