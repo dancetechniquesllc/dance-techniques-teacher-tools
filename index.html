@@ -432,6 +432,13 @@
     .director-task-history-button { min-width:108px; height:var(--director-task-control-size); min-height:var(--director-task-control-size); padding:0 15px; border:1px solid var(--brick); border-radius:999px; background:var(--brick); color:white; font-size:10px; font-weight:850; line-height:1; white-space:nowrap; }
     .director-task-add { width:var(--director-task-control-size); min-width:var(--director-task-control-size); height:var(--director-task-control-size); min-height:var(--director-task-control-size); aspect-ratio:1 / 1; padding:0; border:1px solid #78906f; border-radius:50%; background:color-mix(in srgb,var(--sage) 62%,white); color:#40533a; font-size:22px; line-height:1; }
     .director-task-add svg,.director-task-close svg { display:block; width:14px; height:14px; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; }
+    .director-task-view-toggle { display:grid; grid-template-columns:1fr 1fr; gap:5px; margin:12px 20px 4px; padding:5px; border-radius:15px; background:#f3e7e3; }
+    .director-task-view-toggle button { min-height:38px; border-radius:11px; color:var(--berry); background:transparent; font-size:12px; font-weight:900; }
+    .director-task-view-toggle button[aria-pressed="true"] { background:#fff; box-shadow:0 5px 14px rgb(71 42 47 / 10%); }
+    .director-task-dialog[data-task-view="teacher"] :is(.director-task-sort,.director-task-history-button,.director-task-add) { display:none !important; }
+    .director-teacher-task-group { display:grid; gap:8px; padding:13px; border:1px solid var(--border); border-radius:16px; background:#fff; }
+    .director-teacher-task-group>header { display:flex; align-items:center; justify-content:space-between; gap:10px; }.director-teacher-task-group>header h3,.director-teacher-task-group>header small { margin:0; }.director-teacher-task-group>header small { color:var(--muted); font-size:10px; font-weight:800; }
+    .director-teacher-task-row { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:9px; padding:9px 0; border-top:1px solid #f0deda; }.director-teacher-task-row:first-of-type { border-top:0; }.director-teacher-task-row.is-complete strong { color:var(--muted); text-decoration:line-through; }.director-teacher-task-row span { display:grid; gap:2px; }.director-teacher-task-row small { color:var(--muted); font-size:9px; }
     .director-task-close { width:var(--director-task-control-size); min-width:var(--director-task-control-size); height:var(--director-task-control-size); min-height:var(--director-task-control-size); aspect-ratio:1 / 1; padding:0; border:0; border-radius:50%; background:var(--blush); color:var(--brick); font-size:21px; }
     .director-task-list { display:grid; gap:11px; padding:16px 20px 22px; }
     .director-task-item { position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:10px; align-items:start; padding:48px 13px 42px; border:3px solid var(--task-assignee-color,var(--border)); border-radius:15px; background:color-mix(in srgb,var(--surface) 92%,var(--blush)); cursor:pointer; }
@@ -16279,7 +16286,7 @@
         </details>
         <button class="director-message-shortcut" type="button" data-admin-open-section="messages" aria-label="Open Messages" title="Messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h11.5a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H10l-4.5 3v-3H4a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3Z"></path><path d="M7 9.5h5.5M7 12.5h8"></path><path d="M18.5 9.25H20a3 3 0 0 1 3 3v4a3 3 0 0 1-3 3h-1v2l-3-2h-2.25"></path></svg><span class="notification-unread-count" id="admin-messages-shortcut-bubble" aria-hidden="true"></span></button>
         <button class="director-task-shortcut" type="button" data-open-director-tasks aria-label="Open Tasks" title="Tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"></rect><path d="m8 12 2.5 2.5L16 9"></path></svg><span class="notification-unread-count" id="director-task-count" aria-label="0 open tasks">0</span></button>
-        <dialog class="director-task-dialog" id="director-task-dialog" aria-labelledby="director-task-title"><div class="director-task-head"><div><h2 id="director-task-title">0 Tasks</h2><p id="director-task-subtitle">Parent messages and follow-ups</p></div><div class="director-task-head-actions"><select class="director-task-sort" id="director-task-sort" aria-label="Sort tasks"><option value="priority">Top Priority</option><option value="recent">Most Recent</option><option value="lexi">Ms. Lexi</option><option value="tiffany">Ms. Tiffany</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select><button class="director-task-history-button" type="button" data-director-task-history>Task History</button><button class="director-task-add" type="button" data-director-task-add aria-label="Add a task" title="Add Task"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button><button class="director-task-close" type="button" data-close-director-tasks aria-label="Close Tasks"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"></path></svg></button></div></div><div style="padding:8px 20px"><p id="director-task-sync-status" role="status">Opening tasks…</p><button type="button" data-director-task-retry>Retry</button> <button type="button" data-director-task-review>Review shared tasks</button></div><div class="director-task-list" id="director-task-list"></div></dialog>
+        <dialog class="director-task-dialog" id="director-task-dialog" aria-labelledby="director-task-title" data-task-view="admin"><div class="director-task-head"><div><h2 id="director-task-title">0 Tasks</h2><p id="director-task-subtitle">Parent messages and follow-ups</p></div><div class="director-task-head-actions"><select class="director-task-sort" id="director-task-sort" aria-label="Sort tasks"><option value="priority">Top Priority</option><option value="recent">Most Recent</option><option value="lexi">Ms. Lexi</option><option value="tiffany">Ms. Tiffany</option><option value="today">Today</option><option value="tomorrow">Tomorrow</option></select><button class="director-task-history-button" type="button" data-director-task-history>Task History</button><button class="director-task-add" type="button" data-director-task-add aria-label="Add a task" title="Add Task"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10"></path></svg></button><button class="director-task-close" type="button" data-close-director-tasks aria-label="Close Tasks"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8"></path></svg></button></div></div><nav class="director-task-view-toggle" aria-label="Task list"><button type="button" data-director-task-view="admin" aria-pressed="true">Admin Tasks</button><button type="button" data-director-task-view="teacher" aria-pressed="false">Teacher Tasks</button></nav><div style="padding:8px 20px"><p id="director-task-sync-status" role="status">Opening tasks…</p><button type="button" data-director-task-retry>Retry</button> <button type="button" data-director-task-review>Review shared tasks</button></div><div class="director-task-list" id="director-task-list"></div></dialog>
         <dialog class="director-task-complete-dialog" id="director-task-complete-dialog" aria-labelledby="director-task-complete-title"><div class="director-task-complete-card"><h2 id="director-task-complete-title">Mark as Complete?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-task-complete-cancel>Cancel</button><button class="director-task-complete-yes" type="button" data-task-complete-confirm>Yes</button></div></div></dialog>
         <dialog class="director-task-complete-dialog" id="director-task-remove-dialog" aria-labelledby="director-task-remove-title"><div class="director-task-complete-card"><h2 id="director-task-remove-title">Remove Task?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-task-remove-cancel>Cancel</button><button class="director-task-remove-confirm" type="button" data-task-remove-confirm>Remove</button></div></div></dialog>
         <dialog class="admin-parent-thread-dialog" id="admin-parent-thread-dialog" aria-labelledby="admin-parent-thread-title"><div class="admin-parent-thread-head"><div><h2 id="admin-parent-thread-title">Family Conversation</h2><p id="admin-parent-thread-subtitle"></p></div><div class="admin-parent-thread-head-actions"><button class="admin-parent-dancer-details" type="button" aria-label="Dancer Details coming soon" title="Personalized fields will be added here later">Dancer Details</button><button class="admin-parent-thread-close" type="button" data-close-admin-parent-thread aria-label="Close family conversation">×</button></div></div><div class="admin-parent-thread-messages" id="admin-parent-thread-messages"></div><form class="admin-parent-thread-compose" id="admin-parent-thread-compose"><textarea id="admin-parent-thread-reply" aria-label="Reply to family conversation" placeholder="Reply to the family"></textarea><button type="submit">Send</button></form></dialog>
@@ -28173,7 +28180,7 @@
       if (preserveDirectorData) {
         const teacherOwnedFields = [
           "phone", "tshirtSize", "birthday", "address", "photo", "displayName",
-          "scheduleEvents", "reschedules", "closureClassOverrides", "curriculum"
+          "scheduleEvents", "reschedules", "closureClassOverrides", "curriculum", "personalTasks"
         ];
         teacherOwnedFields.forEach((key) => {
           if (Object.prototype.hasOwnProperty.call(savedTeacher, key)) liveTeacher[key] = clonePayload(savedTeacher[key]);
@@ -33059,6 +33066,7 @@
     var selectedTeacherParentPreviewId = window.selectedTeacherParentPreviewId || "";
     var adminParentMessageFilters = window.adminParentMessageFilters || { school: "all", className: "all", day: "all", teacher: "all", status: "all", search: "" };
     var directorParentTasks = (() => { try { return JSON.parse(localStorage.getItem("dt-director-parent-tasks") || "[]"); } catch { return []; } })();
+    var directorTaskView = "admin";
     var directorTaskHistoryOpen = false;
     var directorTaskSort = "priority";
     var pendingDirectorTaskCompleteId = "";
@@ -33144,6 +33152,23 @@
         count.classList.toggle("active", openCount > 0);
         count.setAttribute("aria-label", `${openCount} unfinished task${openCount === 1 ? "" : "s"}`);
         count.setAttribute("aria-hidden", openCount > 0 ? "false" : "true");
+      }
+      const dialog = document.getElementById("director-task-dialog");
+      if (dialog) dialog.dataset.taskView = directorTaskView;
+      document.querySelectorAll("[data-director-task-view]").forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.directorTaskView === directorTaskView)));
+      const syncPanel = document.getElementById("director-task-sync-status")?.parentElement;
+      if (syncPanel) syncPanel.hidden = directorTaskView === "teacher";
+      if (directorTaskView === "teacher") {
+        const taskTeachers = teachers.filter((teacher) => !isCompanyTeacherProfile(teacher) && Array.isArray(teacher.personalTasks) && teacher.personalTasks.length);
+        const teacherOpenCount = taskTeachers.reduce((sum, teacher) => sum + teacher.personalTasks.filter((task) => !task.complete).length, 0);
+        setText("director-task-title", `${teacherOpenCount} Teacher Task${teacherOpenCount === 1 ? "" : "s"}`);
+        setText("director-task-subtitle", "Teacher-created lists from Teacher Tools");
+        if (list) list.innerHTML = taskTeachers.length ? taskTeachers.map((teacher) => {
+          const tasks = [...teacher.personalTasks].sort((left,right) => Number(Boolean(left.complete))-Number(Boolean(right.complete)) || String(right.createdAt||"").localeCompare(String(left.createdAt||"")));
+          const teacherOpen = tasks.filter((task) => !task.complete).length;
+          return `<section class="director-teacher-task-group"><header><h3>${escapeText(fullName(teacher)||teacherNickname(teacher)||"Teacher")}</h3><small>${teacherOpen} open · ${tasks.length} total</small></header>${tasks.map((task) => `<article class="director-teacher-task-row ${task.complete?"is-complete":""}"><span aria-hidden="true">${task.complete?"✓":"○"}</span><span><strong>${escapeText(task.text)}</strong><small>${task.complete?`Completed${task.completedAt?` · ${escapeText(new Date(task.completedAt).toLocaleDateString())}`:""}`:"Open task"}</small></span></article>`).join("")}</section>`;
+        }).join("") : '<p class="admin-parent-message-preview-empty">No teachers have created tasks yet.</p>';
+        return;
       }
       setText("director-task-title", directorTaskHistoryOpen ? `Task History · ${directorParentTasks.filter((task) => task.complete).length}` : `${openCount} Task${openCount === 1 ? "" : "s"}`);
       setText("director-task-subtitle", directorTaskHistoryOpen ? "Completed tasks, notes, and completion dates" : "Parent messages and follow-ups");
@@ -34445,8 +34470,15 @@
     });
     document.querySelector("[data-open-director-tasks]")?.addEventListener("click", () => {
       directorTaskHistoryOpen = false;
+      directorTaskView = "admin";
       renderDirectorParentTasks();
       document.getElementById("director-task-dialog")?.showModal();
+    });
+    document.querySelector(".director-task-view-toggle")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-director-task-view]");
+      if (!button) return;
+      directorTaskView = button.dataset.directorTaskView === "teacher" ? "teacher" : "admin";
+      renderDirectorParentTasks();
     });
     document.querySelector("[data-close-director-tasks]")?.addEventListener("click", () => document.getElementById("director-task-dialog")?.close());
     document.querySelector("[data-director-task-history]")?.addEventListener("click", () => { directorTaskHistoryOpen = !directorTaskHistoryOpen; renderDirectorParentTasks(); });
