@@ -759,7 +759,7 @@
     const generated=generatedGroups(state.classes);
     state.groups=enforceStageCapacity(enforceUniqueRoutinePerSchool(mergePlans(generated,workspace||persisted)));state.persisted=true;state.loading=false;
     const adjusted=state.groups.some((group)=>group.schoolRuleAdjusted);
-    state.notice=adjusted?"Classes at the same school were separated into different routines.":force?"Suggestions recalculated. Approved, modified, and locked decisions were preserved.":"";if(!state.showPlan||!Object.keys(state.showPlan.classShow||{}).length)buildShows(false);const seededRecitals=ensureRecitalAssignments();if(seededRecitals)await savePlannerWorkspace();rebuildCrossTeacherSuggestions();if(!adjusted&&!force)state.notice="";render();
+    state.notice=adjusted?"Classes at the same school were separated into different routines.":force?"Suggestions recalculated. Approved, modified, and locked decisions were preserved.":"";if(!state.showPlan||!Object.keys(state.showPlan.classShow||{}).length)buildShows(false);const seededRecitals=ensureRecitalAssignments();if(seededRecitals)await savePlannerWorkspace();rebuildCrossTeacherSuggestions();if(!adjusted&&!force)state.notice="";render();window.dispatchEvent(new CustomEvent("dt:recital-planner-ready"));
   };
   const refreshBoardGroup = (group) => {
     group.classes=group.classes.filter(Boolean);
@@ -909,6 +909,12 @@
       state.section="matching";state.view="show";state.stageSheetIndex=`standalone:${candidate.id}`;state.stageSheetPreview=false;render();return true;
     }
     state.section="matching";state.view="show";state.activeRecital=match.recital;state.stageSheetIndex=String(match.index);state.stageSheetPreview=false;render();return true;
+  };
+  window.getTeacherRecitalClassAssignment=(classId)=>{
+    const id=String(classId||""),matches=state.groups.filter((group)=>!group.crossTeacher&&group.decision!=="rejected"&&group.classes.some((item)=>String(item.id)===id||String(item.sourceClassId)===id));
+    if(!matches.length)return null;
+    const requirements=[...new Set(matches.map((group)=>String(group.requirement||"either").toLowerCase()))];
+    return {requirement:requirements.length===1?requirements[0]:"either"};
   };
   window.renderBigStage=()=>initialize(false);
   initialize(false);
