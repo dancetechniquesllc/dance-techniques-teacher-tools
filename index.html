@@ -436,7 +436,7 @@
     .director-task-view-toggle button { min-height:38px; border-radius:11px; color:var(--berry); background:transparent; font-size:12px; font-weight:900; }
     .director-task-view-toggle button[aria-pressed="true"] { background:#fff; box-shadow:0 5px 14px rgb(71 42 47 / 10%); }
     .director-task-dialog[data-task-view="teacher"] :is(.director-task-sort,.director-task-history-button) { display:none !important; }
-    .director-teacher-task-compose { display:grid; grid-template-columns:minmax(130px,.65fr) minmax(180px,1.35fr) auto; gap:8px; padding:14px; margin-bottom:12px; border:1px solid #ead2cc; border-radius:14px; background:#fffaf8; }
+    .director-teacher-task-compose { display:grid; grid-template-columns:minmax(115px,.55fr) minmax(145px,.75fr) minmax(180px,1.25fr) auto; gap:8px; padding:14px; margin-bottom:12px; border:1px solid #ead2cc; border-radius:14px; background:#fffaf8; }
     .director-teacher-task-compose :is(select,input) { min-height:42px; padding:0 12px; border:1px solid #dfb9b0; border-radius:10px; background:#fff; color:#241c1e; font:inherit; font-weight:700; }
     .director-teacher-task-compose button { min-height:42px; padding:0 16px; border-radius:10px; background:var(--berry); color:#fff; font-weight:900; }
     @media (max-width:640px) { .director-teacher-task-compose { grid-template-columns:1fr; } }
@@ -24453,7 +24453,7 @@
       });
       const list = document.getElementById("teacher-desktop-task-list");
       if (!list) return;
-      list.innerHTML = tasks.length ? tasks.map((task) => `<article class="teacher-desktop-task-item ${task.complete?"is-complete":""}"><input type="checkbox" data-tt-task-complete="${escapeText(task.id)}" ${task.complete?"checked":""} aria-label="Complete task"><strong>${escapeText(task.text)}</strong><button type="button" data-tt-task-remove="${escapeText(task.id)}" aria-label="Remove task">×</button></article>`).join("") : '<p class="subtle">No tasks yet. Add anything you want to remember.</p>';
+      list.innerHTML = tasks.length ? tasks.map((task) => `<article class="teacher-desktop-task-item ${task.complete?"is-complete":""}"><input type="checkbox" data-tt-task-complete="${escapeText(task.id)}" ${task.complete?"checked":""} aria-label="Complete task"><span><strong>${escapeText(task.text)}</strong>${task.studentName?`<small>${escapeText(task.studentName)}</small>`:""}</span><button type="button" data-tt-task-remove="${escapeText(task.id)}" aria-label="Remove task">×</button></article>`).join("") : '<p class="subtle">No tasks yet. Add anything you want to remember.</p>';
     };
     const saveTeacherPersonalTasks = () => {
       renderTeacherPersonalTasks();
@@ -33188,15 +33188,16 @@
       if (syncPanel) syncPanel.hidden = directorTaskView === "teacher";
       if (directorTaskView === "teacher") {
         const availableTaskTeachers = teachers.filter((teacher) => !isCompanyTeacherProfile(teacher) && String(teacher.status || "").toLowerCase() !== "inactive");
+        const teacherTaskFirstName = (teacher) => String(teacher?.firstName || teacher?.displayName || fullName(teacher) || "Teacher").trim().replace(/^Ms\.?\s+/i, "").split(/\s+/)[0] || "Teacher";
         const taskTeachers = availableTaskTeachers.filter((teacher) => Array.isArray(teacher.personalTasks) && teacher.personalTasks.length);
         const teacherOpenCount = taskTeachers.reduce((sum, teacher) => sum + teacher.personalTasks.filter((task) => !task.complete).length, 0);
         setText("director-task-title", `${teacherOpenCount} Teacher Task${teacherOpenCount === 1 ? "" : "s"}`);
         setText("director-task-subtitle", "Assign work directly to each teacher's Teacher Tools");
-        const composer = `<form class="director-teacher-task-compose" data-director-teacher-task-form><select name="teacherId" aria-label="Teacher" required><option value="">Choose teacher</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(fullName(teacher)||teacherNickname(teacher)||"Teacher")}</option>`).join("")}</select><input name="taskText" type="text" placeholder="What does this teacher need to do?" aria-label="Task" required><button type="submit">Assign Task</button></form>`;
+        const composer = `<form class="director-teacher-task-compose" data-director-teacher-task-form><select name="teacherId" aria-label="Teacher" required><option value="">Teacher</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherTaskFirstName(teacher))}</option>`).join("")}</select><select name="studentId" aria-label="Student" disabled><option value="">Student (optional)</option></select><input name="taskText" type="text" placeholder="What needs to be done?" aria-label="Task" required><button type="submit">Assign Task</button></form>`;
         const groups = taskTeachers.length ? taskTeachers.map((teacher) => {
           const tasks = [...teacher.personalTasks].sort((left,right) => Number(Boolean(left.complete))-Number(Boolean(right.complete)) || String(right.createdAt||"").localeCompare(String(left.createdAt||"")));
           const teacherOpen = tasks.filter((task) => !task.complete).length;
-          return `<section class="director-teacher-task-group"><header><h3>${escapeText(fullName(teacher)||teacherNickname(teacher)||"Teacher")}</h3><small>${teacherOpen} open · ${tasks.length} total</small></header>${tasks.map((task) => `<article class="director-teacher-task-row ${task.complete?"is-complete":""}"><span aria-hidden="true">${task.complete?"✓":"○"}</span><span><strong>${escapeText(task.text)}</strong><small>${task.complete?`Completed${task.completedAt?` · ${escapeText(new Date(task.completedAt).toLocaleDateString())}`:""}`:`${task.assignedByDirector?"Assigned by DD · ":""}Open task`}</small></span></article>`).join("")}</section>`;
+          return `<section class="director-teacher-task-group"><header><h3>${escapeText(teacherTaskFirstName(teacher))}</h3><small>${teacherOpen} open · ${tasks.length} total</small></header>${tasks.map((task) => `<article class="director-teacher-task-row ${task.complete?"is-complete":""}"><span aria-hidden="true">${task.complete?"✓":"○"}</span><span><strong>${escapeText(task.text)}</strong>${task.studentName?`<small><strong>${escapeText(task.studentName)}</strong></small>`:""}<small>${task.complete?`Completed${task.completedAt?` · ${escapeText(new Date(task.completedAt).toLocaleDateString())}`:""}`:`${task.assignedByDirector?"Assigned by DD · ":""}Open task`}</small></span></article>`).join("")}</section>`;
         }).join("") : '<p class="admin-parent-message-preview-empty">No teacher tasks yet. Assign the first one above.</p>';
         if (list) list.innerHTML = composer + groups;
         return;
@@ -34532,13 +34533,33 @@
       const teacher = teachers.find((item) => String(item.id) === String(formData.get("teacherId") || ""));
       const text = String(formData.get("taskText") || "").trim();
       if (!teacher || !text) return;
+      const studentId = String(formData.get("studentId") || "");
+      const selectedStudent = form.querySelector("select[name='studentId'] option:checked");
+      const studentName = studentId ? String(selectedStudent?.dataset.studentName || selectedStudent?.textContent || "").split(" · ")[0].trim() : "";
       if (!Array.isArray(teacher.personalTasks)) teacher.personalTasks = [];
-      teacher.personalTasks.unshift({ id: crypto.randomUUID(), text, complete: false, createdAt: new Date().toISOString(), assignedByDirector: true });
+      teacher.personalTasks.unshift({ id: crypto.randomUUID(), text, complete: false, createdAt: new Date().toISOString(), assignedByDirector: true, studentId, studentName });
       renderDirectorParentTasks();
       const saved = await saveTeacherPersonalTasksToCloud(teacher);
       showToast(saved ? `Task sent to ${fullName(teacher) || teacherNickname(teacher) || "Teacher"}'s Teacher Tools.` : "That task could not be sent. Please try again.");
     });
     document.getElementById("director-task-list")?.addEventListener("change", (event) => {
+      const teacherPicker = event.target.closest("[data-director-teacher-task-form] select[name='teacherId']");
+      if (teacherPicker) {
+        const studentPicker = teacherPicker.form?.elements?.studentId;
+        if (!studentPicker) return;
+        const records = rosterClasses
+          .filter((rosterClass) => rosterClass.sourceActive !== false && String(rosterClass.teacherId || "") === String(teacherPicker.value || ""))
+          .flatMap((rosterClass) => (rosterClass.students || []).filter((student) => ["", "enrolled", "paused"].includes(String(student.status || "").toLowerCase())).map((student) => ({
+            id: String(student.id || ""),
+            name: `${student.preferredName || student.firstName || "Student"} ${student.lastName || ""}`.trim(),
+            className: rosterClass.name || ""
+          })))
+          .filter((record, index, all) => record.id && all.findIndex((item) => item.id === record.id) === index)
+          .sort((left, right) => left.name.localeCompare(right.name));
+        studentPicker.innerHTML = `<option value="">Student (optional)</option>${records.map((record) => `<option value="${escapeText(record.id)}" data-student-name="${escapeText(record.name)}">${escapeText(record.name)}${record.className?` · ${escapeText(record.className)}`:""}</option>`).join("")}`;
+        studentPicker.disabled = !teacherPicker.value || !records.length;
+        return;
+      }
       const assigneeSelect = event.target.closest("[data-director-task-assignee]");
       if (assigneeSelect) {
         const task = directorParentTasks.find((item) => item.id === assigneeSelect.dataset.directorTaskAssignee);
