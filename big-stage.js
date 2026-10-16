@@ -914,7 +914,8 @@
     const id=String(classId||""),matches=state.groups.filter((group)=>!group.crossTeacher&&group.decision!=="rejected"&&group.classes.some((item)=>String(item.id)===id||String(item.sourceClassId)===id));
     if(!matches.length)return null;
     const requirements=[...new Set(matches.map((group)=>String(group.requirement||"either").toLowerCase()))];
-    return {requirement:requirements.length===1?requirements[0]:"either"};
+    const group=matches[0],plannerClass=group.classes.find((item)=>String(item.id)===id||String(item.sourceClassId)===id),show=group.showAssignments?.[plannerClass?.id]||state.showPlan?.classShow?.[plannerClass?.id]||state.schoolShows[`${plannerClass?.teacherId}::${plannerClass?.school}`]||null;
+    return {requirement:requirements.length===1?requirements[0]:"either",show:Number(show)||null,routineName:plannerRoutineLabel(group,[plannerClass].filter(Boolean))};
   };
   window.renderBigStage=()=>initialize(false);
   initialize(false);
