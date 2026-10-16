@@ -33301,6 +33301,16 @@
       const syncPanel = document.getElementById("director-task-sync-status")?.parentElement;
       if (syncPanel) syncPanel.hidden = directorTaskView === "teacher";
       if (directorTaskView === "teacher") {
+        const existingComposer = list?.querySelector("[data-director-teacher-task-form]");
+        const composerDraft = {
+          teacherId: String(existingComposer?.elements?.teacherId?.value || ""),
+          studentId: String(existingComposer?.elements?.studentId?.value || ""),
+          studentName: String(existingComposer?.elements?.studentName?.value || ""),
+          taskText: String(existingComposer?.elements?.taskText?.value || ""),
+          taskFocused: document.activeElement === existingComposer?.elements?.taskText,
+          selectionStart: existingComposer?.elements?.taskText?.selectionStart ?? null,
+          selectionEnd: existingComposer?.elements?.taskText?.selectionEnd ?? null
+        };
         const availableTaskTeachers = teachers.filter((teacher) => !isCompanyTeacherProfile(teacher) && String(teacher.status || "").toLowerCase() !== "inactive");
         const teacherTaskFirstName = (teacher) => String(teacher?.firstName || teacher?.displayName || fullName(teacher) || "Teacher").trim().replace(/^Ms\.?\s+/i, "").split(/\s+/)[0] || "Teacher";
         const taskTeachers = availableTaskTeachers.filter((teacher) => Array.isArray(teacher.personalTasks) && teacher.personalTasks.length);
@@ -33316,7 +33326,7 @@
           sortSelect.innerHTML = `<option value="all">All Teachers</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherTaskFirstName(teacher))}</option>`).join("")}`;
           sortSelect.value = availableTaskTeachers.some((teacher) => String(teacher.id) === String(directorTeacherTaskFilter)) ? directorTeacherTaskFilter : "all";
         }
-        const composer = `<form class="director-teacher-task-compose" data-director-teacher-task-form><select name="teacherId" aria-label="Teacher" required><option value="">Teacher</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}">${escapeText(teacherTaskFirstName(teacher))}</option>`).join("")}</select><input name="studentId" type="hidden"><input name="studentName" type="hidden"><button class="director-task-student-picker" type="button" data-open-director-task-students disabled>+Student</button><input name="taskText" type="text" placeholder="What needs to be done?" aria-label="Task" required><button type="submit">Assign</button></form>`;
+        const composer = `<form class="director-teacher-task-compose" data-director-teacher-task-form><select name="teacherId" aria-label="Teacher" required><option value="">Teacher</option>${availableTaskTeachers.map((teacher) => `<option value="${escapeText(teacher.id)}" ${String(teacher.id)===composerDraft.teacherId?"selected":""}>${escapeText(teacherTaskFirstName(teacher))}</option>`).join("")}</select><input name="studentId" type="hidden" value="${escapeText(composerDraft.studentId)}"><input name="studentName" type="hidden" value="${escapeText(composerDraft.studentName)}"><button class="director-task-student-picker" type="button" data-open-director-task-students ${composerDraft.teacherId?"":"disabled"}>${escapeText(composerDraft.studentName||"+Student")}</button><input name="taskText" type="text" value="${escapeText(composerDraft.taskText)}" placeholder="What needs to be done?" aria-label="Task" required><button type="submit">Assign</button></form>`;
         const cards = taskTeachers.filter((teacher) => directorTeacherTaskFilter === "all" || String(teacher.id) === String(directorTeacherTaskFilter)).flatMap((teacher) => {
           const students = directorTeacherTaskStudents(teacher.id);
           return [...teacher.personalTasks]
@@ -33332,7 +33342,14 @@
               return `<article class="director-teacher-task-card ${task.complete?"is-complete":""}" style="--teacher-task-color:${escapeText(color)}"><span class="director-teacher-task-name">${escapeText(teacherTaskFirstName(teacher))}</span><input type="checkbox" data-director-teacher-task-complete="${escapeText(task.id)}" data-director-teacher-task-teacher="${escapeText(teacher.id)}" ${task.complete?"checked":""} aria-label="Mark task complete"><div class="director-teacher-task-person"><span class="roster-student-photo">${student?.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(initials)}</span><span class="director-teacher-task-copy"><strong>${escapeText(title)}</strong><small>${escapeText(task.text)}</small>${notes.length?`<span class="director-teacher-task-notes">${notes.map((note) => `<span>+ ${escapeText(note.text || note)}</span>`).join("")}</span>`:""}</span></div><button class="director-teacher-task-note-add" type="button" data-director-teacher-task-note="${escapeText(task.id)}" data-director-teacher-task-note-teacher="${escapeText(teacher.id)}" aria-label="Add note" title="Add Note">+</button></article>`;
             });
         }).join("");
-        if (list) list.innerHTML = (directorTaskHistoryOpen ? "" : composer) + (cards || `<p class="admin-parent-message-preview-empty">${directorTaskHistoryOpen ? "No completed teacher tasks yet." : "No open teacher tasks. Assign the first one above."}</p>`);
+        if (list) {
+          list.innerHTML = (directorTaskHistoryOpen ? "" : composer) + (cards || `<p class="admin-parent-message-preview-empty">${directorTaskHistoryOpen ? "No completed teacher tasks yet." : "No open teacher tasks. Assign the first one above."}</p>`);
+          if (composerDraft.taskFocused && !directorTaskHistoryOpen) window.requestAnimationFrame(() => {
+            const restoredInput = list.querySelector("[data-director-teacher-task-form] input[name='taskText']");
+            restoredInput?.focus();
+            if (restoredInput && composerDraft.selectionStart != null) restoredInput.setSelectionRange(composerDraft.selectionStart, composerDraft.selectionEnd ?? composerDraft.selectionStart);
+          });
+        }
         return;
       }
       setText("director-task-title", directorTaskHistoryOpen ? `Task History · ${directorParentTasks.filter((task) => task.complete).length}` : `${openCount} Task${openCount === 1 ? "" : "s"}`);
