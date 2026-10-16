@@ -457,7 +457,7 @@
     .director-teacher-task-group { display:grid; gap:8px; padding:13px; border:1px solid var(--border); border-radius:16px; background:#fff; }
     .director-teacher-task-group>header { display:flex; align-items:center; justify-content:space-between; gap:10px; }.director-teacher-task-group>header h3,.director-teacher-task-group>header small { margin:0; }.director-teacher-task-group>header small { color:var(--muted); font-size:10px; font-weight:800; }
     .director-teacher-task-row { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:start; gap:9px; padding:9px 0; border-top:1px solid #f0deda; }.director-teacher-task-row:first-of-type { border-top:0; }.director-teacher-task-row.is-complete strong { color:var(--muted); text-decoration:line-through; }.director-teacher-task-row span { display:grid; gap:2px; }.director-teacher-task-row small { color:var(--muted); font-size:9px; }
-    .director-teacher-task-card { --teacher-task-color:var(--berry); position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:13px; min-height:116px; padding:42px 16px 18px; border:3px solid var(--teacher-task-color); border-radius:18px; background:#fff; }
+    .director-teacher-task-card { --teacher-task-color:var(--berry); position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:13px; min-height:116px; padding:42px 52px 22px 16px; border:3px solid var(--teacher-task-color); border-radius:18px; background:#fff; }
     .director-teacher-task-card.is-complete { opacity:.58; }
     .director-teacher-task-card>input { width:22px; height:22px; margin:0; accent-color:var(--teacher-task-color); }
     .director-teacher-task-name { position:absolute; top:13px; right:16px; color:var(--teacher-task-color); font-size:12px; font-weight:900; }
@@ -466,6 +466,8 @@
     .director-teacher-task-copy { display:grid; gap:5px; min-width:0; }
     .director-teacher-task-copy strong { overflow:hidden; text-overflow:ellipsis; font-size:14px; white-space:nowrap; }
     .director-teacher-task-copy small { color:#594b4f; font-size:12px; line-height:1.35; }
+    .director-teacher-task-notes { display:grid; gap:3px; margin-top:3px; color:var(--teacher-task-color); font-size:10px; font-weight:750; }
+    .director-teacher-task-note-add { position:absolute; right:13px; bottom:12px; width:32px; height:32px; display:grid; place-items:center; padding:0; border:1px solid var(--teacher-task-color); border-radius:50%; background:color-mix(in srgb,var(--teacher-task-color) 18%,white); color:var(--teacher-task-color); font-size:24px; font-weight:500; line-height:1; }
     .director-teacher-task-card.is-complete .director-teacher-task-copy { text-decoration:line-through; }
     .director-task-close { width:var(--director-task-control-size); min-width:var(--director-task-control-size); height:var(--director-task-control-size); min-height:var(--director-task-control-size); aspect-ratio:1 / 1; padding:0; border:0; border-radius:50%; background:var(--blush); color:var(--brick); font-size:21px; }
     .director-task-list { display:grid; gap:11px; padding:16px 20px 22px; }
@@ -15851,6 +15853,7 @@
     .teacher-desktop-task-form button { min-height: 44px; padding: 0 18px !important; border-radius: 13px; color: #fff; background: var(--berry); font-weight: 850; }
     .teacher-desktop-task-list { display: grid; gap: 8px; max-height: 360px; overflow-y: auto; }
     .teacher-desktop-task-item { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
+    .teacher-desktop-task-item>span { display:grid; gap:3px; }.teacher-desktop-task-item>span small { color:var(--muted); }
     .teacher-desktop-task-item.is-complete strong { color: var(--muted); text-decoration: line-through; }.teacher-desktop-task-item button { padding: 5px 8px !important; color: var(--muted); background: transparent; }
     .teacher-mobile-task-button { position: relative; display: grid; width: 42px; height: 42px; place-items: center; padding: 0; border: 1px solid #9fc5aa; border-radius: 50%; color: #48614c; background: #bfe1c7; box-shadow: 0 6px 14px rgb(67 104 75 / 13%); }
     .teacher-mobile-task-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -24485,7 +24488,7 @@
       });
       const list = document.getElementById("teacher-desktop-task-list");
       if (!list) return;
-      list.innerHTML = tasks.length ? tasks.map((task) => `<article class="teacher-desktop-task-item ${task.complete?"is-complete":""}"><input type="checkbox" data-tt-task-complete="${escapeText(task.id)}" ${task.complete?"checked":""} aria-label="Complete task"><span><strong>${escapeText(task.text)}</strong>${task.studentName?`<small>${escapeText(task.studentName)}</small>`:""}</span><button type="button" data-tt-task-remove="${escapeText(task.id)}" aria-label="Remove task">×</button></article>`).join("") : '<p class="subtle">No tasks yet. Add anything you want to remember.</p>';
+      list.innerHTML = tasks.length ? tasks.map((task) => `<article class="teacher-desktop-task-item ${task.complete?"is-complete":""}"><input type="checkbox" data-tt-task-complete="${escapeText(task.id)}" ${task.complete?"checked":""} aria-label="Complete task"><span><strong>${escapeText(task.text)}</strong>${task.studentName?`<small>${escapeText(task.studentName)}</small>`:""}${Array.isArray(task.notes)?task.notes.map((note)=>`<small>+ ${escapeText(note.text||note)}</small>`).join(""):""}</span><button type="button" data-tt-task-remove="${escapeText(task.id)}" aria-label="Remove task">×</button></article>`).join("") : '<p class="subtle">No tasks yet. Add anything you want to remember.</p>';
     };
     const saveTeacherPersonalTasks = () => {
       renderTeacherPersonalTasks();
@@ -33263,7 +33266,8 @@
               const title = student ? `${studentName} - ${student.school}` : studentName;
               const initials = student?.initials || studentName.split(/\s+/).map((part) => part.charAt(0)).slice(0,2).join("").toUpperCase() || "DT";
               const color = teacherColorValue(teacher) || "#a95a70";
-              return `<article class="director-teacher-task-card ${task.complete?"is-complete":""}" style="--teacher-task-color:${escapeText(color)}"><span class="director-teacher-task-name">${escapeText(teacherTaskFirstName(teacher))}</span><input type="checkbox" data-director-teacher-task-complete="${escapeText(task.id)}" data-director-teacher-task-teacher="${escapeText(teacher.id)}" ${task.complete?"checked":""} aria-label="Mark task complete"><div class="director-teacher-task-person"><span class="roster-student-photo">${student?.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(initials)}</span><span class="director-teacher-task-copy"><strong>${escapeText(title)}</strong><small>${escapeText(task.text)}</small></span></div></article>`;
+              const notes = Array.isArray(task.notes) ? task.notes : [];
+              return `<article class="director-teacher-task-card ${task.complete?"is-complete":""}" style="--teacher-task-color:${escapeText(color)}"><span class="director-teacher-task-name">${escapeText(teacherTaskFirstName(teacher))}</span><input type="checkbox" data-director-teacher-task-complete="${escapeText(task.id)}" data-director-teacher-task-teacher="${escapeText(teacher.id)}" ${task.complete?"checked":""} aria-label="Mark task complete"><div class="director-teacher-task-person"><span class="roster-student-photo">${student?.photo?`<img src="${escapeText(student.photo)}" alt="">`:escapeText(initials)}</span><span class="director-teacher-task-copy"><strong>${escapeText(title)}</strong><small>${escapeText(task.text)}</small>${notes.length?`<span class="director-teacher-task-notes">${notes.map((note) => `<span>+ ${escapeText(note.text || note)}</span>`).join("")}</span>`:""}</span></div><button class="director-teacher-task-note-add" type="button" data-director-teacher-task-note="${escapeText(task.id)}" data-director-teacher-task-note-teacher="${escapeText(teacher.id)}" aria-label="Add note" title="Add Note">+</button></article>`;
             });
         }).join("");
         if (list) list.innerHTML = composer + (cards || '<p class="admin-parent-message-preview-empty">No teacher tasks yet. Assign the first one above.</p>');
@@ -34704,6 +34708,19 @@
       renderDirectorParentTasks();
     });
     document.getElementById("director-task-list")?.addEventListener("click", (event) => {
+      const teacherNoteButton = event.target.closest("[data-director-teacher-task-note]");
+      if (teacherNoteButton) {
+        const teacher = teachers.find((item) => String(item.id) === String(teacherNoteButton.dataset.directorTeacherTaskNoteTeacher || ""));
+        const task = teacher?.personalTasks?.find((item) => String(item.id) === String(teacherNoteButton.dataset.directorTeacherTaskNote || ""));
+        if (!teacher || !task) return;
+        const text = window.prompt("Add a note")?.trim();
+        if (!text) return;
+        task.notes = Array.isArray(task.notes) ? task.notes : [];
+        task.notes.push({ id: crypto.randomUUID(), text, createdAt: new Date().toISOString(), addedBy: "DD" });
+        renderDirectorParentTasks();
+        void saveTeacherPersonalTasksToCloud(teacher).then((saved) => { if (!saved) showToast("That note could not be saved. Please try again."); });
+        return;
+      }
       const removeButton = event.target.closest("[data-director-task-remove]");
       if (removeButton) {
         pendingDirectorTaskRemoveId = removeButton.dataset.directorTaskRemove;
