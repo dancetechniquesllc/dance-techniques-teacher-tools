@@ -21459,6 +21459,13 @@
         else { document.body.dataset.mode = "teacher"; setTab("messages"); }
         return;
       }
+      if (item.notification_type === "teacher_task" || target.open === "tasks") {
+        if (!isLeader) {
+          openTeacherToolsForViewport("today");
+          window.setTimeout(() => document.querySelector("[data-open-tt-tasks]")?.click(), 80);
+        }
+        return;
+      }
       if ((item.notification_type === "email_plan_upgrade" || ["newsletter", "newsletter-studio"].includes(target.open)) && isLeader) {
         openAdminSection("newsletter-studio");
         return;
@@ -34631,7 +34638,12 @@
       teacher.personalTasks.unshift({ id: crypto.randomUUID(), text, complete: false, createdAt: new Date().toISOString(), assignedByDirector: true, studentId, studentName });
       renderDirectorParentTasks();
       const saved = await saveTeacherPersonalTasksToCloud(teacher);
-      showToast(saved ? `Task sent to ${fullName(teacher) || teacherNickname(teacher) || "Teacher"}'s Teacher Tools.` : "That task could not be sent. Please try again.");
+      if (saved) {
+        const student = directorTeacherTaskStudents(teacher.id).find((item) => String(item.id) === studentId);
+        const notificationMessage = student ? `${studentName} at ${student.school}: ${text}` : `General Task: ${text}`;
+        await queueAppNotifications([teacher.id], { title: "Task Assigned", message: notificationMessage, notification_type: "teacher_task", action_url: "/?open=tasks", metadata: { task_id: teacher.personalTasks[0]?.id || "", student_id: studentId || null } });
+        showToast(`Task sent to ${fullName(teacher) || teacherNickname(teacher) || "Teacher"}'s Teacher Tools.`);
+      } else showToast("That task could not be sent. Please try again.");
     });
     document.getElementById("director-task-list")?.addEventListener("change", async (event) => {
       const teacherTaskCheckbox = event.target.closest("[data-director-teacher-task-complete]");
