@@ -52,6 +52,7 @@
   const fullName = (student) => [student.preferredName || student.firstName, student.lastName].filter(Boolean).join(" ").trim();
   const boardDancerName = (student) => `${student.preferredName || student.firstName || "Dancer"}${student.lastName ? ` ${String(student.lastName).trim().charAt(0)}.` : ""}`;
   const boardDancerInitials = (student) => [student.preferredName || student.firstName,student.lastName].filter(Boolean).map((part)=>String(part).trim().charAt(0)).join("").slice(0,2).toUpperCase() || "DT";
+  const isBoy = (student) => /^(boy|male)$/i.test(String(student?.gender || student?.sex || "").trim());
   const schoolKey = (value) => String(value || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
   const hasSchoolConflict = (classes) => {
     const schools = classes.map((item) => schoolKey(item.school)).filter(Boolean);
@@ -295,15 +296,18 @@
     if(spread<=18)return {tone:"review",label:`${spread} Month Gap`};
     return {tone:"wide",label:`${spread} Month Gap`};
   };
-  const boardClassCard = (item, draggable = false, combinedAges = null, showCombinedAge = false, combineControl = "") => `<article class="stage-board-class" data-stage-board-class="${esc(item.id)}" ${draggable?`draggable="true" title="Drag to another routine row"`:""}>
+  const boardClassCard = (item, draggable = false, combinedAges = null, showCombinedAge = false, combineControl = "") => {
+    const dancers=state.teacherPortal?[...item.students].sort((left,right)=>Number(isBoy(right))-Number(isBoy(left))):item.students;
+    return `<article class="stage-board-class" data-stage-board-class="${esc(item.id)}" ${draggable?`draggable="true" title="Drag to another routine row"`:""}>
     ${combineControl}
     ${showCombinedAge&&combinedAges?`<span class="stage-combined-age"><b>Age: ${ageLabel(combinedAges.min)} – ${ageLabel(combinedAges.max)}</b><em>${combinedAges.total} Total Dancers</em></span>`:""}
     ${state.showPlan?.classShow?.[item.id]&&state.showPlan.classShow[item.id]!==showForSchool(item.school)?`<span class="stage-class-show-badge" style="--class-show-color:${esc(state.showColors[state.showPlan.classShow[item.id]])}">Show ${state.showPlan.classShow[item.id]} · Separate</span>`:""}
-    <div><strong>${esc(item.name)}${item.students.some((student)=>!isNoRecital(student)&&String(student.gender||"").toLowerCase()==="male")?`<i class="stage-boy-bubble" title="Boy in this class" aria-label="Boy in this class">B</i>`:""}</strong><span>${item.count} dancer${item.count===1?"":"s"}</span></div>
+    <div><strong>${esc(item.name)}${item.students.some((student)=>!isNoRecital(student)&&isBoy(student))?`<i class="stage-boy-bubble" title="Boy in this class" aria-label="Boy in this class">B</i>`:""}</strong><span>${item.count} dancer${item.count===1?"":"s"}</span></div>
     <small>${item.ageData?`${ageLabel(item.minAge)}–${ageLabel(item.maxAge)}`:"Birthdates needed"}</small>
     <span class="stage-board-style is-${esc(item.requirement)}">${item.requirement==="either"?"Undecided":title(item.requirement)}</span>
-    <details class="stage-board-dancers"><summary>Dancers <span>${item.count}</span></summary><div>${item.students.map((student)=>{const age=monthsOld(student.birthdate),noRecital=isNoRecital(student);return `<article class="${noRecital?"is-no-recital":""}"><span class="stage-board-dancer-photo ${noRecital?"stage-dancer-no-recital":""}">${noRecital?"×":student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span><strong>${esc(boardDancerName(student))}</strong><small>${noRecital?"No Recital":Number.isFinite(age)?ageLabel(age):"Age needed"}</small></article>`;}).join("")}</div></details>
+    <details class="stage-board-dancers"><summary>Dancers <span>${item.count}</span></summary><div>${dancers.map((student)=>{const age=monthsOld(student.birthdate),noRecital=isNoRecital(student),boy=state.teacherPortal&&isBoy(student);return `<article class="${noRecital?"is-no-recital":""} ${boy?"is-boy":""}"><span class="stage-board-dancer-photo ${noRecital?"stage-dancer-no-recital":""}">${noRecital?"×":student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span><strong>${esc(boardDancerName(student))}</strong><small>${noRecital?"No Recital":Number.isFinite(age)?ageLabel(age):"Age needed"}</small></article>`;}).join("")}</div></details>
   </article>`;
+  };
   const combinedAgeSummary = (classes) => {
     const ages=classes.flatMap((item)=>item.students.filter((student)=>!isNoRecital(student)).map((student)=>monthsOld(student.birthdate)).filter(Number.isFinite));
     return ages.length?{min:Math.min(...ages),max:Math.max(...ages),avg:ages.reduce((sum,age)=>sum+age,0)/ages.length,total:classes.reduce((sum,item)=>sum+item.count,0)}:null;
@@ -882,6 +886,15 @@
     state.teacherPortal=false;app.classList.remove("is-teacher-planner-locked");
     if(directorRootParent){if(directorRootNextSibling?.parentElement===directorRootParent)directorRootParent.insertBefore(app,directorRootNextSibling);else directorRootParent.append(app);}
     render();
+  };
+  window.openTeacherStageSheetEditor=async({classId="",teacherLabel="",school="",className=""}={})=>{
+    if(!state.classes.length)await initialize(false);
+    const normalizedTeacher=String(teacherLabel).replace(/^ms\.?\s*/i,"").trim().toLowerCase(),candidate=state.classes.find((item)=>String(item.id)===String(classId))||state.classes.find((item)=>String(item.teacher||"").replace(/^ms\.?\s*/i,"").trim().toLowerCase()===normalizedTeacher&&String(item.school)===String(school)&&String(item.name)===String(className));
+    if(!candidate)return false;
+    const normalizedSchool=String(school||candidate.school||"").trim().toLowerCase(),normalizedClass=String(className||candidate.name||"").trim().toLowerCase();
+    const match=["A","B","C","D"].map((recital)=>({recital,index:recitalUnits(recital).findIndex((unit)=>unit.classes.some((item)=>item.id===candidate.id||(String(item.school||"").trim().toLowerCase()===normalizedSchool&&String(item.name||"").trim().toLowerCase()===normalizedClass)))})).find((entry)=>entry.index>=0);
+    if(!match)return false;
+    state.section="matching";state.view="show";state.activeRecital=match.recital;state.stageSheetIndex=String(match.index);state.stageSheetPreview=false;render();return true;
   };
   window.renderBigStage=()=>initialize(false);
   initialize(false);
