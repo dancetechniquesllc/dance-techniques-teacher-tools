@@ -15805,6 +15805,21 @@
     .session-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
     .teacher-desktop-session-actions { display: none; align-items: center; gap: 9px; }
     .teacher-desktop-quick-link { min-height: 40px; padding: 0 15px !important; border: 1px solid var(--border); border-radius: 999px; color: var(--berry); background: #fff; font-weight: 850; }
+    .teacher-desktop-task-dialog { width: min(520px,calc(100vw - 32px)); padding: 0; border: 0; border-radius: 22px; background: transparent; box-shadow: 0 24px 70px rgb(56 34 38 / 28%); }
+    .teacher-desktop-task-dialog::backdrop { background: rgb(37 25 28 / 42%); backdrop-filter: blur(3px); }
+    .teacher-desktop-task-card { display: grid; gap: 15px; padding: 24px; border: 1px solid var(--border); border-radius: 22px; background: #fffaf7; }
+    .teacher-desktop-task-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .teacher-desktop-task-head h2,.teacher-desktop-task-head p { margin: 0; }.teacher-desktop-task-head p { margin-top: 3px; color: var(--muted); font-size: 12px; }
+    .teacher-desktop-task-head button { width: 36px; height: 36px; padding: 0 !important; border-radius: 50%; background: var(--blush); color: var(--berry); font-size: 22px; }
+    .teacher-desktop-task-form { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 9px; }
+    .teacher-desktop-task-form input { min-width: 0; min-height: 44px; padding: 9px 13px; border: 1px solid var(--border); border-radius: 13px; background: #fff; }
+    .teacher-desktop-task-form button { min-height: 44px; padding: 0 18px !important; border-radius: 13px; color: #fff; background: var(--berry); font-weight: 850; }
+    .teacher-desktop-task-list { display: grid; gap: 8px; max-height: 360px; overflow-y: auto; }
+    .teacher-desktop-task-item { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 11px 12px; border: 1px solid var(--border); border-radius: 14px; background: #fff; }
+    .teacher-desktop-task-item.is-complete strong { color: var(--muted); text-decoration: line-through; }.teacher-desktop-task-item button { padding: 5px 8px !important; color: var(--muted); background: transparent; }
+    .teacher-mobile-task-button { position: relative; display: grid; width: 42px; height: 42px; place-items: center; padding: 0; border: 1px solid #9fc5aa; border-radius: 50%; color: #48614c; background: #bfe1c7; box-shadow: 0 6px 14px rgb(67 104 75 / 13%); }
+    .teacher-mobile-task-button svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    @media (max-width: 520px) { .teacher-desktop-task-form { grid-template-columns: 1fr; }.teacher-desktop-task-form button { width: 100%; } }
     .teacher-desktop-leader { position: relative; display: grid; width: 46px; height: 46px; place-items: center; padding: 0 !important; border: 2px solid #d8c5bf; border-radius: 50%; color: var(--berry); background: #f6e7e3; font-size: 12px; font-weight: 900; }
     .teacher-desktop-leader img,.teacher-desktop-profile-shortcut img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
     .teacher-desktop-leader::after { content: ""; position: absolute; right: -1px; bottom: 1px; width: 10px; height: 10px; border: 2px solid #fff; border-radius: 50%; background: #aaa; }
@@ -16247,6 +16262,7 @@
         <div class="teacher-desktop-session-actions" aria-label="Teacher Tools shortcuts">
           <button class="teacher-desktop-quick-link" type="button" data-tt-desktop-tab="my-day">My Day</button>
           <button class="teacher-desktop-quick-link" type="button" data-tt-desktop-tab="messages">Messages <span class="notification-unread-count" id="tt-desktop-message-count" aria-hidden="true"></span></button>
+          <button class="teacher-desktop-quick-link" type="button" data-open-tt-tasks>My Tasks <span class="notification-unread-count" id="tt-desktop-task-count" aria-hidden="true"></span></button>
           <button class="teacher-desktop-leader" type="button" data-tt-message-leader="lexi" aria-label="Message Lexi" title="Message Lexi"><span>L</span></button>
           <button class="teacher-desktop-leader" type="button" data-tt-message-leader="tiffany" aria-label="Message Tiffany" title="Message Tiffany"><span>T</span></button>
           <button class="teacher-desktop-profile-shortcut" type="button" data-tt-desktop-tab="profile" aria-label="Open my profile" title="My Profile"><span>Me</span></button>
@@ -16271,6 +16287,7 @@
         <button class="secondary" id="auth-sign-out" type="button">Sign Out</button>
       </div>
     </div>
+    <dialog class="teacher-desktop-task-dialog" id="teacher-desktop-task-dialog" aria-labelledby="teacher-desktop-task-title"><section class="teacher-desktop-task-card"><header class="teacher-desktop-task-head"><div><h2 id="teacher-desktop-task-title">My Tasks</h2><p>Private to your Teacher Tools account.</p></div><button type="button" data-close-tt-tasks aria-label="Close">×</button></header><form class="teacher-desktop-task-form" id="teacher-desktop-task-form"><input id="teacher-desktop-task-input" maxlength="160" placeholder="Add something you need to remember" aria-label="New task" required><button type="submit">Add Task</button></form><div class="teacher-desktop-task-list" id="teacher-desktop-task-list"></div></section></dialog>
     <header class="topbar">
       <div class="brand">
         <div class="mark"><img src="assets/dtllc-d-dancer-white-v3.png" alt="" aria-hidden="true"></div>
@@ -16327,6 +16344,7 @@
                   </div>
                 </div>
                 <div class="mobile-head-actions">
+                  <button class="teacher-mobile-task-button" type="button" data-open-tt-tasks aria-label="Open My Tasks" title="My Tasks"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="3"></rect><path d="m8.5 12 2 2 5-5"></path></svg><span class="notification-unread-count" id="tt-mobile-task-count" aria-hidden="true"></span></button>
                   <details class="teacher-notifications">
                     <summary aria-label="Show notifications" title="Notifications">
                       <svg class="teacher-notification-bell" viewBox="0 0 24 24" aria-hidden="true">
@@ -24407,9 +24425,45 @@
       const unread = notificationCenterItems.filter((item) => item.notification_type === "direct_message" && !item.read_at).length;
       const bubble = document.getElementById("tt-desktop-message-count");
       if (bubble) { bubble.textContent = unread ? String(unread) : ""; bubble.classList.toggle("active", unread > 0); }
+      renderTeacherPersonalTasks();
+    };
+    const teacherPersonalTasks = () => {
+      if (!Array.isArray(profileTeacher?.personalTasks)) profileTeacher.personalTasks = [];
+      return profileTeacher.personalTasks;
+    };
+    const renderTeacherPersonalTasks = () => {
+      const tasks = teacherPersonalTasks();
+      const openCount = tasks.filter((task) => !task.complete).length;
+      ["tt-desktop-task-count","tt-mobile-task-count"].forEach((id) => {
+        const bubble = document.getElementById(id);
+        if (!bubble) return;
+        bubble.textContent = openCount ? String(openCount) : "";
+        bubble.classList.toggle("active", openCount > 0);
+      });
+      const list = document.getElementById("teacher-desktop-task-list");
+      if (!list) return;
+      list.innerHTML = tasks.length ? tasks.map((task) => `<article class="teacher-desktop-task-item ${task.complete?"is-complete":""}"><input type="checkbox" data-tt-task-complete="${escapeText(task.id)}" ${task.complete?"checked":""} aria-label="Complete task"><strong>${escapeText(task.text)}</strong><button type="button" data-tt-task-remove="${escapeText(task.id)}" aria-label="Remove task">×</button></article>`).join("") : '<p class="subtle">No tasks yet. Add anything you want to remember.</p>';
+    };
+    const saveTeacherPersonalTasks = () => {
+      renderTeacherPersonalTasks();
+      scheduleAppDataSave();
+      scheduleCloudAppDataSave();
     };
 
     document.addEventListener("click", (event) => {
+      if (event.target.closest("[data-open-tt-tasks]")) {
+        renderTeacherPersonalTasks();
+        document.getElementById("teacher-desktop-task-dialog")?.showModal();
+        window.setTimeout(() => document.getElementById("teacher-desktop-task-input")?.focus(), 0);
+        return;
+      }
+      if (event.target.closest("[data-close-tt-tasks]")) { document.getElementById("teacher-desktop-task-dialog")?.close(); return; }
+      const taskRemove = event.target.closest("[data-tt-task-remove]");
+      if (taskRemove) {
+        profileTeacher.personalTasks = teacherPersonalTasks().filter((task) => String(task.id) !== String(taskRemove.dataset.ttTaskRemove));
+        saveTeacherPersonalTasks();
+        return;
+      }
       const quickLink = event.target.closest("[data-tt-desktop-tab]");
       if (quickLink) {
         const tab = quickLink.dataset.ttDesktopTab;
@@ -24426,6 +24480,22 @@
       renderTeacherMessages();
       setTab("teacher-conversation");
       document.querySelectorAll("[data-teacher-desktop-view]").forEach((item) => item.classList.toggle("active", item.dataset.teacherDesktopView === "messages"));
+    });
+    document.getElementById("teacher-desktop-task-form")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const input = document.getElementById("teacher-desktop-task-input");
+      const text = input?.value.trim() || "";
+      if (!text) return;
+      teacherPersonalTasks().unshift({ id: crypto.randomUUID(), text, complete: false, createdAt: new Date().toISOString() });
+      input.value = "";
+      saveTeacherPersonalTasks();
+      input.focus();
+    });
+    document.getElementById("teacher-desktop-task-list")?.addEventListener("change", (event) => {
+      const checkbox = event.target.closest("[data-tt-task-complete]");
+      if (!checkbox) return;
+      const task = teacherPersonalTasks().find((item) => String(item.id) === String(checkbox.dataset.ttTaskComplete));
+      if (task) { task.complete = checkbox.checked; task.completedAt = checkbox.checked ? new Date().toISOString() : ""; saveTeacherPersonalTasks(); }
     });
 
     const teacherToolsViewport = window.matchMedia("(min-width: 768px)");
