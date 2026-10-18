@@ -983,13 +983,25 @@
   };
 
   const permanentSampleFamilyPreview = () => {
+    let connectedPreview = null;
+    try { connectedPreview = JSON.parse(window.localStorage?.getItem("dt-connected-preview-world-v1") || "null"); } catch (error) {}
+    const connectedClasses = Array.isArray(connectedPreview?.rosterClasses) ? connectedPreview.rosterClasses : [];
+    const connectedClass = connectedClasses.find((item) => item.students?.some((candidate) => candidate.id === "sample-elena"));
+    const connectedStudent = connectedClass?.students?.find((candidate) => candidate.id === "sample-elena");
+    const connectedTeacher = (connectedPreview?.teachers || []).find((teacher) => String(teacher.id) === String(connectedClass?.teacherId))
+      || (connectedPreview?.teachers || []).find((teacher) => String(teacher.firstName || "").trim().toLowerCase() === "lexi");
+    const connectedSchool = (connectedPreview?.schoolLibrary || []).find((school) => {
+      const normalize = (value) => String(value || "").trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+      return [school.name, school.nickname].some((value) => normalize(value) === normalize(connectedClass?.schoolName));
+    });
+    const dayIndex = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].findIndex((day) => day.toLowerCase() === String(connectedClass?.day || "").toLowerCase());
     const student = {
       id: "sample-elena",
-      first_name: "Elena Eden",
-      preferred_name: "Elena Eden",
-      last_name: "Mancol-Bilbo",
+      first_name: connectedStudent?.firstName || "Elena Eden",
+      preferred_name: connectedStudent?.preferredName || connectedStudent?.firstName || "Elena Eden",
+      last_name: connectedStudent?.lastName || "Mancol-Bilbo",
       status: "enrolled",
-      photoUrl: ""
+      photoUrl: connectedStudent?.photo || ""
     };
     return {
       context: {
@@ -1008,24 +1020,24 @@
         dance_class_id: "sample-class",
         status: "enrolled",
         danceClass: {
-          id: "sample-class",
-          name: "Class 5",
-          start_time: "10:00:00",
+          id: connectedClass?.id || "sample-class",
+          name: connectedClass?.name || "Class 5",
+          start_time: connectedClass?.time || "10:00 AM",
           teacher_school_assignment_id: "sample-assignment"
         },
         school: {
-          name: "Primrose School of Rowlett",
-          nickname: "Primrose Rowlett",
-          dance_day: 4,
-          time_of_day: "AM"
+          name: connectedSchool?.name || connectedClass?.schoolName || "Primrose School of Rowlett",
+          nickname: connectedSchool?.nickname || connectedClass?.schoolName || "Primrose Rowlett",
+          dance_day: Number.isInteger(connectedSchool?.dayOfWeek) ? connectedSchool.dayOfWeek : (dayIndex >= 0 ? dayIndex : 4),
+          time_of_day: connectedSchool?.timeBlock || (/pm/i.test(connectedClass?.time || "") ? "PM" : "AM")
         },
         teacher: {
-          id: "sample-lexi",
-          full_name: "Lexi",
-          color: "#DBA9A1",
-          photo: "assets/people/ms-lexi-profile.png"
+          id: connectedTeacher?.id || "sample-lexi",
+          full_name: connectedTeacher?.displayName || connectedTeacher?.fullName || connectedTeacher?.firstName || "Lexi",
+          color: connectedTeacher?.color || "#DBA9A1",
+          photo: connectedTeacher?.photo || "assets/people/ms-lexi-profile.png"
         },
-        teacherState: { teacher: { reschedules: [] } }
+        teacherState: { teacher: { reschedules: connectedTeacher?.reschedules || [] } }
       }],
       classPosts: [],
       newsletters: [{

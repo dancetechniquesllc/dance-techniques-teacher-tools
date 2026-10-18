@@ -1,4 +1,4 @@
-const CACHE = "dt-parent-portal-secure-family-v47";
+const CACHE = "dt-parent-portal-secure-family-v48";
 const APP_SHELL = [
   "./",
   "./index.html",

@@ -24650,27 +24650,20 @@
         runGuardedNavigation(() => {
           if (document.body.dataset.mode === "teacher-desktop" && nextMode !== "teacher-desktop") unmountTeacherDesktopApp();
           const teacherPreviewModes = ["teacher", "teacher-desktop"];
-          const leavingTeacherPreview = document.body.dataset.tourMode === "true" && teacherPreviewModes.includes(document.body.dataset.mode) && !teacherPreviewModes.includes(nextMode);
-          if (leavingTeacherPreview && teacherToolsPreviewSnapshot) {
-            applyPersistedAppData(JSON.parse(JSON.stringify(teacherToolsPreviewSnapshot)));
-            teacherToolsPreviewSnapshot = null;
-          }
           document.body.dataset.mode = nextMode;
           if (nextMode === "admin") document.body.dataset.adminPage = "home";
           if (nextMode === "parent") {
             const parentPortalFrame = document.getElementById("parent-portal-preview-frame");
-            if (parentPortalFrame && !parentPortalFrame.getAttribute("src")) parentPortalFrame.src = parentPortalFrame.dataset.src;
+            saveAppData();
+            if (parentPortalFrame) parentPortalFrame.src = `${parentPortalFrame.dataset.src}&sync=${Date.now()}`;
           }
           if (teacherPreviewModes.includes(nextMode)) {
             if (document.body.dataset.tourMode === "true") {
-              if (!teacherToolsPreviewSnapshot) teacherToolsPreviewSnapshot = JSON.parse(JSON.stringify(appDataPayload()));
               profileTeacher = teachers.find((teacher) => teacher.firstName?.trim().toLowerCase() === "lexi") || teachers[0] || profileTeacher;
               renderCloudSyncedAppData();
             }
             if (nextMode === "teacher") setTab("today");
             if (nextMode === "teacher-desktop") mountTeacherDesktopApp("home");
-          } else if (leavingTeacherPreview) {
-            renderCloudSyncedAppData();
           }
           document.querySelectorAll("[data-mode-btn]").forEach((item) => item.classList.toggle("active", item === button));
         });
@@ -27498,6 +27491,7 @@
       }
     ];
     const persistentStorageKey = "dt-teacher-tools-prototype-v1";
+    const connectedPreviewStorageKey = "dt-connected-preview-world-v1";
     const persistentStorageBackupKey = `${persistentStorageKey}:history`;
     const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725-v3`;
     const schoolScheduleRecoveryCompletedKey = `${persistentStorageKey}:school-schedule-recovery-20260725-v1`;
@@ -27595,8 +27589,6 @@
       document.body.dataset.tourMode === "true" &&
       document.body.dataset.mode === "teacher"
     );
-    let teacherToolsPreviewSnapshot = null;
-
     const clonePayload = (value) => JSON.parse(JSON.stringify(value ?? null));
     const hasSubstantivePersistedData = (payload) => {
       if (!payload || typeof payload !== "object") return false;
@@ -28095,8 +28087,15 @@
       }
     };
     const saveAppData = () => {
-      if (isTeacherToolsPreviewSandbox()) {
-        window.dtPrototypeStorageStatus = { ok: true, savedAt: "", method: "preview sandbox" };
+      if (document.body.dataset.tourMode === "true") {
+        const previewPayload = appDataPayload();
+        try {
+          window.localStorage?.setItem(connectedPreviewStorageKey, JSON.stringify(previewPayload));
+          window.dtPrototypeStorageStatus = { ok: true, savedAt: previewPayload.savedAt, method: "connected preview" };
+          document.documentElement.dataset.prototypeSavedAt = previewPayload.savedAt;
+        } catch (error) {
+          console.warn("The connected preview world could not be saved.", error);
+        }
         document.documentElement.dataset.prototypeSaved = "preview";
         return;
       }
@@ -28424,6 +28423,12 @@
     loadPersistedAppData();
 
     if (document.body.dataset.tourMode === "true") {
+      try {
+        const connectedPreview = JSON.parse(window.localStorage?.getItem(connectedPreviewStorageKey) || "null");
+        if (hasSubstantivePersistedData(connectedPreview)) applyPersistedAppData(connectedPreview);
+      } catch (error) {
+        console.warn("The connected preview world could not be restored.", error);
+      }
       const previewWaitlistClass = rosterClasses.find((rosterClass) => (
         rosterClass.id === "rowlett-beginners"
         || enrollmentSchoolNameMatches(rosterClass.schoolName, "Primrose Rowlett")
@@ -28476,6 +28481,22 @@
         previewMadelineClass.day = "Thursday";
         previewMadelineClass.time = "9:45 AM";
         previewMadelineClass.students.unshift(previewMadeline);
+      }
+      const previewElena = {
+        id: "sample-elena",
+        firstName: "Elena Eden",
+        lastName: "Mancol-Bilbo",
+        classroom: "Toddlers A",
+        officialClassroom: "Toddlers A",
+        birthdate: "2023-05-18",
+        status: "enrolled",
+        parentName: "Sample Parent",
+        parentEmail: "sample@dancetechniques.info"
+      };
+      if (!rosterClasses.some((rosterClass) => rosterClass.students?.some((student) => student.id === previewElena.id))) {
+        const previewElenaClass = rosterClasses.find((rosterClass) => String(rosterClass.teacherId) === "lexi" && rosterClass.sourceActive !== false)
+          || rosterClasses.find((rosterClass) => rosterClass.sourceActive !== false);
+        previewElenaClass?.students.unshift(previewElena);
       }
     }
 
