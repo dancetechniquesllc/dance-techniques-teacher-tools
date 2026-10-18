@@ -143,7 +143,7 @@
 
     .switcher {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       padding: 3px;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -15381,12 +15381,17 @@
 
     body[data-mode="teacher"] .admin-shell { display: none; }
     .teacher-desktop-stage { display: none; }
-    body:not([data-tour-mode="true"]) [data-mode-btn="teacher-desktop"] { display: none !important; }
+    .parent-portal-preview-stage { display: none; }
+    body:not([data-tour-mode="true"]) :is([data-mode-btn="teacher-desktop"], [data-mode-btn="parent"]) { display: none !important; }
     body:not([data-tour-mode="true"]) .switcher { grid-template-columns: 1fr 1fr; }
     body[data-mode="teacher-desktop"] .phone-stage,
     body[data-mode="teacher-desktop"] .admin-shell { display: none; }
     body[data-mode="teacher-desktop"] .workspace { grid-template-columns: 1fr; }
     body[data-mode="teacher-desktop"] .teacher-desktop-stage { display: grid; }
+    body[data-mode="parent"] :is(.phone-stage, .teacher-desktop-stage, .admin-shell) { display: none; }
+    body[data-mode="parent"] .workspace { grid-template-columns: 1fr; }
+    body[data-mode="parent"] .parent-portal-preview-stage { display: block; }
+    .parent-portal-preview-stage iframe { display: block; width: 100%; min-height: calc(100vh - 112px); border: 1px solid var(--border); border-radius: 24px; background: #fffaf7; box-shadow: var(--shadow); }
     .teacher-desktop-stage { min-height: calc(100vh - 112px); grid-template-columns: 238px minmax(0, 1fr); overflow: hidden; border: 1px solid var(--border); border-radius: 24px; background: #fffaf7; box-shadow: var(--shadow); }
     .teacher-desktop-sidebar { display: flex; max-height: calc(100vh - 112px); flex-direction: column; gap: 5px; padding: 26px 18px; overflow-y: auto; border-right: 1px solid #efcbc5; background: #f8e4df; }
     .teacher-desktop-brand { margin: 0 10px 24px; }
@@ -16353,6 +16358,7 @@
       <nav class="switcher" aria-label="Prototype mode">
         <button data-mode-btn="teacher">Teacher Tools</button>
         <button data-mode-btn="teacher-desktop">TT Desktop</button>
+        <button data-mode-btn="parent">Parent Portal</button>
         <button class="active" data-mode-btn="admin">Director Dashboard</button>
       </nav>
     </header>
@@ -17335,6 +17341,9 @@
           <section class="teacher-desktop-view" data-teacher-desktop-panel="pay"><header class="teacher-desktop-section-head"><div><h2>My Payday</h2><p>Pay periods, class totals, and available statements.</p></div><button class="teacher-desktop-action" type="button">Download Statement</button></header><div class="teacher-desktop-split"><div class="teacher-desktop-panel"><h3>Current Pay Period</h3><p>September 1–15 · 42 classes completed</p><div class="teacher-desktop-chips"><span>Submitted</span><span>Direct deposit</span></div></div><div class="teacher-desktop-panel"><h3>Latest Pay Stub</h3><p>September 1 · Viewed</p></div></div></section>
           <section class="teacher-desktop-view" data-teacher-desktop-panel="stage"><header class="teacher-desktop-section-head"><div><h2>The Big Stage</h2><p>Lexi’s teacher-specific recital Planning Board.</p></div><button class="teacher-desktop-action" type="button">Preview Stage Sheet</button></header><div class="teacher-desktop-grid"><article class="teacher-desktop-card wide"><h3>Planning Board</h3><p>2 shows · 4 schools · 4 assigned routines</p><span class="status ok">Ready to plan</span></article><article class="teacher-desktop-card"><h3>My Shows</h3><p>Show 3 and Show 4</p></article><article class="teacher-desktop-card"><h3>Stage Sheets</h3><p>Assign dancers, tape marks, props, and reminders.</p></article></div></section>
         </div>
+      </section>
+      <section class="parent-portal-preview-stage" aria-label="Parent Portal preview">
+        <iframe id="parent-portal-preview-frame" title="Parent Portal preview" data-src="parent-portal/?family-preview=elena"></iframe>
       </section>
       <svg width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;overflow:hidden">
         <symbol id="icon-dd-home" viewBox="0 0 32 32"><rect x="5" y="5" width="9" height="9" rx="1"/><rect x="18" y="5" width="9" height="9" rx="1"/><rect x="5" y="18" width="9" height="9" rx="1"/><rect x="18" y="18" width="9" height="9" rx="1"/></symbol>
@@ -24631,7 +24640,7 @@
     document.querySelectorAll("[data-mode-btn]").forEach((button) => {
       button.addEventListener("click", () => {
         const nextMode = button.dataset.modeBtn;
-        if (nextMode === "teacher-desktop" && document.body.dataset.tourMode !== "true") return;
+        if (["teacher-desktop", "parent"].includes(nextMode) && document.body.dataset.tourMode !== "true") return;
         if (nextMode === "admin" && window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
           document.body.dataset.mode = "teacher";
           showToast("Director Dashboard access is limited to directors and administrators");
@@ -24641,13 +24650,17 @@
         runGuardedNavigation(() => {
           if (document.body.dataset.mode === "teacher-desktop" && nextMode !== "teacher-desktop") unmountTeacherDesktopApp();
           const teacherPreviewModes = ["teacher", "teacher-desktop"];
-          const leavingTeacherPreview = document.body.dataset.tourMode === "true" && teacherPreviewModes.includes(document.body.dataset.mode) && nextMode === "admin";
+          const leavingTeacherPreview = document.body.dataset.tourMode === "true" && teacherPreviewModes.includes(document.body.dataset.mode) && !teacherPreviewModes.includes(nextMode);
           if (leavingTeacherPreview && teacherToolsPreviewSnapshot) {
             applyPersistedAppData(JSON.parse(JSON.stringify(teacherToolsPreviewSnapshot)));
             teacherToolsPreviewSnapshot = null;
           }
           document.body.dataset.mode = nextMode;
           if (nextMode === "admin") document.body.dataset.adminPage = "home";
+          if (nextMode === "parent") {
+            const parentPortalFrame = document.getElementById("parent-portal-preview-frame");
+            if (parentPortalFrame && !parentPortalFrame.getAttribute("src")) parentPortalFrame.src = parentPortalFrame.dataset.src;
+          }
           if (teacherPreviewModes.includes(nextMode)) {
             if (document.body.dataset.tourMode === "true") {
               if (!teacherToolsPreviewSnapshot) teacherToolsPreviewSnapshot = JSON.parse(JSON.stringify(appDataPayload()));
