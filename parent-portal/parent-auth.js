@@ -982,6 +982,64 @@
     return { context: { guardian, students: [student] }, scheduleRows: enrichedRows.filter((row) => row.student_id === student.id), classPosts, newsletters, preorderMatched: Boolean(preorderCampaign?.id) };
   };
 
+  const permanentSampleFamilyPreview = () => {
+    const student = {
+      id: "sample-elena",
+      first_name: "Elena Eden",
+      preferred_name: "Elena Eden",
+      last_name: "Mancol-Bilbo",
+      status: "enrolled",
+      photoUrl: ""
+    };
+    return {
+      context: {
+        guardian: {
+          id: "sample-guardian",
+          first_name: "Sample",
+          last_name: "Parent",
+          full_name: "Sample Parent",
+          email: "sample@dancetechniques.info",
+          phone: ""
+        },
+        students: [student]
+      },
+      scheduleRows: [{
+        student_id: student.id,
+        dance_class_id: "sample-class",
+        status: "enrolled",
+        danceClass: {
+          id: "sample-class",
+          name: "Class 5",
+          start_time: "10:00:00",
+          teacher_school_assignment_id: "sample-assignment"
+        },
+        school: {
+          name: "Primrose School of Rowlett",
+          nickname: "Primrose Rowlett",
+          dance_day: 4,
+          time_of_day: "AM"
+        },
+        teacher: {
+          id: "sample-lexi",
+          full_name: "Lexi",
+          color: "#DBA9A1",
+          photo: "assets/people/ms-lexi-profile.png"
+        },
+        teacherState: { teacher: { reschedules: [] } }
+      }],
+      classPosts: [],
+      newsletters: [{
+        id: "sample-newsletter",
+        subject: "Welcome to Dance Techniques",
+        sent_at: "2026-09-01T14:00:00.000Z",
+        read_at: "2026-09-01T14:00:00.000Z",
+        source: "sample",
+        body: "Welcome to your Parent Portal sample family. This permanent preview is safe to explore and does not change a real family account."
+      }],
+      preorderMatched: false
+    };
+  };
+
   const renderParentInvoiceTimeline = (invoiceRows = []) => {
     const upcomingPanel = document.getElementById("parent-scheduled-invoices");
     const historyPanel = document.getElementById("parent-payment-history");
@@ -1332,6 +1390,10 @@
 
   const initialize = async () => {
     const familyPreview = new URLSearchParams(window.location.search).get("family-preview");
+    if (familyPreview === "sample") {
+      renderDirectorElenaPreview(permanentSampleFamilyPreview());
+      return;
+    }
     if (familyPreview === "elena") {
       if (window.supabase?.createClient) {
         client = window.supabase.createClient(projectUrl, publishableKey, {
