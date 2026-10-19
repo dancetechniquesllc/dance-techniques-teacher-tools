@@ -39845,15 +39845,20 @@
       const student = rosterClass?.students.find((item) => item.id === profileButton.dataset.teacherRosterProfile && item.status === "enrolled");
       if (rosterClass && student) openTeacherStudentProfile(rosterClass, student);
     });
-    [
-      ["teacher-dancer-school-filter", "school", "change"],
-      ["teacher-dancer-day-filter", "day", "change"],
-      ["teacher-dancer-gender-filter", "gender", "change"],
-      ["teacher-dancer-search", "search", "input"]
-    ].forEach(([id, key, eventName]) => document.getElementById(id)?.addEventListener(eventName, (event) => {
+    const updateTeacherDancerFilter = (event) => {
+      const filterKeys = {
+        "teacher-dancer-school-filter": "school",
+        "teacher-dancer-day-filter": "day",
+        "teacher-dancer-gender-filter": "gender",
+        "teacher-dancer-search": "search"
+      };
+      const key = filterKeys[event.target?.id];
+      if (!key) return;
       teacherDancerDirectoryFilters[key] = event.target.value || (key === "search" ? "" : "all");
       renderTeacherDancers();
-    }));
+    };
+    document.getElementById("dancers-view")?.addEventListener("input", updateTeacherDancerFilter);
+    document.getElementById("dancers-view")?.addEventListener("change", updateTeacherDancerFilter);
     document.getElementById("teacher-roster-class-cancel")?.addEventListener("click", () => setTeacherRosterOverlay("teacher-roster-class-overlay", false));
     document.addEventListener("click", (event) => {
       const launch = event.target.closest("[data-teacher-class-post]");
