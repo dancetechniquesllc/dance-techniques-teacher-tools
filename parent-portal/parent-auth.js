@@ -1003,6 +1003,28 @@
       status: "enrolled",
       photoUrl: connectedStudent?.photo || ""
     };
+    const savedPreviewPosts = Array.isArray(connectedStudent?.parentPortalPosts) ? connectedStudent.parentPortalPosts : [];
+    const savedShoePostTypes = new Set(savedPreviewPosts
+      .map((post) => String(post?.id || post?.sourcePostId || "").match(/^sample-shoe-(tap|ballet)-/i)?.[1]?.toLowerCase())
+      .filter(Boolean));
+    const restoredShoePosts = ["tap", "ballet"]
+      .filter((shoe) => connectedStudent?.shoeStatus?.[shoe] === "too_small" && !savedShoePostTypes.has(shoe))
+      .map((shoe) => ({
+        id: `sample-shoe-${shoe}-restored`,
+        sourcePostId: `sample-shoe-${shoe}-restored`,
+        title: "Shoe Check Update",
+        caption: `${connectedStudent?.firstName || "Elena Eden"}’s ${shoe} shoes were marked too small. Please send a larger pair for the next dance day.`,
+        imageUrl: `assets/curriculum/${shoe === "tap" ? "tap" : "ballet"}-day.png`,
+        teacherName: connectedTeacher?.displayName || connectedTeacher?.firstName || "Ms. Lexi",
+        teacherColor: connectedTeacher?.color || "#DBA9A1",
+        className: connectedClass?.name || "Dance Class",
+        studentIds: [student.id],
+        publishedAt: connectedPreview?.savedAt || new Date().toISOString()
+      }));
+    const classPosts = [...savedPreviewPosts, ...restoredShoePosts].map((post) => ({
+      ...post,
+      studentIds: Array.isArray(post.studentIds) && post.studentIds.length ? post.studentIds : [student.id]
+    }));
     return {
       context: {
         guardian: {
@@ -1039,7 +1061,7 @@
         },
         teacherState: { teacher: { reschedules: connectedTeacher?.reschedules || [] } }
       }],
-      classPosts: [],
+      classPosts,
       newsletters: [{
         id: "sample-newsletter",
         subject: "Welcome to Dance Techniques",

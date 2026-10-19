@@ -51,6 +51,7 @@
           sampleSaved = read.result || {};
           Object.entries(sampleSaved).forEach(([id, patch]) => updateCopies(id, student => {
             if (patch.shoeStatus) student.shoeStatus = patch.shoeStatus;
+            if (Array.isArray(patch.parentPortalPosts)) student.parentPortalPosts = patch.parentPortalPosts;
             if (typeof patch.officialClassroom === 'string') student.officialClassroom = patch.officialClassroom;
           }));
           renderTeacherRosters();
@@ -182,8 +183,26 @@
           const {error} = await window.dtSupabase.rpc('set_dancer_shoe_status', {target_student:r.student.id, shoe_type:shoe, new_status:next, expected_status:before});
           if (error) throw error;
         }
-        if (tour()) await persistTour([[r.student.id, {shoeStatus:{...r.student.shoeStatus, [shoe]:next}}]]);
-        updateCopies(r.student.id, s => { s.shoeStatus = {...s.shoeStatus, [shoe]:next}; });
+        const previewPosts = Array.isArray(r.student.parentPortalPosts) ? [...r.student.parentPortalPosts] : [];
+        if (tour() && r.student.id === 'sample-elena' && next === 'too_small') {
+          const postId = `sample-shoe-${shoe}-${Date.now()}`;
+          previewPosts.unshift({
+            id: postId,
+            sourcePostId: postId,
+            title: 'Shoe Check Update',
+            caption: `${rosterStudentFirstName(r.student)}’s ${shoe} shoes were marked too small. Please send a larger pair for the next dance day.`,
+            imageUrl: `assets/curriculum/${shoe === 'tap' ? 'tap' : 'ballet'}-day.png`,
+            teacherName: profileTeacher?.displayName || profileTeacher?.firstName || 'Dance Techniques',
+            teacherColor: profileTeacher?.color || '#DBA9A1',
+            className: r.rosterClass?.name || 'Dance Class',
+            studentIds: [r.student.id],
+            publishedAt: new Date().toISOString()
+          });
+        }
+        const patch = {shoeStatus:{...r.student.shoeStatus, [shoe]:next}, parentPortalPosts:previewPosts};
+        if (tour()) await persistTour([[r.student.id, patch]]);
+        updateCopies(r.student.id, s => { s.shoeStatus = patch.shoeStatus; s.parentPortalPosts = previewPosts; });
+        if (tour()) window.dtSaveConnectedPreview?.();
         refreshRosters(); busy = false; render(); say(`${rosterStudentFirstName(r.student)} — ${shoe}: ${label(next)}. Saved.`);
         dialog.querySelector(`[data-student="${CSS.escape(r.student.id)}"][data-shoe="${shoe}"]`)?.focus();
       } catch (error) { console.warn('Roster care save failed', error); busy = false; render(); say(errorText(error)); }

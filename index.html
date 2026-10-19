@@ -24532,6 +24532,7 @@
       scheduleAppDataSave();
       scheduleCloudAppDataSave();
     };
+    window.dtSaveConnectedPreview = saveAppData;
 
     document.addEventListener("click", (event) => {
       if (event.target.closest("[data-open-tt-tasks]")) {
@@ -28484,7 +28485,10 @@
         previewMadelineClass.time = "9:45 AM";
         previewMadelineClass.students.unshift(previewMadeline);
       }
+      const savedPreviewElena = rosterClasses.flatMap((rosterClass) => rosterClass.students || [])
+        .find((student) => student.id === "sample-elena") || {};
       const previewElena = {
+        ...savedPreviewElena,
         id: "sample-elena",
         firstName: "Elena Eden",
         lastName: "Mancol-Bilbo",
