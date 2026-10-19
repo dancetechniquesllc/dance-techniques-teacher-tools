@@ -459,11 +459,11 @@
     .director-teacher-task-card { --teacher-task-color:var(--berry); position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:13px; min-height:98px; padding:18px 52px 18px 16px; border:3px solid var(--teacher-task-color); border-radius:18px; background:#fff; }
     .director-teacher-task-card.is-complete { opacity:.58; }
     .director-teacher-task-card>input { width:22px; height:22px; margin:0; accent-color:var(--teacher-task-color); }
-    .director-teacher-task-name { flex:0 0 auto; color:var(--teacher-task-color); font-size:12px; font-weight:900; }
+    .director-teacher-task-name { position:absolute; top:18px; right:16px; color:var(--teacher-task-color); font-size:12px; font-weight:900; }
     .director-teacher-task-person { display:grid; grid-template-columns:auto minmax(0,1fr); align-items:center; gap:12px; min-width:0; }
     .director-teacher-task-person .roster-student-photo { width:54px; height:54px; font-size:15px; border-color:color-mix(in srgb,var(--teacher-task-color) 55%,white); }
     .director-teacher-task-copy { display:grid; gap:5px; min-width:0; }
-    .director-teacher-task-title-row { display:flex; align-items:baseline; justify-content:space-between; gap:14px; min-width:0; }
+    .director-teacher-task-title-row { display:flex; align-items:baseline; min-width:0; }
     .director-teacher-task-copy strong { min-width:0; overflow:hidden; text-overflow:ellipsis; font-size:14px; white-space:nowrap; }
     .director-teacher-task-copy small { color:#594b4f; font-size:12px; line-height:1.35; }
     .director-teacher-task-notes { display:grid; gap:3px; margin-top:3px; color:var(--teacher-task-color); font-size:10px; font-weight:750; }
