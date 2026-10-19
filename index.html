@@ -3357,6 +3357,7 @@
     .teacher-student-profile-edit-trigger:hover, .teacher-student-profile-edit-trigger:focus-visible { border-color: var(--berry); background: var(--surface-soft); outline: none; }
     .teacher-student-profile .roster-student-photo { width: 86px; height: 86px; font-size: 24px; }
     .teacher-student-profile-photo-editor { position: relative; display: grid; justify-items: center; gap: 5px; cursor: pointer; }
+    .tablet-photo-file-input { position: absolute !important; width: 1px !important; height: 1px !important; margin: 0 !important; padding: 0 !important; opacity: .01; overflow: hidden; pointer-events: none; }
     .teacher-student-profile-photo-editor .roster-student-photo { border: 0; }
     .teacher-student-profile-photo-editor small { color: var(--berry); font-size: 10px; font-weight: 800; }
     .teacher-student-profile h3 { margin: 0; font-family: inherit; }
@@ -19958,7 +19959,7 @@
         <div class="roster-profile-identity">
           <label class="roster-photo-editor" aria-label="Add or change student photo">
             <div class="roster-photo-preview" id="roster-edit-photo-preview">Photo<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></div>
-            <input id="roster-edit-photo" type="file" accept="image/*" hidden>
+            <input class="tablet-photo-file-input" id="roster-edit-photo" type="file" accept="image/*,.heic,.heif">
           </label>
           <div class="roster-profile-name-row">
             <label>First name<input id="roster-edit-first-name" required></label>
@@ -35811,6 +35812,10 @@
     });
 
     let profilePhotoCropState = null;
+    const isSupportedProfilePhotoFile = (file) => Boolean(file && (
+      String(file.type || "").startsWith("image/")
+      || /\.(jpe?g|png|webp|gif|heic|heif)$/i.test(String(file.name || ""))
+    ));
     const profilePhotoCropSize = () => Math.max(160, Math.round(document.getElementById("profile-photo-crop-stage")?.clientWidth || 280));
     const clampProfilePhotoCrop = () => {
       const state = profilePhotoCropState;
@@ -35838,7 +35843,7 @@
       overlay?.setAttribute("aria-hidden", "true");
     };
     const openProfilePhotoCropper = (file) => new Promise((resolve, reject) => {
-      if (!file?.type?.startsWith("image/")) return reject(new Error("Choose an image file."));
+      if (!isSupportedProfilePhotoFile(file)) return reject(new Error("Choose an image file."));
       const reader = new FileReader();
       reader.addEventListener("error", () => reject(new Error("The photo could not be read.")));
       reader.addEventListener("load", () => {
@@ -39348,7 +39353,7 @@
         <label class="teacher-student-profile-photo-editor" aria-label="Add or change photo for ${rosterSafe(rosterStudentFullName(student))}">
           <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
           <small>Take or choose photo</small>
-          <input type="file" accept="image/*" hidden data-teacher-student-photo="${rosterSafe(student.id)}" data-teacher-student-photo-class="${rosterSafe(rosterClass.id)}">
+          <input class="tablet-photo-file-input" type="file" accept="image/*,.heic,.heif" data-teacher-student-photo="${rosterSafe(student.id)}" data-teacher-student-photo-class="${rosterSafe(rosterClass.id)}">
         </label>
         <h3 id="teacher-student-profile-title">${rosterSafe(rosterStudentFullName(student))}</h3>
         ${student.status === "paused" ? `<button class="teacher-student-resume-classes" type="button" data-teacher-resume-student="${rosterSafe(student.id)}" data-teacher-resume-student-class="${rosterSafe(rosterClass.id)}">Resume Classes</button>` : ""}
@@ -40071,7 +40076,7 @@
         const file = photoInput.files?.[0];
         photoInput.value = "";
         if (!rosterClass || !student || !file) return;
-        if (!file.type.startsWith("image/")) {
+        if (!isSupportedProfilePhotoFile(file)) {
           showToast("Choose a photo file");
           return;
         }
@@ -54578,7 +54583,7 @@
     document.getElementById("roster-edit-photo")?.addEventListener("change", (event) => {
       const file = event.target.files?.[0];
       if (!file) return;
-      if (!file.type.startsWith("image/")) return showToast("Choose a photo from the library or camera");
+      if (!isSupportedProfilePhotoFile(file)) return showToast("Choose a photo from the library or camera");
       const reader = new FileReader();
       reader.addEventListener("load", () => {
         const source = String(reader.result || "");
