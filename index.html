@@ -22185,11 +22185,16 @@
       return studentIds.size;
     };
     const saveSchoolClassroomOptions = async (school) => {
-      scheduleAppDataSave();
-      if (document.body.dataset.tourMode === "true") return;
+      if (document.body.dataset.tourMode === "true") { scheduleAppDataSave(); return; }
       if (!window.dtSupabase || !isUuid(school?.id)) throw new Error("School classroom options are unavailable.");
-      const { error } = await window.dtSupabase.from("partner_schools").update({ classroom_options: school.classroomOptions }).eq("id", school.id);
+      let query = window.dtSupabase.from("partner_schools").update({ classroom_options: school.classroomOptions }).eq("id", school.id);
+      if (school.updatedAt) query = query.eq("updated_at", school.updatedAt);
+      const { data, error } = await query.select("id, classroom_options, updated_at").maybeSingle();
       if (error) throw error;
+      if (!data?.id) throw new Error("The classroom list was not saved. Reopen the school to load its latest details, and confirm you have permission to manage classrooms.");
+      school.classroomOptions = data.classroom_options || [];
+      school.updatedAt = data.updated_at || school.updatedAt || "";
+      scheduleAppDataSave();
     };
     const mountOfficialClassroomManagerOverlay = () => {
       const overlay = document.getElementById("enrollment-classroom-manager-overlay");
@@ -35534,11 +35539,8 @@
         if (!school) return;
         school.classroomOptions = [...new Set(classroomOptionsField.value.split("\n").map((value) => value.trim()).filter(Boolean))];
         scheduleAppDataSave();
-        if (document.body.dataset.tourMode !== "true" && window.dtSupabase && isUuid(school.id)) {
-          window.dtSupabase.from("partner_schools").update({ classroom_options: school.classroomOptions }).eq("id", school.id).then(({ error }) => {
-            if (error) showToast("Classroom options could not be saved");
-          });
-        }
+        // Classroom names remain a draft until Save School. Background writes
+        // here invalidate the school's updatedAt guard before the explicit save.
         return;
       }
       const field = event.target.closest("[data-school-library-field]");
@@ -51854,9 +51856,12 @@
       if (!school || !name) { showToast("Enter a classroom name."); return; }
       const options = officialClassroomOptionsFor(item, school);
       if (options.some((value) => value.toLowerCase() === name.toLowerCase())) { showToast("That classroom already exists for this school."); return; }
+      const originalOptions = [...(school.classroomOptions || [])];
+      let classroomSaved = false;
       try {
         school.classroomOptions = [...options, name].sort((left, right) => left.localeCompare(right, undefined, { sensitivity: "base" }));
         await saveSchoolClassroomOptions(school);
+        classroomSaved = true;
         if (item) item.official_classroom = name;
         if (item && document.body.dataset.tourMode !== "true" && window.dtSupabase) {
           const { error } = await window.dtSupabase.from("enrollments").update({ official_classroom: name }).eq("id", item.id);
@@ -51874,7 +51879,8 @@
         }
       } catch (error) {
         console.error("Official classroom add failed", error);
-        showToast("The classroom could not be added.");
+        if (!classroomSaved) school.classroomOptions = originalOptions;
+        showToast(classroomSaved ? "The classroom was added, but the dancer selection could not be saved. Please try selecting it again." : (error.message || "The classroom could not be added."));
       }
     });
 
