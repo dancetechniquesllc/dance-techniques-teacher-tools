@@ -3356,7 +3356,8 @@
     .teacher-student-profile-edit-trigger { position: absolute; top: 0; right: 0; width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 1px solid var(--border); border-radius: 50%; background: var(--surface); color: var(--berry); font-size: 18px; line-height: 1; box-shadow: 0 4px 12px oklch(30% 0.03 20 / .08); }
     .teacher-student-profile-edit-trigger:hover, .teacher-student-profile-edit-trigger:focus-visible { border-color: var(--berry); background: var(--surface-soft); outline: none; }
     .teacher-student-profile .roster-student-photo { width: 86px; height: 86px; font-size: 24px; }
-    .teacher-student-profile-photo-editor { position: relative; display: grid; justify-items: center; gap: 5px; cursor: pointer; }
+    .teacher-student-profile-photo-editor { position: relative; display: grid; justify-items: center; gap: 5px; }
+    .teacher-student-profile-photo-button { display: grid; justify-items: center; gap: 5px; padding: 0; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     .tablet-photo-file-input { position: absolute !important; width: 1px !important; height: 1px !important; margin: 0 !important; padding: 0 !important; opacity: .01; overflow: hidden; pointer-events: none; }
     .teacher-student-profile-photo-editor .roster-student-photo { border: 0; }
     .teacher-student-profile-photo-editor small { color: var(--berry); font-size: 10px; font-weight: 800; }
@@ -39350,11 +39351,13 @@
       const absentCount = attendanceHistory.filter((entry) => entry.status === "absent").length;
       content.innerHTML = `
         <button class="teacher-student-profile-edit-trigger" type="button" data-teacher-edit-student="${rosterSafe(student.id)}" data-teacher-edit-student-class="${rosterSafe(rosterClass.id)}" aria-label="Edit ${rosterSafe(rosterStudentFullName(student))}'s information" title="Edit information">✎</button>
-        <label class="teacher-student-profile-photo-editor" aria-label="Add or change photo for ${rosterSafe(rosterStudentFullName(student))}">
-          <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
-          <small>Take or choose photo</small>
+        <div class="teacher-student-profile-photo-editor">
+          <button class="teacher-student-profile-photo-button" type="button" data-teacher-student-photo-trigger="${rosterSafe(student.id)}" aria-label="Take or choose a photo for ${rosterSafe(rosterStudentFullName(student))}">
+            <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
+            <small>Take or choose photo</small>
+          </button>
           <input class="tablet-photo-file-input" type="file" accept="image/*,.heic,.heif" data-teacher-student-photo="${rosterSafe(student.id)}" data-teacher-student-photo-class="${rosterSafe(rosterClass.id)}">
-        </label>
+        </div>
         <h3 id="teacher-student-profile-title">${rosterSafe(rosterStudentFullName(student))}</h3>
         ${student.status === "paused" ? `<button class="teacher-student-resume-classes" type="button" data-teacher-resume-student="${rosterSafe(student.id)}" data-teacher-resume-student-class="${rosterSafe(rosterClass.id)}">Resume Classes</button>` : ""}
         ${String(student.medicalNotes || "").trim() ? `<p class="teacher-student-medical-alert"><span aria-hidden="true">+</span><span class="teacher-student-medical-alert-copy">${rosterSafe(String(student.medicalNotes).trim())}</span></p>` : ""}
@@ -39965,6 +39968,13 @@
       if (event.target.id === "teacher-student-profile-overlay") setTeacherRosterOverlay("teacher-student-profile-overlay", false);
     });
     document.getElementById("teacher-student-profile-overlay")?.addEventListener("click", async (event) => {
+      const photoTrigger = event.target.closest("[data-teacher-student-photo-trigger]");
+      if (photoTrigger) {
+        event.preventDefault();
+        const input = document.querySelector(`[data-teacher-student-photo="${CSS.escape(photoTrigger.dataset.teacherStudentPhotoTrigger || "")}"]`);
+        input?.click();
+        return;
+      }
       const resumeButton = event.target.closest("[data-teacher-resume-student]");
       if (resumeButton) {
         const rosterClass = teacherRosterClasses().find((item) => String(item.id) === String(resumeButton.dataset.teacherResumeStudentClass));
