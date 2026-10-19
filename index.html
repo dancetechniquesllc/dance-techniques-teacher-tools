@@ -24534,7 +24534,7 @@
       scheduleAppDataSave();
       scheduleCloudAppDataSave();
     };
-    window.dtSaveConnectedPreview = saveAppData;
+    window.dtSaveConnectedPreview = (...args) => saveAppData(...args);
 
     document.addEventListener("click", (event) => {
       if (event.target.closest("[data-open-tt-tasks]")) {
