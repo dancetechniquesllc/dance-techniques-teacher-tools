@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v299-save-planning-workspace";
+const CACHE_NAME = "my-dance-techniques-v300-tablet-layout";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
