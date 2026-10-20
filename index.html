@@ -19797,7 +19797,7 @@
           <small id="teacher-roster-class-time-help">Times are available every 15 minutes.</small>
         </label>
         <label>Capacity
-          <input id="teacher-roster-class-capacity" type="number" min="1" max="99" value="12" required>
+          <input id="teacher-roster-class-capacity" type="number" value="8" readonly aria-readonly="true">
         </label>
       </form>
       <div class="confirm-actions">
@@ -19987,7 +19987,7 @@
             <small id="roster-class-create-time-help">Times are available every 15 minutes.</small>
           </label>
           <label>Capacity
-            <input id="roster-class-create-capacity" type="number" min="1" max="99" value="12" required disabled>
+            <input id="roster-class-create-capacity" type="number" value="8" readonly aria-readonly="true" disabled>
           </label>
         </div>
       </form>
@@ -23306,11 +23306,8 @@
       window.alert(`This dancer can’t be placed yet.\n\nPlease complete: ${missing.join(", ")}.`);
       return true;
     };
-    const isTotsAgeClass = (rosterClass) => {
-      const age=String(rosterClass?.ageGroup||rosterClass?.age_group||"").trim().toLowerCase(),name=String(rosterClass?.name||"").trim().toLowerCase();
-      return ["tots","2s","young 2s","under 3"].includes(age)||/\btots?\b/.test(name);
-    };
-    const classRecommendedCapacity = (rosterClass) => isTotsAgeClass(rosterClass) ? 8 : Number(rosterClass?.capacity || 12);
+    const isTotsAgeClass = (rosterClass) => String(rosterClass?.ageGroup || rosterClass?.age_group || "").trim().toLowerCase() === "tots";
+    const classRecommendedCapacity = (rosterClass) => isTotsAgeClass(rosterClass) ? 8 : 12;
     const showFullClassCelebration = (rosterClass, dancerName) => {
       const overlay = document.getElementById("full-class-celebration-overlay");
       const totsClass = isTotsAgeClass(rosterClass);
@@ -24004,7 +24001,16 @@
       return data.id;
     };
 
+    document.getElementById("teacher-roster-class-age")?.addEventListener("change", (event) => {
+      document.getElementById("teacher-roster-class-capacity").value = String(classRecommendedCapacity({ageGroup:event.target.value}));
+    });
+
+    document.getElementById("roster-class-create-age")?.addEventListener("change", (event) => {
+      document.getElementById("roster-class-create-capacity").value = String(classRecommendedCapacity({ageGroup:event.target.value}));
+    });
+
     const saveSharedClass = async (rosterClass) => {
+      rosterClass.capacity = classRecommendedCapacity({ageGroup:rosterClass.ageGroup || "Tots"});
       if (document.body.dataset.tourMode === "true") return true;
       if (!sharedRosterReady || !window.dtSupabase) return false;
       if (rosterClass.sharedSavePending) return rosterClass.sharedSavePending;
@@ -24017,7 +24023,7 @@
           scheduleAppDataSave();
           return false;
         }
-        const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: rosterClass.capacity || 12, status: "active", helper_history: rosterClass.helperHistory || [], recital_performance:["tap","ballet","either"].includes(String(rosterClass.recitalPerformance||"").toLowerCase())?String(rosterClass.recitalPerformance).toLowerCase():null };
+        const payload = { teacher_school_assignment_id: assignmentId, name: rosterClass.name, age_group: rosterClass.ageGroup || "Tots", level: Number(rosterClass.level || 1), start_time: rosterClass.time || null, classroom: rosterClass.classroom || null, capacity: classRecommendedCapacity({ageGroup: rosterClass.ageGroup || "Tots"}), status: "active", helper_history: rosterClass.helperHistory || [], recital_performance:["tap","ballet","either"].includes(String(rosterClass.recitalPerformance||"").toLowerCase())?String(rosterClass.recitalPerformance).toLowerCase():null };
         let query = oldId?.startsWith("roster-")
           ? window.dtSupabase.from("dance_classes").insert(payload)
           : window.dtSupabase.from("dance_classes").update(payload).eq("id", oldId);
@@ -39470,7 +39476,7 @@
       document.getElementById("teacher-roster-class-level").innerHTML = optionMarkup(classLevelOptions, "1");
       document.getElementById("teacher-roster-class-name").value = "";
       document.getElementById("teacher-roster-class-time").innerHTML = quarterHourOptions("");
-      document.getElementById("teacher-roster-class-capacity").value = "12";
+      document.getElementById("teacher-roster-class-capacity").value = "8";
       setTeacherRosterOverlay("teacher-roster-class-overlay", true);
       window.setTimeout(() => document.getElementById("teacher-roster-class-name")?.focus(), 40);
     };
@@ -40458,7 +40464,7 @@
         teacherId: profileTeacher.id,
         schoolName: school.name,
         day: weekdayNames[school.dayOfWeek] || "To schedule",
-        capacity: Math.max(1, Number(document.getElementById("teacher-roster-class-capacity").value) || 12),
+        capacity: classRecommendedCapacity({ageGroup: document.getElementById("teacher-roster-class-age").value || "Tots"}),
         students: [],
         sourceActive: true
       };
@@ -53887,11 +53893,10 @@
         renderClassesAndRosters();
         return;
       }
-      const wasTotsClass = setting === "ageGroup" && isTotsAgeClass(rosterClass);
       rosterClass[setting] = field.value;
       if (setting === "ageGroup") {
         rosterClass.classroom = field.value;
-        if (!isTotsAgeClass(rosterClass) && Number(rosterClass.capacity) === 8) rosterClass.capacity = 12;
+        rosterClass.capacity = classRecommendedCapacity(rosterClass);
       }
       const { row } = linkedSchoolClassRow(rosterClass);
       if (row) {
@@ -53984,7 +53989,7 @@
       teacherSelect.value = activeTeachers.some((teacher) => teacher.id === preferredTeacherId) ? preferredTeacherId : "";
       document.getElementById("roster-class-create-name").value = "";
       document.getElementById("roster-class-create-time").innerHTML = quarterHourOptions("");
-      document.getElementById("roster-class-create-capacity").value = "12";
+      document.getElementById("roster-class-create-capacity").value = "8";
       updateRosterClassCreateSchools();
       const schoolSelect = document.getElementById("roster-class-create-school");
       const selectedTeacher = activeTeachers.find((teacher) => teacher.id === teacherSelect.value);
@@ -54028,7 +54033,7 @@
         teacherId: teacher.id,
         schoolName: school.name,
         day: weekdayNames[school.dayOfWeek] || "To schedule",
-        capacity: Math.max(1, Number(document.getElementById("roster-class-create-capacity").value) || 12),
+        capacity: classRecommendedCapacity({ageGroup: document.getElementById("roster-class-create-age").value || "Tots"}),
         students: [],
         sourceActive: true
       };
@@ -54944,7 +54949,7 @@
       }
       const targetPreviousCount = rosterEnrolled(targetClass).length;
       const nextStatus = document.getElementById("roster-edit-status").value;
-      if (targetClass.id !== rosterClass.id && nextStatus === "enrolled" && targetPreviousCount >= targetClass.capacity) {
+      if (targetClass.id !== rosterClass.id && nextStatus === "enrolled" && targetPreviousCount >= classRecommendedCapacity(targetClass)) {
         showToast(`${targetClass.name} is at capacity. Choose another class or add a new one.`);
         restoreSaveButton();
         return;
