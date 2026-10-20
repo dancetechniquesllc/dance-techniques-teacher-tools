@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v303-student-photo-refresh";
+const CACHE_NAME = "my-dance-techniques-v304-visible-alert-position";
 const CORE_ASSETS = [
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
