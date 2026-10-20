@@ -8503,6 +8503,7 @@
     .enrollment-future-merge-suggestion .roster-student-photo { grid-row: 1 / span 2; width: 52px; height: 52px; }
     .enrollment-future-merge-suggestion strong, .enrollment-future-merge-suggestion small { display: block; }
     .enrollment-future-merge-suggestion small { color: var(--muted); }
+    .enrollment-future-merge-suggestion button { grid-column: 1 / -1; min-height: 44px; white-space: normal; }
     .enrollment-future-merge-suggestion em { grid-column: 1 / -1; color: var(--berry); font-size: 11px; font-style: normal; font-weight: 800; }
     .enrollment-priority-bubble { display: inline-flex; width: fit-content; align-items: center; margin-top: 3px; padding: 4px 9px; border-radius: 999px; font-size: 11px; font-weight: 800; line-height: 1; }
     .enrollment-priority-bubble.today { background: oklch(91% 0.09 25); color: oklch(43% 0.16 25); }
@@ -22432,37 +22433,45 @@
     const enrollmentPersonMatchKey = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
     const enrollmentMatchEmail = (value) => String(value || "").trim().toLowerCase();
     const enrollmentMatchPhone = (value) => String(value || "").replace(/\D/g, "").slice(-10);
+    const confirmedEnrollmentTrials = new Map();
+    const rejectedEnrollmentTrials = new Map();
+    const enrollmentTrialCandidates = (item) => {
+      const key = enrollmentPersonMatchKey;
+      const firstNames = [item?.student_first_name, item?.student_preferred_name].map(key).filter(Boolean);
+      const lastName = key(item?.student_last_name);
+      if (!firstNames.length || !lastName) return [];
+      const officialSchool = schoolLibrary.find((school) => school.id === item?.matched_partner_school_id);
+      const schoolName = officialSchool?.name || item?.requested_school_name || "";
+      if (!schoolName) return [];
+      return rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false
+        && (enrollmentSchoolNameMatches(rosterClass.schoolName, schoolName)
+          || enrollmentSchoolNameMatches(rosterSchoolNickname(rosterClass.schoolName), schoolName)))
+        .flatMap((rosterClass) => rosterClass.students.filter((student) => student.status === "trial-scheduled"
+          && !student.additionalInformation?.future_dancer_archived).map((student) => {
+          const names = [student.firstName, student.preferredName].map(key).filter(Boolean);
+          const sameLast = lastName === key(student.lastName);
+          const nameMatches = sameLast && firstNames.some((name) => names.includes(name));
+          const similarName = sameLast && firstNames.some((name) => names.some((other) => name[0] === other[0]));
+          const birthday = String(item.student_birth_date || "").slice(0,10);
+          const trialBirthday = String(student.birthdate || "").slice(0,10);
+          const birthdateMatches = Boolean(birthday && birthday === trialBirthday);
+          const birthdayConflict = Boolean(birthday && trialBirthday && birthday !== trialBirthday);
+          const email = enrollmentMatchEmail(item.parent_email);
+          const phone = enrollmentMatchPhone(item.parent_phone);
+          const emailMatches = Boolean(email && email === enrollmentMatchEmail(student.parentEmail));
+          const phoneMatches = phone.length === 10 && phone === enrollmentMatchPhone(student.parentPhone);
+          const identityMatches = birthdateMatches || emailMatches || phoneMatches;
+          const score = (nameMatches ? 5 : 0) + (birthdateMatches ? 4 : 0) + (emailMatches ? 3 : 0) + (phoneMatches ? 3 : 0) + 2;
+          const reasons = [nameMatches ? "same dancer name" : "similar dancer name", "same school", birthdateMatches ? "same birthday" : "", emailMatches ? "same parent email" : "", phoneMatches ? "same parent phone" : "", birthdayConflict ? "different birthdays — check carefully" : ""].filter(Boolean);
+          return {rosterClass, student, score, reasons, reasonable: nameMatches || (similarName && identityMatches), strong: nameMatches && identityMatches && !birthdayConflict};
+        })).filter((candidate) => candidate.reasonable)
+        .sort((left,right) => right.score-left.score || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
+    };
     const futureDancerMatchForEnrollment = (item) => {
-      const enrollmentNames = [
-        [item?.student_first_name, item?.student_last_name].filter(Boolean).join(" "),
-        [item?.student_preferred_name, item?.student_last_name].filter(Boolean).join(" ")
-      ].map(enrollmentPersonMatchKey).filter(Boolean);
-      if (!enrollmentNames.length) return null;
-      const enrollmentEmail = enrollmentMatchEmail(item?.parent_email);
-      const enrollmentPhone = enrollmentMatchPhone(item?.parent_phone);
-      const enrollmentBirthdate = String(item?.student_birth_date || "").slice(0, 10);
-      const candidates = rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false).flatMap((rosterClass) => rosterClass.students
-        .filter((student) => !["enrolled", "paused", "inactive"].includes(student.status) && !student.additionalInformation?.future_dancer_archived)
-        .map((student) => ({ rosterClass, student }))).map(({ rosterClass, student }) => {
-          const futureNames = [
-            rosterStudentFullName(student),
-            [student.firstName, student.lastName].filter(Boolean).join(" "),
-            [student.preferredName, student.lastName].filter(Boolean).join(" ")
-          ].map(enrollmentPersonMatchKey).filter(Boolean);
-          const nameMatches = enrollmentNames.some((name) => futureNames.includes(name));
-          const schoolMatches = !item?.requested_school_name
-            || enrollmentSchoolNameMatches(rosterClass.schoolName, item.requested_school_name)
-            || enrollmentSchoolNameMatches(rosterSchoolNickname(rosterClass.schoolName), item.requested_school_name);
-          const birthdateMatches = Boolean(enrollmentBirthdate && enrollmentBirthdate === String(student.birthdate || "").slice(0, 10));
-          const emailMatches = Boolean(enrollmentEmail && enrollmentEmail === enrollmentMatchEmail(student.parentEmail));
-          const phoneMatches = Boolean(enrollmentPhone && enrollmentPhone === enrollmentMatchPhone(student.parentPhone));
-          const identityMatches = [birthdateMatches, emailMatches, phoneMatches].filter(Boolean).length;
-          const score = (nameMatches ? 5 : 0) + (birthdateMatches ? 4 : 0) + (emailMatches ? 3 : 0) + (phoneMatches ? 3 : 0) + (schoolMatches ? 2 : 0);
-          const reasons = [nameMatches ? "same dancer name" : "", birthdateMatches ? "same birthday" : "", emailMatches ? "same parent email" : "", phoneMatches ? "same parent phone" : "", schoolMatches ? "same school" : ""].filter(Boolean);
-          return { rosterClass, student, score, reasons, strong: nameMatches && identityMatches > 0 && score >= 9 };
-        }).filter((candidate) => candidate.strong)
-        .sort((left, right) => right.score - left.score || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
-      return candidates[0] || null;
+      const candidates = enrollmentTrialCandidates(item).filter((candidate) => !rejectedEnrollmentTrials.get(item?.id)?.has(candidate.student.id));
+      const confirmed = candidates.find((candidate) => candidate.student.id === confirmedEnrollmentTrials.get(item?.id));
+      if (confirmed) return confirmed;
+      return candidates.length === 1 && candidates[0].strong ? candidates[0] : null;
     };
     const rosterStudentRecordByName = (name) => {
       const normalized = String(name || "").trim().toLowerCase();
@@ -22565,7 +22574,7 @@
             ${billingTuition ? `<span class="enrollment-card-billing-bubble tuition" aria-label="Suggested Tuition: ${escapeText(billingTuition)}"><span>Suggested Tuition</span><b>${escapeText(billingTuition)}</b></span>` : `<span class="enrollment-card-billing-bubble tuition" aria-label="Suggested Tuition unavailable"><span>Suggested Tuition</span><b>Unavailable</b></span>`}
           </span>` : ""}
           ${placed ? `<span class="enrollment-stage-bubble">${escapeText(enrollmentWorkflowLabel(item))}</span>` : `<span class="enrollment-priority-bubble ${priorityStyle}">${escapeText(priority.label)}</span>`}
-          ${futureDancerMatch ? `<span class="enrollment-future-match-heart" aria-label="Matches Future Dancer" title="Matches Future Dancer">♥</span>` : ""}
+          ${enrollmentTrialCandidates(item).length ? `<span class="enrollment-future-match-heart" aria-label="Possible trial match" title="Review trial match">♥</span>` : ""}
           </button>
         </div>`;
       }).join("") : `<div class="roster-empty">No enrollments match these filters.</div>`;
@@ -22790,11 +22799,14 @@
             <button class="${item.parent_invited_at ? "primary" : "secondary"}" type="button" data-enrollment-welcome-email ${item.parent_invited_at || enrollmentWelcomeSending.has(item.id) ? "disabled" : ""}>${enrollmentWelcomeSending.has(item.id) ? "Sending… " : item.parent_invited_at ? "✓ " : "○ "}Welcome Email</button>
           </div>` : `
           <section class="enrollment-placement-class-section">
-            ${futureDancerMatch ? `<div class="enrollment-future-merge-suggestion">
-              <span class="roster-student-photo is-prospect-heart">${studentPhotoMarkup(futureDancerMatch.student)}</span>
-              <span><strong>Suggested Merge: ${escapeText(rosterStudentFullName(futureDancerMatch.student))}</strong><small>${escapeText(futureDancerMatch.student.status === "waitlisted" ? "Waitlist" : "Prospective Dancer")} · ${escapeText(rosterSchoolNickname(futureDancerMatch.rosterClass.schoolName))} · ${escapeText(futureDancerMatch.rosterClass.name)}</small></span>
-              <em>${escapeText(futureDancerMatch.reasons.join(" + "))}. Approving this enrollment will merge the records.${futureDancerMatch.student.trialDate ? ` Trial: ${escapeText(new Date(`${futureDancerMatch.student.trialDate}T12:00:00`).toLocaleDateString())}.` : ""}</em>
-            </div>` : ""}
+            ${enrollmentTrialCandidates(item).filter((candidate) => !rejectedEnrollmentTrials.get(item.id)?.has(candidate.student.id)).map((candidate) => `<div class="enrollment-future-merge-suggestion">
+              <span class="roster-student-photo is-prospect-heart">${studentPhotoMarkup(candidate.student)}</span>
+              <span><strong>${futureDancerMatch?.student.id === candidate.student.id ? "Matching Trial" : "Possible Trial Match"}: ${escapeText(rosterStudentFullName(candidate.student))}</strong><small>${escapeText(rosterSchoolNickname(candidate.rosterClass.schoolName))} · ${escapeText(candidate.rosterClass.name)}</small></span>
+              <em>${escapeText(candidate.reasons.join(" + "))}. ${futureDancerMatch?.student.id === candidate.student.id ? "Approval will enroll this existing dancer and keep their trial history." : "Confirm whether this is the same dancer before approval."}</em>
+              <button class="secondary" type="button" data-confirm-enrollment-trial="${escapeText(candidate.student.id)}">${confirmedEnrollmentTrials.get(item.id) === candidate.student.id ? "✓ Trial Confirmed" : "This Is the Same Dancer"}</button>
+              <button class="secondary" type="button" data-reject-enrollment-trial="${escapeText(candidate.student.id)}">Different Dancer</button>
+            </div>`).join("")}
+            ${rejectedEnrollmentTrials.get(item.id)?.size ? `<button class="secondary" type="button" data-reset-enrollment-trials>Review Dismissed Trial Matches</button>` : ""}
             <div class="enrollment-placement-class-grid">
               ${enrollmentClassCards || `<div class="roster-empty">Choose an Official School to see its available classes.</div>`}
             </div>
@@ -23233,7 +23245,7 @@
         .find(({ rosterClass, student }) => rosterClass.id === match.rosterClassId && student.id === match.studentId);
       const placedRecord = rosterClasses.flatMap((rosterClass) => rosterClass.students.map((student) => ({ rosterClass, student })))
         .find(({ student }) => student.id === item.placed_student_id);
-      if (!futureRecord || !placedRecord) return;
+      if (!futureRecord || !placedRecord || futureRecord.student.id === placedRecord.student.id) return;
       if (match.trialDate) placedRecord.student.trialDate = match.trialDate;
       const trialOccurred = Boolean(futureRecord.student.additionalInformation?.trial_completed || futureRecord.student.additionalInformation?.trial_completed_at);
       const trialCountsAsReceivedClass = trialOccurred && trialFallsWithinEnrollmentWindow(match.trialDate, item.submitted_at || item.created_at || item.placed_at);
@@ -23377,6 +23389,10 @@
       if (!item) return window.alert("Open an Enrollment Card before placing a dancer.");
       if (explainBlockedEnrollmentPlacement(item)) return;
       const futureMatch = futureDancerMatchForEnrollment(item);
+      if (enrollmentTrialCandidates(item).some((candidate) => !rejectedEnrollmentTrials.get(item.id)?.has(candidate.student.id)) && !futureMatch) {
+        showToast("A possible trial match needs review. Confirm the matching trial before placing this dancer.");
+        return;
+      }
       const futureMatchSnapshot = futureMatch ? {
         rosterClassId: futureMatch.rosterClass.id,
         studentId: futureMatch.student.id,
@@ -23389,14 +23405,15 @@
           const targetClass = rosterClasses.find((rosterClass) => rosterClass.id === item.matched_dance_class_id) || futureMatch.rosterClass;
           const enrolledStudent = {
             ...JSON.parse(JSON.stringify(futureMatch.student)),
-            id: `tour-enrolled-${Date.now()}`,
-            enrollmentId: `tour-class-enrollment-${Date.now()}`,
+            id: futureMatch.student.id,
+            enrollmentId: futureMatch.student.enrollmentId,
             firstName: item.student_first_name || futureMatch.student.firstName,
             preferredName: item.student_preferred_name || futureMatch.student.preferredName || "",
             lastName: item.student_last_name || futureMatch.student.lastName,
             status: "enrolled",
             trialDate: futureMatch.student.trialDate || ""
           };
+          futureMatch.rosterClass.students.splice(futureMatch.rosterClass.students.indexOf(futureMatch.student), 1);
           targetClass.students.push(enrolledStudent);
           item.placed_student_id = enrolledStudent.id;
           await transferFutureDancerEnrollment(item, futureMatchSnapshot);
@@ -23411,7 +23428,9 @@
         target_enrollment_id: item.id,
         target_partner_school_id: item.matched_partner_school_id,
         target_teacher_id: item.matched_teacher_id,
-        target_dance_class_id: item.matched_dance_class_id
+        target_dance_class_id: item.matched_dance_class_id,
+        target_trial_student_id: futureMatch?.student.id || null,
+        rejected_trial_student_ids: [...(rejectedEnrollmentTrials.get(item.id) || [])]
       });
       if (error) {
         console.error("Enrollment placement failed", error);
@@ -51857,6 +51876,32 @@
     });
 
     document.getElementById("enrollment-review-overlay")?.addEventListener("click", (event) => {
+      if (event.target.closest("[data-reset-enrollment-trials]")) {
+        rejectedEnrollmentTrials.delete(selectedEnrollmentIntakeId);
+        renderEnrollmentQueue();
+        return;
+      }
+      const rejectTrial = event.target.closest("[data-reject-enrollment-trial]");
+      if (rejectTrial) {
+        const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
+        if (!item) return;
+        const rejected = rejectedEnrollmentTrials.get(item.id) || new Set();
+        rejected.add(rejectTrial.dataset.rejectEnrollmentTrial);
+        rejectedEnrollmentTrials.set(item.id,rejected);
+        if (confirmedEnrollmentTrials.get(item.id) === rejectTrial.dataset.rejectEnrollmentTrial) confirmedEnrollmentTrials.delete(item.id);
+        renderEnrollmentQueue();
+        return;
+      }
+
+      const confirmTrial = event.target.closest("[data-confirm-enrollment-trial]");
+      if (confirmTrial) {
+        const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
+        if (!item || !enrollmentTrialCandidates(item).some((candidate) => candidate.student.id === confirmTrial.dataset.confirmEnrollmentTrial)) return;
+        confirmedEnrollmentTrials.set(item.id, confirmTrial.dataset.confirmEnrollmentTrial);
+        renderEnrollmentQueue();
+        return;
+      }
+
       if (event.target.id !== "enrollment-review-overlay") return;
       const item = enrollmentIntakeQueue.find((entry) => entry.id === selectedEnrollmentIntakeId);
       if (item) item.editing_enrollment = false;
