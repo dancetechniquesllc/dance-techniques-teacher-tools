@@ -22032,6 +22032,26 @@
       return 55;
     };
 
+    const enrollmentMatchedTrialDate = (item) => {
+      const matched = futureDancerMatchForEnrollment(item)?.student;
+      const savedId = item.additional_information?.trial_match_review?.matched_trial_student_id;
+      const student = matched || (savedId ? rosterClasses.flatMap((entry) => entry.students || []).find((entry) => entry.id === savedId) : null);
+      const id = student?.id || savedId;
+      if (!id) return "";
+      const info = student?.additionalInformation || {};
+      const explicitDate = student?.trialDate || info.trial_received_class_date || info.original_trial_date;
+      if (explicitDate) return String(explicitDate).slice(0, 10);
+      // A reused prospect can have completed attendance even without trial_date.
+      const enrolled = new Date(item.submitted_at || item.created_at || Date.now());
+      if (Number.isNaN(enrolled.valueOf())) return "";
+      const lastDay = isoDate(enrolled);
+      return rosterClasses.flatMap((entry) => Object.entries(entry.attendance || {}).filter(([date, records]) => {
+        const record = records?.[id];
+        return date <= lastDay && record && typeof record === "object"
+          && ["present", "tardy"].includes(record.status) && Boolean(record.checkOutAt);
+      }).map(([date]) => date)).sort().at(-1) || String(info.trial_completed_at || "").slice(0, 10);
+    };
+
     const suggestedEnrollmentTuition = (item, suggestion) => {
       const discountType = effectiveEnrollmentTuitionType(item, suggestion);
       const discounted = ["sibling", "staff", "director"].includes(discountType);
@@ -22056,10 +22076,8 @@
       const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
       const danceDayIndex = dayNames.indexOf(rosterClass?.day) >= 0 ? dayNames.indexOf(rosterClass.day) : Number(school?.dayOfWeek);
       let classDates = [];
-      const exactSchedule = typeof lexiSchedule === "undefined" ? null : lexiSchedule.find((entry) => enrollmentSchoolNameMatches(entry.school, rosterClass?.schoolName || item.requested_school_name));
-      if (exactSchedule?.events?.length) {
-        classDates = exactSchedule.events.map((event) => new Date(`${event[2]}T12:00:00`)).filter((date) => date.getFullYear() === start.getFullYear() && date.getMonth() === start.getMonth() && date >= new Date(start.getFullYear(), start.getMonth(), start.getDate()));
-      } else if (danceDayIndex >= 0 && danceDayIndex <= 6) {
+      // Use the current weekly class assignment, not the sample curriculum dates.
+      if (danceDayIndex >= 0 && danceDayIndex <= 6) {
         const cursor = new Date(start.getFullYear(), start.getMonth(), start.getDate(), 12);
         const month = cursor.getMonth();
         while (cursor.getMonth() === month) {
@@ -22079,10 +22097,7 @@
       }
       // A confirmed prospect trial is a received class in this billing month.
       // Keep the persisted match after placement, when it is no longer a trial candidate.
-      const matchedTrial = futureDancerMatchForEnrollment(item)?.student;
-      const savedTrialId = item.additional_information?.trial_match_review?.matched_trial_student_id;
-      const savedTrial = savedTrialId ? rosterClasses.flatMap((entry) => entry.students || []).find((student) => student.id === savedTrialId) : null;
-      const trialDate = String(matchedTrial?.trialDate || savedTrial?.trialDate || "").slice(0, 10);
+      const trialDate = enrollmentMatchedTrialDate(item);
       const trial = /^\d{4}-\d{2}-\d{2}$/.test(trialDate) ? new Date(`${trialDate}T12:00:00`) : null;
       const includedTrialDate = trial && isoDate(trial) === trialDate
         && trial.getFullYear() === start.getFullYear() && trial.getMonth() === start.getMonth()

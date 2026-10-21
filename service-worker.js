@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v314-brick-absence-overlay";
+const CACHE_NAME = "my-dance-techniques-v315-june-trial-tuition";
 const CORE_ASSETS = [
   "./attendance-storage.js?v=student-storage-20261020",
   "./attendance-preview.js?v=attendance-workflows-20261020",
