@@ -3338,6 +3338,7 @@
       text-shadow: 0 1px 2px oklch(35% 0.06 10 / .3);
     }
     .teacher-roster-selection-check.is-safe { background: rgb(118 118 118 / .78); text-shadow: none; }
+    .teacher-roster-student-tile.is-tardy .teacher-roster-selection-check:not(.aw-absence-x) { background: color-mix(in oklch, var(--gold) 78%, transparent); text-shadow: none; }
     .teacher-roster-check { position: absolute; right: -2px; top: -2px; width: 22px; height: 22px; display: grid; place-items: center; border: 2px solid white; border-radius: 50%; background: oklch(72% 0.12 145); color: white; font-size: 12px; font-weight: 900; }
     .teacher-roster-check.is-tardy { background: oklch(76% 0.14 86); color: oklch(30% 0.065 75); }
     .teacher-roster-check.is-absent { background: var(--berry); color: white; }
@@ -38752,7 +38753,7 @@
                   <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${studentPhotoMarkup(student)}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
                   ${teacherRosterTaskOverlayMarkup(student)}
                   ${pending ? `<span class="teacher-roster-selection-check ${checkOutActive ? "is-safe" : ""}" aria-hidden="true">✓</span>` : ""}
-                  ${!pending && !(window.DTAttendancePreview?.enabled && (kitDeliveryActive || boutiqueDeliveryActive)) && checkedIn && (checkInSubmitted || checkOutActive || checkedOut) ? `<span class="teacher-roster-selection-check ${checkedOut ? "is-safe" : ""}" aria-label="${checkedOut ? "Safely returned to classroom" : "Checked in"}" title="${checkedOut ? "Safely returned to classroom" : "Checked in"}">✓</span>` : ""}
+                  ${!pending && !(window.DTAttendancePreview?.enabled && (kitDeliveryActive || boutiqueDeliveryActive)) && checkedIn && (checkInSubmitted || checkOutActive || checkedOut) ? `<span class="teacher-roster-selection-check ${checkedOut ? "is-safe" : ""}" aria-label="${status === "tardy" ? "Tardy · " : ""}${checkedOut ? "Safely returned to classroom" : "Checked in"}" title="${checkedOut ? "Safely returned to classroom" : "Checked in"}">✓</span>` : ""}
                   ${!pending && !checkedIn && !(kitDeliveryActive || boutiqueDeliveryActive) && (knownAbsence || (attendanceFinalized && status === "absent")) ? `<span class="teacher-roster-selection-check aw-absence-x" aria-label="Absent" title="Absent">×</span>` : ""}
                 </button>
                 <strong class="${weeklyHelperId === student.id ? "teacher-helper-name" : ""}">${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
