@@ -68,7 +68,7 @@
   button.onclick=()=>{editing=person;document.getElementById('director-presence-title').textContent=names[person]+"’s availability";dialog.querySelectorAll('[data-availability]').forEach(b=>b.setAttribute('aria-pressed',String(rows[person]?.status===b.dataset.availability)));note(tour()?'Preview · Updates other preview tabs':'Choose your availability');dialog.showModal();void refresh();};
   bottom.append(button);
  }
- bottom.append(actions.querySelector('#auth-sign-out'));actions.classList.add('director-corner');actions.prepend(top,middle);actions.append(dialog);
+ bottom.append(actions.querySelector('#auth-sign-out'));actions.classList.add('director-corner');actions.prepend(top,middle);document.body.append(dialog);
  const footer=document.createElement('div');footer.className='director-corner director-corner-footer';footer.append(bottom);document.getElementById('session-strip').append(footer);
  const refresh=async()=>{
   if(busy)return;
@@ -77,7 +77,7 @@
    if(tour()){rows=await sampleStore();}
    else{
     const id=window.dtCurrentProfile?.id;if(!id||!['admin','director'].includes(window.dtCurrentProfile?.role))return;
-    const {data,error}=await window.dtSupabase.from('director_availability').select('person,status,revision,updated_at').eq('account_id',id);
+    const {data,error}=await window.dtSupabase.from('director_availability').select('person,status,revision,updated_at').order('updated_at',{ascending:true}).order('account_id',{ascending:true});
     if(error)throw error;if(current!==request)return;rows=Object.fromEntries((data||[]).map(r=>[r.person,r]));
    }
    unavailable=false;render();
@@ -114,7 +114,7 @@
   render();void refreshPortraits().catch(()=>{});
   if(!tour()&&window.dtSupabase&&window.dtCurrentProfile?.id!==profileId){
    if(channel)await window.dtSupabase.removeChannel(channel);profileId=window.dtCurrentProfile?.id||'';
-   if(profileId)channel=window.dtSupabase.channel('director-availability-'+profileId).on('postgres_changes',{event:'*',schema:'public',table:'director_availability',filter:'account_id=eq.'+profileId},refresh).subscribe();
+   if(profileId)channel=window.dtSupabase.channel('director-availability-'+profileId).on('postgres_changes',{event:'*',schema:'public',table:'director_availability'},refresh).subscribe();
   }
   await refresh();
   window.dtRenderBoutiqueCorner?.();

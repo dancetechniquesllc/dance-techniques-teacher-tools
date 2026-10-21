@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v308-trial-missing-surname";
+const CACHE_NAME = "my-dance-techniques-v309-shared-director-status";
 const CORE_ASSETS = [
   "./attendance-storage.js?v=student-storage-20261020",
   "./attendance-preview.js?v=attendance-workflows-20261020",
@@ -11,7 +11,7 @@ const CORE_ASSETS = [
   "./enrollment-tuition-confirmation.js",
   "./vendor/pdf-lib-1.17.1.min.js",
   "./assets/director-open-shape-magic.png",
-  "./director-corner.js?v=20260908",
+  "./director-corner.js?v=20261020-shared-status",
   "./director-corner.css?v=20260908",
   "./director-duet.js?v=20260918",
   "./director-task-sync.js?v=20260908",
