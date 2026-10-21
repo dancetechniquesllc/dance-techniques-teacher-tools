@@ -22077,9 +22077,20 @@
         const includedDate = new Date(item.provisional_included_at);
         if (includedDate.getFullYear() === start.getFullYear() && includedDate.getMonth() === start.getMonth() && !classDates.some((date) => isoDate(date) === isoDate(includedDate))) classDates.push(includedDate);
       }
+      // A confirmed prospect trial is a received class in this billing month.
+      // Keep the persisted match after placement, when it is no longer a trial candidate.
+      const matchedTrial = futureDancerMatchForEnrollment(item)?.student;
+      const savedTrialId = item.additional_information?.trial_match_review?.matched_trial_student_id;
+      const savedTrial = savedTrialId ? rosterClasses.flatMap((entry) => entry.students || []).find((student) => student.id === savedTrialId) : null;
+      const trialDate = String(matchedTrial?.trialDate || savedTrial?.trialDate || "").slice(0, 10);
+      const trial = /^\d{4}-\d{2}-\d{2}$/.test(trialDate) ? new Date(`${trialDate}T12:00:00`) : null;
+      const includedTrialDate = trial && isoDate(trial) === trialDate
+        && trial.getFullYear() === start.getFullYear() && trial.getMonth() === start.getMonth()
+        && trial <= new Date(start.getFullYear(), start.getMonth(), start.getDate(), 12) ? trialDate : "";
+      if (includedTrialDate && !classDates.some((date) => isoDate(date) === includedTrialDate)) classDates.push(trial);
       const classCount = classDates.length;
       const percentage = Math.min(1, classCount / 4);
-      return { classCount, amount: Number((monthlyTuition * percentage).toFixed(2)), monthlyTuition, discounted, nextMonth: classCount === 0 };
+      return { classCount, amount: Number((monthlyTuition * percentage).toFixed(2)), monthlyTuition, discounted, nextMonth: classCount === 0, includedTrialDate };
     };
     const enrollmentSuggestedTuitionLabel = (tuition) => {
       if (!tuition || !Number.isFinite(tuition.amount) || !Number.isFinite(tuition.monthlyTuition)) return "";
@@ -22790,7 +22801,7 @@
             <div class="enrollment-editor-finance">
               <label class="enrollment-review-field ${item.payment_status === "paid" ? "" : "fee-unpaid"}"><span>Enrollment Fee Status</span><select name="payment_status"><option value="unpaid" ${item.payment_status !== "paid" ? "selected" : ""}>Unpaid</option><option value="paid" ${item.payment_status === "paid" ? "selected" : ""}>Paid</option></select></label>
               <label class="enrollment-review-field"><span>Tuition Circumstances</span><select name="tuition_discount"><option value="none" ${effectiveEnrollmentTuitionType(item, suggestion) === "none" ? "selected" : ""}>None</option><option value="meadow_oaks" ${effectiveEnrollmentTuitionType(item, suggestion) === "meadow_oaks" ? "selected" : ""}>Meadow Oaks Rate — $65</option><option value="sibling" ${effectiveEnrollmentTuitionType(item, suggestion) === "sibling" ? "selected" : ""}>Sibling</option><option value="staff" ${effectiveEnrollmentTuitionType(item, suggestion) === "staff" ? "selected" : ""}>Staff</option><option value="director" ${effectiveEnrollmentTuitionType(item, suggestion) === "director" ? "selected" : ""}>Director</option></select></label>
-              <div class="enrollment-review-field suggested"><span>Suggested Tuition</span><strong>${tuition.beforeSeason ? `$${tuition.amount.toFixed(2)} · Full Tuition` : tuition.nextMonth ? `$${tuition.monthlyTuition.toFixed(2)} Next Month` : `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`}</strong><small>${tuition.beforeSeason ? `Season starts ${new Date(`${tuition.seasonStartDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric" })}.` : tuition.nextMonth ? "No remaining classes this month." : `${tuition.classCount} remaining ${tuition.classCount === 1 ? "class" : "classes"}.`}</small></div>
+              <div class="enrollment-review-field suggested"><span>Suggested Tuition</span><strong>${tuition.beforeSeason ? `$${tuition.amount.toFixed(2)} · Full Tuition` : tuition.nextMonth ? `$${tuition.monthlyTuition.toFixed(2)} Next Month` : `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`}</strong><small>${tuition.beforeSeason ? `Season starts ${new Date(`${tuition.seasonStartDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric" })}.` : tuition.nextMonth ? "No remaining classes this month." : `${tuition.classCount} ${tuition.classCount === 1 ? "class" : "classes"}${tuition.includedTrialDate ? `, including trial ${new Date(`${tuition.includedTrialDate}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : " remaining"}.`}</small></div>
             </div>
             <div class="enrollment-editor-admin-grid">
               <div class="enrollment-editor-fields">${renderAdditionalInformationFields(item.additional_information, "data-enrollment-additional-information")}</div>
