@@ -1,0 +1,88 @@
+.aw-preview-banner{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;background:#f8e9d4;padding:10px 16px;border:1px solid #dfc39a;border-radius:12px;margin:8px 0;color:#5e173b}.aw-preview-banner span{font-size:12px}.aw-preview-banner button,.aw-panel button,.aw-history button{cursor:pointer;min-height:44px;font:inherit}.aw-preview-banner button{border:1px solid #d8a79e;border-radius:9px;background:#fffaf7;padding:8px 12px}.aw-panel{width:min(1000px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;border-radius:22px;background:#fffaf7;border:1px solid #e8bdb8;padding:24px;box-shadow:0 18px 65px #371c2340;color:#261b20}.aw-panel>header{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px solid #edd3ce;padding-bottom:14px;margin-bottom:18px}.aw-panel h2{margin:3px 0;color:#681139;font-size:25px}.aw-panel h3{color:#681139;margin:14px 0}.aw-panel header small{font-size:11px;color:#795359}.aw-close{border:1px solid #d9aaa2;background:#edc9c0;border-radius:50%;width:44px;flex-shrink:0;font-size:26px!important}.aw-panel label{display:grid;gap:6px;font-weight:700}.aw-panel select,.aw-panel input:not([type=checkbox]),.aw-panel textarea,.aw-history select{font:inherit;border:1px solid #dcaea7;background:white;border-radius:9px;padding:10px;min-height:44px;max-width:100%;box-sizing:border-box}.aw-panel textarea{min-height:100px;resize:vertical}.aw-panel form{display:grid;gap:18px}.aw-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0;position:sticky;top:0;background:#fffaf7;z-index:1;padding:8px 0}.aw-actions button{padding:10px 16px}.aw-class-list{display:grid;gap:10px;margin:18px 0}.aw-class-list label{display:flex;align-items:center;border:1px solid #e8c5bd;border-radius:12px;padding:14px;gap:14px;background:white}.aw-class-list input{width:24px;height:24px;accent-color:#8c4055}.aw-class-list small,.aw-known-list small,.aw-review-row small{display:block;font-size:12px;font-weight:500;margin-top:4px}.aw-progress{font-size:13px;color:#795359}.aw-room{margin:22px 0;border-top:1px solid #ecd6d1;padding-top:6px}.aw-dancer-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.aw-dancer{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;border:1px solid #e5b9b1;border-radius:14px;background:#fff;padding:14px 8px;text-align:center;min-height:154px}.aw-dancer strong{font-size:14px}.aw-dancer small{font-size:11px}.aw-dancer>span:last-child{font-size:11px}.aw-dancer .roster-student-photo{width:54px;height:54px;flex-shrink:0}.aw-dancer.is-selected{border:3px solid #839a76;background:#edf1e6;padding:12px 6px}.aw-dancer.is-done{opacity:.43;background:#e8e7e1}.aw-dancer[disabled]{cursor:default}.aw-known{color:#8d3d47;background:#f4dfd7;border-radius:12px;padding:3px 8px;font-weight:750}.aw-review-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:14px;border:1px solid #e6beb5;border-radius:12px;margin:10px 0;background:white}.aw-review-row select{min-width:150px}.aw-message{padding:12px;border-radius:10px;background:#f6e7c7;color:#653c24;font-size:14px}.aw-history-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.aw-history-heading h4{font-size:18px;margin:16px 0}.aw-pencil{width:44px;border:1px solid #dfb4aa;background:#fff7f0;border-radius:50%;font-size:22px!important;flex-shrink:0}.aw-history-toolbar{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin:10px 0 16px}.aw-history-entry{display:grid;grid-template-columns:1fr auto;gap:14px;border:1px solid #ebc6be;border-radius:14px;padding:18px;margin:12px 0;background:#fff8f3}.aw-history-entry>div{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.aw-history-entry small:last-child{text-align:right}.aw-pill{display:inline-flex;border-radius:22px;padding:6px 13px;font-size:12px;font-weight:800;color:#34362b;align-items:center;white-space:nowrap}.aw-pill.is-present{background:#cbd8bf;color:#35482f}.aw-pill.is-tardy{background:#f1d78f;color:#665018}.aw-pill.is-absent{background:#b5645b;color:white}.aw-known-list article{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px;background:#f6e8d5;border-radius:12px;margin:10px 0;flex-wrap:wrap}.aw-known-today{padding:12px;border:1px solid #d6b695;border-radius:12px;background:#f8ebd8;margin:10px 0;display:grid;gap:5px;font-size:12px}.aw-history select{min-width:120px}.teacher-roster-management-row:has(#aw-combine-classes){grid-template-columns:repeat(3,minmax(0,1fr))}#aw-overlay{z-index:2000}#teacher-checkout-review-overlay{z-index:2100}@media(max-width:700px){.aw-dancer-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.aw-panel{padding:16px}.aw-panel h2{font-size:21px}.aw-history-entry{padding:14px}.aw-history-entry>strong{font-size:12px}.aw-panel>header{gap:8px}}@media(max-width:430px){.aw-dancer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.aw-history-entry{grid-template-columns:1fr}.aw-history-entry small:last-child{text-align:left}.aw-actions button{flex:1}.aw-preview-banner{justify-content:flex-start}.aw-panel{width:calc(100vw - 20px);max-height:calc(100dvh - 20px);padding:14px}.aw-review-row select{width:100%}.teacher-roster-management-row:has(#aw-combine-classes){grid-template-columns:1fr}.aw-class-list label{padding:12px}.aw-history-toolbar button{flex:1}}
+
+/* Match the circle-sized attendance cues in normal TT check-in. */
+.aw-dancer .aw-avatar{position:relative;display:grid;place-items:center;width:64px;height:64px;flex-shrink:0;border-radius:50%;overflow:hidden}
+.aw-dancer .aw-avatar>.roster-student-photo{width:64px;height:64px;margin:0}
+.aw-circle-overlay{position:absolute;inset:0;display:grid;place-items:center;border-radius:50%;color:white;font-size:36px;font-weight:900;line-height:1;text-shadow:0 1px 2px #692d4a44;background:color-mix(in oklch,var(--blush) 88%,transparent)}
+.aw-avatar.is-absent .roster-student-photo{filter:grayscale(1);opacity:.5}
+.aw-avatar.is-absent .aw-circle-overlay{background:rgb(140 140 140 / .88);text-shadow:none;font-size:42px}
+.aw-avatar.is-finished .aw-circle-overlay{background:rgb(118 118 118 / .84);text-shadow:none}
+
+/* Combined attendance uses TT's existing classroom / three-column circle roster. */
+.aw-panel .teacher-roster-classroom{margin-top:14px}
+.aw-panel .teacher-roster-classroom h4{font-family:inherit;font-size:15px;font-weight:700;color:inherit}
+.aw-panel .teacher-roster-student-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px}
+.aw-panel .teacher-roster-profile-button{min-height:62px;width:62px;height:62px;padding:0}
+.aw-panel .teacher-roster-profile-button .roster-student-photo{width:58px;height:58px}
+.aw-panel .teacher-roster-selection-check.aw-absence-x{background:rgb(140 140 140 / .92);font-size:34px;text-shadow:none}
+.aw-panel .aw-is-complete{opacity:.56}
+.aw-panel .aw-known-caption{font-size:10px;color:var(--muted)}
+
+.aw-exclusion-class{border:1px solid #e8c5bd;border-radius:12px;background:white;overflow:hidden}
+.aw-exclusion-row{display:flex;align-items:center;gap:4px}
+.aw-class-list .aw-exclusion-row>label{border:0;border-radius:0;flex:1;min-width:0;margin:0}
+.aw-class-expand{display:grid;place-items:center;width:44px;height:44px;padding:8px;margin-right:8px;flex-shrink:0;border:0;background:transparent;color:var(--berry);border-radius:50%}
+.aw-class-expand svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.aw-class-expand[aria-expanded=true] svg{transform:rotate(90deg)}
+.aw-class-roster{padding:16px 10px;border-top:1px solid #ecd6d1;background:#fffaf7}
+.aw-class-roster[hidden]{display:none}
+.aw-class-roster .roster-student-photo{width:58px;height:58px}
+.aw-class-roster small{font-size:10px;color:var(--muted);max-width:100%;overflow-wrap:anywhere}
+
+.aw-exclude-bubble{display:inline-block;padding:5px 12px;border-radius:999px;background:#dfada4;color:#64113c;font-size:.85em;vertical-align:middle}.aw-school-name{font-weight:700;color:#64113c;margin-bottom:8px}.aw-setup-hint{font-size:.85em;color:#6c605d}
+
+.aw-excluded-badge{display:inline-block;margin-left:7px;padding:3px 8px;border-radius:999px;background:#dfada4;color:#64113c;font-size:12px;font-weight:700}.aw-excluded-badge[hidden]{display:none}
+
+.aw-excluded-badge.is-combined{background:#dce7d5;color:#34472e}.aw-excluded-badge.is-excluded{background:#dfada4;color:#64113c}
+
+.aw-class-summary{flex:1;min-width:0;padding:12px}.aw-class-summary>strong,.aw-class-summary>small{display:block}.aw-class-summary>small{font-size:12px;color:#76635f;margin:3px 0 9px}.aw-class-toggle{display:inline-flex;border:1px solid #e1ccc6;border-radius:999px;padding:3px;gap:3px;background:#faf6f3}.aw-class-toggle button{min-height:42px;min-width:96px;padding:8px 14px;border:0;border-radius:999px;background:transparent;color:#756d68;font-weight:700}.aw-class-toggle button[data-mode="combine"][aria-pressed="true"]{background:#dce7d5;color:#34472e}.aw-class-toggle button[data-mode="exclude"][aria-pressed="true"]{background:#dfada4;color:#64113c}
+
+.aw-setup-notes{padding-left:20px;margin:12px 0 18px;color:#625753;font-size:14px;line-height:1.45}.aw-setup-notes li{font-weight:400;margin:6px 0}.aw-exclusion-row{align-items:flex-start;position:relative;min-height:98px}.aw-class-summary{padding-right:184px}.aw-class-summary>.aw-class-toggle{position:absolute;top:10px;right:10px}.aw-class-toggle button{min-width:76px;padding:8px 10px}.aw-exclusion-row>.aw-class-expand{position:absolute;right:10px;bottom:3px}.aw-class-summary>small{margin-top:6px}
+
+.aw-exclusion-row{min-height:86px}.aw-class-summary{padding-bottom:38px}.aw-class-summary>.aw-class-toggle{top:8px}.aw-class-toggle button{min-height:32px;padding:4px 10px}.aw-class-summary>small{position:absolute;left:12px;right:52px;bottom:14px;margin:0;line-height:18px}.aw-exclusion-row>.aw-class-expand{bottom:3px;min-height:40px;height:40px}
+
+.aw-progress{font-size:22px;font-weight:750;color:#64113c;line-height:1.3;margin:18px 0}.aw-actions .aw-complete-day{flex-basis:100%;width:100%;line-height:1.35}@media(min-width:700px){#aw-overlay .teacher-roster-student-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+.aw-day-completion{flex-basis:100%;width:100%;display:flex;justify-content:flex-end}.aw-actions .aw-complete-day{flex:0 0 auto;width:auto;min-width:142px;min-height:44px;padding:8px 16px;font-size:14px;line-height:1.2;background:var(--brick);border-color:var(--brick);color:white}
+
+.aw-day-completion{flex:0 0 auto;width:auto;display:contents}.aw-actions:has(.aw-day-completion){display:flex;flex-wrap:nowrap;align-items:stretch;justify-content:space-between;gap:10px}.aw-actions:has(.aw-day-completion)>button,.aw-actions .aw-complete-day{min-width:0;flex:1 1 0;padding:10px 14px;line-height:1.25}
+
+#aw-overlay [data-aw="choose-count"]{background:var(--blush,#dfada4);border-color:var(--blush,#dfada4);color:#64113c}#aw-overlay [data-aw="resume-day"]{background:var(--sage,#b5c0aa);border-color:var(--sage,#b5c0aa);color:#34472e}
+
+body.aw-workflows .teacher-roster-class-actions{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+.aw-delivery-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;margin:18px 0}.aw-delivery-choices button{display:flex;flex-direction:column;align-items:center;gap:10px;background:transparent;border:0;padding:8px;color:var(--ink,#231c1a);font-weight:700;line-height:1.3}.aw-delivery-choices img{width:88px;height:88px;object-fit:contain}.aw-delivery-choices span{display:block}.aw-delivery-cancel{display:flex;justify-content:center;margin-top:16px}.aw-delivery-cancel button{min-height:44px;padding:8px 30px}
+
+[data-teacher-deliveries],.aw-delivery-icon{position:relative}.aw-delivery-choices .aw-delivery-icon{display:inline-block;width:88px;height:88px}.aw-delivery-count{position:absolute;top:-3px;right:-3px;display:flex!important;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 5px;border-radius:999px;background:var(--brick,#934356);color:white;border:2px solid white;font-size:12px;font-weight:750;line-height:1;box-sizing:border-box}[data-teacher-deliveries]>.aw-delivery-count{right:4px;top:0}
+
+body.aw-workflows .teacher-roster-active-heading h3,body.aw-workflows .teacher-class-action-title{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;height:auto;max-height:none;-webkit-line-clamp:unset}
+
+.aw-delivery-instructions{padding:12px;border-radius:12px;background:#e4ebdf;color:#34472e;font-weight:650;line-height:1.4}
+
+[data-delivery-pick] .teacher-roster-selection-check[hidden]{display:none!important}
+
+.aw-delivery-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;background:#f6eeea;border-radius:16px}.aw-delivery-tabs button{position:relative;min-height:56px;border:0;border-radius:12px;background:transparent;color:#64113c;font-weight:700;line-height:1.3}.aw-delivery-tabs button[aria-pressed="true"]{background:var(--blush)}.aw-tab-count{display:inline-flex;align-items:center;justify-content:center;background:var(--brick);color:white;border-radius:999px;min-width:20px;height:20px;font-size:12px;margin-left:3px}
+
+.aw-delivery-tabs button{display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;font-size:14px;padding:8px 6px;min-height:44px}.aw-delivery-tabs .aw-tab-count{flex-shrink:0;margin-left:0}
+
+.aw-panel .aw-delivery-saved,.aw-panel .aw-delivery-saved:disabled{background:var(--sage,#aebaa6);border-color:var(--sage,#aebaa6);color:#34472e;opacity:1}
+
+.aw-delivery-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.aw-delivery-heading h2{margin:0}.aw-delivery-heading .aw-close{flex-shrink:0;min-width:44px;min-height:44px}
+
+.aw-known-absence-alert .teacher-new-enrollment-heading{position:relative;padding-right:40px}.aw-known-close{position:absolute;right:0;top:0;min-height:36px;min-width:36px;border:0;border-radius:50%;background:transparent;color:var(--brick);font-size:24px}.aw-known-absence-alert[hidden]{display:none!important}
+
+.aw-original-class-actions{display:none!important}.aw-class-actions-launch{display:block;width:100%;min-height:46px;margin:12px 0;background:var(--brick);border:1px solid var(--brick);border-radius:12px;color:white;font-weight:700}.aw-class-actions-menu{display:grid;gap:12px;margin:18px 0}.aw-class-actions-menu button{min-height:48px;border-radius:12px;background:var(--blush);color:#64113c;border:1px solid #dfbcb4;font-weight:700}
+
+.aw-class-actions-menu{grid-template-columns:repeat(2,minmax(0,1fr))}.aw-class-actions-menu button:last-child{grid-column:1/-1}
+
+body[data-teacher-device="tablet"] .teacher-desktop-sidebar{align-self:start;align-items:center;height:auto;min-height:0}body[data-teacher-device="tablet"] .teacher-desktop-nav{align-self:center;height:48px;max-height:48px;min-height:48px}
+
+body[data-teacher-device="tablet"] .teacher-desktop-stage{grid-template-rows:auto auto minmax(0,1fr);align-content:start}body[data-teacher-device="tablet"] .teacher-device-toolbar{align-self:start;min-height:0;height:auto}body[data-teacher-device="tablet"] .teacher-desktop-main{align-self:start}
+
+body[data-teacher-device="tablet"] .teacher-notifications>summary{position:relative;box-sizing:border-box;padding:0;display:grid;place-items:center}body[data-teacher-device="tablet"] .teacher-notifications>summary>.teacher-notification-bell{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);margin:0;flex-shrink:0}body[data-teacher-device="tablet"] .teacher-notifications>summary>.notification-unread-count{position:absolute;top:-4px;right:-5px}
+
+.enrollment-tempo-card{background:#fffaf2;background-image:none}
+
+.aw-class-actions-launch{background:transparent;border:0;padding:0;min-height:44px;line-height:0}.aw-class-actions-launch img{display:block;width:100%;height:auto;object-fit:contain}.aw-class-actions-launch:focus-visible{outline:3px solid var(--berry);outline-offset:3px}
+
+.aw-more-circle{display:grid;place-items:center;width:62px;height:62px;max-width:100%;margin:0 auto 6px;border-radius:50%;border:1px solid #e4bdb5;background:#f7e6df;color:var(--brick);font-size:22px;letter-spacing:2px}

@@ -1,5 +1,10 @@
-const CACHE_NAME = "my-dance-techniques-v306-fixed-class-capacity";
+const CACHE_NAME = "my-dance-techniques-v307-attendance-workflows";
 const CORE_ASSETS = [
+  "./attendance-storage.js?v=student-storage-20261020",
+  "./attendance-preview.js?v=attendance-workflows-20261020",
+  "./attendance-preview.css?v=attendance-workflows-20261020",
+  "./assets/teacher-class-action-deliveries.png",
+  "./assets/teacher-class-actions.png",
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
   "./payroll-statements.js",

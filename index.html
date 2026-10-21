@@ -3566,13 +3566,15 @@
       .dashboard-entity-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     .teacher-attendance-review-list { display: grid; gap: 8px; margin-top: 14px; }
+    #teacher-checkout-review-overlay button { min-height: 44px; }
+    #teacher-checkout-review-overlay [aria-pressed="true"] { background: var(--sage); border-color: var(--berry); }
     .teacher-attendance-review-row { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-soft); }
     .teacher-attendance-review-row .roster-student-photo { width: 42px; height: 42px; font-size: 12px; }
     .teacher-attendance-review-row strong { font-size: 13px; }
     @media (max-width: 600px) {
-      #teacher-attendance-review-list .teacher-attendance-review-row { grid-template-columns: auto minmax(0, 1fr); }
-      #teacher-attendance-review-list .teacher-attendance-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
-      #teacher-attendance-review-list .teacher-attendance-actions button { flex: 1; }
+      #teacher-attendance-review-list .teacher-attendance-review-row, #teacher-checkout-review-list .teacher-attendance-review-row { grid-template-columns: auto minmax(0, 1fr); }
+      #teacher-attendance-review-list .teacher-attendance-actions, #teacher-checkout-review-list .teacher-attendance-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
+      #teacher-attendance-review-list .teacher-attendance-actions button, #teacher-checkout-review-list .teacher-attendance-actions button { flex: 1; }
     }
 
     .teacher-roster-section-title {
@@ -20233,6 +20235,14 @@
       <div class="teacher-attendance-review-list" id="teacher-attendance-review-list"></div>
     </div>
   </div>
+  <div class="confirm-overlay" id="teacher-checkout-review-overlay" aria-hidden="true">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-checkout-review-title">
+      <h3 id="teacher-checkout-review-title">Missed Check-In Review</h3>
+      <p>These dancers were selected for check-out but weren’t checked in. Were they present from the start, or tardy?</p>
+      <div class="teacher-attendance-review-list" id="teacher-checkout-review-list"></div>
+      <div class="confirm-actions"><button class="secondary" type="button" id="teacher-checkout-review-cancel">Back to Check-Out</button><button class="primary" type="button" id="teacher-checkout-review-confirm" disabled>Save Check-Out</button></div>
+    </div>
+  </div>
   <div class="confirm-overlay" id="teacher-helper-picker-overlay" aria-hidden="true">
     <div class="confirm-dialog teacher-helper-picker-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-helper-picker-title">
       <button class="roster-profile-close teacher-helper-picker-close" type="button" id="teacher-helper-picker-close" aria-label="Close helper picker">×</button>
@@ -20627,6 +20637,8 @@
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <script src="/teacher-music-data.js?v=20260826-playlist-workshop"></script>
   <script src="roster-care.js?v=20260908"></script>
+  <script src="attendance-storage.js?v=student-storage-20261020"></script>
+  <script src="attendance-preview.js?v=attendance-workflows-20261020"></script>
   <script>
     const modalScrollLockSelector = [
       ".confirm-overlay.active",
@@ -23624,7 +23636,7 @@
         client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled", "paused", "waitlisted"]),
         client.from("student_notes").select("id, student_id, note, created_at").order("created_at", { ascending: false }),
         client.from("class_enrollments").select("id, dance_class_id, student_id, ended_date, students(*)").eq("status", "withdrawn").order("ended_date", { ascending: false }),
-        client.from("class_attendance_records").select("dance_class_id, student_id, attendance_date, status, check_in_at, check_out_at"),
+        window.DTAttendanceStorage.loadClassAttendance(client).catch(error => ({data:null,error})),
         emailHistoryQuery,
         familyLinksQuery,
         newsletterArchiveQuery,
@@ -23959,6 +23971,7 @@
       ]);
       await window.refreshTeacherRecitalPlanner?.();
       selectedRosterClassId = rosterClasses[0]?.id || "";
+      await window.DTAttendancePreview?.reload?.();
       sharedRosterReady = true;
       setSharedRosterState("ready");
       renderHomeWidget();
@@ -27738,8 +27751,8 @@
         uploadedAt: "2026-06-29T12:00:00"
       }
     ];
-    const persistentStorageKey = "dt-teacher-tools-prototype-v1";
-    const connectedPreviewStorageKey = "dt-connected-preview-world-v1";
+    const persistentStorageKey = new URLSearchParams(location.search).get("attendance-preview") === "1" ? "dt-attendance-preview-app-" + (localStorage.getItem("dt-attendance-preview-generation") || "v1") : "dt-teacher-tools-prototype-v1";
+    const connectedPreviewStorageKey = new URLSearchParams(location.search).get("attendance-preview") === "1" ? "dt-attendance-preview-connected-" + (localStorage.getItem("dt-attendance-preview-generation") || "v1") : "dt-connected-preview-world-v1";
     const persistentStorageBackupKey = `${persistentStorageKey}:history`;
     const operationalRecoveryCompletedKey = `${persistentStorageKey}:operational-recovery-20260725-v3`;
     const schoolScheduleRecoveryCompletedKey = `${persistentStorageKey}:school-schedule-recovery-20260725-v1`;
@@ -28335,6 +28348,7 @@
       }
     };
     const saveAppData = () => {
+      if (window.dtResettingAttendancePreview && window.DTAttendancePreview?.enabled) return;
       if (document.body.dataset.tourMode === "true") {
         const previewPayload = appDataPayload();
         try {
@@ -36672,7 +36686,9 @@
       const overlay = document.getElementById("delivery-message-overlay");
       overlay?.classList.remove("active");
       overlay?.setAttribute("aria-hidden", "true");
+      const onClose=pendingDeliveryMessage?.onClose;
       pendingDeliveryMessage = null;
+      if(typeof onClose==='function')onClose();
     };
     const completeDeliveryStatus = async (pending) => {
       let deliveredCount = 0;
@@ -36694,6 +36710,7 @@
         deliveredCount = results.filter((result) => result.status === "fulfilled" && result.value).length;
         selectedBoutiqueOrderIds.clear();
         boutiqueItemDeliverySelections.clear();
+        if(deliveredCount!==(pending.orders||[]).length)throw new Error('Some Boutique deliveries could not be saved. Refresh before retrying.');
       }
       renderBoutiqueBackendSummary();
       renderDirectorBoutiqueOrders();
@@ -37013,6 +37030,10 @@
           { id: "sample-wix-2", wix_order_number: "SAMPLE-102", status: "to_fill", buyer_first_name: "Jordan", buyer_last_name: "Sample", buyer_email: "jordan.sample@example.com", requested_dancer_name: "Jordan Sample", requested_school: "", test_scenario: "Wix: parent entered Jordan Sample as Dancer's Name", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-2", name: "Dance Bow", quantity: 2, options: {} }] },
           { id: "sample-wix-3", wix_order_number: "SAMPLE-101", status: "to_fill", buyer_first_name: "Casey", buyer_last_name: "Carter", buyer_email: "casey.carter@example.com", requested_dancer_name: "Miles Carter", requested_school: "Primrose", test_scenario: "Wix: Dancer's Name: Miles Carter · School: Primrose", assigned_student_id: null, wix_created_at: new Date().toISOString(), boutique_order_items: [{ id: "sample-item-3", name: "Ballet Skirt", quantity: 1, options: { Size: "5T" } }] }
         ];
+        if(window.DTAttendancePreview?.enabled){
+          const sampleClass=teacherRosterClasses()[0],student=sampleClass?.students.find(s=>s.status==='enrolled');
+          if(student){boutiqueOrders[0].assigned_student_id=student.id;boutiqueOrders[0].status='to_deliver';}
+        }
         renderDirectorBoutiqueOrders();
         renderTeacherOrders();
         await loadBoutiquePreorders(profile);
@@ -38521,7 +38542,7 @@
     const teacherAttendanceTimeLabel = (value) => value ? new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "—";
     const teacherClassCheckedInEntries = (rosterClass, attendance = teacherAttendanceForClass(rosterClass)) => teacherRosterAttendanceStudents(rosterClass)
       .map((student) => attendance[student.id])
-      .filter((entry) => ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && typeof entry === "object" && entry.checkInAt);
+      .filter((entry) => ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && typeof entry === "object" && (entry.checkInAt || entry.checkOutAt));
     const teacherAttendanceHereCorrection = (rosterClass, attendance = teacherAttendanceForClass(rosterClass)) => {
       const firstCheckIn = teacherClassCheckedInEntries(rosterClass, attendance)
         .map((entry) => entry.checkInAt)
@@ -38687,6 +38708,7 @@
               const status = teacherAttendanceStatus(attendanceEntry);
               const checkedOut = typeof attendanceEntry === "object" && Boolean(attendanceEntry?.checkOutAt);
               const checkedIn = ["present", "tardy"].includes(status);
+              const knownAbsence=window.DTAttendancePreview?.knownFor?.(student.id,teacherAttendanceDateKey());
               const attendanceSelectable = !paused && (checkInActive ? !status : (checkOutActive && status !== "absent" && !checkedOut));
               const pendingKey = `${rosterClass.id}:${student.id}`;
               const kitSelectable = !paused && kitDeliveryActive && student.kitPickedUp && !student.kitReceived;
@@ -38702,8 +38724,8 @@
                   <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}" ${rosterStudentBadgeTitle(student) ? `title="${rosterSafe(rosterStudentBadgeTitle(student))}"` : ""}>${studentPhotoMarkup(student)}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
                   ${teacherRosterTaskOverlayMarkup(student)}
                   ${pending ? `<span class="teacher-roster-selection-check ${checkOutActive ? "is-safe" : ""}" aria-hidden="true">✓</span>` : ""}
-                  ${!pending && checkedIn && (checkInSubmitted || checkOutActive || checkedOut) ? `<span class="teacher-roster-selection-check ${checkedOut ? "is-safe" : ""}" aria-label="${checkedOut ? "Safely returned to classroom" : "Checked in"}" title="${checkedOut ? "Safely returned to classroom" : "Checked in"}">✓</span>` : ""}
-                  ${attendanceFinalized && status === "absent" ? `<span class="teacher-roster-check is-absent" aria-label="Absent" title="Absent">×</span>` : ""}
+                  ${!pending && !(window.DTAttendancePreview?.enabled && (kitDeliveryActive || boutiqueDeliveryActive)) && checkedIn && (checkInSubmitted || checkOutActive || checkedOut) ? `<span class="teacher-roster-selection-check ${checkedOut ? "is-safe" : ""}" aria-label="${checkedOut ? "Safely returned to classroom" : "Checked in"}" title="${checkedOut ? "Safely returned to classroom" : "Checked in"}">✓</span>` : ""}
+                  ${!pending && !checkedIn && !(kitDeliveryActive || boutiqueDeliveryActive) && (knownAbsence || (attendanceFinalized && status === "absent")) ? `<span class="teacher-roster-check is-absent" aria-label="Absent" title="Absent">×</span>` : ""}
                 </button>
                 <strong class="${weeklyHelperId === student.id ? "teacher-helper-name" : ""}">${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
                 ${student.connectedPreviewSample || student.id === "sample-elena" ? `<span class="teacher-roster-preview-badge">PP Sample</span>` : ""}
@@ -39039,8 +39061,18 @@
       }
       const visibleClasses = allClasses.filter((rosterClass) => teacherRosterSchoolFilter === "all"
         || (selectedSchool && teacherRosterClassMatchesSchool(rosterClass, selectedSchool)))
-        .sort((left, right) => teacherRosterTimeValue(left.time) - teacherRosterTimeValue(right.time)
-          || left.name.localeCompare(right.name, undefined, { numeric: true }));
+        .sort((left, right) => {
+          if(teacherRosterSchoolFilter === "all"){
+            const weekdays=["monday","tuesday","wednesday","thursday","friday","saturday","sunday"];
+            const currentWeekday=(new Date().getDay()+6)%7;
+            const dayRank=c=>{const index=weekdays.indexOf(teacherRosterDayKey(teacherRosterScheduledDay(c)));return index<0?7:(index-currentWeekday+7)%7;};
+            const schoolName=c=>{const school=schools.find(s=>teacherRosterClassMatchesSchool(c,s));return school?.nickname||school?.name||c.schoolName||"";};
+            const grouping=dayRank(left)-dayRank(right)||schoolName(left).localeCompare(schoolName(right),undefined,{numeric:true,sensitivity:"base"});
+            if(grouping)return grouping;
+          }
+          return teacherRosterTimeValue(left.time)-teacherRosterTimeValue(right.time)
+            ||left.name.localeCompare(right.name,undefined,{numeric:true})||String(left.id).localeCompare(String(right.id));
+        });
       document.getElementById("teacher-roster-add-future")?.toggleAttribute("disabled", allClasses.length === 0);
       if (!visibleClasses.some((rosterClass) => rosterClass.id === selectedTeacherRosterClassId)) selectedTeacherRosterClassId = visibleClasses[0]?.id || "";
       if (!visibleClasses.length) {
@@ -39099,12 +39131,13 @@
           && /^class\s*5$/i.test(String(rosterClass.name || "").trim())
         );
         return `<details class="teacher-roster-card teacher-roster-active-card" data-teacher-roster-details="${rosterSafe(rosterClass.id)}" ${classIsOpen ? "open" : ""}>
-          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(classDisplayTitle)} class roster"><div class="teacher-roster-active-heading"><div><h3 class="${teacherRosterSchoolFilter === "all" ? "is-all-schools-title" : ""}">${rosterSafe(classDisplayTitle)}</h3><p><span>${rosterSafe(scheduledDay || "Day not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span>${rosterSafe(rosterClass.time || "Time not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span class="teacher-roster-duration ${durationClass}"><strong>${attendanceStudents.length} dancers</strong><span class="teacher-roster-heading-dot" aria-hidden="true"> • </span>${rosterSafe(duration).replace(" minutes", " min")}</span></p>${classTimingMarkup}</div>${classCanPostToParentPortal ? `<button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button>` : ""}</div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" ${readyBoutiqueOrders.length ? "" : "disabled"}>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button><button class="teacher-class-action-helper" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}" aria-label="Class Star">${classActionContent("teacher-class-action-star.png", "Class Star")}</button><button class="teacher-class-action-photo-frames" type="button" data-teacher-photo-frames="${rosterSafe(rosterClass.id)}" aria-label="Photo Frames">${classActionContent("teacher-class-action-photo-frames.png", "Photo Frames")}</button></div></summary>
+          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(classDisplayTitle)} class roster"><div class="teacher-roster-active-heading"><div><h3 class="${teacherRosterSchoolFilter === "all" ? "is-all-schools-title" : ""}">${rosterSafe(classDisplayTitle)}</h3><p><span>${rosterSafe(scheduledDay || "Day not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span>${rosterSafe(rosterClass.time || "Time not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span class="teacher-roster-duration ${durationClass}"><strong>${attendanceStudents.length} dancers</strong><span class="teacher-roster-heading-dot" aria-hidden="true"> • </span>${rosterSafe(duration).replace(" minutes", " min")}</span></p>${classTimingMarkup}</div>${classCanPostToParentPortal ? `<button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button>` : ""}</div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}${window.DTAttendancePreview?.enabled ? `<button type="button" data-teacher-deliveries="${rosterSafe(rosterClass.id)}" data-shirts-ready="${readyKits.length}" data-boutique-ready="${readyBoutiqueOrders.length}" aria-label="Deliveries">${classActionContent("teacher-class-action-deliveries.png", kitDeliveryActive ? "Delivering Shirts & Bags" : boutiqueDeliveryActive ? "Delivering Boutique" : "Deliveries")}${readyKits.length+readyBoutiqueOrders.length ? `<span class="aw-delivery-count" aria-label="${readyKits.length+readyBoutiqueOrders.length} deliveries ready">${readyKits.length+readyBoutiqueOrders.length}</span>` : ""}</button>` : `<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" ${readyBoutiqueOrders.length ? "" : "disabled"}>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button>`}<button class="teacher-class-action-photo-frames" type="button" data-teacher-photo-frames="${rosterSafe(rosterClass.id)}" aria-label="Photo Frames">${classActionContent("teacher-class-action-photo-frames.png", "Photo Frames")}</button><button type="button" data-teacher-class-more="${rosterSafe(rosterClass.id)}" aria-label="Actions"><span class="aw-more-circle" aria-hidden="true">•••</span><span class="teacher-class-action-title">Actions</span></button></div></summary>
           <div class="teacher-roster-card-body">
             ${classComplete ? `<div class="teacher-attendance-complete">✓ Class attendance complete for today</div>` : checkInSubmitted ? `<div class="teacher-attendance-complete">✓ Check-in recorded</div>` : ""}
             <div>${displayedStudents.length ? teacherRosterClassroomMarkup(displayedStudents, rosterClass) : `<div class="teacher-roster-empty">No dancers attending this class yet.</div>`}</div>
             ${attendanceStudents.length && !checkInSubmitted && checkInActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-attendance="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-attendance-finish="${rosterSafe(rosterClass.id)}">Check In</button></div>` : ""}
             ${checkInSubmitted && checkOutActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-attendance="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-attendance-checkout="${rosterSafe(rosterClass.id)}">Check Out</button></div>` : ""}
+            ${window.DTAttendancePreview?.enabled && (kitDeliveryActive || boutiqueDeliveryActive) ? `<p class="aw-delivery-instructions" role="status">${kitDeliveryActive ? "Shirts & Dance Bags" : "Boutique Orders"}: select the dancers receiving a delivery, then tap Mark as Delivered.</p>` : ""}
             ${kitDeliveryActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-kit-delivery="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-kit-delivery-finish="${rosterSafe(rosterClass.id)}">Mark as Delivered</button></div>` : ""}
             ${boutiqueDeliveryActive ? `<div class="teacher-attendance-footer"><button class="secondary teacher-workflow-cancel" type="button" data-teacher-cancel-boutique-delivery="${rosterSafe(rosterClass.id)}">Cancel</button><button class="primary" type="button" data-teacher-boutique-delivery-finish="${rosterSafe(rosterClass.id)}" ${selectedBoutiqueDeliveryCount ? "" : "disabled"}>Mark as Delivered${selectedBoutiqueDeliveryCount ? ` (${selectedBoutiqueDeliveryCount})` : ""}</button></div>` : ""}
             <details class="teacher-roster-future-panel"><summary><span>Future Dancers (${prospects.length})</span><button class="secondary roster-add-future-button" type="button" data-teacher-roster-add-future="${rosterSafe(rosterClass.id)}">Add Prospect</button></summary>${prospects.length ? `<div class="teacher-future-prospect-grid">${sortRosterStudents(prospects).map((student) => teacherFutureProspectCardMarkup(student, rosterClass)).join("")}</div>` : `<div class="teacher-roster-empty">No future dancers yet.</div>`}</details>
@@ -39634,12 +39667,52 @@
         </div>
         <label class="roster-profile-kit-check"><input type="checkbox" ${student.kitReady ? "checked" : ""} disabled> T-Shirt &amp; Bag Ready</label>
         <label class="roster-profile-kit-check" data-teacher-student-edit-related hidden><input type="checkbox" data-teacher-kit-received="${rosterSafe(student.id)}" data-teacher-kit-class="${rosterSafe(rosterClass.id)}" ${student.kitReceived ? "checked" : ""}> Received T-Shirt &amp; Bag</label>
-        <div class="teacher-student-attendance-history">
+        <div class="teacher-student-attendance-history">${window.DTAttendancePreview?.enabled ? window.DTAttendancePreview.history(rosterClass, student) : `
           <h4>Attendance History · ${tardyCount} Tardy · ${absentCount} Absent</h4>
           ${attendanceHistory.length ? attendanceHistory.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(new Date(`${entry.date}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))} · ${rosterSafe(entry.status[0].toUpperCase() + entry.status.slice(1))}</strong><strong>${rosterSafe(rosterClass.name)}</strong><small>In ${rosterSafe(teacherAttendanceTimeLabel(entry.checkInAt))}</small><small>Out ${rosterSafe(teacherAttendanceTimeLabel(entry.checkOutAt))}</small></div>`).join("") : `<div class="teacher-roster-empty">No attendance recorded yet.</div>`}
-        </div>`;
+`}        </div>`;
       setTeacherRosterOverlay("teacher-student-profile-overlay", true);
     };
+
+    let teacherCheckoutReviewPending = null;
+    const teacherCheckoutNeedsReview = (entry) => !["present", "tardy"].includes(teacherAttendanceStatus(entry));
+    const reviewTeacherMissedCheckIns = (rosterClass, students) => new Promise((resolve) => {
+      if (teacherCheckoutReviewPending) return resolve(null);
+      const choices = new Map();
+      const list = document.getElementById("teacher-checkout-review-list");
+      const confirm = document.getElementById("teacher-checkout-review-confirm");
+      confirm.disabled = true;
+      list.innerHTML = students.map((student) => `<div class="teacher-attendance-review-row"><span class="roster-student-photo">${studentPhotoMarkup(student)}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><span class="teacher-attendance-actions"><button class="secondary" type="button" data-checkout-review-student="${rosterSafe(student.id)}" data-checkout-review-status="present" aria-pressed="false">Present</button><button class="secondary" type="button" data-checkout-review-student="${rosterSafe(student.id)}" data-checkout-review-status="tardy" aria-pressed="false">Tardy</button></span></div>`).join("");
+      teacherCheckoutReviewPending = { choices, studentIds: new Set(students.map((student) => student.id)), resolve };
+      setTeacherRosterOverlay("teacher-checkout-review-overlay", true);
+      list.querySelector("button")?.focus();
+    });
+    const finishTeacherMissedCheckInReview = (confirmed) => {
+      const pending = teacherCheckoutReviewPending;
+      if (!pending || (confirmed && pending.choices.size !== pending.studentIds.size)) return;
+      teacherCheckoutReviewPending = null;
+      setTeacherRosterOverlay("teacher-checkout-review-overlay", false);
+      pending.resolve(confirmed ? pending.choices : null);
+    };
+    document.getElementById("teacher-checkout-review-list")?.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-checkout-review-status]");
+      const pending = teacherCheckoutReviewPending;
+      if (!button || !pending || !pending.studentIds.has(button.dataset.checkoutReviewStudent)
+        || !["present", "tardy"].includes(button.dataset.checkoutReviewStatus)) return;
+      pending.choices.set(button.dataset.checkoutReviewStudent,button.dataset.checkoutReviewStatus);
+      document.querySelectorAll("#teacher-checkout-review-list [data-checkout-review-status]").forEach((choice) => {
+        choice.setAttribute("aria-pressed", String(pending.choices.get(choice.dataset.checkoutReviewStudent) === choice.dataset.checkoutReviewStatus));
+      });
+      document.getElementById("teacher-checkout-review-confirm").disabled = pending.choices.size !== pending.studentIds.size;
+    });
+    document.getElementById("teacher-checkout-review-confirm")?.addEventListener("click", () => finishTeacherMissedCheckInReview(true));
+    document.getElementById("teacher-checkout-review-cancel")?.addEventListener("click", () => finishTeacherMissedCheckInReview(false));
+    document.getElementById("teacher-checkout-review-overlay")?.addEventListener("click", (event) => {
+      if (event.target.id === "teacher-checkout-review-overlay") finishTeacherMissedCheckInReview(false);
+    });
+    document.getElementById("teacher-checkout-review-overlay")?.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") { event.preventDefault(); finishTeacherMissedCheckInReview(false); }
+    });
 
     const renderTeacherAttendanceReview = (rosterClass) => {
       const list = document.getElementById("teacher-attendance-review-list");
@@ -39749,6 +39822,46 @@
       openRosterPrintDialog(selectedClass, schoolClasses);
     });
     document.getElementById("teacher-roster-list")?.addEventListener("click", async (event) => {
+      const more=event.target.closest('[data-teacher-class-more]');
+      if(more){event.preventDefault();event.stopPropagation();const popup=document.createElement('div');popup.className='confirm-overlay active';popup.style.cssText='display:flex;z-index:2147483646';popup.innerHTML=`<section class="aw-panel" role="dialog" aria-modal="true" aria-label="Class actions"><h2>Actions</h2><div class="aw-class-actions-menu"><button type="button" data-teacher-change-helper="${rosterSafe(more.dataset.teacherClassMore)}">Class Star</button><button type="button" data-class-shoe-check>Shoe Check</button><button type="button" data-delivery-menu-close>Cancel</button></div></section>`;document.getElementById('teacher-roster-list').append(popup);return;}
+      const shoe=event.target.closest('[data-class-shoe-check]');if(shoe){event.preventDefault();shoe.closest('.confirm-overlay').remove();document.getElementById('teacher-roster-shoe-check')?.click();return;}
+      const deliveryMenu=event.target.closest('[data-teacher-deliveries]');
+      if(deliveryMenu){
+        event.preventDefault();event.stopPropagation();
+        const popup=document.createElement('div');popup.className='confirm-overlay is-open';popup.style.cssText='display:flex;z-index:2147483646';
+        popup.innerHTML=`<section class="aw-panel" role="dialog" aria-modal="true" aria-label="Deliveries"><h2>Deliveries</h2><div class="aw-delivery-choices"><button data-delivery-category="shirts" data-delivery-class="${rosterSafe(deliveryMenu.dataset.teacherDeliveries)}" ${Number(deliveryMenu.dataset.shirtsReady)?'':'disabled'}><span class="aw-delivery-icon"><img src="assets/teacher-class-action-shirts.png" alt="">${Number(deliveryMenu.dataset.shirtsReady) ? `<span class="aw-delivery-count" aria-label="${Number(deliveryMenu.dataset.shirtsReady)} ready">${Number(deliveryMenu.dataset.shirtsReady)}</span>` : ""}</span><span>Shirts &amp;<br>Dance Bags</span></button><button data-delivery-category="boutique" data-delivery-class="${rosterSafe(deliveryMenu.dataset.teacherDeliveries)}" ${Number(deliveryMenu.dataset.boutiqueReady)?'':'disabled'}><span class="aw-delivery-icon"><img src="assets/teacher-class-action-boutique.png" alt="">${Number(deliveryMenu.dataset.boutiqueReady) ? `<span class="aw-delivery-count" aria-label="${Number(deliveryMenu.dataset.boutiqueReady)} ready">${Number(deliveryMenu.dataset.boutiqueReady)}</span>` : ""}</span><span>Boutique<br>Orders</span></button></div><div class="aw-delivery-cancel"><button data-delivery-menu-close>Cancel</button></div></section>`;
+        document.getElementById('teacher-roster-list').append(popup);popup.querySelector('[data-delivery-category]:not([disabled])')?.click();popup.querySelector('button:not([disabled])')?.focus();return;
+      }
+      const category=event.target.closest('[data-delivery-category]');
+      if(category){
+        event.preventDefault();event.stopPropagation();
+        const c=teacherRosterClasses().find(c=>c.id===category.dataset.deliveryClass);if(!c)return;
+        const shirts=category.dataset.deliveryCategory==='shirts',orders=teacherBoutiqueDeliveryOrdersForClass(c);
+        const students=rosterEnrolled(c).filter(s=>shirts ? s.kitPickedUp&&!s.kitReceived : orders.some(o=>String(o.assigned_student_id)===String(s.id)));
+        const popup=category.closest('.confirm-overlay');
+        popup.innerHTML=`<section class="aw-panel" role="dialog" aria-modal="true" aria-label="Delivery dancers"><div class="aw-delivery-heading"><h2>Deliveries</h2><button type="button" class="aw-close" data-delivery-menu-close aria-label="Close deliveries">×</button></div><div class="aw-delivery-tabs" role="group" aria-label="Delivery category"><button type="button" data-delivery-category="shirts" data-delivery-class="${rosterSafe(c.id)}" aria-pressed="${shirts}">Shirts &amp; Bags <span class="aw-tab-count">${rosterEnrolled(c).filter(s=>s.kitPickedUp&&!s.kitReceived).length}</span></button><button type="button" data-delivery-category="boutique" data-delivery-class="${rosterSafe(c.id)}" aria-pressed="${!shirts}">Boutique <span class="aw-tab-count">${orders.length}</span></button></div><p>Select the dancers receiving their delivery.</p><div class="teacher-roster-student-grid">${students.map(s=>`<div class="teacher-roster-student-tile"><button type="button" class="teacher-roster-profile-button" data-delivery-pick="${rosterSafe(s.id)}" data-delivery-class="${rosterSafe(c.id)}" data-delivery-kind="${shirts?'shirts':'boutique'}" aria-label="Select ${rosterSafe(rosterStudentFullName(s))}" aria-pressed="false"><span class="roster-student-photo">${studentPhotoMarkup(s)}</span><span class="teacher-roster-selection-check" hidden>✓</span></button><strong>${rosterSafe(rosterStudentFullName(s))}</strong></div>`).join('')}</div><div class="aw-actions"><button data-delivery-menu-close>Cancel</button><button type="button" ${shirts?'data-teacher-kit-delivery-finish':'data-teacher-boutique-delivery-finish'}="${rosterSafe(c.id)}" disabled>Deliver</button></div></section>`;
+        popup.querySelectorAll('[data-delivery-pick]').forEach(button=>{const id=button.dataset.deliveryPick,selected=shirts?pendingTeacherKitDeliveries.has(`${c.id}:${id}`):orders.filter(o=>String(o.assigned_student_id)===id).every(o=>pendingTeacherBoutiqueDeliveries.has(String(o.id)));button.setAttribute('aria-pressed',String(selected));button.classList.toggle('is-pending',selected);button.querySelector('.teacher-roster-selection-check').hidden=!selected;});
+        popup.querySelector('[data-teacher-kit-delivery-finish],[data-teacher-boutique-delivery-finish]').disabled=!popup.querySelector('[data-delivery-pick][aria-pressed="true"]');return;
+      }
+      const pick=event.target.closest('[data-delivery-pick]');
+      if(pick){
+        event.preventDefault();event.stopPropagation();const selected=pick.getAttribute('aria-pressed')!=='true',c=pick.dataset.deliveryClass,id=pick.dataset.deliveryPick;
+        pick.setAttribute('aria-pressed',String(selected));pick.classList.toggle('is-pending',selected);pick.querySelector('.teacher-roster-selection-check').hidden=!selected;
+        if(pick.dataset.deliveryKind==='shirts'){const key=`${c}:${id}`;if(selected)pendingTeacherKitDeliveries.add(key);else pendingTeacherKitDeliveries.delete(key);}
+        else teacherBoutiqueDeliveryOrdersForClass(teacherRosterClasses().find(r=>r.id===c)).filter(o=>String(o.assigned_student_id)===id).forEach(o=>{if(selected)pendingTeacherBoutiqueDeliveries.add(String(o.id));else pendingTeacherBoutiqueDeliveries.delete(String(o.id));});
+        const popup=pick.closest('.confirm-overlay');popup.querySelector('[data-teacher-kit-delivery-finish],[data-teacher-boutique-delivery-finish]').disabled=!popup.querySelector('[data-delivery-pick][aria-pressed="true"]');return;
+      }
+      const menuPopup=event.target.closest('.confirm-overlay');
+      const keepDeliveryPopup=()=>{
+        if(!menuPopup||!menuPopup.querySelector('.aw-delivery-tabs'))return;
+        document.getElementById('teacher-roster-list').append(menuPopup);
+        const done=menuPopup.querySelector('[data-teacher-kit-delivery-finish],[data-teacher-boutique-delivery-finish]');done.textContent='Delivered ✓';done.classList.add('aw-delivery-saved');done.disabled=true;
+        const c=teacherRosterClasses().find(c=>c.id===(done.dataset.teacherKitDeliveryFinish||done.dataset.teacherBoutiqueDeliveryFinish));
+        if(c){menuPopup.querySelector('[data-delivery-category="shirts"] .aw-tab-count').textContent=rosterEnrolled(c).filter(s=>s.kitPickedUp&&!s.kitReceived).length;menuPopup.querySelector('[data-delivery-category="boutique"] .aw-tab-count').textContent=teacherBoutiqueDeliveryOrdersForClass(c).length;}
+      };
+
+      if(menuPopup&&(event.target.closest('[data-teacher-start-kit-delivery],[data-teacher-start-boutique-delivery],[data-teacher-change-helper],[data-delivery-menu-close]'))){menuPopup.remove();if(event.target.closest('[data-delivery-menu-close]')){event.preventDefault();return;}}
+
       const newEnrollmentButton = event.target.closest("[data-teacher-new-enrollment]");
       if (newEnrollmentButton) {
         event.preventDefault();
@@ -39963,14 +40076,34 @@
         const classPrefix = `${rosterClass.id}:`;
         const checkedOutAt = new Date().toISOString();
         const selectedAttendanceIds = [...pendingTeacherRosterCheckIns].filter((key) => key.startsWith(classPrefix)).map((key) => key.slice(classPrefix.length));
+        if (teacherCheckoutReviewPending) return;
+        const missingCheckIns = selectedAttendanceIds.filter((id) => teacherCheckoutNeedsReview(attendance[id]))
+          .map((id) => rosterClass.students.find((student) => student.id === id)).filter(Boolean);
+        const reviewDate = teacherAttendanceDateKey();
+        const reviewProfile = window.dtCurrentProfile?.id || "";
+        const reviewed = missingCheckIns.length ? await reviewTeacherMissedCheckIns(rosterClass, missingCheckIns) : new Map();
+        if (!reviewed) return;
+        if (reviewDate !== teacherAttendanceDateKey() || reviewProfile !== (window.dtCurrentProfile?.id || "")
+          || !teacherRosterClasses().includes(rosterClass)) {
+          showToast("The class or day changed during review. Reopen check-out before saving.");
+          return;
+        }
         selectedAttendanceIds.forEach((studentId) => {
           const existing = attendance[studentId];
           const existingStatus = teacherAttendanceStatus(existing);
-          attendance[studentId] = existingStatus
-            ? (typeof existing === "object"
+          const reviewedStatus = reviewed.get(studentId);
+          if (teacherCheckoutNeedsReview(existing)) {
+            if (!["present", "tardy"].includes(reviewedStatus)) return;
+            attendance[studentId] = {
+              status: reviewedStatus,
+              checkInAt: reviewedStatus === "present" ? teacherAttendanceHereCorrection(rosterClass,attendance).checkInAt : "",
+              checkOutAt: checkedOutAt
+            };
+          } else {
+            attendance[studentId] = typeof existing === "object"
               ? { ...existing, checkOutAt: checkedOutAt }
-              : { status: existingStatus, checkInAt: "", checkOutAt: checkedOutAt })
-            : { status: "tardy", checkInAt: checkedOutAt, checkOutAt: checkedOutAt, autoTardy: true };
+              : { status: existingStatus, checkInAt: "", checkOutAt: checkedOutAt };
+          }
           pendingTeacherRosterCheckIns.delete(`${classPrefix}${studentId}`);
         });
         const completedProspects = teacherRosterAttendanceStudents(rosterClass).filter((student) => {
@@ -40041,13 +40174,21 @@
           student.kitDeliveredAt = deliveredAt;
           student.kitDeliveredBy = deliveredBy;
         });
+        try {
+          if(document.body.dataset.tourMode!=="true"&&(!sharedRosterReady||!window.dtSupabase))throw new Error('Reconnect before saving deliveries.');
+          await Promise.all(selectedStudents.map((student) => saveSharedKitStatus(student)));
+        } catch(error){
+          showToast('Delivery could not be confirmed. Refresh before retrying.');
+          if(document.body.dataset.tourMode!=="true")await loadSharedClassesAndRosters();
+          return;
+        }
         selectedKeys.forEach((key) => pendingTeacherKitDeliveries.delete(key));
         activeTeacherKitDeliveryClassIds.delete(rosterClass.id);
         scheduleAppDataSave();
-        Promise.all(selectedStudents.map((student) => saveSharedKitStatus(student))).catch((error) => sharedRosterError("The T-Shirt and bag delivery could not be saved.", error, { reload: false }));
         renderTeacherRosters();
         renderStudentLibrary();
         renderClassesAndRosters();
+        keepDeliveryPopup();
         showToast(`${selectedStudents.length} enrollment kit${selectedStudents.length === 1 ? "" : "s"} marked delivered`);
         return;
       }
@@ -40057,16 +40198,20 @@
         if (!rosterClass) return;
         const orders = teacherBoutiqueDeliveryOrdersForClass(rosterClass).filter((order) => pendingTeacherBoutiqueDeliveries.has(String(order.id)));
         if (!orders.length) return showToast("Select at least one dancer receiving a Boutique order");
-        openDeliveryMessage({
+        if(menuPopup)menuPopup.style.display='none';
+        await openDeliveryMessage({
           type: "boutique",
           orders,
+          onClose:()=>{if(menuPopup){menuPopup.style.display='flex';if(!menuPopup.isConnected)document.getElementById('teacher-roster-list').append(menuPopup);}},
           onComplete: () => {
             orders.forEach((order) => pendingTeacherBoutiqueDeliveries.delete(String(order.id)));
             activeTeacherBoutiqueDeliveryClassIds.delete(rosterClass.id);
             renderTeacherRosters();
             renderTeacherOrders();
+            keepDeliveryPopup();
           }
         });
+        if(menuPopup&&!document.getElementById('delivery-message-overlay')?.classList.contains('active'))menuPopup.style.display='flex';
         return;
       }
       const prospectButton = event.target.closest("[data-teacher-edit-prospect]");
@@ -56454,6 +56599,19 @@
           console.error("Local enrollment preview could not load", error);
           setEnrollmentQueueState("error", "Preview data could not be opened", "Refresh this local preview and try again.");
         });
+    }
+    if (window.DTAttendancePreview?.enabled) {
+      window.DTAttendancePreview.init({
+        get classes(){return rosterClasses;}, get client(){return window.dtSupabase;}, get profile(){return window.dtCurrentProfile;}, teacherClasses:teacherRosterClasses, selectedSchool:teacherRosterSelectedSchool,
+        date:teacherAttendanceDateKey, trialPending:rosterTrialAttendancePending, photo:studentPhotoMarkup,
+        save:scheduleAppDataSave, refresh:renderTeacherRosters, openStudent:openTeacherStudentProfile, toast:showToast,
+        reset:() => {
+          window.dtResettingAttendancePreview = true;
+          window.removeEventListener("beforeunload", saveAppData);
+          [persistentStorageKey,connectedPreviewStorageKey,persistentStorageBackupKey,operationalRecoveryCompletedKey,schoolScheduleRecoveryCompletedKey,missingSchoolDataRecoveryCompletedKey].forEach(key=>localStorage.removeItem(key));
+          window.name = "";
+        }
+      });
     }
   </script>
   <script>
