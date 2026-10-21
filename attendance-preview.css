@@ -89,3 +89,5 @@ body[data-teacher-device="tablet"] .teacher-notifications>summary{position:relat
 
 /* Keep the artwork a compact control on tablet and desktop rosters. */
 @media(min-width:641px){.aw-class-actions-launch{width:min(100%,320px);margin:12px auto}}
+
+.teacher-class-action-star .teacher-class-action-badge{border-radius:50%}
