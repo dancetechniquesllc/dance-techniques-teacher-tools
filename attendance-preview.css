@@ -91,3 +91,11 @@ body[data-teacher-device="tablet"] .teacher-notifications>summary{position:relat
 @media(min-width:641px){.aw-class-actions-launch{width:min(100%,320px);margin:12px auto}}
 
 .teacher-class-action-star .teacher-class-action-badge{border-radius:50%}
+
+/* Center the history summary and keep its actions together on every device. */
+.aw-history-heading{display:block;text-align:center}
+.aw-history-heading h4{margin:16px 0 4px}
+.aw-history-heading p{margin:0 0 14px;font-size:14px;font-weight:500}
+.aw-history-toolbar{flex-wrap:nowrap;align-items:center;justify-content:center}
+.aw-history-toolbar .aw-pencil{flex:0 0 44px;height:44px;padding:0}
+.aw-history-toolbar .aw-known-absence-button{flex:1;min-width:0;border:1px solid var(--brick,#934356);border-radius:10px;background:var(--brick,#934356);color:white;padding:10px 12px;font-weight:700}
