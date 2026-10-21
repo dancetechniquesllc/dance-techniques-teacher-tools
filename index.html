@@ -22461,7 +22461,9 @@
         .flatMap((rosterClass) => rosterClass.students.filter((student) => student.status === "trial-scheduled"
           && !student.additionalInformation?.future_dancer_archived).map((student) => {
           const names = [student.firstName, student.preferredName].map(key).filter(Boolean);
-          const sameLast = lastName === key(student.lastName);
+          const trialLastName = key(student.lastName);
+          const sameLast = lastName === trialLastName;
+          const firstNameOnly = !trialLastName && firstNames.some((name) => names.includes(name));
           const nameMatches = sameLast && firstNames.some((name) => names.includes(name));
           const similarName = sameLast && firstNames.some((name) => names.some((other) => name[0] === other[0]));
           const birthday = String(item.student_birth_date || "").slice(0,10);
@@ -22474,8 +22476,8 @@
           const phoneMatches = phone.length === 10 && phone === enrollmentMatchPhone(student.parentPhone);
           const identityMatches = birthdateMatches || emailMatches || phoneMatches;
           const score = (nameMatches ? 5 : 0) + (birthdateMatches ? 4 : 0) + (emailMatches ? 3 : 0) + (phoneMatches ? 3 : 0) + 2;
-          const reasons = [nameMatches ? "same dancer name" : "similar dancer name", "same school", birthdateMatches ? "same birthday" : "", emailMatches ? "same parent email" : "", phoneMatches ? "same parent phone" : "", birthdayConflict ? "different birthdays — check carefully" : ""].filter(Boolean);
-          return {rosterClass, student, score, reasons, reasonable: nameMatches || (similarName && identityMatches), strong: nameMatches && identityMatches && !birthdayConflict};
+          const reasons = [nameMatches ? "same dancer name" : firstNameOnly ? "same first name — trial last name missing" : "similar dancer name", "same school", birthdateMatches ? "same birthday" : "", emailMatches ? "same parent email" : "", phoneMatches ? "same parent phone" : "", birthdayConflict ? "different birthdays — check carefully" : ""].filter(Boolean);
+          return {rosterClass, student, score, reasons, reasonable: nameMatches || firstNameOnly || (similarName && identityMatches), strong: nameMatches && identityMatches && !birthdayConflict};
         })).filter((candidate) => candidate.reasonable)
         .sort((left,right) => right.score-left.score || rosterStudentFullName(left.student).localeCompare(rosterStudentFullName(right.student)));
     };
