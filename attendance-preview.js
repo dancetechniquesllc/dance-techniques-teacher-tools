@@ -1,6 +1,7 @@
 /* Shared attendance workflows. Sample data is restricted to explicit local review mode. */
 window.DTAttendancePreview = (() => {
   const demo = new URLSearchParams(location.search).get('attendance-preview') === '1'
+    && new URLSearchParams(location.search).get('tour') === '1'
     && ['127.0.0.1','localhost'].includes(location.hostname);
   const enabled=true;
   let initialized=false,busy=false,workspaceReady=demo;
