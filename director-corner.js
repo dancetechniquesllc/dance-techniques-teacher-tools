@@ -11,6 +11,7 @@
  };
  const names={lexi:'Lexi',tiffany:'Tiffany'};
  const portraits={};let portraitCheckedAt=0,portraitLoading=false,portraitAccount='';
+ const canEdit=()=>tour()||['admin','director'].includes(window.dtCurrentProfile?.role);
  const labels={busy:'Online and Busy',open:'Online and Open',offline:'Offline'};
  const safe=value=>escapeText(String(value||''));
  window.dtNotificationCategory=item=>{
@@ -56,7 +57,8 @@
    const button=bottom.querySelector(`[data-director-person="${person}"]`);if(!button)continue;
    const record=unavailable?null:rows[person];
    if(record)button.dataset.status=record.status;else delete button.dataset.status;
-   button.setAttribute('aria-label',`${names[person]}: ${record?labels[record.status]:(unavailable?'Status unavailable':'Status not set')}. Set availability`);
+   button.setAttribute('aria-label',`${names[person]}: ${record?labels[record.status]:(unavailable?'Status unavailable':'Status not set')}${canEdit()?'. Set availability':''}`);
+   button.setAttribute('aria-disabled',String(!canEdit()));
    button.title=`${names[person]} · ${record?labels[record.status]:(unavailable?'Status unavailable':'Status not set')}`;
    const teacher=teachers.find(t=>String(t.firstName||'').toLowerCase()===person);
    const photo=portraits[person]??teacher?.photo??'';
@@ -65,7 +67,7 @@
  };
  for(const person of Object.keys(names)) {
   const button=document.createElement('button');button.type='button';button.className='director-presence';button.dataset.directorPerson=person;button.textContent=names[person][0];
-  button.onclick=()=>{editing=person;document.getElementById('director-presence-title').textContent=names[person]+"’s availability";dialog.querySelectorAll('[data-availability]').forEach(b=>b.setAttribute('aria-pressed',String(rows[person]?.status===b.dataset.availability)));note(tour()?'Preview · Updates other preview tabs':'Choose your availability');dialog.showModal();void refresh();};
+  button.onclick=()=>{if(!canEdit())return;editing=person;document.getElementById('director-presence-title').textContent=names[person]+"’s availability";dialog.querySelectorAll('[data-availability]').forEach(b=>b.setAttribute('aria-pressed',String(rows[person]?.status===b.dataset.availability)));note(tour()?'Preview · Updates other preview tabs':'Choose your availability');dialog.showModal();void refresh();};
   bottom.append(button);
  }
  bottom.append(actions.querySelector('#auth-sign-out'));actions.classList.add('director-corner');actions.prepend(top,middle);document.body.append(dialog);
@@ -76,15 +78,15 @@
   try{
    if(tour()){rows=await sampleStore();}
    else{
-    const id=window.dtCurrentProfile?.id;if(!id||!['admin','director'].includes(window.dtCurrentProfile?.role))return;
-    const {data,error}=await window.dtSupabase.from('director_availability').select('person,status,revision,updated_at').order('updated_at',{ascending:true}).order('account_id',{ascending:true});
+    const id=window.dtCurrentProfile?.id;if(!id||!['admin','director','teacher'].includes(window.dtCurrentProfile?.role))return;
+    const {data,error}=await window.dtSupabase.rpc('get_director_availability');
     if(error)throw error;if(current!==request)return;rows=Object.fromEntries((data||[]).map(r=>[r.person,r]));
    }
    unavailable=false;render();
   }catch{unavailable=true;render();if(dialog.open)note('Status could not sync. Please try again.');}
  };
  dialog.querySelectorAll('[data-availability]').forEach(button=>button.onclick=async()=>{
-  if(busy)return;busy=true;++request;dialog.querySelectorAll('[data-availability]').forEach(b=>b.disabled=true);note('Saving…');
+  if(busy||!canEdit())return;busy=true;++request;dialog.querySelectorAll('[data-availability]').forEach(b=>b.disabled=true);note('Saving…');
   const person=editing,status=button.dataset.availability;
   try{
    if(tour()){
