@@ -86,3 +86,6 @@ body[data-teacher-device="tablet"] .teacher-notifications>summary{position:relat
 .aw-class-actions-launch{background:transparent;border:0;padding:0;min-height:44px;line-height:0}.aw-class-actions-launch img{display:block;width:100%;height:auto;object-fit:contain}.aw-class-actions-launch:focus-visible{outline:3px solid var(--berry);outline-offset:3px}
 
 .aw-more-circle{display:grid;place-items:center;width:62px;height:62px;max-width:100%;margin:0 auto 6px;border-radius:50%;border:1px solid #e4bdb5;background:#f7e6df;color:var(--brick);font-size:22px;letter-spacing:2px}
+
+/* Keep the artwork a compact control on tablet and desktop rosters. */
+@media(min-width:641px){.aw-class-actions-launch{width:min(100%,320px);margin:12px auto}}
