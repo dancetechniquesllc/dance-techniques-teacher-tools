@@ -5,10 +5,7 @@
   const STORAGE_KEY = "dt-big-stage-planned-shows:v1";
   const RECITAL_DATE_KEY = "dt-big-stage-recital-date:v1";
   const RESET_KEY = "dt-big-stage-recital-reset:2026-10-12";
-  if (localStorage.getItem(RESET_KEY) !== "complete") {
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.setItem(RESET_KEY, "complete");
-  }
+  // Restored planners keep all existing saved show choices.
   const liveSchools = () => {
     const classes = typeof window.getBigStageRosterClasses === "function" ? window.getBigStageRosterClasses() : [];
     const grouped = new Map();
