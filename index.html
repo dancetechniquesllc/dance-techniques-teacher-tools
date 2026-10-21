@@ -38738,7 +38738,7 @@
                   ${teacherRosterTaskOverlayMarkup(student)}
                   ${pending ? `<span class="teacher-roster-selection-check ${checkOutActive ? "is-safe" : ""}" aria-hidden="true">✓</span>` : ""}
                   ${!pending && !(window.DTAttendancePreview?.enabled && (kitDeliveryActive || boutiqueDeliveryActive)) && checkedIn && (checkInSubmitted || checkOutActive || checkedOut) ? `<span class="teacher-roster-selection-check ${checkedOut ? "is-safe" : ""}" aria-label="${checkedOut ? "Safely returned to classroom" : "Checked in"}" title="${checkedOut ? "Safely returned to classroom" : "Checked in"}">✓</span>` : ""}
-                  ${!pending && !checkedIn && !(kitDeliveryActive || boutiqueDeliveryActive) && (knownAbsence || (attendanceFinalized && status === "absent")) ? `<span class="teacher-roster-check is-absent" aria-label="Absent" title="Absent">×</span>` : ""}
+                  ${!pending && !checkedIn && !(kitDeliveryActive || boutiqueDeliveryActive) && (knownAbsence || (attendanceFinalized && status === "absent")) ? `<span class="teacher-roster-selection-check aw-absence-x" aria-label="Absent" title="Absent">×</span>` : ""}
                 </button>
                 <strong class="${weeklyHelperId === student.id ? "teacher-helper-name" : ""}">${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
                 ${student.connectedPreviewSample || student.id === "sample-elena" ? `<span class="teacher-roster-preview-badge">PP Sample</span>` : ""}
