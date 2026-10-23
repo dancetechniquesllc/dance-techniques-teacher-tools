@@ -20848,6 +20848,7 @@
       { id: "kara", firstName: "Kara", lastName: "Rogers" }
     ];
     const requiredActiveStaffNames = new Set(["tiffany edwards"]);
+    const inactiveLiveStaffIds = new Set();
     teachers.push(...teachingTeamDirectorySeeds.map((profile) => duplicateTeacherProfile(teachers[0], profile)));
 
     const knownPayrollTiers = new Map([
@@ -23770,6 +23771,9 @@
           calculationSnapshot: payment.calculation_snapshot || {}
         }
       ]));
+      inactiveLiveStaffIds.clear();
+      profiles.filter((item) => item.active === false && !requiredActiveStaffNames.has(String(item.full_name || "").trim().toLowerCase()))
+        .forEach((item) => inactiveLiveStaffIds.add(String(item.id)));
       const assignments = assignmentsResult.data || [];
       const activeAssignments = assignments.filter((assignment) => assignment.active !== false);
       let recoverInactiveAssignments = false;
@@ -23824,7 +23828,7 @@
         teacher.teacherType = item.role === "teacher" ? "Teacher" : (item.role === "director" ? "Director" : "Admin");
         teacher.color = item.color || teacher.color || "";
         teacher.phone = item.phone || teacher.phone || "";
-        const hasRecoverableAssignment = recoverInactiveAssignments && assignments.some((assignment) => assignment.teacher_id === item.id);
+        const hasRecoverableAssignment = false; // Explicit shared deactivation must never be reversed by autosave recovery.
         const normalizedLiveName = item.full_name.trim().toLowerCase();
         const isRequiredActiveStaff = requiredActiveStaffNames.has(normalizedLiveName);
         teacher.status = item.active === false && !hasRecoverableAssignment && !isRequiredActiveStaff ? "inactive" : "active";
@@ -23884,7 +23888,7 @@
           const localAssignedTeacherId = localSchoolAssignmentsById.get(resolvedSchoolId);
           const activeAssignment = activeAssignments.find((assignment) => assignment.partner_school_id === school.id);
           const recoveredInactiveAssignment = !activeAssignment && recoverInactiveAssignments
-            ? assignments.find((assignment) => assignment.partner_school_id === school.id)
+            ? assignments.find((assignment) => assignment.partner_school_id === school.id && !inactiveLiveStaffIds.has(String(assignment.teacher_id)))
             : null;
           const databaseAssignedTeacherId = activeAssignment?.teacher_id || recoveredInactiveAssignment?.teacher_id || "";
           return {
@@ -23892,7 +23896,7 @@
           initials: school.initials || "",
           isd: school.district || "", directorName: school.director_name || "", phone: school.director_phone || "", email: school.director_email || "",
           dayOfWeek: school.dance_day, timeBlock: school.time_of_day || "AM", seasonStartDate: school.season_start_date || "",
-          assignedTeacherId: databaseAssignedTeacherId || localAssignedTeacherId || "",
+          assignedTeacherId: databaseAssignedTeacherId || (!inactiveLiveStaffIds.has(String(localAssignedTeacherId)) ? localAssignedTeacherId : "") || "",
           recoveredFromInactiveAssignment: Boolean(recoveredInactiveAssignment?.teacher_id),
           classroomOptions: school.classroom_options || [], partnershipBenefit: school.partnership_benefit || "",
           preferredVendorPaymentMethod: paymentPreference.preferred_method || "", vendorPaymentDestination: paymentPreference.payment_destination || "",
@@ -27951,7 +27955,7 @@
       schoolLibrary.forEach((school) => {
         const restoreId = sourceById.get(String(school.id || ""))
           || sourceByName.get(String(school.name || "").trim().toLowerCase());
-        if (!restoreId) return;
+        if (!restoreId || inactiveLiveStaffIds.has(String(restoreId))) return;
         if (!onlyUnassigned || !school.assignedTeacherId) {
           if (school.assignedTeacherId !== restoreId) {
             school.assignedTeacherId = restoreId;
@@ -27999,7 +28003,7 @@
       ];
       const fieldHasValue = (value) => Array.isArray(value) ? value.length > 0 : value !== "" && value != null;
       const currentTeacherIdForHistorical = (savedTeacherId, payload) => {
-        if (!savedTeacherId) return "";
+        if (!savedTeacherId || inactiveLiveStaffIds.has(String(savedTeacherId))) return "";
         if (isUuid(savedTeacherId) && teachers.some((teacher) => teacher.id === savedTeacherId)) return savedTeacherId;
         const savedTeacher = (payload.teachers || []).find((teacher) => teacher.id === savedTeacherId);
         const savedName = savedTeacher ? fullName(savedTeacher).trim().toLowerCase() : "";
@@ -28040,6 +28044,7 @@
       if (!sourcePayload || !Array.isArray(sourcePayload.teachers)) return [];
       const restored = [];
       sourcePayload.teachers.forEach((savedTeacher) => {
+        if (inactiveLiveStaffIds.has(String(savedTeacher.id))) return;
         const savedName = fullName(savedTeacher).trim().toLowerCase();
         const alreadyPresent = teachers.some((teacher) => (
           (savedTeacher.id && teacher.id === savedTeacher.id)
@@ -40836,9 +40841,14 @@
     const rosterCurrentStudents = (rosterClass) => rosterClass.students.filter((student) => ["enrolled", "paused"].includes(student.status));
     const rosterProspects = (rosterClass) => rosterClass.students.filter((student) => !["enrolled", "paused", "inactive"].includes(student.status) && !student.additionalInformation?.future_dancer_archived);
     const rosterClassAssignedDancers = (rosterClass) => {
-      const rosterStudents = (rosterClass?.students || []).filter((student) => !student.additionalInformation?.future_dancer_archived);
+      const rosterStudents = (rosterClass?.students || []).filter((student) => student.status !== "inactive" && !student.additionalInformation?.future_dancer_archived);
+      // Completed placement links are history, not a second active assignment.
+      // A current dancer is already counted in the shared class roster above.
       const queuedAssignments = enrollmentIntakeQueue.filter((item) => (
-        String(item.matched_dance_class_id || item.placed_dance_class_id || "") === String(rosterClass?.id || "")
+        !enrollmentIsArchived(item)
+        && !["placed", "complete"].includes(String(item.status || "").toLowerCase())
+        && !item.placed_student_id && !item.placed_class_enrollment_id
+        && String(item.matched_dance_class_id || item.placed_dance_class_id || "") === String(rosterClass?.id || "")
       ));
       return { rosterStudents, queuedAssignments, total: rosterStudents.length + queuedAssignments.length };
     };
@@ -56416,7 +56426,7 @@
       const recoveredTeachers = shouldRunOperationalRecovery ? [
         ...restoreMissingTeachersFromHistory(),
         ...teachers.filter((teacher) => teacher.recoveredFromInactive)
-      ].filter((teacher, index, list) => list.findIndex((candidate) => candidate.id === teacher.id) === index) : [];
+      ].filter((teacher, index, list) => !inactiveLiveStaffIds.has(String(teacher.id)) && list.findIndex((candidate) => candidate.id === teacher.id) === index) : [];
       const recoveredAssignments = shouldRunOperationalRecovery ? restoreSchoolAssignmentsFromHistory({ onlyUnassigned: true }) : false;
       let schoolScheduleRecoveryAlreadyCompleted = false;
       try { schoolScheduleRecoveryAlreadyCompleted = Boolean(window.localStorage?.getItem(schoolScheduleRecoveryCompletedKey)); } catch (error) {}
