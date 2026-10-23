@@ -99,3 +99,5 @@ body[data-teacher-device="tablet"] .teacher-notifications>summary{position:relat
 .aw-history-toolbar{flex-wrap:nowrap;align-items:center;justify-content:center}
 .aw-history-toolbar .aw-pencil{flex:0 0 44px;height:44px;padding:0}
 .aw-history-toolbar .aw-known-absence-button{flex:1;min-width:0;border:1px solid var(--brick,#8A4E54);border-radius:10px;background:var(--brick,#8A4E54);color:white;padding:10px 12px;font-weight:700}
+
+.aw-class-actions-art-menu{gap:18px 16px}.aw-class-actions-art-menu button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:8px;background:transparent;border:0;color:var(--berry,#64113c);font-size:16px;line-height:1.2}.aw-class-actions-art-menu button img{display:block;width:96px;height:96px;object-fit:contain}.aw-class-actions-art-menu button span{font-weight:750}.aw-class-actions-art-menu button:disabled{opacity:.45}.aw-class-actions-art-menu button:focus-visible{outline:3px solid var(--berry,#64113c);outline-offset:3px;border-radius:16px}.aw-class-actions-art-menu button:not(:disabled):hover{background:#f8e9e440}

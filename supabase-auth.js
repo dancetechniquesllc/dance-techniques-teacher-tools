@@ -23,6 +23,8 @@
     || ["invite", "recovery"].includes(authQuery.get("type"))
     || ["invite", "recovery"].includes(authHash.get("type"));
   let authCallbackInitializing = passwordRecoveryMode;
+  let authSessionGeneration = 0;
+  let signOutInProgress = false;
   const isLocalTour = ["127.0.0.1", "localhost"].includes(window.location.hostname)
     && new URLSearchParams(window.location.search).get("tour") === "1";
 
@@ -32,6 +34,8 @@
     document.body.classList.toggle("auth-checking", state === "checking");
     document.body.dataset.authenticated = state === "ready" ? "true" : "false";
     app?.setAttribute("aria-hidden", state === "ready" ? "false" : "true");
+    app?.toggleAttribute("hidden", state !== "ready");
+    app?.toggleAttribute("inert", state !== "ready");
   };
 
   const friendlyAuthError = (error) => {
@@ -166,6 +170,8 @@
   };
 
   const showSession = async (session) => {
+    if (signOutInProgress) return;
+    const generation = ++authSessionGeneration;
     if (passwordRecoveryMode && session?.user) {
       setGateState("setup");
       return;
@@ -177,12 +183,14 @@
       return;
     }
     if (!session?.user) {
+      clearAuthenticatedProfile();
       setGateState("landing");
       return;
     }
 
     setGateState("checking");
     const { data: profile, error } = await loadSignedInProfile(session.user.id);
+    if (generation !== authSessionGeneration || signOutInProgress) return;
 
     if (error || !profile) {
       if (error) {
@@ -222,8 +230,10 @@
     if (profile.role === "teacher") document.body.dataset.currentTeacherId = profile.id;
     window.clearTimeout(teacherProfileResolutionTimer);
     teacherProfileResolutionTimer = 0;
-    setGateState("ready");
     window.dispatchEvent(new CustomEvent("dt-auth-ready", { detail: { profile } }));
+    // Synchronous listeners select the exact teacher and clear the previous
+    // account's roster before the private screen becomes visible.
+    if (window.dtCurrentProfile?.id === profile.id) setGateState("ready");
   };
 
   form?.addEventListener("submit", async (event) => {
@@ -245,12 +255,28 @@
     message.textContent = "Opening your Teacher Tools profile…";
   });
 
+  const clearAuthenticatedProfile = () => {
+    authSessionGeneration += 1;
+    window.dtCurrentProfile = null;
+    delete document.body.dataset.currentTeacherId;
+    window.dispatchEvent(new CustomEvent("dt-auth-cleared"));
+  };
+
   const signOut = async (event) => {
     event?.preventDefault();
-    await client.auth.signOut();
-    passwordInput.value = "";
-    message.textContent = "";
-    setGateState("landing");
+    if (signOutInProgress) return;
+    signOutInProgress = true;
+    clearAuthenticatedProfile();
+    setGateState("checking");
+    message.textContent = "Signing out…";
+    try {
+      await client.auth.signOut();
+    } finally {
+      passwordInput.value = "";
+      message.textContent = "";
+      setGateState("landing");
+      signOutInProgress = false;
+    }
   };
 
   document.getElementById("auth-sign-out")?.addEventListener("click", signOut);
@@ -366,6 +392,7 @@
   });
 
   client.auth.onAuthStateChange((event, session) => {
+    if (signOutInProgress) return;
     if (authCallbackInitializing) return;
     if (profileRecoveryRefreshing && event === "TOKEN_REFRESHED") return;
     if (event === "PASSWORD_RECOVERY") {
@@ -373,7 +400,12 @@
       setGateState("setup");
       return;
     }
-    window.setTimeout(() => showSession(session), 0);
+    window.setTimeout(async () => {
+      if (signOutInProgress) return;
+      const { data } = await client.auth.getSession();
+      if (signOutInProgress || (data.session?.user?.id || null) !== (session?.user?.id || null)) return;
+      showSession(data.session);
+    }, 0);
   });
 
   const establishCallbackSession = async () => {

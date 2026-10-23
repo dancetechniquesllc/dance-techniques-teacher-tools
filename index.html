@@ -9190,6 +9190,7 @@
     .roster-student-row.is-male .roster-student-photo { background: #e2e8de; color: #4f5f48; }
     .teacher-helper-sparkle { margin: 0 1px; color: var(--fg); font-size: 8px; line-height: 1; vertical-align: 1px; }
     .teacher-helper-name { display: inline-flex; align-items: center; gap: 2px; max-width: 100%; padding: 3px 6px; border: 1px solid #d3a51e; border-radius: 999px; background: #f8e7a9; color: var(--fg); white-space: nowrap; }
+    .teacher-helper-next-sparkle { color: var(--gold); display: inline-block; font-size: 1.05em; vertical-align: baseline; }
     .teacher-helper-picker-dialog { position: relative; }
     .teacher-helper-picker-close { position: absolute; top: 10px; right: 10px; }
     .roster-photo-editor { display: flex; align-items: center; gap: 12px; }
@@ -14839,7 +14840,8 @@
     .confirm-overlay {
       position: fixed;
       inset: 0;
-      z-index: 30;
+      /* Action dialogs must cover the Teacher Tools navigation (z-index 60). */
+      z-index: 100;
       display: none;
       align-items: center;
       justify-content: center;
@@ -17382,7 +17384,7 @@
           <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="schools"><span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 22V10h16v12M2 10l10-7 10 7M9 22v-6h6v6M12 3V1h5v3h-5M6 13h1m10 0h1"/><circle cx="12" cy="10" r="2"/></svg></span><span>My Schools</span></button>
           <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="pay"><span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 1v22M18 5H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8H5"/></svg></span><span>My Payday</span></button>
           <button class="teacher-desktop-nav" type="button" data-teacher-desktop-view="stage"><span><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 3h20v18H2zM2 7h20M3 8c4 0 6-2 9-4 3 2 5 4 9 4M3 8c4 3 4 6 0 10m18-10c-4 3-4 6 0 10M8 21v-3h8v3"/></svg></span><span>The Big Stage</span></button>
-          <div class="teacher-desktop-profile"><strong>Lexi</strong><br><small>Teacher workspace</small></div>
+          <div class="teacher-desktop-profile"><strong id="teacher-desktop-current-teacher-name">Teacher</strong><br><small>Teacher workspace</small></div>
         </aside>
         <div class="teacher-desktop-main">
           <div class="teacher-desktop-app-host" id="teacher-desktop-app-host"></div>
@@ -17579,7 +17581,7 @@
               <div><h3>Costume Catalog</h3><p><em>Browse the complete Dance Techniques costume inventory and match dancer sizes.</em></p></div>
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
-            <iframe class="dt-tunes-embedded-frame" id="costume-catalog-frame" title="Dance Techniques Costume Catalog" data-src="costume-catalog.html?v=20260911" scrolling="no" style="min-height:1100px"></iframe>
+            <iframe class="dt-tunes-embedded-frame" id="costume-catalog-frame" title="Dance Techniques Costume Catalog" data-src="costume-catalog.html?v=20261021-restored" scrolling="no" style="min-height:1100px"></iframe>
           </section>
 
           <section class="admin-profile-card admin-section-page big-stage" id="admin-home-big-stage">
@@ -20634,12 +20636,12 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="data/partner-schools.js"></script>
-  <script src="supabase-auth.js?v=20261016-responsive-teacher-tools"></script>
+  <script src="supabase-auth.js?v=20261022-session-lifecycle"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
-  <script src="/teacher-music-data.js?v=20260826-playlist-workshop"></script>
+  <!-- Workshop previews use the built-in fallback; live music loads from shared storage. -->
   <script src="roster-care.js?v=20260908"></script>
   <script src="attendance-storage.js?v=student-storage-20261020"></script>
-  <script src="attendance-preview.js?v=20261020-history-header"></script>
+  <script src="attendance-preview.js?v=class-action-artwork-20261022"></script>
   <script>
     const modalScrollLockSelector = [
       ".confirm-overlay.active",
@@ -21073,6 +21075,7 @@
     let enrollmentClassroomManagerOpen = false;
     let officialClassroomManagerSchoolId = "";
     let officialClassroomManagerSource = "enrollment";
+    let officialClassroomManagerChangeId = "";
     let enrollmentIntakeSubscription = null;
     let enrollmentChangeSubscription = null;
     let sharedRosterSubscription = null;
@@ -22237,13 +22240,16 @@
     const saveSchoolClassroomOptions = async (school) => {
       if (document.body.dataset.tourMode === "true") { scheduleAppDataSave(); return; }
       if (!window.dtSupabase || !isUuid(school?.id)) throw new Error("School classroom options are unavailable.");
-      let query = window.dtSupabase.from("partner_schools").update({ classroom_options: school.classroomOptions }).eq("id", school.id);
-      if (school.updatedAt) query = query.eq("updated_at", school.updatedAt);
-      const { data, error } = await query.select("id, classroom_options, updated_at").maybeSingle();
+      const { data, error } = await window.dtSupabase.rpc("update_own_partner_school_classrooms", {
+        target_school_id: school.id,
+        target_classroom_options: school.classroomOptions,
+        expected_updated_at: school.updatedAt || null
+      }).maybeSingle();
       if (error) throw error;
       if (!data?.id) throw new Error("The classroom list was not saved. Reopen the school to load its latest details, and confirm you have permission to manage classrooms.");
       school.classroomOptions = data.classroom_options || [];
       school.updatedAt = data.updated_at || school.updatedAt || "";
+      syncTeachingTeamSchools();
       scheduleAppDataSave();
     };
     const mountOfficialClassroomManagerOverlay = () => {
@@ -22393,7 +22399,7 @@
       "squarenonce", "squarepm", "squarepaymentmethod", "submitdate", "submitsource",
       "timetosubmit", "transactionid", "uploadserverurl", "validatednewrequiredfieldids",
       "visitedpages", "formid", "eventid", "simple_spc", "teacherfeedback",
-      "trialattendancepending", "trialcompleted", "trialcompletedat",
+      "trialattendancepending", "trialcompleted", "trialcompletedat", "trialmatchreview",
       "futuredancerarchived", "futuredancerarchivedat", "parentcontacthistory"
     ]);
     const normalizedEnrollmentShirtSize = (size, gender = "") => {
@@ -22485,7 +22491,7 @@
       return rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false
         && (enrollmentSchoolNameMatches(rosterClass.schoolName, schoolName)
           || enrollmentSchoolNameMatches(rosterSchoolNickname(rosterClass.schoolName), schoolName)))
-        .flatMap((rosterClass) => rosterClass.students.filter((student) => student.status === "trial-scheduled"
+        .flatMap((rosterClass) => rosterClass.students.filter((student) => ["trial-scheduled", "trial-attended", "ready-to-enroll"].includes(student.status)
           && !student.additionalInformation?.future_dancer_archived).map((student) => {
           const names = [student.firstName, student.preferredName].map(key).filter(Boolean);
           const trialLastName = key(student.lastName);
@@ -23154,10 +23160,11 @@
         const submittedSchoolOption=targetSchool&&!schoolNames.includes(targetSchool)?`<option value="${escapeText(targetSchool)}" selected>${escapeText(targetSchool)} · Submitted New School Data</option>`:"";
         const schoolOptions=submittedSchoolOption+schoolNames.map((schoolName)=>`<option value="${escapeText(schoolName)}" ${schoolName===targetSchool?"selected":""}>${escapeText(rosterSchoolNickname(schoolName))}</option>`).join("");
         const targetClasses=rosterClasses.filter((rosterClass)=>rosterClass.sourceActive!==false&&(!targetSchool||enrollmentSchoolNameMatches(rosterClass.schoolName,targetSchool)));
-        const targetSchoolProfile=schoolProfileByName(targetSchool);
+        const targetSchoolProfile=enrollmentChangeSchoolProfile(targetSchool);
         const officialClassrooms=[...new Set([...(targetSchoolProfile?.classroomOptions||[]),...targetClasses.flatMap((rosterClass)=>rosterClass.students||[]).map((student)=>student.officialClassroom).filter(Boolean)].map((value)=>String(value).trim()).filter(Boolean))].sort((left,right)=>left.localeCompare(right,undefined,{numeric:true}));
         const matchedOfficialClassroom=officialClassrooms.find((classroom)=>normalizedClassroomName(classroom).toLowerCase()===normalizedClassroomName(newSchoolClassroom).toLowerCase())||"";
         const targetClassroom=item.target_classroom||matchedOfficialClassroom||"";
+        if (!item.target_classroom && matchedOfficialClassroom) item.target_classroom = matchedOfficialClassroom;
         const officialClassroomOptions=officialClassrooms.map((classroom)=>`<option value="${escapeText(classroom)}" ${classroom===targetClassroom?"selected":""}>${escapeText(classroom)}</option>`).join("");
         const selectedTargetClass=targetClasses.find((rosterClass)=>String(rosterClass.id)===String(item.target_class_id));
         const classSelectionModalOpen=String(enrollmentChangeClassOpenId)===String(item.id);
@@ -23189,7 +23196,7 @@
         const refundModalOpen=String(enrollmentChangeBrightwheelRefundOpenId)===String(item.id);
         const refundModalMarkup=refundModalOpen?`<div class="enrollment-change-assignment-overlay" data-enrollment-change-refund-overlay="${escapeText(item.id)}" role="presentation"><section class="enrollment-change-assignment-dialog enrollment-change-refund-dialog" role="dialog" aria-modal="true" aria-labelledby="enrollment-change-refund-title-${escapeText(item.id)}"><div class="enrollment-change-assignment-dialog-header"><div><h4 id="enrollment-change-refund-title-${escapeText(item.id)}">Brightwheel Refunds · ${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" "))}${assigned?` · ${escapeText(assignedTuitionLabel)}`:""}</h4><p>Select every refunded month. Full Refund uses the dancer’s recorded monthly tuition; Partial Refund opens an amount field.</p></div><button class="enrollment-change-assignment-close" type="button" data-enrollment-change-close-refund aria-label="Close Brightwheel refund details">×</button></div><div class="enrollment-change-refund-months">${enrollmentChangeRefundMonths().map((month)=>{const saved=savedRefundDetails.find((detail)=>detail.month===month.value)||{};const partial=saved.type==="partial";return `<div class="enrollment-change-refund-month"><input type="checkbox" aria-label="Refund ${escapeText(month.label)}" data-enrollment-change-refund-month="${escapeText(month.value)}" ${saved.month?"checked":""}><strong>${escapeText(month.label)}</strong><div class="enrollment-change-refund-type-toggle" role="group" aria-label="Refund type for ${escapeText(month.label)}"><label><input type="radio" name="refund-type-${escapeText(item.id)}-${escapeText(month.value)}" value="full" data-enrollment-change-refund-kind="${escapeText(month.value)}" ${!partial?"checked":""}><span>Full Refund</span></label><label><input type="radio" name="refund-type-${escapeText(item.id)}-${escapeText(month.value)}" value="partial" data-enrollment-change-refund-kind="${escapeText(month.value)}" ${partial?"checked":""}><span>Partial Refund</span></label></div><input type="number" min="0.01" step="0.01" inputmode="decimal" data-enrollment-change-refund-amount="${escapeText(month.value)}" value="${escapeText(partial?saved.amount||"":"")}" placeholder="Partial refund amount" ${partial?"":"hidden"}></div>`;}).join("")}</div><div class="enrollment-change-refund-actions"><button class="secondary" type="button" data-enrollment-change-close-refund>Cancel</button><button class="primary" type="button" data-enrollment-change-save-refunds="${escapeText(item.id)}">Save Refunds</button></div></section></div>`:"";
         const pauseWorkflowMarkup=`<div class="enrollment-change-pause-dates"><div class="enrollment-change-pause-date"><small>Requested Stop Date</small><strong>${escapeText(requestDateLabel(pauseDates.stop)||"Not entered")}</strong></div><div class="enrollment-change-pause-date"><small>Requested Start Date</small><strong>${escapeText(requestDateLabel(pauseDates.resume)||"Not entered")}</strong></div></div><div class="enrollment-change-pause-actions"><button class="is-approve" type="button" data-enrollment-change-approve-pause="${escapeText(item.id)}" ${!assigned?"disabled":""}>Approve</button><button class="is-adjust" type="button" data-enrollment-change-open-pause="${escapeText(item.id)}" ${!assigned?"disabled":""}>Adjust</button><button class="is-deny" type="button" data-enrollment-change-deny-pause="${escapeText(item.id)}" ${!assigned?"disabled":""}>Deny</button></div>`;
-        const workflowMarkup=isSchoolChange?`<div class="enrollment-change-school"><label>New School<select data-enrollment-change-target-school="${escapeText(item.id)}"><option value="">Choose a school…</option>${schoolOptions}</select></label><label>New School Classroom<input value="${escapeText(newSchoolClassroom)}" readonly aria-label="Submitted new school classroom"></label><label>Official Classroom<select data-enrollment-change-target-classroom="${escapeText(item.id)}"><option value="">Choose an official classroom…</option>${officialClassroomOptions}</select></label><button class="secondary" type="button" data-enrollment-change-open-class="${escapeText(item.id)}" ${!targetSchool?"disabled":""}>${selectedTargetClass?`✓ ${escapeText(selectedTargetClass.name)}`:"Assign to Class"}</button><button class="primary" type="button" data-enrollment-change-open-move="${escapeText(item.id)}" ${!assigned||!targetSchool||!targetClassroom||!item.target_class_id?"disabled":""}>${item.status==="scheduled"&&item.school_change_effective_date?`Scheduled · ${escapeText(requestDateLabel(item.school_change_effective_date))}`:"Process School Change"}</button></div>`:isPause?pauseWorkflowMarkup:`<div class="enrollment-change-steps">${step("enrollment_fee_refund_status","Enrollment Fee Refund",true)}${step("brightwheel_refund_status","Brightwheel Refund",true)}${step("billing_plan_status","Stop Billing Plan")}<div class="enrollment-change-step ${item.deactivation_status==="completed"?"is-complete":""}"><strong>${finalActionLabel}</strong><small>${item.deactivation_status==="completed"?"✓ Complete":!assigned?"Assign dancer first":!financialReady?"Resolve refunds first":!billingReady?"Stop billing first":"Ready"}</small><div class="enrollment-change-step-actions"><button class="primary enrollment-change-deactivate" type="button" data-enrollment-change-deactivate="${escapeText(item.id)}" ${!assigned||!financialReady||!billingReady||item.deactivation_status==="completed"?"disabled":""}>${finalActionLabel}</button></div></div></div>`;
+        const workflowMarkup=isSchoolChange?`<div class="enrollment-change-school"><label>New School<select data-enrollment-change-target-school="${escapeText(item.id)}"><option value="">Choose a school…</option>${schoolOptions}</select></label><label>New School Classroom<input value="${escapeText(newSchoolClassroom)}" readonly aria-label="Submitted new school classroom"></label><label>Official Classroom<select data-enrollment-change-target-classroom="${escapeText(item.id)}"><option value="">Choose an official classroom…</option>${officialClassroomOptions}<option value="__add__">Add Official Classroom</option></select></label><button class="secondary" type="button" data-enrollment-change-open-class="${escapeText(item.id)}" ${!targetSchool?"disabled":""}>${selectedTargetClass?`✓ ${escapeText(selectedTargetClass.name)}`:"Assign to Class"}</button><button class="primary" type="button" data-enrollment-change-open-move="${escapeText(item.id)}" ${!assigned||!targetSchool||!targetClassroom||!item.target_class_id?"disabled":""}>${item.status==="scheduled"&&item.school_change_effective_date?`Scheduled · ${escapeText(requestDateLabel(item.school_change_effective_date))}`:"Process School Change"}</button></div>`:isPause?pauseWorkflowMarkup:`<div class="enrollment-change-steps">${step("enrollment_fee_refund_status","Enrollment Fee Refund",true)}${step("brightwheel_refund_status","Brightwheel Refund",true)}${step("billing_plan_status","Stop Billing Plan")}<div class="enrollment-change-step ${item.deactivation_status==="completed"?"is-complete":""}"><strong>${finalActionLabel}</strong><small>${item.deactivation_status==="completed"?"✓ Complete":!assigned?"Assign dancer first":!financialReady?"Resolve refunds first":!billingReady?"Stop billing first":"Ready"}</small><div class="enrollment-change-step-actions"><button class="primary enrollment-change-deactivate" type="button" data-enrollment-change-deactivate="${escapeText(item.id)}" ${!assigned||!financialReady||!billingReady||item.deactivation_status==="completed"?"disabled":""}>${finalActionLabel}</button></div></div></div>`;
         return `<article class="enrollment-change-card">
           <div class="enrollment-change-heading"><div class="enrollment-change-identity">${assigned?`<span class="roster-student-photo ${rosterStudentBadgeClasses(assigned.student)}">${studentPhotoMarkup(assigned.student)}</span>`:""}<h4 class="enrollment-change-title"><span>${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"Dancer name not entered")} is</span><select data-enrollment-change-request-type="${escapeText(item.id)}" aria-label="Request type for ${escapeText([item.dancer_first_name,item.dancer_last_name].filter(Boolean).join(" ")||"this dancer")}">${requestTypeOptions}</select><button class="enrollment-change-assign-open ${assigned?"is-assigned":""}" type="button" data-enrollment-change-open-assignment="${escapeText(item.id)}">Assign Student ${assigned?"✓":"+"}</button><button class="enrollment-change-cancel-request" type="button" data-enrollment-change-cancel-request="${escapeText(item.id)}">Cancel Request</button></h4></div><div class="enrollment-change-heading-badges"><span class="enrollment-change-request-source"${requestSourceStyle}>${escapeText(requestSourceLabel)}</span><span class="enrollment-change-submitted-date">${escapeText(new Date(item.submitted_at||item.created_at||Date.now()).toLocaleDateString())}</span></div></div>
           ${isPause?"":`<div class="enrollment-change-last-day-banner">Last day at <strong>${escapeText(currentSchool||"the current school")}</strong> is <strong>${escapeText(item.last_day?new Date(`${item.last_day}T12:00:00`).toLocaleDateString():"not entered")}</strong>.</div>`}
@@ -23204,6 +23211,23 @@
           ${pauseModalMarkup}
         </article>`;
       }).join("");
+    };
+
+    const enrollmentChangeSchoolProfile = (name) => {
+      const key = enrollmentSchoolKey(name);
+      if (!key) return null;
+      return schoolLibrary.find((school) => [school.name, school.nickname, ...(school.aliases || []), ...(school.alternateNames || [])]
+        .filter(Boolean).some((value) => enrollmentSchoolKey(value) === key)) || schoolProfileByName(name);
+    };
+
+    const saveEnrollmentChangePlacement = async (item, payload) => {
+      if (document.body.dataset.tourMode !== "true") {
+        if (!window.dtSupabase) { showToast("Reconnect before saving this school change."); return false; }
+        const { data, error } = await window.dtSupabase.from("enrollment_change_requests").update(payload).eq("id", item.id).select("id").maybeSingle();
+        if (error || !data?.id) { console.error("School change selection could not save", error || "No saved request returned"); showToast("The school change selection could not be saved. Please try again."); return false; }
+      }
+      Object.assign(item, payload);
+      return true;
     };
 
     const executeEnrollmentSchoolChange = async (item, { quiet = false } = {}) => {
@@ -23227,7 +23251,10 @@
       target.students.push(source.student);
       source.student.classroom=item.new_school_classroom||item.target_classroom||"";
       source.student.officialClassroom=item.target_classroom||"";
-      await saveSharedStudent(source.student,target);
+      if (!(await saveSharedStudent(source.student,target))) {
+        showToast("The dancer moved, but the classroom could not be saved. The request remains open for retry.");
+        return false;
+      }
       const payload={target_school:target.schoolName,target_class_id:target.id,target_classroom:item.target_classroom||null,school_change_timing:item.school_change_timing||"immediate",school_change_effective_date:effectiveDate,status:"completed",completed_at:new Date().toISOString()};
       Object.assign(item,payload);
       if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){
@@ -23501,7 +23528,10 @@
     };
 
     const dbTime = (value = "") => value ? String(value).slice(0, 5) : "";
-    const uiStudentStatus = (status) => status === "paused" ? "paused" : status === "enrolled" ? "enrolled" : status === "waitlisted" ? "waitlisted" : "trial-scheduled";
+    const uiStudentStatus = (status, information = {}) => {
+      if (["paused", "enrolled", "waitlisted"].includes(status)) return status;
+      return information?.trial_completed || information?.trial_completed_at ? "trial-attended" : "trial-scheduled";
+    };
     const dbEnrollmentStatus = (status) => status === "paused" ? "paused" : status === "enrolled" ? "enrolled" : status === "waitlisted" ? "waitlisted" : "trial";
 
     // Photo URLs are temporary credentials; keep their cache in memory only.
@@ -23676,6 +23706,7 @@
         ["admin", "director"].includes(profile.role) ? client.from("class_recital_performance_group_members").select("*") : Promise.resolve({ data: [], error: null }),
         recitalHistoryQuery
       ]);
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       // Older production schemas may not have the new `paused` enrollment enum
       // value yet. PostgreSQL rejects the entire `.in()` filter in that case,
       // which used to make every class and Curriculum Composer look offline.
@@ -23684,6 +23715,7 @@
         console.warn("Paused enrollment status is not available yet; loading active rosters without paused students.", enrollmentsResult.error);
         enrollmentsResult = await client.from("class_enrollments").select("id, dance_class_id, student_id, status, trial_date, enrolled_date, students(*)").in("status", ["trial", "enrolled"]);
       }
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       const attendanceTableUnavailable = attendanceResult.error?.code === "42P01";
       // Classes and enrollments are the shared roster. Supporting features such
       // as guardian links, email history, attendance, and partnership payments
@@ -23976,12 +24008,12 @@
               kitPickedUp: Boolean(student.kit_picked_up), kitPickedUpAt: student.kit_picked_up_at || "", kitPickedUpBy: student.kit_picked_up_by || "",
               kitDeliveredAt: student.kit_delivered_at || "", kitDeliveredBy: student.kit_delivered_by || "",
               kitDeliveryNote: student.kit_delivery_note || "",
-              enrolledDate: enrollment.enrolled_date || "", status: uiStudentStatus(enrollment.status), trialDate: enrollment.trial_date || "", parentName: student.parent_name || "",
+              enrolledDate: enrollment.enrolled_date || "", status: uiStudentStatus(enrollment.status, student.additional_information), trialDate: enrollment.trial_date || "", parentName: student.parent_name || "",
               systemEntryDate: student.created_at || "", createdAt: student.created_at || "", enrolledAt: student.created_at || "",
               parentFirstName: student.parent_first_name || "", parentLastName: student.parent_last_name || "", parentPhone: student.parent_phone || "",
               parentEmail: student.parent_email || "", tuitionDiscount: student.tuition_discount || "none", medicalNotes: student.medical_notes || "", registrationNotes: student.registration_notes || "",
               requestedDanceStyle: recitalHistoryByStudentId.get(String(student.id)) || "",
-              notes: note?.note || student.registration_notes || "", parentPortalConnected: connectedParentPortalStudentIds.has(String(student.id)), additionalInformation: student.additional_information && typeof student.additional_information === "object" ? { ...student.additional_information } : {},
+              notes: student.registration_notes || note?.note || "", parentPortalConnected: connectedParentPortalStudentIds.has(String(student.id)), additionalInformation: student.additional_information && typeof student.additional_information === "object" ? { ...student.additional_information } : {},
               teacherFeedback: student.additional_information?.teacher_feedback || "", newsletterHistory: emailHistoryByStudent.get(student.id) || [], linkedFamilyEmails: (familyLinksByStudent.get(student.id) || []).map((link) => { const adult = Array.isArray(link.guardians) ? link.guardians[0] : link.guardians; return adult?.email || ""; }).filter(Boolean), photoPath: student.photo_path || "", photo: "" };
           })
         };
@@ -23999,10 +24031,13 @@
         ...pendingLocalClasses.filter((rosterClass) => !liveClassIds.has(String(rosterClass.id)))
       ]);
       await window.refreshTeacherRecitalPlanner?.();
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       selectedRosterClassId = rosterClasses[0]?.id || "";
       await window.DTAttendancePreview?.reload?.();
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       sharedRosterReady = true;
       setSharedRosterState("ready");
+      if (document.body.dataset.adminSection === "costume-catalog" && costumeMatcherLeader()) void loadCostumeMatcherSelections().then(() => document.getElementById("costume-catalog-frame")?.contentWindow?.refreshCostumeMatcherData?.()).catch(() => {});
       renderHomeWidget();
       renderLexiSchedule();
       initializeAdminProfile();
@@ -24762,7 +24797,7 @@
     const teacherDesktopViewForTab = (tab) => Object.entries(teacherDesktopTabs).find(([, teacherTab]) => teacherTab === tab)?.[0] || "home";
     const openTeacherToolsForViewport = (tab = "today") => {
       const nextMode = preferredTeacherToolsMode();
-      if (document.body.dataset.mode === "teacher-desktop" && nextMode !== "teacher-desktop") unmountTeacherDesktopApp();
+      if (nextMode !== "teacher-desktop") unmountTeacherDesktopApp();
       document.body.dataset.mode = nextMode;
       document.querySelectorAll("[data-mode-btn]").forEach((item) => item.classList.toggle("active", item.dataset.modeBtn === nextMode));
       if (nextMode === "teacher-desktop") mountTeacherDesktopApp(teacherDesktopViewForTab(tab));
@@ -24932,7 +24967,6 @@
         const nextMode = button.dataset.modeBtn;
         if (["teacher-desktop", "parent"].includes(nextMode) && document.body.dataset.tourMode !== "true") return;
         if (nextMode === "admin" && window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
-          document.body.dataset.mode = "teacher";
           showToast("Director Dashboard access is limited to directors and administrators");
           return;
         }
@@ -28116,6 +28150,7 @@
           }, { onConflict: "teacher_id" });
       const { error } = await cloudWrite;
       cloudPersistenceSaving = false;
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       if (error) {
         console.error("Director Dashboard cloud save failed", error);
         return false;
@@ -28967,6 +29002,8 @@
             email: school.email || "",
             importantNotes: school.importantNotes || "",
             partnershipBenefit: school.partnershipBenefit || "",
+            updatedAt: school.updatedAt || "",
+            classroomOptions: [...(school.classroomOptions || [])],
             color: school.color || ""
           }));
       });
@@ -31321,6 +31358,7 @@
       const teacherToolsProfile = document.body.dataset.teacherToolsViewer === "true"
         ? profileTeacher
         : signedInTeacher || profileTeacher;
+      setText("teacher-desktop-current-teacher-name", teacherToolsProfile.firstName || "Teacher");
       setText("admin-profile-title", displayName);
       setText("teacher-profile-display-name", displayName);
       setText("admin-profile-email", profileTeacher.email);
@@ -31952,7 +31990,6 @@
 
     const openTeacherProfile = (teacherId = profileTeacher.id) => {
       if (window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
-        document.body.dataset.mode = "teacher";
         showToast("Director Dashboard access is limited to directors and administrators");
         return;
       }
@@ -38664,17 +38701,20 @@
       const activeStudentIds = new Set(rosterEnrolled(rosterClass).map((student) => student.id));
       return (rosterClass.helperHistory || []).find((entry) => entry.weekStart === teacherHelperWeekKey() && !entry.replacedAt && activeStudentIds.has(entry.studentId)) || null;
     };
-    const assignTeacherRosterHelper = (rosterClass) => {
-      const existing = teacherRosterHelperForWeek(rosterClass);
-      if (existing) return rosterClass.students.find((student) => student.id === existing.studentId) || null;
-      const eligible = rosterEnrolled(rosterClass);
-      if (!eligible.length) return null;
+    const teacherRosterHelperRotation = (rosterClass, eligible = rosterEnrolled(rosterClass)) => {
       const history = Array.isArray(rosterClass.helperHistory) ? rosterClass.helperHistory : [];
       const countFor = (studentId) => history.filter((entry) => entry.studentId === studentId).length;
       const lastFor = (studentId) => history.filter((entry) => entry.studentId === studentId).map((entry) => entry.weekStart || "").sort().at(-1) || "";
-      const helper = [...eligible].sort((left, right) => countFor(left.id) - countFor(right.id)
+      return [...eligible].sort((left, right) => countFor(left.id) - countFor(right.id)
         || lastFor(left.id).localeCompare(lastFor(right.id))
-        || rosterStudentFullName(left).localeCompare(rosterStudentFullName(right)))[0];
+        || rosterStudentFullName(left).localeCompare(rosterStudentFullName(right)));
+    };
+    const assignTeacherRosterHelper = (rosterClass) => {
+      const existing = teacherRosterHelperForWeek(rosterClass);
+      if (existing) return rosterClass.students.find((student) => student.id === existing.studentId) || null;
+      const helper = teacherRosterHelperRotation(rosterClass)[0];
+      if (!helper) return null;
+      const history = Array.isArray(rosterClass.helperHistory) ? rosterClass.helperHistory : [];
       rosterClass.helperHistory = [...history, {
         weekStart: teacherHelperWeekKey(),
         studentId: helper.id,
@@ -38791,13 +38831,13 @@
     };
 
     const teacherRosterScheduledDay = (rosterClass) => {
-      if (teacherRosterDayKey(rosterClass?.day)) return rosterClass.day;
       const assignedSchool = assignedTeacherSchools().find((school) => (
         (rosterClass?.partnerSchoolId && school.id && String(rosterClass.partnerSchoolId) === String(school.id))
         || enrollmentSchoolNameMatches(school.name, rosterClass?.schoolName)
         || enrollmentSchoolNameMatches(school.nickname, rosterClass?.schoolName)
       ));
-      return weekdayNames[Number(assignedSchool?.dayOfWeek)] || "";
+      const assignedDay = assignedSchool?.dayOfWeek;
+      return (assignedDay !== null && assignedDay !== undefined && assignedDay !== "" ? weekdayNames[Number(assignedDay)] : "") || rosterClass?.day || "";
     };
 
     const confirmTeacherOffDayStart = (rosterClass) => new Promise((resolve) => {
@@ -39769,7 +39809,7 @@
       if (!list) return;
       const attendance = teacherAttendanceForClass(rosterClass);
       const currentHelperId = teacherRosterHelperForWeek(rosterClass)?.studentId || "";
-      const choices = sortRosterStudents(rosterEnrolled(rosterClass).filter((student) => {
+      let choices = sortRosterStudents(rosterEnrolled(rosterClass).filter((student) => {
         if (mode === "manual") return student.id !== currentHelperId;
         const entry = attendance[student.id];
         return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && typeof entry === "object" && Boolean(entry.checkOutAt);
@@ -39778,11 +39818,13 @@
         showToast("No other dancers are available for Helper");
         return;
       }
+      const nextHelper = teacherRosterHelperRotation(rosterClass, choices)[0];
+      choices = [nextHelper, ...choices.filter((student) => student.id !== nextHelper.id)];
       document.getElementById("teacher-helper-picker-title").textContent = mode === "manual" ? "Choose a New Helper" : "Choose This Week’s Helper";
       document.getElementById("teacher-helper-picker-copy").textContent = mode === "manual"
         ? "Select a replacement. The current helper will be scheduled again next week for a redemption opportunity."
         : "The planned helper did not attend today. Select a dancer who attended class.";
-      list.innerHTML = choices.map((student) => `<button class="teacher-attendance-review-row" type="button" data-teacher-helper-choice="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${studentPhotoMarkup(student)}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><span>Choose</span></button>`).join("");
+      list.innerHTML = choices.map((student) => `<button class="teacher-attendance-review-row" type="button" data-teacher-helper-choice="${rosterSafe(student.id)}"><span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${studentPhotoMarkup(student)}</span><strong>${rosterSafe(rosterStudentFullName(student))}${student.id === nextHelper.id ? ' <span class="teacher-helper-next-sparkle" role="img" aria-label="Next in Class Star rotation" title="Next in Class Star rotation">✦</span>' : ""}</strong><span>Choose</span></button>`).join("");
       teacherHelperPickerClassId = rosterClass.id;
       teacherHelperPickerMode = mode;
       setTeacherRosterOverlay("teacher-helper-picker-overlay", true);
@@ -48522,9 +48564,71 @@
       updateCommunicationStudioToggles();
     };
 
+    let costumeMatcherRows = new Map();
+    const costumeMatcherLeader = () => Boolean(window.dtCurrentProfile?.active !== false && ["admin", "director"].includes(window.dtCurrentProfile?.role));
+    const loadCostumeMatcherSelections = async () => {
+      const profileId = window.dtCurrentProfile?.id;
+      if (!costumeMatcherLeader() || !window.dtSupabase) throw new Error("Sign in as a director to open costume assignments.");
+      const { data, error } = await window.dtSupabase.from("portal_costume_selections").select("id,payload,updated_at").like("id", "costume-selection:%");
+      if (window.dtCurrentProfile?.id !== profileId) return false;
+      if (error) throw error;
+      costumeMatcherRows = new Map((data || []).map(row => [String(row.id).slice("costume-selection:".length), row]));
+      // Recover prior saved device assignments only for current authorized classes.
+      // Insert-only preserves every existing shared assignment and the original device copy.
+      if (sharedRosterReady && typeof localStorage !== "undefined") {
+        let legacy = {};
+        try { legacy = JSON.parse(localStorage.getItem("dt-costume-selections-v1") || "{}"); } catch (_) {}
+        for (const selection of Object.values(legacy || {})) {
+          const classId = String(selection?.classId || "");
+          if (window.dtCurrentProfile?.id !== profileId) return false;
+          if (costumeMatcherRows.has(classId) || !String(selection?.costumeName || "").trim() || !rosterClasses.some(item => String(item.id) === classId && item.sourceActive !== false)) continue;
+          const { data: recovered } = await window.dtSupabase.from("portal_costume_selections").insert({ id: `costume-selection:${classId}`, dance_class_id: classId, payload: { selection: clonePayload(selection) }, updated_by: profileId }).select("id,payload,updated_at").maybeSingle();
+          if (window.dtCurrentProfile?.id !== profileId) return false;
+          if (recovered) costumeMatcherRows.set(classId, recovered);
+        }
+      }
+      return true;
+    };
+    window.getCostumeMatcherData = () => {
+      if (!costumeMatcherLeader() || !sharedRosterReady) return { teachers: [], classes: [] };
+      const names = new Map(teachers.map(teacher => [String(teacher.id), teacher.displayName || fullName(teacher)]));
+      const classes = rosterClasses.filter(item => item.sourceActive !== false).map(item => ({
+        id: String(item.id), teacherId: String(item.teacherId || ""), teacherName: names.get(String(item.teacherId)) || "Unassigned",
+        schoolName: item.schoolName || "School", name: item.name || "Class", day: item.day || "", time: item.time || "",
+        showTime: item.showTime || item.recitalShowTime || item.performanceTime || "",
+        performanceType: String(item.recitalPerformance || item.performanceType || "either").toLowerCase(),
+        combinedPerformanceId: String(item.combinedPerformanceId || item.combinedClassGroupId || item.recitalCombinedGroupId || item.performanceGroupId || ""),
+        combinedPerformanceName: item.combinedPerformanceName || item.combinedClassName || item.recitalCombinedName || "",
+        costumeSelection: costumeMatcherRows.get(String(item.id))?.payload?.selection || null,
+        students: (item.students || []).filter(student => student.status === "enrolled").map(student => ({
+          id: student.id, name: [student.firstName, student.lastName].filter(Boolean).join(" ") || "Dancer", photo: student.photo || student.photoUrl || "",
+          isBoy: ["male", "boy", "m"].includes(String(student.gender || "").toLowerCase()),
+          measurements: student.measurements || student.additionalInformation?.costume_measurements || {}
+        }))
+      }));
+      return clonePayload({ teachers: teachers.filter(teacher => classes.some(item => item.teacherId === String(teacher.id))).map(teacher => ({ id: String(teacher.id), name: names.get(String(teacher.id)), color: teacher.color || "#dba9a1" })), classes });
+    };
+    window.saveCostumeMatcherSelection = async (selection) => {
+      const profileId = window.dtCurrentProfile?.id;
+      if (!costumeMatcherLeader() || !window.dtSupabase || !sharedRosterReady) throw new Error("Sign in as a director before assigning a costume.");
+      const classId = String(selection?.classId || "");
+      if (!rosterClasses.some(item => String(item.id) === classId && item.sourceActive !== false) || !String(selection?.costumeName || "").trim()) throw new Error("Choose an active class and costume.");
+      const id = `costume-selection:${classId}`;
+      const current = costumeMatcherRows.get(classId);
+      const row = { id, dance_class_id: classId, payload: { selection: clonePayload(selection) }, updated_by: profileId };
+      const query = current
+        ? window.dtSupabase.from("portal_costume_selections").update(row).eq("id", id).eq("updated_at", current.updated_at)
+        : window.dtSupabase.from("portal_costume_selections").insert(row);
+      const { data, error } = await query.select("id,payload,updated_at").maybeSingle();
+      if (window.dtCurrentProfile?.id !== profileId) throw new Error("Your account changed before this assignment finished.");
+      if (error) throw new Error(error.code === "23505" ? "This assignment changed. Reopen the catalog before saving again." : "The costume assignment could not be saved. Please try again.");
+      if (!data) throw new Error("This assignment changed. Reopen the catalog before saving again.");
+      costumeMatcherRows.set(classId, data);
+      return true;
+    };
+
     function openAdminSection(section) {
       if (window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
-        document.body.dataset.mode = "teacher";
         delete document.body.dataset.adminPage;
         delete document.body.dataset.adminSection;
         showToast("Director Dashboard access is limited to directors and administrators");
@@ -48572,7 +48676,11 @@
       }
       if (section === "costume-catalog") {
         const frame = document.getElementById("costume-catalog-frame");
-        if (frame && !frame.getAttribute("src")) frame.setAttribute("src", frame.dataset.src);
+        if (frame) void loadCostumeMatcherSelections().then(loaded => {
+          if (!loaded || document.body.dataset.adminSection !== "costume-catalog") return;
+          if (!frame.getAttribute("src")) frame.setAttribute("src", frame.dataset.src);
+          else frame.contentWindow?.refreshCostumeMatcherData?.();
+        }).catch(() => showToast("Costume assignments could not open. Please try again."));
       }
       if (section === "big-stage" && typeof window.renderBigStage === "function") window.renderBigStage();
       if (section === "school-library") renderIsdCalendars();
@@ -48605,7 +48713,6 @@
 
     function openAdminToolsHome() {
       if (window.dtCurrentProfile?.role === "teacher" && document.body.dataset.tourMode !== "true") {
-        document.body.dataset.mode = "teacher";
         delete document.body.dataset.adminPage;
         delete document.body.dataset.adminSection;
         showToast("Director Dashboard access is limited to directors and administrators");
@@ -52253,7 +52360,14 @@
           if (error) throw error;
           if (item.placed_student_id) await window.dtSupabase.from("students").update({ official_classroom: name }).eq("id", item.placed_student_id);
         }
-        if (item) {
+        if (officialClassroomManagerSource === "enrollment-change") {
+          const request = enrollmentChangeRequests.find((entry) => String(entry.id) === String(officialClassroomManagerChangeId));
+          if (!request || !(await saveEnrollmentChangePlacement(request, {target_classroom:name}))) throw new Error("The school change selection could not be saved.");
+          enrollmentClassroomManagerOpen = false;
+          renderEnrollmentClassroomManager();
+          renderEnrollmentChanges();
+          showToast(`${name} added and selected.`);
+        } else if (item) {
           enrollmentClassroomManagerOpen = false;
           renderEnrollmentQueue();
           showToast(`${name} added and selected.`);
@@ -52481,21 +52595,31 @@
       if(schoolSelect){
         const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(schoolSelect.dataset.enrollmentChangeTargetSchool));
         if(!item)return;
-        item.target_school=schoolSelect.value;
-        item.target_class_id="";
-        item.target_classroom="";
+        await saveEnrollmentChangePlacement(item, {target_school:schoolSelect.value, target_class_id:null, target_classroom:null});
         renderEnrollmentChanges();
       }
       if(classroomSelect){
         const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(classroomSelect.dataset.enrollmentChangeTargetClassroom));
         if(!item)return;
-        item.target_classroom=classroomSelect.value;
+        if (classroomSelect.value === "__add__") {
+          const targetClass = rosterClasses.find((candidate) => String(candidate.id) === String(item.target_class_id));
+          const school = enrollmentChangeSchoolProfile(item.target_school || targetClass?.schoolName || classroomSelect.closest(".enrollment-change-school")?.querySelector("[data-enrollment-change-target-school]")?.value);
+          classroomSelect.value = item.target_classroom || "";
+          if (!school) return showToast("Choose a connected new school before adding an official classroom.");
+          officialClassroomManagerSource = "enrollment-change";
+          officialClassroomManagerChangeId = item.id;
+          officialClassroomManagerSchoolId = String(school.id || school.name);
+          enrollmentClassroomManagerOpen = true;
+          renderEnrollmentClassroomManager();
+          return;
+        }
+        await saveEnrollmentChangePlacement(item, {target_classroom:classroomSelect.value || null});
         renderEnrollmentChanges();
       }
     });
     document.getElementById("enrollment-change-list")?.addEventListener("input", (event) => {
       const classroomInput=event.target.closest("[data-enrollment-change-target-classroom]");
-      if(!classroomInput)return;
+      if(!classroomInput || classroomInput.tagName === "SELECT")return;
       const item=enrollmentChangeRequests.find((entry)=>String(entry.id)===String(classroomInput.dataset.enrollmentChangeTargetClassroom));
       if(item)item.target_classroom=classroomInput.value;
     });
@@ -52615,7 +52739,7 @@
       } else if(selectClassButton){
         const rosterClass=rosterClasses.find((candidate)=>String(candidate.id)===String(selectClassButton.dataset.enrollmentChangeSelectClass));
         if(!rosterClass)return showToast("That class could not be found");
-        item.target_class_id=rosterClass.id;
+        if (!(await saveEnrollmentChangePlacement(item, {target_class_id:rosterClass.id,target_school:rosterClass.schoolName,target_classroom:item.target_classroom || null}))) return;
         enrollmentChangeClassOpenId="";
         showToast(`${rosterClass.name} selected`);
       } else if(openAssignmentButton){
@@ -55700,7 +55824,8 @@
       const nameInput = document.getElementById("new-my-playlist-name");
       const name = (nameInput?.value || "").trim();
       if (!name) return;
-      const submitButton = event.currentTarget.querySelector('[type="submit"]');
+      const form = event.currentTarget;
+      const submitButton = form.querySelector('[type="submit"]');
       if (submitButton) submitButton.disabled = true;
       setText("my-playlist-form-status", "Creating your playlist…");
       const { error } = await createMyPlaylist(name);
@@ -55709,8 +55834,8 @@
         setText("my-playlist-form-status", error.code === "23505" ? "You already have a playlist with that name." : "That playlist could not be created. Please try again.");
         return;
       }
-      event.currentTarget.reset();
-      event.currentTarget.hidden = true;
+      form.reset();
+      form.hidden = true;
       setText("my-playlist-form-status", "");
     });
 
@@ -56249,6 +56374,7 @@
       const { data, error } = isLeader
         ? await client.from("portal_app_state").select("payload, updated_at").eq("id", cloudStateRecordId).maybeSingle()
         : await client.from("teacher_portal_state").select("payload, updated_at").eq("teacher_id", profile.id).maybeSingle();
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       if (error) {
         console.error("Teacher Tools cloud data could not load", error);
         if (isLeader) await loadNewsletterCanonicalWelcomeStore(client);
@@ -56281,7 +56407,9 @@
       }
       if (isLeader) await loadDurableCurriculumCardEdits(client);
       const durableIsdLoaded = await loadDurableIsdCalendars();
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       if (isLeader) await loadNewsletterCanonicalWelcomeStore(client);
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       let operationalRecoveryAlreadyCompleted = false;
       try { operationalRecoveryAlreadyCompleted = Boolean(window.localStorage?.getItem(operationalRecoveryCompletedKey)); } catch (error) {}
       const shouldRunOperationalRecovery = isLeader && !operationalRecoveryAlreadyCompleted;
@@ -56361,6 +56489,7 @@
         }
       }
       await DTWorkClock.load();
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       renderTeacherDesktopSessionActions();
       syncAllPartnerSchoolScheduleReferences();
       const removedDemoContent = stripLegacyProductionDemoContent();
@@ -56370,9 +56499,37 @@
         showToast(isLeader ? "Director Dashboard synced from the cloud" : "Teacher Tools synced from the cloud");
       }
       try { await loadIssuedPayrollStatements(); renderPaydaySummary(); renderPayArchive(); } catch(error) { showToast(error.message); }
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
       cloudPersistenceReady = true;
       if (isLeader && (recoveredTeachers.length || recoveredAssignments || recoveredSchoolSchedules.length || recoveredMissingSchoolData.length)) await saveCloudAppData();
       if (removedDemoContent) await saveCloudAppData();
+    };
+
+    const prepareAuthenticatedTeacherSession = (profile) => {
+      if (profile?.role !== "teacher") return;
+      delete document.documentElement?.dataset.cloudLoadedAt;
+      const cached = teachers.find((teacher) => teacher.id === profile.id);
+      const names = String(profile.full_name || "Teacher").trim().split(/\s+/);
+      profileTeacher = cached || createBlankTeacherProfile();
+      Object.assign(profileTeacher, {
+        id: profile.id, firstName: names[0], lastName: names.slice(1).join(" "),
+        displayName: `Ms. ${names[0]}`, email: profile.email || "", loginEmail: profile.email || ""
+      });
+      if (!cached) teachers.push(profileTeacher);
+      document.body.dataset.currentTeacherId = profile.id;
+      sharedRosterReady = false;
+      replaceCollection(rosterClasses, []);
+      replaceCollection(messageThreads, []);
+      setSharedRosterState("loading", "Opening your shared roster…", "Your classes and messages are syncing securely.");
+      renderProfileHero();
+      renderHomeWidget();
+      renderContactSchools();
+      renderPaydaySummary();
+      renderPayArchive();
+      renderTeacherDancers();
+      renderTeacherRosters();
+      renderTeacherOrders();
+      renderTeacherMessages();
     };
 
     const loadSharedPortalData = async (profile) => {
@@ -56390,7 +56547,7 @@
         await window.dtCompleteTeacherProfileResolution?.({ profileId: profile.id, ready: true });
       }
       const exactProfileReady = await loadSharedClassesAndRosters(profile);
-      if (profile?.role === "teacher" && !exactProfileReady) return false;
+      if (!exactProfileReady) return false;
       await loadTeacherRosterNewEnrollments(profile);
       await loadBoutiqueOrders(profile);
       await loadCloudAppData(profile);
@@ -56451,13 +56608,24 @@
     });
 
     window.addEventListener("beforeunload", saveAppData);
+    window.addEventListener("dt-auth-cleared", () => {
+      costumeMatcherRows = new Map();
+      clearTimeout(cloudPersistenceSaveTimer);
+      cloudPersistenceReady = false;
+      cloudPersistencePending = false;
+      delete document.documentElement.dataset.cloudLoadedAt;
+      delete document.documentElement.dataset.cloudSaved;
+      delete document.documentElement.dataset.cloudSavedAt;
+    });
     window.addEventListener("dt-auth-ready", async (event) => {
       const profile = event.detail?.profile;
+      prepareAuthenticatedTeacherSession(profile);
       if (profile?.role === "teacher") openTeacherToolsForViewport("today");
       await loadSharedPortalData(profile);
     });
     if (window.dtCurrentProfile) {
       const startupProfile = window.dtCurrentProfile;
+      prepareAuthenticatedTeacherSession(startupProfile);
       if (startupProfile.role === "teacher") openTeacherToolsForViewport("today");
       loadSharedPortalData(startupProfile);
     }
@@ -57010,7 +57178,7 @@
 <link rel="stylesheet" href="big-stage-order.css?v=20261005-compact-separation">
 <link rel="stylesheet" href="big-stage-wizard.css?v=20261012-recital-reset">
 <link rel="stylesheet" href="big-stage-matching.css?v=20261008-live-classes">
-  <script src="big-stage.js?v=20261020-planner-restored"></script>
+  <script src="big-stage.js?v=20261020-unresolved-conflicts"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
 <script src="big-stage-wizard.js?v=20261020-preserve-plans"></script>
   <script src="director-task-sync.js?v=20260908"></script>

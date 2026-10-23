@@ -514,6 +514,10 @@
     }));
     return records.sort((left,right)=>left.details.kind.localeCompare(right.details.kind)||left.item.teacher.localeCompare(right.item.teacher)||fullName(left.student).localeCompare(fullName(right.student)));
   };
+  const unresolvedRecitalConflictCount = () => recitalConflictRecords().filter(({student,sampleId}) => {
+    const information=studentAdditionalInformation(student),key=sampleId||student.id;
+    return !(state.sampleConflictAcknowledged[sampleId]||information.recital_conflict_acknowledged_at||state.sampleConflictResolutions[key]||information.recital_conflict_resolution);
+  }).length;
   const sampleConflictRecords = () => {
     const examples=[
       {firstName:"Avery",lastName:"Sample",school:"Primrose Rockwall",name:"Pre-K",teacher:"Ms. Erika",label:"Cannot Attend",kind:"no-recital",response:"We will NOT be able to attend recital.",note:"Our family will be out of town on recital day."},
@@ -746,11 +750,12 @@
     if(!root())return;
     document.querySelector(".stage-sheet-modal")?.remove();document.querySelector(".stage-master-sheet-modal")?.remove();document.querySelector(".stage-print-setup-modal")?.remove();document.querySelector(".stage-fill-chooser-modal")?.remove();document.querySelector(".stage-routine-preview-modal")?.remove();document.querySelector(".stage-prop-management-modal")?.remove();
     const body=state.view==="board"?teacherPlanningBoard():state.view==="teacher"?teacherView():state.view==="school"?schoolView():state.view==="routine"?routineView():state.view==="conflicts"?conflictsView():showView();
-    const conflictCount=recitalConflictRecords().length;
+    const conflictCount=unresolvedRecitalConflictCount();
     const matching=`<nav class="stage-view-tabs" aria-label="Recital planning views">${[["board","Planning Board",""],["teacher","Compatible Combos",""],["show","Recitals",""],["conflicts","Recital Conflicts",conflictCount]].map(([key,label,count])=>`<button class="${key==="conflicts"&&Number(count)>0?"has-alert":""}" data-stage-view="${key}" aria-pressed="${state.view===key}">${label}${count!==""?`<small>${count}</small>`:""}</button>`).join("")}</nav>${state.notice?`<div class="big-stage-note">${esc(state.notice)}</div>`:""}${state.view==="teacher"?filterMarkup():""}${state.loading?`<div class="stage-empty">Analyzing current classes, ages, recital needs, and family links…</div>`:body}`;
     root().innerHTML=`<div class="big-stage-shell"><nav class="stage-section-toggle" aria-label="The Big Stage sections"><button data-stage-section="shows" aria-pressed="${state.section==="shows"}">Show Production</button><button data-stage-section="matching" aria-pressed="${state.section==="matching"}">Recital Matching</button></nav>${state.section==="shows"?productionView():matching}</div>`;decorateCombineToggles();alignCombinedHeaderControls();decorateRoutineTypeControls();decoratePendingShowColumn();decorateSchoolColumnDragging();clearZeroBoyCounts();decorateLockedRecitalOptions();decorateStageSheetButtons();decorateMasterStageSheetButton();decorateTeacherPortal();if(state.stageSheetIndex!==""){document.body.insertAdjacentHTML("beforeend",stageSheetModalMarkup());decorateRoutinePositionPrompts();decorateRoutineReminderField();decorateSelectedPropTools();decorateRoutineStudentRoster();decorateRoutineTapeExclusions();decorateRoutinePreviewButton();}if(state.masterStageSheet)document.body.insertAdjacentHTML("beforeend",masterStageSheetModalMarkup());decorateMasterBackRow();decorateMasterFillTitles();decorateMasterPropManagement();if(state.stagePrintSetup)document.body.insertAdjacentHTML("beforeend",stagePrintSetupMarkup());if(state.activeTapeSlot)document.body.insertAdjacentHTML("beforeend",stageFillChooserMarkup());if(state.stageSheetPreview){document.body.insertAdjacentHTML("beforeend",routineStageSheetPreviewMarkup());decorateRoutinePreviewReminder();decorateRoutinePreviewCrossouts();decorateRoutinePreviewProps();}if(state.propManagement)document.body.insertAdjacentHTML("beforeend",propManagementMarkup());
   };
   const initialize = async (force=false) => {
+    if(document.body.dataset.tourMode!=="true"&&!window.dtCurrentProfile?.id)return;
     if(!state.savedTapeFills.length){try{state.savedTapeFills=JSON.parse(localStorage.getItem("dt-master-stage-saved-fills")||"[]");}catch(error){state.savedTapeFills=[];}}
     try{const props=JSON.parse(localStorage.getItem("dt-stage-saved-props")||"null"),icons=JSON.parse(localStorage.getItem("dt-stage-prop-icons")||"{}");if(Array.isArray(props)&&props.length)state.savedProps=props;if(icons&&typeof icons==="object")state.propIcons=icons;}catch(error){console.warn("Saved props could not be loaded.",error);}
     if(state.loading)return;state.loading=true;render();

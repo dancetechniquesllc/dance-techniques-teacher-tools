@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v320-teacher-status-read";
+const CACHE_NAME = "my-dance-techniques-v323-publishing-verification";
 const CORE_ASSETS = [
   "./attendance-storage.js?v=student-storage-20261020",
   "./attendance-preview.js?v=attendance-workflows-20261020",
@@ -26,7 +26,7 @@ const CORE_ASSETS = [
   "./",
   "./index.html",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20260830-teacher-open-after-profile-v7",
+  "./supabase-auth.js?v=20261022-session-lifecycle",
   "./data/partner-schools.js",
   "./dt-touch/dt-touch.js?v=20260722c",
   "./config/dt-touch-voice.json",

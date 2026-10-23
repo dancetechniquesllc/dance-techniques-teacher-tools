@@ -220,7 +220,7 @@ window.DTAttendancePreview = (() => {
     Object.values(state.records).forEach(r=>{const c=cls(r.classId);if(c){c.attendance ||= {};c.attendance[r.date] ||= {};c.attendance[r.date][r.studentId]=r;}});
     } // End sample-only data setup.
     document.body.classList.add('aw-workflows');
-    const style=document.createElement('link');style.rel='stylesheet';style.href='attendance-preview.css?v=attendance-workflows-20261020';document.head.append(style);
+    const style=document.createElement('link');style.rel='stylesheet';style.href='attendance-preview.css?v=class-action-artwork-20261022';document.head.append(style);
     const overlay=document.createElement('div');overlay.id='aw-overlay';overlay.className='confirm-overlay';overlay.setAttribute('aria-hidden','true');overlay.innerHTML='<section class="aw-panel" role="dialog" aria-modal="true" aria-label="Attendance"></section>';document.body.append(overlay);panel=overlay.firstElementChild;
     if(demo){const banner=document.createElement('div');banner.className='aw-preview-banner';banner.innerHTML='<strong>Attendance Preview · Updated TT Layout</strong><span>Sample dancers only · live attendance is unchanged</span><button data-aw="launch-combine">Try Combine Classes</button><button data-aw="sample-history">Try Attendance History</button><button data-aw="reset-preview">Reset Preview</button>';document.querySelector('.session-strip')?.after(banner);}
     const combine=document.createElement('button');combine.className='teacher-roster-multi-class-edit';combine.id='aw-combine-classes';combine.textContent='Combine Classes';combine.dataset.aw='launch-combine';document.querySelector('.teacher-roster-management-row')?.append(combine);
@@ -272,8 +272,8 @@ window.DTAttendancePreview = (() => {
         renderShell(name(student),`<p class="aw-absence-reason-date">${dateLabel(absence.date)}</p><h3>Known Absence</h3><p>${e(absence.note||'No reason provided.')}</p><div class="aw-actions"><button data-aw="close">Close</button></div>`);return;
       }
       if(action==='class-actions'){
-        const choices=[['Rearrange Classes','teacher-roster-multi-class-edit'],['Combine Classes','aw-combine-classes'],['Shoe Check','teacher-roster-shoe-check'],['Move Ups','teacher-roster-move-ups'],['Print Rosters','teacher-roster-print']];
-        renderShell('Class Actions',`<div class="aw-class-actions-menu">${choices.map(([label,id])=>`<button type="button" data-aw="run-class-action" data-id="${id}" ${document.getElementById(id)?.disabled?'disabled':''}>${label}</button>`).join('')}</div>`);return;
+        const choices=[['Rearrange','teacher-roster-multi-class-edit','rearrange'],['Combine','aw-combine-classes','combine'],['Move Ups','teacher-roster-move-ups','move-ups'],['Shoe Check','teacher-roster-shoe-check','shoe-check'],['Print','teacher-roster-print','print']];
+        renderShell('Class Actions',`<div class="aw-class-actions-menu aw-class-actions-art-menu">${choices.map(([label,id,art])=>`<button type="button" data-aw="run-class-action" data-id="${id}" aria-label="${label}" ${document.getElementById(id)?.disabled?'disabled':''}><img src="assets/class-action-${art}.png" width="96" height="96" loading="lazy" decoding="async" alt="" aria-hidden="true"><span>${label}</span></button>`).join('')}</div>`);return;
       }
       if(action==='run-class-action'){const target=document.getElementById(button.dataset.id);document.getElementById('aw-overlay').classList.remove('active');document.getElementById('aw-overlay').setAttribute('aria-hidden','true');queueMicrotask(()=>target?.click());return;}
       if(action==='launch-combine'){openCombine();return;}
