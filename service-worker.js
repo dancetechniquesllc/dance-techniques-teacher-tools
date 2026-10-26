@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v325-collapsible-preorders";
+const CACHE_NAME = "my-dance-techniques-v326-preorder-ready-to-fill";
 const CORE_ASSETS = [
   "./attendance-storage.js?v=student-storage-20261020",
   "./attendance-preview.js?v=attendance-workflows-20261020",

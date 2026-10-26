@@ -37448,14 +37448,23 @@
         const nextStatus = orderButton.dataset.preorderNextStatus;
         if (document.body.dataset.tourMode === "true") {
           const order = boutiquePreorderCampaigns.flatMap(preorderCampaignOrders).find((item) => String(item.id) === String(orderId));
-          if (order) order.status = nextStatus;
-          renderBoutiquePreorders();
-          return showToast(`Preorder marked ${preorderStatusLabel(nextStatus).toLowerCase()}`);
+          if (order) {
+            order.status = nextStatus;
+            const campaign = boutiquePreorderCampaigns.find(item=>preorderCampaignOrders(item).some(p=>String(p.id)===String(order.id)));
+            if (nextStatus === "ready_to_distribute" && campaign && !boutiqueOrders.some(item=>item.wix_order_id===`preorder:${order.id}`)) boutiqueOrders.unshift({
+              id:`boutique-${order.id}`,wix_order_id:`preorder:${order.id}`,wix_order_number:`PRE-${order.jotform_submission_id}`,status:"to_fill",payment_status:"paid",total:order.amount_total,
+              assigned_student_id:order.assigned_student_id,requested_dancer_name:order.dancer_name,requested_school:order.school_name,wix_created_at:order.submitted_at||new Date().toISOString(),raw_order:{source:"preorder",preorder_order_id:order.id,campaign_id:campaign.id},
+              boutique_order_items:[{id:`boutique-item-${order.id}`,name:campaign.product_name,quantity:Math.max(1,Number(order.quantity)||1),fulfilled_quantity:0,options:{Size:order.size,Personalization:order.personalization}}]
+            });
+          }
+          renderBoutiquePreorders();renderDirectorBoutiqueOrders();renderTeacherOrders();
+          return showToast(nextStatus === "ready_to_distribute" ? "Preorder moved to Boutique To Fill" : `Preorder marked ${preorderStatusLabel(nextStatus).toLowerCase()}`);
         }
         const { error } = await window.dtSupabase.rpc("set_boutique_preorder_order_status", { target_order_id: orderId, target_status: nextStatus });
         if (error) return showToast(error.message || "That preorder could not be updated.");
         await loadBoutiquePreorders();
-        return showToast(`Preorder marked ${preorderStatusLabel(nextStatus).toLowerCase()}`);
+        if (nextStatus === "ready_to_distribute") await loadBoutiqueOrders(window.dtCurrentProfile, { sync: false });
+        return showToast(nextStatus === "ready_to_distribute" ? "Preorder moved to Boutique To Fill" : `Preorder marked ${preorderStatusLabel(nextStatus).toLowerCase()}`);
       }
     });
 
