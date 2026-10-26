@@ -23547,13 +23547,14 @@
         studentPhotoOwner = owner;
         studentPhotoRecords.clear();
         studentPhotoUrls.clear();
+        studentPhotoRequests.clear();
       }
       for (const student of students || []) {
         if (!student?.id) continue;
         const id = String(student.id);
         let record = studentPhotoRecords.get(id);
         if (!record) { record = { path: "", refs: new Set(), initials: "" }; studentPhotoRecords.set(id, record); }
-        if (student.photoPath) record.path = student.photoPath;
+        if (student.photoPath && (!record.path || (student.photoPathConfirmed && (student.photoLoadedAt||0)>=(record.confirmedAt||0)))) {record.path = student.photoPath;student.photoPathConfirmed=false;}
         record.refs.add(student);
         if (record.refs.size > 32) record.refs.delete(record.refs.values().next().value);
         const initials = `${String(student.preferredName || student.firstName || "").charAt(0)}${String(student.lastName || "").charAt(0)}`.toUpperCase();
@@ -23565,7 +23566,7 @@
     const paintStudentPhoto = (id, url) => {
       const record = studentPhotoRecords.get(String(id));
       if (!record) return;
-      for (const student of record.refs) { if (!student.photo?.startsWith("data:image/")) student.photo = url; student.photoPath = record.path; }
+      for (const student of record.refs) { if (!student.photoUploadPending && !student.photoSaveError && url && (!student.photo?.startsWith("data:image/") || (student.photoConfirmedPath===record.path && student.photoConfirmedData===student.photo))) {student.photo = url;delete student.photoConfirmedData;delete student.photoConfirmedPath;} student.photoPath = record.path; }
       document.querySelectorAll(`[data-student-photo-id="${CSS.escape(String(id))}"]`).forEach((node) => {
         if (node.dataset.studentPhotoId !== String(id)) return;
         if (url) {
@@ -23605,14 +23606,15 @@
           const cached = studentPhotoUrls.get(path);
           return !studentPhotoRequests.has(path) && !(cached?.retryAt > now) && ((force && forcedPaths.has(path)) || !cached?.url || cached.expiresAt <= now + 5 * 60 * 1000);
         });
-      paths.forEach((path) => studentPhotoRequests.set(path, true));
+      const requestToken=Symbol("photo-links");
+      paths.forEach((path) => studentPhotoRequests.set(path, requestToken));
       const batches = [];
       for (let index = 0; index < paths.length; index += 40) batches.push(paths.slice(index, index + 40));
       let nextBatch = 0;
       const worker = async () => {
         while (nextBatch < batches.length) {
           const batch = batches[nextBatch++];
-          batch.forEach((path) => studentPhotoRequests.set(path, true));
+          batch.forEach((path) => studentPhotoRequests.set(path, requestToken));
           let timeout;
           try {
             const result = await Promise.race([
@@ -23638,7 +23640,7 @@
             console.warn("Some student photo links will be retried.", error?.message || error);
           } finally {
             window.clearTimeout(timeout);
-            batch.forEach((path) => studentPhotoRequests.delete(path));
+            batch.forEach((path) => {if(studentPhotoRequests.get(path)===requestToken)studentPhotoRequests.delete(path);});
           }
         }
       };
@@ -23660,6 +23662,7 @@
     window.addEventListener("online", () => { void refreshStudentPhotos(); });
 
     const loadSharedClassesAndRosters = async (profile = window.dtCurrentProfile) => {
+      const photoSnapshotStartedAt=Date.now();
       const client = window.dtSupabase;
       if (document.body.dataset.tourMode === "true") return true;
       if (!client || !profile) return false;
@@ -24019,7 +24022,7 @@
               parentEmail: student.parent_email || "", tuitionDiscount: student.tuition_discount || "none", medicalNotes: student.medical_notes || "", registrationNotes: student.registration_notes || "",
               requestedDanceStyle: recitalHistoryByStudentId.get(String(student.id)) || "",
               notes: student.registration_notes || note?.note || "", parentPortalConnected: connectedParentPortalStudentIds.has(String(student.id)), additionalInformation: student.additional_information && typeof student.additional_information === "object" ? { ...student.additional_information } : {},
-              teacherFeedback: student.additional_information?.teacher_feedback || "", newsletterHistory: emailHistoryByStudent.get(student.id) || [], linkedFamilyEmails: (familyLinksByStudent.get(student.id) || []).map((link) => { const adult = Array.isArray(link.guardians) ? link.guardians[0] : link.guardians; return adult?.email || ""; }).filter(Boolean), photoPath: student.photo_path || "", photo: "" };
+              teacherFeedback: student.additional_information?.teacher_feedback || "", newsletterHistory: emailHistoryByStudent.get(student.id) || [], linkedFamilyEmails: (familyLinksByStudent.get(student.id) || []).map((link) => { const adult = Array.isArray(link.guardians) ? link.guardians[0] : link.guardians; return adult?.email || ""; }).filter(Boolean), photoPath: student.photo_path || "", photoPathConfirmed:true, photoLoadedAt:photoSnapshotStartedAt, photo: "" };
           })
         };
       });
@@ -24257,6 +24260,38 @@
       // profile already contains useful information.
     };
 
+    const studentPhotoSaveJobs = new Map();
+    const saveSharedStudentPhoto = async (student) => {
+      if (document.body.dataset.tourMode === "true") {scheduleAppDataSave();return true;}
+      if (studentPhotoSaveJobs.has(String(student.id))) return studentPhotoSaveJobs.get(String(student.id));
+      if (!student.photo?.startsWith("data:image/")) return true;
+      const dataUrl=student.photo;
+      student.photoUploadPending=true;
+      student.photoSaveError="";
+      const job=(async()=>{
+        try {
+          const photos=await import("./student-photo-save.mjs?v=20261025");
+          const saved=await photos.uploadStudentPhoto(window.dtSupabase,String(student.id),dataUrl);
+          student.photoPath=saved.path;
+          student.photoConfirmedPath=saved.path;
+          student.photoConfirmedData=dataUrl;
+          student.photoUploadPending=false;
+          // Register the confirmed path before signing; older views must not restore an old path.
+          const record=studentPhotoRecords.get(String(student.id));
+          if(record){record.path=saved.path;record.confirmedAt=Date.now();for(const ref of record.refs)ref.photoPath=saved.path;}
+          await refreshStudentPhotos([student],{force:true});
+          scheduleAppDataSave();
+          return true;
+        } catch(error) {
+          student.photoSaveError=error.message||"The photo was not saved. Please retry.";
+          showToast(student.photoSaveError);
+          return false;
+        } finally {student.photoUploadPending=false;studentPhotoSaveJobs.delete(String(student.id));}
+      })();
+      studentPhotoSaveJobs.set(String(student.id),job);
+      return job;
+    };
+
     const saveSharedStudent = async (student, rosterClass) => {
       await syncStudentToEnrollmentIntake(student, rosterClass);
       if (document.body.dataset.tourMode === "true") return true;
@@ -24312,19 +24347,19 @@
         const noteResult = await noteQuery.select("id").single();
         if (!noteResult.error) student.noteId = noteResult.data.id;
       }
-      if (student.photo?.startsWith("data:image/")) {
-        const photoPath = `${studentId}/${Date.now()}.jpg`;
-        const photoBlob = await fetch(student.photo).then((response) => response.blob());
-        const upload = await window.dtSupabase.storage.from("student-photos").upload(photoPath, photoBlob, { contentType: "image/jpeg", upsert: false });
-        if (upload.error) return sharedRosterError("The dancer details were shared, but the photo was not uploaded.", upload.error);
-        const photoUpdate = await window.dtSupabase.from("students").update({ photo_path: photoPath }).eq("id", studentId);
-        if (photoUpdate.error) return sharedRosterError("The photo uploaded, but could not be attached to the dancer.", photoUpdate.error);
-        student.photoPath = photoPath;
-        student.photo = "";
-        void refreshStudentPhotos([student], { force: true });
-      }
+      if (student.photo?.startsWith("data:image/") && !(await saveSharedStudentPhoto(student))) return false;
       return true;
     };
+
+    document.addEventListener("click",async event=>{
+      const button=event.target.closest("[data-teacher-photo-retry]");if(!button)return;
+      const rosterClass=teacherRosterClasses().find(c=>String(c.id)===button.dataset.teacherPhotoRetryClass);
+      const student=rosterClass?.students.find(s=>String(s.id)===button.dataset.teacherPhotoRetry);if(!student)return;
+      button.disabled=true;
+      const saved=await saveSharedStudentPhoto(student);
+      openTeacherStudentProfile(rosterClass,student);
+      if(saved){renderTeacherRosters();renderStudentLibrary();renderClassesAndRosters();showToast("Photo saved and confirmed");}
+    });
 
     const saveSharedKitStatus = async (student) => {
       if (document.body.dataset.tourMode === "true" || !sharedRosterReady || !window.dtSupabase) return true;
@@ -39717,6 +39752,7 @@
           <input class="tablet-photo-file-input" type="file" accept="image/*,.heic,.heif" data-teacher-student-photo="${rosterSafe(student.id)}" data-teacher-student-photo-class="${rosterSafe(rosterClass.id)}">
         </div>
         <h3 id="teacher-student-profile-title">${rosterSafe(rosterStudentFullName(student))}</h3>
+        ${student.photoSaveError?`<p role="alert">${rosterSafe(student.photoSaveError)}</p><button type="button" data-teacher-photo-retry="${rosterSafe(student.id)}" data-teacher-photo-retry-class="${rosterSafe(rosterClass.id)}">Retry Photo Save</button>`:""}
         ${student.status === "paused" ? `<button class="teacher-student-resume-classes" type="button" data-teacher-resume-student="${rosterSafe(student.id)}" data-teacher-resume-student-class="${rosterSafe(rosterClass.id)}">Resume Classes</button>` : ""}
         ${String(student.medicalNotes || "").trim() ? `<p class="teacher-student-medical-alert"><span aria-hidden="true">+</span><span class="teacher-student-medical-alert-copy">${rosterSafe(String(student.medicalNotes).trim())}</span></p>` : ""}
         <div class="teacher-student-profile-details">
@@ -40422,15 +40458,18 @@
     document.getElementById("teacher-roster-future-cancel")?.addEventListener("click", () => setTeacherRosterOverlay("teacher-roster-future-overlay", false));
     document.getElementById("teacher-roster-future-delete")?.addEventListener("click", deleteTeacherFutureDancer);
     document.getElementById("teacher-roster-future-class")?.addEventListener("change", renderTeacherFutureDancerClassrooms);
-    document.getElementById("teacher-roster-future-photo")?.addEventListener("change", (event) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        pendingTeacherProspectPhoto = typeof reader.result === "string" ? reader.result : "";
-        setText("teacher-roster-future-photo-status", pendingTeacherProspectPhoto ? file.name : "No picture selected.");
-      });
-      reader.readAsDataURL(file);
+    document.getElementById("teacher-roster-future-photo")?.addEventListener("change", async (event) => {
+      const file=event.target.files?.[0];if(!file)return;
+      const button=document.querySelector('[form="teacher-roster-future-form"][type="submit"]');if(button)button.disabled=true;
+      let url;
+      try {
+        if(!isSupportedProfilePhotoFile(file))throw new Error("Choose a photo from the library or camera");
+        url=URL.createObjectURL(file);const image=new Image();image.src=url;await image.decode();
+        const scale=Math.min(1,480/Math.max(image.naturalWidth,image.naturalHeight));const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
+        pendingTeacherProspectPhoto=canvas.toDataURL("image/jpeg",.82);
+        setText("teacher-roster-future-photo-status","Photo ready — save this dancer to upload it.");
+      }catch(error){showToast(error.message||"The photo could not be opened. Please choose another.");}
+      finally{if(url)URL.revokeObjectURL(url);if(button)button.disabled=false;}
     });
     document.getElementById("teacher-student-profile-close")?.addEventListener("click", () => setTeacherRosterOverlay("teacher-student-profile-overlay", false));
     document.getElementById("teacher-student-profile-overlay")?.addEventListener("click", (event) => {
@@ -40505,7 +40544,10 @@
       student.officialClassroom = classroom;
       student.classroom = classroom;
       scheduleAppDataSave();
-      await saveSharedStudent(student, rosterClass);
+      if (!(await saveSharedStudent(student, rosterClass))) {
+        button.disabled=false;button.textContent="Save Classroom";
+        return;
+      }
       renderTeacherRosters();
       renderStudentLibrary();
       renderClassesAndRosters();
@@ -40545,7 +40587,10 @@
       student.notes = String(values.get("notes") || "").trim();
       student.registrationNotes = student.notes;
       scheduleAppDataSave();
-      await saveSharedStudent(student, rosterClass);
+      if (!(await saveSharedStudent(student, rosterClass))) {
+        if (submitButton) {submitButton.disabled=false;submitButton.textContent="Save Changes";}
+        return;
+      }
       renderTeacherRosters();
       renderStudentLibrary();
       renderClassesAndRosters();
@@ -40565,9 +40610,10 @@
           return;
         }
         try {
+          photoInput.disabled=true;
           student.photo = await openProfilePhotoCropper(file);
-          scheduleAppDataSave();
-          await saveSharedStudent(student, rosterClass);
+          const photoSaved=await saveSharedStudentPhoto(student);
+          if(!photoSaved){openTeacherStudentProfile(rosterClass,student);return;}
           renderTeacherRosters();
           renderStudentLibrary();
           renderClassesAndRosters();
@@ -40578,7 +40624,7 @@
             console.error("Dancer photo upload did not finish", error);
             showToast(error.message || "Photo upload did not finish");
           }
-        }
+        } finally {photoInput.disabled=false;}
         return;
       }
       const checkbox = event.target.closest("[data-teacher-kit-received]");
@@ -55180,32 +55226,32 @@
       refreshRosterPrintPreview();
       window.print();
     });
-    document.getElementById("roster-edit-photo")?.addEventListener("change", (event) => {
-      const file = event.target.files?.[0];
-      if (!file) return;
-      if (!isSupportedProfilePhotoFile(file)) return showToast("Choose a photo from the library or camera");
-      const reader = new FileReader();
-      reader.addEventListener("load", () => {
-        const source = String(reader.result || "");
-        const image = new Image();
-        image.addEventListener("load", () => {
-          const maxSize = 480;
-          const scale = Math.min(1, maxSize / Math.max(image.naturalWidth, image.naturalHeight));
-          const canvas = document.createElement("canvas");
-          canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-          canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-          canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height);
-          pendingRosterStudentPhoto = canvas.toDataURL("image/jpeg", 0.82);
-          rosterStudentProfileDirty = true;
-          const preview = document.getElementById("roster-edit-photo-preview");
-          const isFutureDancer = document.getElementById("roster-student-edit-form")?.classList.contains("is-future-dancer");
-          if (preview && !isFutureDancer) preview.innerHTML = `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Student photo preview"><span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span>`;
-          const futurePreview = document.getElementById("roster-future-picture-preview");
-          if (futurePreview && isFutureDancer) futurePreview.innerHTML = `<img src="${rosterSafe(pendingRosterStudentPhoto)}" alt="Teacher-uploaded dancer picture">`;
-        });
-        image.src = source;
-      });
-      reader.readAsDataURL(file);
+    document.getElementById("roster-edit-photo")?.addEventListener("change", async (event) => {
+      const input=event.target,file=input.files?.[0];if(!file)return;
+      const classId=editingRosterClassId,studentId=editingRosterStudentId;
+      const rosterClass=rosterClasses.find(c=>c.id===classId),student=rosterClass?.students.find(s=>s.id===studentId);
+      if(!student || !isSupportedProfilePhotoFile(file))return showToast("Choose a photo from the library or camera");
+      input.disabled=true;
+      const saveButton=document.getElementById("roster-student-edit-submit");if(saveButton)saveButton.disabled=true;
+      let url;
+      try {
+        url=URL.createObjectURL(file);const image=new Image();image.src=url;await image.decode();
+        const scale=Math.min(1,480/Math.max(image.naturalWidth,image.naturalHeight));
+        const canvas=document.createElement("canvas");canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+        canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
+        const dataUrl=canvas.toDataURL("image/jpeg",.82);student.photo=dataUrl;
+        if(editingRosterStudentId===studentId){
+          pendingRosterStudentPhoto=dataUrl;rosterStudentProfileDirty=true;
+          for(const id of ["roster-edit-photo-preview","roster-future-picture-preview"]){const preview=document.getElementById(id);if(preview){const img=document.createElement("img");img.src=dataUrl;img.alt="Student photo preview";preview.replaceChildren(img);}}
+        }
+        const saved=await saveSharedStudentPhoto(student);
+        if(saved){
+          if(editingRosterStudentId===studentId)pendingRosterStudentPhoto=student.photo;
+          renderTeacherRosters();renderStudentLibrary();renderClassesAndRosters();
+          showToast("Photo saved and confirmed");
+        }else showToast("Photo not saved. Keep this profile open and click Save Dancer to retry.");
+      } catch(error){showToast(error.message||"The photo could not be opened. Please try again.");}
+      finally{if(url)URL.revokeObjectURL(url);input.disabled=false;input.value="";if(saveButton&&editingRosterStudentId===studentId)saveButton.disabled=false;}
     });
     document.getElementById("roster-student-edit-overlay")?.addEventListener("click", (event) => {
       if (event.target.id === "roster-student-edit-overlay") requestCloseRosterStudentEditor();
