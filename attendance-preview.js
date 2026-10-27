@@ -7,6 +7,8 @@ window.DTAttendancePreview = (() => {
   let initialized=false,busy=false,workspaceReady=demo;
   const historyCache=new Map(),historyLoading=new Set();
   let sessionDrafts={};
+  let combinedClockTimer=null;
+  const hourPromptsShown=new Set();
   let api, state, selectedStudent = null, editing = false, drafts = {}, panel, selected = new Set(), message = '';
   const generation=localStorage.getItem('dt-attendance-preview-generation')||'v1';
   const key = 'dt-attendance-review-preview-'+generation;
@@ -98,6 +100,7 @@ window.DTAttendancePreview = (() => {
     renderShell('Known Absence',`<p>Record a date and note without starting class.</p><form id="aw-absence-form"><label>Date<input type="date" name="date" min="${today()}" value="${found?.date||today()}" required></label><label>Note<textarea name="note" maxlength="600" placeholder="For example: parent reported an appointment">${e(found?.note||'')}</textarea></label><input type="hidden" name="id" value="${e(id)}"><div class="aw-actions"><button class="secondary" type="button" data-aw="close">Cancel</button><button class="primary" type="submit">Save Known Absence</button></div></form>`);
   }
   function renderShell(title,body) {
+    clearInterval(combinedClockTimer);combinedClockTimer=null;
     panel.innerHTML=`<header><div>${demo?'<small>Attendance preview · sample dancers only</small>':''}<h2>${e(title).replace(/EXCLUDE/g,'<span class="aw-exclude-bubble">EXCLUDE</span>')}</h2></div><button class="aw-close" data-aw="close" aria-label="${demo?'Close attendance preview':'Close attendance'}">×</button></header>${message?`<p class="aw-message" role="status">${e(message)}</p>`:''}${body}`;
     document.getElementById('aw-overlay').classList.add('active');document.getElementById('aw-overlay').setAttribute('aria-hidden','false');
   }
@@ -162,7 +165,27 @@ window.DTAttendancePreview = (() => {
       const remaining=students.filter(r=>!done.has(r.student.id));
       body+=`<h3>Complete Dance Day · Attendance Review</h3><p>Review the remaining dancers. Known absences are prefilled. No dancer was marked absent just because an earlier group ended.</p>${remaining.map(({student})=>{const value=day.review[student.id]||'',groupId=day.reviewGroup[student.id]||'';return `<div class="aw-review-row"><div><strong>${e(name(student))}</strong>${known(student.id,day.date)?`<small>${e(known(student.id,day.date).note)}</small>`:''}</div><select data-aw-final-status="${e(student.id)}" aria-label="Final attendance for ${e(name(student))}">${options(value,true)}</select>${['present','tardy'].includes(value)?`<label>Class attended<select data-aw-final-group="${e(student.id)}"><option value="">Choose class…</option>${day.groups.filter(g=>g.endAt).map((g,i)=>`<option value="${g.id}" ${g.id===groupId?'selected':''}>Class ${i+1} · ${time(g.startAt)}–${time(g.endAt)}</option>`).join('')}</select></label>`:''}</div>`;}).join('')||'<p>Everyone has attended and checked out.</p>'}<div class="aw-actions"><button class="secondary" data-aw="back-day">Back</button><button class="primary" data-aw="finish-day" ${remaining.some(({student:s})=>!day.review[s.id]||(['present','tardy'].includes(day.review[s.id])&&!day.reviewGroup[s.id]))?'disabled':''}>Save & Complete Dance Day</button></div>`;
     } else body+=`<h3>✓ Dance day complete</h3><p>Attendance is saved, attached to each dancer’s regular class. Excluded classes keep their normal attendance workflow.</p><button class="primary" data-aw="close">Done</button>`;
+    refreshCombinedResume();
     renderShell('Combined Classes',body);
+    if(group && (group.clockStartedAt || group.startAt)) {
+      const started=Date.parse(group.clockStartedAt || group.startAt);
+      if(Number.isFinite(started)) {
+        const tools=document.createElement('div');tools.className='aw-combined-header-tools';
+        const close=panel.querySelector('header > .aw-close');close.replaceWith(tools);tools.append(close);
+        const clock=document.createElement('div');clock.className='aw-combined-clock';clock.setAttribute('role','timer');clock.setAttribute('aria-label',`Class ${day.groups.length} elapsed time`);
+        const label=document.createElement('small');label.textContent=`Class ${day.groups.length}`;
+        const value=document.createElement('strong');clock.append(value,label);tools.append(clock);
+        const update=()=>{const stopped=Date.parse(group.clockEndedAt || group.endAt || '');const seconds=Math.min(3600,Math.max(0,Math.floor(((Number.isFinite(stopped)?stopped:Date.now())-started)/1000)));value.textContent='◷ '+(seconds>=3600?`${Math.floor(seconds/3600)}:`:'')+`${String(Math.floor(seconds/60)%60).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`;};
+        update();combinedClockTimer=setInterval(update,1000);
+      }
+    }
+
+  }
+  function closeSavedAttendance() {
+    clearInterval(combinedClockTimer);combinedClockTimer=null;
+    document.getElementById('aw-overlay').classList.remove('active');
+    document.getElementById('aw-overlay').setAttribute('aria-hidden','true');
+    refreshCombinedResume();
   }
   async function commitCheckout() {
     const day=activeDay(),group=day.groups.at(-1),outAt=day.checkoutAt||new Date().toISOString();
@@ -175,9 +198,41 @@ window.DTAttendancePreview = (() => {
     }
     selected.clear();day.checkoutSelection=[];day.missed=[];
     if(group.members.every(id=>group.checkedOut.includes(id))){group.endAt=outAt;day.phase='ready';message='Class complete — dancers have returned to their classrooms.';}else{day.phase='checkout';message='Check out the remaining dancers before starting the next class.';}
-    await persist();api.refresh();renderDay();
+    await persist();api.refresh();closeSavedAttendance();api.toast("Check-out saved");
+  }
+  function checkCombinedHourLimit() {
+    if(!workspaceReady||!state||document.getElementById('aw-hour-limit-dialog')?.open)return;
+    for(const [dayId,day] of Object.entries(state.days||{})) {
+      if(day.date!==today()||day.phase==='complete'||!['checkin','teaching'].includes(day.phase))continue;
+      if(!(day.classIds||[]).some(id=>api.teacherClasses().some(c=>String(c.id)===String(id))))continue;
+      const group=day.groups.at(-1),started=Date.parse(group?.clockStartedAt||group?.startAt||'');
+      if(!Number.isFinite(started)||group.clockEndedAt||group.endAt||Date.now()-started<3600000||hourPromptsShown.has(group.id))continue;
+      hourPromptsShown.add(group.id);
+      const dialog=document.createElement('dialog');dialog.id='aw-hour-limit-dialog';dialog.className='aw-hour-limit-dialog';
+      dialog.innerHTML='<h2>Time to check students out</h2><p>The class clock has stopped at 1 hour. Please review and check your students out.</p><p role="status"></p><div class="aw-actions"><button type="button" class="secondary" data-hour-later>Return to Class</button><button type="button" class="primary" data-hour-checkout>Check Students Out</button></div>';
+      dialog.querySelector('[data-hour-later]').onclick=()=>{dialog.close();dialog.remove();state.activeDay=dayId;renderDay();};
+      dialog.querySelector('[data-hour-checkout]').onclick=async()=>{
+        state.activeDay=dayId;
+        if(day.phase==='checkin'){dialog.querySelector('[role="status"]').textContent='Check-in was never submitted. Return to Class and complete check-in first.';return;}
+        group.clockEndedAt=new Date(started+3600000).toISOString();day.phase='checkout';selected.clear();
+        try{await persist();dialog.close();dialog.remove();renderDay();}catch(error){dialog.querySelector('[role="status"]').textContent='Could not open check-out. Please try again.';}
+      };
+      dialog.addEventListener('cancel',()=>dialog.remove());document.body.append(dialog);dialog.showModal();return;
+    }
+  }
+  function refreshCombinedResume() {
+    const launch=document.querySelector('.aw-class-actions-launch');
+    if(!launch||!state)return;
+    let shortcuts=document.getElementById('aw-resume-combined');
+    if(!shortcuts){shortcuts=document.createElement('div');shortcuts.id='aw-resume-combined';launch.after(shortcuts);}
+    const assigned=new Set(api.teacherClasses().map(c=>String(c.id)));
+    const school=api.selectedSchool()?.name;
+    const days=Object.entries(state.days||{}).filter(([,day])=>day.date===today()&&day.phase!=='complete'&&(!school||day.school===school)&&(day.classIds||[]).some(id=>assigned.has(String(id))));
+    shortcuts.innerHTML=days.map(([id,day])=>`<button type="button" class="aw-resume-combined-button" data-aw="resume-combined" data-day="${e(id)}"><img src="assets/class-action-combine.png" alt=""><span><strong>Resume Combined Classes</strong><small>${e(day.school)} · ${day.phase==='ready'?`Ready for class ${Math.min(day.groups.length+1,day.plannedCount)} of ${day.plannedCount}`:`Class ${day.groups.length} of ${day.plannedCount} in progress`}</small></span><span aria-hidden="true">›</span></button>`).join('');
+    shortcuts.hidden=!days.length;
   }
   function refreshSchoolNote() {
+    refreshCombinedResume();
     const list=document.getElementById('teacher-roster-list');if(!list)return;
     const old=document.getElementById('aw-known-today');if(old)old.remove();
     const relevant=state.absences.filter(a=>!a.canceled&&a.date===today()&&api.teacherClasses().some(c=>c.students.some(s=>s.id===a.studentId)));
@@ -231,10 +286,14 @@ window.DTAttendancePreview = (() => {
       firstManagement.classList.add('aw-original-class-actions');document.getElementById('teacher-roster-shoe-check')?.closest('.teacher-roster-management-row')?.classList.add('aw-original-class-actions');
     }
     if(demo)void persist();api.refresh();refreshSchoolNote();
+    setInterval(checkCombinedHourLimit,1000);
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkCombinedHourLimit();});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape' && document.getElementById('aw-overlay')?.classList.contains('active') && ['checkin','checkout','missed'].includes(activeDay()?.phase)){event.preventDefault();panel.querySelector('[data-aw="close"]')?.click();}});
     // Keep the note visible when TT re-renders its normal roster.
     new MutationObserver(()=>{if(!document.getElementById('aw-known-today'))refreshSchoolNote();}).observe(document.getElementById('teacher-roster-list'),{childList:true});
     document.addEventListener('change',event=>{
       const t=event.target;
+      if(t.id==='teacher-roster-school-filter')setTimeout(refreshCombinedResume,0);
       if(t.matches('[data-aw-status]')){drafts[t.dataset.awStatus]=t.value;refreshHistory();return;}
       if(t.matches('[data-aw-history-session]')){sessionDrafts[t.dataset.awHistorySession]=t.value;return;}
       if(t.matches('[data-aw-school]')){state.setup={school:t.value,excluded:lessonClasses(t.value).filter(completeClass).map(c=>c.id)};renderSetup();return;}
@@ -263,7 +322,17 @@ window.DTAttendancePreview = (() => {
     document.addEventListener('click',async event=>{
       const button=event.target.closest('[data-aw]');if(!button)return;event.preventDefault();const action=button.dataset.aw;message='';if(busy)return;
       const before=JSON.stringify(state),attendanceBefore=new Map(allClasses().map(c=>[c.id,JSON.parse(JSON.stringify(c.attendance||{}))]));busy=true;try{
-      if(action==='close'){document.getElementById('aw-overlay').classList.remove('active');document.getElementById('aw-overlay').setAttribute('aria-hidden','true');selected.clear();return;}
+      if(action==='close'){
+        const pending=activeDay();
+        if(panel.querySelector('h2')?.textContent==='Combined Classes' && ['checkout','missed'].includes(pending?.phase)) {
+          if(!window.confirm('Cancel Check Out?\nYour selected dancers have not been checked out.'))return;
+          pending.phase='teaching';delete pending.checkoutSelection;delete pending.checkoutAt;delete pending.missed;delete pending.choices;selected.clear();await persist();
+        }
+        if(panel.querySelector('h2')?.textContent==='Combined Classes' && pending?.phase==='checkin') {
+          if(!window.confirm('Cancel Check In?\nYour selected dancers have not been checked in.'))return;
+          pending.groups.pop();pending.phase='ready';selected.clear();await persist();
+        }
+        clearInterval(combinedClockTimer);combinedClockTimer=null;refreshCombinedResume();document.getElementById('aw-overlay').classList.remove('active');document.getElementById('aw-overlay').setAttribute('aria-hidden','true');selected.clear();return;}
       if(action==='reset-preview'){api.reset();localStorage.removeItem(key);localStorage.setItem('dt-attendance-preview-generation','reset-'+Date.now().toString(36));location.reload();return;}
       if(action==='dismiss-known'){document.getElementById('aw-known-today').hidden=true;return;}
       if(action==='view-known-reason'){
@@ -277,6 +346,14 @@ window.DTAttendancePreview = (() => {
       }
       if(action==='run-class-action'){const target=document.getElementById(button.dataset.id);document.getElementById('aw-overlay').classList.remove('active');document.getElementById('aw-overlay').setAttribute('aria-hidden','true');queueMicrotask(()=>target?.click());return;}
       if(action==='launch-combine'){openCombine();return;}
+      if(action==='resume-combined'){
+        const day=state.days[button.dataset.day];
+        if(!day||day.date!==today()||day.phase==='complete'){refreshCombinedResume();api.toast('That combined dance day is no longer active.');return;}
+        if(!(day.classIds||[]).some(id=>api.teacherClasses().some(c=>String(c.id)===String(id))))return;
+        state.activeDay=button.dataset.day;state.setup={school:day.school,excluded:[...(day.excluded||[])]};
+        selected.clear();message='';renderDay();return;
+      }
+
       if(action==='sample-history'){const c=api.teacherClasses()[0];editing=false;drafts={};api.openStudent(c,c.students.find(s=>s.status==='enrolled'));return;}
       if(action==='edit-history'){editing=true;drafts={};sessionDrafts={};refreshHistory();return;}
       if(action==='cancel-history'){editing=false;drafts={};refreshHistory();return;}
@@ -322,8 +399,8 @@ window.DTAttendancePreview = (() => {
       }
       const day=activeDay();if(!day||day.date!==today()){api.toast('Open Combine Classes for today before continuing.');return;}
       const group=day.groups.at(-1);
-      if(action==='start-group'){day.groups.push({id:uid(),members:[],checkedOut:[],startAt:'',endAt:''});day.phase='checkin';selected.clear();}
-      if(action==='cancel-group'){day.groups.pop();day.phase='ready';selected.clear();}
+      if(action==='start-group'){day.groups.push({id:uid(),members:[],checkedOut:[],startAt:'',endAt:'',clockStartedAt:new Date().toISOString()});day.phase='checkin';selected.clear();}
+      if(action==='cancel-group'){if(!window.confirm('Cancel Check In?\nYour selected dancers have not been checked in.'))return;day.groups.pop();day.phase='ready';selected.clear();}
       if(action==='add-group'){day.plannedCount++;}
       if(action==='select-dancer'){if(!finishedIds(day).has(button.dataset.id)){if(selected.has(button.dataset.id))selected.delete(button.dataset.id);else selected.add(button.dataset.id);}}
       if(action==='save-checkin'){
@@ -331,7 +408,7 @@ window.DTAttendancePreview = (() => {
         for(const id of selected){const r=find(id);write(r.rosterClass,id,day.date,{status:'present',checkInAt:group.startAt,checkOutAt:'',sessionId:group.id});}
         selected.clear();day.phase='teaching';api.refresh();
       }
-      if(action==='end-group'){day.phase='checkout';selected.clear();}
+      if(action==='end-group'){group.clockEndedAt ||= new Date().toISOString();day.phase='checkout';selected.clear();}
       if(action==='save-checkout'){
         if(!selected.size)return;day.checkoutSelection=[...selected];day.checkoutAt=new Date().toISOString();day.missed=[...selected].filter(id=>!group.members.includes(id));day.choices={};
         if(day.missed.length){day.phase='missed';}else{await commitCheckout();return;}
@@ -350,7 +427,9 @@ window.DTAttendancePreview = (() => {
         remaining.forEach(({student:s,rosterClass:c})=>{const status=day.review[s.id],g=day.groups.find(g=>g.id===day.reviewGroup[s.id]);write(c,s.id,day.date,{status,checkInAt:status==='present'?g.startAt:'',checkOutAt:status==='absent'?'':g.endAt,sessionId:g?.id||null});});
         day.phase='complete';api.refresh();
       }
-      if(action!=='select-dancer')await persist();renderDay();
+      if(action!=='select-dancer')await persist();
+      if(action==='save-checkin'){api.refresh();closeSavedAttendance();api.toast('Check-in saved');return;}
+      renderDay();
       }catch(error){state=JSON.parse(before);allClasses().forEach(c=>{if(attendanceBefore.has(c.id))c.attendance=attendanceBefore.get(c.id);});selected.clear();api.toast('Attendance was not saved: '+error.message);if(!demo)await reload().catch(()=>{});api.refresh();api.save();if(action.includes('history'))refreshHistory();else if(activeDay())renderDay();}
       finally{busy=false;}
     });

@@ -38948,6 +38948,18 @@
       rosterView.classList.add("is-my-day-roster-popup");
     };
     const closeMyDayRosterPopup = () => {
+      if(activeTeacherRosterCheckOutClassIds.has(myDayRosterPopupClassId)) {
+        if(!window.confirm("Cancel Check Out?\nYour selected dancers have not been checked out."))return;
+        activeTeacherRosterCheckOutClassIds.delete(myDayRosterPopupClassId);
+        const prefix=`${myDayRosterPopupClassId}:`;
+        [...pendingTeacherRosterCheckIns].filter(key=>key.startsWith(prefix)).forEach(key=>pendingTeacherRosterCheckIns.delete(key));
+      }
+      if(activeTeacherRosterCheckInClassIds.has(myDayRosterPopupClassId)) {
+        if(!window.confirm("Cancel Check In?\nYour selected dancers have not been checked in."))return;
+        const prefix=`${myDayRosterPopupClassId}:`;
+        activeTeacherRosterCheckInClassIds.delete(myDayRosterPopupClassId);
+        [...pendingTeacherRosterCheckIns].filter(key=>key.startsWith(prefix)).forEach(key=>pendingTeacherRosterCheckIns.delete(key));
+      }
       myDayRosterPopupClassId = "";
       document.getElementById("rosters-view")?.classList.remove("is-my-day-roster-popup");
       renderTeacherRosters();
@@ -40000,6 +40012,9 @@
       const cancelAttendanceButton = event.target.closest("[data-teacher-cancel-attendance]");
       if (cancelAttendanceButton) {
         const classId = cancelAttendanceButton.dataset.teacherCancelAttendance;
+        if(activeTeacherRosterCheckInClassIds.has(classId) && !window.confirm("Cancel Check In?\nYour selected dancers have not been checked in."))return;
+        if(activeTeacherRosterCheckOutClassIds.has(classId) && !window.confirm("Cancel Check Out?\nYour selected dancers have not been checked out."))return;
+        if(myDayRosterPopupClassId===classId){myDayRosterPopupClassId="";document.getElementById("rosters-view")?.classList.remove("is-my-day-roster-popup");}
         activeTeacherRosterCheckInClassIds.delete(classId);
         activeTeacherRosterCheckOutClassIds.delete(classId);
         [...pendingTeacherRosterCheckIns].filter((key) => key.startsWith(`${classId}:`)).forEach((key) => pendingTeacherRosterCheckIns.delete(key));
@@ -40080,7 +40095,7 @@
         else activeTeacherRosterCheckInClassIds.add(classId);
         openTeacherRosterClassIds.add(classId);
         teacherRosterAttendanceReviewClassId = "";
-        renderTeacherRosters();
+        openMyDayRosterPopup(classId);
         showToast(mode === "checkout" ? "Check-out started" : "Check-in started");
         return;
       }
@@ -40173,6 +40188,8 @@
         const attendance = teacherAttendanceForClass(rosterClass);
         const classPrefix = `${rosterClass.id}:`;
         const selectedAttendanceIds = [...pendingTeacherRosterCheckIns].filter((key) => key.startsWith(classPrefix)).map((key) => key.slice(classPrefix.length));
+        if(!selectedAttendanceIds.length){showToast("Select dancers to check in first.");return;}
+        if(finishButton.disabled)return;finishButton.disabled=true;
         if (selectedAttendanceIds.length) ensureTeacherClassStarted(rosterClass);
         selectedAttendanceIds.forEach((studentId) => {
           attendance[studentId] = { status: "present", checkInAt: new Date().toISOString(), checkOutAt: "" };
@@ -40181,7 +40198,10 @@
         const unresolved = teacherRosterAttendanceStudents(rosterClass).filter((student) => !teacherAttendanceStatus(attendance[student.id]));
         const helper = assignTeacherRosterHelper(rosterClass);
         scheduleAppDataSave();
-        void persistTeacherAttendanceBatch(rosterClass, selectedAttendanceIds);
+        const saved = await persistTeacherAttendanceBatch(rosterClass, selectedAttendanceIds);
+        if(!saved){selectedAttendanceIds.forEach(id=>pendingTeacherRosterCheckIns.add(`${classPrefix}${id}`));finishButton.disabled=false;renderTeacherRosters();return;}
+        myDayRosterPopupClassId="";
+        document.getElementById("rosters-view")?.classList.remove("is-my-day-roster-popup");
         submittedTeacherRosterCheckInClassIds.add(rosterClass.id);
         activeTeacherRosterCheckInClassIds.delete(rosterClass.id);
         teacherRosterAttendanceReviewClassId = "";
@@ -40197,6 +40217,7 @@
         const classPrefix = `${rosterClass.id}:`;
         const checkedOutAt = new Date().toISOString();
         const selectedAttendanceIds = [...pendingTeacherRosterCheckIns].filter((key) => key.startsWith(classPrefix)).map((key) => key.slice(classPrefix.length));
+        if(!selectedAttendanceIds.length){showToast("Select dancers to check out first.");return;}
         if (teacherCheckoutReviewPending) return;
         const missingCheckIns = selectedAttendanceIds.filter((id) => teacherCheckoutNeedsReview(attendance[id]))
           .map((id) => rosterClass.students.find((student) => student.id === id)).filter(Boolean);
@@ -40260,7 +40281,10 @@
         });
         if (!remaining.length && teacherClassCheckedInEntries(rosterClass, attendance).length) ensureTeacherClassEnded(rosterClass, checkedOutAt);
         scheduleAppDataSave();
-        void persistTeacherAttendanceBatch(rosterClass, selectedAttendanceIds);
+        const saved = await persistTeacherAttendanceBatch(rosterClass, selectedAttendanceIds);
+        if(!saved){selectedAttendanceIds.forEach(id=>pendingTeacherRosterCheckIns.add(`${classPrefix}${id}`));renderTeacherRosters();return;}
+        myDayRosterPopupClassId="";
+        document.getElementById("rosters-view")?.classList.remove("is-my-day-roster-popup");
         renderTeacherRosters();
         if (remaining.length) {
           showToast(`${remaining.length} dancer${remaining.length === 1 ? " still needs" : "s still need"} check-out`);
@@ -55444,9 +55468,11 @@
     const musicLibraryState = {
       playlists: [],
       selectedPlaylistId: "",
+      libraryAccountId: "",
       search: "",
       typeFilter: "all",
       currentTrackId: "",
+      playbackPlaylistId: "",
       repeatCurrentTrack: false,
       previewPlaying: false,
       catalogTracks: [],
@@ -55466,13 +55492,17 @@
       const cachedUrl = cachedMusicTrackUrl(track);
       if (cachedUrl) return cachedUrl;
       if (musicSignedUrlRequests.has(track.storage_path)) return musicSignedUrlRequests.get(track.storage_path);
-      const request = client.storage.from("teacher-music").createSignedUrl(track.storage_path, 3600)
+      let linkTimeout;
+      const request = Promise.race([
+        client.storage.from("teacher-music").createSignedUrl(track.storage_path, 3600),
+        new Promise((_,reject)=>{linkTimeout=setTimeout(()=>reject(new Error("Music link request timed out")),12000);})
+      ])
         .then(({ data, error }) => {
           if (error || !data?.signedUrl) throw error || new Error("Signed music URL was unavailable");
           musicSignedUrlCache.set(track.storage_path, { url: data.signedUrl, expiresAt: Date.now() + (50 * 60 * 1000) });
           return data.signedUrl;
         })
-        .finally(() => musicSignedUrlRequests.delete(track.storage_path));
+        .finally(() => {clearTimeout(linkTimeout);musicSignedUrlRequests.delete(track.storage_path);});
       musicSignedUrlRequests.set(track.storage_path, request);
       return request;
     };
@@ -55645,6 +55675,9 @@
         if (backButton) backButton.hidden = true;
         return;
       }
+      document.getElementById("music-playlist-grid").hidden=true;
+      document.getElementById("music-track-panel").hidden=false;
+      document.getElementById("music-back-to-playlists").hidden=false;
       const query = musicLibraryState.search.trim().toLowerCase();
       const tracks = musicPlaylistTracks(selected);
       const visibleTracks = tracks.filter((track) => !query || `${track.title} ${track.artist}`.toLowerCase().includes(query));
@@ -55714,11 +55747,14 @@
     };
 
     const loadSharedMusicLibrary = async (profile = window.dtCurrentProfile) => {
+      const accountId=String(profile?.id || profileTeacher?.id || "preview");
+      if(musicLibraryState.libraryAccountId && musicLibraryState.libraryAccountId!==accountId)musicLibraryState.selectedPlaylistId="";
+      musicLibraryState.libraryAccountId=accountId;
       const client = window.dtSupabase;
       const grid = document.getElementById("music-playlist-grid");
       if (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1") {
         musicLibraryState.playlists = workshopMusicPlaylists();
-        musicLibraryState.selectedPlaylistId = "";
+        if(!musicLibraryState.playlists.some(playlist=>playlist.id===musicLibraryState.selectedPlaylistId))musicLibraryState.selectedPlaylistId="";
         setText("music-profile-label", `${profile?.full_name || "Ms. Lexi"} • Dance Techniques teacher library`);
         renderMusicPlaylists();
         updateMyDayMusicPlayer();
@@ -55754,7 +55790,7 @@
         music_playlist_tracks: (playlist.music_teacher_playlist_tracks || []).map((link) => ({ position: link.position, music_tracks: link.music_tracks }))
       }));
       musicLibraryState.playlists = [...directorPlaylists, ...myPlaylists];
-      musicLibraryState.selectedPlaylistId = "";
+      if(!musicLibraryState.playlists.some(playlist=>playlist.id===musicLibraryState.selectedPlaylistId))musicLibraryState.selectedPlaylistId="";
       renderMusicPlaylists();
       updateMyDayMusicPlayer();
       hydrateMusicCoverUrls(musicLibraryState.playlists, client).then(() => {
@@ -55999,24 +56035,31 @@
       try { audio.mozPreservesPitch = true; } catch (_) {}
     };
 
-    const playMusicTrack = async (trackId) => {
+    const playMusicTrack = async (trackId, {playlistId=musicLibraryState.selectedPlaylistId,intent="toggle"}={}) => {
       const client = window.dtSupabase;
       const audio = document.getElementById("dt-tunes-audio");
-      const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === trackId);
+      const playbackPlaylist=musicLibraryState.playlists.find(p=>p.id===playlistId && musicPlaylistTracks(p).some(t=>t.id===trackId)) || musicLibraryState.playlists.find(p=>musicPlaylistTracks(p).some(t=>t.id===trackId));
+      const track = musicPlaylistTracks(playbackPlaylist).find(item=>item.id===trackId);
       if (!audio || !track) return;
+      const playbackRequestId = ++musicPlaybackRequestId;
+      musicLibraryState.playbackPlaylistId=playbackPlaylist.id;
+      const resumePosition=audio.dataset.musicTrackId===track.id ? Number(audio.currentTime)||0 : 0;
       normalizeMusicPlayback(audio);
       const isSameTrack = musicLibraryState.currentTrackId === track.id;
       if (isSameTrack && track.workshop_preview) {
-        musicLibraryState.previewPlaying = !musicLibraryState.previewPlaying;
+        musicLibraryState.previewPlaying = intent==="play" ? true : !musicLibraryState.previewPlaying;
         updateMyDayMusicPlayer();
         renderMusicTrackList();
         return;
       }
-      if (isSameTrack && audio.src) {
-        if (audio.paused) await audio.play().catch(() => showToast("Press play again to begin."));
-        else audio.pause();
-        return;
+      if(isSameTrack && audio.dataset.musicTrackId===track.id && !audio.paused && !audio.ended && !audio.error){if(intent!=="play")audio.pause();return;}
+      if (isSameTrack && audio.src && audio.dataset.musicTrackId===track.id && !audio.error && (cachedMusicTrackUrl(track) || (intent==="play" && audio.readyState>=2))) {
+        if (audio.paused) {
+          try{if(audio.ended)audio.currentTime=0;await audio.play();return;}
+          catch(error){if(error.name==='NotAllowedError'){showToast("Tap Play to resume this song.");return;}musicSignedUrlCache.delete(track.storage_path);}
+        } else {audio.pause();return;}
       }
+      if(audio.error)musicSignedUrlCache.delete(track.storage_path);
       musicLibraryState.currentTrackId = track.id;
       musicLibraryState.previewPlaying = Boolean(track.workshop_preview);
       audio.loop = musicLibraryState.repeatCurrentTrack;
@@ -56024,7 +56067,7 @@
       setText("music-now-playing-title", track.title);
       setText("music-now-playing-artist", artist);
       updateMyDayMusicPlayer();
-      const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+      const playlist = playbackPlaylist;
       const coverUrl = musicNowPlayingCoverUrl(track, playlist);
       showMusicNowPlayingArtwork(track, playlist);
       if (track.workshop_preview) {
@@ -56033,18 +56076,22 @@
         updateMyDayMusicPlayer();
         return;
       }
-      if (!client) return;
-      const playbackRequestId = ++musicPlaybackRequestId;
+      if (!client) {showToast("Music connection unavailable. Please try again.");return;}
+      audio.pause();
       let signedUrl = "";
       try {
         signedUrl = await musicTrackSignedUrl(track, client);
+        if(!signedUrl)throw new Error("Song link unavailable");
       } catch (error) {
+        if(playbackRequestId!==musicPlaybackRequestId)return;
         console.error("DT Tunes song could not open", error);
-        showToast("That song couldn’t open. Please try again.");
+        showToast("That song couldn’t open. Tap Play to retry.");
         return;
       }
       if (playbackRequestId !== musicPlaybackRequestId || musicLibraryState.currentTrackId !== track.id) return;
+      audio.dataset.musicTrackId=track.id;
       audio.src = signedUrl;
+      if(resumePosition && !audio.ended)audio.addEventListener('loadedmetadata',()=>{if(musicPlaybackRequestId===playbackRequestId && Number.isFinite(audio.duration) && resumePosition<audio.duration)audio.currentTime=resumePosition;},{once:true});
       normalizeMusicPlayback(audio);
       audio.load();
       try {
@@ -56060,22 +56107,7 @@
           album: "DT Tunes",
           artwork: coverUrl ? [{ src: new URL(coverUrl, window.location.href).href, sizes: "512x512", type: "image/png" }] : []
         });
-        const registerMediaAction = (action, handler) => {
-          try { navigator.mediaSession.setActionHandler(action, handler); } catch (_) { /* Unsupported by this iPhone version. */ }
-        };
-        registerMediaAction("play", () => { normalizeMusicPlayback(audio); return audio.play(); });
-        registerMediaAction("pause", () => audio.pause());
-        registerMediaAction("previoustrack", () => playAdjacentMusicTrack(-1));
-        registerMediaAction("nexttrack", () => playAdjacentMusicTrack(1));
-        registerMediaAction("seekbackward", (details) => {
-          audio.currentTime = Math.max(0, audio.currentTime - (details.seekOffset || 15));
-        });
-        registerMediaAction("seekforward", (details) => {
-          audio.currentTime = Math.min(audio.duration || audio.currentTime, audio.currentTime + (details.seekOffset || 15));
-        });
-        registerMediaAction("seekto", (details) => {
-          if (Number.isFinite(details.seekTime)) audio.currentTime = details.seekTime;
-        });
+
       }
     };
 
@@ -56107,13 +56139,14 @@
       if (button) seekMusicPosition(document.getElementById("dt-tunes-audio").currentTime + Number(button.dataset.musicSkip));
     });
     const currentMusicPlaylistTracks = () => {
-      const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+      const id=musicLibraryState.currentTrackId ? musicLibraryState.playbackPlaylistId : musicLibraryState.selectedPlaylistId;
+      const playlist = musicLibraryState.playlists.find(item=>item.id===id);
       return musicPlaylistTracks(playlist);
     };
 
     const updateMyDayMusicPlayer = () => {
       const audio = document.getElementById("dt-tunes-audio");
-      const playlist = musicLibraryState.playlists.find((item) => item.id === musicLibraryState.selectedPlaylistId);
+      const playlist = musicLibraryState.playlists.find((item) => item.id === (musicLibraryState.playbackPlaylistId || musicLibraryState.selectedPlaylistId));
       const track = musicLibraryState.playlists.flatMap(musicPlaylistTracks).find((item) => item.id === musicLibraryState.currentTrackId);
       const title = track?.title || (playlist ? `${musicPlaylistTracks(playlist).length} songs ready` : "Ready when you are");
       const isPlaying = Boolean(track?.workshop_preview ? musicLibraryState.previewPlaying : (audio && !audio.paused && !audio.ended && audio.src));
@@ -56168,6 +56201,7 @@
       const audio = document.getElementById("dt-tunes-audio");
       musicPlaybackRequestId += 1;
       musicLibraryState.currentTrackId = "";
+      musicLibraryState.playbackPlaylistId = "";
       musicLibraryState.previewPlaying = false;
       if (audio) {
         audio.pause();
@@ -56190,11 +56224,12 @@
       const tracks = currentMusicPlaylistTracks();
       const currentIndex = tracks.findIndex((track) => track.id === musicLibraryState.currentTrackId);
       const nextIndex = currentIndex + direction;
-      if (currentIndex < 0 || nextIndex < 0 || nextIndex >= tracks.length) {
+      if(currentIndex<0){if(!automatic){if(tracks.length)playMusicTrack(tracks[direction>0?0:tracks.length-1].id,{playlistId:musicLibraryState.playbackPlaylistId||musicLibraryState.selectedPlaylistId});else showToast("Choose a playlist to continue.");}return;}
+      if (nextIndex < 0 || nextIndex >= tracks.length) {
         if (!automatic) showToast(direction > 0 ? "You’re at the end of this playlist." : "You’re at the first song in this playlist.");
         return;
       }
-      playMusicTrack(tracks[nextIndex].id);
+      playMusicTrack(tracks[nextIndex].id,{playlistId:musicLibraryState.playbackPlaylistId||musicLibraryState.selectedPlaylistId});
     };
 
     const toggleMusicRepeat = () => {
@@ -56211,6 +56246,20 @@
     };
 
     const dtTunesAudio = document.getElementById("dt-tunes-audio");
+    if("mediaSession" in navigator && dtTunesAudio) {
+      const registerMediaAction=(action,handler)=>{try{navigator.mediaSession.setActionHandler(action,handler);}catch(_){}};
+      registerMediaAction("play",()=>{
+        const trackId=musicLibraryState.currentTrackId || currentMusicPlaylistTracks()[0]?.id;
+        if(trackId)void playMusicTrack(trackId,{playlistId:musicLibraryState.playbackPlaylistId || musicLibraryState.selectedPlaylistId,intent:"play"});
+      });
+      registerMediaAction("pause",()=>{musicPlaybackRequestId++;dtTunesAudio.pause();});
+      registerMediaAction("previoustrack",()=>playAdjacentMusicTrack(-1));
+      registerMediaAction("nexttrack",()=>playAdjacentMusicTrack(1));
+      registerMediaAction("seekbackward",details=>seekMusicPosition(dtTunesAudio.currentTime-(details.seekOffset||15)));
+      registerMediaAction("seekforward",details=>seekMusicPosition(dtTunesAudio.currentTime+(details.seekOffset||15)));
+      registerMediaAction("seekto",details=>{if(Number.isFinite(details.seekTime))seekMusicPosition(details.seekTime);});
+    }
+
 
     ["loadedmetadata", "canplay", "play", "ratechange"].forEach((eventName) => {
       dtTunesAudio?.addEventListener(eventName, () => normalizeMusicPlayback(dtTunesAudio));
@@ -56334,8 +56383,7 @@
           updateMyDayMusicPlayer();
           renderMusicTrackList();
         } else if (audio?.src) {
-          if (audio.paused) audio.play().catch(() => showToast("Open DT Tunes and press play to begin."));
-          else audio.pause();
+          if(selectedTrack)playMusicTrack(selectedTrack.id,{playlistId:musicLibraryState.playbackPlaylistId});
         }
         return;
       }
@@ -56350,8 +56398,7 @@
           return;
         }
         if (audio?.src) {
-          if (audio.paused) audio.play().catch(() => showToast("Open DT Tunes and press play to begin."));
-          else audio.pause();
+          if(selectedTrack)playMusicTrack(selectedTrack.id,{playlistId:musicLibraryState.playbackPlaylistId});
           return;
         }
         const firstTrack = currentMusicPlaylistTracks()[0];
