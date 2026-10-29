@@ -34773,6 +34773,8 @@
       return { address: value || null, city: null, state: "TX", postal_code: null };
     };
 
+    const schoolPayloadMatchesRecord = (payload, record) => Boolean(record && Object.keys(payload).every((key) => JSON.stringify(payload[key]) === JSON.stringify(record[key])));
+
     const syncPartnerSchoolToDatabase = async (school) => {
       if (document.body.dataset.tourMode === "true" || !window.dtSupabase || !school) return true;
       const hasPercentageBenefit = /^\s*\d+(?:\.\d+)?%\s*Tuition\s*$/i.test(String(school.partnershipBenefit || ""));
@@ -34802,13 +34804,25 @@
         ? window.dtSupabase.from("partner_schools").update(payload).eq("id", school.id)
         : window.dtSupabase.from("partner_schools").insert({ ...payload, active: true });
       if (isUuid(school.id) && school.updatedAt) query = query.eq("updated_at", school.updatedAt);
-      const { data, error } = await query.select("id, updated_at").maybeSingle();
+      let { data, error } = await query.select("id, updated_at").maybeSingle();
       if (error) {
         console.error("Partner School profile could not be synchronized", error);
+        showToast("The school details could not be saved. Your edits are still in this card; check your connection and try again.");
         return false;
       }
+      if (!data?.id && isUuid(school.id)) {
+        const { data: current, error: readError } = await window.dtSupabase.from("partner_schools")
+          .select(["id", "updated_at", ...Object.keys(payload)].join(",")).eq("id", school.id).maybeSingle();
+        // A repeated save may already be complete. Read and compare every field;
+        // never retry a stale broad update against a newer school revision.
+        if (!readError && schoolPayloadMatchesRecord(payload, current)) data = current;
+        else {
+          showToast(readError ? "The latest school details could not be checked. Your edits are still here; try again when connected." : "This school changed in another session. Your edits are still here, and newer school details have not been overwritten.");
+          return false;
+        }
+      }
       if (!data?.id) {
-        showToast("This school changed in another session. Refresh before saving so no newer information is overwritten.");
+        showToast("The school save was not confirmed. Your edits are still in this card.");
         return false;
       }
       if (!isUuid(school.id) && data?.id) school.id = data.id;
@@ -34824,6 +34838,7 @@
       const { error: preferenceError } = await preferenceQuery;
       if (preferenceError) {
         console.error("Partner School payment preference could not be synchronized", preferenceError);
+        showToast("The school details were saved, but its payment preferences could not be saved. Your card is still open so you can retry.");
         return false;
       }
       return true;
@@ -35969,27 +35984,40 @@
       if (!school) return;
       saveButton.disabled = true;
       saveButton.textContent = "Saving…";
-      syncAllPartnerSchoolScheduleReferences();
-      saveAppData();
-      const schoolSaved = await syncPartnerSchoolToDatabase(school);
-      syncAllPartnerSchoolScheduleReferences();
-      saveAppData();
-      const [assignmentsSaved, cloudSaved] = await Promise.all([
-        schoolSaved === false ? Promise.resolve(false) : syncSchoolAssignmentsToDatabase([school]),
-        saveCloudAppData()
-      ]);
-      const saveFailed = schoolSaved === false || assignmentsSaved === false || cloudSaved === false;
-      renderSchoolLibrary();
-      if (saveFailed) {
-        const reopenedCard = document.querySelector(`.school-library-card[data-library-school-index="${schoolIndex}"]`);
-        if (reopenedCard) reopenedCard.open = true;
+      try {
+        syncAllPartnerSchoolScheduleReferences();
+        saveAppData();
+        const schoolSaved = await syncPartnerSchoolToDatabase(school);
+        if (schoolSaved === false) return; // Keep the specific error and the untouched form.
+        syncAllPartnerSchoolScheduleReferences();
+        saveAppData();
+        const assignmentsSaved = await syncSchoolAssignmentsToDatabase([school]);
+        if (assignmentsSaved === false) {
+          showToast("School details saved, but the teacher assignment could not be confirmed. Your edits are still here so you can retry.");
+          return;
+        }
+        const cloudSaved = await saveCloudAppData();
+        if (cloudSaved === false) {
+          showToast("School details and teacher assignment saved. The dashboard backup could not sync; this card is still open so you can retry.");
+          return;
+        }
+        if (cloudSaved !== true && document.body.dataset.tourMode !== "true") {
+          showToast("School details and teacher assignment saved. The dashboard backup has not confirmed yet; your card is still open.");
+          return;
+        }
+        renderSchoolLibrary();
+        renderStudentLibrary();
+        renderEnrollmentQueue();
+        renderClassesAndRosters();
+        renderTeacherProfileList();
+        showToast("Partner school updated everywhere");
+      } catch (error) {
+        console.error("School save could not complete", error);
+        showToast("The school save could not finish. Your edits are still in this card; check your connection and try again.");
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Save School";
       }
-      renderStudentLibrary();
-      renderEnrollmentQueue();
-      renderClassesAndRosters();
-      renderTeacherProfileList();
-      if (saveFailed) showToast("This school could not be saved everywhere. The card is still open so you can try again.");
-      else showToast("Partner school updated everywhere");
     });
 
     document.getElementById("admin-school-library-list")?.addEventListener("input", (event) => {
