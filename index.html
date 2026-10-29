@@ -57202,6 +57202,8 @@
         ["Group Photo", "assets/photo-frames/group-photo.png"],
         ["Dance Day", "assets/photo-frames/dance-day.png"],
         ["Halloween", "assets/photo-frames/halloween.png"],
+        ["Thanksgiving", "assets/photo-frames/thanksgiving.png"],
+        ["Group Thankful", "assets/photo-frames/group-thankful.png"],
         ["Hispanic Heritage", "assets/photo-frames/hispanic-heritage.png"],
         ["1st Position", "assets/photo-frames/first-position.png"]
       ];
@@ -57283,7 +57285,7 @@
       const anotherButton = modal.querySelector(".photo-frame-another");
       const saveButton = modal.querySelector(".photo-frame-save");
 
-      const selectedFrameIsLandscape = () => selectedFrame[1].endsWith("/group-photo.png");
+      const selectedFrameIsLandscape = () => ["/group-photo.png", "/group-thankful.png"].some((name) => selectedFrame[1].endsWith(name));
       const updateFrameLayout = () => {
         stage.classList.toggle("is-landscape", selectedFrameIsLandscape());
       };

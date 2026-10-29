@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v336-my-day-class-weekdays";
+const CACHE_NAME = "my-dance-techniques-v337-thanksgiving-photo-frames";
 const CORE_ASSETS = [
   "./student-photo-save.mjs?v=20261025",
   "./attendance-storage.js?v=student-storage-20261020",
@@ -21,6 +21,8 @@ const CORE_ASSETS = [
   "./assets/photo-frames/dance-besties.png",
   "./assets/photo-frames/hispanic-heritage.png",
   "./assets/photo-frames/first-position.png",
+  "./assets/photo-frames/thanksgiving.png",
+  "./assets/photo-frames/group-thankful.png",
 
   "./roster-care.js?v=20260908",
   "./roster-care.css?v=20260908",
