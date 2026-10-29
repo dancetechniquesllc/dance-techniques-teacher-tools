@@ -8151,6 +8151,9 @@
     .partnership-payment-card .school-directory-initials { width: 58px; height: 58px; white-space: pre-line; }
     .partnership-payment-card small { color: var(--muted); font-family: "Avenir Next", sans-serif; font-size: 10px; font-weight: 400; }
     .partnership-payment-card .status { margin-top: 4px; }
+    .partnership-payment-status-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-items: center; }
+    .partnership-payment-card .partnership-breakdown-status.is-pending { background: #f8d7d4; color: #9d3038; border: 1px solid #e7a6a2; }
+    .partnership-payment-card .partnership-breakdown-status.is-sent { background: #cbd8bf; color: #38503b; border: 1px solid #a5bda0; }
     .partnership-payment-card .status.vendor-amount-pending { background: #f8d7d4; color: #9d3038; border-color: #e7a6a2; }
     .partnership-payment-day { position: absolute; top: 10px; right: 10px; min-width: 28px; height: 28px; display: grid; place-items: center; padding: 0 7px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; font-weight: 800; }
     .partnership-payment-detail { display: grid; gap: 14px; padding: 18px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface); }
@@ -46876,6 +46879,12 @@
       ? "Check Received"
       : ({ ready: "Amount Pending", held: "Held Balance", amount_confirmed: "Amount Confirmed", sent: "Payment Sent", paid: "Payment Verified", not_applicable: "No Cash Payment" }[status] || "Review");
     const partnershipPaymentStatusClass = (status) => status === "paid" ? "ok" : status === "held" ? "private" : status === "ready" ? "vendor-amount-pending" : ["amount_confirmed", "sent"].includes(status) ? "pending" : "disabled";
+    const partnershipBreakdownCardStatusMarkup = (record) => {
+      if (!["sent", "paid"].includes(record.status)) return "";
+      return record.saved?.breakdownSentAt
+        ? `<span class="status partnership-breakdown-status is-sent">✓ Breakdown Sent</span>`
+        : `<span class="status partnership-breakdown-status is-pending">Send Breakdown</span>`;
+    };
     const partnershipPaymentProofMarkup = (record) => {
       const saved = record.saved || {};
       const rows = [
@@ -47038,7 +47047,7 @@
       if (day) { const values = [...new Set(schoolLibrary.map((school) => String(school.dayOfWeek || "")).filter(Boolean))].sort(); day.innerHTML = `<option value="all">All Dance Days</option>${values.map((value) => `<option value="${escapeText(value)}">${escapeText(weekdayNames[Number(value)] || "Unassigned")}</option>`).join("")}`; day.value = schoolPartnershipPaymentState.day; }
       const status = document.getElementById("partnership-payment-status"); if (status) status.value = schoolPartnershipPaymentState.status;
       const grid = document.getElementById("partnership-payment-grid");
-      if (grid) grid.innerHTML = visible.length ? visible.map((record) => { const dayText = record.school.dayOfWeek ? (weekdayNames[Number(record.school.dayOfWeek)] || "U").slice(0, 2) : "U"; const shownAmount = ["paid", "sent", "amount_confirmed"].includes(record.status) ? Number(record.saved?.amount || record.ready) : record.ready; const method = record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod; return `<button class="partnership-payment-card" type="button" data-open-partnership-payment="${escapeText(record.school.id || record.school.name)}"><span class="partnership-payment-day">${escapeText(dayText)}</span><span class="school-directory-initials">${escapeText(partnershipPaymentInitials(record.school))}</span><strong>${escapeText(record.school.nickname || record.school.name)}</strong><small>${escapeText(record.school.directorName || "Director not entered")}</small><small>${escapeText(record.school.partnershipBenefit)} · ${escapeText(vendorPaymentMethodLabel(record.school.preferredVendorPaymentMethod))}</small><strong>${payrollCurrency(shownAmount)}</strong><span class="status ${partnershipPaymentStatusClass(record.status)}">${escapeText(partnershipPaymentStatusLabel(record.status, method))}</span></button>`; }).join("") : `<div class="payroll-placeholder">No schools with a percentage-based tuition partnership match these filters. Partnership benefits are assigned in Partner Schools.</div>`;
+      if (grid) grid.innerHTML = visible.length ? visible.map((record) => { const dayText = record.school.dayOfWeek ? (weekdayNames[Number(record.school.dayOfWeek)] || "U").slice(0, 2) : "U"; const shownAmount = ["paid", "sent", "amount_confirmed"].includes(record.status) ? Number(record.saved?.amount || record.ready) : record.ready; const method = record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod; return `<button class="partnership-payment-card" type="button" data-open-partnership-payment="${escapeText(record.school.id || record.school.name)}"><span class="partnership-payment-day">${escapeText(dayText)}</span><span class="school-directory-initials">${escapeText(partnershipPaymentInitials(record.school))}</span><strong>${escapeText(record.school.nickname || record.school.name)}</strong><small>${escapeText(record.school.directorName || "Director not entered")}</small><small>${escapeText(record.school.partnershipBenefit)} · ${escapeText(vendorPaymentMethodLabel(record.school.preferredVendorPaymentMethod))}</small><strong>${payrollCurrency(shownAmount)}</strong><span class="partnership-payment-status-row"><span class="status ${partnershipPaymentStatusClass(record.status)}">${escapeText(partnershipPaymentStatusLabel(record.status, method))}</span>${partnershipBreakdownCardStatusMarkup(record)}</span></button>`; }).join("") : `<div class="payroll-placeholder">No schools with a percentage-based tuition partnership match these filters. Partnership benefits are assigned in Partner Schools.</div>`;
       const selected = records.find((record) => record.cashBenefit && String(record.school.id || record.school.name) === String(schoolPartnershipPaymentState.selectedSchoolId));
       renderSchoolPartnershipPaymentDetail(selected);
     };

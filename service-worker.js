@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v339-school-breakdown-send-state";
+const CACHE_NAME = "my-dance-techniques-v340-breakdown-card-status";
 const CORE_ASSETS = [
   "./student-photo-save.mjs?v=20261025",
   "./attendance-storage.js?v=student-storage-20261020",
