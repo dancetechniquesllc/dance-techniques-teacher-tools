@@ -25797,7 +25797,10 @@
       return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, "0")}-${String(monday.getDate()).padStart(2, "0")}`;
     };
 
-    const dayLabelForSchool = (profileSchool, fallback) => weekdayNames[Number(profileSchool?.dayOfWeek)] || fallback;
+    const dayLabelForSchool = (profileSchool, fallback) => {
+      const day = profileSchool?.dayOfWeek;
+      return day !== null && day !== undefined && day !== "" && Number(day) >= 1 && Number(day) <= 5 ? weekdayNames[Number(day)] : fallback;
+    };
 
     const rescheduleOverridesForTeacher = () => profileTeacher?.reschedules || [];
     const closureClassOverridesForTeacher = () => profileTeacher?.closureClassOverrides || [];
@@ -25949,7 +25952,13 @@
       };
     };
 
-    const scheduleSourcesForTeacher = () => (profileTeacher.schools || []).map((profileSchool) => {
+    const scheduleSourcesForTeacher = () => (profileTeacher.schools || []).filter((profileSchool) => (
+      profileSchool.active !== false && (!isUuid(profileTeacher.id) || (
+        profileSchool.dayOfWeek !== null && profileSchool.dayOfWeek !== undefined && profileSchool.dayOfWeek !== "" &&
+        Number(profileSchool.dayOfWeek) >= 1 && Number(profileSchool.dayOfWeek) <= 5 &&
+        classCountForSchool(profileSchool.name, profileSchool) > 0
+      ))
+    )).map((profileSchool) => {
       const profileSchoolKeys = new Set([
         profileSchool.name,
         profileSchool.nickname,
@@ -25995,7 +26004,7 @@
         classNames: rosterClass ? [rosterClass.name] : undefined,
         school: school.school,
         displaySchool: profileSchool?.nickname?.trim() || school.nickname || school.school,
-        day: override ? weekdayLabelFromDate(eventDate) : dayLabelForSchool(profileSchool, school.day),
+        day: weekdayLabelFromDate(eventDate),
         isd: profileSchool?.isd || school.isd,
         address: profileSchool?.address || school.school,
         teacher: profileTeacher.firstName || teacherNickname(profileTeacher),
@@ -31017,11 +31026,11 @@
     };
 
     const myDayClassRowsForEvent = (school, event) => {
-      if (event?.classIds) {
-        const rows = normalizeClassCurriculumRows(school);
+      if (event?.classIds || isUuid(profileTeacher.id)) {
+        const rows = Array.isArray(school.classCurriculum) ? school.classCurriculum : [];
         return rescheduleRosterClassesForEvent(event).map((item) => {
           const row = rows.find((row) => row.title === item.name) || rows[item.sourceRowIndex] || {};
-          return { ...row, title: item.name, age: item.ageGroup || row.age || "", level: item.level || row.level || "1", students: item.students?.length || row.students || "" };
+          return { ...row, title: item.name, age: item.ageGroup || row.age || "", level: item.level || row.level || "1", students: Array.isArray(item.students) ? item.students.length : row.students || "", startTime: item.time || row.startTime || "" };
         });
       }
       if (!event?.isPreviewOnly) return normalizeClassCurriculumRows(school);
@@ -31318,7 +31327,12 @@
       const dayEvents = scheduledDayEvents.length || document.body.dataset.tourMode !== "true"
         ? scheduledDayEvents
         : teacherToolsPreviewMyDayEvents(todayKey);
-      const workClockMarkup = DTWorkClock.otherMarkup(dayEvents);
+      const missingWeekdaySchools = isUuid(profileTeacher.id) ? (profileTeacher.schools || []).filter((school) => (
+        school.active !== false && classCountForSchool(school.name, school) > 0 &&
+        !dayLabelForSchool(school, "")
+      )) : [];
+      const scheduleWarning = missingWeekdaySchools.length ? `<section class="panel" role="status"><strong>Schedule needs a weekday</strong><p>${missingWeekdaySchools.map((school) => escapeText(school.nickname || school.name)).join(", ")} — the dance day hasn’t been set. These classes won’t be placed on a day until the schedule is completed.</p></section>` : "";
+      const workClockMarkup = scheduleWarning + DTWorkClock.otherMarkup(dayEvents);
       const stack = document.getElementById("my-day-stack");
       setText("my-day-subtitle", dateLabel);
       if (!stack) return;
