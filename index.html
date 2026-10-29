@@ -46946,6 +46946,15 @@
       } catch (_) {}
       return error?.message || "The breakdown could not be sent. Please try again.";
     };
+    const partnershipBreakdownSending = new Set();
+    const renderPartnershipBreakdownSendButton = () => {
+      const button = document.getElementById("send-partnership-breakdown");
+      if (!button) return;
+      const record = partnershipBreakdownRecord;
+      const sending = Boolean(record?.saved?.id && partnershipBreakdownSending.has(String(record.saved.id)));
+      button.disabled = sending || !record?.saved?.id || !partnershipBreakdownRecipientEmail(record?.school);
+      button.textContent = sending ? "Sending…" : record?.saved?.breakdownSentAt ? "Send Again" : "Send Breakdown";
+    };
     const openPartnershipBreakdown = (record) => {
       const overlay = document.getElementById("partnership-breakdown-overlay");
       const statement = partnershipBreakdownStatementHtml(record);
@@ -46955,7 +46964,7 @@
       document.getElementById("partnership-breakdown-subtitle").textContent = "Review the statement and generated email before sending.";
       const email = partnershipBreakdownRecipientEmail(record.school);
       document.getElementById("partnership-breakdown-email").innerHTML = `<h4>Generated Email</h4><label>To<input type="email" id="partnership-breakdown-recipient" value="${escapeText(email)}" readonly></label><label>Subject<input id="partnership-breakdown-subject" value="${escapeText(partnershipBreakdownMonthLabel())} Partner School Share" readonly></label><div class="partnership-breakdown-email-body">Hi ${escapeText(record.school.nickname || record.school.name || "Dance Techniques Partner")}!<br><br>Your <strong>${escapeText(partnershipBreakdownMonthLabel())} Partner School Share</strong> is on its way. The complete blush statement shown beside this preview will be included in the email.<br><br><strong>Partner School Share:</strong> ${payrollCurrency(record.saved?.amount || record.ready)}<br><strong>Payment Method:</strong> ${escapeText(vendorPaymentMethodLabel(record.saved?.paymentMethod || record.school.preferredVendorPaymentMethod))}<br><strong>Confirmation #:</strong> ${escapeText(record.saved?.confirmationReference || "Pending")}<br>${partnershipBreakdownCheckPreview(record)}<br>Warmly,<br><strong>Dance Techniques</strong></div>${email ? "" : `<p class="partnership-breakdown-error">Add a valid payment contact or school email before sending.</p>`}`;
-      document.getElementById("send-partnership-breakdown").disabled = !email;
+      renderPartnershipBreakdownSendButton();
       overlay?.classList.add("active"); overlay?.setAttribute("aria-hidden", "false");
     };
     const sendPartnershipBreakdown = async () => {
@@ -46963,7 +46972,10 @@
       const button = document.getElementById("send-partnership-breakdown");
       const recipientEmail = partnershipBreakdownRecipientEmail(record?.school);
       if (!record || !record.saved?.id || !recipientEmail || !button) return;
-      button.disabled = true; button.textContent = "Sending…";
+      const paymentKey = String(record.saved.id);
+      if (partnershipBreakdownSending.has(paymentKey)) return;
+      partnershipBreakdownSending.add(paymentKey);
+      renderPartnershipBreakdownSendButton();
       try {
         const statementHtml = partnershipBreakdownStatementHtml(record);
         const subject = `${partnershipBreakdownMonthLabel()} Partner School Share`;
@@ -46977,7 +46989,8 @@
           record.saved.breakdownSentTo = data.sentTo || recipientEmail;
           record.saved.breakdownProviderMessageId = data.messageId || "";
         }
-        closePartnershipBreakdown(); renderSchoolPartnershipPayments();
+        if (partnershipBreakdownRecord === record) closePartnershipBreakdown();
+        renderSchoolPartnershipPayments();
         showToast(`${record.school.nickname || record.school.name} breakdown sent to ${recipientEmail}`);
       } catch (error) {
         console.error("Partner School Share breakdown could not be sent", error);
@@ -46987,7 +47000,9 @@
         record.saved.breakdownFailureReason = reason;
         renderSchoolPartnershipPayments();
         showToast(reason);
-        button.disabled = false; button.textContent = "Send Breakdown";
+      } finally {
+        partnershipBreakdownSending.delete(paymentKey);
+        renderPartnershipBreakdownSendButton();
       }
     };
     const renderSchoolPartnershipPaymentDetail = (record) => {
