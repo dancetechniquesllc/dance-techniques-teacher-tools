@@ -38767,6 +38767,7 @@
         checkOutAt: teacherClassEndTime(rosterClass, attendance) || ""
       };
     };
+    const teacherClassCheckInSubmitted = (rosterClass, attendance = teacherAttendanceForClass(rosterClass)) => submittedTeacherRosterCheckInClassIds.has(rosterClass.id) || (!activeTeacherRosterCheckInClassIds.has(rosterClass.id) && teacherRosterAttendanceStudents(rosterClass).some(student => ["present", "tardy"].includes(teacherAttendanceStatus(attendance[student.id]))));
     const teacherClassStartTime = (rosterClass, attendance = teacherAttendanceForClass(rosterClass)) => {
       if (attendance.__classStartedAt) return attendance.__classStartedAt;
       const firstCheckIn = teacherClassCheckedInEntries(rosterClass, attendance).map((entry) => entry.checkInAt).filter(Boolean).sort()[0] || "";
@@ -38906,7 +38907,7 @@
       const attendance = teacherAttendanceForClass(rosterClass);
       const checkInActive = activeTeacherRosterCheckInClassIds.has(rosterClass.id);
       const checkOutActive = activeTeacherRosterCheckOutClassIds.has(rosterClass.id);
-      const checkInSubmitted = submittedTeacherRosterCheckInClassIds.has(rosterClass.id);
+      const checkInSubmitted = teacherClassCheckInSubmitted(rosterClass, attendance);
       const kitDeliveryActive = activeTeacherKitDeliveryClassIds.has(rosterClass.id);
       const boutiqueDeliveryActive = activeTeacherBoutiqueDeliveryClassIds.has(rosterClass.id);
       const weeklyHelperId = teacherRosterHelperForWeek(rosterClass)?.studentId || "";
@@ -39324,7 +39325,7 @@
         const selectedBoutiqueDeliveryCount = readyBoutiqueOrders.filter((order) => pendingTeacherBoutiqueDeliveries.has(String(order.id))).length;
         const outstandingKits = enrolled.filter((student) => !student.kitReceived);
         const readyKits = outstandingKits.filter((student) => student.kitPickedUp);
-        const checkInSubmitted = submittedTeacherRosterCheckInClassIds.has(rosterClass.id);
+        const checkInSubmitted = teacherClassCheckInSubmitted(rosterClass, attendance);
         const awaitingCheckOut = attendanceStudents.filter((student) => {
           const entry = attendance[student.id];
           return ["present", "tardy"].includes(teacherAttendanceStatus(entry)) && !(typeof entry === "object" && entry.checkOutAt);
@@ -39373,7 +39374,7 @@
         </details>`;
       }).join("");
       updateTeacherClassStopwatches();
-      if (myDayRosterPopupClassId) window.setTimeout(mountMyDayRosterPopup, 0);
+      if (myDayRosterPopupClassId) mountMyDayRosterPopup();
     }
 
     const closeTeacherNewEnrollmentDialog = () => {
@@ -40266,7 +40267,7 @@
           const startAnyway = await confirmTeacherOffDayStart(rosterClass);
           if (!startAnyway) return;
         }
-        const mode = startClassButton.dataset.teacherStartMode || "checkin";
+        const mode = teacherClassCheckInSubmitted(rosterClass) ? "checkout" : "checkin";
         activeTeacherBoutiqueDeliveryClassIds.delete(classId);
         activeTeacherKitDeliveryClassIds.delete(classId);
         [...pendingTeacherKitDeliveries].filter((key) => key.startsWith(`${classId}:`)).forEach((key) => pendingTeacherKitDeliveries.delete(key));
@@ -55943,7 +55944,14 @@
 
     const loadSharedMusicLibrary = async (profile = window.dtCurrentProfile) => {
       const accountId=String(profile?.id || profileTeacher?.id || "preview");
-      if(musicLibraryState.libraryAccountId && musicLibraryState.libraryAccountId!==accountId)musicLibraryState.selectedPlaylistId="";
+      if(musicLibraryState.libraryAccountId && musicLibraryState.libraryAccountId!==accountId) {
+        musicLibraryState.selectedPlaylistId="";
+        musicLibraryState.playbackPlaylistSnapshot=null;
+        musicLibraryState.playbackPlaylistId="";
+        musicLibraryState.currentTrackId="";
+        const previousAudio=document.getElementById("dt-tunes-audio");
+        previousAudio?.pause();previousAudio?.removeAttribute("src");previousAudio?.load();
+      }
       musicLibraryState.libraryAccountId=accountId;
       const client = window.dtSupabase;
       const grid = document.getElementById("music-playlist-grid");
@@ -55971,6 +55979,7 @@
           .eq("active", true)
           .order("name")
       ]);
+      if (window.dtCurrentProfile?.id !== profile.id) return;
       if (directorResult.error) {
         console.error("DT Tunes could not load", directorResult.error);
         if (grid) grid.innerHTML = `<p class="subtle">DT Tunes couldn’t open. Refresh and try again.</p>`;
@@ -56233,14 +56242,16 @@
     const playMusicTrack = async (trackId, {playlistId=musicLibraryState.selectedPlaylistId,intent="toggle"}={}) => {
       const client = window.dtSupabase;
       const audio = document.getElementById("dt-tunes-audio");
-      const playbackPlaylist=musicLibraryState.playlists.find(p=>p.id===playlistId && musicPlaylistTracks(p).some(t=>t.id===trackId)) || musicLibraryState.playlists.find(p=>musicPlaylistTracks(p).some(t=>t.id===trackId));
+      const playbackPlaylist=(musicLibraryState.playbackPlaylistSnapshot?.id===playlistId && musicPlaylistTracks(musicLibraryState.playbackPlaylistSnapshot).some(t=>t.id===trackId) ? musicLibraryState.playbackPlaylistSnapshot : null) || musicLibraryState.playlists.find(p=>p.id===playlistId && musicPlaylistTracks(p).some(t=>t.id===trackId)) || musicLibraryState.playlists.find(p=>musicPlaylistTracks(p).some(t=>t.id===trackId));
       const track = musicPlaylistTracks(playbackPlaylist).find(item=>item.id===trackId);
       if (!audio || !track) return;
       const playbackRequestId = ++musicPlaybackRequestId;
       musicLibraryState.playbackPlaylistId=playbackPlaylist.id;
+      musicLibraryState.playbackPlaylistSnapshot=playbackPlaylist;
       const resumePosition=audio.dataset.musicTrackId===track.id ? Number(audio.currentTime)||0 : 0;
       normalizeMusicPlayback(audio);
       const isSameTrack = musicLibraryState.currentTrackId === track.id;
+      if (isSameTrack && audio.dataset.musicTrackId !== track.id) musicSignedUrlCache.delete(track.storage_path);
       if (isSameTrack && track.workshop_preview) {
         musicLibraryState.previewPlaying = intent==="play" ? true : !musicLibraryState.previewPlaying;
         updateMyDayMusicPlayer();
@@ -56275,7 +56286,7 @@
       audio.pause();
       let signedUrl = "";
       try {
-        signedUrl = await musicTrackSignedUrl(track, client);
+        signedUrl = cachedMusicTrackUrl(track) || await musicTrackSignedUrl(track, client);
         if(!signedUrl)throw new Error("Song link unavailable");
       } catch (error) {
         if(playbackRequestId!==musicPlaybackRequestId)return;
@@ -56335,7 +56346,7 @@
     });
     const currentMusicPlaylistTracks = () => {
       const id=musicLibraryState.currentTrackId ? musicLibraryState.playbackPlaylistId : musicLibraryState.selectedPlaylistId;
-      const playlist = musicLibraryState.playlists.find(item=>item.id===id);
+      const playlist = musicLibraryState.playbackPlaylistSnapshot?.id===id ? musicLibraryState.playbackPlaylistSnapshot : musicLibraryState.playlists.find(item=>item.id===id);
       return musicPlaylistTracks(playlist);
     };
 
@@ -56424,7 +56435,7 @@
         if (!automatic) showToast(direction > 0 ? "You’re at the end of this playlist." : "You’re at the first song in this playlist.");
         return;
       }
-      playMusicTrack(tracks[nextIndex].id,{playlistId:musicLibraryState.playbackPlaylistId||musicLibraryState.selectedPlaylistId});
+      return playMusicTrack(tracks[nextIndex].id,{playlistId:musicLibraryState.playbackPlaylistId||musicLibraryState.selectedPlaylistId,intent:"play"});
     };
 
     const toggleMusicRepeat = () => {

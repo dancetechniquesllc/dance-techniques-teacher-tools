@@ -188,10 +188,16 @@
       return;
     }
 
-    setGateState("checking");
+    const currentProfile = window.dtCurrentProfile;
+    const continuingSession = currentProfile?.id === session.user.id && document.body.dataset.authenticated === "true";
+    if (!continuingSession) setGateState("checking");
     const { data: profile, error } = await loadSignedInProfile(session.user.id);
     if (generation !== authSessionGeneration || signOutInProgress) return;
 
+    if (continuingSession && error && !profile && /fetch|network|timeout|connection/i.test(String(error.message || ""))) {
+      console.warn("The account refresh will retry; the current verified session remains open.");
+      return;
+    }
     if (error || !profile) {
       if (error) {
         console.error("Shared profile lookup failed: " + JSON.stringify({
@@ -216,7 +222,8 @@
     sessionName.textContent = profile.full_name ? `${profile.full_name} · ${profile.role}` : `Signed in · ${profile.role}`;
     profile.email = session.user.email || "";
     document.body.dataset.userRole = profile.role;
-    const landingMode = profile.role === "teacher" ? "teacher" : "admin";
+    const sameActiveAccount = continuingSession && currentProfile.role === profile.role;
+    const landingMode = sameActiveAccount ? document.body.dataset.mode : profile.role === "teacher" ? "teacher" : "admin";
     document.body.dataset.mode = landingMode;
     document.querySelectorAll("[data-mode-btn]").forEach((button) => {
       button.classList.toggle("active", button.dataset.modeBtn === landingMode);
@@ -230,7 +237,7 @@
     if (profile.role === "teacher") document.body.dataset.currentTeacherId = profile.id;
     window.clearTimeout(teacherProfileResolutionTimer);
     teacherProfileResolutionTimer = 0;
-    window.dispatchEvent(new CustomEvent("dt-auth-ready", { detail: { profile } }));
+    if (!sameActiveAccount) window.dispatchEvent(new CustomEvent("dt-auth-ready", { detail: { profile } }));
     // Synchronous listeners select the exact teacher and clear the previous
     // account's roster before the private screen becomes visible.
     if (window.dtCurrentProfile?.id === profile.id) setGateState("ready");
@@ -463,7 +470,7 @@
         if (!publishedVersion) return;
         const savedVersion = window.localStorage?.getItem("dt-published-app-version") || "";
         window.localStorage?.setItem("dt-published-app-version", publishedVersion);
-        if (savedVersion && savedVersion !== publishedVersion) window.location.reload();
+        if (savedVersion && savedVersion !== publishedVersion && document.body.dataset.authenticated !== "true") window.location.reload();
       } catch (error) {
         console.warn("The latest app version could not be checked", error);
       }
@@ -473,7 +480,7 @@
       // Do not reload while iOS is creating and saving a PushManager
       // subscription. Interrupting that flow leaves permission granted but no
       // phone attached to the signed-in teacher.
-      if (window.dtPushSetupInProgress) return;
+      if (window.dtPushSetupInProgress || document.body.dataset.authenticated === "true") return;
       refreshingForAppUpdate = true;
       window.location.reload();
     });
