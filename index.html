@@ -25318,7 +25318,13 @@
       const sectionButton = event.target.closest("[data-admin-open-section]");
       if (sectionButton) {
         event.preventDefault();
-        openAdminSection(sectionButton.dataset.adminOpenSection);
+        const websiteAlerts = sectionButton.classList.contains("director-message-shortcut")
+          ? notificationCenterItems.filter((item) => item.notification_type === "website_inquiry" && !item.read_at && !item.dismissed_at && (!item.expires_at || new Date(item.expires_at) > new Date()))
+          : [];
+        if (websiteAlerts.length) {
+          openCommunicationStudioView("web");
+          websiteAlerts.forEach((item) => markNotificationRead(item.id));
+        } else openAdminSection(sectionButton.dataset.adminOpenSection);
         return;
       }
 
