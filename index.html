@@ -24084,7 +24084,7 @@
         return {
           id: item.id, assignmentId: item.teacher_school_assignment_id, name: item.name, ageGroup: item.age_group, level: String(item.level),
           time: dbTime(item.start_time), teacherId: assignment?.teacher_id || "", partnerSchoolId: school.id || assignment?.partner_school_id || assignmentHistory?.partner_school_id || "", schoolName: school.name || "Partner School",
-          day: weekdayNames[Number(item.schedule_day)] || weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, recitalPerformance: ["tap","ballet","either"].includes(String(item.recital_performance||"").toLowerCase()) ? String(item.recital_performance).toLowerCase() : "", sourceActive: true,
+          scheduleDay: item.schedule_day, schedulePeriod: item.schedule_period, day: weekdayNames[Number(item.schedule_day)] || weekdayNames[school.dance_day] || "To schedule", classroom: item.classroom || "", capacity: item.capacity, recitalPerformance: ["tap","ballet","either"].includes(String(item.recital_performance||"").toLowerCase()) ? String(item.recital_performance).toLowerCase() : "", sourceActive: true,
           updatedAt: item.updated_at || "",
           helperHistory: Array.isArray(item.helper_history) ? item.helper_history : [],
           attendance: attendanceByClass.get(item.id) || {},
@@ -25985,12 +25985,15 @@
         const hasClassChanges = rescheduleOverridesForTeacher().some((item) => item.classId &&
           enrollmentSchoolNameMatches(item.schoolName, school.school) && item.originalDate === scheduledDate);
         const groups = new Map();
-        const occurrences = hasClassChanges && schoolClasses.length ? schoolClasses : [null];
+        const hasIndividualSchedule = schoolClasses.some((item) => item.scheduleDay !== null && item.scheduleDay !== undefined && item.scheduleDay !== "" && Number(item.scheduleDay) !== Number(profileSchool?.dayOfWeek) || ["AM", "PM"].includes(item.schedulePeriod) && item.schedulePeriod !== profileSchool?.timeBlock);
+        const occurrences = (hasClassChanges || hasIndividualSchedule) && schoolClasses.length ? schoolClasses : [null];
         occurrences.forEach((rosterClass) => {
-        const override = rescheduleOverrideFor(school.school, scheduledDate, week, curriculum, rosterClass?.id || "");
+        const classScheduledDate = rosterClass?.scheduleDay !== null && rosterClass?.scheduleDay !== undefined && rosterClass?.scheduleDay !== ""
+          ? scheduleDateForSchool(scheduledDate, { dayOfWeek: rosterClass.scheduleDay }) : scheduledDate;
+        const override = rescheduleOverrideFor(school.school, classScheduledDate, week, curriculum, rosterClass?.id || "");
         if (override && rescheduleActionFor(override) !== "reschedule_now") return;
-        const eventDate = override?.newDate || effectiveDate;
-        const eventTimeBlock = override?.timeBlock || profileSchool?.timeBlock || school.timeBlock || "AM";
+        const eventDate = override?.newDate || (effectiveDate === scheduledDate ? classScheduledDate : effectiveDate);
+        const eventTimeBlock = override?.timeBlock || (["AM", "PM"].includes(rosterClass?.schedulePeriod) ? rosterClass.schedulePeriod : "") || profileSchool?.timeBlock || school.timeBlock || "AM";
         const key = JSON.stringify([eventDate, eventTimeBlock, override?.originalDate || "", override?.reason || ""]);
         if (groups.has(key)) {
           const group = groups.get(key);
@@ -26013,7 +26016,7 @@
         week,
         curriculum,
         date: eventDate,
-        originalDate: override ? scheduledDate : "",
+        originalDate: override ? classScheduledDate : "",
         isRescheduled: Boolean(override),
         rescheduleReason: override?.reason || "",
         requestedBy: override?.requestedBy || "",
@@ -34734,7 +34737,7 @@
         });
         rosterClasses.filter((rosterClass) => partnerSchoolMatchesScheduleRecord(school, rosterClass)).forEach((rosterClass) => {
           rosterClass.partnerSchoolId = school.id || rosterClass.partnerSchoolId || "";
-          rosterClass.day = dayName;
+          rosterClass.day = (rosterClass.scheduleDay !== null && rosterClass.scheduleDay !== undefined && rosterClass.scheduleDay !== "" ? weekdayNames[Number(rosterClass.scheduleDay)] : "") || dayName;
         });
       });
     };
@@ -39032,6 +39035,8 @@
     };
 
     const teacherRosterScheduledDay = (rosterClass) => {
+      const classDay = rosterClass?.scheduleDay;
+      if (classDay !== null && classDay !== undefined && classDay !== "" && Number(classDay) >= 1 && Number(classDay) <= 5) return weekdayNames[Number(classDay)];
       const assignedSchool = assignedTeacherSchools().find((school) => (
         (rosterClass?.partnerSchoolId && school.id && String(rosterClass.partnerSchoolId) === String(school.id))
         || enrollmentSchoolNameMatches(school.name, rosterClass?.schoolName)
