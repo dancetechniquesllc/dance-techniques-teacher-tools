@@ -6064,15 +6064,28 @@
     .admin-message-audience-panel[hidden] { display: none; }
 
     .admin-message-audience-toggle { margin-top: 14px; }
-    .communication-studio-toggle { width: min(1040px, 100%); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; margin: 4px auto 18px; padding: 5px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
-    .communication-studio-toggle button { min-height: 46px; border: 0; border-radius: 999px; background: transparent; color: var(--fg); font-weight: 850; }
-    .communication-studio-toggle button[aria-selected="true"] { background: var(--blush); color: var(--brick); box-shadow: 0 5px 13px rgb(93 52 54 / .12); }
+    .communication-studio-toggle { width: min(1040px, 100%); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 4px auto 12px; padding: 7px; border: 1px solid var(--border); border-radius: 16px; background: #f8f4f1; }
+    .communication-studio-toggle button { min-height: 46px; border: 0; border-radius: 11px; background: transparent; color: var(--fg); font-weight: 850; }
+    .communication-studio-toggle button[aria-selected="true"] { background: var(--blush); color: var(--brick); box-shadow: none; }
+    .communication-studio-primary { background: #f7eeea; }
+    .communication-studio-primary button[aria-selected="true"] { background: #8A4E54; color: #fff; }
+    .communication-studio-secondary[hidden] { display: none; }
     .communication-studio-toggle button:focus-visible { outline: 3px solid color-mix(in srgb, var(--brick) 34%, transparent); outline-offset: 2px; }
     #admin-home-messages > .admin-message-audience-toggle { display: none; }
     body[data-communication-view="parents"] #admin-home-messages .admin-announcement-box { display: none; }
     body[data-communication-view="automated"] #admin-home-messages .admin-announcement-box,
     body[data-communication-view="automated"] #admin-home-messages .admin-message-audience-toggle,
     body[data-communication-view="automated"] #admin-home-messages .admin-message-audience-panel { display: none; }
+    body[data-communication-view="web"] #admin-home-messages .admin-announcement-box,
+    body[data-communication-view="web"] #admin-home-messages .admin-message-audience-toggle,
+    body[data-communication-view="web"] #admin-home-messages .admin-message-audience-panel { display: none; }
+    #admin-web-submissions-panel[hidden] {display:none}
+    .web-submission-card {padding:20px;border:1px solid var(--border);border-radius:20px;background:var(--surface);margin-top:14px}
+    .web-submission-card h4 {margin:0 0 8px;color:var(--brick)}
+    .web-submission-card dl {display:grid;grid-template-columns:minmax(100px,1fr) 3fr;gap:8px;margin:12px 0 0}
+    .web-submission-card dt {color:var(--muted);font-weight:600}
+    .web-submission-card dd {margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
+    @media(max-width:800px) and (min-width:561px){.communication-studio-toggle{grid-template-columns:repeat(3,minmax(0,1fr));border-radius:22px}}
     #admin-automated-posts-panel[hidden] { display: none; }
     .automated-posts-panel { display: grid; gap: 18px; }
     .automated-posts-summary { display: flex; align-items: end; justify-content: space-between; gap: 16px; padding: 20px; border: 1px solid var(--border); border-radius: 20px; background: color-mix(in srgb, var(--surface) 92%, var(--sage)); }
@@ -6090,7 +6103,7 @@
     .automated-post-event p { grid-column: 1 / -1; margin: 0; }
     .automated-post-empty { padding: 24px; border: 1px dashed var(--border); border-radius: 17px; color: var(--muted); text-align: center; }
     @media (max-width: 760px) { .automated-post-library-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 560px) { .communication-studio-toggle { grid-template-columns: 1fr 1fr; border-radius: 18px; } .communication-studio-toggle button { min-height: 42px; padding: 7px 5px; border-radius: 14px; font-size: 11px; } .automated-post-library-grid { grid-template-columns: 1fr; } .automated-posts-summary { align-items: stretch; flex-direction: column; } }
+    @media (max-width: 560px) { .communication-studio-toggle { grid-template-columns: repeat(3,minmax(0,1fr)); border-radius: 16px; } .communication-studio-toggle button { min-height: 42px; padding: 7px 5px; border-radius: 14px; font-size: 11px; } .automated-post-library-grid { grid-template-columns: 1fr; } .automated-posts-summary { align-items: stretch; flex-direction: column; } }
 
     .director-duet { display:grid; gap:14px; margin:14px 0 18px; padding:18px; border:1px solid var(--border); border-radius:22px; background:linear-gradient(145deg,color-mix(in srgb,var(--blush) 42%,white),color-mix(in srgb,var(--sage) 30%,white)); }
     .director-duet-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
@@ -6349,6 +6362,9 @@
     .teacher-parent-conversation-copy small,
     .teacher-parent-conversation-copy span { display: block; }
     .teacher-parent-conversation-copy strong { font-size: 13px; }
+    .teacher-parent-conversation-copy strong{font-weight:700}
+    .teacher-parent-conversation-copy .teacher-parent-school-class{font-size:11.5px;font-weight:600;color:var(--ink)}
+    .teacher-parent-conversation-copy .teacher-parent-family-label{font-size:10.5px;font-weight:400;color:var(--muted)}
     .teacher-parent-conversation-copy small { margin-top: 2px; color: var(--muted); font-size: 10.5px; }
     .teacher-parent-conversation-copy span {
       margin-top: 6px;
@@ -6450,7 +6466,8 @@
     }
 
     .teacher-parent-preview-compose textarea { min-height: 54px; resize: none; }
-    .teacher-parent-preview-compose button { align-self: stretch; }
+    .teacher-parent-preview-compose { grid-template-columns: minmax(0,1fr); }
+    .teacher-parent-preview-compose button { grid-column:1; justify-self:end; align-self:center; min-height:42px; min-width:100px; padding:10px 24px; border-radius:999px; }
     .teacher-parent-preview-compose-note {
       grid-column: 1 / -1;
       margin: 0;
@@ -16269,6 +16286,22 @@
     .teacher-device-toggle button:focus-visible { outline:3px solid var(--berry); outline-offset:2px; }
     details.preorder-campaign{display:block;border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden}summary.preorder-campaign-toggle{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;cursor:pointer;list-style:none}summary.preorder-campaign-toggle::-webkit-details-marker{display:none}.preorder-campaign-toggle:focus-visible{outline:3px solid var(--berry);outline-offset:-3px}.preorder-campaign-toggle .preorder-heading-copy strong{font-size:18px}.preorder-campaign-chevron{display:grid;place-items:center;flex:none;width:36px;height:36px;border:1px solid var(--border);border-radius:50%;color:var(--berry);font-size:24px}details.preorder-campaign[open] .preorder-campaign-chevron{transform:rotate(180deg)}.preorder-campaign-body{display:grid;gap:14px;padding:0 16px 16px}
     .teacher-student-attendance-entry>strong:first-child{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.teacher-student-attendance-entry .dd-attendance-status{display:inline-flex;align-items:center;white-space:nowrap;border-radius:999px;padding:6px 13px;font-size:12px;line-height:1.2;font-weight:800}.dd-attendance-status.is-present{background:#cbd8bf;color:#35482f}.dd-attendance-status.is-tardy{background:#f1d78f;color:#665018}.dd-attendance-status.is-absent{background:#b5645b;color:#fff}
+
+    #teacher-parent-shared-compose{grid-template-columns:minmax(0,1fr) auto;align-items:start}
+    .teacher-reply-editor{position:relative;grid-column:1/-1;grid-row:1;min-width:0}.teacher-reply-editor textarea{width:100%;padding-top:36px}
+    #teacher-parent-shared-compose textarea{grid-column:1;grid-row:1}
+    #teacher-parent-shared-compose>button[type="submit"]{grid-row:2;grid-column:2;justify-self:end}
+    #teacher-parent-shared-compose .teacher-reply-dt-touch{grid-column:1;grid-row:2;justify-self:start;width:44px;height:44px;min-width:44px;min-height:44px;padding:8px;border-radius:50%;background:var(--blush);border:1px solid var(--blush);animation:reply-dt-pulse 2.4s ease-in-out infinite;align-self:center}
+    .teacher-reply-dt-touch img{display:block;width:100%;height:100%;object-fit:contain}
+    .teacher-reply-touch-feedback{grid-column:1/-1;margin:0;font-size:12px;color:var(--brick)}.teacher-reply-touch-feedback:empty{display:none}
+    #teacher-parent-shared-compose .teacher-reply-touch-undo{position:absolute;top:7px;right:8px;min-width:0;min-height:24px;font-size:11px;padding:3px 8px;background:#fffaf6;color:var(--brick);border:1px solid var(--blush);border-radius:99px}
+    .teacher-reply-touch-undo[hidden]{display:none!important}
+    #teacher-parent-shared-compose .teacher-reply-dt-touch{position:relative;overflow:hidden;background:linear-gradient(135deg,#f7e2a1,#d8ad50);border-color:#c69a3c;animation:none;box-shadow:0 2px 8px #b8892930}
+    .teacher-reply-dt-touch::after{content:"";pointer-events:none;position:absolute;inset:-35% -100%;background:linear-gradient(110deg,transparent 42%,#fff9dd99 50%,transparent 58%);transform:translateX(-65%);animation:dt-touch-gold-shimmer 4s ease-in-out infinite}
+    @keyframes dt-touch-gold-shimmer{0%,55%{transform:translateX(-65%)}85%,100%{transform:translateX(65%)}}
+    @media(prefers-reduced-motion:reduce){.teacher-reply-dt-touch::after{animation:none;display:none}}
+    @keyframes reply-dt-pulse{0%,100%{box-shadow:0 0 0 0 #dba9a144}50%{box-shadow:0 0 0 6px #dba9a122}}
+    @media(prefers-reduced-motion:reduce){#teacher-parent-shared-compose .teacher-reply-dt-touch{animation:none}}
 </style>
   <link rel="stylesheet" href="tulle.css?v=20260729-questions">
   <link rel="stylesheet" href="roster-care.css?v=20260908">
@@ -16813,11 +16846,11 @@
                 </section>
 
                 <div class="teacher-message-audience-toggle" role="tablist" aria-label="Message audience">
-                  <button id="teacher-messages-parents-tab" type="button" role="tab" aria-selected="false" aria-controls="teacher-messages-parents-panel" tabindex="-1" data-teacher-message-audience="parents">Parents</button>
-                  <button id="teacher-messages-staff-tab" type="button" role="tab" aria-selected="true" aria-controls="teacher-messages-staff-panel" data-teacher-message-audience="staff">Staff</button>
+                  <button id="teacher-messages-parents-tab" type="button" role="tab" aria-selected="true" aria-controls="teacher-messages-parents-panel" data-teacher-message-audience="parents">Parents</button>
+                  <button id="teacher-messages-staff-tab" type="button" role="tab" aria-selected="false" aria-controls="teacher-messages-staff-panel" tabindex="-1" data-teacher-message-audience="staff">Staff</button>
                 </div>
 
-                <section class="panel teacher-message-audience-panel" id="teacher-messages-parents-panel" role="tabpanel" aria-labelledby="teacher-messages-parents-tab" hidden>
+                <section class="panel teacher-message-audience-panel" id="teacher-messages-parents-panel" role="tabpanel" aria-labelledby="teacher-messages-parents-tab">
                   <div class="teacher-parent-preview-inbox" id="teacher-parent-preview-inbox">
                     <div class="teacher-parent-preview-header">
                       <div>
@@ -16851,7 +16884,7 @@
                 </section>
                 <dialog class="director-task-complete-dialog" id="teacher-parent-escalate-dialog" aria-labelledby="teacher-parent-escalate-title"><div class="director-task-complete-card"><h2 id="teacher-parent-escalate-title">Escalate to Admin?</h2><div class="director-task-complete-actions"><button class="director-task-complete-cancel" type="button" data-teacher-escalate-cancel>Cancel</button><button class="director-task-complete-yes" type="button" data-teacher-escalate-confirm>Yes, Escalate</button></div></div></dialog>
 
-                <section class="panel teacher-message-audience-panel" id="teacher-messages-staff-panel" role="tabpanel" aria-labelledby="teacher-messages-staff-tab">
+                <section class="panel teacher-message-audience-panel" id="teacher-messages-staff-panel" role="tabpanel" aria-labelledby="teacher-messages-staff-tab" hidden>
                   <button class="team-talk-card" type="button" data-teacher-thread="team-meeting">
                     <div class="section-title">
                       <h3>Team Talk</h3>
@@ -17777,11 +17810,15 @@
               <div><h3>Newsletter Studio</h3><p><em>Create beautiful, personal updates for families and partner schools.</em></p></div>
               <span class="admin-page-actions"><select class="admin-section-nav" data-admin-section-jump onchange="openAdminSection(this.value)" aria-label="Jump to admin tool"></select><button class="secondary" type="button" data-admin-tools-home>Director Dashboard</button></span>
             </div>
-            <div class="communication-studio-toggle" role="tablist" aria-label="Communication Studio tools">
-              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="parents">Parent Messages</button>
-              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="team">Team Talk</button>
-              <button type="button" role="tab" aria-selected="true" data-communication-studio-view="newsletter">Newsletter Wizard</button>
+            <div class="communication-studio-toggle communication-studio-primary" role="tablist" aria-label="Communication Studio tools">
+              <button type="button" role="tab" aria-selected="true" data-communication-studio-view="messages">Messages</button>
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="newsletter">Newsletters</button>
               <button type="button" role="tab" aria-selected="false" data-communication-studio-view="automated">Automated Posts</button>
+            </div>
+            <div class="communication-studio-toggle communication-studio-secondary" role="tablist" aria-label="Message channels">
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="parents">Parent Portal</button>
+              <button type="button" role="tab" aria-selected="true" data-communication-studio-view="team">Teaching Team</button>
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="web">Web Submissions</button>
             </div>
             <div class="newsletter-workflow-entry-grid" aria-label="Newsletter Studio workflows">
               <section class="newsletter-workflow-entry">
@@ -18519,12 +18556,20 @@
                 <button class="secondary" type="button" data-admin-tools-home onclick="openAdminToolsHome()">Director Dashboard</button>
               </span>
             </div>
-            <div class="communication-studio-toggle" role="tablist" aria-label="Communication Studio tools">
-              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="parents">Parent Messages</button>
-              <button type="button" role="tab" aria-selected="true" data-communication-studio-view="team">Team Talk</button>
-              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="newsletter">Newsletter Wizard</button>
+            <div class="communication-studio-toggle communication-studio-primary" role="tablist" aria-label="Communication Studio tools">
+              <button type="button" role="tab" aria-selected="true" data-communication-studio-view="messages">Messages</button>
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="newsletter">Newsletters</button>
               <button type="button" role="tab" aria-selected="false" data-communication-studio-view="automated">Automated Posts</button>
             </div>
+            <div class="communication-studio-toggle communication-studio-secondary" role="tablist" aria-label="Message channels">
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="parents">Parent Portal</button>
+              <button type="button" role="tab" aria-selected="true" data-communication-studio-view="team">Teaching Team</button>
+              <button type="button" role="tab" aria-selected="false" data-communication-studio-view="web">Web Submissions</button>
+            </div>
+            <section id="admin-web-submissions-panel" hidden aria-labelledby="admin-web-submissions-title">
+              <div class="automated-posts-summary"><div><h3 id="admin-web-submissions-title">Web Submissions</h3><p>Contact requests from the Dance Techniques website.</p></div><button type="button" class="secondary" id="refresh-web-submissions">Refresh</button></div>
+              <p id="web-submissions-status" role="status" aria-live="polite"></p><div id="web-submissions-list"></div>
+            </section>
             <section class="automated-posts-panel" id="admin-automated-posts-panel" hidden aria-labelledby="admin-automated-posts-title">
               <div class="automated-posts-summary">
                 <div>
@@ -19906,12 +19951,9 @@
       <h3 id="teacher-roster-future-title">Trial Request</h3>
       <p>Add the dancer and parent contact information to one of your assigned classes.</p>
       <form class="teacher-roster-form" id="teacher-roster-future-form">
-        <label>Class Attending
-          <select id="teacher-roster-future-class"></select>
-        </label>
-        <label>School Classroom
-          <select id="teacher-roster-future-classroom"></select>
-        </label>
+        <section class="prospect-form-section full-field" aria-labelledby="prospect-dancer-section-title">
+          <h4 id="prospect-dancer-section-title">Dancer Information</h4>
+          <div class="prospect-form-fields">
         <label>First Name
           <input id="teacher-roster-future-first" required autocomplete="off">
         </label>
@@ -19924,22 +19966,42 @@
         <label>Trial Date
           <input id="teacher-roster-future-trial" type="date">
         </label>
+        <label id="teacher-roster-future-entered-classroom-label" hidden>Classroom Entered
+          <input id="teacher-roster-future-entered-classroom" readonly>
+        </label>
+        <label><span id="teacher-roster-future-classroom-label">School Classroom</span>
+          <select id="teacher-roster-future-classroom"></select>
+        </label>
+          </div>
+        </section>
+        <section class="prospect-form-section full-field" aria-labelledby="prospect-parent-section-title">
+          <h4 id="prospect-parent-section-title">Parent Information</h4>
+          <div class="prospect-form-fields">
         <label>Parent First Name
           <input id="teacher-roster-future-parent-first" autocomplete="given-name">
         </label>
         <label>Parent Last Name
           <input id="teacher-roster-future-parent-last" autocomplete="family-name">
         </label>
-        <label>Parent Phone
-          <input id="teacher-roster-future-phone" type="tel" autocomplete="tel">
-        </label>
         <label>Parent Email
           <input id="teacher-roster-future-email" type="email" autocomplete="email">
         </label>
+        <label>Parent Phone
+          <input id="teacher-roster-future-phone" type="tel" autocomplete="tel">
+        </label>
         <label class="full-field">Notes
-          <textarea id="teacher-roster-future-notes"></textarea>
+          <textarea id="teacher-roster-future-notes" data-dt-touch-disabled="true"></textarea>
           <small class="field-subtitle">Example: Ms. Jessica suggested we take her, she's new to the school.</small>
         </label>
+          </div>
+        </section>
+        <section class="prospect-form-section full-field" aria-labelledby="prospect-class-section-title">
+          <h4 id="prospect-class-section-title">Class Attending</h4>
+          <label id="prospect-trial-class-select-label">Class Attending
+            <select id="teacher-roster-future-class"></select>
+          </label>
+          <div class="enrollment-placement-class-grid" id="inquiry-prospect-class-options" hidden></div>
+        </section>
         <div class="teacher-prospect-followup-section" id="teacher-roster-future-followup-section" hidden>
           <label>Picture
             <input id="teacher-roster-future-photo" type="file" accept="image/*">
@@ -20640,6 +20702,10 @@
   <script src="data/partner-schools.js"></script>
   <script src="supabase-auth.js?v=20261022-session-lifecycle"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
+  <link rel="stylesheet" href="dt-touch/writing-fields.css">
+  <script type="module" src="dt-touch/writing-fields.mjs?v=20261028-notes-optout"></script>
+  <link rel="stylesheet" href="web-submissions.css">
+  <script type="module" src="web-submissions.mjs"></script>
   <!-- Workshop previews use the built-in fallback; live music loads from shared storage. -->
   <script src="roster-care.js?v=20260908"></script>
   <script src="attendance-storage.js?v=student-storage-20261020"></script>
@@ -25171,6 +25237,7 @@
         void loadMyEnrollmentTempo();
       }
       if (tab === "dancers") renderTeacherDancers();
+      if(tab === "messages")window.setTimeout(()=>{if(currentViewTab === "messages")renderTeacherMessageAudience();},0);
       if (tab === "orders") renderTeacherOrders();
       if (tab === "teacher-stage") renderTeacherStageBoard();
       if (tab === "music" && (document.body.dataset.tourMode === "true" || new URLSearchParams(window.location.search).get("tour") === "1")) loadSharedMusicLibrary(window.dtCurrentProfile);
@@ -30074,9 +30141,9 @@
           }).join("")}
         </div>
         <form class="teacher-parent-preview-compose" id="teacher-parent-shared-compose" aria-label="Reply to family">
-          <textarea id="teacher-parent-shared-reply" aria-label="Reply to family" placeholder="Reply to the family"></textarea>
+          <div class="teacher-reply-editor"><textarea id="teacher-parent-shared-reply" aria-label="Reply to family" placeholder="Reply to the family"></textarea><button class="teacher-reply-touch-undo" type="button" data-reply-dt-undo hidden>↶ Undo</button></div><button class="teacher-reply-dt-touch" type="button" data-reply-dt-touch aria-label="✨ Suggest a Reply" title="✨ Suggest a Reply"><img src="assets/dance-techniques-logo-only.png" alt=""></button>
           <button class="primary" type="submit">Send</button>
-          <p class="teacher-parent-preview-compose-note">Replies are shared with every linked guardian.</p>
+          <p class="teacher-parent-preview-compose-note">Replies are shared with every linked guardian.</p><p class="teacher-reply-touch-feedback" role="status"></p>
         </form>
       `;
     };
@@ -30100,8 +30167,8 @@
           ${parentStudentBubbleMarkup(parentConversationStudent(conversation), conversation.initials)}
           <span class="teacher-parent-conversation-copy">
             <strong>${escapeText(conversation.studentName)}</strong>
-            <small>${escapeText(familyConversationLabel(conversation))}</small>
-            <small>${escapeText(conversation.school)} · ${escapeText(conversation.className)}</small>
+            <small class="teacher-parent-school-class">${escapeText([conversation.school,conversation.className].filter(Boolean).join(" · "))}</small>
+            <small class="teacher-parent-family-label">${escapeText(familyConversationLabel(conversation))}</small>
             ${conversation.messages?.length ? `<span>${escapeText(conversation.messages.at(-1)?.text || conversation.newestPreview || "")}</span>` : ""}
           </span>
           ${conversation.messages?.length ? `<span class="teacher-parent-conversation-meta">
@@ -34797,7 +34864,7 @@
       scrollTeacherConversationToReply();
     };
 
-    var selectedTeacherMessageAudience = window.selectedTeacherMessageAudience || "staff";
+    var selectedTeacherMessageAudience = window.selectedTeacherMessageAudience || "parents";
     const renderTeacherMessageAudience = () => {
       const parentsSelected = selectedTeacherMessageAudience === "parents";
       const parentsButton = document.getElementById("teacher-messages-parents-tab");
@@ -35042,6 +35109,34 @@
       if (error) { window.alert(error.message || "The family message could not be sent."); return; }
       reply.value = "";
       await loadSharedFamilyConversations();
+    });
+    const updateReplyDtTouchLabel = (form) => {
+      const reply=form.querySelector('textarea'),button=form.querySelector('[data-reply-dt-touch]');if(!reply||!button)return;
+      const label=form.dtTouchResult && reply.value===form.dtTouchResult ? '✨ Try Again' : reply.value.trim() ? '✨ Add the DT Touch' : '✨ Suggest a Reply';
+      button.title=label;button.setAttribute('aria-label',label);
+    };
+    document.addEventListener('input',event=>{if(event.target.id==='teacher-parent-shared-reply')updateReplyDtTouchLabel(event.target.closest('form'));});
+    document.addEventListener("click", async event => {
+      const touch=event.target.closest("[data-reply-dt-touch]"),undo=event.target.closest("[data-reply-dt-undo]");if(!touch&&!undo)return;
+      const form=(touch||undo).closest("form"),reply=form.querySelector("textarea"),status=form.querySelector(".teacher-reply-touch-feedback"),restore=form.querySelector("[data-reply-dt-undo]");
+      if(undo){reply.value=form.dtTouchOriginal??reply.value;restore.hidden=true;form.dtTouchResult='';form.dtTouchHasOriginal=false;status.textContent='Original draft restored.';updateReplyDtTouchLabel(form);reply.focus();return;}
+      if(touch.disabled)return;
+      const conversation=teacherParentPreviewConversations.find(item=>item.id===selectedTeacherParentPreviewId),studentId=conversation?.sharedStudentId||conversation?.studentId;
+      const snapshot=reply.value,regenerate=form.dtTouchResult===snapshot&&form.dtTouchHasOriginal;
+      const draft=regenerate?form.dtTouchOriginal:snapshot;
+      if(!window.dtSupabase||!studentId||document.body.dataset.tourMode==='true'){status.textContent='AI replies require a signed-in Teacher Tools conversation. Your draft is unchanged.';return;}
+      touch.disabled=true;touch.setAttribute('aria-busy','true');status.textContent='✨ Adding a little DT magic…';
+      try{
+        const {data,error}=await window.dtSupabase.functions.invoke('dt-touch-rewrite',{body:{originalText:draft,studentId}});
+        if(error||!data?.ok)throw Error(data?.message||'DT Touch could not finish. Your draft is unchanged.');
+        if(!form.isConnected||reply.value!==snapshot){status.textContent='Your draft changed while DT Touch was working. Please try again.';return;}
+        if(typeof data.rewritten_text!=='string'||!data.rewritten_text.trim())throw Error('DT Touch could not finish. Your draft is unchanged.');
+        if(data.rewritten_text.length>4000)throw Error('This response is too long. Your draft is unchanged.');
+        if(!form.dtTouchHasOriginal){form.dtTouchOriginal=snapshot;form.dtTouchHasOriginal=true;}
+        form.dtTouchResult=data.rewritten_text;reply.value=data.rewritten_text;restore.hidden=false;
+        restore.textContent=form.dtTouchOriginal.trim()?'↶ Restore Original':'Clear Suggestion';
+        status.textContent='Review and edit before sending.';updateReplyDtTouchLabel(form);reply.focus();
+      }catch(error){status.textContent=error.message;}finally{touch.disabled=false;touch.removeAttribute('aria-busy');}
     });
     document.getElementById("teacher-messages-parents-panel")?.addEventListener("click", (event) => {
       const taskButton = event.target.closest("[data-parent-message-task]");
@@ -39651,11 +39746,21 @@
     let editingTeacherProspectClassId = "";
     let pendingTeacherProspectPhoto = "";
     let teacherFutureDancerDirectorMode = false;
+    let inquiryProspectClassIds = null;
+    let inquiryProspectSchool = null;
     const futureDancerCreatorClasses = () => teacherFutureDancerDirectorMode
-      ? rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false)
+      ? rosterClasses.filter((rosterClass) => rosterClass.sourceActive !== false && (!inquiryProspectClassIds || inquiryProspectClassIds.includes(String(rosterClass.id))))
       : teacherRosterClasses();
 
     const openTeacherFutureDancerCreator = (preferredClassId = "", student = null, options = {}) => {
+      inquiryTrialPrefillActive = false;
+      inquiryProspectClassIds = null;
+      inquiryProspectSchool = null;
+      document.getElementById("inquiry-prospect-class-options").hidden = true;
+      document.getElementById("prospect-trial-class-select-label").hidden = false;
+      document.getElementById("teacher-roster-future-entered-classroom-label").hidden = true;
+      document.getElementById("teacher-roster-future-classroom-label").textContent = "School Classroom";
+      document.querySelector("#teacher-roster-future-overlay .roster-edit-dialog > p").textContent = "Add the dancer and parent contact information to one of your assigned classes.";
       teacherFutureDancerDirectorMode = Boolean(options.directorMode);
       const classes = futureDancerCreatorClasses();
       if (!classes.length) return showToast("Create a class before adding a future dancer");
@@ -39688,20 +39793,94 @@
       document.getElementById("teacher-roster-future-delete")?.toggleAttribute("hidden", !student);
       setText("teacher-roster-future-title", student ? "Future Dancer" : "Trial Request");
       const submitButton = document.querySelector(".trial-request-submit");
-      if (submitButton) submitButton.textContent = student ? "Trial Complete" : "Add Prospect Dancer";
+      if (submitButton) { submitButton.disabled = false; submitButton.textContent = student ? "Trial Complete" : "Add Prospect Dancer"; }
       setText("teacher-roster-future-photo-status", pendingTeacherProspectPhoto ? "Picture on file. Choose another to replace it." : "No picture selected.");
       setTeacherRosterOverlay("teacher-roster-future-overlay", true);
       window.setTimeout(() => document.getElementById("teacher-roster-future-first")?.focus(), 40);
     };
 
+    // Contact inquiries open the existing director prospect form; saving stays explicit.
+    let inquiryTrialPrefillActive = false;
+    const prefillInquiryTrialDate = () => {
+      if (!inquiryTrialPrefillActive) return;
+      const field = document.getElementById("teacher-roster-future-trial");
+      const cls = rosterClasses.find(c => String(c.id) === document.getElementById("teacher-roster-future-class").value);
+      field.value = "";
+      if (!cls) return;
+      const day = Number(Object.entries(weekdayNames).find(([,name]) => name.toLowerCase() === String(cls.day || "").toLowerCase())?.[0] || -1);
+      if (day < 0) return;
+      const now = new Date(), changes = rescheduleChangesForClass(teachers.find(t => t.id === cls.teacherId)?.reschedules || [], cls);
+      const candidates = [];
+      for (let offset = 1; offset <= 90; offset++) {
+        const date = new Date(now.getFullYear(), now.getMonth(), now.getDate() + offset, 12);
+        const key = isoDate(date);
+        const regular = date.getDay() === day && !changes.some(c => c.originalDate === key && ["cancelled", "rescheduled", "date_tbd"].includes(rescheduleStatusFor(c)));
+        const moved = changes.some(c => c.newDate === key && rescheduleStatusFor(c) === "rescheduled");
+        if (!regular && !moved) continue;
+        const event = { date: key, school: cls.schoolName, classIds: [String(cls.id)], timeBlock: Number(String(cls.time || "").split(":")[0]) >= 12 ? "PM" : "AM" };
+        if (eventIsClosedByClosures(event, closuresForDate(allClosureMarkers(), key, [event]))) continue;
+        candidates.push(key);
+      }
+      field.value = candidates[0] || "";
+    };
+    window.dtOpenInquiryProspect = (inquiry) => {
+      if (!["admin", "director"].includes(window.dtCurrentProfile?.role)) return;
+      const fields = inquiry.payload?.fields || [];
+      const field = label => String(fields.find(f => f.label === label)?.value || "");
+      const school = inquiry.school && schoolLibrary.find(s => String(s.id) === String(inquiry.school.id));
+      const classes = school ? rosterClasses.filter(c => c.sourceActive !== false && enrollmentOfficialSchoolMatchesClass(school, c)) : [];
+      openTeacherFutureDancerCreator(classes.length === 1 ? classes[0].id : "", null, { directorMode: true });
+      inquiryTrialPrefillActive = true;
+      inquiryProspectClassIds = classes.map(c => String(c.id));
+      inquiryProspectSchool = school;
+      document.getElementById("teacher-roster-future-entered-classroom-label").hidden = false;
+      document.getElementById("teacher-roster-future-entered-classroom").value = field("Classroom at School") || "Not provided";
+      document.getElementById("teacher-roster-future-classroom-label").textContent = "Official Classroom";
+      const select = document.getElementById("teacher-roster-future-class");
+      [...select.options].forEach(option => { if (!classes.some(c => String(c.id) === option.value)) option.remove(); });
+      if (classes.length !== 1) {
+        const empty = document.createElement("option"); empty.value = ""; empty.textContent = classes.length ? "Choose the trial class…" : "No active classes at this school"; select.prepend(empty); select.value = "";
+      }
+      renderTeacherFutureDancerClassrooms();
+      document.querySelector(".trial-request-submit").disabled = !classes.length;
+      document.querySelector("#teacher-roster-future-overlay .roster-edit-dialog > p").textContent = "Review the dancer’s details, choose their trial class, and confirm the next class date before adding them.";
+      const values = {birthdate:field("Birthday"),first:field("Dancer's First Name"),last:field("Dancer's Last Name"),phone:field("Phone"),email:field("Email"),"parent-first":field("Your Name").split(/\s+/)[0],"parent-last":field("Your Name").split(/\s+/).slice(1).join(" "),notes:field("How can we help?")};
+      for (const [key,value] of Object.entries(values)) document.getElementById("teacher-roster-future-"+key).value = value;
+      const classroom = document.getElementById("teacher-roster-future-classroom");
+      classroom.value = "";
+      setText("teacher-roster-future-title", "Add Prospective Student at " + (school?.nickname || school?.name || field("Dancer's School") || "Selected School"));
+      prefillInquiryTrialDate();
+      renderInquiryProspectClasses();
+    };
+    document.getElementById("teacher-roster-future-class")?.addEventListener("change", prefillInquiryTrialDate);
+
+    const renderInquiryProspectClasses = () => {
+      if (!inquiryTrialPrefillActive) return;
+      const holder = document.getElementById("inquiry-prospect-class-options"), select = document.getElementById("teacher-roster-future-class");
+      holder.hidden = false;
+      document.getElementById("prospect-trial-class-select-label").hidden = true;
+      holder.innerHTML = futureDancerCreatorClasses().map(cls => {
+        const students = rosterEnrolled(cls), capacity = classRecommendedCapacity(cls), selected = String(cls.id) === select.value;
+        return `<article class="roster-class-card enrollment-placement-class-card ${selected ? "is-assigned" : ""}"><div class="enrollment-class-compare-heading"><strong>${rosterSafe(cls.name)}</strong><small>${rosterSafe(cls.day || "Day not set")} · ${rosterSafe(friendlyScheduleTime(cls.time) || "Time not set")}</small></div><div class="enrollment-class-compare-bubbles"><span>${students.length}/${capacity} Enrolled${students.length >= capacity ? " · Full" : ""}</span></div><div class="enrollment-class-compare-students">${students.map(student => `<div class="enrollment-class-compare-student"><span class="roster-student-photo">${studentPhotoMarkup(student)}</span><strong>${rosterSafe(rosterStudentFullName(student))}</strong><small>${rosterSafe(student.officialClassroom || student.classroom || "Classroom not entered")}</small><small>${rosterSafe(rosterAge(student.birthdate))}</small></div>`).join("") || '<div class="enrollment-class-empty-roster">No dancers assigned yet.</div>'}</div><span class="enrollment-class-card-actions"><button class="enrollment-class-card-assign ${selected ? "is-selected" : ""}" type="button" data-inquiry-trial-class="${rosterSafe(cls.id)}" aria-pressed="${selected}">${selected ? "Class Selected" : "Select Class"}</button></span></article>`;
+      }).join("") || '<div class="roster-empty">No active classes are available at this school.</div>';
+      holder.onclick = event => {
+        const button = event.target.closest("[data-inquiry-trial-class]");
+        if (!button) return;
+        select.value = button.dataset.inquiryTrialClass;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        renderInquiryProspectClasses();
+      };
+    };
+
     const renderTeacherFutureDancerClassrooms = () => {
       const classroomSelect = document.getElementById("teacher-roster-future-classroom");
       const selectedClass = futureDancerCreatorClasses().find((item) => item.id === document.getElementById("teacher-roster-future-class")?.value);
-      if (!classroomSelect || !selectedClass) return;
-      const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, selectedClass.schoolName));
+      if (!classroomSelect) return;
+      const school = inquiryProspectSchool || (selectedClass && schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, selectedClass.schoolName)));
+      if (!school && !selectedClass) { classroomSelect.replaceChildren(new Option("No official classrooms available", "")); return; }
       const officialClassrooms = [...new Set([
         ...(school?.classroomOptions || []),
-        ...rosterClasses.filter((item) => enrollmentSchoolNameMatches(item.schoolName, selectedClass.schoolName))
+        ...rosterClasses.filter((item) => school ? enrollmentOfficialSchoolMatchesClass(school, item) : enrollmentSchoolNameMatches(item.schoolName, selectedClass.schoolName))
           .flatMap((item) => item.students.map((student) => student.officialClassroom || student.classroom).filter(Boolean))
       ].map((value) => String(value).trim()).filter(Boolean))].sort((left, right) => left.localeCompare(right, undefined, { sensitivity: "base", numeric: true }));
       classroomSelect.innerHTML = `<option value="">Select classroom</option>${officialClassrooms.map((classroom) => `<option value="${rosterSafe(classroom)}">${rosterSafe(classroom)}</option>`).join("")}`;
@@ -40828,6 +41007,7 @@
         additionalInformation: { trial_attendance_pending: true }
       };
       Object.assign(student, studentDetails);
+      if (inquiryTrialPrefillActive) student.additionalInformation = { ...(student.additionalInformation || {}), parent_entered_classroom: document.getElementById("teacher-roster-future-entered-classroom").value === "Not provided" ? "" : document.getElementById("teacher-roster-future-entered-classroom").value };
       const normalButtonLabel = existingStudent ? "Trial Complete" : "Add Prospect Dancer";
       if (submitButton) { submitButton.disabled = true; submitButton.textContent = "Saving…"; }
       try {
@@ -48622,18 +48802,33 @@
       if (parentsSelected) renderAdminParentMessagePreview();
     };
 
+    window.dtInquiryTeacherAppearance = (id) => { const teacher = teachers.find(item => item.id === id); return teacher ? { name: teacher.displayName || teacher.firstName, color: teacher.color || null } : null; };
     const updateCommunicationStudioToggles = () => {
       const view = document.body.dataset.adminSection === "newsletter-studio"
         ? "newsletter"
         : selectedCommunicationStudioView;
       document.body.dataset.communicationView = view;
+      document.querySelectorAll(".communication-studio-secondary").forEach(toggle => { toggle.hidden = !["parents", "team", "web"].includes(view); });
       document.querySelectorAll("[data-communication-studio-view]").forEach((button) => {
-        const active = button.dataset.communicationStudioView === view;
+        const active = button.dataset.communicationStudioView === view || (button.dataset.communicationStudioView === "messages" && ["parents", "team", "web"].includes(view));
         button.setAttribute("aria-selected", active ? "true" : "false");
         button.tabIndex = active ? 0 : -1;
       });
     };
+    let lastCommunicationMessageView = "parents";
     const openCommunicationStudioView = (view) => {
+      if (view === "messages") view = lastCommunicationMessageView;
+      if (["parents", "team", "web"].includes(view)) lastCommunicationMessageView = view;
+      document.getElementById("admin-web-submissions-panel")?.setAttribute("hidden", "");
+      if(view === "web") {
+        selectedCommunicationStudioView = "web";
+        openAdminSection("messages");
+        document.getElementById("admin-automated-posts-panel")?.setAttribute("hidden", "");
+        document.getElementById("admin-web-submissions-panel")?.removeAttribute("hidden");
+        updateCommunicationStudioToggles();
+        window.loadWebSubmissions?.();
+        return;
+      }
       if (view === "newsletter") {
         selectedCommunicationStudioView = "newsletter";
         openAdminSection("newsletter-studio");

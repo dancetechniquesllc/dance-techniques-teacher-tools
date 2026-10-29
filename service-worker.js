@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v329-class-music-recovery";
+const CACHE_NAME = "my-dance-techniques-v330-communication-studio";
 const CORE_ASSETS = [
   "./student-photo-save.mjs?v=20261025",
   "./attendance-storage.js?v=student-storage-20261020",
@@ -26,6 +26,11 @@ const CORE_ASSETS = [
   "./roster-care.css?v=20260908",
   "./",
   "./index.html",
+  "./web-submissions.mjs",
+  "./web-submissions.css",
+  "./inquiry-age.mjs",
+  "./dt-touch/writing-fields.mjs?v=20261028-notes-optout",
+  "./dt-touch/writing-fields.css",
   "./manifest.webmanifest",
   "./supabase-auth.js?v=20261022-session-lifecycle",
   "./data/partner-schools.js",
