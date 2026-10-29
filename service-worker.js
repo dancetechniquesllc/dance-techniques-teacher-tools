@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v331-teacher-session-continuity";
+const CACHE_NAME = "my-dance-techniques-v332-prospect-profile-layout";
 const CORE_ASSETS = [
   "./student-photo-save.mjs?v=20261025",
   "./attendance-storage.js?v=student-storage-20261020",
