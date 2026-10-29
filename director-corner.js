@@ -16,7 +16,7 @@
  const safe=value=>escapeText(String(value||''));
  window.dtNotificationCategory=item=>{
   const type=String(item.notification_type||'').toLowerCase();
-  if(['direct_message','studio_announcement'].includes(type))return 'messages';
+  if(['direct_message','studio_announcement','website_inquiry'].includes(type))return 'messages';
   if(/enrollment|roster|provisional|schedule|school_closure|jotform/.test(type))return 'enrollment';
   const text=[type,item.action_url,item.title].join(' ').toLowerCase();
   if(/feedback|shape.?the.?magic|shape-magic/.test(text)) return 'magic';

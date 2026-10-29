@@ -21286,6 +21286,7 @@
     };
 
     const renderNotificationCenter = () => {
+      updateAdminDashboardReviewBubbles();
       const directMessageItems = notificationShowcaseMode
         ? notificationCenterItems.filter((item) => item.notification_type === "direct_message" && !item.read_at)
         : [];
@@ -21631,6 +21632,10 @@
           setTab("rosters");
           window.setTimeout(() => openBoutiqueAssignment(target.orderId), 80);
         }
+        return;
+      }
+      if (isLeader && (item.notification_type === "website_inquiry" || target.open === "web-submissions")) {
+        openCommunicationStudioView("web");
         return;
       }
       if (item.notification_type === "direct_message" || item.notification_type === "studio_announcement" || target.open === "messages") {
@@ -33292,7 +33297,14 @@
     )).filter(({ teacher, item }) => rescheduleSourceType(teacher, item) === "teacher" && !item.adminViewedAt).length;
 
     const updateAdminDashboardReviewBubbles = () => {
-      const adminUnreadMessages = unreadThreadCountFor("Admin", messageThreads);
+      const unreadInquiries = notificationCenterItems.filter((item) => item.notification_type === "website_inquiry" && !item.read_at && !item.dismissed_at && (!item.expires_at || new Date(item.expires_at) > new Date())).length;
+      const adminUnreadMessages = unreadThreadCountFor("Admin", messageThreads) + unreadInquiries;
+      const messagesBubble = document.getElementById("admin-messages-shortcut-bubble");
+      if (messagesBubble) {
+        messagesBubble.textContent = adminUnreadMessages ? String(adminUnreadMessages > 99 ? "99+" : adminUnreadMessages) : "";
+        messagesBubble.classList.toggle("active", adminUnreadMessages > 0);
+        messagesBubble.setAttribute("aria-label", `${adminUnreadMessages} unread messages`);
+      }
       const bubbleStates = [
         ["admin-teacher-profiles-count", adminDashboardReviewFlags.teacherProfiles],
         ["admin-school-library-shortcut-bubble", adminDashboardReviewFlags.schoolLibrary],
