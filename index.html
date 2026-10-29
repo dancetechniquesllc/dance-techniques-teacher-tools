@@ -25546,9 +25546,19 @@
       "Primrose Rowlett": 4,
       "Highview Learning Center": 4
     };
-    const classCountForSchool = (schoolName, profileSchool) => {
+    const classCountForSchool = (schoolName, profileSchool, eventDate = "") => {
+      const matchingClasses = rosterClasses.filter((item) => (
+        item.sourceActive !== false && item.teacherId === profileTeacher.id &&
+        enrollmentOfficialSchoolMatchesClass(profileSchool || { name: schoolName }, item)
+      ));
+      // Saved rosters are authoritative. Inherit the current school weekday just
+      // as attendance does, rather than counting an old copied school total.
+      if (matchingClasses.length || isUuid(profileTeacher.id)) {
+        const eventDay = eventDate ? teacherRosterDayKey(weekdayLabelFromDate(eventDate)) : "";
+        return new Set(matchingClasses.filter((item) => !eventDay || teacherRosterDayKey(teacherRosterScheduledDay(item)) === eventDay).map((item) => item.id)).size;
+      }
       const profileCount = Number(profileSchool?.classCount);
-      return profileSchool?.classCount !== "" && profileSchool?.classCount != null && Number.isFinite(profileCount) ? profileCount : (schoolClassCounts[schoolName] || 4);
+      return profileSchool?.classCount !== "" && profileSchool?.classCount != null && Number.isFinite(profileCount) ? profileCount : (schoolClassCounts[schoolName] || 0);
     };
 
     const timeBlockOptions = ["AM", "PM"];
@@ -25989,7 +25999,7 @@
         isd: profileSchool?.isd || school.isd,
         address: profileSchool?.address || school.school,
         teacher: profileTeacher.firstName || teacherNickname(profileTeacher),
-        classCount: rosterClass ? 1 : classCountForSchool(school.school, profileSchool),
+        classCount: rosterClass ? 1 : classCountForSchool(school.school, profileSchool, scheduledDate),
         timeBlock: eventTimeBlock,
         week,
         curriculum,
