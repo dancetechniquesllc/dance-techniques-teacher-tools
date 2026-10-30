@@ -20721,6 +20721,7 @@
   <link rel="stylesheet" href="web-submissions.css">
   <script type="module" src="web-submissions.mjs"></script>
   <!-- Workshop previews use the built-in fallback; live music loads from shared storage. -->
+  <script src="newsletter-history.js?v=20261030-shared-images"></script>
   <script src="roster-care.js?v=20260908"></script>
   <script src="attendance-storage.js?v=student-storage-20261020"></script>
   <script src="attendance-preview.js?v=class-action-artwork-20261022"></script>
@@ -45430,9 +45431,10 @@
       }
       await publishNewsletterWelcomeCandidate();
     };
+    const newsletterHistoryCodec = window.createNewsletterHistoryCodec();
     const newsletterUndoStack = [];
     const newsletterRedoStack = [];
-    let newsletterHistoryCurrent = JSON.stringify(newsletterDraft);
+    let newsletterHistoryCurrent = newsletterHistoryCodec.pack(newsletterDraft);
     let newsletterHistorySuspended = false;
     let newsletterLastHistoryAt = 0;
     const updateNewsletterHistoryButtons = () => {
@@ -46232,13 +46234,15 @@
       persistNewsletterActiveVersion();
       syncNewsletterAutoSendWelcome();
       const snapshot = JSON.stringify(newsletterDraft);
+      const historySnapshot = newsletterHistoryCodec.pack(newsletterDraft);
       const revision = ++newsletterSaveRevision;
-      if (!newsletterHistorySuspended && snapshot !== newsletterHistoryCurrent) {
+      if (!newsletterHistorySuspended && historySnapshot !== newsletterHistoryCurrent) {
         const now = Date.now();
         if (!newsletterUndoStack.length || now - newsletterLastHistoryAt > 550) newsletterUndoStack.push(newsletterHistoryCurrent);
         if (newsletterUndoStack.length > 80) newsletterUndoStack.shift();
         newsletterRedoStack.length = 0;
-        newsletterHistoryCurrent = snapshot;
+        newsletterHistoryCurrent = historySnapshot;
+        newsletterHistoryCodec.trim(newsletterHistoryCurrent, newsletterUndoStack, newsletterRedoStack);
         newsletterLastHistoryAt = now;
         updateNewsletterHistoryButtons();
       }
@@ -46389,7 +46393,7 @@
       if (!snapshot) return;
       destination.push(newsletterHistoryCurrent);
       newsletterHistorySuspended = true;
-      newsletterDraft = JSON.parse(snapshot);
+      newsletterDraft = newsletterHistoryCodec.unpack(snapshot);
       newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
       newsletterHistoryCurrent = snapshot;
       renderNewsletterStudio();
@@ -46424,7 +46428,7 @@
         if (!Array.isArray(newsletterDraft.backgroundBoxes)) newsletterDraft.backgroundBoxes = [];
         newsletterGenderView = newsletterDraft.genderView === "male" ? "male" : "female";
         ensureNewsletterBreakpointVersions();
-        newsletterHistoryCurrent = JSON.stringify(newsletterDraft);
+        newsletterHistoryCurrent = newsletterHistoryCodec.pack(newsletterDraft);
         newsletterSetupSelection = {
           mode: newsletterDraft.template ? "template" : "blank",
           category: newsletterCategoryForTemplate(newsletterDraft.template),
