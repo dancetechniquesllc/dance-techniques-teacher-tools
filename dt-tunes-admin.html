@@ -129,6 +129,9 @@
       .track-row .track-actions .danger { flex: 1; }
       .full { grid-column: auto; }
     }
+    .order-grip {touch-action:none;cursor:grab;font-size:28px;min-width:48px;min-height:48px;color:#8A4E54;background:#f9eeeb;}
+    .order-grip:active {cursor:grabbing;}
+    .order-dragging {outline:2px solid #8A4E54;background:#fff5f2;}
   </style>
 </head>
 <body>
@@ -166,6 +169,9 @@
             <div class="card-head">
               <div class="selected-playlist-head"><span id="selected-playlist-cover"></span><div><h3 id="selected-playlist-name">Choose a playlist</h3><p id="selected-playlist-count">Select a playlist to see its songs.</p></div></div>
               <div class="track-actions">
+                <button class="secondary small-button" type="button" id="edit-playlist-order" hidden>Edit Order</button>
+                <button class="primary small-button" type="button" id="save-playlist-order" hidden>Save Order</button>
+                <button class="secondary small-button" type="button" id="cancel-playlist-order" hidden>Cancel</button>
                 <button class="secondary small-button" type="button" id="rename-playlist" hidden>Rename</button>
                 <button class="secondary small-button" type="button" id="change-playlist-cover" hidden>Change Cover</button>
                 <button class="secondary small-button" type="button" id="open-add-tracks" hidden>+ Add Songs</button>
@@ -252,6 +258,9 @@
   <script>
     const CATALOG_SECTIONS = ["Ballet", "Tap", "Tots", "Transitions", "Holidays", "Celebrations", "Other DT Originals"];
     const state = { client: null, playlists: [], tracks: [], links: [], selectedPlaylistId: "", catalogSection: "All", catalogSearch: "" };
+    let orderDraft = null;
+    let orderSaving = false;
+    let orderDrag = null;
     const $ = (selector) => document.querySelector(selector);
     const escapeText = (value = "") => String(value).replace(/[&<>'"]/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
     const safeExtension = (file) => String(file?.name || "").split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
@@ -377,23 +386,29 @@
       $("#hidden-summary").textContent = hiddenCount ? `${hiddenCount} older playlist${hiddenCount === 1 ? " is" : "s are"} safely hidden from teachers.` : "";
       const playlist = selectedPlaylist();
       $("#selected-playlist-name").textContent = playlist?.name || "Choose a playlist";
-      const tracks = playlist ? tracksForPlaylist(playlist.id) : [];
+      const tracks = playlist ? (orderDraft ? orderDraft.ids.map(id => state.tracks.find(track => track.id === id)).filter(Boolean) : tracksForPlaylist(playlist.id)) : [];
       $("#selected-playlist-count").textContent = playlist ? `${tracks.length} song${tracks.length === 1 ? "" : "s"} · Teachers receive changes automatically.` : "Select a playlist to see its songs.";
       $("#hide-playlist").hidden = !playlist;
       $("#open-add-tracks").hidden = !playlist;
       $("#change-playlist-cover").hidden = !playlist;
       $("#rename-playlist").hidden = !playlist;
+      $("#edit-playlist-order").hidden = !playlist || !!orderDraft || tracks.length < 2;
+      $("#save-playlist-order").hidden = !orderDraft;
+      $("#cancel-playlist-order").hidden = !orderDraft;
+      for (const id of ["rename-playlist", "change-playlist-cover", "open-add-tracks", "hide-playlist", "open-create-playlist"]) $("#" + id).disabled = !!orderDraft;
+      for (const id of ["rename-playlist", "change-playlist-cover", "open-add-tracks", "hide-playlist"]) $("#" + id).hidden = !playlist || !!orderDraft;
+      document.querySelectorAll("[data-playlist-id]").forEach(button => button.disabled = !!orderDraft);
+      $("#save-playlist-order").disabled = orderSaving;
+      $("#cancel-playlist-order").disabled = orderSaving;
       $("#selected-playlist-cover").innerHTML = playlist ? coverMarkup(playlist, playlist.name) : "";
       if (!playlist) { $("#add-tracks-panel").hidden = true; }
       if (!$("#add-tracks-panel").hidden) renderAddTracks();
       $("#playlist-track-list").innerHTML = !playlist ? `<p class="empty">Choose a playlist on the left.</p>` : !tracks.length ? `<p class="empty">No songs yet. Tap “+ Add Songs” to pull them from your catalog.</p>` : tracks.map((track, index) => `
-        <div class="track-row">
+        <div class="track-row" data-order-track="${escapeText(track.id)}">
           ${coverMarkup(track, track.title)}
           <div><strong>${escapeText(track.title)}</strong><small>${escapeText(track.catalog_section || "Other DT Originals")} · ${durationLabel(track.duration_seconds)}</small></div>
           <div class="track-actions">
-            <button class="move-button" type="button" data-move-track="${escapeText(track.id)}" data-dir="up" ${index === 0 ? "disabled" : ""} aria-label="Move ${escapeText(track.title)} up">&uarr;</button>
-            <button class="move-button" type="button" data-move-track="${escapeText(track.id)}" data-dir="down" ${index === tracks.length - 1 ? "disabled" : ""} aria-label="Move ${escapeText(track.title)} down">&darr;</button>
-            <button class="danger small-button" type="button" data-remove-track="${escapeText(track.id)}">Remove</button>
+            ${orderDraft ? `<button type="button" class="secondary small-button order-grip" data-order-grip="${escapeText(track.id)}" aria-label="Reorder ${escapeText(track.title)}. Drag or use up and down arrow keys." ${orderSaving ? "disabled" : ""}>⠿</button>` : `<button class="danger small-button" type="button" data-remove-track="${escapeText(track.id)}">Remove</button>`}
           </div>
         </div>`).join("");
     }
@@ -509,12 +524,100 @@
       if (error) throw error;
     }
 
+
+    function completeDraftOrder(draft) {
+      const visible = new Set(draft.ids);
+      let index = 0;
+      return draft.expected.map(id => visible.has(id) ? draft.ids[index++] : id);
+    }
+    function moveDraftTrack(id, targetId, after) {
+      if (!orderDraft || orderSaving || id === targetId) return;
+      const ids = orderDraft.ids.filter(value => value !== id);
+      const target = ids.indexOf(targetId);
+      if (target < 0) return;
+      ids.splice(target + (after ? 1 : 0), 0, id);
+      orderDraft.ids = ids;
+      const list = $("#playlist-track-list");
+      const rows = new Map([...list.children].map(row => [row.dataset.orderTrack, row]));
+      ids.forEach(value => list.append(rows.get(value)));
+    }
+    $("#edit-playlist-order").addEventListener("click", () => {
+      const ids = tracksForPlaylist(state.selectedPlaylistId).map(track => track.id);
+      orderDraft = { playlistId: state.selectedPlaylistId, expected: state.links.filter(link => link.playlist_id === state.selectedPlaylistId).sort((a,b) => a.position-b.position).map(link => link.track_id), ids: [...ids] };
+      $("#add-tracks-panel").hidden = true;
+      setStatus("#playlist-cover-status", "Drag the handles to rearrange songs, then Save Order. Keyboard: use the handle’s up/down arrow keys.");
+      renderPlaylists();
+    });
+    $("#cancel-playlist-order").addEventListener("click", async () => {
+      if (orderSaving) return;
+      orderDraft = null; orderDrag = null;
+      setStatus("#playlist-cover-status", "Order unchanged."); renderPlaylists();
+      try { await loadData(state.selectedPlaylistId); } catch { setStatus("#playlist-cover-status", "Order unchanged. Could not refresh the library.", true); }
+    });
+    $("#save-playlist-order").addEventListener("click", async () => {
+      if (!orderDraft || orderSaving) return;
+      const draft = orderDraft;
+      orderSaving = true; orderDrag = null; renderPlaylists();
+      setStatus("#playlist-cover-status", "Saving order…");
+      try {
+        const {error} = await state.client.rpc("reorder_music_playlist_tracks", {
+          p_playlist_id: draft.playlistId, p_expected_track_ids: draft.expected, p_ordered_track_ids: completeDraftOrder(draft)
+        });
+        if (error) throw error;
+        // Keep the confirmed result locally even if the subsequent refresh fails.
+        completeDraftOrder(draft).forEach((id, position) => { const link = state.links.find(row => row.playlist_id === draft.playlistId && row.track_id === id); if (link) link.position = position; });
+        orderDraft = null;
+        setStatus("#playlist-cover-status", "Order saved. Teachers receive the new order automatically.");
+        try { await loadData(draft.playlistId); } catch { setStatus("#playlist-cover-status", "Order saved. Refresh to reload the library."); }
+      } catch (error) {
+        setStatus("#playlist-cover-status", error?.message?.includes("changed") ? "This playlist changed elsewhere. Cancel and reopen Edit Order to use the latest version." : "Could not confirm the save. Your draft is still here; retry or Cancel to reload the saved order.", true);
+      } finally { orderSaving = false; renderPlaylists(); }
+    });
+    document.addEventListener("pointerdown", event => {
+      const grip = event.target.closest("[data-order-grip]");
+      if (!grip || !orderDraft || orderSaving || (event.button !== 0 && event.pointerType === "mouse")) return;
+      event.preventDefault();
+      orderDrag = {id: grip.dataset.orderGrip, pointer: event.pointerId, before: [...orderDraft.ids]};
+      grip.setPointerCapture(event.pointerId);
+      grip.closest(".track-row").classList.add("order-dragging");
+    });
+    document.addEventListener("pointermove", event => {
+      if (!orderDrag || event.pointerId !== orderDrag.pointer) return;
+      event.preventDefault();
+      const row = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-order-track]");
+      if (row) moveDraftTrack(orderDrag.id, row.dataset.orderTrack, event.clientY > row.getBoundingClientRect().top + row.offsetHeight / 2);
+      if (event.clientY < 90) window.scrollBy(0, -18);
+      if (event.clientY > window.innerHeight - 90) window.scrollBy(0, 18);
+    }, {passive: false});
+    function finishOrderDrag(event) {
+      if (!orderDrag || event.pointerId !== orderDrag.pointer) return;
+      if (event.type === "pointercancel" && orderDraft) {
+        orderDraft.ids = orderDrag.before;
+        const list = $("#playlist-track-list");
+        const rows = new Map([...list.children].map(row => [row.dataset.orderTrack, row]));
+        orderDraft.ids.forEach(id => list.append(rows.get(id)));
+      }
+      document.querySelectorAll(".order-dragging").forEach(row => row.classList.remove("order-dragging"));
+      orderDrag = null;
+    }
+    document.addEventListener("pointerup", finishOrderDrag);
+    document.addEventListener("pointercancel", finishOrderDrag);
+    document.addEventListener("keydown", event => {
+      const grip = event.target.closest("[data-order-grip]");
+      if (!grip || !orderDraft || orderSaving || !["ArrowUp", "ArrowDown"].includes(event.key)) return;
+      event.preventDefault();
+      const index = orderDraft.ids.indexOf(grip.dataset.orderGrip);
+      const target = index + (event.key === "ArrowUp" ? -1 : 1);
+      if (target >= 0 && target < orderDraft.ids.length) moveDraftTrack(grip.dataset.orderGrip, orderDraft.ids[target], event.key === "ArrowDown");
+      grip.focus();
+    });
+
     document.addEventListener("click", async (event) => {
       const tab = event.target.closest("[data-tab]");
       if (tab) showTab(tab.dataset.tab);
       if (event.target.closest("[data-jump-add]")) showTab("add-song");
       const playlistButton = event.target.closest("[data-playlist-id]");
-      if (playlistButton) { state.selectedPlaylistId = playlistButton.dataset.playlistId; renderPlaylists(); }
+      if (playlistButton && !orderDraft) { state.selectedPlaylistId = playlistButton.dataset.playlistId; renderPlaylists(); }
       const sectionButton = event.target.closest("[data-catalog-section]");
       if (sectionButton) { state.catalogSection = sectionButton.dataset.catalogSection; renderCatalog(); }
       const moveButton = event.target.closest("[data-move-track]");
