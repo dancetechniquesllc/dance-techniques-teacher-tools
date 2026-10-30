@@ -10217,6 +10217,11 @@
     .newsletter-section-background-fit button { width: auto; min-height: 29px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-soft); color: var(--fg); font-size: 9px; }
     .newsletter-section-background-fit button.is-selected { border-color: var(--berry); background: var(--blush); color: var(--berry); }
     .newsletter-preview-drag-handle { cursor: grab; }
+    /* Open editing menus must sit above the sticky Live Preview controls. */
+    .newsletter-brand-controls:has(.newsletter-field-popover:not([hidden]), .newsletter-list-popover:not([hidden]), .newsletter-condition-popover:not([hidden])) {
+      position: relative;
+      z-index: 30;
+    }
     .newsletter-inline-toolbar { position: relative; display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-soft); }
     .newsletter-inline-toolbar > button { min-height: 30px; padding: 5px 9px; border-radius: 999px; background: var(--blush); color: var(--berry); font-size: 10px; }
     .newsletter-inline-toolbar .newsletter-toolbar-row-break { flex-basis: 100%; height: 0; }
