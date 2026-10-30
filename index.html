@@ -17924,7 +17924,7 @@
                     <div class="newsletter-block-category"><strong>Media</strong><div class="newsletter-add-section-buttons"><button type="button" data-newsletter-add-section="photo">+ Add Picture</button><button type="button" data-newsletter-add-graphic>+ Add Graphic</button><button type="button" data-newsletter-add-section="youtube">+ YouTube</button><button type="button" data-newsletter-add-section="social">+ Social Links</button><button type="button" disabled title="Resource Library is coming next">+ Resource Library</button></div></div>
                   </div>
                 </div>
-                <div class="newsletter-editor-actions"><button class="secondary" type="button" id="newsletter-reset">New Draft</button><button class="secondary" type="button" id="newsletter-test-send">Send Test</button><button class="secondary" type="button" id="newsletter-change-audience">Change Audience</button><button type="button" id="newsletter-send" disabled>Connect Email Provider to Send</button></div>
+                <div class="newsletter-editor-actions"><button class="secondary" type="button" id="newsletter-reset">New Draft</button><button class="secondary" type="button" id="newsletter-test-send">Send Test</button><button class="secondary" type="button" id="newsletter-create-web-link">Create Web Link</button><button class="secondary" type="button" id="newsletter-change-audience">Change Audience</button><button type="button" id="newsletter-send" disabled>Connect Email Provider to Send</button></div>
               </article>
               <article class="admin-card newsletter-preview-panel">
                 <div class="newsletter-gender-versions" aria-label="Newsletter gender versions">
@@ -20723,6 +20723,7 @@
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <link rel="stylesheet" href="dt-touch/writing-fields.css">
   <script type="module" src="dt-touch/writing-fields.mjs?v=20261028-notes-optout"></script>
+  <link rel="stylesheet" href="newsletter-web.css">
   <link rel="stylesheet" href="web-submissions.css">
   <script type="module" src="web-submissions.mjs"></script>
   <!-- Workshop previews use the built-in fallback; live music loads from shared storage. -->
@@ -46018,7 +46019,8 @@
         __schoolConditionKeys: newsletterConditionSchoolKeys(school, rosterClass)
       };
     };
-    const newsletterSampleContext = () => newsletterContextForRecord(newsletterFilteredRecords()[0] || newsletterAudienceRecords()[0] || boutiqueKitRecords()[0]);
+    let newsletterRenderContextOverride = null;
+    const newsletterSampleContext = () => newsletterRenderContextOverride || newsletterContextForRecord(newsletterFilteredRecords()[0] || newsletterAudienceRecords()[0] || boutiqueKitRecords()[0]);
     const newsletterConditionalHtml = (value = "", context = newsletterSampleContext()) => {
       const html = String(value || "");
       if (!html.includes("newsletter-school-condition")) return html;
@@ -51135,6 +51137,19 @@
       renderNewsletterStudio();
       saveNewsletterDraft();
       showToast("A fresh newsletter draft is ready.");
+    });
+    document.getElementById("newsletter-create-web-link")?.addEventListener("click", async () => {
+      try {
+        const { openNewsletterWebDialog } = await import("./newsletter-web-editor.mjs");
+        await openNewsletterWebDialog({client: window.dtSupabase, buildSnapshot: (context) => {
+          const version = newsletterVersionForGender(newsletterGenderView);
+          const previousContext = newsletterRenderContextOverride;
+          try {
+            newsletterRenderContextOverride = context;
+            return {title: newsletterPersonalize(version.subject || version.headline || "Dance Techniques Newsletter", context), html: newsletterEmailHtml(context, {...version, genderView:newsletterGenderView}), videoUrl: newsletterPersonalize(version.videoUrl || "", context)};
+          } finally { newsletterRenderContextOverride = previousContext; }
+        }});
+      } catch(error) { showToast(error.message || "The web newsletter preview could not open."); }
     });
     document.getElementById("newsletter-test-send")?.addEventListener("click", async () => {
       const button = document.getElementById("newsletter-test-send");

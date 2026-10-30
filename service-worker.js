@@ -1,5 +1,10 @@
-const CACHE_NAME = "my-dance-techniques-v346-newsletter-email-images";
+const CACHE_NAME = "my-dance-techniques-v347-newsletter-web-view";
 const CORE_ASSETS = [
+  "./newsletter.html",
+  "./newsletter-web.css",
+  "./newsletter-web-shared.mjs",
+  "./newsletter-web-editor.mjs",
+  "./newsletter-web-reader.mjs",
   "./newsletter-email-images.mjs?v=20261030",
   "./newsletter-history.js?v=20261030-shared-images",
   "./student-photo-save.mjs?v=20261025",
