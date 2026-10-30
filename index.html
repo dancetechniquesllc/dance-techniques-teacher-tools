@@ -46574,10 +46574,12 @@
       }))];
       if (unresolvedFields.length) throw new Error(`Personalized fields still need recipient data: ${unresolvedFields.join(", ")}. Nothing was sent.`);
       if (!window.dtSupabase) throw new Error("Sign in to the live Director Dashboard before sending.");
+      const { prepareNewsletterEmailImages } = await import("./newsletter-email-images.mjs?v=20261030");
+      const preparedMessages = await prepareNewsletterEmailImages(messages, window.dtSupabase);
       let data;
       let error;
       for (let attempt = 0; attempt < 2; attempt += 1) {
-        ({ data, error } = await window.dtSupabase.functions.invoke("send-newsletter", { body: { messages, mode, confirmed, sendId } }));
+        ({ data, error } = await window.dtSupabase.functions.invoke("send-newsletter", { body: { messages: preparedMessages, mode, confirmed, sendId } }));
         const responseReachedService = error?.context instanceof Response;
         if (!error || responseReachedService || attempt === 1) break;
         // A dropped browser-to-Edge-Function connection is safe to retry with
@@ -51150,7 +51152,7 @@
           { to: testEmail.trim(), name: "Dance Techniques Girl Version Test", subject: `[TEST · GIRL] ${newsletterPersonalize(girlVersion.subject || girlVersion.headline || "Dance Techniques Newsletter", context)}`, html: newsletterEmailHtml(context, { ...girlVersion, genderView: "female" }) },
           { to: testEmail.trim(), name: "Dance Techniques Boy Version Test", subject: `[TEST · BOY] ${newsletterPersonalize(boyVersion.subject || boyVersion.headline || "Dance Techniques Newsletter", context)}`, html: newsletterEmailHtml(context, { ...boyVersion, genderView: "male" }) }
         ] });
-        showToast(`Girl and boy test newsletters sent to ${testEmail.trim()}.`);
+        showToast(`Girl and boy tests accepted by the email service for ${testEmail.trim()}.`);
       } catch (error) {
         showToast(error.message || "The test newsletter could not be sent.");
       } finally {

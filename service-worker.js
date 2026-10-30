@@ -1,5 +1,6 @@
-const CACHE_NAME = "my-dance-techniques-v345-playlist-rename-feedback";
+const CACHE_NAME = "my-dance-techniques-v346-newsletter-email-images";
 const CORE_ASSETS = [
+  "./newsletter-email-images.mjs?v=20261030",
   "./newsletter-history.js?v=20261030-shared-images",
   "./student-photo-save.mjs?v=20261025",
   "./attendance-storage.js?v=student-storage-20261020",
