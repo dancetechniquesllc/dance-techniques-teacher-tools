@@ -834,22 +834,45 @@
       await loadData("");
     });
 
+    const playlistRenameDrafts = new Map();
+    const playlistRenameFailureMessage = (error) => {
+      if (error?.code === "23505") return "That name is already used by another playlist, possibly a hidden one. Please choose a different name.";
+      if (["42501", "PGRST301", "PGRST302"].includes(error?.code) || /jwt|permission denied|not authenticated/i.test(error?.message || "")) return "Your sign-in could not authorize this rename. Check your sign-in before retrying. Your entered name is kept in this window.";
+      if (/fetch|network|timeout|connection/i.test(error?.message || "")) return "The connection interrupted the rename. Your entered name is kept here; check your connection and retry.";
+      return error?.message ? `The rename was not confirmed: ${String(error.message).slice(0, 240)}` : "The rename was not confirmed. Your entered name is kept here; please retry.";
+    };
     $("#rename-playlist").addEventListener("click", async () => {
       const playlist = selectedPlaylist();
       if (!playlist) return;
-      const input = prompt("Rename this playlist:", playlist.name);
+      const input = prompt("Rename this playlist:", playlistRenameDrafts.get(playlist.id) || playlist.name);
       if (input === null) return;
       const name = input.trim();
-      if (!name || name === playlist.name) return;
+      if (!name || name === playlist.name) { playlistRenameDrafts.delete(playlist.id); return; }
+      playlistRenameDrafts.set(playlist.id, name);
       if (name.length > 80) return alert("Please keep the playlist name under 80 characters.");
+      const duplicate = state.playlists.find(item => item.id !== playlist.id && item.name === name);
+      if (duplicate) {
+        const message = duplicate.active ? "Another playlist already uses that name. Please choose a different name." : "A hidden playlist already uses that name. Please choose a different name; the hidden playlist has been preserved.";
+        setStatus("#playlist-cover-status", message, true); alert(message); return;
+      }
       const button = $("#rename-playlist");
       button.disabled = true;
-      const { error } = await state.client.from("music_playlists").update({ name, updated_at: new Date().toISOString() }).eq("id", playlist.id);
-      button.disabled = false;
-      if (error) return alert("That playlist could not be renamed. Please try again.");
-      playlist.name = name;
-      renderPlaylists();
-      setStatus("#playlist-cover-status", "Renamed. Teachers see the new name the next time DT Tunes opens.");
+      try {
+        const { data, error } = await state.client.from("music_playlists")
+          .update({ name, updated_at: new Date().toISOString() }).eq("id", playlist.id).eq("name", playlist.name).select("id,name").maybeSingle();
+        if (error) throw error;
+        if (!data || data.id !== playlist.id || data.name !== name) {
+          const message = "This playlist may have changed elsewhere, or your sign-in cannot edit it. The rename was not confirmed; your entered name is kept in this window.";
+          setStatus("#playlist-cover-status", message, true); alert(message); return;
+        }
+        playlist.name = data.name;
+        playlistRenameDrafts.delete(playlist.id);
+        renderPlaylists();
+        setStatus("#playlist-cover-status", "Renamed. Teachers see the new name the next time DT Tunes opens.");
+      } catch (error) {
+        const message = playlistRenameFailureMessage(error);
+        setStatus("#playlist-cover-status", message, true); alert(message);
+      } finally { button.disabled = false; }
     });
 
     $("#change-playlist-cover").addEventListener("click", () => {
