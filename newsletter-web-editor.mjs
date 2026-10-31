@@ -1,17 +1,17 @@
+import {prepareNewsletterEmailImages} from './newsletter-email-images.mjs';
 import {generalNewsletterContext,cleanNewsletterWebHtml,newsletterWebUrl} from './newsletter-web-shared.mjs';
 export async function openNewsletterWebDialog({client,buildSnapshot}) {
  const snapshot=buildSnapshot(generalNewsletterContext());
  const html=cleanNewsletterWebHtml(snapshot.html,{videoUrl:snapshot.videoUrl}),title=Array.from((String(snapshot.title||'').trim()||'Dance Techniques Newsletter')).slice(0,160).join('');
- if(html.length>8000000)throw new Error('This web version is too large. Use smaller uploaded pictures and retry. Your draft is unchanged.');
  const requestId=crypto.randomUUID();
  const dialog=document.createElement('dialog');dialog.className='newsletter-web-dialog';
  dialog.setAttribute('aria-labelledby','newsletter-web-title');
- dialog.innerHTML=`<div class="newsletter-web-heading"><h2 id="newsletter-web-title">General Web Newsletter</h2><button type="button" data-web-close aria-label="Close web newsletter">×</button></div><p>Uses your current design, with general wording instead of family fields. School-only text is left out. Anyone with the link can view this saved version; later draft edits won’t change it.</p><iframe title="General newsletter preview" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe><div class="newsletter-web-actions"><button type="button" class="primary" data-web-create>Create Web Link</button><button type="button" class="secondary" data-web-close>Close</button></div><p data-web-status role="status" aria-live="polite"></p><div data-web-result hidden><label>Link for Brightwheel<input readonly aria-label="Newsletter web link"></label><button type="button" class="secondary" data-web-copy>Copy Link</button><a target="_blank" rel="noopener noreferrer">Open Web View</a></div><h3>Recent Web Links</h3><div data-web-recent>Loading links…</div>`;
+ dialog.innerHTML=`<div class="newsletter-web-heading"><h2 id="newsletter-web-title">General Web Newsletter</h2><button type="button" data-web-close aria-label="Close web newsletter">×</button></div><p>Uses your current design, with general wording instead of family fields. School-only text is left out. Anyone with the link can view this saved version; later draft edits won’t change it. Pictures in this shared version are public too.</p><iframe title="General newsletter preview" sandbox="allow-popups allow-popups-to-escape-sandbox" referrerpolicy="no-referrer"></iframe><div class="newsletter-web-actions"><button type="button" class="primary" data-web-create>Create Web Link</button><button type="button" class="secondary" data-web-close>Close</button></div><p data-web-status role="status" aria-live="polite"></p><div data-web-result hidden><label>Link for Brightwheel<input readonly aria-label="Newsletter web link"></label><button type="button" class="secondary" data-web-copy>Copy Link</button><a target="_blank" rel="noopener noreferrer">Open Web View</a></div><h3>Recent Web Links</h3><div data-web-recent>Loading links…</div>`;
  document.body.append(dialog);dialog.querySelector('iframe').srcdoc=html;dialog.showModal();
  const status=dialog.querySelector('[data-web-status]'),create=dialog.querySelector('[data-web-create]');
  const say=(message,error=false)=>{status.textContent=message;status.classList.toggle('error',error);};
  const copy=async(url,input)=>{try{await navigator.clipboard.writeText(url);say('Link copied. Paste it into Brightwheel.');}catch{if(input){input.focus();input.select();}say('Select and copy the link above to paste into Brightwheel.');}};
- let createdUrl='';
+ let createdUrl='',publishedHtml=null;
  dialog.querySelectorAll('[data-web-close]').forEach(button=>button.onclick=()=>dialog.close());
  dialog.addEventListener('close',()=>dialog.remove(),{once:true});
  dialog.querySelector('[data-web-copy]').onclick=()=>copy(createdUrl,dialog.querySelector('[data-web-result] input'));
@@ -45,7 +45,15 @@ export async function openNewsletterWebDialog({client,buildSnapshot}) {
   if(!client)return say('Sign in as a director to create a web link.',true);
   create.disabled=true;say('Creating your web link…');
   try{
-   const {data,error}=await client.rpc('publish_newsletter_web_view',{p_id:requestId,p_title:title,p_html:html});
+   if (publishedHtml === null) {
+    say('Preparing your newsletter pictures…');
+    const prepared = await prepareNewsletterEmailImages([{html}],client,{webSnapshotId:requestId});
+    const outgoing = cleanNewsletterWebHtml(prepared[0].html);
+    if(outgoing.length>8000000)throw new Error('This newsletter contains too much text or layout information for a web link. Your draft is unchanged.');
+    publishedHtml = outgoing;
+   }
+   say('Creating your web link…');
+   const {data,error}=await client.rpc('publish_newsletter_web_view',{p_id:requestId,p_title:title,p_html:publishedHtml});
    if(error)throw error;
    const record=data?.[0];if(record?.id!==requestId)throw new Error('The web link was not confirmed. Please retry.');
    createdUrl=newsletterWebUrl(record.token);
