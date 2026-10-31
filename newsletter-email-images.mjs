@@ -1,3 +1,4 @@
+import { prepareNewsletterEmailLogos } from './newsletter-email-logo.mjs';
 // Email clients need hosted pictures; never copy large base64 images into email HTML.
 const bucket = 'newsletter-email-images';
 const imagePattern = /data:image\/(png|jpe?g|webp|gif);base64,[A-Za-z0-9+/]+={0,2}/gi;
@@ -5,6 +6,7 @@ const maxImageBytes = 10 * 1024 * 1024;
 const maxTotalBytes = 25 * 1024 * 1024;
 const signedImageLifetime = 365 * 24 * 60 * 60;
 export async function prepareNewsletterEmailImages(messages, client) {
+  messages = await prepareNewsletterEmailLogos(messages);
   const images = new Map();
   for (const message of messages) for (const match of String(message.html || '').matchAll(imagePattern)) images.set(match[0], match[1].toLowerCase());
   if (!images.size) return messages;

@@ -10156,9 +10156,9 @@
     .newsletter-floating-graphic:hover, .newsletter-floating-graphic:focus-within, .newsletter-floating-graphic.is-selected { border-color: var(--newsletter-accent); background: rgb(255 250 246 / .88); outline: none; }
     .newsletter-floating-graphic img { display: block; width: 100%; height: auto; object-fit: contain; pointer-events: none; }
     .newsletter-floating-graphic-placeholder { min-height: 76px; display: grid; place-items: center; padding: 9px; border: 1px dashed var(--newsletter-accent); border-radius: 8px; background: #fffaf6; color: var(--muted); font-size: 10px; text-align: center; }
-    .newsletter-floating-graphic-controls { display: flex; gap: 4px; opacity: 0; transition: opacity .15s ease; }
+    .newsletter-floating-graphic-controls { display: flex; flex-wrap: wrap; gap: 4px; opacity: 0; transition: opacity .15s ease; }
     .newsletter-floating-graphic:hover .newsletter-floating-graphic-controls, .newsletter-floating-graphic:focus-within .newsletter-floating-graphic-controls, .newsletter-floating-graphic.is-selected .newsletter-floating-graphic-controls { opacity: 1; }
-    .newsletter-floating-graphic-controls input { min-width: 0; height: 28px; padding: 4px 6px; font-size: 9px; }
+    .newsletter-floating-graphic-controls input { flex: 1 1 100%; width:100%; min-width: 0; height: 28px; padding: 4px 6px; font-size: 9px; }
     .newsletter-floating-graphic-controls button { width: 28px; min-height: 28px; padding: 0; border-radius: 999px; background: var(--blush); color: var(--berry); }
     .newsletter-floating-graphic-controls .newsletter-graphic-anchor { color: #160f0d; }
     .newsletter-floating-graphic-controls .newsletter-graphic-anchor.is-locked { background: #160f0d; color: var(--ivory); }
@@ -44918,6 +44918,7 @@
       } else {
         source.graphics.forEach((graphic, index) => {
           target.graphics[index].url = graphic.url;
+          target.graphics[index].imageLink = graphic.imageLink;
           target.graphics[index].alt = graphic.alt;
           // Position, size, transforms, and locks are breakpoint presentation
           // state. Preserve the target snapshot instead of copying the active
@@ -45531,13 +45532,19 @@
       cleanupNewsletterEmptyListItems(template.content, { preserveCaret: false });
       return template.innerHTML;
     };
+    const newsletterPictureLink = (html, value) => {
+      let url;
+      try { url = new URL(String(value || "").trim()); } catch { return html; }
+      if (!["https:", "http:", "mailto:", "tel:"].includes(url.protocol)) return html;
+      return `<a href="${rosterSafe(url.href)}" target="_blank" rel="noopener noreferrer" style="display:block;">${html}</a>`;
+    };
     const newsletterPhotoUploadMarkup = (section, index, scope = "preview") => {
       const hasImage = Boolean(section?.url);
       return `<div class="newsletter-photo-upload-control">
         <input id="newsletter-photo-upload-${scope}-${index}" data-newsletter-photo-upload="${index}" type="file" accept="image/*">
         <label for="newsletter-photo-upload-${scope}-${index}">${hasImage ? "Replace Picture" : "Choose Picture"}</label>
         <span class="newsletter-photo-upload-status">${hasImage ? `<img src="${rosterSafe(section.url)}" alt=""><span>${rosterSafe(section.imageName || "Picture selected")}</span>` : `<span>No picture selected yet</span>`}</span>
-      </div>`;
+      </div><label class="full">Picture Link (optional)<input type="url" data-newsletter-${scope === "panel" ? "section-field" : "preview-section-field"}="imageLink" value="${rosterSafe(section.imageLink || "")}" placeholder="https://..."></label>`;
     };
     const newsletterPhotoDataUrl = (file) => new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -45566,7 +45573,7 @@
       const width = newsletterPhotoWidth(section);
       const image = `<img class="newsletter-block-image${section.imageFit === "cover" ? " is-cropped" : ""}" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}">`;
       const control = editable ? `<label class="newsletter-photo-size-control">Picture Width<input type="range" min="20" max="100" step="1" value="${width}" data-newsletter-photo-width="${index}" aria-label="Picture width as a percentage of this section"><output>${width}%</output></label>` : "";
-      return `<div class="newsletter-photo-frame" style="--newsletter-photo-width:${width}%">${image}</div>${control}`;
+      return `<div class="newsletter-photo-frame" style="--newsletter-photo-width:${width}%">${editable ? image : newsletterPictureLink(image, section.imageLink)}</div>${control}`;
     };
     const newsletterSocialLinksForGender = (section, gender = newsletterGenderView) => {
       const existingLinks = Array.isArray(section?.socialLinks) ? section.socialLinks : [];
@@ -45629,7 +45636,7 @@
         const mobileWidth = newsletterPhotoWidth(mobileSection);
         const desktopPhotoFit = desktopSection.imageFit === "cover" ? "cover" : "contain";
         const mobilePhotoFit = mobileSection.imageFit === "cover" ? "cover" : "contain";
-        return section.url ? `<section class="newsletter-content-section newsletter-responsive-section" style="${sectionBackgroundStyle}"><div class="newsletter-email-photo-frame" style="width:${desktopWidth}%;max-width:100%;margin:0 auto;--newsletter-photo-mobile-width:${mobileWidth}%"><img class="newsletter-email-photo-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}" style="display:block;box-sizing:border-box;width:100%;max-width:100%;height:${desktopPhotoFit === "cover" ? "340px" : "auto"};object-fit:${desktopPhotoFit};--newsletter-photo-mobile-fit:${mobilePhotoFit};--newsletter-photo-mobile-height:${mobilePhotoFit === "cover" ? "340px" : "auto"};border-radius:12px;"></div>${section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text))}</p>` : ""}</section>` : `<section class="newsletter-content-section is-highlight newsletter-responsive-section" style="${sectionBackgroundStyle}"><p>Photo or Resource Library image</p></section>`;
+        return section.url ? `<section class="newsletter-content-section newsletter-responsive-section" style="${sectionBackgroundStyle}"><div class="newsletter-email-photo-frame" style="width:${desktopWidth}%;max-width:100%;margin:0 auto;--newsletter-photo-mobile-width:${mobileWidth}%">${newsletterPictureLink(`<img class="newsletter-email-photo-image" src="${rosterSafe(section.url)}" alt="${rosterSafe(section.title || "Newsletter photo")}" style="display:block;box-sizing:border-box;width:100%;max-width:100%;height:${desktopPhotoFit === "cover" ? "340px" : "auto"};object-fit:${desktopPhotoFit};--newsletter-photo-mobile-fit:${mobilePhotoFit};--newsletter-photo-mobile-height:${mobilePhotoFit === "cover" ? "340px" : "auto"};border-radius:12px;">`, section.imageLink)}</div>${section.text ? `<p>${rosterSafe(newsletterPersonalize(section.text))}</p>` : ""}</section>` : `<section class="newsletter-content-section is-highlight newsletter-responsive-section" style="${sectionBackgroundStyle}"><p>Photo or Resource Library image</p></section>`;
       }
       if (section.type === "youtube") {
         const details = newsletterYouTubeDetails(section.url);
@@ -45864,7 +45871,7 @@
       const extraTransform = transform ? ` ${transform}` : "";
       return `<div class="newsletter-floating-graphic ${locked ? "is-locked" : ""} ${newsletterSelectedGraphicIndex === index ? "is-selected" : ""}" tabindex="0" role="button" aria-label="Select ${rosterSafe(graphic.alt || "newsletter graphic")} for positioning" draggable="${locked ? "false" : "true"}" data-newsletter-floating-graphic="${index}" style="left:${x}%;top:${y}%;width:${width}px;${height ? `height:${height}px;` : ""}transform:translate(-50%,-50%) scale(${scale})${extraTransform};">
         ${graphic.url ? `<img src="${rosterSafe(graphic.url)}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}">` : `<span class="newsletter-floating-graphic-placeholder">Paste a graphic URL below, then drag this anywhere.</span>`}
-        <span class="newsletter-floating-graphic-controls"><input type="url" data-newsletter-graphic-url="${index}" value="${rosterSafe(graphic.url || "")}" placeholder="Graphic URL"><button class="newsletter-graphic-anchor ${locked ? "is-locked" : ""}" type="button" data-newsletter-toggle-graphic-lock="${index}" aria-label="${locked ? "Unfreeze graphic position" : "Freeze graphic position"}" title="${locked ? "Unfreeze position" : "Freeze position"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2h2v4.08a4 4 0 0 1 2.92 2.92H20v2h-4.08A4 4 0 0 1 13 13.92V20a7 7 0 0 0 5.83-3.13l-2.12-2.12 1.41-1.41L22 17.22A9 9 0 0 1 12 23a9 9 0 0 1-10-5.78l3.88-3.88 1.41 1.41-2.12 2.12A7 7 0 0 0 11 20v-6.08A4 4 0 0 1 8.08 11H4V9h4.08A4 4 0 0 1 11 6.08V2Zm1 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path></svg></button><button type="button" data-newsletter-remove-graphic="${index}" aria-label="Remove graphic">×</button></span>
+        <span class="newsletter-floating-graphic-controls"><input type="url" data-newsletter-graphic-url="${index}" value="${rosterSafe(graphic.url || "")}" placeholder="Graphic URL"><input type="url" data-newsletter-graphic-link="${index}" value="${rosterSafe(graphic.imageLink || "")}" placeholder="Picture Link (optional)" aria-label="Picture link"><button class="newsletter-graphic-anchor ${locked ? "is-locked" : ""}" type="button" data-newsletter-toggle-graphic-lock="${index}" aria-label="${locked ? "Unfreeze graphic position" : "Freeze graphic position"}" title="${locked ? "Unfreeze position" : "Freeze position"}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 2h2v4.08a4 4 0 0 1 2.92 2.92H20v2h-4.08A4 4 0 0 1 13 13.92V20a7 7 0 0 0 5.83-3.13l-2.12-2.12 1.41-1.41L22 17.22A9 9 0 0 1 12 23a9 9 0 0 1-10-5.78l3.88-3.88 1.41 1.41-2.12 2.12A7 7 0 0 0 11 20v-6.08A4 4 0 0 1 8.08 11H4V9h4.08A4 4 0 0 1 11 6.08V2Zm1 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z"></path></svg></button><button type="button" data-newsletter-remove-graphic="${index}" aria-label="Remove graphic">×</button></span>
         ${locked ? "" : `<button class="newsletter-graphic-resize-handle" type="button" data-newsletter-graphic-resize-handle="${index}" aria-label="Resize graphic" title="Drag to resize"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 15h8V7"></path><path d="m9 11 6-6"></path></svg></button>`}
       </div>`;
     };
@@ -46481,7 +46488,11 @@
         const desktopWidth = newsletterEmailGraphicWidth(graphic, desktopSize, "desktop");
         const mobileWidth = newsletterEmailGraphicWidth(graphic, mobileSize, "mobile");
         const characterClass = newsletterGraphicIsCharacter(graphic) ? " is-character-graphic" : "";
-        return `<img class="newsletter-email-floating-graphic${characterClass}" src="${rosterSafe(source)}" width="${desktopWidth}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:${desktop.x}%;top:${desktop.y}%;--desktop-x:${desktop.x}%;--desktop-y:${desktop.y}%;--mobile-x:${mobile.x}%;--mobile-y:${mobile.y}%;--desktop-width:${desktopWidth}px;--mobile-width:${mobileWidth}px;--desktop-scale:${desktopSize.scale};--mobile-scale:${mobileSize.scale};display:block;width:${desktopWidth}px;max-width:45%;height:auto;transform:translate(-50%,-50%) scale(${desktopSize.scale});">`;
+        const graphicImage = `<img class="newsletter-email-floating-graphic${characterClass}" src="${rosterSafe(source)}" width="${desktopWidth}" alt="${rosterSafe(graphic.alt || "Newsletter graphic")}" style="position:absolute;z-index:3;left:${desktop.x}%;top:${desktop.y}%;--desktop-x:${desktop.x}%;--desktop-y:${desktop.y}%;--mobile-x:${mobile.x}%;--mobile-y:${mobile.y}%;--desktop-width:${desktopWidth}px;--mobile-width:${mobileWidth}px;--desktop-scale:${desktopSize.scale};--mobile-scale:${mobileSize.scale};display:block;width:${desktopWidth}px;max-width:45%;height:auto;transform:translate(-50%,-50%) scale(${desktopSize.scale});">`;
+        const linked = newsletterPictureLink(graphicImage, graphic.imageLink);
+        if (linked === graphicImage) return graphicImage;
+        const positionStyle = graphicImage.match(/style="([^"]+)"/)?.[1] || "";
+        return linked.replace('style="display:block;"', `class="newsletter-email-floating-graphic${characterClass}" style="${positionStyle}"`).replace(/<img class="[^"]+"/, '<img').replace(/(<img[^>]*?)style="[^"]+"/, '$1style="display:block;width:100%;height:auto;"');
       }).join("");
       const backgroundBoxes = (draft.backgroundBoxes || []).map((box, index) => {
         const mobileBox = mobileDraft.backgroundBoxes?.[index] || box;
@@ -46513,11 +46524,14 @@
         ? `<div role="img" aria-label="Dance Techniques" style="display:block;width:${logoWidth}px;max-width:80%;aspect-ratio:1;margin:0 auto;background:${logoColor};-webkit-mask:${boyLogoMask};mask:${boyLogoMask};"></div>`
         : `<div role="img" aria-label="Dance Techniques" style="width:${logoWidth}px;max-width:80%;aspect-ratio:2.15/1;margin:0 auto;background:${logoColor};-webkit-mask:${logoMask};mask:${logoMask};"></div>`;
       const badgeStyle = draft.logoBadgeShape === "circle-outline" ? `border:4px solid ${badgeColor};border-radius:50%;background:transparent;` : draft.logoBadgeShape === "solid-circle" ? `border-radius:50%;background:${badgeColor};` : draft.logoBadgeShape === "solid-heart" ? `background:${badgeColor};-webkit-mask:${heartMask};mask:${heartMask};` : "";
-      const deliveredLogo = draft.genderView !== "male" && draft.logoBadgeShape === "solid-heart" && (!draft.logoBadgeColor || draft.logoBadgeColor === "blush")
+      const deliveredLogoMarkup = draft.genderView !== "male" && draft.logoBadgeShape === "solid-heart" && (!draft.logoBadgeColor || draft.logoBadgeColor === "blush")
         ? `<img src="${girlHeartLogoUrl}" width="${logoWidth}" alt="Dance Techniques" style="display:block;width:${logoWidth}px;max-width:80%;height:auto;margin:0 auto;">`
         : draft.logoBadgeShape
         ? `<div role="img" aria-label="Dance Techniques" style="box-sizing:border-box;display:grid;place-items:center;width:${logoWidth}px;max-width:80%;aspect-ratio:1;margin:0 auto;padding:6%;overflow:hidden;${badgeStyle}">${draft.genderView === "male" ? `<span style="display:block;width:47.6%;height:47.6%;background:${logoColor};-webkit-mask:${boyLogoMask};mask:${boyLogoMask};"></span>` : `<span style="display:block;width:150%;max-width:none;aspect-ratio:2.15/1;background:${logoColor};-webkit-mask:${logoMask};mask:${logoMask};"></span>`}</div>`
         : logoOnly;
+      const emailLogoSpec = {width:logoWidth, male:draft.genderView === "male", shape:draft.logoBadgeShape || "", color:logoColor, badgeColor};
+      const isCompositeLogo = draft.genderView !== "male" && draft.logoBadgeShape === "solid-heart" && (!draft.logoBadgeColor || draft.logoBadgeColor === "blush");
+      const deliveredLogo = isCompositeLogo ? deliveredLogoMarkup : `<div data-newsletter-email-logo="${rosterSafe(JSON.stringify(emailLogoSpec))}">${deliveredLogoMarkup}</div>`;
       const desktopMessageWidth = Math.max(20, Math.min(100, Number(draft.messageWidth) || 100));
       const desktopMessageLeft = Math.max(0, Math.min(100 - desktopMessageWidth, Number(draft.messageLeft) || 0));
       const mobileMessageWidth = Math.max(20, Math.min(100, Number(mobileDraft.messageWidth) || 100));
@@ -50190,6 +50204,13 @@
       }
       if (event.target.matches("[data-newsletter-button-field]")) {
         event.target.dispatchEvent(new Event("input", { bubbles: true }));
+        return;
+      }
+      const graphicLink = event.target.closest("[data-newsletter-graphic-link]");
+      if (graphicLink) {
+        const graphic = newsletterDraft.graphics?.[Number(graphicLink.dataset.newsletterGraphicLink)];
+        if (graphic) graphic.imageLink = graphicLink.value.trim();
+        saveNewsletterDraft();
         return;
       }
       const graphicUrl = event.target.closest("[data-newsletter-graphic-url]");
