@@ -1,8 +1,10 @@
+import {prepareNewsletterEmailLogos} from './newsletter-email-logo.mjs';
 import {prepareNewsletterEmailImages} from './newsletter-email-images.mjs';
 import {generalNewsletterContext,cleanNewsletterWebHtml,newsletterWebUrl} from './newsletter-web-shared.mjs';
 export async function openNewsletterWebDialog({client,buildSnapshot}) {
  const snapshot=buildSnapshot(generalNewsletterContext());
- const html=cleanNewsletterWebHtml(snapshot.html,{videoUrl:snapshot.videoUrl}),title=Array.from((String(snapshot.title||'').trim()||'Dance Techniques Newsletter')).slice(0,160).join('');
+ const [preview]=await prepareNewsletterEmailLogos([{html:snapshot.html}]);
+ const html=cleanNewsletterWebHtml(preview.html,{videoUrl:snapshot.videoUrl}),title=Array.from((String(snapshot.title||'').trim()||'Dance Techniques Newsletter')).slice(0,160).join('');
  const requestId=crypto.randomUUID();
  const dialog=document.createElement('dialog');dialog.className='newsletter-web-dialog';
  dialog.setAttribute('aria-labelledby','newsletter-web-title');

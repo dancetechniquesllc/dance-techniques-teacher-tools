@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v349-newsletter-web-pictures";
+const CACHE_NAME = "my-dance-techniques-v350-newsletter-web-logo-preview";
 const CORE_ASSETS = [
   "./newsletter.html",
   "./newsletter-web.css",
