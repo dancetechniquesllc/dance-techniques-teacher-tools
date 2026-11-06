@@ -8508,6 +8508,15 @@
       box-shadow: inset 0 0 0 1px var(--berry);
     }
 
+    .enrollment-queue-item.is-christmas { padding-top: 50px; }
+    .enrollment-christmas-badge { position:absolute; top:10px; left:10px; width:32px; height:32px; display:grid; place-items:center; border-radius:50%; background:#e5bc5b; border:1px solid #cc9429; font-size:20px; }
+    .enrollment-queue-item.is-christmas .enrollment-queue-select { left:50px; }
+    .enrollment-queue-item.is-christmas .enrollment-stage-bubble, .enrollment-queue-item.is-christmas .enrollment-priority-bubble { max-width:calc(100% - 85px); }
+    .enrollment-christmas-status { display:inline-block; padding:6px 13px; border-radius:999px; font-size:11px; font-weight:850; line-height:1.25; }
+    .enrollment-christmas-status.paid { background:#dce9d5; color:#376243; }
+    .enrollment-christmas-status.january { background:#8A4E54; color:white; }
+    .enrollment-christmas-status.immediate { background:var(--blush); color:#68103f; }
+    .enrollment-christmas-status.review { background:#f8e2ae; color:#69480f; }
     .enrollment-card-avatar { width: 68px; height: 68px; display: grid; place-items: center; border-radius: 999px; background: var(--blush); color: var(--berry); font-family: var(--font-body); font-size: 19px; font-weight: 850; }
     .enrollment-queue-item strong { font-family: var(--font-body); font-size: 17px; font-weight: 800 !important; line-height: 1.15; }
     .enrollment-queue-item small { color: var(--muted); font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; font-size: 11px; font-weight: 400 !important; }
@@ -22214,6 +22223,26 @@
     };
 
     const enrollmentWelcomeSending = new Set();
+    const enrollmentChristmasSpecial = (item) => String(item?.jotform_form_id || "") === "263095823533056";
+    const enrollmentChristmasStart = (item) => {
+      if (!enrollmentChristmasSpecial(item)) return "";
+      const raw = item?.raw_submission?.rawRequest || {};
+      const answer = item?.additional_information?.["Christmas Start Preference"]
+        || raw.q33_iWould || raw["33"]?.answer || "";
+      const text = (Array.isArray(answer) ? answer.join(" | ") : String(answer)).toLowerCase().replace(/[’‘]/g, "'");
+      const january = text.includes("in january!") && text.includes("front desk");
+      const immediate = text.includes("right away") && text.includes("too excited to wait");
+      return january && immediate ? "review" : january ? "january" : immediate ? "immediate" : "";
+    };
+    const enrollmentChristmasStatusMarkup = (item, step) => {
+      if (!enrollmentChristmasSpecial(item)) return "";
+      if (step === "bill-recital" && String(item.payment_status).toLowerCase() === "paid") return '<span class="enrollment-christmas-status paid">PAID</span>';
+      if (step !== "implement-billing") return "";
+      const start = enrollmentChristmasStart(item);
+      return start === "january" ? '<span class="enrollment-christmas-status january">January Start</span>'
+        : start === "immediate" ? '<span class="enrollment-christmas-status immediate">Immediate Enrollment</span>'
+        : start === "review" ? '<span class="enrollment-christmas-status review">Review Start Choice</span>' : "";
+    };
     const enrollmentFeeStatusLabel = (item) => {
       const status = String(item?.payment_status || "").trim().toLowerCase();
       if (!status || status === "unknown") return "Status Not Recorded";
@@ -22703,7 +22732,8 @@
           ? rosterClasses.find((rosterClass) => String(rosterClass.id) === String(item.matched_dance_class_id))
           : null;
         return `
-        <div class="enrollment-queue-item ${batchConfig ? "is-batchable" : ""} ${item.id === selectedEnrollmentIntakeId && enrollmentReviewOpen ? "is-selected" : ""}">
+        <div class="enrollment-queue-item ${enrollmentChristmasSpecial(item) ? "is-christmas" : ""} ${batchConfig ? "is-batchable" : ""} ${item.id === selectedEnrollmentIntakeId && enrollmentReviewOpen ? "is-selected" : ""}">
+          ${enrollmentChristmasSpecial(item) ? `<span class="enrollment-christmas-badge" role="img" aria-label="Christmas Special" title="Christmas Special">🎄</span>` : ""}
           ${batchConfig ? `<input class="enrollment-queue-select" type="checkbox" data-enrollment-batch-select="${escapeText(item.id)}" aria-label="Select ${escapeText([firstName, lastName].filter(Boolean).join(" ") || "enrollment")} for batch completion" ${enrollmentBatchSelected.has(item.id) ? "checked" : ""}>` : ""}
           <button class="enrollment-queue-open" type="button" data-enrollment-intake-open="${escapeText(item.id)}" aria-label="Open ${escapeText([firstName, lastName].filter(Boolean).join(" ") || "enrollment")}">
           <span class="enrollment-card-avatar ${teacherProfileColorClass(assignedTeacherId)}">${escapeText(initials)}</span>
@@ -22711,6 +22741,7 @@
           <small>${escapeText(enrollmentDisplaySchoolName(item))}</small>
           ${brightwheelClass ? `<small class="enrollment-card-class">${escapeText(brightwheelClass.name)}</small>` : ""}
           <small class="enrollment-card-age">${escapeText(item.student_birth_date ? enrollmentAgeLabel(item.student_birth_date) : "Age not provided")}</small>
+          ${enrollmentChristmasStatusMarkup(item, enrollmentChecklistFilter)}
           ${enrollmentChecklistFilter === "implement-billing" ? `<span class="enrollment-card-billing-bubbles">
             ${billingDiscount ? `<span class="enrollment-card-billing-bubble discount" aria-label="Tuition Circumstances: ${escapeText(billingDiscount)}"><span>Tuition Circumstances</span><b>${escapeText(billingDiscount)}</b></span>` : ""}
             ${billingTuition ? `<span class="enrollment-card-billing-bubble tuition" aria-label="Suggested Tuition: ${escapeText(billingTuition)}"><span>Suggested Tuition</span><b>${escapeText(billingTuition)}</b></span>` : `<span class="enrollment-card-billing-bubble tuition" aria-label="Suggested Tuition unavailable"><span>Suggested Tuition</span><b>Unavailable</b></span>`}
