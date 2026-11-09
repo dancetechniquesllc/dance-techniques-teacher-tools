@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v353-payroll-summary";
+const CACHE_NAME = "my-dance-techniques-v354-dt-touch-interview";
 const CORE_ASSETS = [
   "./newsletter.html",
   "./newsletter-web.css",
@@ -41,6 +41,7 @@ const CORE_ASSETS = [
   "./inquiry-age.mjs",
   "./dt-touch/writing-fields.mjs?v=20261028-notes-optout",
   "./dt-touch/writing-fields.css",
+  "./dt-touch/behavior-interview.mjs",
   "./manifest.webmanifest",
   "./supabase-auth.js?v=20261022-session-lifecycle",
   "./data/partner-schools.js",

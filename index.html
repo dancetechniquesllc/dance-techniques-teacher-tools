@@ -20738,6 +20738,7 @@
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <link rel="stylesheet" href="dt-touch/writing-fields.css">
   <script type="module" src="dt-touch/writing-fields.mjs?v=20261028-notes-optout"></script>
+  <script type="module" src="dt-touch/behavior-interview.mjs"></script>
   <link rel="stylesheet" href="newsletter-web.css">
   <link rel="stylesheet" href="web-submissions.css">
   <script type="module" src="web-submissions.mjs"></script>
@@ -30234,6 +30235,7 @@
         <form class="teacher-parent-preview-compose" id="teacher-parent-shared-compose" aria-label="Reply to family">
           <div class="teacher-reply-editor"><textarea id="teacher-parent-shared-reply" aria-label="Reply to family" placeholder="Reply to the family"></textarea><button class="teacher-reply-touch-undo" type="button" data-reply-dt-undo hidden>↶ Undo</button></div><button class="teacher-reply-dt-touch" type="button" data-reply-dt-touch aria-label="✨ Suggest a Reply" title="✨ Suggest a Reply"><img src="assets/dance-techniques-logo-only.png" alt=""></button>
           <button class="primary" type="submit">Send</button>
+          <button class="secondary" type="button" data-reply-behavior-interview>Classroom Behavior Interview</button>
           <p class="teacher-parent-preview-compose-note">Replies are shared with every linked guardian.</p><p class="teacher-reply-touch-feedback" role="status"></p>
         </form>
       `;
@@ -35235,26 +35237,81 @@
     };
     document.addEventListener('input',event=>{if(event.target.id==='teacher-parent-shared-reply')updateReplyDtTouchLabel(event.target.closest('form'));});
     document.addEventListener("click", async event => {
-      const touch=event.target.closest("[data-reply-dt-touch]"),undo=event.target.closest("[data-reply-dt-undo]");if(!touch&&!undo)return;
-      const form=(touch||undo).closest("form"),reply=form.querySelector("textarea"),status=form.querySelector(".teacher-reply-touch-feedback"),restore=form.querySelector("[data-reply-dt-undo]");
-      if(undo){reply.value=form.dtTouchOriginal??reply.value;restore.hidden=true;form.dtTouchResult='';form.dtTouchHasOriginal=false;status.textContent='Original draft restored.';updateReplyDtTouchLabel(form);reply.focus();return;}
-      if(touch.disabled)return;
-      const conversation=teacherParentPreviewConversations.find(item=>item.id===selectedTeacherParentPreviewId),studentId=conversation?.sharedStudentId||conversation?.studentId;
-      const snapshot=reply.value,regenerate=form.dtTouchResult===snapshot&&form.dtTouchHasOriginal;
-      const draft=regenerate?form.dtTouchOriginal:snapshot;
-      if(!window.dtSupabase||!studentId||document.body.dataset.tourMode==='true'){status.textContent='AI replies require a signed-in Teacher Tools conversation. Your draft is unchanged.';return;}
-      touch.disabled=true;touch.setAttribute('aria-busy','true');status.textContent='✨ Adding a little DT magic…';
-      try{
-        const {data,error}=await window.dtSupabase.functions.invoke('dt-touch-rewrite',{body:{originalText:draft,studentId}});
-        if(error||!data?.ok)throw Error(data?.message||'DT Touch could not finish. Your draft is unchanged.');
-        if(!form.isConnected||reply.value!==snapshot){status.textContent='Your draft changed while DT Touch was working. Please try again.';return;}
-        if(typeof data.rewritten_text!=='string'||!data.rewritten_text.trim())throw Error('DT Touch could not finish. Your draft is unchanged.');
-        if(data.rewritten_text.length>4000)throw Error('This response is too long. Your draft is unchanged.');
-        if(!form.dtTouchHasOriginal){form.dtTouchOriginal=snapshot;form.dtTouchHasOriginal=true;}
-        form.dtTouchResult=data.rewritten_text;reply.value=data.rewritten_text;restore.hidden=false;
-        restore.textContent=form.dtTouchOriginal.trim()?'↶ Restore Original':'Clear Suggestion';
-        status.textContent='Review and edit before sending.';updateReplyDtTouchLabel(form);reply.focus();
-      }catch(error){status.textContent=error.message;}finally{touch.disabled=false;touch.removeAttribute('aria-busy');}
+      const manual = event.target.closest("[data-reply-behavior-interview]");
+      const touch = event.target.closest("[data-reply-dt-touch]");
+      const undo = event.target.closest("[data-reply-dt-undo]");
+      if (!manual && !touch && !undo) return;
+      const form = (manual || touch || undo).closest("form");
+      const reply = form.querySelector("textarea");
+      const status = form.querySelector(".teacher-reply-touch-feedback");
+      const restore = form.querySelector("[data-reply-dt-undo]");
+      if (undo) {
+        reply.value = form.dtTouchOriginal ?? reply.value;
+        restore.hidden = true;
+        form.dtTouchResult = "";
+        form.dtTouchHasOriginal = false;
+        status.textContent = "Original draft restored.";
+        updateReplyDtTouchLabel(form);
+        reply.focus();
+        return;
+      }
+      if (form.dtTouchBusy) return;
+      const conversation = teacherParentPreviewConversations.find(item => item.id === selectedTeacherParentPreviewId);
+      const studentId = conversation?.sharedStudentId || conversation?.studentId;
+      const snapshot = reply.value;
+      const regenerate = form.dtTouchResult === snapshot && form.dtTouchHasOriginal;
+      const draft = regenerate ? form.dtTouchOriginal : snapshot;
+      const interview = window.DTBehaviorInterview;
+      if (!window.dtSupabase || !studentId || document.body.dataset.tourMode === "true" || !interview) {
+        status.textContent = "AI replies require a signed-in Teacher Tools conversation. Your draft is unchanged.";
+        return;
+      }
+      if (manual && !draft.trim()) { status.textContent = "Enter a few classroom notes first."; reply.focus(); return; }
+      const apply = message => {
+        if (!form.isConnected || reply.value !== snapshot || selectedTeacherParentPreviewId !== conversation.id) return false;
+        if (typeof message !== "string" || !message.trim() || message.length > 4000) throw Error("DT Touch did not return a usable draft. Your draft is unchanged.");
+        if (!regenerate) form.dtTouchOriginal = snapshot;
+        form.dtTouchHasOriginal = true;
+        form.dtTouchResult = message;
+        reply.value = message;
+        restore.hidden = false;
+        restore.textContent = form.dtTouchOriginal.trim() ? "↶ Restore Original" : "Clear Suggestion";
+        status.textContent = "Review and edit before sending.";
+        updateReplyDtTouchLabel(form);
+        reply.focus();
+        return true;
+      };
+      const button = manual || touch;
+      form.dtTouchBusy = true;
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+      status.textContent = "✨ Adding a little DT magic…";
+      const request = behavior => interview.requestBehavior(window.dtSupabase, { originalText: draft, studentId, behavior });
+      try {
+        const data = await request(draft.trim() ? { phase: "plan", manual: Boolean(manual) } : undefined);
+        if (!form.isConnected || reply.value !== snapshot || selectedTeacherParentPreviewId !== conversation.id) {
+          status.textContent = "Your draft changed while DT Touch was working. Please try again.";
+          return;
+        }
+        if (data.interview) {
+          status.textContent = "";
+          interview.openBehaviorInterview({
+            plan: data.interview, draft, apply,
+            generate: async (answers, tone) => {
+              if (!form.isConnected || selectedTeacherParentPreviewId !== conversation.id) throw Error("Reopen the original conversation to continue.");
+              return request({ phase: "draft", answers, tone });
+            }
+          });
+        } else if (manual) {
+          status.textContent = "The classroom interview is unavailable. Your draft is unchanged.";
+        } else apply(data.rewritten_text);
+      } catch (error) {
+        status.textContent = error.message;
+      } finally {
+        form.dtTouchBusy = false;
+        button.disabled = false;
+        button.removeAttribute("aria-busy");
+      }
     });
     document.getElementById("teacher-messages-parents-panel")?.addEventListener("click", (event) => {
       const taskButton = event.target.closest("[data-parent-message-task]");
@@ -40727,6 +40784,22 @@
       const dancer = event.target.closest("[data-teacher-activity-private-dancer]");
       if (dancer) { const id=String(dancer.dataset.teacherActivityPrivateDancer); if(teacherActivitiesPrivateDancerIds.has(id))teacherActivitiesPrivateDancerIds.delete(id);else teacherActivitiesPrivateDancerIds.add(id); renderTeacherActivities(); return; }
       const incident = event.target.closest("[data-teacher-incident-type]");
+      if (incident?.dataset.teacherIncidentType === "home-help") {
+        const options = teacherActivitiesDancers().map(student =>
+          `<option value="${rosterSafe(student.id)}">${rosterSafe(rosterStudentFullName(student))}</option>`
+        ).join("");
+        document.getElementById("teacher-activities-content").innerHTML = `<section class="teacher-activities-step" data-help-from-home-draft>
+          <button class="secondary" type="button" data-teacher-activities-back>← Activities</button>
+          <h4>Help from Home</h4>
+          <p class="subtle">Prepare a private draft for one dancer’s family.</p>
+          <label>Dancer<select data-help-dancer><option value="">Choose one dancer</option>${options}</select></label>
+          <label>What happened in class?<textarea data-help-notes data-dt-touch-disabled="true" rows="4" maxlength="6000" placeholder="Add a few notes about what happened and what you tried"></textarea></label>
+          <button class="primary" type="button" data-help-interview>✨ Add the DT Touch</button>
+          <p role="status" data-help-status></p>
+          <label data-help-result-wrap hidden>Parent message draft<textarea data-help-result data-dt-touch-disabled="true" rows="6" maxlength="4000"></textarea></label>
+        </section>`;
+        return;
+      }
       if (incident) { const label=({potty:"Potty Accident","boo-boo":"Boo Boo Report","home-help":"Help from Home"})[incident.dataset.teacherIncidentType]; document.getElementById("teacher-activities-content").innerHTML=`<section class="teacher-activities-step"><button class="secondary" type="button" data-teacher-activities-back>← Activities</button><h4>${label}</h4><p class="subtle">Private incident draft — choose one dancer.</p><label>Dancer<select id="teacher-incident-dancer"><option value="">Choose one dancer</option>${teacherActivitiesDancers().map((student)=>`<option value="${rosterSafe(student.id)}">${rosterSafe(rosterStudentFullName(student))}</option>`).join("")}</select></label><p class="teacher-activities-draft-note">Preview only — nothing will be sent yet.</p></section>`; return; }
       if (event.target.closest("[data-teacher-alert-review-back]")) { teacherActivitiesAlertReview=false; renderTeacherActivities(); return; }
       if (event.target.closest("[data-teacher-activity-continue]")) {
