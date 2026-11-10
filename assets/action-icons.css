@@ -1,0 +1,44 @@
+/* Opt in only for short View actions and actions that save a file to the device.
+   Give every icon-only control a contextual aria-label. */
+[data-dt-action-icon="view"] {
+  --dt-action-image: url("action-view.png");
+  --dt-action-canvas-scale: 1.56;
+}
+
+[data-dt-action-icon="download"] {
+  --dt-action-image: url("action-download.png");
+  --dt-action-canvas-scale: 1.88;
+}
+
+:is(button, a)[data-dt-action-icon]:not([hidden]) {
+  --dt-action-art-width: 24px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--border, var(--line, #f0c7c1));
+  border-radius: 12px;
+  background-color: var(--surface, var(--paper, #fff));
+}
+
+[data-dt-action-icon]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* The PNGs include transparent margins around the artwork. */
+  background: var(--dt-action-image) center / calc(var(--dt-action-art-width) * var(--dt-action-canvas-scale)) auto no-repeat;
+}
+
+:is(button, a)[data-dt-action-icon]:not([hidden], :disabled, [aria-disabled="true"]):hover {
+  background-color: var(--blush-soft, #f8e0dd);
+}
+
+:is(button, a)[data-dt-action-icon]:focus-visible {
+  outline: 2px solid var(--brick, #944a53);
+  outline-offset: 2px;
+}

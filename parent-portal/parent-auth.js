@@ -408,7 +408,7 @@
       <div class="install-guide-card">
         <h2 id="pp-install-guide-title">Keep Dance Techniques<br><span>One Tap Away</span></h2>
         <p class="install-guide-intro"><em>Add the Parent Portal to your Home Screen for quick, easy access.</em></p>
-        <div class="install-device-choices" role="group" aria-label="Choose your phone type">
+        <div class="install-device-choices" role="group" aria-label="Choose Your Phone Type">
           <button class="install-device-choice" type="button" data-install-device="iphone">iPhone</button>
           <button class="install-device-choice" type="button" data-install-device="android">Android</button>
         </div>
@@ -546,7 +546,7 @@
         const unread = document.createElement("span");
         unread.className = "unread newsletter-unread-indicator";
         unread.textContent = "1";
-        unread.setAttribute("aria-label", "Unread newsletter");
+        unread.setAttribute("aria-label", "Unread Newsletter");
         summary.append(unread);
       }
       summary.append(sent);
@@ -625,7 +625,7 @@
     const visiblePosts = posts.filter((post) => Array.isArray(post.studentIds) && post.studentIds.includes(selectedStudentId));
     feed.replaceChildren();
     if (!visiblePosts.length) {
-      feed.innerHTML = '<div class="family-updates-empty-card"><img class="family-updates-empty" src="assets/feed/family-updates-empty.png?v=4" alt="The magic will appear here. Photos, class moments, celebrations, and special updates from your dancer’s day will appear here."><button class="heart family-updates-empty-heart" type="button" aria-label="Heart this welcome card" aria-pressed="false" title="Heart">♡</button></div>';
+      feed.innerHTML = '<div class="family-updates-empty-card"><img class="family-updates-empty" src="assets/feed/family-updates-empty.png?v=4" alt="The magic will appear here. Photos, class moments, celebrations, and special updates from your dancer’s day will appear here."><button class="heart family-updates-empty-heart" type="button" aria-label="Heart This Welcome Card" aria-pressed="false" title="Heart"></button></div>';
       return;
     }
     visiblePosts.forEach((post) => {
@@ -663,9 +663,8 @@
       const heart = document.createElement("button");
       heart.type = "button";
       heart.className = `heart${post.hearted ? " liked" : ""}`;
-      heart.textContent = post.hearted ? "♥" : "♡";
       heart.setAttribute("aria-pressed", String(Boolean(post.hearted)));
-      heart.setAttribute("aria-label", post.hearted ? "Remove heart from this post" : "Heart this post");
+      heart.setAttribute("aria-label", post.hearted ? "Remove Heart from This Post" : "Heart This Post");
       heart.title = post.hearted ? "Remove heart" : "Heart";
       heart.addEventListener("click", async (event) => {
         event.preventDefault();
@@ -679,9 +678,8 @@
           if (error) throw error;
           post.hearted = liked === true;
           heart.classList.toggle("liked", post.hearted);
-          heart.textContent = post.hearted ? "♥" : "♡";
           heart.setAttribute("aria-pressed", String(post.hearted));
-          heart.setAttribute("aria-label", post.hearted ? "Remove heart from this post" : "Heart this post");
+          heart.setAttribute("aria-label", post.hearted ? "Remove Heart from This Post" : "Heart This Post");
           heart.title = post.hearted ? "Remove heart" : "Heart";
           window.dispatchEvent(new CustomEvent("parent-portal:post-heart-changed", {
             detail: { postId: post.sourcePostId, hearted: post.hearted }
@@ -751,7 +749,7 @@
     else welcomeAnchor.after(homeWelcome);
 
     const today = document.querySelector(".today");
-    today.innerHTML = '<span class="eyebrow">Family schedule</span><h2>Schedule Connection in Progress</h2><p>No class schedule is displayed until its authorized Parent Portal data source is connected.</p>';
+    today.innerHTML = '<span class="eyebrow">Family Schedule</span><h2>Schedule Connection in Progress</h2><p>No class schedule is displayed until its authorized Parent Portal data source is connected.</p>';
     renderClassFeed(classPosts, firstStudent.id);
     const feedFirstName = String(firstStudent.first_name || firstName).trim();
     const feedTitle = document.querySelector(".section-head h2");
@@ -778,7 +776,7 @@
     const profileCard = document.querySelector("#profile .profile-card");
     profileCard.innerHTML = `
       <span class="avatar family-dancer-bubble parent-profile-avatar">${guardian.photoUrl ? `<img src="${guardian.photoUrl}" alt="${guardian.full_name || "Parent profile"}">` : guardianInitials}</span>
-      <div class="parent-profile-name-row"><h2></h2><button class="parent-profile-edit-pencil" type="button" data-family-preview="edit" aria-label="Edit parent profile" title="Edit Profile">✎</button></div>
+      <div class="parent-profile-name-row"><h2></h2><button class="parent-profile-edit-pencil" type="button" data-family-preview="edit" aria-label="Edit Parent Profile" title="Edit Profile">✎</button></div>
       <p></p>
       <div class="family-actions single-action">
         <button class="family-action-card" type="button" data-family-preview="add"><strong>Add a Guardian or Family Member</strong><small>Invite another trusted adult and choose their access.</small></button>
@@ -795,7 +793,7 @@
       const card = document.createElement("article");
       const name = dancerName(student);
       card.className = "family-dancer-card";
-      card.innerHTML = `<button class="family-dancer-bubble" type="button" aria-label="Add or change dancer profile photo"></button><span class="family-dancer-name-row"><strong></strong><button class="parent-profile-edit-pencil" type="button" data-family-preview="dancer" aria-label="Edit ${name}’s information" title="Edit Dancer Information">✎</button></span><small>Tap the photo to add or change it</small>`;
+      card.innerHTML = `<button class="family-dancer-bubble" type="button" aria-label="Add or Change Dancer Profile Photo"></button><span class="family-dancer-name-row"><strong></strong><button class="parent-profile-edit-pencil" type="button" data-family-preview="dancer" aria-label="Edit ${name}’s information" title="Edit Dancer Information">✎</button></span><small>Tap the photo to add or change it</small>`;
       const bubble = card.querySelector(".family-dancer-bubble");
       bubble.dataset.photoStudentId = student.id;
       if (student.photoUrl) {
@@ -1151,7 +1149,7 @@
     renderTruthfulEmptyStates(context, classPosts, newsletters);
     window.renderParentPortalForms?.(preorderMatched);
     const overview = document.getElementById("parent-financial-overview");
-    if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan" data-monthly-tuition-card><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><button class="parent-financial-metric" type="button" data-open-billing-setup><small>Automatic Payments</small><strong>Setup</strong><span>Card and approval needed</span></button><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No family credits</span></article>';
+    if (overview) overview.innerHTML = '<article class="parent-financial-metric"><small>Enrollment Fee</small><strong>Paid</strong><span>Enrollment date not recorded</span></article><article class="parent-financial-metric" id="parent-tuition-plan" data-monthly-tuition-card><small>Monthly Tuition</small><strong>$55.00</strong><span>Drafts September 1–May 1</span></article><button class="parent-financial-metric" type="button" data-open-billing-setup><small>Automatic Payments</small><strong>Setup</strong><span>Card and Approval Needed</span></button><article class="parent-financial-metric"><small>Credit Available</small><strong>$0.00</strong><span>No Family Credits</span></article>';
     renderParentInvoiceTimeline(Array.from({ length: 9 }, (_, index) => {
       const due = new Date(2026, 8 + index, 1, 12);
       const issued = new Date(due);
@@ -1175,11 +1173,11 @@
     const curriculumStyle = Math.abs(curriculumWeekOffset) % 2 === 0 ? "Ballet" : "Tap";
     const classSummary = document.querySelector(".today");
     classSummary.classList.add("class-summary");
-    classSummary.innerHTML = `<img class="class-summary-art" src="assets/curriculum/${curriculumStyle.toLowerCase()}-day.png" alt="${curriculumStyle} shoes"><div class="class-summary-copy"><span class="eyebrow">Elena Eden’s class</span><h2>${dayName}${timeBlock ? ` <span class="class-time-dot">•</span> ${timeBlock === "AM" ? "Morning" : "Afternoon"}` : ""}</h2><p>${schoolName} · ${curriculumStyle} with ${teacherLabel}</p><button class="class-summary-link" type="button" data-page="calendar"><img src="assets/navigation/calendar.png" alt=""><strong>View full schedule</strong><span aria-hidden="true">›</span></button></div>`;
+    classSummary.innerHTML = `<img class="class-summary-art" src="assets/curriculum/${curriculumStyle.toLowerCase()}-day.png" alt="${curriculumStyle} shoes"><div class="class-summary-copy"><span class="eyebrow">Elena Eden’s class</span><h2>${dayName}${timeBlock ? ` <span class="class-time-dot">•</span> ${timeBlock === "AM" ? "Morning" : "Afternoon"}` : ""}</h2><p>${schoolName} · ${curriculumStyle} with ${teacherLabel}</p><button class="class-summary-link" type="button" data-page="calendar"><img src="assets/navigation/calendar.png" alt=""><strong>View Full Schedule</strong><span aria-hidden="true">›</span></button></div>`;
     const calendar = document.getElementById("monthly-calendar");
     document.getElementById("calendar-page-title").textContent = "Elena Eden’s Upcoming Dance Days";
-    document.querySelector("#calendar .eyebrow").textContent = "Weekly schedule";
-    calendar.setAttribute("aria-label", "Elena Eden’s upcoming class calendar");
+    document.querySelector("#calendar .eyebrow").textContent = "Weekly Schedule";
+    calendar.setAttribute("aria-label", "Elena Eden’s Upcoming Class Calendar");
     const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const dateAtNoon = (value) => {
       const date = new Date(`${String(value || "").slice(0, 10)}T12:00:00`);
@@ -1260,7 +1258,7 @@
     // The same assigned-school schedule renderer is used in director preview and live family sessions.
     // This keeps teacher reschedules authoritative instead of maintaining a second sample calendar.
     renderAuthorizedFamilyCalendar(scheduleRows, context.students[0]);
-    document.getElementById("threads").innerHTML = `<button class="conversation-card teacher" type="button" data-conversation="teacher" aria-label="Open message thread with ${teacherLabel}"><span class="conversation-avatar teacher${teacherPhoto ? " has-photo" : ""}">${teacherPhoto ? `<img class="teacher-profile-photo" src="${teacherPhoto}" alt="${teacherLabel}">` : initials(teacherName, "")}</span><h3>${teacherLabel}</h3><p class="conversation-role">Elena Eden’s personal teacher</p></button><button class="conversation-card admin" type="button" data-conversation="admin" aria-label="Open message thread with Dance Techniques Admin"><span class="conversation-avatar admin"><img src="assets/brand/dance-techniques-logo.png" alt="Dance Techniques"></span><h3>Dance Techniques Admin</h3><p class="conversation-role">Questions about accounts, tuition, or enrollment</p></button>`;
+    document.getElementById("threads").innerHTML = `<button class="conversation-card teacher" type="button" data-conversation="teacher" aria-label="Open message thread with ${teacherLabel}"><span class="conversation-avatar teacher${teacherPhoto ? " has-photo" : ""}">${teacherPhoto ? `<img class="teacher-profile-photo" src="${teacherPhoto}" alt="${teacherLabel}">` : initials(teacherName, "")}</span><h3>${teacherLabel}</h3><p class="conversation-role">Elena Eden’s personal teacher</p></button><button class="conversation-card admin" type="button" data-conversation="admin" aria-label="Open Message Thread with Dance Techniques Admin"><span class="conversation-avatar admin"><img src="assets/brand/dance-techniques-logo.png" alt="Dance Techniques"></span><h3>Dance Techniques Admin</h3><p class="conversation-role">Questions about accounts, tuition, or enrollment</p></button>`;
     revealFamilyPortal();
   };
 
@@ -1337,8 +1335,8 @@
       if (!data?.matched) return;
       document.querySelectorAll(".jacket-preorder").forEach((card) => {
         card.classList.add("is-ordered");
-        card.setAttribute("aria-label", "Quarter Zip Jacket Pre-Order received");
-        card.title = "Pre-order received";
+        card.setAttribute("aria-label", "Quarter Zip Jacket Pre-Order Received");
+        card.title = "Pre-Order Received";
       });
     });
     if (activate) showFirstLoginInstallGuide();
@@ -1464,6 +1462,14 @@
     else if (setupRequested) await stopSession("This secure invitation has expired, was already used, or did not finish opening. Ask Dance Techniques to send a new setup link.");
     else showView("login");
   };
+
+  document.getElementById("pp-password-toggle")?.addEventListener("click", (event) => {
+    const password = document.getElementById("pp-login-password");
+    const show = password.type === "password";
+    password.type = show ? "text" : "password";
+    event.currentTarget.setAttribute("aria-pressed", String(show));
+    event.currentTarget.setAttribute("aria-label", show ? "Hide Password" : "Show Password");
+  });
 
   document.getElementById("pp-login-form").addEventListener("submit", async (event) => {
     event.preventDefault();

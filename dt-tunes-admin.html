@@ -26,7 +26,7 @@
     [hidden] { display: none !important; }
     .shell { width: min(1180px, 100%); margin: 0 auto; }
     .hero { display: flex; justify-content: space-between; gap: 22px; align-items: end; padding: 22px 24px; border: 1px solid #f0d9df; border-radius: 22px; background: linear-gradient(135deg, #fff 0%, #fff5f6 70%, #f8e4e9 100%); box-shadow: var(--shadow); }
-    .eyebrow { margin: 0 0 6px; color: var(--burgundy); font-size: .76rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .eyebrow { margin: 0 0 6px; color: var(--burgundy); font-size: .76rem; font-weight: 800; letter-spacing: .12em; }
     h1 { margin: 0; font-family: Georgia, serif; font-size: clamp(2rem, 4vw, 3.1rem); line-height: .96; color: var(--burgundy-dark); }
     .hero p:last-child { margin: 10px 0 0; max-width: 690px; color: var(--muted); }
     .sync-badge { flex: none; padding: 10px 14px; border-radius: 999px; background: #eaf5f0; color: var(--green); font-size: .84rem; font-weight: 800; }
@@ -136,6 +136,7 @@
     .order-grip:active {cursor:grabbing;}
     .order-dragging {outline:2px solid #8A4E54;background:#fff5f2;}
   </style>
+  <link rel="stylesheet" href="assets/search-input.css">
 </head>
 <body>
   <main class="shell">
@@ -148,7 +149,7 @@
       <span class="sync-badge" id="sync-badge">Connecting to Supabase…</span>
     </header>
 
-    <nav class="tabs" aria-label="DT Tunes sections">
+    <nav class="tabs" aria-label="DT Tunes Sections">
       <button class="tab" type="button" data-tab="playlists" aria-selected="true">Teacher Playlists</button>
       <button class="tab" type="button" data-tab="catalog" aria-selected="false">DT Song Catalog</button>
       <button class="tab" type="button" data-tab="add-song" aria-selected="false">Add a DT Original</button>
@@ -176,7 +177,7 @@
           </div>
           <div>
             <div class="card-head">
-              <div class="selected-playlist-head"><span id="selected-playlist-cover"></span><div><h3 id="selected-playlist-name">Choose a playlist</h3><p id="selected-playlist-count">Select a playlist to see its songs.</p></div></div>
+              <div class="selected-playlist-head"><span id="selected-playlist-cover"></span><div><h3 id="selected-playlist-name">Choose a Playlist</h3><p id="selected-playlist-count">Select a playlist to see its songs.</p></div></div>
               <div class="track-actions">
                 <button class="secondary small-button" type="button" id="edit-playlist-order" hidden>Edit Order</button>
                 <button class="primary small-button" type="button" id="save-playlist-order" hidden>Save Order</button>
@@ -192,7 +193,7 @@
             <div class="track-list" id="playlist-track-list"><p class="empty">Choose a playlist on the left.</p></div>
             <div class="add-tracks" id="add-tracks-panel" hidden>
               <strong>Add songs already in your catalog</strong>
-              <label class="full">Find a song<input type="search" id="add-tracks-search" placeholder="Search by title or section"></label>
+              <label class="full">Find a Song<input type="search" id="add-tracks-search" placeholder="Search by Title or Section"></label>
               <div class="pick-list" id="add-tracks-list"></div>
               <div class="track-actions">
                 <button class="primary small-button" type="button" id="confirm-add-tracks">Add to Playlist</button>
@@ -207,8 +208,8 @@
       <form class="card" id="create-playlist-form" hidden>
         <div class="card-head"><div><h2>Create a Playlist</h2><p>The new playlist will appear for teachers as soon as you save it.</p></div><button class="secondary small-button" type="button" id="cancel-create-playlist">Cancel</button></div>
         <div class="form-grid">
-          <label>Playlist name<input id="new-playlist-name" required maxlength="80" placeholder="Example: October Ballet"></label>
-          <label>Square playlist cover (optional)<input id="new-playlist-cover" type="file" accept="image/png,image/jpeg,image/webp"></label>
+          <label>Playlist Name<input id="new-playlist-name" required maxlength="80" placeholder="Example: October Ballet"></label>
+          <label>Square Playlist Cover (Optional)<input id="new-playlist-cover" type="file" accept="image/png,image/jpeg,image/webp"></label>
         </div>
         <div class="actions"><button class="primary" type="submit">Create Teacher Playlist</button><span class="status" id="playlist-form-status"></span></div>
       </form>
@@ -218,7 +219,7 @@
       <div class="card">
         <div class="card-head"><div><h2>DT Song Catalog</h2><p>Your complete originals library, divided into easy sections for building future playlists.</p></div><button class="primary" type="button" data-jump-add>Add a Song</button></div>
         <div class="catalog-toolbar">
-          <label>Find a song<input id="catalog-search" type="search" placeholder="Song title"></label>
+          <label>Find a Song<input id="catalog-search" type="search" placeholder="Song Title"></label>
           <strong id="catalog-count"></strong>
         </div>
         <div class="section-pills" id="section-pills"></div>
@@ -231,20 +232,22 @@
         <div class="card-head"><div><h2>Add a DT Original</h2><p>Upload the song and its cover once. Choose every playlist that should receive it.</p></div></div>
         <p class="step-note">Teachers see the song only through the playlist boxes you check below. Your ORICO backup is separate and is never changed by this screen.</p>
         <div class="form-grid">
-          <label>Song title<input id="song-title" required maxlength="120" placeholder="Song title"></label>
-          <label>Song Catalog section
+          <label>Song Title<input id="song-title" required maxlength="120" placeholder="Song Title"></label>
+          <label>Song Catalog Section
             <select id="song-section" required>
               <option>Ballet</option>
               <option>Tap</option>
               <option>Tots</option>
               <option>Transitions</option>
+              <option>Props</option>
+              <option value="Across The Floor">Across the Floor</option>
               <option>Holidays</option>
               <option>Celebrations</option>
               <option>Other DT Originals</option>
             </select>
           </label>
-          <label>Song file<input id="song-file" type="file" required accept=".mp3,.m4a,.aac,.wav,.aiff,audio/*"><span class="help">MP3, M4A, AAC, WAV, or AIFF · up to 25 MB</span></label>
-          <label>Square song cover<input id="song-cover" type="file" required accept="image/png,image/jpeg,image/webp"><span class="help">JPG, PNG, or WebP · up to 10 MB</span></label>
+          <label>Song File<input id="song-file" type="file" required accept=".mp3,.m4a,.aac,.wav,.aiff,audio/*"><span class="help">MP3, M4A, AAC, WAV, or AIFF · up to 25 MB</span></label>
+          <label>Square Song Cover<input id="song-cover" type="file" required accept="image/png,image/jpeg,image/webp"><span class="help">JPG, PNG, or WebP · up to 10 MB</span></label>
           <div class="full">
             <label>Send this song to these teacher playlists</label>
             <div class="playlist-checks" id="song-playlist-checks"></div>
@@ -265,7 +268,8 @@
   </main>
 
   <script>
-    const CATALOG_SECTIONS = ["Ballet", "Tap", "Tots", "Transitions", "Holidays", "Celebrations", "Other DT Originals"];
+    const catalogSectionLabel = (section) => section === "Across The Floor" ? "Across the Floor" : section;
+    const CATALOG_SECTIONS = ["Ballet", "Tap", "Tots", "Transitions", "Props", "Across The Floor", "Holidays", "Celebrations", "Other DT Originals"];
     const state = { client: null, playlists: [], tracks: [], links: [], selectedPlaylistId: "", catalogSection: "All", catalogSearch: "" };
     let listOrderDraft = null;
     let listOrderSaving = false;
@@ -392,12 +396,12 @@
       const active = listOrderDraft ? listOrderDraft.ids.map(id => state.playlists.find(playlist => playlist.id === id)).filter(Boolean) : state.playlists.filter((playlist) => playlist.active);
       $("#playlist-list").innerHTML = active.length ? active.map((playlist) => {
         const count = tracksForPlaylist(playlist.id).length;
-        return `<div class="playlist-order-row" data-playlist-order-id="${escapeText(playlist.id)}"><button class="playlist-choice ${playlist.id === state.selectedPlaylistId ? "selected" : ""}" type="button" data-playlist-id="${escapeText(playlist.id)}"><strong>${escapeText(playlist.name)}</strong><span class="teacher-dot" title="Visible to teachers"></span><small>${count} song${count === 1 ? "" : "s"} · Visible to teachers</small></button>${listOrderDraft ? `<button class="secondary small-button order-grip" type="button" data-playlist-order-grip="${escapeText(playlist.id)}" aria-label="Reorder playlist ${escapeText(playlist.name)}. Drag or use up and down arrow keys." ${listOrderSaving ? "disabled" : ""}>⠿</button>` : ""}</div>`;
+        return `<div class="playlist-order-row" data-playlist-order-id="${escapeText(playlist.id)}"><button class="playlist-choice ${playlist.id === state.selectedPlaylistId ? "selected" : ""}" type="button" data-playlist-id="${escapeText(playlist.id)}"><strong>${escapeText(playlist.name)}</strong><span class="teacher-dot" title="Visible to Teachers"></span><small>${count} song${count === 1 ? "" : "s"} · Visible to teachers</small></button>${listOrderDraft ? `<button class="secondary small-button order-grip" type="button" data-playlist-order-grip="${escapeText(playlist.id)}" aria-label="Reorder playlist ${escapeText(playlist.name)}. Drag or use up and down arrow keys." ${listOrderSaving ? "disabled" : ""}>⠿</button>` : ""}</div>`;
       }).join("") : `<p class="empty">No teacher playlists yet.</p>`;
       const hiddenCount = state.playlists.length - active.length;
       $("#hidden-summary").textContent = hiddenCount ? `${hiddenCount} older playlist${hiddenCount === 1 ? " is" : "s are"} safely hidden from teachers.` : "";
       const playlist = selectedPlaylist();
-      $("#selected-playlist-name").textContent = playlist?.name || "Choose a playlist";
+      $("#selected-playlist-name").textContent = playlist?.name || "Choose a Playlist";
       const tracks = playlist ? (orderDraft ? orderDraft.ids.map(id => state.tracks.find(track => track.id === id)).filter(Boolean) : tracksForPlaylist(playlist.id)) : [];
       $("#selected-playlist-count").textContent = playlist ? `${tracks.length} song${tracks.length === 1 ? "" : "s"} · Teachers receive changes automatically.` : "Select a playlist to see its songs.";
       $("#hide-playlist").hidden = !playlist;
@@ -495,13 +499,13 @@
       $("#catalog-count").textContent = `${visible.length} of ${state.tracks.length} songs`;
       $("#section-pills").innerHTML = ["All", ...CATALOG_SECTIONS].map((section) => {
         const count = section === "All" ? state.tracks.length : state.tracks.filter((track) => (track.catalog_section || "Other DT Originals") === section).length;
-        return `<button class="section-pill ${state.catalogSection === section ? "active" : ""}" type="button" data-catalog-section="${escapeText(section)}">${escapeText(section)} · ${count}</button>`;
+        return `<button class="section-pill ${state.catalogSection === section ? "active" : ""}" type="button" data-catalog-section="${escapeText(section)}">${escapeText(catalogSectionLabel(section))} · ${count}</button>`;
       }).join("");
       const sections = CATALOG_SECTIONS.filter((section) => state.catalogSection === "All" || state.catalogSection === section);
       $("#catalog-groups").innerHTML = sections.map((section) => {
         const songs = visible.filter((track) => (track.catalog_section || "Other DT Originals") === section);
         if (!songs.length) return "";
-        return `<section class="catalog-group"><div class="catalog-group-title"><h3>${escapeText(section)}</h3><span>${songs.length} song${songs.length === 1 ? "" : "s"}</span></div><div class="catalog-song-grid">${songs.map((track) => `<article class="catalog-song">${coverMarkup(track, track.title, true)}<div><strong>${escapeText(track.title)}</strong><small>${durationLabel(track.duration_seconds)} · Used in ${state.links.filter((link) => link.track_id === track.id && state.playlists.some((playlist) => playlist.id === link.playlist_id && playlist.active)).length} teacher playlist(s)</small><label class="cover-replace-label">Replace cover<input type="file" accept="image/png,image/jpeg,image/webp" data-attach-cover="${escapeText(track.id)}" hidden></label><label class="catalog-move-label">Move to<select class="catalog-move-select" data-move-section="${escapeText(track.id)}" aria-label="Move ${escapeText(track.title)} to a different section">${CATALOG_SECTIONS.map((option) => `<option value="${escapeText(option)}" ${option === section ? "selected" : ""}>${escapeText(option)}</option>`).join("")}</select></label></div></article>`).join("")}</div></section>`;
+        return `<section class="catalog-group"><div class="catalog-group-title"><h3>${escapeText(catalogSectionLabel(section))}</h3><span>${songs.length} song${songs.length === 1 ? "" : "s"}</span></div><div class="catalog-song-grid">${songs.map((track) => `<article class="catalog-song">${coverMarkup(track, track.title, true)}<div><strong>${escapeText(track.title)}</strong><small>${durationLabel(track.duration_seconds)} · Used in ${state.links.filter((link) => link.track_id === track.id && state.playlists.some((playlist) => playlist.id === link.playlist_id && playlist.active)).length} teacher playlist(s)</small><label class="cover-replace-label">Replace Cover<input type="file" accept="image/png,image/jpeg,image/webp" data-attach-cover="${escapeText(track.id)}" hidden></label><label class="catalog-move-label">Move To<select class="catalog-move-select" data-move-section="${escapeText(track.id)}" aria-label="Move ${escapeText(track.title)} to a different section">${CATALOG_SECTIONS.map((option) => `<option value="${escapeText(option)}" ${option === section ? "selected" : ""}>${escapeText(option)}</option>`).join("")}</select></label></div></article>`).join("")}</div></section>`;
       }).join("") || `<p class="empty">No songs match that search.</p>`;
     }
 
@@ -1000,7 +1004,7 @@
         $("#sync-badge").textContent = "Live with Teacher Tools";
       } catch (error) {
         $("#loading").innerHTML = `<strong>DT Tunes could not open.</strong><br>${escapeText(error.message || "Refresh and try again.")}`;
-        $("#sync-badge").textContent = "Not connected";
+        $("#sync-badge").textContent = "Not Connected";
       }
     }
 

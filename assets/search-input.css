@@ -1,0 +1,17 @@
+/* Use type="search", or data-dt-search when a search must retain its input type. */
+input:is([type="search"], [data-dt-search]) {
+  --dt-search-canvas-height: 36px;
+  --dt-search-icon-inset: 12px;
+  --dt-search-icon-gap: 12px;
+
+  /* Position the 22px-tall artwork inside the original transparent canvas. */
+  padding-left: calc(var(--dt-search-icon-inset) + var(--dt-search-canvas-height) * .533 + var(--dt-search-icon-gap)) !important;
+  background-image: url("search-magnifying-glass.png") !important;
+  background-size: auto var(--dt-search-canvas-height) !important;
+  background-repeat: no-repeat !important;
+  background-position: calc(var(--dt-search-icon-inset) - var(--dt-search-canvas-height) * .262) calc(50% + var(--dt-search-canvas-height) * .034) !important;
+}
+
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}

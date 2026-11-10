@@ -304,7 +304,7 @@
     const showing = passwordInput.type === "text";
     passwordInput.type = showing ? "password" : "text";
     button.setAttribute("aria-pressed", showing ? "false" : "true");
-    button.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+    button.setAttribute("aria-label", showing ? "Show Password" : "Hide Password");
     passwordInput.focus({ preventScroll: true });
   });
 

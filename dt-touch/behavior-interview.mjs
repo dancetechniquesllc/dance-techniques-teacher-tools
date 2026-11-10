@@ -75,7 +75,7 @@ export function openBehaviorInterview({ plan, draft, generate, apply }) {
       select.onchange = () => { tone = select.value; };
       label.append(select);
       const result = element('textarea', '', { rows: 6, maxLength: 4000, value: output, hidden: !output });
-      result.setAttribute('aria-label', 'Review and edit parent message');
+      result.setAttribute('aria-label', 'Review and Edit Parent Message');
       result.oninput = () => { output = result.value; };
       const actions = element('div', '', { className: 'dt-behavior-actions' });
       const generateButton = action(output ? 'Regenerate Draft' : 'Generate Draft', async () => {
@@ -113,7 +113,7 @@ export function openBehaviorInterview({ plan, draft, generate, apply }) {
     group.append(element('legend', question));
     const chosen = selections[key] ?? [];
     const customInput = element('textarea', '', { rows: 2, maxLength: 500, value: custom[key] || '', placeholder: 'Other or additional details' });
-    customInput.setAttribute('aria-label', 'Other or additional details');
+    customInput.setAttribute('aria-label', 'Other or Additional Details');
     const choices = element('div', '', { className: 'dt-behavior-actions' });
     for (const option of options) {
       const button = action(option, () => {

@@ -6,7 +6,7 @@
 /* The full message is displayed below an expanded inquiry. */
 .inquiry-card[open] .inquiry-preview { display: none; }
 
-.inquiry-heading-row{display:flex;align-items:center;gap:12px}.inquiry-identity{min-width:0}.inquiry-prospect{display:grid;place-items:center;flex:0 0 58px;width:58px;min-height:58px!important;padding:0!important;border:0!important;background:transparent!important;cursor:pointer}.inquiry-prospect .roster-student-photo{width:58px;height:58px;flex-basis:58px}.inquiry-prospect-plus{color:#fff;font:700 25px/1 sans-serif;transform:translateY(-3px);pointer-events:none}.inquiry-prospect:focus-visible{outline:3px solid #8A4E54;outline-offset:2px;border-radius:8px}
+.inquiry-heading-row{display:flex;align-items:center;gap:12px}.inquiry-identity{min-width:0}.inquiry-prospect{display:grid;place-items:center;flex:0 0 58px;width:58px;min-height:58px!important;padding:0!important;border:0!important;background:transparent!important;cursor:pointer}.inquiry-prospect .roster-student-photo,.inquiry-heading-row .inquiry-enrolled-photo{width:58px;height:58px;flex-basis:58px}.inquiry-prospect-plus{color:#fff;font:700 25px/1 sans-serif;transform:translateY(-3px);pointer-events:none}.inquiry-prospect:focus-visible{outline:3px solid #8A4E54;outline-offset:2px;border-radius:8px}
 
 .inquiry-name-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;margin-bottom:5px}.inquiry-name-row h4{margin:0!important}.inquiry-name-row .inquiry-status{flex-shrink:0}
 

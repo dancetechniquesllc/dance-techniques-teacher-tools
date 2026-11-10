@@ -1,5 +1,10 @@
-const CACHE_NAME = "my-dance-techniques-v357-locked-recital-layouts";
+const CACHE_NAME = "my-dance-techniques-v358-dashboard-messaging-ui";
 const CORE_ASSETS = [
+  "./assets/search-input.css",
+  "./assets/action-icons.css",
+  "./assets/action-view.png",
+  "./assets/action-download.png",
+  "./assets/search-magnifying-glass.png",
   "./newsletter.html",
   "./newsletter-web.css",
   "./newsletter-web-shared.mjs",
@@ -130,7 +135,8 @@ self.addEventListener("fetch", (event) => {
   }
 
   const mustBeFresh = ["script", "style", "document"].includes(event.request.destination)
-    || /\.(?:js|css|html)$/i.test(requestUrl.pathname);
+    || /\.(?:js|css|html)$/i.test(requestUrl.pathname)
+    || /\/assets\/(?:search-magnifying-glass|action-view|action-download)\.png$/.test(requestUrl.pathname);
 
   if (mustBeFresh) {
     event.respondWith(

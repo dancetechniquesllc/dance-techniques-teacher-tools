@@ -116,7 +116,7 @@
       row.className = "big-stage-combined-row";
       row.dataset.combinedSample = sample.kind;
       const combinedArea = sample.dancerSummary ? `<div class="big-stage-combined-content"><div class="big-stage-combined-pair-layout"><div class="big-stage-combined-stack">${sample.bands}</div>${sample.dancerSummary}</div></div>` : `<div class="big-stage-combined-stack">${sample.bands}</div>`;
-      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${sample.kind}">${options}</select><span class="big-stage-combined-badge">Combined</span></td><td class="big-stage-combined-area" colspan="4">${combinedArea}</td><td data-stage-column="song">${sample.song}</td><td class="big-stage-costume" data-stage-column="costume"><strong>${sample.costume}</strong><small>Catalog item</small></td><td data-stage-column="props">${sample.props}</td><td data-stage-column="instructions">${sample.instructions}</td>`;
+      row.innerHTML = `<td data-stage-column="order"><span class="big-stage-order is-${performanceClass}">1</span><select class="big-stage-order-type" data-stage-performance aria-label="Performance type for ${sample.kind}">${options}</select><span class="big-stage-combined-badge">Combined</span></td><td class="big-stage-combined-area" colspan="4">${combinedArea}</td><td data-stage-column="song">${sample.song}</td><td class="big-stage-costume" data-stage-column="costume"><strong>${sample.costume}</strong><small>Catalog Item</small></td><td data-stage-column="props">${sample.props}</td><td data-stage-column="instructions">${sample.instructions}</td>`;
       body.appendChild(row);
     });
     table.dataset.combinedSamplesReady = "true";
@@ -232,7 +232,7 @@
       const movedClass = decision?.movedClass || "The other class";
       const destination = decision?.action === "current" ? "will receive its own spot in this show" : decision?.action === "other" ? `will move to ${decision.destination}` : "will be temporarily unassigned from all recitals";
       const markup = decision
-        ? `<span aria-hidden="true">✓</span><div><strong>Separation planned</strong><small>${safe(movedClass)} ${safe(destination)}. Click to change this plan.</small></div>`
+        ? `<span aria-hidden="true">✓</span><div><strong>Separation Planned</strong><small>${safe(movedClass)} ${safe(destination)}. Click to change this plan.</small></div>`
         : `<span aria-hidden="true">!</span><div><strong>Combined class is over the 12-dancer limit</strong><small>${total} dancers total · Click to separate these classes.</small></div>`;
       if (alert.innerHTML !== markup) alert.innerHTML = markup;
       if (separationTestMode && root.dataset.combinedSeparationTestOpened !== "true") {
@@ -272,7 +272,7 @@
         cell.appendChild(warning);
       }
       warning = cell.querySelector(".big-stage-costume-conflict");
-      const markup = `<strong>Costume conflict</strong><span>${safe(costumeName)} is already in this show.</span>`;
+      const markup = `<strong>Costume Conflict</strong><span>${safe(costumeName)} is already in this show.</span>`;
       if (warning.innerHTML !== markup) warning.innerHTML = markup;
     });
   };
@@ -294,17 +294,17 @@
     modal.id = "big-stage-combined-capacity-modal";
     modal.className = "big-stage-combined-capacity-modal";
     modal.innerHTML = `<section class="big-stage-combined-capacity-dialog" role="dialog" aria-modal="true" aria-labelledby="combined-capacity-title">
-      <button class="big-stage-combined-capacity-close" type="button" aria-label="Close separation planner">×</button>
-      <span class="big-stage-combined-capacity-kicker">Combined class limit</span>
-      <h3 id="combined-capacity-title">Separate these classes</h3>
+      <button class="big-stage-combined-capacity-close" type="button" aria-label="Close Separation Planner">×</button>
+      <span class="big-stage-combined-capacity-kicker">Combined Class Limit</span>
+      <h3 id="combined-capacity-title">Separate These Classes</h3>
       <p>Choose which class keeps this performance assignment. Then decide where the other class should go.</p>
-      <fieldset class="big-stage-combined-keep"><legend>Keep the current assignment for</legend>${classes.map((className) => `<label><input type="radio" name="combined-keep" value="${safe(className)}" ${className === keepClass ? "checked" : ""}><span><strong>${safe(className)}</strong><small>Stays in this performance spot</small></span></label>`).join("")}</fieldset>
-      <fieldset class="big-stage-combined-move"><legend>Move the other class</legend>
+      <fieldset class="big-stage-combined-keep"><legend>Keep the Current Assignment For</legend>${classes.map((className) => `<label><input type="radio" name="combined-keep" value="${safe(className)}" ${className === keepClass ? "checked" : ""}><span><strong>${safe(className)}</strong><small>Stays in this performance spot</small></span></label>`).join("")}</fieldset>
+      <fieldset class="big-stage-combined-move"><legend>Move the Other Class</legend>
         <label><input type="radio" name="combined-action" value="current" ${action === "current" ? "checked" : ""}><span><strong>Own spot on this recital</strong><small>Create a separate performance in the current show.</small></span></label>
-        <label><input type="radio" name="combined-action" value="other" ${action === "other" ? "checked" : ""}><span><strong>Move to another recital</strong><small>Choose an existing or newly planned show.</small></span></label>
-        <label><input type="radio" name="combined-action" value="unassign" ${action === "unassign" ? "checked" : ""}><span><strong>Temporarily unassign</strong><small>Remove it from every recital until a decision is made.</small></span></label>
+        <label><input type="radio" name="combined-action" value="other" ${action === "other" ? "checked" : ""}><span><strong>Move to Another Recital</strong><small>Choose an existing or newly planned show.</small></span></label>
+        <label><input type="radio" name="combined-action" value="unassign" ${action === "unassign" ? "checked" : ""}><span><strong>Temporarily Unassign</strong><small>Remove it from every recital until a decision is made.</small></span></label>
       </fieldset>
-      <label class="big-stage-combined-destination" ${action === "other" ? "" : "hidden"}>Choose recital<select>${showChoices().map((show) => `<option${show === destination ? " selected" : ""}>${safe(show)}</option>`).join("")}</select></label>
+      <label class="big-stage-combined-destination" ${action === "other" ? "" : "hidden"}>Choose Recital<select>${showChoices().map((show) => `<option${show === destination ? " selected" : ""}>${safe(show)}</option>`).join("")}</select></label>
       <div class="big-stage-combined-capacity-actions"><button class="secondary" type="button" data-combined-cancel>Cancel</button><button class="primary" type="button" data-combined-apply>Save Separation Plan</button></div>
     </section>`;
     document.body.appendChild(modal);
@@ -409,7 +409,7 @@
       const modal = document.createElement("div");
       modal.id = "big-stage-costume-detail-modal";
       modal.className = "big-stage-costume-detail-modal";
-      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close costume details">×</button><div class="big-stage-costume-detail-visual"><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><section class="big-stage-costume-roster"><h4>Dancer Sizes</h4><div>${dancers.map(costumeDancerMarkup).join("")}</div></section></div><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd class="big-stage-costume-classes">${(classParts.length ? classParts : [className]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>School</dt><dd class="big-stage-costume-schools">${(schoolParts.length ? schoolParts : [school]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>Teacher</dt><dd class="big-stage-costume-teachers">${(teacherParts.length ? teacherParts : [teacher]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>Song</dt><dd>${safe(song)}</dd></div><div><dt>Costumes Needed</dt><dd class="big-stage-costume-needed"><strong>${costumesNeeded}</strong><small>${sizeBreakdown}</small></dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
+      modal.innerHTML = `<section class="big-stage-costume-detail-dialog" role="dialog" aria-modal="true" aria-label="${costumeName} details"><button class="big-stage-costume-detail-close" type="button" aria-label="Close Costume Details">×</button><div class="big-stage-costume-detail-visual"><img class="big-stage-costume-detail-image" src="${image}" alt="${costumeName}"><section class="big-stage-costume-roster"><h4>Dancer Sizes</h4><div>${dancers.map(costumeDancerMarkup).join("")}</div></section></div><div class="big-stage-costume-detail-copy"><span class="big-stage-costume-detail-label">Assigned Costume</span><h3>${costumeName}</h3><dl><div><dt>Class</dt><dd class="big-stage-costume-classes">${(classParts.length ? classParts : [className]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>School</dt><dd class="big-stage-costume-schools">${(schoolParts.length ? schoolParts : [school]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>Teacher</dt><dd class="big-stage-costume-teachers">${(teacherParts.length ? teacherParts : [teacher]).map((name) => `<span>${safe(name)}</span>`).join("")}</dd></div><div><dt>Song</dt><dd>${safe(song)}</dd></div><div><dt>Costumes Needed</dt><dd class="big-stage-costume-needed"><strong>${costumesNeeded}</strong><small>${sizeBreakdown}</small></dd></div></dl><button class="primary" type="button" data-stage-costume-detail-done>Done</button></div></section>`;
       document.body.appendChild(modal);
       const close = () => modal.remove();
       modal.querySelector(".big-stage-costume-detail-close").addEventListener("click", close);

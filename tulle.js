@@ -162,18 +162,18 @@
     root.className = "tulle-root";
     root.dataset.unsavedIgnore = "true";
     root.innerHTML = `
-      <button class="tulle-launcher" type="button" aria-label="Open TULLE, your Director Dashboard assistant" aria-expanded="false">
+      <button class="tulle-launcher" type="button" aria-label="Open TULLE, Your Director Dashboard Assistant" aria-expanded="false">
         <img src="assets/tulle-solo.png" alt="">
         <span class="tulle-state-orb" aria-hidden="true">☀</span>
       </button>
-      <section class="tulle-panel" role="dialog" aria-modal="false" aria-label="TULLE assistant" hidden>
+      <section class="tulle-panel" role="dialog" aria-modal="false" aria-label="TULLE Assistant" hidden>
         <header class="tulle-panel-head">
           <img class="tulle-panel-portrait" src="assets/tulle-solo.png" alt="TULLE, the Dance Techniques ballet shoe assistant">
           <div class="tulle-panel-title"><strong>T.U.L.L.E.</strong><span>The Ultimate Little Link to Everything</span></div>
           <div class="tulle-head-actions">
-            <button class="tulle-icon-button" type="button" data-tulle-sleep aria-label="Put TULLE to sleep" title="Sleep">☀</button>
+            <button class="tulle-icon-button" type="button" data-tulle-sleep aria-label="Put TULLE to Sleep" title="Sleep">☀</button>
             <button class="tulle-icon-button" type="button" data-tulle-minimize aria-label="Minimize TULLE" title="Minimize">−</button>
-            <button class="tulle-icon-button" type="button" data-tulle-close aria-label="Close TULLE and clear this conversation" title="Close">×</button>
+            <button class="tulle-icon-button" type="button" data-tulle-close aria-label="Close TULLE and Clear This Conversation" title="Close">×</button>
           </div>
         </header>
         <div class="tulle-panel-body">
@@ -181,7 +181,7 @@
           <div class="tulle-response" aria-live="polite" hidden></div>
           <div class="tulle-choice-list" hidden></div>
           <div class="tulle-review" hidden></div>
-          <div class="tulle-quick-actions" aria-label="TULLE quick actions">
+          <div class="tulle-quick-actions" aria-label="TULLE Quick Actions">
             ${quickActions.map(([key, label]) => `<button class="tulle-quick-action" type="button" data-tulle-quick="${key}">${label}</button>`).join("")}
           </div>
         </div>
@@ -193,14 +193,14 @@
           </div>
         </div>
         <div class="tulle-input-row">
-          <textarea data-tulle-input rows="1" aria-label="Tell TULLE what you need" placeholder="Tell me what you need…"></textarea>
-          <button class="tulle-icon-button" type="button" data-tulle-mic aria-label="Dictate a request" title="Microphone">●</button>
+          <textarea data-tulle-input rows="1" aria-label="Tell TULLE What You Need" placeholder="Tell Me What You Need…"></textarea>
+          <button class="tulle-icon-button" type="button" data-tulle-mic aria-label="Dictate a Request" title="Microphone">●</button>
           <button class="tulle-send" type="button" data-tulle-send>Send</button>
         </div>
         <div class="tulle-settings">
           <label><input type="checkbox" data-tulle-reduce-motion> Reduce motion on this device</label>
         </div>
-        <p class="tulle-tagline" aria-label="a sweet little shoe keeping you one step ahead"><span aria-hidden="true">✦</span><span>a sweet little shoe keeping you one step ahead</span><span aria-hidden="true">✦</span></p>
+        <p class="tulle-tagline" aria-label="A Sweet Little Shoe Keeping You One Step Ahead"><span aria-hidden="true">✦</span><span>a sweet little shoe keeping you one step ahead</span><span aria-hidden="true">✦</span></p>
       </section>`;
     document.body.appendChild(root);
     return root;

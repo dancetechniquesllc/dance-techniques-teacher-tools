@@ -60,7 +60,7 @@
     const nav = document.createElement("div");
     nav.className = "big-stage-view-toggle";
     nav.setAttribute("role", "tablist");
-    nav.setAttribute("aria-label", "Big Stage views");
+    nav.setAttribute("aria-label", "Big Stage Views");
     nav.innerHTML = `
       <button type="button" role="tab" aria-selected="${active === "shows"}" data-stage-view="shows">Shows</button>
       <button type="button" role="tab" aria-selected="${active === "matching"}" data-stage-view="matching">Matching Classes</button>`;

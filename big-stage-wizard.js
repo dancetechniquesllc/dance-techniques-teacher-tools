@@ -48,7 +48,7 @@
     const overlay = document.createElement("div");
     overlay.id = "big-stage-show-wizard";
     overlay.className = "big-stage-wizard-overlay";
-    overlay.innerHTML = `<section class="big-stage-wizard" role="dialog" aria-modal="true" aria-label="Plan a show"><button class="big-stage-wizard-close" type="button" aria-label="Close show planner">×</button><div data-wizard-content></div></section>`;
+    overlay.innerHTML = `<section class="big-stage-wizard" role="dialog" aria-modal="true" aria-label="Plan a Show"><button class="big-stage-wizard-close" type="button" aria-label="Close Show Planner">×</button><div data-wizard-content></div></section>`;
     document.body.appendChild(overlay);
     overlay.querySelector(".big-stage-wizard-close").addEventListener("click", close);
     overlay.addEventListener("click", (event) => { if (event.target === overlay) close(); });
@@ -75,9 +75,9 @@
   function renderBasics(content) {
     content.innerHTML = shell("Start the show", "Begin with a letter name. You can add the exact show time closer to recital day.", `
       <div class="big-stage-wizard-grid">
-        <label>Show name<input data-wizard-name value="${safe(state.name)}" placeholder="Show A"></label>
-        <label>Recital date<input data-wizard-date type="date" value="${safe(state.date)}"></label>
-        <label class="wide">Show time <span class="optional">Optional for now</span><input data-wizard-time type="time" value="${safe(state.time)}"></label>
+        <label>Show Name<input data-wizard-name value="${safe(state.name)}" placeholder="Show A"></label>
+        <label>Recital Date<input data-wizard-date type="date" value="${safe(state.date)}"></label>
+        <label class="wide">Show Time <span class="optional">Optional for now</span><input data-wizard-time type="time" value="${safe(state.time)}"></label>
       </div>
       <div class="big-stage-wizard-note"><strong>One recital date for every show.</strong> Changing this date updates the recital date used when planning the next show.</div>
     `, false);
@@ -166,8 +166,8 @@
     const combined = selectedClasses().filter(({ school, className }) => combinedClasses.has(selectionKey(school, className)));
     const conflicts = selectedClasses().filter(({ school, className }) => sampleAssignments.has(selectionKey(school, className)));
     content.innerHTML = shell("Handle connected details", "Decide how combined classes should move and what should transfer with reassigned classes.", `
-      ${combined.length ? `<section class="big-stage-combined-question"><h3>Combined class found</h3><p>${combined.map((item) => `<strong>${safe(item.className)}</strong>`).join(" + ")}</p><div class="big-stage-choice-buttons"><label><input type="radio" name="combined-choice" value="move" ${state.combinedChoices.main !== "split" ? "checked" : ""}><span><strong>Move Combined Class</strong><small>Keep the performance together.</small></span></label><label><input type="radio" name="combined-choice" value="split" ${state.combinedChoices.main === "split" ? "checked" : ""}><span><strong>Split Combined Class</strong><small>Place only the selected class here.</small></span></label></div></section>` : '<div class="big-stage-wizard-empty"><strong>No combined classes need a decision.</strong><span>You can continue to the final review.</span></div>'}
-      ${conflicts.length ? `<section class="big-stage-transfer-question"><h3>Transfer from the current show</h3><p>Select the information that should move with the class.</p><div class="big-stage-transfer-checks">${[["song","Song"],["costume","Costume"],["props","Props"],["positions","Beginning position & special sections"]].map(([key,label]) => `<label><input type="checkbox" data-transfer="${key}" ${state.transfer[key] ? "checked" : ""}> ${label}</label>`).join("")}</div></section>` : ""}
+      ${combined.length ? `<section class="big-stage-combined-question"><h3>Combined Class Found</h3><p>${combined.map((item) => `<strong>${safe(item.className)}</strong>`).join(" + ")}</p><div class="big-stage-choice-buttons"><label><input type="radio" name="combined-choice" value="move" ${state.combinedChoices.main !== "split" ? "checked" : ""}><span><strong>Move Combined Class</strong><small>Keep the performance together.</small></span></label><label><input type="radio" name="combined-choice" value="split" ${state.combinedChoices.main === "split" ? "checked" : ""}><span><strong>Split Combined Class</strong><small>Place only the selected class here.</small></span></label></div></section>` : '<div class="big-stage-wizard-empty"><strong>No combined classes need a decision.</strong><span>You can continue to the final review.</span></div>'}
+      ${conflicts.length ? `<section class="big-stage-transfer-question"><h3>Transfer from the Current Show</h3><p>Select the information that should move with the class.</p><div class="big-stage-transfer-checks">${[["song","Song"],["costume","Costume"],["props","Props"],["positions","Beginning position & special sections"]].map(([key,label]) => `<label><input type="checkbox" data-transfer="${key}" ${state.transfer[key] ? "checked" : ""}> ${label}</label>`).join("")}</div></section>` : ""}
     `);
     content.querySelectorAll('[name="combined-choice"]').forEach((radio) => radio.addEventListener("change", () => { state.combinedChoices.main = radio.value; }));
     content.querySelectorAll("[data-transfer]").forEach((checkbox) => checkbox.addEventListener("change", () => { state.transfer[checkbox.dataset.transfer] = checkbox.checked; }));

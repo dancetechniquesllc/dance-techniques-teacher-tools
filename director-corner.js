@@ -27,26 +27,117 @@
  const top=document.createElement('div'),middle=document.createElement('div'),bottom=document.createElement('div');
  top.className='director-corner-row director-corner-top';middle.className='director-corner-row director-corner-middle';bottom.className='director-corner-row director-corner-bottom';
  const original=actions.querySelector('.director-session-notifications'); const template=original.cloneNode(true);
- const icons={enrollment:'<circle cx="12" cy="6" r="3"/><path d="M8 10h8l3 11H5z"/>',boutique:'<path d="M5 8h14v13H5zM8 8V6a4 4 0 0 1 8 0v2"/><path d="M8 13c2-3 4 0 4 0s2-3 4 0c0 2-4 5-4 5s-4-3-4-5Z"/>',magic:'<path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>'};
- for(const [category,title] of Object.entries({enrollment:'Enrollment Notifications',boutique:'Boutique Notifications',magic:'Magic Notifications'})) {
+ const messageShortcut=actions.querySelector('.director-message-shortcut');
+ const icons={messages:messageShortcut.querySelector('svg').innerHTML,enrollment:'<circle cx="12" cy="6" r="3"/><path d="M8 10h8l3 11H5z"/>',boutique:'<path d="M5 8h14v13H5zM8 8V6a4 4 0 0 1 8 0v2"/><path d="M8 13c2-3 4 0 4 0s2-3 4 0c0 2-4 5-4 5s-4-3-4-5Z"/>',magic:'<path d="m12 2 3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/>'};
+ let messagesPanel;
+ for(const [category,title] of Object.entries({enrollment:'Enrollment Notifications',boutique:'Boutique Notifications',magic:'Magic Notifications',messages:'Message Notifications'})) {
   const panel=category==='enrollment'?original:template.cloneNode(true);
   panel.dataset.directorCategory=category;
   const summary=panel.querySelector('summary');summary.setAttribute('aria-label',title);summary.title=title;
   summary.querySelector('svg').innerHTML=icons[category];
   panel.querySelector('.notification-panel-head strong').textContent=title;
+  if(category==='messages'){
+   summary.querySelector('[data-notification-unread]').replaceWith(messageShortcut.querySelector('[data-notification-unread]'));
+   messagesPanel=panel;
+   continue;
+  }
   const link=document.createElement('button');link.type='button';link.className='secondary';link.textContent=category==='magic'?'Open Shape the Magic':category==='boutique'?'Open Boutique':'Open Enrollment & Students';
   if(category==='magic'){link.classList.add('director-magic-artwork');link.setAttribute('aria-label','Open Shape the Magic');link.title='Open Shape the Magic';link.textContent='';const image=document.createElement('img');image.src='assets/director-open-shape-magic.png';image.alt='';link.append(image);}
   link.addEventListener('click',()=>{panel.open=false;openAdminSection(category==='magic'?'shape-the-magic':category==='boutique'?'boutique-backend':'student-library');});
   panel.querySelector('.teacher-notification-panel').append(link);
-  panel.addEventListener('toggle',()=>{if(panel.open){top.querySelectorAll('details').forEach(p=>{if(p!==panel)p.open=false;});if(category==='magic')void loadStaffFeedbackInbox();}});
   top.append(panel);
  }
- [...document.querySelectorAll('.teacher-notification-panel'),...top.querySelectorAll('.teacher-notification-panel')].forEach(popup=>{
-  const close=document.createElement('button');close.type='button';close.className='notification-popup-close';close.textContent='×';close.setAttribute('aria-label','Close notifications');
+ const panels=[...top.querySelectorAll('details'),messagesPanel];
+ for(const panel of panels){
+  panel.addEventListener('toggle',()=>{
+   if(!panel.open)return;
+   for(const other of panels)if(other!==panel)other.open=false;
+   if(panel.dataset.directorCategory==='magic')void loadStaffFeedbackInbox();
+   if(panel===messagesPanel){
+    void refreshWebInquiryCount();
+    void loadSharedFamilyConversations();
+   }
+  });
+ }
+ [...panels.map(panel=>panel.querySelector('.teacher-notification-panel')),...document.querySelectorAll('.teacher-notification-panel:not(.director-session-notifications *)')].forEach(popup=>{
+  const close=document.createElement('button');close.type='button';close.className='notification-popup-close';close.textContent='×';close.setAttribute('aria-label','Close Notifications');
   close.addEventListener('click',()=>{const details=popup.closest('details');details.open=false;details.querySelector('summary')?.focus();});
   popup.querySelector('.notification-panel-head').append(close);
  });
- middle.append(actions.querySelector('.director-task-shortcut'),actions.querySelector('.director-message-shortcut'),actions.querySelector('.director-settings-shortcut'));
+ middle.append(actions.querySelector('.director-task-shortcut'),messagesPanel,actions.querySelector('.director-settings-shortcut'));
+ messageShortcut.remove();
+ const messageChannels=[
+  {view:'parents',label:'Parent Portal',description:'Need Attention'},
+  {view:'team',label:'Teaching Team',description:'Unread'},
+  {view:'web',label:'Web Submissions',description:'Unresolved'}
+ ];
+ const channelLinks=document.createElement('nav');
+ channelLinks.className='director-message-channels';
+ channelLinks.setAttribute('aria-label','Message Channels');
+ for(const channel of messageChannels){
+  const link=document.createElement('button');
+  link.type='button';
+  link.className='secondary director-message-channel';
+  link.textContent=channel.label;
+  channel.counter=document.createElement('span');
+  link.append(channel.counter);
+  link.addEventListener('click',()=>{
+   messagesPanel.open=false;
+   openCommunicationStudioView(channel.view);
+  });
+  channelLinks.append(link);
+ }
+ messagesPanel.querySelector('[data-notification-list]').before(channelLinks);
+ let webInquiryCount,webInquiryAccount='',webInquiryRefreshAt=0,webInquiryRequest=0;
+ const refreshWebInquiryCount=async({force=false}={})=>{
+  const profile=window.dtCurrentProfile;
+  if(tour()||!profile?.id||!canEdit()||!window.dtSupabase)return;
+  if(webInquiryAccount!==profile.id){
+   webInquiryAccount=profile.id;
+   webInquiryCount=undefined;
+   webInquiryRefreshAt=0;
+   window.dtRenderMessagesCorner();
+  }
+  if(!force&&Date.now()-webInquiryRefreshAt<30000)return;
+  webInquiryRefreshAt=Date.now();
+  const request=++webInquiryRequest;
+  try{
+   const {count,error}=await window.dtSupabase.from('website_contact_submissions').select('id',{count:'exact',head:true}).neq('status','resolved');
+   if(!error&&count!==null&&request===webInquiryRequest&&window.dtCurrentProfile?.id===profile.id){
+    webInquiryCount=count;
+    window.dtRenderMessagesCorner();
+   }
+  }catch{/* Keep the last known count until the next refresh. */}
+ };
+ window.dtRefreshWebInquiryCount=()=>refreshWebInquiryCount({force:true});
+ window.addEventListener('dt-web-inquiry-count',({detail})=>{
+  if(!detail?.profileId||detail.profileId!==window.dtCurrentProfile?.id||!canEdit())return;
+  ++webInquiryRequest;
+  webInquiryAccount=detail.profileId;
+  webInquiryRefreshAt=Date.now();
+  webInquiryCount=detail.count;
+  window.dtRenderMessagesCorner();
+ });
+ window.dtRenderMessagesCorner=()=>{
+  const unread=notificationCenterItems.filter(item=>!item.read_at&&!item.dismissed_at&&(!item.expires_at||new Date(item.expires_at)>new Date()));
+  const countType=type=>unread.filter(item=>item.notification_type===type).length;
+  const counts=[
+   tour()||loadedFamilyConversationProfile===window.dtCurrentProfile?.id
+    ? teacherParentPreviewConversations.filter(adminParentConversationNotReplied).length : 0,
+   Math.max(unreadThreadCountFor('Admin',messageThreads),countType('direct_message'))+countType('studio_announcement'),
+   (webInquiryAccount===window.dtCurrentProfile?.id?webInquiryCount:undefined)??countType('website_inquiry')
+  ];
+  messageChannels.forEach(({counter,description},index)=>{
+   const label=counts[index]+' '+description;
+   if(counter.textContent!==label)counter.textContent=label;
+  });
+  const count=counts.reduce((total,value)=>total+value,0);
+  const badge=messagesPanel.querySelector('[data-notification-unread]');
+  badge.textContent=count>99?'99+':String(count);
+  badge.classList.toggle('active',count>0);
+  messagesPanel.querySelector('summary').setAttribute('aria-label',count?'Message Notifications, '+count+' need attention':'Message Notifications');
+  messagesPanel.querySelector('.notification-empty')?.toggleAttribute('hidden',count>0);
+ };
  let rows={},editing='',busy=false,unavailable=false,channel,profileId='',request=0;
  const dialog=document.createElement('dialog');dialog.className='director-status-dialog';dialog.setAttribute('aria-labelledby','director-presence-title');
  dialog.innerHTML='<h2 id="director-presence-title">Availability</h2><div class="director-status-options">'+Object.entries(labels).map(([value,label])=>`<button type="button" data-availability="${value}" aria-pressed="false"><i aria-hidden="true" style="--dot:${value==='busy'?'#d6a11a':value==='open'?'#4b9a51':'#c34548'}"></i>${label}</button>`).join('')+'</div><p class="director-status-note" role="status"></p><button type="button" data-presence-close>Close</button>';
@@ -113,7 +204,7 @@
   }finally{portraitLoading=false;}
  };
  const connect=async()=>{
-  render();void refreshPortraits().catch(()=>{});
+  render();void refreshWebInquiryCount();void refreshPortraits().catch(()=>{});
   if(!tour()&&window.dtSupabase&&window.dtCurrentProfile?.id!==profileId){
    if(channel)await window.dtSupabase.removeChannel(channel);profileId=window.dtCurrentProfile?.id||'';
    if(profileId)channel=window.dtSupabase.channel('director-availability-'+profileId).on('postgres_changes',{event:'*',schema:'public',table:'director_availability'},refresh).subscribe();
@@ -143,7 +234,11 @@
   const badge=top.querySelector('[data-director-category=magic] [data-notification-unread]');const count=items.length+notificationCenterItems.filter(i=>window.dtNotificationCategory(i)==='magic'&&!i.read_at&&!i.dismissed_at&&(!i.expires_at||new Date(i.expires_at)>new Date())).length;badge.textContent=String(count);badge.classList.toggle('active',count>0);badge.setAttribute('aria-label',`${count} new Magic notifications`);
  };
  sampleChannel.onmessage=()=>{if(tour())void refresh();};
- window.addEventListener('dt-auth-ready',connect);window.addEventListener('focus',connect);window.addEventListener('online',connect);
+ window.addEventListener('dt-auth-ready',()=>{
+  void connect();
+  if(canEdit())void loadSharedFamilyConversations();
+ });
+ window.addEventListener('focus',connect);window.addEventListener('online',connect);
  setInterval(()=>{if(!document.hidden)void connect();},5000);
  const countObserver=new MutationObserver(()=>window.dtRenderBoutiqueCorner());
  for(const id of ['boutique-kits-not-ready','boutique-orders-to-fill']){const el=document.getElementById(id);if(el)countObserver.observe(el,{childList:true,subtree:true,characterData:true});}

@@ -1,5 +1,5 @@
 // One opt-in writing control for teacher prose; never submits forms or changes recipients.
-const selectors=['article[aria-label="Teacher mobile PWA"] textarea','[data-reschedule-reason]','[data-partner-school-notes]','#future-reschedule-reason','#schedule-event-notes','textarea[id^="teacher-"]','textarea[id^="tt-"]','#teacher-activities-content textarea','#teacher-activities-content input[type="text"]','#teacher-class-post-custom-title','#teacher-desktop-task-input','[data-practice-title]','[data-practice-caption]','[data-dt-touch-field]'];
+const selectors=['article[aria-label="Teacher Mobile PWA"] textarea','[data-reschedule-reason]','[data-partner-school-notes]','#future-reschedule-reason','#schedule-event-notes','textarea[id^="teacher-"]','textarea[id^="tt-"]','#teacher-activities-content textarea','#teacher-activities-content input[type="text"]','#teacher-class-post-custom-title','#teacher-desktop-task-input','[data-practice-title]','[data-practice-caption]','[data-dt-touch-field]'];
 export function mountWritingFields({root=document,getClient=()=>window.dtSupabase,isPreview=()=>document.body.dataset.tourMode==='true'}={}) {
  const attach=field=>{
   if(field.dataset.dtTouchDisabled==='true'||field.dataset.dtTouchMounted||field.id==='teacher-parent-shared-reply'||field.readOnly||field.disabled||field.type==='search')return;

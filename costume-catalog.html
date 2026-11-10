@@ -39,7 +39,7 @@
   .total-badge { float:right; background:#944a53; color:white; border-radius:10px; padding:2px 8px; font-size:0.75rem; font-weight:bold; }
   .inventory-size-table { width:100%; margin-top:9px; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid #f0c7c1; border-radius:12px; font-size:11px; text-align:center; }
   .inventory-size-table th,.inventory-size-table td { padding:7px 5px; border-bottom:1px solid #f3dfdc; }
-  .inventory-size-table th { background:#f8e0dd; color:#674f4f; font-size:9px; text-transform:uppercase; }
+  .inventory-size-table th { background:#f8e0dd; color:#674f4f; font-size:9px; }
   .inventory-size-table th:first-child,.inventory-size-table td:first-child { text-align:left; font-weight:900; }
   .inventory-size-table tbody tr:last-child td { border-bottom:0; }
   .inventory-size-table tfoot td { border-top:2px solid #e5b0aa; border-bottom:0; background:#fffaf6; font-weight:900; }
@@ -91,7 +91,7 @@
   /* SIZE MATCHER */
   .matcher-wizard { display:grid; gap:18px; }
   .wizard-steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding:16px; border:1px solid #f0c7c1; border-radius:20px; background:#fff; }
-  .wizard-field { display:grid; gap:7px; color:#6f6260; font-size:11px; font-weight:850; letter-spacing:.04em; text-transform:uppercase; }
+  .wizard-field { display:grid; gap:7px; color:#6f6260; font-size:11px; font-weight:850; letter-spacing:.04em; }
   .wizard-field select { width:100%; min-height:48px; padding:9px 12px; border:1px solid #f0c7c1; border-radius:14px; background:#fffaf6; color:#241918; font:inherit; font-size:14px; font-weight:750; text-transform:none; }
   .wizard-field select:focus { outline:3px solid rgba(148,74,83,.2); border-color:#944a53; }
   .matcher-class-summary { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:center; padding:18px 20px; border:1px solid #f0c7c1; border-radius:20px; background:linear-gradient(135deg,#fff,#f8e0dd); }
@@ -126,7 +126,7 @@
   .costume-size-table { width:100%; border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid #eee1dc; border-radius:12px; font-size:11px; }
   .costume-size-table th,.costume-size-table td { padding:7px 8px; text-align:right; border-bottom:1px solid #eee1dc; }
   .costume-size-table th:first-child,.costume-size-table td:first-child { text-align:left; }
-  .costume-size-table thead th { background:#f8e0dd; color:#674f4f; font-size:10px; text-transform:uppercase; letter-spacing:.03em; }
+  .costume-size-table thead th { background:#f8e0dd; color:#674f4f; font-size:10px; letter-spacing:.03em; }
   .costume-size-table tbody tr:last-child td { border-bottom:0; }
   .costume-size-table tfoot td { border-top:2px solid #e5b0aa; border-bottom:0; background:#fffaf6; color:#241918; font-weight:900; }
   .costume-match-card .costume-size-table th,.costume-match-card .costume-size-table td { padding-left:6px; padding-right:6px; }
@@ -183,7 +183,7 @@
   .assignment-size { display:flex; align-items:center; gap:5px; padding:7px 11px; border:1px solid #9caf91; border-radius:999px; background:#dce9d6; color:#36553a; font-size:12px; font-weight:900; }
   .assignment-size-groups { display:grid; gap:13px; }
   .assignment-size-group { display:grid; gap:10px; }
-  .assignment-size-divider { display:flex; align-items:center; gap:10px; color:#944a53; font-size:18px; font-weight:900; text-transform:uppercase; letter-spacing:.06em; }
+  .assignment-size-divider { display:flex; align-items:center; gap:10px; color:#944a53; font-size:18px; font-weight:900; letter-spacing:.06em; }
   .assignment-size-divider::after { content:""; height:1px; flex:1; background:#e5b0aa; }
   .assignment-dancers { display:flex; flex-wrap:wrap; gap:14px; }
   .assignment-dancer { width:72px; display:grid; justify-items:center; gap:6px; text-align:center; color:#241918; font-size:11px; font-weight:750; }
@@ -247,10 +247,11 @@
     .tab { min-width:0; min-height:44px; padding:8px; line-height:1.25; white-space:normal; }
   }
 </style>
+  <link rel="stylesheet" href="assets/search-input.css">
 </head>
 <body>
 
-<div class="tabs" role="tablist" aria-label="Costume Catalog sections">
+<div class="tabs" role="tablist" aria-label="Costume Catalog Sections">
   <button class="tab active" type="button" role="tab" aria-selected="true" onclick="switchTab('inventory', this)">Inventory</button>
   <button class="tab" type="button" role="tab" aria-selected="false" onclick="switchTab('matcher', this)">Size Matcher</button>
   <button class="tab" type="button" role="tab" aria-selected="false" onclick="switchTab('assignments', this)">Costume Assignments</button>
@@ -268,7 +269,7 @@
     <span id="count-label" class="inventory-count"></span>
   </div>
   <div class="filters">
-    <input type="text" id="search" placeholder="🔍 Search costume name..." oninput="renderGrid()">
+    <input type="text" id="search" data-dt-search placeholder="Search Costume Name..." oninput="renderGrid()">
     <select id="filterCompany" onchange="renderGrid()">
       <option value="">All Companies</option>
     </select>
@@ -331,7 +332,7 @@
       <label class="wizard-field">3. Class<select id="matcher-class" disabled></select></label>
     </div>
     <section class="matcher-class-summary" id="matcher-class-summary" hidden></section>
-    <div class="measurement-note"><strong>Fit priority:</strong> Girth is the deciding measurement, followed by hips, then waist. Chest is used as the final fit check.</div>
+    <div class="measurement-note"><strong>Fit Priority:</strong> Girth is the deciding measurement, followed by hips, then waist. Chest is used as the final fit check.</div>
     <div class="matcher-results-head">
       <div><h3>Costume Matches</h3><p>Only costumes with enough inventory in the calculated sizes appear as ready matches.</p></div>
     </div>
@@ -344,10 +345,10 @@
   <section class="assignments-page">
     <div class="assignments-page-head"><h2>Costume Assignments</h2><p>Classes with confirmed costume selections appear here.</p></div>
     <div class="assignment-filters">
-      <select id="assignment-teacher-filter" aria-label="Filter costume assignments by teacher" onchange="renderCostumeAssignments()"><option value="">All Teachers</option></select>
-      <select id="assignment-school-filter" aria-label="Filter costume assignments by school" onchange="renderCostumeAssignments()"><option value="">All Schools</option></select>
-      <select id="assignment-show-filter" aria-label="Filter costume assignments by show time" onchange="renderCostumeAssignments()"><option value="">All Show Times</option></select>
-      <select id="assignment-type-filter" aria-label="Filter costume assignments by recital type" onchange="renderCostumeAssignments()"><option value="">All Types</option><option value="ballet">Ballet</option><option value="tap">Tap</option><option value="either">Either</option></select>
+      <select id="assignment-teacher-filter" aria-label="Filter Costume Assignments by Teacher" onchange="renderCostumeAssignments()"><option value="">All Teachers</option></select>
+      <select id="assignment-school-filter" aria-label="Filter Costume Assignments by School" onchange="renderCostumeAssignments()"><option value="">All Schools</option></select>
+      <select id="assignment-show-filter" aria-label="Filter Costume Assignments by Show Time" onchange="renderCostumeAssignments()"><option value="">All Show Times</option></select>
+      <select id="assignment-type-filter" aria-label="Filter Costume Assignments by Recital Type" onchange="renderCostumeAssignments()"><option value="">All Types</option><option value="ballet">Ballet</option><option value="tap">Tap</option><option value="either">Either</option></select>
     </div>
     <div class="assignment-grid" id="assignment-grid"></div>
   </section>
@@ -357,11 +358,11 @@
 <div id="panel-boys" class="panel">
   <section class="assignments-page">
     <div class="assignments-page-head"><h2>Boys Costumes</h2><p>Each class with boys is handled separately from the girls’ measurement matching.</p></div>
-    <div class="assignment-filters" aria-label="Boys costume filters">
-      <select id="boys-teacher-filter" aria-label="Filter boys costumes by teacher" onchange="renderBoysCatalog()"><option value="">All Teachers</option></select>
-      <select id="boys-school-filter" aria-label="Filter boys costumes by school" onchange="renderBoysCatalog()"><option value="">All Schools</option></select>
-      <select id="boys-class-filter" aria-label="Filter boys costumes by class" onchange="renderBoysCatalog()"><option value="">All Classes</option></select>
-      <select id="boys-show-filter" aria-label="Filter boys costumes by show time" onchange="renderBoysCatalog()"><option value="">All Show Times</option></select>
+    <div class="assignment-filters" aria-label="Boys Costume Filters">
+      <select id="boys-teacher-filter" aria-label="Filter Boys Costumes by Teacher" onchange="renderBoysCatalog()"><option value="">All Teachers</option></select>
+      <select id="boys-school-filter" aria-label="Filter Boys Costumes by School" onchange="renderBoysCatalog()"><option value="">All Schools</option></select>
+      <select id="boys-class-filter" aria-label="Filter Boys Costumes by Class" onchange="renderBoysCatalog()"><option value="">All Classes</option></select>
+      <select id="boys-show-filter" aria-label="Filter Boys Costumes by Show Time" onchange="renderBoysCatalog()"><option value="">All Show Times</option></select>
     </div>
     <button class="outside-order-card" type="button" onclick="openOutsideOrder('boys')"><span>+</span><span><strong>Ordering Something?</strong><small>Paste the product link and calculate the boys’ sizes by company.</small></span></button>
     <div class="outside-orders-list" id="boys-outside-orders"></div>
@@ -375,7 +376,7 @@
 <!-- SIZING CHARTS POPUP -->
 <div class="modal-overlay" id="charts-modal" onclick="closeSizingCharts(event)">
   <div class="modal charts-dialog" role="dialog" aria-modal="true" aria-labelledby="charts-title">
-    <button class="modal-close" type="button" aria-label="Close sizing charts" onclick="closeSizingCharts()">&times;</button>
+    <button class="modal-close" type="button" aria-label="Close Sizing Charts" onclick="closeSizingCharts()">&times;</button>
     <h2 id="charts-title">Sizing Charts</h2>
     <div class="chart-grid" id="charts-grid"></div>
   </div>
@@ -391,20 +392,20 @@
 
 <div class="modal-overlay" id="selection-modal" onclick="closeCostumeSelection(event)">
   <div class="modal selection-dialog" role="dialog" aria-modal="true" aria-labelledby="selection-title">
-    <button class="modal-close" onclick="closeCostumeSelection()" aria-label="Close costume review">✕</button>
+    <button class="modal-close" onclick="closeCostumeSelection()" aria-label="Close Costume Review">✕</button>
     <div id="selection-content"></div>
   </div>
 </div>
 
 <div class="modal-overlay" id="outside-order-modal" onclick="closeOutsideOrder(event)">
   <div class="modal selection-dialog" role="dialog" aria-modal="true" aria-labelledby="outside-order-title">
-    <button class="modal-close" type="button" aria-label="Close order form" onclick="closeOutsideOrder()">&times;</button>
+    <button class="modal-close" type="button" aria-label="Close Order Form" onclick="closeOutsideOrder()">&times;</button>
     <h2 id="outside-order-title">Ordering Something?</h2>
     <div class="outside-order-form">
       <label>Class<select id="outside-order-class" onchange="previewOutsideOrderSizes()"></select></label>
-      <label>Product link<input id="outside-order-link" type="url" placeholder="Paste the item link" oninput="previewOutsideOrderImage()"></label>
+      <label>Product Link<input id="outside-order-link" type="url" placeholder="Paste the Item Link" oninput="previewOutsideOrderImage()"></label>
       <label>Company<select id="outside-order-company" onchange="previewOutsideOrderSizes()"></select></label>
-      <label>Date ordered<input id="outside-order-date" type="date"></label>
+      <label>Date Ordered<input id="outside-order-date" type="date"></label>
       <div class="outside-order-sizes" id="outside-order-sizes">Choose a class and company to calculate sizes.</div>
       <div class="selection-actions"><button class="keep-looking" type="button" onclick="closeOutsideOrder()">Cancel</button><button class="assign-costume" type="button" onclick="saveOutsideOrder()">Save Order</button></div>
     </div>
@@ -496,6 +497,9 @@ const COSTUMES = [
   {name:"Boy Animal",company:"Discount Dance",status:"unknown",XXSC:null,XSC:2,SC:1,IC:null,MC:null,LC:null,total:3,location:null,img:"pasted-image-18.jpeg"},
   {name:"Elemental",company:"Weissman",status:"inventoried",XXSC:null,XSC:null,SC:7,IC:2,MC:1,LC:null,total:10,location:"Forward BOX",img:"Screenshot 2026-06-04 at 5.55.01 PM-535.png"},
   {name:"Turquoise Cupcake Tutus",company:"Unknown",status:"inventoried",XXSC:null,XSC:null,SC:11,IC:null,MC:null,LC:null,total:11,location:"Forward Tower SM BOX",img:"Screenshot 2026-06-04 at 8.08.44 PM-634.png"},
+  {name:"Shake A Tail Feather",company:"Revolution",status:"inventoried",XXSC:null,XSC:1,SC:11,IC:null,MC:null,LC:null,total:12,location:null,img:"Shake a Tail Feather.png"},
+  {name:"The Story of Tonight (Boy)",company:"Revolution",status:"inventoried",XXSC:null,XSC:5,SC:5,IC:null,MC:null,LC:null,total:10,location:null,img:"The Story of Tonight.png"},
+  {name:"Say The Word",company:"Revolution",status:"inventoried",XXSC:null,XSC:2,SC:20,IC:null,MC:5,LC:2,total:29,location:null,img:"Say The Word.png"},
 ];
 
 const SIZING = {
@@ -652,9 +656,9 @@ function renderBoysCatalog() {
     const available=girlCostume?boysCustomMatchAvailability(girlCostume,classInfo.id):{};
     const availableSizes=SIZE_KEYS.filter(size=>Number(available[size]||0)>0);
     const reservationMatches=currentReservation&&girlCostume&&currentReservation.costumeName===girlCostume.name&&(!currentReservation.company||currentReservation.company===girlCostume.company);
-    const reserveMarkup=girlCostume&&availableSizes.length?`<div class="boys-custom-reserve ${reservationMatches?"is-reserved":""}"><strong>${reservationMatches?`Reserved ${htmlEscape(currentReservation.size)} to custom match`:`Reserve one to custom match?`}</strong><select aria-label="Choose a girls costume size to reserve">${availableSizes.map(size=>`<option value="${htmlEscape(size)}" ${reservationMatches&&currentReservation.size===size?"selected":""}>${htmlEscape(size)} · ${available[size]} available</option>`).join("")}</select><button type="button" onclick="reserveBoysCustomMatch(this,'${htmlEscape(classInfo.id)}')">${reservationMatches?"Change":"Reserve"}</button></div>`:"";
+    const reserveMarkup=girlCostume&&availableSizes.length?`<div class="boys-custom-reserve ${reservationMatches?"is-reserved":""}"><strong>${reservationMatches?`Reserved ${htmlEscape(currentReservation.size)} to custom match`:`Reserve one to custom match?`}</strong><select aria-label="Choose a Girls Costume Size to Reserve">${availableSizes.map(size=>`<option value="${htmlEscape(size)}" ${reservationMatches&&currentReservation.size===size?"selected":""}>${htmlEscape(size)} · ${available[size]} available</option>`).join("")}</select><button type="button" onclick="reserveBoysCustomMatch(this,'${htmlEscape(classInfo.id)}')">${reservationMatches?"Change":"Reserve"}</button></div>`:"";
     const dancerMarkup=boys.map(student=>{const initials=String(student.name||"B").split(/\s+/).map(part=>part[0]).join("").slice(0,2).toUpperCase();return `<div class="boys-dancer"><span class="boys-dancer-avatar">${student.photo?`<img src="${htmlEscape(student.photo)}" alt="">`:htmlEscape(initials)}</span><span>${htmlEscape(student.name)}</span></div>`}).join("");
-    return `<article class="boys-class-card"><div><h3>${htmlEscape(classInfo.schoolName)} · ${htmlEscape(classInfo.name)}</h3><p>${htmlEscape(classInfo.teacherName)}${classInfo.day?` · ${htmlEscape(classInfo.day)}`:""}${classInfo.time?` · ${htmlEscape(classInfo.time)}`:""}${classInfo.showTime?` · ${htmlEscape(classInfo.showTime)}`:""}</p></div><div class="boys-girl-costume">${girlCostume?.img?`<img src="${IMAGE_BASE}${encodeURIComponent(girlCostume.img)}" alt="${htmlEscape(girlCostume.name)}">`:`<span class="boys-dancer-avatar">—</span>`}<div><small>Girls’ assigned costume</small><strong>${htmlEscape(selection?.costumeName||"Not assigned yet")}</strong>${selection?.company?`<small>${htmlEscape(selection.company)}</small>`:""}</div></div>${reserveMarkup}<div><strong>${boys.length} boy${boys.length===1?"":"s"}</strong><div class="boys-dancers">${dancerMarkup}</div></div></article>`;
+    return `<article class="boys-class-card"><div><h3>${htmlEscape(classInfo.schoolName)} · ${htmlEscape(classInfo.name)}</h3><p>${htmlEscape(classInfo.teacherName)}${classInfo.day?` · ${htmlEscape(classInfo.day)}`:""}${classInfo.time?` · ${htmlEscape(classInfo.time)}`:""}${classInfo.showTime?` · ${htmlEscape(classInfo.showTime)}`:""}</p></div><div class="boys-girl-costume">${girlCostume?.img?`<img src="${IMAGE_BASE}${encodeURIComponent(girlCostume.img)}" alt="${htmlEscape(girlCostume.name)}">`:`<span class="boys-dancer-avatar">—</span>`}<div><small>Girls’ Assigned Costume</small><strong>${htmlEscape(selection?.costumeName||"Not assigned yet")}</strong>${selection?.company?`<small>${htmlEscape(selection.company)}</small>`:""}</div></div>${reserveMarkup}<div><strong>${boys.length} boy${boys.length===1?"":"s"}</strong><div class="boys-dancers">${dancerMarkup}</div></div></article>`;
   }).join(""):'<p class="no-results" style="grid-column:1/-1">No boys classes match these filters.</p>';
   const classSelect=document.getElementById("boys-match-class");
   const previous=classSelect.value;
@@ -1080,17 +1084,17 @@ function populateMatcherWizard() {
   const teacherSelect=document.getElementById("matcher-teacher");
   const schoolSelect=document.getElementById("matcher-school");
   const classSelect=document.getElementById("matcher-class");
-  teacherSelect.innerHTML=matcherData.teachers.length ? matcherData.teachers.map(teacher=>`<option value="${htmlEscape(teacher.id)}">${htmlEscape(teacher.name)}</option>`).join("") : '<option value="">No teachers available</option>';
+  teacherSelect.innerHTML=matcherData.teachers.length ? matcherData.teachers.map(teacher=>`<option value="${htmlEscape(teacher.id)}">${htmlEscape(teacher.name)}</option>`).join("") : '<option value="">No Teachers Available</option>';
   const populateSchools=()=>{
     const classes=matcherData.classes.filter(item=>String(item.teacherId)===teacherSelect.value);
     const schools=[...new Set(classes.map(item=>item.schoolName))];
-    schoolSelect.innerHTML=schools.length ? schools.map(school=>`<option value="${htmlEscape(school)}">${htmlEscape(school)}</option>`).join("") : '<option value="">No schools available</option>';
+    schoolSelect.innerHTML=schools.length ? schools.map(school=>`<option value="${htmlEscape(school)}">${htmlEscape(school)}</option>`).join("") : '<option value="">No Schools Available</option>';
     schoolSelect.disabled=!schools.length;
     populateClasses();
   };
   const populateClasses=()=>{
     const classes=matcherData.classes.filter(item=>String(item.teacherId)===teacherSelect.value&&item.schoolName===schoolSelect.value);
-    classSelect.innerHTML=classes.length ? classes.map(item=>`<option value="${htmlEscape(item.id)}">${htmlEscape(item.name)}</option>`).join("") : '<option value="">No classes available</option>';
+    classSelect.innerHTML=classes.length ? classes.map(item=>`<option value="${htmlEscape(item.id)}">${htmlEscape(item.name)}</option>`).join("") : '<option value="">No Classes Available</option>';
     classSelect.disabled=!classes.length;
     renderMatcherResults();
   };
@@ -1131,7 +1135,7 @@ function outsideOrderCalculation() {
 function previewOutsideOrderSizes() {
   const calculation=outsideOrderCalculation();
   const sizes=Object.entries(calculation.counts);
-  document.getElementById("outside-order-sizes").innerHTML=sizes.length?`<strong>Sizes needed:</strong> ${sizes.map(([size,count])=>`${htmlEscape(size)} - ${count}`).join(" · ")}${calculation.unmeasured.length?`<br><small>Needs measurements: ${calculation.unmeasured.map(htmlEscape).join(", ")}</small>`:""}`:`No measurable ${outsideOrderMode==="boys"?"boys":"girls"} are available for this company’s chart yet.`;
+  document.getElementById("outside-order-sizes").innerHTML=sizes.length?`<strong>Sizes Needed:</strong> ${sizes.map(([size,count])=>`${htmlEscape(size)} - ${count}`).join(" · ")}${calculation.unmeasured.length?`<br><small>Needs measurements: ${calculation.unmeasured.map(htmlEscape).join(", ")}</small>`:""}`:`No measurable ${outsideOrderMode==="boys"?"boys":"girls"} are available for this company’s chart yet.`;
 }
 
 function previewOutsideOrderImage() {}
