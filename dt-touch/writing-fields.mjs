@@ -2,6 +2,7 @@
 const selectors=['article[aria-label="Teacher Mobile PWA"] textarea','[data-reschedule-reason]','[data-partner-school-notes]','#future-reschedule-reason','#schedule-event-notes','textarea[id^="teacher-"]','textarea[id^="tt-"]','#teacher-activities-content textarea','#teacher-activities-content input[type="text"]','#teacher-class-post-custom-title','#teacher-desktop-task-input','[data-practice-title]','[data-practice-caption]','[data-dt-touch-field]'];
 export function mountWritingFields({root=document,getClient=()=>window.dtSupabase,isPreview=()=>document.body.dataset.tourMode==='true'}={}) {
  const attach=field=>{
+  if(field.closest('.big-stage-modal'))return;
   if(field.dataset.dtTouchDisabled==='true'||field.dataset.dtTouchMounted||field.id==='teacher-parent-shared-reply'||field.readOnly||field.disabled||field.type==='search')return;
   if(/search|phone|email|birth|medical|password|url/i.test(field.id))return;
   field.dataset.dtTouchMounted='true';

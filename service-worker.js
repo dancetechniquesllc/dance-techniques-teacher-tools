@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v358-dashboard-messaging-ui";
+const CACHE_NAME = "my-dance-techniques-v359-finance-stage-availability";
 const CORE_ASSETS = [
   "./assets/search-input.css",
   "./assets/action-icons.css",

@@ -156,9 +156,77 @@
    if(button.dataset.photo!==photo){button.replaceChildren();if(photo){const img=document.createElement('img');img.src=photo;img.alt=names[person];button.append(img);}else button.textContent=names[person][0];button.dataset.photo=photo;}
   }
  };
+ const idleLimit=60*60*1000;
+ let promptedAccount='',sessionDirector='',lastActivityAt=0,syncedActivityAt=0,lastActivityRequest=0,activityPending=false;
+ const availabilityPreview=new URLSearchParams(location.search).get('availability-preview');
+ const namedDirector=()=>{
+  if(tour())return availabilityPreview==='1'?'lexi':'';
+  if(!canEdit())return '';
+  const first=String(window.dtCurrentProfile?.full_name||'').trim().toLowerCase().replace(/^ms\.?\s+/,'').split(/\s+/)[0];
+  return Object.hasOwn(names,first)?first:'';
+ };
+ const ownDirector=()=>namedDirector()||sessionDirector;
+ const options=dialog.querySelector('.director-status-options');
+ const chooser=document.createElement('div');
+ chooser.className='director-status-options';
+ chooser.hidden=true;
+ for(const [person,label] of Object.entries(names)){
+  const choice=document.createElement('button');
+  choice.type='button';
+  choice.textContent=label;
+  choice.addEventListener('click',()=>{
+   sessionDirector=person;
+   showAvailability(person);
+  });
+  chooser.append(choice);
+ }
+ options.before(chooser);
+ const showAvailability=person=>{
+  editing=person;
+  chooser.hidden=Boolean(person);
+  options.hidden=!person;
+  document.getElementById('director-presence-title').textContent=person?names[person]+"’s Availability":'Who’s Working in DD?';
+  dialog.querySelectorAll('[data-availability]').forEach(button=>button.setAttribute('aria-pressed',String(rows[person]?.status===button.dataset.availability)));
+  note(person?'Choose your availability. After an hour without activity in DD, it switches to Offline.':'Choose whose availability to set.');
+  if(!dialog.open)dialog.showModal();
+  else options.querySelector('button')?.focus();
+ };
+ const promptOnDashboard=()=>{
+  const account=tour()?(availabilityPreview?'preview':''):window.dtCurrentProfile?.id;
+  if(!canEdit()||!account||document.body.dataset.mode!=='admin'||promptedAccount===account)return;
+  promptedAccount=account;
+  showAvailability(ownDirector());
+ };
+ const recordDashboardActivity=event=>{
+  if(!event.isTrusted||document.hidden||document.body.dataset.mode!=='admin'||!ownDirector())return;
+  const now=Date.now();
+  if(lastActivityAt&&now-lastActivityAt>=idleLimit&&rows[ownDirector()]?.status==='offline')showAvailability(ownDirector());
+  lastActivityAt=now;
+  void syncDashboardActivity();
+ };
+ const syncDashboardActivity=async()=>{
+  const person=ownDirector(),account=window.dtCurrentProfile?.id,now=Date.now();
+  if(!person||document.body.dataset.mode!=='admin'||!lastActivityAt||activityPending||busy)return;
+  const row=rows[person];
+  if(!row||!['open','busy'].includes(row.status))return;
+  if(tour()){
+   if(now-lastActivityAt>=idleLimit){await sampleStore(person,'offline');sampleChannel.postMessage('changed');await refresh();}
+   return;
+  }
+  const age=Math.floor((now-lastActivityAt)/1000);
+  if(age>=3600||lastActivityAt<=syncedActivityAt||now-lastActivityRequest<30000)return;
+  const activity=lastActivityAt;
+  lastActivityRequest=now;
+  activityPending=true;
+  try{
+   const {error}=await window.dtSupabase.rpc('record_director_dashboard_activity',{expected_account:account,target_person:person,expected_revision:row.revision,activity_age_seconds:age});
+   if(!error&&account===window.dtCurrentProfile?.id)syncedActivityAt=activity;
+  }catch{/* Retry from the next active DD sync. */}
+  finally{activityPending=false;}
+ };
  for(const person of Object.keys(names)) {
   const button=document.createElement('button');button.type='button';button.className='director-presence';button.dataset.directorPerson=person;button.textContent=names[person][0];
-  button.onclick=()=>{if(!canEdit())return;editing=person;document.getElementById('director-presence-title').textContent=names[person]+"’s availability";dialog.querySelectorAll('[data-availability]').forEach(b=>b.setAttribute('aria-pressed',String(rows[person]?.status===b.dataset.availability)));note(tour()?'Preview · Updates other preview tabs':'Choose your availability');dialog.showModal();void refresh();};
+  button.onclick=()=>{if(!canEdit())return;showAvailability(person);void refresh();};
   bottom.append(button);
  }
  bottom.append(actions.querySelector('#auth-sign-out'));actions.classList.add('director-corner');actions.prepend(top,middle);document.body.append(dialog);
@@ -185,6 +253,7 @@
    }else{
     const {error}=await window.dtSupabase.rpc('set_director_availability',{expected_account:window.dtCurrentProfile.id,target_person:person,new_status:status,expected_revision:rows[person]?.revision||0});if(error)throw error;
    }
+   if(person===ownDirector()&&document.body.dataset.mode==='admin')lastActivityAt=syncedActivityAt=Date.now();
    note('Status saved');dialog.close();
   }catch(error){note(error.message||'Status did not save. Please try again.');}
   finally{busy=false;dialog.querySelectorAll('[data-availability]').forEach(b=>b.disabled=false);await refresh();}
@@ -210,6 +279,8 @@
    if(profileId)channel=window.dtSupabase.channel('director-availability-'+profileId).on('postgres_changes',{event:'*',schema:'public',table:'director_availability'},refresh).subscribe();
   }
   await refresh();
+  promptOnDashboard();
+  await syncDashboardActivity();
   window.dtRenderBoutiqueCorner?.();
  };
  window.dtRenderBoutiqueCorner=()=>{
@@ -238,6 +309,14 @@
   void connect();
   if(canEdit())void loadSharedFamilyConversations();
  });
+ window.addEventListener('dt-auth-cleared',()=>{
+  promptedAccount='';sessionDirector='';lastActivityAt=syncedActivityAt=lastActivityRequest=0;
+  if(dialog.open)dialog.close();
+ });
+ for(const type of ['pointerdown','keydown','wheel','touchstart','input']){
+  document.addEventListener(type,recordDashboardActivity,{capture:true,passive:true});
+ }
+ new MutationObserver(promptOnDashboard).observe(document.body,{attributes:true,attributeFilter:['data-mode']});
  window.addEventListener('focus',connect);window.addEventListener('online',connect);
  setInterval(()=>{if(!document.hidden)void connect();},5000);
  const countObserver=new MutationObserver(()=>window.dtRenderBoutiqueCorner());

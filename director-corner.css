@@ -19,6 +19,8 @@
 .director-status-dialog::backdrop { background:#30202055; }
 .director-status-dialog h2 { margin:0 0 14px; font-size:22px; }
 .director-status-options { display:grid; gap:10px; }
+.director-status-options[hidden] { display:none; }
+.director-status-dialog .director-status-options button { min-height:42px; }
 .session-strip .director-status-options button { display:flex; align-items:center; gap:10px; width:100%; min-height:46px; padding:10px 14px; border:1px solid var(--border); border-radius:12px; background:white; color:var(--fg); }
 .director-status-options i { width:14px; height:14px; border-radius:50%; background:var(--dot); }
 .director-status-options button[aria-pressed=true] { outline:2px solid var(--berry); }
