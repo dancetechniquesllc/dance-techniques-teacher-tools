@@ -25230,6 +25230,12 @@
         ];
       }
       if(document.body.dataset.tourMode!=="true")assigned=assigned.map((item)=>{const plannerAssignment=window.getTeacherRecitalClassAssignment?.(item.stageSheetId||item.id);return plannerAssignment?{...item,recitalShow:plannerAssignment.show||item.recitalShow,routineName:plannerAssignment.routineName||item.routineName,recitalRequirement:plannerAssignment.requirement||item.recitalRequirement}:item;});
+      const plannerTeacherId = document.body.dataset.tourMode === "true"
+        ? `tour-${String(teacherName).replace(/^ms\.?\s*/i,"").trim().toLowerCase()}` : teacherId;
+      const lockedShows = window.getTeacherLockedRecitalShows?.(plannerTeacherId) || [];
+      const lockedClasses = window.getTeacherLockedRecitalClasses?.(plannerTeacherId) || [];
+      const unlockedShows = assigned.filter((item)=>!lockedShows.some(({show})=>show===Number(item.recitalShow)));
+      const showClasses = [...lockedClasses,...unlockedShows];
       const shows=[1,2,3,4],showColors=["#dba9a1","#b8c8aa","#e3bd74","#aebfd3"];
       const desktopMode=document.body.dataset.mode==="teacher-desktop";
       if(!desktopMode)teacherStageMode="shows";
@@ -25239,7 +25245,7 @@
       const desktopPlanning=desktopMode?`<div class="teacher-shared-planner" id="teacher-shared-planner" ${teacherStageMode==="planning"?"":"hidden"}><div class="stage-empty">Opening your live planning board…</div></div>`:"";
       const decorateTeacherShowCards=()=>{
         board.querySelectorAll(".teacher-stage-my-shows [data-teacher-stage-plan]").forEach((button)=>{
-          const item=assigned.find((candidate)=>String(candidate.id)===String(button.dataset.teacherStagePlan));
+          const item=showClasses.find((candidate)=>String(candidate.id)===String(button.dataset.teacherStagePlan));
           if(!item)return;
           const teacherStageIsBoy=(student)=>/^(boy|male)$/i.test(String(student?.gender||student?.sex||"").trim());
           const dancers=(item.students||[]).filter((student)=>String(student.status||"").toLowerCase()==="enrolled"),boys=dancers.filter(teacherStageIsBoy).length;
@@ -25250,7 +25256,7 @@
           const combined=Boolean(item.combined||item.isCombined||item.classes?.length>1||/\s\+\s/.test(String(item.schoolName||"")));
           const sortedDancers=[...dancers].sort((left,right)=>Number(teacherStageIsBoy(right))-Number(teacherStageIsBoy(left)));
           const studentMarkup=sortedDancers.map((student)=>{const first=student.preferredName||student.firstName||"Dancer",last=String(student.lastName||"").trim(),name=`${first}${last?` ${last.charAt(0)}.`:""}`,initials=`${first.charAt(0)}${last.charAt(0)}`.toUpperCase(),school=student.schoolName||student.school||item.schoolName||"Partner School",boy=teacherStageIsBoy(student);return `<span class="${boy?"is-boy":""}">${studentPhotoMarkup(student, initials)}<b>${escapeText(name)}</b>${combined?`<small>${escapeText(school)}</small>`:""}</span>`;}).join("");
-          card.innerHTML=`<span class="teacher-stage-show-type is-${escapeText(style)}" aria-label="${style==="either"?"Undecided":escapeText(style)} routine">${typeLetter}</span><strong>${escapeText(item.routineName||item.name||"Routine")}</strong><strong>${escapeText(item.schoolName||"Partner School")}</strong><strong>${escapeText(item.name||"Class")}</strong><strong>${dancers.length}</strong><strong>${boys||""}</strong><strong>${escapeText(ageRange)}</strong><button class="teacher-stage-roster-toggle" type="button" data-teacher-stage-roster aria-expanded="false">Roster</button><button type="button" data-teacher-stage-sheet="${escapeText(item.stageSheetId||item.id)}">Stage Sheet</button><div class="teacher-stage-show-roster" hidden>${studentMarkup||"<p>No enrolled students.</p>"}</div>`;
+          card.innerHTML=`<span class="teacher-stage-show-type is-${escapeText(style)}" aria-label="${style==="either"?"Undecided":escapeText(style)} routine">${typeLetter}</span><strong>${escapeText(item.routineName||item.name||"Routine")}</strong><strong>${escapeText(item.schoolName||"Partner School")}</strong><strong>${escapeText(item.name||"Class")}</strong><strong>${dancers.length}</strong><strong>${boys||""}</strong><strong>${escapeText(ageRange)}</strong><button class="teacher-stage-roster-toggle" type="button" data-teacher-stage-roster aria-expanded="false">Roster</button><button type="button" data-teacher-stage-sheet="${escapeText(item.stageSheetId||item.id)}">Edit Stage Layout</button><div class="teacher-stage-show-roster" hidden>${studentMarkup||"<p>No enrolled students.</p>"}</div>`;
           const rosterToggle=card.querySelector("[data-teacher-stage-roster]"),className=card.children[3],classToggle=document.createElement("div");
           classToggle.className="teacher-stage-class-toggle";
           rosterToggle.textContent="";
@@ -25258,11 +25264,13 @@
           className.replaceWith(classToggle);
           classToggle.append(rosterToggle,className);
           const stageSheetButton=card.querySelector("[data-teacher-stage-sheet]");
+          stageSheetButton.dataset.teacherStageRecital=item.recitalLetter||"";
+          stageSheetButton.dataset.teacherStageOwner=plannerTeacherId||"";
           stageSheetButton.dataset.teacherStageSchool=item.schoolName||"";
           stageSheetButton.dataset.teacherStageClass=item.name||"";
           button.replaceWith(card);
         });
-        if(desktopMode)board.querySelectorAll(".teacher-stage-my-shows>article>div").forEach((list)=>{if(!list.querySelector(".teacher-stage-show-class"))return;list.insertAdjacentHTML("afterbegin",'<div class="teacher-stage-show-head"><span aria-hidden="true"></span><span>Routine Name</span><span>School</span><span>Class</span><span>Dancers</span><span>Boys</span><span>Age Range</span><span>Stage Sheet</span></div>');});
+        if(desktopMode)board.querySelectorAll(".teacher-stage-my-shows>article>div").forEach((list)=>{if(!list.querySelector(".teacher-stage-show-class"))return;list.insertAdjacentHTML("afterbegin",'<div class="teacher-stage-show-head"><span aria-hidden="true"></span><span>Routine Name</span><span>School</span><span>Class</span><span>Dancers</span><span>Boys</span><span>Age Range</span><span>Stage Layout</span></div>');});
       };
       board.dataset.stageMode=teacherStageMode;
       board.innerHTML = `<nav class="teacher-stage-view-toggle" aria-label="Big Stage teacher views"><button type="button" data-teacher-stage-mode="planning" aria-pressed="${teacherStageMode==="planning"}">Planning Board</button><button type="button" data-teacher-stage-mode="shows" aria-pressed="${teacherStageMode==="shows"}">My Shows</button></nav>${desktopPlanning}<div class="teacher-stage-phone-board" ${teacherStageMode==="planning"&&!desktopMode?"":"hidden"}>
@@ -25273,10 +25281,14 @@
           <div class="teacher-stage-routine-status"><strong>Using 1 Time</strong><span>✓ Strong Match</span></div>
           <section class="teacher-stage-phone-show"><div class="teacher-stage-phone-show-title"><strong>${show?`Show ${show}`:"Planning Pool"}</strong><small>${escapeText(rosterClass.schoolName||"Partner School")}</small></div>
             <article class="teacher-stage-phone-class"><div><strong>${escapeText(rosterClass.name||"Class")}</strong><span>${dancers.length} dancers</span></div><p>${escapeText(rosterClass.day||"Day TBD")} · ${escapeText(rosterClass.time||"Time TBD")}</p><details><summary>Dancers <span>${dancers.length}</span></summary><div>${dancers.map((student)=>`<span>${studentPhotoMarkup(student)}<small>${escapeText(student.firstName||"Dancer")}</small></span>`).join("")}</div></details><footer><button type="button" data-teacher-stage-plan="${escapeText(rosterClass.id)}">Plan Routine</button><button type="button" data-teacher-stage-sheet="${escapeText(rosterClass.id)}">Stage Sheet</button></footer></article>
-          </section></article>`;}).join(""):'<div class="empty-state"><strong>No assigned recital classes yet.</strong><small>Classes will appear here as soon as the director assigns them to you.</small></div>'}</section></div><section class="teacher-stage-my-shows" ${teacherStageMode==="shows"?"":"hidden"}>${shows.map((show,index)=>{const routines=assigned.filter((item)=>Number(item.recitalShow)===show);return `<article style="--teacher-show-color:${showColors[index]}"><header><div><small>RECITAL</small><h3>Show ${show}</h3></div><span>${routines.length} Routine${routines.length===1?"":"s"}</span></header>${routines.length?`<div>${routines.map((item)=>`<button type="button" data-teacher-stage-plan="${escapeText(item.id)}"><span><strong>${escapeText(item.routineName||item.name||"Routine")}</strong><small>${escapeText(item.schoolName||"Partner School")}</small></span><em>${(item.students||[]).filter((student)=>String(student.status||"").toLowerCase()==="enrolled").length} dancers</em></button>`).join("")}</div>`:'<p>No routines assigned to this show yet.</p>'}</article>`;}).join("")}</section>`;
+          </section></article>`;}).join(""):'<div class="empty-state"><strong>No assigned recital classes yet.</strong><small>Classes will appear here as soon as the director assigns them to you.</small></div>'}</section></div><section class="teacher-stage-my-shows" ${teacherStageMode==="shows"?"":"hidden"}>${shows.map((show,index)=>{const locked = lockedShows.find((entry)=>entry.show===show),routines=showClasses.filter((item)=>Number(item.recitalShow)===show);return `<article style="--teacher-show-color:${showColors[index]}"><header><div><small>${locked?`SHOW ${show} · LOCKED`:"RECITAL"}</small><h3>${locked?`Recital ${locked.recital}`:`Show ${show}`}</h3></div><span>${routines.length} Routine${routines.length===1?"":"s"}</span></header>${routines.length?`<div>${routines.map((item)=>`<button type="button" data-teacher-stage-plan="${escapeText(item.id)}"><span><strong>${escapeText(item.routineName||item.name||"Routine")}</strong><small>${escapeText(item.schoolName||"Partner School")}</small></span><em>${(item.students||[]).filter((student)=>String(student.status||"").toLowerCase()==="enrolled").length} dancers</em></button>`).join("")}</div>`:'<p>No routines assigned to this show yet.</p>'}</article>`;}).join("")}</section>`;
       decorateTeacherShowCards();
       if(desktopMode&&teacherStageMode==="planning") setTimeout(()=>window.mountTeacherBigStagePlanner?.(document.getElementById("teacher-shared-planner"),teacherName),0);
     }
+
+    window.addEventListener("dt:stage-layout-saved",()=>{
+      if (currentViewTab==="teacher-stage") showToast("Stage layout saved.");
+    });
 
     window.addEventListener("dt:recital-planner-ready",()=>{
       if(currentViewTab==="teacher-stage")renderTeacherStageBoard();
@@ -25338,7 +25350,22 @@
       const teacherStageRoster=event.target.closest("[data-teacher-stage-roster]");
       if(teacherStageRoster){const roster=teacherStageRoster.closest(".teacher-stage-show-class")?.querySelector(".teacher-stage-show-roster"),expanded=teacherStageRoster.getAttribute("aria-expanded")!=="true";teacherStageRoster.setAttribute("aria-expanded",String(expanded));if(roster)roster.hidden=!expanded;return;}
       const teacherStageSheet=event.target.closest("[data-teacher-stage-sheet]");
-      if(teacherStageSheet){event.preventDefault();const teacherLabel=profileTeacher?.firstName||teacherNickname(profileTeacher)||"Teacher",allowStandalone=/^lexi$/i.test(String(teacherLabel).replace(/^ms\.?\s*/i,"").trim());window.openTeacherStageSheetEditor?.({classId:teacherStageSheet.dataset.teacherStageSheet,teacherLabel,school:teacherStageSheet.dataset.teacherStageSchool||"",className:teacherStageSheet.dataset.teacherStageClass||"",allowStandalone}).then((opened)=>{if(!opened){showToast("This routine needs to be assigned to a recital before its stage sheet can open.");return;}if(document.body.dataset.mode==="teacher"){const modal=document.querySelector(".stage-sheet-modal"),host=document.querySelector(".phone-screen");if(modal&&host){modal.classList.add("is-phone-landscape");host.append(modal);const rect=host.getBoundingClientRect(),top=Math.max(0,rect.top),viewportHeight=Math.min(window.innerHeight-top,rect.height),dialog=modal.querySelector(".big-stage-dialog");Object.assign(modal.style,{left:`${rect.left}px`,top:`${top}px`,width:`${rect.width}px`,height:`${viewportHeight}px`});if(dialog){dialog.style.width=`${viewportHeight}px`;dialog.style.height=`${rect.width}px`;}}}});return;}
+      if (teacherStageSheet) {
+        event.preventDefault();
+        const teacherLabel = profileTeacher?.firstName || teacherNickname(profileTeacher) || "Teacher";
+        const allowStandalone = /^lexi$/i.test(String(teacherLabel).replace(/^ms\.?\s*/i, "").trim());
+        window.openTeacherStageSheetEditor?.({
+          classId:teacherStageSheet.dataset.teacherStageSheet,
+          recital:teacherStageSheet.dataset.teacherStageRecital,
+          teacherId:teacherStageSheet.dataset.teacherStageOwner,
+          school:teacherStageSheet.dataset.teacherStageSchool || "",
+          className:teacherStageSheet.dataset.teacherStageClass || "",
+          teacherLabel,allowStandalone
+        }).then((opened)=>{
+          if (!opened) showToast("This routine needs a locked recital assignment before its stage layout can open.");
+        }).catch(()=>showToast("The stage layout couldn’t load. Please try again."));
+        return;
+      }
       const navToggle = event.target.closest("#teacher-nav-button");
       if (navToggle) {
         const menu = document.getElementById("teacher-nav-menu");
@@ -57845,7 +57872,7 @@
 <link rel="stylesheet" href="big-stage-order.css?v=20261005-compact-separation">
 <link rel="stylesheet" href="big-stage-wizard.css?v=20261012-recital-reset">
 <link rel="stylesheet" href="big-stage-matching.css?v=20261008-live-classes">
-  <script src="big-stage.js?v=20261020-unresolved-conflicts"></script>
+  <script src="big-stage.js?v=20261109-locked-recital-layouts"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
 <script src="big-stage-wizard.js?v=20261020-preserve-plans"></script>
   <script src="director-task-sync.js?v=20260908"></script>

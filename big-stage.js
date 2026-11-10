@@ -14,8 +14,37 @@
   const workspaceGroupSnapshot = (group) => ({id:group.id,name:group.name,requirement:group.requirement,relationship:group.relationship,quality:group.quality,decision:group.decision,owner:group.owner,teacherIds:group.teacherIds,crossTeacher:Boolean(group.crossTeacher),emptyForTeacher:group.emptyForTeacher||"",classIds:group.classes.map((item)=>item.id),stageSets:group.stageSets.map((set)=>set.map((item)=>item.id)),analysis:group.analysis||{},songId:group.songId||"",songTitle:group.songTitle||"",showAssignments:group.showAssignments||{},teacherShows:group.teacherShows||[],showsLinked:Boolean(group.showsLinked),resultingShowUses:group.resultingShowUses||0,sourceRoutineUses:group.sourceRoutineUses||[],targetFourPriority:group.targetFourPriority||0});
   const plannerWorkspaceSnapshot = () => ({groups:state.groups.filter((group)=>group.classes.length).map(workspaceGroupSnapshot),schoolShows:{...state.schoolShows},pendingShows:{...state.pendingShows},showColors:{...state.showColors},classShow:{...(state.showPlan?.classShow||{})},boardTeacher:state.boardTeacher,activeRecital:state.activeRecital,recitalTeacherShows:state.recitalTeacherShows,recitalLocks:state.recitalLocks});
   const hydrateWorkspaceGroups = (savedGroups) => (savedGroups||[]).map((saved)=>{const classes=(saved.classIds||[]).map((id)=>state.classes.find((item)=>item.id===id)).filter(Boolean),stageSets=(saved.stageSets||[]).map((set)=>(set||[]).map((id)=>state.classes.find((item)=>item.id===id)).filter(Boolean)).filter((set)=>set.length);if(!classes.length)return null;return {...saved,classes,stageSets,teacherIds:[...new Set(classes.map((item)=>item.teacherId))],analysis:saved.analysis||{},showAssignments:saved.showAssignments||{}};}).filter(Boolean);
-  const loadPlannerWorkspace = async () => {let saved=null;if(document.body.dataset.tourMode!=="true"&&window.dtSupabase){const result=await window.dtSupabase.from("recital_planner_workspace_states").select("workspace_state").eq("season",SEASON).maybeSingle();if(result.error)throw result.error;saved=result.data?.workspace_state||null;}if(!saved){try{saved=JSON.parse(localStorage.getItem(workspaceStorageKey)||"null");}catch{saved=null;}}if(!saved)return null;state.schoolShows={...(saved.schoolShows||{})};state.pendingShows={...(saved.pendingShows||{})};state.showColors={...state.showColors,...(saved.showColors||{})};state.boardTeacher=saved.boardTeacher||state.boardTeacher;state.activeRecital=saved.activeRecital||"A";state.recitalTeacherShows={A:{},B:{},C:{},D:{},...(saved.recitalTeacherShows||{})};state.recitalLocks={A:{},B:{},C:{},D:{},...(saved.recitalLocks||{})};state.showPlan={classShow:{...(saved.classShow||{})},shows:[]};return hydrateWorkspaceGroups(saved.groups);};
+  const loadPlannerWorkspace = async () => {
+    const live = document.body.dataset.tourMode !== "true";
+    const teacher = live && window.dtCurrentProfile?.role === "teacher";
+    let saved = null;
+    if (teacher) {
+      const result = await window.dtSupabase.rpc("teacher_recital_workspace", {target_season:SEASON});
+      if (result.error) throw result.error;
+      saved = result.data || {};
+    } else {
+      if (live && window.dtSupabase) {
+        const result = await window.dtSupabase.from("recital_planner_workspace_states").select("workspace_state").eq("season", SEASON).maybeSingle();
+        if (result.error) throw result.error;
+        saved = result.data?.workspace_state;
+      }
+      if (!saved) {
+        try { saved = JSON.parse(localStorage.getItem(workspaceStorageKey) || "null"); } catch { saved = null; }
+      }
+      if (!saved) return null;
+    }
+    state.schoolShows = {...saved.schoolShows};
+    state.pendingShows = {...saved.pendingShows};
+    state.showColors = {...state.showColors, ...saved.showColors};
+    state.boardTeacher = teacher ? String(window.dtCurrentProfile.id) : saved.boardTeacher || state.boardTeacher;
+    state.activeRecital = saved.activeRecital || "A";
+    state.recitalTeacherShows = {A:{},B:{},C:{},D:{},...saved.recitalTeacherShows};
+    state.recitalLocks = {A:{},B:{},C:{},D:{},...saved.recitalLocks};
+    state.showPlan = {classShow:{...saved.classShow},shows:[]};
+    return hydrateWorkspaceGroups(saved.groups);
+  };
   const savePlannerWorkspace = async () => {
+    if (document.body.dataset.tourMode !== "true" && window.dtCurrentProfile?.role === "teacher") return false;
     const workspace=JSON.parse(JSON.stringify(plannerWorkspaceSnapshot()));
     try {
       if(document.body.dataset.tourMode!=="true") {
@@ -412,7 +441,9 @@
     if(!state.boardTeacher||!loads.some((item)=>item.id===state.boardTeacher))state.boardTeacher=loads[0].id;
     const load=loads.find((item)=>item.id===state.boardTeacher);
     const classes=state.classes.filter((item)=>item.teacherId===state.boardTeacher).sort((a,b)=>(a.avgAge??999)-(b.avgAge??999)||a.name.localeCompare(b.name,undefined,{numeric:true}));
-    const routines=state.groups.filter((group)=>group.decision!=="rejected"&&(group.classes.some((item)=>item.teacherId===state.boardTeacher)||group.emptyForTeacher===state.boardTeacher)&&!group.crossTeacher);normalizeCombinedShowAssignments(routines);
+    const routines=state.groups.filter((group)=>group.decision!=="rejected"&&(group.classes.some((item)=>item.teacherId===state.boardTeacher)||group.emptyForTeacher===state.boardTeacher)&&!group.crossTeacher);
+    // Rendering the planning board must not move classes after a show has been locked.
+    if (!Object.values(state.recitalLocks).some((locks)=>locks[state.boardTeacher])) normalizeCombinedShowAssignments(routines);
     const schools=orderedBoardSchools([...new Set(classes.map((item)=>item.school))],routines);
     const recitalSongs=recitalPlaylistSongs();
     return `<section class="stage-teacher-board ${state.fullscreen?"is-workspace-fullscreen":""}" data-stage-teacher-planning-board>${state.fullscreen?`<button type="button" class="stage-fullscreen-close" data-stage-exit-fullscreen aria-label="Exit fullscreen planning view">×</button>`:""}
@@ -516,9 +547,10 @@
     const number=plannerRoutineNumber(group,teacherId);
     return number>0?`Routine ${number}`:"Routine";
   };
-  const recitalUnits = (recital) => {
+  const recitalUnits = (recital,teacherId="") => {
     const selected=state.recitalTeacherShows[recital]||{};
-    const units=state.groups.filter((group)=>!group.crossTeacher&&group.decision!=="rejected").map((group)=>{const classes=group.classes.filter((item)=>Number(selected[item.teacherId])===Number(teacherShowForItem(item)));return classes.length?{group,classes}:null;}).filter(Boolean);
+    const units=state.groups.filter((group)=>!group.crossTeacher&&group.decision!=="rejected").map((group)=>{const classes=group.classes.filter((item)=>(!teacherId||item.teacherId===teacherId)&&Number(selected[item.teacherId])===Number(teacherShowForItem(item)));return classes.length?{group,classes}:null;}).filter(Boolean);
+    if (teacherId) return units;
     state.groups.filter((group)=>group.crossTeacher&&group.showsLinked&&group.decision!=="rejected").forEach((linked)=>{const linkedSelected=linked.classes.every((item,index)=>Number(selected[item.teacherId])===Number(linked.teacherShows?.[index]||teacherShowForItem(item)));if(!linkedSelected)return;const sourceUnits=units.filter((unit)=>linked.classes.some((match)=>unit.group.classes.some((item)=>item.id===match.id)));if(sourceUnits.length<2)return;const insertAt=Math.min(...sourceUnits.map((unit)=>units.indexOf(unit))),classes=[...new Map(sourceUnits.flatMap((unit)=>unit.classes).map((item)=>[item.id,item])).values()],teachers=[...new Set(classes.map((item)=>item.teacher))],decidedRequirements=[...new Set(sourceUnits.map((unit)=>unit.group.requirement).filter((requirement)=>requirement&&requirement!=="either"))],resolvedRequirement=decidedRequirements.length===1?decidedRequirements[0]:linked.requirement,merged={...linked,requirement:resolvedRequirement,name:`${teachers.join(" + ")} · ${resolvedRequirement==="either"?"Undecided":title(resolvedRequirement)} Cross-Teacher Routine`,crossTeacher:true};sourceUnits.forEach((unit)=>units.splice(units.indexOf(unit),1));units.splice(insertAt,0,{group:merged,classes});});
     return units;
   };
@@ -587,15 +619,21 @@
     const liveRecords=recitalConflictRecords(),showSamples=document.body.dataset.tourMode==="true"&&!liveRecords.length,records=showSamples?sampleConflictRecords():liveRecords,noRecital=records.filter((record)=>record.details.kind==="no-recital").length,timeConflicts=records.length-noRecital,assigned=records.filter((record)=>record.recital).length;
     return `<section class="stage-conflicts"><header><div><small>RECITAL PLANNING</small><h4>Recital Conflicts</h4><p>Review dancers who will not participate or whose availability may affect show placement.</p></div><div class="stage-conflict-summary"><span><strong>${records.length}</strong>${showSamples?"Sample Flags":"Total Flags"}</span><span class="is-no-recital"><strong>${noRecital}</strong>NO Recital</span><span class="is-time"><strong>${timeConflicts}</strong>Time Conflicts</span><span class="is-assigned"><strong>${assigned}</strong>Assigned</span></div></header>${showSamples?`<div class="stage-conflict-sample-note"><strong>Sample submissions</strong><span>These examples show how each answer from the conflict form will appear.</span></div>`:""}${records.length?`<div class="stage-conflict-list">${records.map(({student,item,details,show,recital,sample,sampleId})=>{const isAssigned=sample&&Boolean(state.sampleConflictAssignments[sampleId]),acknowledged=Boolean(state.sampleConflictAcknowledged[sampleId]||studentAdditionalInformation(student).recital_conflict_acknowledged_at),key=sampleId||student.id,reason=details.note||details.window||details.response||"No reason provided",resolution=state.sampleConflictResolutions[key]||studentAdditionalInformation(student).recital_conflict_resolution;return `<article class="is-${details.kind} ${sample?"is-sample":""} ${acknowledged||resolution?"is-acknowledged":""}">${sample?`<button class="stage-conflict-avatar ${isAssigned?"is-assigned":"is-add"}" type="button" data-stage-conflict-assign="${esc(sampleId)}" aria-label="${isAssigned?"Change":"Assign"} official student">${isAssigned?esc(boardDancerInitials(student)):"+"}</button>`:`<span class="stage-conflict-avatar">${esc(boardDancerInitials(student))}</span>`}<div class="stage-conflict-identity"><strong>${esc(fullName(student)||"Dancer")}${sample&&!isAssigned?`<em>Sample</em>`:isAssigned?`<em>Assigned</em>`:""}</strong><small>${esc(item.teacher)} - ${esc(item.school)} - ${esc(item.name)}</small></div><span class="stage-conflict-status">${esc(details.label)}</span><div class="stage-conflict-note"><p>${esc(reason)}</p></div><div class="stage-conflict-placement"><strong>${show?`Teacher Show ${show}`:"Teacher show not assigned"}</strong><small>${recital?`Recital ${recital}`:"Recital not assigned"}</small></div>${details.kind==="no-recital"?`<button class="stage-conflict-acknowledge" type="button" data-stage-conflict-acknowledge="${esc(key)}" ${sample&&!isAssigned||acknowledged?"disabled":""}>${acknowledged?"Acknowledged":"Acknowledge"}</button>`:`<button class="stage-conflict-review" type="button" data-stage-time-review="${esc(key)}">${resolution?"Resolved":"Review Options"}</button>`}</article>`;}).join("")}</div>`:`<div class="stage-empty"><h4>No recital conflicts reported</h4><p>NO Recital selections and submitted time conflicts will appear here automatically.</p></div>`}${conflictAssignmentModal()}</section>`;
   };
-  const matchedProductionShows = () => ["A","B","C","D"].map((recital)=>{
-    const units=recitalUnits(recital),classes=[...new Map(units.flatMap((unit)=>unit.classes).map((item)=>[item.id,item])).values()];
-    if(!units.length)return null;
-    const teacherIds=[...new Set(classes.map((item)=>item.teacherId))],locked=teacherIds.length&&teacherIds.every((teacherId)=>Boolean(state.recitalLocks[recital]?.[teacherId]));
-    return {id:`recital-${recital}`,name:`Recital ${recital}`,recital,time:"Time not assigned",date:"Saturday, May 22, 2027",ready:locked?100:70,schools:new Set(classes.map((item)=>item.school)).size,performances:units.length,dancers:classes.reduce((sum,item)=>sum+item.count,0),derived:true};
+  const matchedProductionShows = (lockedOnly=false) => ["A","B","C","D"].map((recital)=>{
+    const allUnits = recitalUnits(recital);
+    const units = lockedOnly ? allUnits.map(({group,classes})=>({
+      group, classes:classes.filter((item)=>state.recitalLocks[recital]?.[item.teacherId])
+    })).filter((unit)=>unit.classes.length) : allUnits;
+    if (!units.length) return null;
+    const classes = [...new Map(units.flatMap((unit)=>unit.classes).map((item)=>[item.id,item])).values()];
+    const locked = allUnits.every((unit)=>unit.classes.every((item)=>state.recitalLocks[recital]?.[item.teacherId]));
+    const lockedTeachers = [...new Map(classes.filter((item)=>state.recitalLocks[recital]?.[item.teacherId])
+      .map((item)=>[item.teacherId,`${item.teacher} · Show ${state.recitalTeacherShows[recital][item.teacherId]}`])).values()];
+    return {lockedTeachers,id:`recital-${recital}`,name:`Recital ${recital}`,recital,time:"Time not assigned",date:"Saturday, May 22, 2027",ready:locked?100:70,schools:new Set(classes.map((item)=>item.school)).size,performances:units.length,dancers:classes.reduce((sum,item)=>sum+item.count,0),derived:true};
   }).filter(Boolean);
   const productionView = () => {
-    const previewShows=document.body.dataset.tourMode==="true"?matchedProductionShows():[],activeShows=[...previewShows,...productionShows],selected=activeShows.find((show)=>show.id===state.productionShow);
-    if(selected)return `<div class="big-stage-view-title"><button class="secondary" data-stage-production-back>← All Shows</button><div><h4>${esc(selected.name||`${selected.time} Show`)}</h4><p>${esc(selected.date||"Saturday, May 22, 2027")}${selected.time&&selected.time!=="Time not assigned"?` · Drop-off ${esc(recitalDropOffWindow(selected.time))}`:" · Time not assigned"}</p></div></div><div class="big-stage-toolbar"><div><strong>Performance Flow Order</strong><p>${selected.performances} performances · ${selected.dancers} dancers</p></div><div class="big-stage-actions"><button class="secondary" type="button">Preview Newsletter</button><button class="primary" type="button">+ Assign a Class</button></div></div><div class="stage-empty"><h4>${selected.derived?"This recital is connected to Recital Matching.":"Show production stays right here."}</h4><p>Flow order, songs, costumes, props, participation, and family communication remain connected to the populated recital plan.</p></div>`;
+    const matchedShows=matchedProductionShows(document.body.dataset.tourMode!=="true"),activeShows=[...matchedShows,...productionShows],selected=activeShows.find((show)=>show.id===state.productionShow);
+    if(selected)return `<div class="big-stage-view-title"><button class="secondary" data-stage-production-back>← All Shows</button><div><h4>${esc(selected.name||`${selected.time} Show`)}</h4><p>${esc(selected.date||"Saturday, May 22, 2027")}${selected.time&&selected.time!=="Time not assigned"?` · Drop-off ${esc(recitalDropOffWindow(selected.time))}`:" · Time not assigned"}</p></div></div><div class="big-stage-toolbar"><div><strong>Performance Flow Order</strong><p>${selected.performances} performances · ${selected.dancers} dancers</p>${selected.lockedTeachers?.length?`<p>${selected.lockedTeachers.map(esc).join(" • ")}</p>`:""}</div><div class="big-stage-actions"><button class="secondary" type="button">Preview Newsletter</button><button class="primary" type="button">+ Assign a Class</button></div></div><div class="stage-empty"><h4>${selected.derived?"This recital is connected to Recital Matching.":"Show production stays right here."}</h4><p>Flow order, songs, costumes, props, participation, and family communication remain connected to the populated recital plan.</p></div>`;
     return `<div class="big-stage-toolbar"><div><h4>2027 Dance Techniques Recital</h4><p>${activeShows.length?"Recitals built in matching appear here automatically.":"Start fresh by creating the first recital."}</p></div><div class="big-stage-actions"><button class="secondary" type="button">+ Create Recital Newsletter</button><button class="primary" type="button" data-stage-new>+ Add Show</button></div></div><div class="big-stage-show-grid">${activeShows.map((show)=>`<button class="big-stage-show-card" data-stage-production-show="${show.id}"><div class="big-stage-show-top"><div><div class="big-stage-show-time">${esc(show.name||show.time)}</div><div class="big-stage-show-date">${esc(show.date||"Saturday, May 22, 2027")}</div></div><span class="big-stage-pill">${show.ready}% planned</span></div><div>Rockwall-Heath High School<br><small>${show.time&&show.time!=="Time not assigned"?`Student drop-off · ${esc(recitalDropOffWindow(show.time))}`:"Show time not assigned"}</small></div><div class="big-stage-show-meta"><div class="big-stage-stat"><strong>${show.schools}</strong><small>Schools</small></div><div class="big-stage-stat"><strong>${show.performances}</strong><small>Performances</small></div><div class="big-stage-stat"><strong>${show.dancers}</strong><small>Dancers</small></div></div><div class="big-stage-progress"><span style="width:${show.ready}%"></span></div></button>`).join("")}</div>${activeShows.length?"":`<div class="big-stage-note"><strong>No recitals are currently active.</strong> Build teacher shows in Recital Matching or use Add Show.</div>`}`;
   };
   const decorateCombineToggles = () => {
@@ -619,20 +657,67 @@
   };
   const decorateSchoolColumnDragging = () => root()?.querySelectorAll("[data-stage-school-header]").forEach((header)=>{header.draggable=true;header.title=`Drag ${header.dataset.stageSchoolHeader} onto a show`;});
   const activeStageSheetUnit = () => {
-    const standalonePrefix="standalone:",sheetId=String(state.stageSheetIndex||"");
-    if(sheetId.startsWith(standalonePrefix)){
-      const classId=sheetId.slice(standalonePrefix.length),item=state.classes.find((candidate)=>String(candidate.id)===classId);
-      if(!item)return null;
+    const sheetId = String(state.stageSheetIndex || "");
+    if (sheetId.startsWith("standalone:")) {
+      const item = state.classes.find((candidate)=>candidate.id===sheetId.slice("standalone:".length));
+      if (!item) return null;
       return {group:{name:item.routineName||item.name||"Routine",requirement:item.requirement||"either"},classes:[item],standalone:true,index:0};
     }
-    const index=Number(sheetId),unit=recitalUnits(state.activeRecital)[index];
-    return unit?{...unit,standalone:false,index}:null;
+    const units = recitalUnits(state.activeRecital,state.stageSheetTeacher || "");
+    const index = units.findIndex((unit)=>String(unit.group.id)===sheetId);
+    return index < 0 ? null : {...units[index],standalone:false,index};
+  };
+  const stageSheetDraftKey = () => JSON.stringify([state.activeRecital,state.stageSheetIndex,state.stageSheetTeacher || ""]);
+  const stageLayoutQuery = (request,key) => {
+    return request.eq("season",key.season).eq("recital",key.recital).eq("routine_id",key.routine_id).eq("teacher_id",key.teacher_id);
+  };
+  const stageLayoutKey = () => {
+    const unit = activeStageSheetUnit();
+    if (document.body.dataset.tourMode === "true" || !unit || unit.standalone || unit.group.crossTeacher) return null;
+    return {season:SEASON,recital:state.activeRecital,routine_id:unit.group.id,teacher_id:unit.classes[0].teacherId};
+  };
+  const openStageSheet = async (recital,sheetId,teacherId="") => {
+    if (state.stageSheetIndex) return false;
+    state.activeRecital = recital;
+    state.stageSheetIndex = String(sheetId);
+    state.stageSheetTeacher = teacherId;
+    state.stageSheetPreview = false;
+    const layoutKey = stageLayoutKey();
+    if (layoutKey) {
+      state.stageSheetLoading = true;
+      try {
+        const {data,error} = await stageLayoutQuery(window.dtSupabase.from("recital_stage_layouts").select("layout,revision"),layoutKey).maybeSingle();
+        if (error) throw error;
+        state.stageSheetDrafts[stageSheetDraftKey()] = {patterns:{},...data?.layout};
+        state.stageSheetRevision = data?.revision || null;
+      } catch (error) {
+        state.stageSheetIndex = "";
+        state.stageSheetTeacher = "";
+        throw error;
+      } finally {
+        state.stageSheetLoading = false;
+      }
+    }
+    render();
+    return true;
+  };
+  const saveStageLayout = async () => {
+    const key = stageLayoutKey();
+    if (!key) return;
+    const {placingProps,...layout} = state.stageSheetDrafts[stageSheetDraftKey()] || {};
+    const revision = crypto.randomUUID();
+    const table = window.dtSupabase.from("recital_stage_layouts");
+    const request = state.stageSheetRevision
+      ? stageLayoutQuery(table.update({layout,revision}),key).eq("revision",state.stageSheetRevision)
+      : table.insert({...key,layout,revision});
+    const {data,error} = await request.select("revision").maybeSingle();
+    if (error || !data) throw error || new Error("Stage layout changed on another device");
   };
   const stageSheetModalMarkup = () => {
-    if(state.stageSheetIndex==="")return "";
+    if(state.stageSheetIndex===""||state.stageSheetLoading)return "";
     const unit=activeStageSheetUnit();if(!unit)return "";
-    const {group,classes,index,standalone}=unit,key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={start:"",placement:"",props:"",patterns:{}}),students=classes.flatMap((item)=>item.students||[]).filter((student)=>!isNoRecital(student)),patterns=["scales","rainbow","floral","sparkle","frog","daisy","checker","disco","mushroom","retro","stars","watercolor"],teachers=[...new Set(classes.map((item)=>item.teacher))],schools=[...new Set(classes.map((item)=>item.school))],routineName=String(group.name||`Routine ${index+1}`).replace(/^[^·]+·\s*/,"");
-    return `<div class="big-stage-modal stage-sheet-modal" role="dialog" aria-modal="true" aria-label="Build stage sheet"><div class="big-stage-dialog"><div class="big-stage-dialog-head"><div><small>${standalone?"LEXI · STAGE SHEET":`RECITAL ${esc(state.activeRecital)} · ROUTINE ${index+1}`}</small><h3>Build Stage Sheet</h3><p>${esc(teachers.join(" + "))} · ${esc(routineName)} · ${esc(schools.join(" + "))}</p></div><button class="big-stage-close" type="button" data-stage-sheet-close aria-label="Close">×</button></div><div class="stage-sheet-editor"><section class="stage-sheet-fields"><label><span>Starting Position</span><textarea data-stage-sheet-field="start" placeholder="Example: Begin on dance house">${esc(draft.start)}</textarea></label><label><span>Stage Placement & Routine Notes</span><textarea data-stage-sheet-field="placement" placeholder="Example: First position feet, low fifth arms">${esc(draft.placement)}</textarea></label><label><span>Props & Special Instructions</span><textarea data-stage-sheet-field="props" placeholder="Example: Place apple in front of each dance house">${esc(draft.props)}</textarea></label></section><section class="stage-tape-builder"><header><div><h4>Stage Tape Lineup</h4><p>Choose a different patterned duct-tape square for each dancer so they know where to stand.</p></div><strong>${students.length} dancers</strong></header><div class="stage-tape-lineup">${students.map((student,studentIndex)=>{const studentKey=String(student.id||student.student_id||studentIndex),pattern=draft.patterns[studentKey]||patterns[studentIndex%patterns.length];return `<article><button type="button" class="stage-tape-square is-${pattern}" data-stage-tape-student="${esc(studentKey)}" data-stage-tape-pattern="${esc(pattern)}" aria-label="Change tape pattern for ${esc(fullName(student)||`Dancer ${studentIndex+1}`)}"></button><strong>${esc(fullName(student)||`Dancer ${studentIndex+1}`)}</strong><small>${esc(pattern.replace(/-/g," "))}</small></article>`;}).join("")||`<div class="stage-empty"><h4>No dancers listed</h4><p>Dancers will appear here from the class roster.</p></div>`}</div></section></div><footer class="stage-sheet-actions"><button type="button" data-stage-sheet-close>Cancel</button><button type="button" class="is-primary" data-stage-sheet-save>Save Stage Sheet</button></footer></div></div>`;
+    const {group,classes,index,standalone}=unit,key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={start:"",placement:"",props:"",patterns:{}}),students=classes.flatMap((item)=>item.students||[]).filter((student)=>!isNoRecital(student)),patterns=["scales","rainbow","floral","sparkle","frog","daisy","checker","disco","mushroom","retro","stars","watercolor"],teachers=[...new Set(classes.map((item)=>item.teacher))],schools=[...new Set(classes.map((item)=>item.school))],routineName=String(group.name||`Routine ${index+1}`).replace(/^[^·]+·\s*/,"");
+    return `<div class="big-stage-modal stage-sheet-modal" role="dialog" aria-modal="true" aria-label="Build stage sheet"><div class="big-stage-dialog"><div class="big-stage-dialog-head"><div><small>${standalone?"LEXI · STAGE SHEET":`RECITAL ${esc(state.activeRecital)} · ROUTINE ${index+1}`}</small><h3>Build Stage Sheet</h3><p>${esc(teachers.join(" + "))} · ${esc(routineName)} · ${esc(schools.join(" + "))}</p></div><button class="big-stage-close" type="button" data-stage-sheet-close aria-label="Close">×</button></div><div class="stage-sheet-editor"><section class="stage-sheet-fields"><label><span>Starting Position</span><textarea data-stage-sheet-field="start" placeholder="Example: Begin on dance house">${esc(draft.start)}</textarea></label><label><span>Stage Placement & Routine Notes</span><textarea data-stage-sheet-field="placement" placeholder="Example: First position feet, low fifth arms">${esc(draft.placement)}</textarea></label><label><span>Props & Special Instructions</span><textarea data-stage-sheet-field="props" placeholder="Example: Place apple in front of each dance house">${esc(draft.props)}</textarea></label></section><section class="stage-tape-builder"><header><div><h4>Stage Tape Lineup</h4><p>Choose a different patterned duct-tape square for each dancer so they know where to stand.</p></div><strong>${students.length} dancers</strong></header><div class="stage-tape-lineup">${students.map((student,studentIndex)=>{const studentKey=String(student.id||student.student_id||studentIndex),pattern=draft.patterns[studentKey]||patterns[studentIndex%patterns.length];return `<article><button type="button" class="stage-tape-square is-${pattern}" data-stage-tape-student="${esc(studentKey)}" data-stage-tape-pattern="${esc(pattern)}" aria-label="Change tape pattern for ${esc(fullName(student)||`Dancer ${studentIndex+1}`)}"></button><strong>${esc(fullName(student)||`Dancer ${studentIndex+1}`)}</strong><small>${esc(pattern.replace(/-/g," "))}</small></article>`;}).join("")||`<div class="stage-empty"><h4>No dancers listed</h4><p>Dancers will appear here from the class roster.</p></div>`}</div></section></div><footer class="stage-sheet-actions"><span data-stage-layout-status role="status"></span><button type="button" data-stage-sheet-close>Cancel</button><button type="button" class="is-primary" data-stage-sheet-save>Save Stage Sheet</button></footer></div></div>`;
   };
   const masterStageSheetEditorMarkup = () => {
     if(!state.masterStageSheet)return "";const defaults=["scales","rainbow","floral","sparkle","frog","daisy","checker","disco","mushroom","retro","stars","watercolor"],active=state.activeTapeSlot;
@@ -658,20 +743,20 @@
     return `<div class="big-stage-modal stage-prop-management-modal" role="dialog" aria-modal="true" aria-label="Prop Management"><div class="big-stage-dialog"><div class="big-stage-dialog-head"><div><small>STAGE PROPS</small><h3>Prop Management</h3><p>Add reusable prop names and icon pictures for every routine.</p></div><button class="big-stage-close" type="button" data-stage-prop-management-close aria-label="Close">×</button></div><nav class="stage-fill-tabs" aria-label="Prop management choices"><button type="button" data-stage-prop-tab="new" aria-pressed="${state.propManagementTab==="new"}">New Prop</button><button type="button" data-stage-prop-tab="saved" aria-pressed="${state.propManagementTab==="saved"}">Saved Props</button></nav>${state.propManagementTab==="new"?`<section class="stage-new-prop-form"><label><span>Prop Title</span><input type="text" data-stage-new-prop-title placeholder="Example: Apple"></label><label><span>Icon</span><input type="file" accept="image/*" data-stage-new-prop-icon></label><button type="button" class="is-primary" data-stage-prop-create>Save Prop</button></section>`:`<section class="stage-saved-prop-gallery">${state.savedProps.map((prop)=>`<article>${propVisualMarkup(prop)}<strong>${esc(prop)}</strong></article>`).join("")}</section>`}</div></div>`;
   };
   const routineStageSheetPreviewMarkup = () => {
-    if(!state.stageSheetPreview||state.stageSheetIndex==="")return "";const unit=activeStageSheetUnit();if(!unit)return "";const {group,classes,index}=unit,key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||{},patterns=["scales","rainbow","floral","sparkle","frog","daisy","checker","disco","mushroom","retro","stars","watercolor"],teachers=[...new Set(classes.map((item)=>item.teacher))],schools=[...new Set(classes.map((item)=>item.school))],classNames=[...new Set(classes.map((item)=>item.name))],students=classes.flatMap((item)=>item.students||[]),studentMap=new Map();classes.forEach((item)=>item.students.forEach((student,studentIndex)=>studentMap.set(String(student.id||student.student_id||`${item.id}:${studentIndex}`),{student,school:item.school,teacher:item.teacher})));const routineName=String(group.name||`Routine ${index+1}`).replace(/^[^·]+·\s*/,""),boys=students.filter((student)=>/^(boy|male)$/i.test(String(student.gender||student.sex||"").trim())).length,position=draft.position||{},row=(offset)=>`<div class="stage-routine-preview-lineup">${patterns.map((fallback,positionIndex)=>{const slot=String(offset+positionIndex+1),fill=state.masterTapeSlots[slot]||{pattern:fallback},fillTitle=fill.name||title(fill.pattern||fallback),assignment=studentMap.get(draft.assignments?.[slot]),student=assignment?.student,fillMarkup=fill.url?`<img src="${esc(fill.url)}" alt="${esc(fillTitle)}">`:`<span class="stage-tape-square is-${esc(fill.pattern||fallback)}"></span>`;return `<div><small>${esc(fillTitle)}</small>${fillMarkup}${student?`<span class="stage-roster-profile" style="border-color:${esc(teacherColor(assignment.teacher))}">${student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span><strong>${esc(boardDancerName(student))}</strong>`:""}</div>`;}).join("")}</div>`;
+    if(!state.stageSheetPreview||state.stageSheetIndex==="")return "";const unit=activeStageSheetUnit();if(!unit)return "";const {group,classes,index}=unit,key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||{},patterns=["scales","rainbow","floral","sparkle","frog","daisy","checker","disco","mushroom","retro","stars","watercolor"],teachers=[...new Set(classes.map((item)=>item.teacher))],schools=[...new Set(classes.map((item)=>item.school))],classNames=[...new Set(classes.map((item)=>item.name))],students=classes.flatMap((item)=>item.students||[]),studentMap=new Map();classes.forEach((item)=>item.students.forEach((student,studentIndex)=>studentMap.set(String(student.id||student.student_id||`${item.id}:${studentIndex}`),{student,school:item.school,teacher:item.teacher})));const routineName=String(group.name||`Routine ${index+1}`).replace(/^[^·]+·\s*/,""),boys=students.filter((student)=>/^(boy|male)$/i.test(String(student.gender||student.sex||"").trim())).length,position=draft.position||{},row=(offset)=>`<div class="stage-routine-preview-lineup">${patterns.map((fallback,positionIndex)=>{const slot=String(offset+positionIndex+1),fill=state.masterTapeSlots[slot]||{pattern:fallback},fillTitle=fill.name||title(fill.pattern||fallback),assignment=studentMap.get(draft.assignments?.[slot]),student=assignment?.student,fillMarkup=fill.url?`<img src="${esc(fill.url)}" alt="${esc(fillTitle)}">`:`<span class="stage-tape-square is-${esc(fill.pattern||fallback)}"></span>`;return `<div><small>${esc(fillTitle)}</small>${fillMarkup}${student?`<span class="stage-roster-profile" style="border-color:${esc(teacherColor(assignment.teacher))}">${student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span><strong>${esc(boardDancerName(student))}</strong>`:""}</div>`;}).join("")}</div>`;
     return `<div class="big-stage-modal stage-routine-preview-modal" role="dialog" aria-modal="true" aria-label="Stage sheet preview"><div class="big-stage-dialog stage-sheet-preview-dialog"><div class="stage-sheet-preview-toolbar"><div><small>STAGE SHEET PREVIEW</small><h3>${esc(routineName)}</h3></div><button class="big-stage-close" type="button" data-stage-preview-close aria-label="Close">×</button></div><article class="stage-sheet-paper stage-routine-preview-paper"><header class="stage-sheet-title-block"><h2>Recital ${esc(state.activeRecital)}</h2><div class="stage-sheet-header-row"><div class="stage-sheet-routine-summary"><div class="stage-sheet-routine-heading"><span class="stage-sheet-order-number" style="background:${esc(teacherColor(teachers[0]))}">${index+1}</span><strong>${esc(routineName)}</strong></div><div class="stage-sheet-routine-tags"><span class="stage-sheet-teacher-tag" style="background:${esc(teacherColor(teachers[0]))}">${esc(teachers.join(" + "))}</span><span class="stage-sheet-style-tag">${esc(group.requirement==="either"?"Undecided":title(group.requirement))}</span></div></div><div class="stage-sheet-class-summary"><strong>${esc(schools.join(" + "))}</strong><span>${esc(classNames.join(" + "))}</span><div>${boys?`<b>${students.length} Dancers</b>`:""}<i>${Math.max(0,students.length-boys)} Girls</i>${boys?`<em>${boys} Boys</em>`:""}</div></div></div></header><section class="stage-preview-notes"><div><h4>Beginning Position</h4><p><b>Feet:</b> ${esc(position.feet||"")}<br><b>Arms:</b> ${esc(position.arms||"")}<br><b>Facing:</b> ${esc(position.facing||"")}</p></div><div><h4>Staging Notes</h4><p>${esc(draft.placement||"")}</p></div>${draft.propsEnabled?`<div class="is-prop"><h4>${esc(draft.propTitle||"Props")} · Qty ${draft.propQuantity||1}</h4><p>${esc(draft.propInstructions||"")}</p></div>`:""}</section>${draft.backRow?row(12):""}<div class="stage-preview-center-star">CS</div>${row(0)}</article><footer class="stage-sheet-actions"><button type="button" data-stage-preview-close>Back to Editor</button><button type="button" class="is-primary" onclick="window.print()">Print Stage Sheet</button></footer></div></div>`;
   };
   const decorateRoutineReminderField = () => {
     const fields=document.querySelector(".stage-sheet-modal .stage-sheet-fields");
     if(!fields||fields.querySelector('[data-stage-sheet-field="reminder"]'))return;
-    const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}}),label=document.createElement("label");
+    const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}}),label=document.createElement("label");
     label.className="stage-dancer-reminder-field";
     label.innerHTML=`<span>Dancer Reminder</span><textarea data-stage-sheet-field="reminder" placeholder="Example: Big smiles and eyes up">${esc(draft.reminder||"")}</textarea>`;
     const props=fields.querySelector(".stage-props-editor");
     fields.insertBefore(label,props||null);
   };
   const decorateSelectedPropTools = () => {
-    const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||{},quantity=document.querySelector(".stage-sheet-modal .stage-prop-quantity");
+    const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||{},quantity=document.querySelector(".stage-sheet-modal .stage-prop-quantity");
     if(!quantity||!draft.propTitle)return;
     const icon=document.createElement("span");
     icon.className="stage-selected-prop-icon";
@@ -687,7 +772,7 @@
   const decorateRoutinePreviewReminder = () => {
     const paper=document.querySelector(".stage-routine-preview-paper");
     if(!paper)return;
-    const key=`${state.activeRecital}:${state.stageSheetIndex}`,reminder=String(state.stageSheetDrafts[key]?.reminder||"").trim();
+    const key=stageSheetDraftKey(),reminder=String(state.stageSheetDrafts[key]?.reminder||"").trim();
     paper.classList.toggle("has-reminder",Boolean(reminder));
     paper.dataset.reminder=reminder;
     const summary=paper.querySelector(".stage-sheet-class-summary");
@@ -696,7 +781,7 @@
   const decorateRoutinePreviewCrossouts = () => {
     const paper=document.querySelector(".stage-routine-preview-paper");
     if(!paper)return;
-    const key=`${state.activeRecital}:${state.stageSheetIndex}`,inactive=state.stageSheetDrafts[key]?.inactive||{};
+    const key=stageSheetDraftKey(),inactive=state.stageSheetDrafts[key]?.inactive||{};
     paper.querySelectorAll(".stage-routine-preview-lineup").forEach((lineup,rowIndex)=>{
       const offset=paper.querySelectorAll(".stage-routine-preview-lineup").length>1&&rowIndex===0?12:0;
       [...lineup.children].forEach((position,index)=>position.classList.toggle("is-crossed-out",Boolean(inactive[String(offset+index+1)])));
@@ -705,7 +790,7 @@
   const decorateRoutinePreviewProps = () => {
     const paper=document.querySelector(".stage-routine-preview-paper"),dialog=paper?.closest(".stage-routine-preview-modal .big-stage-dialog");
     if(!paper||!dialog)return;
-    const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||{},quantity=Math.max(1,Number(draft.propQuantity)||1),title=draft.propTitle||"Prop";
+    const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||{},quantity=Math.max(1,Number(draft.propQuantity)||1),title=draft.propTitle||"Prop";
     if(!draft.propsEnabled||!draft.propTitle)return;
     draft.propPlacements=Array.isArray(draft.propPlacements)?draft.propPlacements.slice(0,quantity):[];
     while(draft.propPlacements.length<quantity)draft.propPlacements.push(null);
@@ -724,7 +809,7 @@
     table.querySelectorAll(".stage-recital-routines>article").forEach((row,index)=>{if(!row.querySelector(".stage-sheet-button"))row.insertAdjacentHTML("beforeend",`<button type="button" class="stage-sheet-button" data-stage-sheet="${index}">Stage Sheet</button>`);});
   };
   const decorateRoutineTapeExclusions = () => {
-    const modal=document.querySelector(".stage-sheet-modal"),unit=activeStageSheetUnit();if(!modal||!unit)return;const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{},inactive:{},assignments:{}});draft.inactive=draft.inactive||{};draft.assignments=draft.assignments||{};
+    const modal=document.querySelector(".stage-sheet-modal"),unit=activeStageSheetUnit();if(!modal||!unit)return;const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{},inactive:{},assignments:{}});draft.inactive=draft.inactive||{};draft.assignments=draft.assignments||{};
     const lineup=modal.querySelector(".stage-tape-lineup"),patterns=["scales","rainbow","floral","sparkle","frog","daisy","checker","disco","mushroom","retro","stars","watercolor"],studentMap=new Map(),multiSchool=new Set(unit.classes.map((item)=>item.school)).size>1,combined=unit.classes.length>1;unit.classes.forEach((item)=>item.students.forEach((student,studentIndex)=>studentMap.set(String(student.id||student.student_id||`${item.id}:${studentIndex}`),{student,school:item.school,teacher:item.teacher})));Object.entries(draft.assignments).forEach(([slot,studentKey])=>{if(isNoRecital(studentMap.get(studentKey)?.student))delete draft.assignments[slot];});
     const shortName=(student)=>{const first=student.preferredName||student.firstName||"Dancer",last=String(student.lastName||"").trim();return `${first}${last?` ${last.charAt(0)}.`:""}`;},rowMarkup=(offset)=>patterns.map((fallback,position)=>{const slot=String(offset+position+1),fill=state.masterTapeSlots[slot]||{pattern:fallback},fillTitle=fill.name||title(fill.pattern||fallback),fillMarkup=fill.url?`<img class="stage-tape-square" src="${esc(fill.url)}" alt="${esc(fillTitle)}">`:`<span class="stage-tape-square is-${esc(fill.pattern||fallback)}" aria-label="${esc(fillTitle)}"></span>`,studentKey=draft.assignments[slot]||"",assignment=studentMap.get(studentKey),student=assignment?.student,crossed=Boolean(draft.inactive[slot]);return `<article class="${student?"is-assigned":"is-empty-position"} ${crossed?"is-crossed-out":""}" style="--roster-color:${esc(teacherColor(assignment?.teacher||"Teacher"))}" data-stage-tape-drop="${slot}" ${student?`draggable="true" data-stage-assigned-student="${esc(studentKey)}"`:""}>${fillMarkup}${student?`<span class="stage-roster-profile ${combined?"is-combined":""}">${student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span>`:""}<strong>${student?esc(multiSchool?shortName(student):boardDancerName(student)):"&nbsp;"}</strong>${student&&multiSchool?`<small class="stage-tape-student-school">${esc(assignment.school)}</small>`:""}<small class="stage-tape-fill-title">${esc(fillTitle)}</small><button type="button" class="stage-tape-exclude" data-stage-tape-exclude="${slot}" aria-label="${crossed?"Restore":"Cross out"} this tape position">×</button></article>`;}).join("");
     lineup.innerHTML=rowMarkup(0);lineup.insertAdjacentHTML("beforebegin",`<div class="stage-lineup-controls"><span class="stage-builder-center-star" aria-label="Center stage">CS</span><button type="button" data-stage-routine-back-row>${draft.backRow?"− Remove Back Row":"+ Add Back Row"}</button></div>`);if(draft.backRow)lineup.insertAdjacentHTML("afterend",`<div class="stage-tape-lineup is-back-row">${rowMarkup(12)}</div>`);modal.querySelectorAll(".stage-tape-lineup article.is-assigned").forEach((article)=>{const profile=article.querySelector(".stage-roster-profile");if(!profile)return;profile.draggable=true;profile.dataset.stageAssignedStudent=article.dataset.stageAssignedStudent;profile.dataset.stageSourceSlot=article.dataset.stageTapeDrop;profile.setAttribute("title","Drag to move this dancer");});
@@ -732,10 +817,10 @@
   const decorateRoutineStudentRoster = () => {
     const modal=document.querySelector(".stage-sheet-modal"),unit=activeStageSheetUnit();if(!modal||!unit)return;const {classes}=unit,teachers=[...new Set(classes.map((item)=>item.teacher))],schools=[...new Set(classes.map((item)=>item.school))],combined=classes.length>1,multiTeacher=teachers.length>1,multiSchool=schools.length>1,groups=[];
     classes.forEach((item)=>{const groupKey=multiTeacher?`teacher:${item.teacher}`:multiSchool?`school:${item.school}`:"routine",label=multiTeacher?`${item.teacher}'s Dancers`:multiSchool?`${item.school}'s Dancers`:"Routine Dancers";let group=groups.find((candidate)=>candidate.key===groupKey);if(!group){group={key:groupKey,label,teacher:item.teacher,students:[]};groups.push(group);}item.students.forEach((student,studentIndex)=>group.students.push({student,school:item.school,key:String(student.id||student.student_id||`${item.id}:${studentIndex}`)}));});
-    const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{},assignments:{}}),assigned=new Set(Object.values(draft.assignments||{})),shortName=(student)=>{const first=student.preferredName||student.firstName||"Dancer",last=String(student.lastName||"").trim();return `${first}${last?` ${last.charAt(0)}.`:""}`;},markup=`<section class="stage-sheet-roster"><header><h4>Dancers Needing Placement</h4><p>Drag each profile bubble to a tape square below.</p></header><div class="stage-sheet-roster-groups">${groups.map((group)=>{const waiting=group.students.filter(({student,key})=>isNoRecital(student)||!assigned.has(key));return waiting.length?`<section style="--roster-color:${esc(teacherColor(group.teacher))}"><h5>${esc(group.label)}</h5><div>${waiting.map(({student,school,key:studentKey})=>{const noRecital=isNoRecital(student);return `<article class="${noRecital?"is-no-recital":""}" ${noRecital?"":`draggable="true" data-stage-roster-student="${esc(studentKey)}"`}><span class="stage-roster-profile ${combined?"is-combined":""}">${noRecital?"×":student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span><strong>${esc(multiSchool?shortName(student):boardDancerName(student))}</strong>${multiSchool?`<small>${esc(school)}</small>`:""}</article>`;}).join("")}</div></section>`:"";}).join("")||`<p class="stage-roster-complete">All dancers have been placed.</p>`}</div></section>`;modal.querySelector(".stage-tape-builder")?.insertAdjacentHTML("beforebegin",markup);
+    const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{},assignments:{}}),assigned=new Set(Object.values(draft.assignments||{})),shortName=(student)=>{const first=student.preferredName||student.firstName||"Dancer",last=String(student.lastName||"").trim();return `${first}${last?` ${last.charAt(0)}.`:""}`;},markup=`<section class="stage-sheet-roster"><header><h4>Dancers Needing Placement</h4><p>Drag each profile bubble to a tape square below.</p></header><div class="stage-sheet-roster-groups">${groups.map((group)=>{const waiting=group.students.filter(({student,key})=>isNoRecital(student)||!assigned.has(key));return waiting.length?`<section style="--roster-color:${esc(teacherColor(group.teacher))}"><h5>${esc(group.label)}</h5><div>${waiting.map(({student,school,key:studentKey})=>{const noRecital=isNoRecital(student);return `<article class="${noRecital?"is-no-recital":""}" ${noRecital?"":`draggable="true" data-stage-roster-student="${esc(studentKey)}"`}><span class="stage-roster-profile ${combined?"is-combined":""}">${noRecital?"×":student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span><strong>${esc(multiSchool?shortName(student):boardDancerName(student))}</strong>${multiSchool?`<small>${esc(school)}</small>`:""}</article>`;}).join("")}</div></section>`:"";}).join("")||`<p class="stage-roster-complete">All dancers have been placed.</p>`}</div></section>`;modal.querySelector(".stage-tape-builder")?.insertAdjacentHTML("beforebegin",markup);
   };
   const decorateRoutinePositionPrompts = () => {
-    const modal=document.querySelector(".stage-sheet-modal"),field=modal?.querySelector('[data-stage-sheet-field="start"]'),notes=modal?.querySelector('[data-stage-sheet-field="placement"]'),props=modal?.querySelector('[data-stage-sheet-field="props"]'),key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.position=draft.position||{feet:"",arms:"",facing:""};draft.propQuantity=Math.max(1,Number(draft.propQuantity)||1);if(field){const wrapper=document.createElement("div");wrapper.className="stage-beginning-field";wrapper.innerHTML=`<span>Beginning Position</span><div>${[["feet","Feet"],["arms","Arms"],["facing","Facing"]].map(([name,label])=>`<label><b>${label}:</b><input type="text" data-stage-position-field="${name}" value="${esc(draft.position[name]||"")}"></label>`).join("")}</div>`;field.closest("label")?.replaceWith(wrapper);}if(notes){const label=notes.closest("label")?.querySelector("span");if(label)label.textContent="Staging Notes";notes.placeholder="Example: Start 5 feet behind and skip up";}if(props){const section=document.createElement("section");section.className=`stage-props-editor ${draft.propsEnabled?"is-open":""}`;section.innerHTML=`<header><button type="button" data-stage-props-toggle aria-pressed="${Boolean(draft.propsEnabled)}"><span>Props</span><i></i></button></header>${draft.propsEnabled?`<div class="stage-props-body"><div class="stage-props-top"><label><span>Title</span><select data-stage-prop-select><option value="">Select a prop…</option>${state.savedProps.map((prop)=>`<option value="${esc(prop)}" ${draft.propTitle===prop?"selected":""}>${esc(prop)}</option>`).join("")}<option value="__add__">+ Add Prop</option></select></label><div class="stage-prop-quantity"><span>Quantity</span><div><button type="button" data-stage-prop-quantity="-1" aria-label="Decrease quantity">−</button><strong>${draft.propQuantity}</strong><button type="button" data-stage-prop-quantity="1" aria-label="Increase quantity">+</button></div></div></div><label class="stage-prop-instructions"><span>Instructions</span><textarea data-stage-prop-instructions placeholder="Add placement, handling, or backstage instructions">${esc(draft.propInstructions||draft.props||"")}</textarea></label></div>`:""}`;const header=section.querySelector("header"),toggle=header?.querySelector("button"),toggleLabel=toggle?.querySelector("span");toggleLabel?.remove();toggle?.setAttribute("aria-label","Toggle props");header?.insertAdjacentHTML("afterbegin","<span>Props</span>");props.closest("label")?.replaceWith(section);}
+    const modal=document.querySelector(".stage-sheet-modal"),field=modal?.querySelector('[data-stage-sheet-field="start"]'),notes=modal?.querySelector('[data-stage-sheet-field="placement"]'),props=modal?.querySelector('[data-stage-sheet-field="props"]'),key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.position=draft.position||{feet:"",arms:"",facing:""};draft.propQuantity=Math.max(1,Number(draft.propQuantity)||1);if(field){const wrapper=document.createElement("div");wrapper.className="stage-beginning-field";wrapper.innerHTML=`<span>Beginning Position</span><div>${[["feet","Feet"],["arms","Arms"],["facing","Facing"]].map(([name,label])=>`<label><b>${label}:</b><input type="text" data-stage-position-field="${name}" value="${esc(draft.position[name]||"")}"></label>`).join("")}</div>`;field.closest("label")?.replaceWith(wrapper);}if(notes){const label=notes.closest("label")?.querySelector("span");if(label)label.textContent="Staging Notes";notes.placeholder="Example: Start 5 feet behind and skip up";}if(props){const section=document.createElement("section");section.className=`stage-props-editor ${draft.propsEnabled?"is-open":""}`;section.innerHTML=`<header><button type="button" data-stage-props-toggle aria-pressed="${Boolean(draft.propsEnabled)}"><span>Props</span><i></i></button></header>${draft.propsEnabled?`<div class="stage-props-body"><div class="stage-props-top"><label><span>Title</span><select data-stage-prop-select><option value="">Select a prop…</option>${state.savedProps.map((prop)=>`<option value="${esc(prop)}" ${draft.propTitle===prop?"selected":""}>${esc(prop)}</option>`).join("")}<option value="__add__">+ Add Prop</option></select></label><div class="stage-prop-quantity"><span>Quantity</span><div><button type="button" data-stage-prop-quantity="-1" aria-label="Decrease quantity">−</button><strong>${draft.propQuantity}</strong><button type="button" data-stage-prop-quantity="1" aria-label="Increase quantity">+</button></div></div></div><label class="stage-prop-instructions"><span>Instructions</span><textarea data-stage-prop-instructions placeholder="Add placement, handling, or backstage instructions">${esc(draft.propInstructions||draft.props||"")}</textarea></label></div>`:""}`;const header=section.querySelector("header"),toggle=header?.querySelector("button"),toggleLabel=toggle?.querySelector("span");toggleLabel?.remove();toggle?.setAttribute("aria-label","Toggle props");header?.insertAdjacentHTML("afterbegin","<span>Props</span>");props.closest("label")?.replaceWith(section);}
   };
   const decorateRoutinePreviewButton = () => {
     const button=document.querySelector('.stage-sheet-modal .stage-sheet-actions [data-stage-sheet-close]');if(!button)return;button.removeAttribute("data-stage-sheet-close");button.setAttribute("data-stage-sheet-preview","");button.textContent="Preview";
@@ -770,13 +855,26 @@
     app.querySelectorAll("button,select,input,textarea").forEach((control)=>{control.disabled=true;control.setAttribute("aria-disabled","true");});
     app.querySelectorAll('[draggable="true"]').forEach((item)=>item.setAttribute("draggable","false"));
   };
+  const fitTeacherStageSheet = () => {
+    if (document.body.dataset.mode !== "teacher") return;
+    const modal = document.querySelector(".stage-sheet-modal"), host = document.querySelector(".phone-screen");
+    const dialog = modal?.querySelector(".big-stage-dialog");
+    if (!host || !dialog) return;
+    const rect = host.getBoundingClientRect(), top = Math.max(0,rect.top);
+    const height = Math.max(0,Math.min(window.innerHeight-top,rect.height));
+    if (!rect.width || !height) return;
+    modal.classList.add("is-phone-landscape");
+    host.append(modal);
+    Object.assign(modal.style,{left:`${rect.left}px`,top:`${top}px`,width:`${rect.width}px`,height:`${height}px`});
+    Object.assign(dialog.style,{width:`${height}px`,height:`${rect.width}px`});
+  };
   const render = () => {
     if(!root())return;
     document.querySelector(".stage-sheet-modal")?.remove();document.querySelector(".stage-master-sheet-modal")?.remove();document.querySelector(".stage-print-setup-modal")?.remove();document.querySelector(".stage-fill-chooser-modal")?.remove();document.querySelector(".stage-routine-preview-modal")?.remove();document.querySelector(".stage-prop-management-modal")?.remove();
     const body=state.view==="board"?teacherPlanningBoard():state.view==="teacher"?teacherView():state.view==="school"?schoolView():state.view==="routine"?routineView():state.view==="conflicts"?conflictsView():showView();
     const conflictCount=unresolvedRecitalConflictCount();
     const matching=`<nav class="stage-view-tabs" aria-label="Recital planning views">${[["board","Planning Board",""],["teacher","Compatible Combos",""],["show","Recitals",""],["conflicts","Recital Conflicts",conflictCount]].map(([key,label,count])=>`<button class="${key==="conflicts"&&Number(count)>0?"has-alert":""}" data-stage-view="${key}" aria-pressed="${state.view===key}">${label}${count!==""?`<small>${count}</small>`:""}</button>`).join("")}</nav>${state.notice?`<div class="big-stage-note">${esc(state.notice)}</div>`:""}${state.view==="teacher"?filterMarkup():""}${state.loading?`<div class="stage-empty">Analyzing current classes, ages, recital needs, and family links…</div>`:body}`;
-    root().innerHTML=`<div class="big-stage-shell"><nav class="stage-section-toggle" aria-label="The Big Stage sections"><button data-stage-section="shows" aria-pressed="${state.section==="shows"}">Show Production</button><button data-stage-section="matching" aria-pressed="${state.section==="matching"}">Recital Matching</button></nav>${state.section==="shows"?productionView():matching}</div>`;decorateCombineToggles();alignCombinedHeaderControls();decorateRoutineTypeControls();decoratePendingShowColumn();decorateSchoolColumnDragging();clearZeroBoyCounts();decorateLockedRecitalOptions();decorateStageSheetButtons();decorateMasterStageSheetButton();decorateTeacherPortal();if(state.stageSheetIndex!==""){document.body.insertAdjacentHTML("beforeend",stageSheetModalMarkup());decorateRoutinePositionPrompts();decorateRoutineReminderField();decorateSelectedPropTools();decorateRoutineStudentRoster();decorateRoutineTapeExclusions();decorateRoutinePreviewButton();}if(state.masterStageSheet)document.body.insertAdjacentHTML("beforeend",masterStageSheetModalMarkup());decorateMasterBackRow();decorateMasterFillTitles();decorateMasterPropManagement();if(state.stagePrintSetup)document.body.insertAdjacentHTML("beforeend",stagePrintSetupMarkup());if(state.activeTapeSlot)document.body.insertAdjacentHTML("beforeend",stageFillChooserMarkup());if(state.stageSheetPreview){document.body.insertAdjacentHTML("beforeend",routineStageSheetPreviewMarkup());decorateRoutinePreviewReminder();decorateRoutinePreviewCrossouts();decorateRoutinePreviewProps();}if(state.propManagement)document.body.insertAdjacentHTML("beforeend",propManagementMarkup());
+    root().innerHTML=`<div class="big-stage-shell"><nav class="stage-section-toggle" aria-label="The Big Stage sections"><button data-stage-section="shows" aria-pressed="${state.section==="shows"}">Show Production</button><button data-stage-section="matching" aria-pressed="${state.section==="matching"}">Recital Matching</button></nav>${state.section==="shows"?productionView():matching}</div>`;decorateCombineToggles();alignCombinedHeaderControls();decorateRoutineTypeControls();decoratePendingShowColumn();decorateSchoolColumnDragging();clearZeroBoyCounts();decorateLockedRecitalOptions();decorateStageSheetButtons();decorateMasterStageSheetButton();decorateTeacherPortal();if(state.stageSheetIndex!==""){document.body.insertAdjacentHTML("beforeend",stageSheetModalMarkup());decorateRoutinePositionPrompts();decorateRoutineReminderField();decorateSelectedPropTools();decorateRoutineStudentRoster();decorateRoutineTapeExclusions();decorateRoutinePreviewButton();fitTeacherStageSheet();}if(state.masterStageSheet)document.body.insertAdjacentHTML("beforeend",masterStageSheetModalMarkup());decorateMasterBackRow();decorateMasterFillTitles();decorateMasterPropManagement();if(state.stagePrintSetup)document.body.insertAdjacentHTML("beforeend",stagePrintSetupMarkup());if(state.activeTapeSlot)document.body.insertAdjacentHTML("beforeend",stageFillChooserMarkup());if(state.stageSheetPreview){document.body.insertAdjacentHTML("beforeend",routineStageSheetPreviewMarkup());decorateRoutinePreviewReminder();decorateRoutinePreviewCrossouts();decorateRoutinePreviewProps();}if(state.propManagement)document.body.insertAdjacentHTML("beforeend",propManagementMarkup());
   };
   const initialize = async (force=false) => {
     if(document.body.dataset.tourMode!=="true"&&!window.dtCurrentProfile?.id)return;
@@ -784,7 +882,10 @@
     try{const props=JSON.parse(localStorage.getItem("dt-stage-saved-props")||"null"),icons=JSON.parse(localStorage.getItem("dt-stage-prop-icons")||"{}");if(Array.isArray(props)&&props.length)state.savedProps=props;if(icons&&typeof icons==="object")state.propIcons=icons;}catch(error){console.warn("Saved props could not be loaded.",error);}
     if(state.loading)return;state.loading=true;render();
     try {
-    state.classes=(document.body.dataset.tourMode==="true"?tourPlannerClasses():activeRosterClasses().flatMap(planningClassRecords)).filter((item)=>item.id);
+    const liveTeacherId = document.body.dataset.tourMode !== "true" && window.dtCurrentProfile?.role === "teacher"
+      ? String(window.dtCurrentProfile.id) : "";
+    state.classes=(document.body.dataset.tourMode==="true"?tourPlannerClasses():activeRosterClasses().flatMap(planningClassRecords))
+      .filter((item)=>item.id&&(!liveTeacherId||item.teacherId===liveTeacherId));
     const workspace=force?null:await loadPlannerWorkspace(),persisted=force?state.groups.filter((group)=>["approved","modified","locked"].includes(group.decision)):workspace||await loadPersisted();
     const generated=generatedGroups(state.classes);
     state.groups=enforceStageCapacity(enforceUniqueRoutinePerSchool(mergePlans(generated,workspace||persisted)));state.persisted=true;state.loading=false;
@@ -809,7 +910,7 @@
     state.notice=`All ${sameShow.length} schools in this row assigned to Show ${sharedShow} will share the stage.`;render();
   };
   document.addEventListener("change", async (event) => {
-    const propSelect=event.target.closest("[data-stage-prop-select]");if(propSelect){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});if(propSelect.value==="__add__"){const added=String(window.prompt("Add Prop Title","")||"").trim();if(added){if(!state.savedProps.includes(added))state.savedProps.push(added);draft.propTitle=added;}render();return;}draft.propTitle=propSelect.value;render();return;}
+    const propSelect=event.target.closest("[data-stage-prop-select]");if(propSelect){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});if(propSelect.value==="__add__"){const added=String(window.prompt("Add Prop Title","")||"").trim();if(added){if(!state.savedProps.includes(added))state.savedProps.push(added);draft.propTitle=added;}render();return;}draft.propTitle=propSelect.value;render();return;}
     const printBackRow=event.target.closest("[data-stage-print-back-row]");if(printBackRow){state.stagePrintOptions.backRow=printBackRow.checked;return;}
     const printField=event.target.closest("[data-stage-print-field]");if(printField){state.stagePrintOptions.fields[printField.dataset.stagePrintField]=printField.checked;return;}
     const printFilterType=event.target.closest("[data-stage-print-filter-type]");if(printFilterType){state.stagePrintOptions.filterType=printFilterType.value;state.stagePrintOptions.filterValue="";render();return;}
@@ -831,23 +932,55 @@
   document.addEventListener("click",(event)=>{if(state.recitalSaving&&event.target.closest("[data-stage-recital-lock]"))return;if(event.target.closest(undoClickTargets))rememberPlannerState();},true);
   document.addEventListener("change",(event)=>{if(state.recitalSaving&&event.target.closest("[data-stage-recital-teacher-show]"))return;if(event.target.closest("[data-stage-school-show],[data-stage-show-color],[data-stage-routine-song],[data-stage-routine-type],[data-stage-relation],[data-stage-link-shows-choice],[data-stage-recital-teacher-show]"))rememberPlannerState();},true);
   document.addEventListener("drop",(event)=>{if((state.draggedSchool||state.draggedShow||state.draggedClass)&&event.target.closest("[data-stage-show-band],[data-stage-unplaced-show],[data-stage-school-header],[data-stage-drop-group]"))rememberPlannerState();},true);
-  document.addEventListener("input",(event)=>{const propInstructions=event.target.closest("[data-stage-prop-instructions]");if(propInstructions){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.propInstructions=propInstructions.value;return;}const positionField=event.target.closest("[data-stage-position-field]");if(positionField){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.position=draft.position||{};draft.position[positionField.dataset.stagePositionField]=positionField.value;return;}const sheetField=event.target.closest("[data-stage-sheet-field]");if(sheetField){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft[sheetField.dataset.stageSheetField]=sheetField.value;return;}if(!event.target.matches("[data-stage-conflict-search]"))return;const query=String(event.target.value||"").trim().toLowerCase(),modal=event.target.closest(".stage-conflict-assignment-modal"),buttons=[...modal.querySelectorAll(".stage-conflict-student-options [data-stage-conflict-search-text]")];let visible=0;buttons.forEach((button)=>{const match=!query||button.dataset.stageConflictSearchText.includes(query);button.hidden=!match;if(match)visible+=1;});const empty=modal.querySelector(".stage-conflict-no-results");if(empty)empty.hidden=visible>0;});
+  document.addEventListener("input",(event)=>{const propInstructions=event.target.closest("[data-stage-prop-instructions]");if(propInstructions){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.propInstructions=propInstructions.value;return;}const positionField=event.target.closest("[data-stage-position-field]");if(positionField){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.position=draft.position||{};draft.position[positionField.dataset.stagePositionField]=positionField.value;return;}const sheetField=event.target.closest("[data-stage-sheet-field]");if(sheetField){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft[sheetField.dataset.stageSheetField]=sheetField.value;return;}if(!event.target.matches("[data-stage-conflict-search]"))return;const query=String(event.target.value||"").trim().toLowerCase(),modal=event.target.closest(".stage-conflict-assignment-modal"),buttons=[...modal.querySelectorAll(".stage-conflict-student-options [data-stage-conflict-search-text]")];let visible=0;buttons.forEach((button)=>{const match=!query||button.dataset.stageConflictSearchText.includes(query);button.hidden=!match;if(match)visible+=1;});const empty=modal.querySelector(".stage-conflict-no-results");if(empty)empty.hidden=visible>0;});
   document.addEventListener("click", async (event) => {
     if(event.target.closest("[data-stage-prop-management]")){state.propManagement=true;state.propManagementTab="new";render();return;}
     if(event.target.closest("[data-stage-prop-management-close]")){state.propManagement=false;render();return;}
     const propTab=event.target.closest("[data-stage-prop-tab]");if(propTab){state.propManagementTab=propTab.dataset.stagePropTab;render();return;}
     if(event.target.closest("[data-stage-prop-create]")){const modal=event.target.closest(".stage-prop-management-modal"),name=String(modal?.querySelector("[data-stage-new-prop-title]")?.value||"").trim(),file=modal?.querySelector("[data-stage-new-prop-icon]")?.files?.[0];if(!name){modal?.querySelector("[data-stage-new-prop-title]")?.focus();return;}if(!state.savedProps.includes(name))state.savedProps.push(name);if(file)state.propIcons[name]=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=reject;reader.readAsDataURL(file);});state.propManagementTab="saved";render();return;}
-    if(event.target.closest("[data-stage-routine-back-row]")){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.backRow=!draft.backRow;if(!draft.backRow)Object.keys(draft.assignments||{}).filter((slot)=>Number(slot)>12).forEach((slot)=>delete draft.assignments[slot]);render();return;}
-    if(event.target.closest("[data-stage-props-toggle]")){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.propsEnabled=!draft.propsEnabled;render();return;}
-    const propQuantity=event.target.closest("[data-stage-prop-quantity]");if(propQuantity){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.propQuantity=Math.max(1,(Number(draft.propQuantity)||1)+Number(propQuantity.dataset.stagePropQuantity));render();return;}
-    const stageSheet=event.target.closest("[data-stage-sheet]");if(stageSheet){state.stageSheetIndex=stageSheet.dataset.stageSheet;render();return;}
-    if(event.target.closest("[data-stage-place-prop]")){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.placingProps=true;state.stageSheetPreview=true;render();return;}
-    if(event.target.closest("[data-stage-sheet-preview]")){const key=`${state.activeRecital}:${state.stageSheetIndex}`;if(state.stageSheetDrafts[key])state.stageSheetDrafts[key].placingProps=false;state.stageSheetPreview=true;render();return;}
-    if(event.target.closest("[data-stage-preview-close]")){const key=`${state.activeRecital}:${state.stageSheetIndex}`;if(state.stageSheetDrafts[key])state.stageSheetDrafts[key].placingProps=false;state.stageSheetPreview=false;render();return;}
-    if(event.target.closest("[data-stage-sheet-close]")){state.stageSheetIndex="";render();return;}
-    if(event.target.closest("[data-stage-sheet-save]")){state.stageSheetIndex="";state.notice="Stage Sheet saved for this routine.";render();return;}
-    const tapeExclude=event.target.closest("[data-stage-tape-exclude]");if(tapeExclude){const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{},inactive:{}}),studentKey=tapeExclude.dataset.stageTapeExclude;draft.inactive=draft.inactive||{};draft.inactive[studentKey]=!draft.inactive[studentKey];render();return;}
-    const tape=event.target.closest("[data-stage-tape-student]");if(tape){const patterns=["scales","rainbow","floral","sparkle","frog","daisy","checker","disco","mushroom","retro","stars","watercolor"],current=patterns.indexOf(tape.dataset.stageTapePattern),next=patterns[(current+1)%patterns.length],key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.patterns=draft.patterns||{};draft.patterns[tape.dataset.stageTapeStudent]=next;tape.className=`stage-tape-square is-${next}`;tape.dataset.stageTapePattern=next;tape.closest("article")?.querySelector("small")?.replaceChildren(next);return;}
+    if(event.target.closest("[data-stage-routine-back-row]")){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.backRow=!draft.backRow;if(!draft.backRow)Object.keys(draft.assignments||{}).filter((slot)=>Number(slot)>12).forEach((slot)=>delete draft.assignments[slot]);render();return;}
+    if(event.target.closest("[data-stage-props-toggle]")){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.propsEnabled=!draft.propsEnabled;render();return;}
+    const propQuantity=event.target.closest("[data-stage-prop-quantity]");if(propQuantity){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.propQuantity=Math.max(1,(Number(draft.propQuantity)||1)+Number(propQuantity.dataset.stagePropQuantity));render();return;}
+    const stageSheet=event.target.closest("[data-stage-sheet]");
+    if (stageSheet) {
+      const unit = recitalUnits(state.activeRecital)[Number(stageSheet.dataset.stageSheet)];
+      if (unit) {
+        try { await openStageSheet(state.activeRecital,unit.group.id); }
+        catch { state.notice="The stage layout couldn’t load. Please try again.";render(); }
+      }
+      return;
+    }
+    if(event.target.closest("[data-stage-place-prop]")){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.placingProps=true;state.stageSheetPreview=true;render();return;}
+    if(event.target.closest("[data-stage-sheet-preview]")){const key=stageSheetDraftKey();if(state.stageSheetDrafts[key])state.stageSheetDrafts[key].placingProps=false;state.stageSheetPreview=true;render();return;}
+    if(event.target.closest("[data-stage-preview-close]")){const key=stageSheetDraftKey();if(state.stageSheetDrafts[key])state.stageSheetDrafts[key].placingProps=false;state.stageSheetPreview=false;render();return;}
+    if(event.target.closest("[data-stage-sheet-close]")){if(state.stageSheetSaving)return;state.stageSheetPreview=false;state.stageSheetIndex="";state.stageSheetTeacher="";render();return;}
+    const saveSheet = event.target.closest("[data-stage-sheet-save]");
+    if (saveSheet) {
+      if (state.stageSheetSaving) return;
+      const sheet = saveSheet.closest(".stage-sheet-modal");
+      const controls = [...sheet.querySelectorAll("button,input,select,textarea")].filter((control)=>!control.disabled);
+      const status = sheet.querySelector("[data-stage-layout-status]");
+      const shared = Boolean(stageLayoutKey());
+      state.stageSheetSaving = true;
+      controls.forEach((control)=>{ control.disabled=true; });
+      try {
+        await saveStageLayout();
+        state.stageSheetIndex="";
+        state.stageSheetTeacher="";
+        state.stageSheetPreview=false;
+        if (state.section === "matching") state.notice = shared ? "Stage layout saved." : "Stage layout kept for this session.";
+        render();
+        if (shared) window.dispatchEvent(new CustomEvent("dt:stage-layout-saved"));
+      } catch {
+        status.textContent = "The layout couldn’t be saved. Your edits are still here.";
+      } finally {
+        state.stageSheetSaving=false;
+        controls.forEach((control)=>{ control.disabled=false; });
+      }
+      return;
+    }
+    const tapeExclude=event.target.closest("[data-stage-tape-exclude]");if(tapeExclude){const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{},inactive:{}}),studentKey=tapeExclude.dataset.stageTapeExclude;draft.inactive=draft.inactive||{};draft.inactive[studentKey]=!draft.inactive[studentKey];render();return;}
+    const tape=event.target.closest("[data-stage-tape-student]");if(tape){const patterns=["scales","rainbow","floral","sparkle","frog","daisy","checker","disco","mushroom","retro","stars","watercolor"],current=patterns.indexOf(tape.dataset.stageTapePattern),next=patterns[(current+1)%patterns.length],key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{}});draft.patterns=draft.patterns||{};draft.patterns[tape.dataset.stageTapeStudent]=next;tape.className=`stage-tape-square is-${next}`;tape.dataset.stageTapePattern=next;tape.closest("article")?.querySelector("small")?.replaceChildren(next);return;}
     if(event.target.closest("[data-stage-master-sheet]")){state.masterStageSheet=true;state.activeTapeSlot="";render();return;}
     if(event.target.closest("[data-stage-back-row]")){state.masterBackRow=!state.masterBackRow;state.activeTapeSlot="";render();return;}
     const fillTab=event.target.closest("[data-stage-fill-tab]");if(fillTab){state.stageFillTab=fillTab.dataset.stageFillTab;render();return;}
@@ -898,7 +1031,7 @@
   document.addEventListener("pointerdown",(event)=>{const handle=event.target.closest("[data-stage-show-resize]"),band=handle?.closest("[data-stage-show-band]");if(!handle||!band||!band.dataset.stageShowBand)return;event.preventDefault();rememberPlannerState();const matrix=band.closest(".stage-routine-matrix"),headers=[...matrix.querySelectorAll(".stage-routine-column-heads>div")].slice(1),schools=orderedBoardSchools([...new Set(state.classes.filter((item)=>item.teacherId===state.boardTeacher).map((item)=>item.school))],state.groups.filter((group)=>group.decision!=="rejected"&&group.classes.some((item)=>item.teacherId===state.boardTeacher)&&!group.crossTeacher));const show=Number(band.dataset.stageShowBand),start=Number(band.dataset.stageBandStart),end=start+Number(band.dataset.stageBandSpan)-1,edge=handle.dataset.stageShowResize;handle.setPointerCapture?.(event.pointerId);band.classList.add("is-resizing");const finish=(upEvent)=>{const centers=headers.map((header)=>{const rect=header.getBoundingClientRect();return rect.left+rect.width/2;}),nearest=centers.reduce((best,center,index)=>Math.abs(center-upEvent.clientX)<Math.abs(centers[best]-upEvent.clientX)?index:best,0),nextStart=edge==="start"?Math.min(nearest,end):start,nextEnd=edge==="end"?Math.max(nearest,start):end;schools.forEach((school,index)=>{const was=index>=start&&index<=end,isNow=index>=nextStart&&index<=nextEnd;if(isNow)setSchoolShow(school,show);else if(was&&showForSchool(school)===show)setSchoolShow(school,null);});handle.releasePointerCapture?.(upEvent.pointerId);handle.removeEventListener("pointerup",finish);handle.removeEventListener("pointercancel",finish);state.notice=`Show ${show} now includes ${nextEnd-nextStart+1} school${nextEnd-nextStart===0?"":"s"}.`;render();};handle.addEventListener("pointerup",finish);handle.addEventListener("pointercancel",finish);});
   document.addEventListener("dragover",(event)=>{const tapeSlot=event.target.closest("[data-stage-tape-drop]");if(!tapeSlot||!event.dataTransfer?.types.includes("text/stage-student"))return;event.preventDefault();tapeSlot.classList.add("is-drag-target");event.dataTransfer.dropEffect="move";});
   document.addEventListener("dragleave",(event)=>event.target.closest("[data-stage-tape-drop]")?.classList.remove("is-drag-target"));
-  document.addEventListener("drop",(event)=>{const tapeSlot=event.target.closest("[data-stage-tape-drop]");if(!tapeSlot)return;const studentKey=event.dataTransfer?.getData("text/stage-student");if(!studentKey)return;event.preventDefault();const key=`${state.activeRecital}:${state.stageSheetIndex}`,draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{},assignments:{}}),targetSlot=tapeSlot.dataset.stageTapeDrop,sourceSlot=event.dataTransfer?.getData("text/stage-source-slot");draft.assignments=draft.assignments||{};if(sourceSlot)delete draft.assignments[sourceSlot];Object.keys(draft.assignments).forEach((slot)=>{if(draft.assignments[slot]===studentKey)delete draft.assignments[slot];});draft.assignments[targetSlot]=studentKey;render();});
+  document.addEventListener("drop",(event)=>{const tapeSlot=event.target.closest("[data-stage-tape-drop]");if(!tapeSlot)return;const studentKey=event.dataTransfer?.getData("text/stage-student");if(!studentKey)return;event.preventDefault();const key=stageSheetDraftKey(),draft=state.stageSheetDrafts[key]||(state.stageSheetDrafts[key]={patterns:{},assignments:{}}),targetSlot=tapeSlot.dataset.stageTapeDrop,sourceSlot=event.dataTransfer?.getData("text/stage-source-slot");draft.assignments=draft.assignments||{};if(sourceSlot)delete draft.assignments[sourceSlot];Object.keys(draft.assignments).forEach((slot)=>{if(draft.assignments[slot]===studentKey)delete draft.assignments[slot];});draft.assignments[targetSlot]=studentKey;render();});
   document.addEventListener("dragover",(event)=>{const slot=event.target.closest("[data-stage-drop-group]");if(!slot||!state.draggedClass||state.draggedByShowHandle)return;event.preventDefault();slot.classList.add("is-drag-target");if(event.dataTransfer)event.dataTransfer.dropEffect="move";});
   document.addEventListener("dragover",(event)=>{const band=event.target.closest("[data-stage-show-band],[data-stage-unplaced-show]");if(!band||!(band.dataset.stageShowBand||band.dataset.stageUnplacedShow)||(!state.draggedSchool&&!state.draggedClass))return;event.preventDefault();band.classList.add("is-show-drop-target");if(event.dataTransfer)event.dataTransfer.dropEffect="move";});
   document.addEventListener("dragleave",(event)=>event.target.closest("[data-stage-show-band],[data-stage-unplaced-show]")?.classList.remove("is-show-drop-target"));
@@ -919,7 +1052,9 @@
     if(!state.classes.length)await initialize(false);
     const normalized=String(teacherLabel||"").replace(/^ms\.?\s*/i,"").trim().toLowerCase();
     const teacher=teacherLoad().find((item)=>String(item.name||"").replace(/^ms\.?\s*/i,"").trim().toLowerCase()===normalized)||teacherLoad().find((item)=>String(item.name||"").toLowerCase().includes(normalized));
-    if(teacher)state.boardTeacher=teacher.id;
+    if (document.body.dataset.tourMode !== "true" && window.dtCurrentProfile?.role === "teacher") {
+      state.boardTeacher = String(window.dtCurrentProfile.id);
+    } else if (teacher) state.boardTeacher=teacher.id;
     render();
   };
   window.unmountTeacherBigStagePlanner=()=>{
@@ -928,18 +1063,39 @@
     if(directorRootParent){if(directorRootNextSibling?.parentElement===directorRootParent)directorRootParent.insertBefore(app,directorRootNextSibling);else directorRootParent.append(app);}
     render();
   };
-  window.openTeacherStageSheetEditor=async({classId="",teacherLabel="",school="",className="",allowStandalone=false}={})=>{
+  window.getTeacherLockedRecitalShows = (teacherId) => Object.entries(state.recitalLocks)
+    .filter(([,locks])=>locks[teacherId])
+    .map(([recital])=>({recital,show:Number(state.recitalTeacherShows[recital]?.[teacherId])}))
+    .filter(({show})=>show>=1&&show<=4);
+  window.getTeacherLockedRecitalClasses = (teacherId) => window.getTeacherLockedRecitalShows(teacherId)
+    .flatMap(({recital,show})=>recitalUnits(recital,String(teacherId)).flatMap(({group,classes})=>classes.map((item)=>({
+      ...item.source,id:item.id,stageSheetId:item.id,name:item.name,schoolName:item.school,students:item.students,
+      recitalShow:show,recitalLetter:recital,routineName:plannerRoutineLabel(group,classes),
+      recitalRequirement:group.requirement,combined:classes.length>1
+    }))));
+  window.openTeacherStageSheetEditor=async({classId="",teacherId="",recital="",teacherLabel="",school="",className="",allowStandalone=false}={})=>{
+    while (state.loading) await new Promise((resolve)=>setTimeout(resolve,50));
     if(!state.classes.length)await initialize(false);
-    const normalizedTeacher=String(teacherLabel).replace(/^ms\.?\s*/i,"").trim().toLowerCase(),lexiStandalone=allowStandalone&&normalizedTeacher==="lexi",candidate=state.classes.find((item)=>String(item.id)===String(classId)||String(item.sourceClassId)===String(classId))||state.classes.find((item)=>(lexiStandalone||String(item.teacher||"").replace(/^ms\.?\s*/i,"").trim().toLowerCase()===normalizedTeacher)&&String(item.school)===String(school)&&String(item.name)===String(className));
-    if(!candidate)return false;
-    const normalizedSchool=String(school||candidate.school||"").trim().toLowerCase(),normalizedClass=String(className||candidate.name||"").trim().toLowerCase();
-    const match=["A","B","C","D"].map((recital)=>({recital,index:recitalUnits(recital).findIndex((unit)=>unit.classes.some((item)=>item.id===candidate.id||(String(item.school||"").trim().toLowerCase()===normalizedSchool&&String(item.name||"").trim().toLowerCase()===normalizedClass)))})).find((entry)=>entry.index>=0);
-    if(!match){
-      const candidateTeacher=String(candidate.teacher||"").replace(/^ms\.?\s*/i,"").trim().toLowerCase();
-      if(!lexiStandalone&&normalizedTeacher!=="lexi"&&candidateTeacher!=="lexi")return false;
-      state.section="matching";state.view="show";state.stageSheetIndex=`standalone:${candidate.id}`;state.stageSheetPreview=false;render();return true;
+    const tour = document.body.dataset.tourMode === "true";
+    const owner = window.dtCurrentProfile?.role === "teacher" && !tour ? String(window.dtCurrentProfile.id) : String(teacherId);
+    const normalizedTeacher = String(teacherLabel).replace(/^ms\.?\s*/i,"").trim().toLowerCase();
+    const candidates = state.classes.filter((item)=>!owner||tour||item.teacherId===owner);
+    const candidate = candidates.find((item)=>item.id===String(classId))
+      || candidates.find((item)=>item.sourceClassId===String(classId))
+      || candidates.find((item)=>item.school===school&&item.name===className
+        && String(item.teacher).replace(/^ms\.?\s*/i,"").trim().toLowerCase()===normalizedTeacher);
+    if (!candidate) return false;
+    const locks = window.getTeacherLockedRecitalShows(candidate.teacherId);
+    const letters = recital ? [recital] : tour ? ["A","B","C","D"] : locks.map((entry)=>entry.recital);
+    for (const letter of letters) {
+      if (!tour && !locks.some((entry)=>entry.recital===letter)) continue;
+      const unit = recitalUnits(letter,candidate.teacherId).find((entry)=>entry.classes.some((item)=>item.id===candidate.id));
+      if (unit) return openStageSheet(letter,unit.group.id,candidate.teacherId);
     }
-    state.section="matching";state.view="show";state.activeRecital=match.recital;state.stageSheetIndex=String(match.index);state.stageSheetPreview=false;render();return true;
+    if (!recital && allowStandalone && normalizedTeacher==="lexi") {
+      return openStageSheet(state.activeRecital,`standalone:${candidate.id}`);
+    }
+    return false;
   };
   window.getTeacherRecitalClassAssignment=(classId)=>{
     const id=String(classId||""),matches=state.groups.filter((group)=>!group.crossTeacher&&group.decision!=="rejected"&&group.classes.some((item)=>String(item.id)===id||String(item.sourceClassId)===id));
