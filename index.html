@@ -8915,9 +8915,10 @@
     .roster-school-results-line { height: 1px; margin: 8px 0 14px; background: var(--border); }
     .roster-school-class-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
     .confirm-dialog.roster-multi-class-dialog { width: calc(100vw - 28px); max-width: 1800px; max-height: calc(100vh - 28px); overflow: auto; padding: 24px; border-radius: 14px; }
-    .roster-multi-class-toolbar { position: sticky; top: -24px; z-index: 20; display: grid; grid-template-columns: minmax(210px, 1fr) auto auto auto; align-items: end; gap: 10px; margin: 16px 0 20px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(12px); }
-    .roster-multi-class-toolbar label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 850; }
+    .roster-multi-class-toolbar { position: sticky; top: -24px; z-index: 20; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) auto auto auto; align-items: end; gap: 10px; margin: 16px 0 20px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(12px); }
+    .roster-multi-class-toolbar label { display: grid; min-width: 0; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 850; }
     .roster-multi-class-toolbar select, .roster-multi-class-toolbar button { min-height: 42px; }
+    .roster-multi-class-toolbar select { width: 100%; min-width: 0; }
     .roster-multi-change-count { min-height: 42px; display: grid; place-items: center; padding: 0 14px; border-radius: 999px; background: var(--surface-soft); color: var(--berry); font-size: 12px; font-weight: 900; white-space: nowrap; }
     .roster-multi-class-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 8px; }
     .roster-multi-class-section { position: relative; min-height: 330px; padding: 16px; border: 1px solid var(--border); border-radius: 18px; background: color-mix(in srgb, var(--surface) 92%, transparent); outline: none; transition: opacity .16s ease, background .16s ease, box-shadow .16s ease; }
@@ -8933,7 +8934,7 @@
     .roster-multi-capacity { position: absolute; top: 14px; right: 14px; padding: 5px 10px; border-radius: 999px; background: var(--sage-light); color: var(--sage-dark); font-weight: 900; }
     .roster-multi-class-section.is-over-capacity .roster-multi-capacity { background: var(--brick); color: white; }
     .roster-multi-class-divider { height: 2px; margin: 9px 0 16px; border-radius: 999px; background: var(--blush); }
-    .roster-multi-student-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .roster-multi-student-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
     .roster-multi-student { display: grid; justify-items: center; align-content: start; gap: 6px; min-width: 0; padding: 12px 8px; border: 1px solid transparent; border-radius: 14px; outline: none; background: transparent; text-align: center; cursor: grab; touch-action: none; }
     .roster-multi-student:hover { border-color: var(--border); background: var(--surface-soft); }
     .roster-multi-student:focus-visible { border-color: var(--accent-strong); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blush) 60%, transparent); }
@@ -8944,18 +8945,24 @@
     .roster-multi-student.is-keyboard-selected { border-color: var(--accent-strong); background: color-mix(in srgb, var(--blush) 30%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blush) 50%, transparent); }
     .roster-multi-student.is-selected { border-color: var(--berry); background: var(--blush); box-shadow: 0 0 0 3px color-mix(in srgb, var(--blush) 62%, transparent); }
     .roster-multi-student.is-moved { border-color: var(--moved-teacher-color, var(--berry)); background: color-mix(in srgb, var(--moved-teacher-color, var(--blush)) 24%, white); box-shadow: 0 0 0 3px color-mix(in srgb, var(--moved-teacher-color, var(--berry)) 48%, transparent), 0 0 18px color-mix(in srgb, var(--moved-teacher-color, var(--berry)) 30%, transparent); }
-    .roster-multi-student .roster-student-photo { width: 76px; height: 76px; }
-    .roster-multi-student strong { max-width: 100%; font-size: 15px; line-height: 1.15; }
-    .roster-multi-student small { max-width: 100%; color: var(--muted); font-size: 11px; line-height: 1.25; }
+    .roster-multi-student .roster-student-photo { width: min(76px, 100%); height: auto; aspect-ratio: 1; }
+    .roster-multi-student.is-classroom-match:not(.is-selected):not(.is-moved) { border-color: #8b9e7d; background: #edf3e8; }
+    .roster-multi-student.is-classroom-muted { filter: grayscale(1); opacity: .58; }
+    .roster-multi-student.is-classroom-muted:is(:hover, :focus-visible, .is-selected) { opacity: .86; }
+    .roster-multi-student strong { overflow-wrap: anywhere; max-width: 100%; font-size: 15px; line-height: 1.15; }
+    .roster-multi-student small { overflow-wrap: anywhere; max-width: 100%; color: var(--muted); font-size: 11px; line-height: 1.25; }
     .roster-multi-empty { grid-column: 1 / -1; min-height: 92px; display: grid; place-items: center; border: 1px dashed var(--border); border-radius: 12px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 1080px) {
+      .roster-multi-class-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
     @media (max-width: 760px) {
       .confirm-dialog.roster-multi-class-dialog { width: calc(100vw - 12px); max-height: calc(100vh - 12px); padding: 16px; }
       .roster-multi-class-toolbar { position: static; grid-template-columns: 1fr 1fr; }
-      .roster-multi-class-toolbar label { grid-column: 1 / -1; }
+      .roster-multi-class-toolbar label, .roster-multi-change-count { grid-column: 1 / -1; }
       .roster-multi-class-grid { grid-template-columns: 1fr; }
-      .roster-multi-student-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+      .roster-multi-student-grid { gap: 4px; }
       .roster-multi-student { padding: 9px 4px; }
-      .roster-multi-student .roster-student-photo { width: 58px; height: 58px; }
+      .roster-multi-student .roster-student-photo { width: min(58px, 100%); }
       .roster-multi-student strong { font-size: 12px; }
       .roster-multi-student small { font-size: 9px; }
     }
@@ -18361,6 +18368,7 @@
                 <div class="roster-profile-header"><div><h3 id="roster-multi-class-title">Rearrange Classes</h3><p class="subtle" id="roster-multi-class-school"></p></div><span class="roster-multi-class-head-actions"><button class="primary" type="button" id="roster-multi-class-add" hidden>+ Add Class</button><button class="roster-profile-close" type="button" id="roster-multi-class-close" aria-label="Close Rearrange Classes">×</button></span></div>
                 <div class="roster-multi-class-toolbar">
                   <label>School<select id="roster-multi-school-select"></select></label>
+                  <label>Classroom View<select id="roster-multi-classroom-select"><option value="">All Official Classrooms</option></select></label>
                   <span class="roster-multi-change-count" id="roster-multi-change-count">0 dancers moved</span>
                   <button class="secondary" type="button" id="roster-multi-class-undo" disabled>Undo All</button>
                   <button class="primary" type="button" id="roster-multi-class-save" disabled>Save Changes</button>
@@ -44386,6 +44394,7 @@
       if (rosterMultiHasUnsavedChanges() && !window.confirm("Leave without saving your class changes?")) return;
       if (rosterMultiHasUnsavedChanges()) restoreRosterMultiClassSnapshot();
       rosterMultiClassSchoolName = "";
+      document.getElementById("roster-multi-classroom-select").value = "";
       rosterMultiClassDragStudent = null;
       rosterMultiClassPointerDrag = null;
       rosterMultiClassDragGhost?.remove();
@@ -44428,6 +44437,14 @@
       });
       return [...byDisplayName.values()].sort((left, right) => rosterSchoolNickname(left).localeCompare(rosterSchoolNickname(right)));
     };
+    const updateRosterMultiClassroomHighlight = () => {
+      const selectedRoom = document.getElementById("roster-multi-classroom-select").value;
+      document.querySelectorAll("#roster-multi-class-grid [data-roster-multi-classroom]").forEach((card) => {
+        const matches = Boolean(selectedRoom) && card.dataset.rosterMultiClassroom === selectedRoom;
+        card.classList.toggle("is-classroom-match", matches);
+        card.classList.toggle("is-classroom-muted", Boolean(selectedRoom) && !matches);
+      });
+    };
     const renderRosterMultiClassEdit = () => {
       const overlay = document.getElementById("roster-multi-class-overlay");
       const grid = document.getElementById("roster-multi-class-grid");
@@ -44448,8 +44465,23 @@
       const schools = rosterMultiSchoolOptions();
       if (schoolSelect) {
         schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school)}">${rosterSafe(rosterSchoolNickname(school))}</option>`).join("");
-        schoolSelect.value = rosterMultiClassSchoolName;
+        schoolSelect.value = schools.includes(rosterMultiClassSchoolName)
+          ? rosterMultiClassSchoolName
+          : schools.find((school) => enrollmentSchoolNameMatches(school, rosterMultiClassSchoolName)) || "";
       }
+      const roomSelect = document.getElementById("roster-multi-classroom-select");
+      const previousRoom = roomSelect.value;
+      const school = schoolLibrary.find((item) => enrollmentSchoolNameMatches(item.name, rosterMultiClassSchoolName)
+        || enrollmentSchoolNameMatches(item.nickname, rosterMultiClassSchoolName));
+      const rooms = new Map();
+      for (const value of [...(school?.classroomOptions || []), ...records.map(({ student }) => rosterMultiOfficialClassroom(student))]) {
+        const name = normalizedClassroomName(value);
+        const key = name.toLowerCase();
+        if (key && !rooms.has(key)) rooms.set(key, name);
+      }
+      const roomOptions = [...rooms].sort((left, right) => left[1].localeCompare(right[1], undefined, { numeric: true }));
+      roomSelect.innerHTML = `<option value="">All Official Classrooms</option>${roomOptions.map(([key, name]) => `<option value="${rosterSafe(key)}">${rosterSafe(name)}</option>`).join("")}`;
+      roomSelect.value = rooms.has(previousRoom) ? previousRoom : "";
       setText("roster-multi-change-count", `${rosterMultiClassMovedIds.size} dancer${rosterMultiClassMovedIds.size === 1 ? "" : "s"} moved`);
       document.getElementById("roster-multi-class-undo").disabled = !rosterMultiHasUnsavedChanges();
       const multiClassSaveButton = document.getElementById("roster-multi-class-save");
@@ -44470,7 +44502,7 @@
         return `<section class="roster-multi-class-section ${suggestedClassId === rosterClass.id ? "is-suggested" : ""} ${overCapacity ? "is-over-capacity" : ""} ${selectedRecord && full && selectedRecord.rosterClass.id !== rosterClass.id ? "is-dimmed" : ""}" tabindex="0" role="button" aria-label="Move selected dancer to ${rosterSafe(rosterClass.name)}" data-roster-multi-drop-class="${rosterSafe(rosterClass.id)}">
           <div class="roster-multi-class-title-row"><h4>${rosterSafe(rosterClass.name)}</h4><small>${rosterSafe(rosterMultiAgeRange(enrolled))}</small><span class="roster-multi-capacity">${enrolled.length}/${capacity} Enrolled${overCapacity ? " · Over Capacity" : full ? " · Full" : ""}</span></div>
           <div class="roster-multi-class-divider"></div>
-          <div class="roster-multi-student-grid">${students.length ? students.map((student) => `<article class="roster-multi-student ${rosterMultiClassSelected.has(student.id) ? "is-selected" : ""} ${rosterMultiClassMovedIds.has(student.id) ? "is-moved" : ""}" style="--moved-teacher-color:${rosterSafe(teacherProfileColor(teachers.find((teacher) => teacher.id === rosterClass.teacherId)))}" draggable="true" tabindex="0" role="button" aria-grabbed="${rosterMultiClassSelected.has(student.id) ? "true" : "false"}" aria-label="Move ${rosterSafe(rosterStudentFullName(student))} to another class" data-roster-multi-student="${rosterSafe(student.id)}" data-roster-multi-source-class="${rosterSafe(rosterClass.id)}" title="Drag to move ${rosterSafe(rosterStudentFullName(student))} to another class">
+          <div class="roster-multi-student-grid">${students.length ? students.map((student) => `<article class="roster-multi-student ${rosterMultiClassSelected.has(student.id) ? "is-selected" : ""} ${rosterMultiClassMovedIds.has(student.id) ? "is-moved" : ""}" style="--moved-teacher-color:${rosterSafe(teacherProfileColor(teachers.find((teacher) => teacher.id === rosterClass.teacherId)))}" draggable="true" tabindex="0" role="button" aria-grabbed="${rosterMultiClassSelected.has(student.id) ? "true" : "false"}" aria-label="Move ${rosterSafe(rosterStudentFullName(student))} to another class" data-roster-multi-classroom="${rosterSafe(normalizedClassroomName(rosterMultiOfficialClassroom(student)).toLowerCase())}" data-roster-multi-student="${rosterSafe(student.id)}" data-roster-multi-source-class="${rosterSafe(rosterClass.id)}" title="Drag to move ${rosterSafe(rosterStudentFullName(student))} to another class">
             <span class="roster-student-photo ${rosterStudentBadgeClasses(student)}">${studentPhotoMarkup(student)}<span class="birthday-crown-frame" aria-hidden="true"></span><span class="boutique-order-badge" aria-hidden="true"></span></span>
             <strong>${rosterSafe(rosterMultiStudentDisplayName(student, duplicateFirstNames))}</strong>
             <small>${rosterSafe(rosterMultiOfficialClassroomLabel(student))}</small>
@@ -44478,6 +44510,7 @@
           </article>`).join("") : `<div class="roster-multi-empty">Drag students here to add them to this class.</div>`}</div>
         </section>`;
       }).join("") : `<div class="roster-empty">No active classes are available for this school.</div>`;
+      updateRosterMultiClassroomHighlight();
       overlay.classList.add("active");
       overlay.setAttribute("aria-hidden", "false");
     };
@@ -55233,9 +55266,11 @@
       }
       if (rosterMultiHasUnsavedChanges()) restoreRosterMultiClassSnapshot();
       rosterMultiClassSchoolName = nextSchool;
+      document.getElementById("roster-multi-classroom-select").value = "";
       beginRosterMultiClassSession();
       renderRosterMultiClassEdit();
     });
+    document.getElementById("roster-multi-classroom-select")?.addEventListener("change", updateRosterMultiClassroomHighlight);
     document.getElementById("roster-multi-class-undo")?.addEventListener("click", () => {
       restoreRosterMultiClassSnapshot();
       renderRosterMultiClassEdit();
