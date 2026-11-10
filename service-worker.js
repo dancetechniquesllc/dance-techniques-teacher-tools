@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v354-dt-touch-interview";
+const CACHE_NAME = "my-dance-techniques-v355-attendance-scroll";
 const CORE_ASSETS = [
   "./newsletter.html",
   "./newsletter-web.css",

@@ -39216,7 +39216,7 @@
     };
 
     let myDayRosterPopupClassId = "";
-    const mountMyDayRosterPopup = () => {
+    const mountMyDayRosterPopup = ({ scrollTop = 0, focusedDancerId } = {}) => {
       if (!myDayRosterPopupClassId) return;
       const rosterView = document.getElementById("rosters-view");
       const list = document.getElementById("teacher-roster-list");
@@ -39225,13 +39225,19 @@
       if (!rosterView || !list || !rosterClass || !card) return;
       const popup = document.createElement("section");
       popup.className = "my-day-roster-popup";
+      popup.dataset.rosterClassId = rosterClass.id;
       popup.setAttribute("role", "dialog");
       popup.setAttribute("aria-modal", "true");
       popup.setAttribute("aria-label", `${rosterClass.name} class roster`);
       popup.innerHTML = `<div class="my-day-roster-popup-header"><h3>${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} · ${rosterSafe(rosterClass.name)}</h3><button class="my-day-roster-popup-close" type="button" data-close-my-day-roster-popup aria-label="Close Class Roster">×</button></div><div class="my-day-roster-popup-body"></div>`;
-      popup.querySelector(".my-day-roster-popup-body")?.appendChild(card);
+      const body = popup.querySelector(".my-day-roster-popup-body");
+      body.appendChild(card);
       list.appendChild(popup);
       rosterView.classList.add("is-my-day-roster-popup");
+      if (focusedDancerId) {
+        body.querySelector(`[data-teacher-attendance-select="${CSS.escape(focusedDancerId)}"]`)?.focus({ preventScroll: true });
+      }
+      body.scrollTop = scrollTop;
     };
     const closeMyDayRosterPopup = () => {
       if(activeTeacherRosterCheckOutClassIds.has(myDayRosterPopupClassId)) {
@@ -39453,6 +39459,14 @@
       const list = document.getElementById("teacher-roster-list");
       const filter = document.getElementById("teacher-roster-school-filter");
       if (!list || !filter) return;
+      const existingPopup = list.querySelector(".my-day-roster-popup");
+      const popupBody = existingPopup?.dataset.rosterClassId === myDayRosterPopupClassId
+        ? existingPopup.querySelector(".my-day-roster-popup-body") : null;
+      const popupPosition = popupBody ? {
+        scrollTop: popupBody.scrollTop,
+        focusedDancerId: popupBody.contains(document.activeElement)
+          ? document.activeElement.dataset.teacherAttendanceSelect : undefined
+      } : undefined;
       const schools = assignedTeacherSchools();
       const allClasses = teacherRosterClasses();
       const requestedSchool = document.getElementById("rosters-view")?.dataset.requestedSchool || "";
@@ -39564,7 +39578,7 @@
         </details>`;
       }).join("");
       updateTeacherClassStopwatches();
-      if (myDayRosterPopupClassId) mountMyDayRosterPopup();
+      if (myDayRosterPopupClassId) mountMyDayRosterPopup(popupPosition);
     }
 
     const closeTeacherNewEnrollmentDialog = () => {
