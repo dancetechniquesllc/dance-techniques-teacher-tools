@@ -16393,6 +16393,28 @@
     .payroll-copy-summary h3 { margin-top: 0; }
     .payroll-copy-summary textarea { display: block; box-sizing: border-box; width: 100%; margin-bottom: 14px; line-height: 1.7; resize: vertical; }
     #payroll-copy-status { margin-left: 12px; color: #53694e; }
+  #issued-statement-view {
+    box-sizing: border-box;
+    width: min(95vw, 900px);
+    max-height: 90dvh;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #e8c9c4;
+    border-radius: 16px;
+    background: #fff;
+  }
+  #issued-statement-view > header { padding: 10px 12px; }
+  .issued-statement-pages {
+    max-height: calc(90dvh - 66px);
+    overflow: auto;
+    padding: 0 8px 8px;
+  }
+  .issued-statement-pages canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .issued-statement-pages canvas + canvas { border-top: 1px solid #e8c9c4; }
 </style>
   <link rel="stylesheet" href="tulle.css?v=20260729-questions">
   <link rel="stylesheet" href="roster-care.css?v=20260908">
@@ -16569,16 +16591,16 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
                 </button>
                 <div class="nav-menu-panel" id="teacher-nav-panel">
-                <button class="nav-menu-option" type="button" data-nav-target="today">Teacher Tools</button>
-                <button class="nav-menu-option" type="button" data-nav-target="my-day">My Day</button>
-                  <button class="nav-menu-option" type="button" data-nav-target="rosters">Rosters</button>
-                  <button class="nav-menu-option" type="button" data-nav-target="schools">Partner Schools</button>
-                  <button class="nav-menu-option" type="button" data-nav-target="music">Music</button>
-                  <button class="nav-menu-option" type="button" data-nav-target="pay">Payday</button>
+                  <button class="nav-menu-option" type="button" data-nav-target="today">HOME</button>
                   <button class="nav-menu-option" type="button" data-nav-target="curriculum">Curriculum</button>
-                  <button class="nav-menu-option" type="button" data-nav-target="classes">Schedule</button>
                   <button class="nav-menu-option" type="button" data-nav-target="messages">Messages</button>
+                  <button class="nav-menu-option" type="button" data-nav-target="music">Music</button>
+                  <button class="nav-menu-option" type="button" data-nav-target="my-day">My Day</button>
                   <button class="nav-menu-option" type="button" data-nav-target="orders">Orders</button>
+                  <button class="nav-menu-option" type="button" data-nav-target="schools">Partner Schools</button>
+                  <button class="nav-menu-option" type="button" data-nav-target="pay">Payday</button>
+                  <button class="nav-menu-option" type="button" data-nav-target="rosters">Rosters</button>
+                  <button class="nav-menu-option" type="button" data-nav-target="classes">Schedule</button>
                 </div>
               </div>
             </nav>
@@ -32767,24 +32789,28 @@
       return matches;
     };
 
-    const loadIsdCalendarPdfReader = async () => {
-      if (window.pdfjsLib) return window.pdfjsLib;
-      await new Promise((resolve, reject) => {
-        const existing = document.querySelector('script[data-isd-pdf-reader="true"]');
-        if (existing) {
-          existing.addEventListener("load", resolve, { once: true });
-          existing.addEventListener("error", () => reject(new Error("The calendar PDF reader could not be loaded.")), { once: true });
-          return;
-        }
+    let pdfReaderPromise;
+    const loadIsdCalendarPdfReader = () => {
+      pdfReaderPromise ??= new Promise((resolve, reject) => {
         const script = document.createElement("script");
         script.src = "./assets/vendor/pdfjs/pdf.compat.min.js";
-        script.dataset.isdPdfReader = "true";
-        script.onload = resolve;
-        script.onerror = () => reject(new Error("The calendar PDF reader could not be loaded."));
+        script.setAttribute("data-isd-pdf-reader", "true");
+        script.onload = () => {
+          const reader = window.pdfjsLib;
+          if (!reader) {
+            reject(new Error("The PDF reader did not initialize."));
+            return;
+          }
+          reader.GlobalWorkerOptions.workerSrc = new URL("./assets/vendor/pdfjs/pdf.worker.compat.min.js", window.location.href).href;
+          resolve(reader);
+        };
+        script.onerror = () => reject(new Error("The PDF reader could not be loaded."));
         document.head.appendChild(script);
+      }).catch(error => {
+        pdfReaderPromise = null;
+        throw error;
       });
-      if (!window.pdfjsLib) throw new Error("The calendar PDF reader did not initialize.");
-      return window.pdfjsLib;
+      return pdfReaderPromise;
     };
 
     const readIsdCalendarPdfFile = async (file) => {
@@ -32860,7 +32886,6 @@
 
     const extractIsdCalendarClosures = async (file, isd) => {
       const pdfReader = await loadIsdCalendarPdfReader();
-      pdfReader.GlobalWorkerOptions.workerSrc = new URL("./assets/vendor/pdfjs/pdf.worker.compat.min.js", window.location.href).href;
       const pdf = await pdfReader.getDocument({ data: await readIsdCalendarPdfFile(file) }).promise;
       const lines = [];
       for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
@@ -48353,6 +48378,53 @@
       if (error) throw new Error("Pay statements could not load. Please try again.");
       applyIssuedPayrollStatements(data || []);
     };
+    const viewIssuedPayStatement = async (bytes) => {
+      const dialog = document.getElementById("issued-statement-view");
+      if (dialog.open || dialog.hasChildNodes()) return;
+      dialog.innerHTML = `<header><button class="secondary" type="button" aria-label="Close Pay Statement">× Close</button></header>
+        <div class="issued-statement-pages" tabindex="0" role="region" aria-label="Pay Statement Pages">
+          <p role="status">Loading pay statement…</p>
+        </div>`;
+      const pages = dialog.querySelector(".issued-statement-pages");
+      const status = pages.querySelector("[role=status]");
+      dialog.querySelector("button").onclick = () => dialog.close();
+      dialog.addEventListener("close", () => dialog.replaceChildren(), { once: true });
+      dialog.showModal();
+
+      let loadingTask;
+      try {
+        const reader = await loadIsdCalendarPdfReader();
+        if (!pages.isConnected || !dialog.open) return;
+        loadingTask = reader.getDocument({ data: bytes, isEvalSupported: false });
+        const pdf = await loadingTask.promise;
+        for (let pageNumber = 1; pageNumber <= pdf.numPages && pages.isConnected && dialog.open; pageNumber += 1) {
+          const page = await pdf.getPage(pageNumber);
+          if (!pages.isConnected || !dialog.open) break;
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement("canvas");
+          canvas.width = Math.ceil(viewport.width);
+          canvas.height = Math.ceil(viewport.height);
+          canvas.setAttribute("role", "img");
+          canvas.setAttribute("aria-label", `Pay Statement, Page ${pageNumber} of ${pdf.numPages}`);
+          const renderTask = page.render({ canvasContext: canvas.getContext("2d"), viewport });
+          const cancelRender = () => renderTask.cancel();
+          dialog.addEventListener("close", cancelRender, { once: true });
+          try {
+            await renderTask.promise;
+          } finally {
+            dialog.removeEventListener("close", cancelRender);
+          }
+          if (pages.isConnected && dialog.open) pages.insertBefore(canvas, status);
+          page.cleanup();
+        }
+        status.remove();
+      } catch (error) {
+        if (pages.isConnected && dialog.open) status.textContent = "The pay statement could not be displayed. Close this window and use Save to open the PDF.";
+      } finally {
+        await loadingTask?.destroy();
+      }
+    };
+
     const openIssuedPayStatement = async (teacherId, payDate, download = false) => {
       try {
         if(!download&&String(teacherId)===String(profileTeacher.id))clearPayStubNotification();
@@ -48361,16 +48433,16 @@
         if (!stub?.statement) { showToast("This older entry has no issued PDF. Please ask the director."); return; }
         const logo = await fetch("assets/dance-techniques-logo-only.png").then(r => { if (!r.ok) throw new Error("Logo could not load"); return r.arrayBuffer(); });
         const bytes = await DTPayrollStatements.pdf(stub.statement, logo);
-        const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
-        if (download) { const a = document.createElement("a"); a.href=url; a.download=stub.filename; a.click(); }
-        else {
-          let dialog=document.getElementById("issued-statement-view");
-          if (!dialog) { dialog=document.createElement("dialog"); dialog.id="issued-statement-view"; dialog.style.cssText="width:95vw;max-width:1000px;height:90vh;padding:12px";
-            dialog.innerHTML='<button type="button" aria-label="Close Pay Statement">× Close</button><iframe title="Pay Statement" style="width:100%;height:90%;border:0"></iframe>';
-            dialog.querySelector("button").onclick=()=>dialog.close(); document.body.append(dialog); }
-          dialog.querySelector("iframe").src=url;dialog.showModal();dialog.addEventListener("close",()=>URL.revokeObjectURL(url),{once:true});
+        if (download) {
+          const url = URL.createObjectURL(new Blob([bytes], { type: "application/pdf" }));
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = stub.filename;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(url), 60000);
+        } else {
+          await viewIssuedPayStatement(bytes);
         }
-        if(download)setTimeout(()=>URL.revokeObjectURL(url),60000);
       } catch(error) { showToast(error.message || "The statement could not open."); }
     };
     const previewCurrentPayrollStatement = async (teacherId) => {
@@ -58225,5 +58297,6 @@
   <script src="director-corner.js?v=20261110-idle-availability"></script>
   <script src="tulle.js?v=20260729-questions"></script>
   <script src="director-duet.js?v=20260918"></script>
+  <dialog id="issued-statement-view" aria-label="Pay Statement"></dialog>
 </body>
 </html>

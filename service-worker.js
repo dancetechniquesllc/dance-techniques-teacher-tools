@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v360-enrollment-prospect-photo";
+const CACHE_NAME = "my-dance-techniques-v361-teacher-pay-statement-view";
 const CORE_ASSETS = [
   "./assets/search-input.css",
   "./assets/action-icons.css",
