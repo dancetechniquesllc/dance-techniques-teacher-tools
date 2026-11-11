@@ -16415,14 +16415,248 @@
     height: auto;
   }
   .issued-statement-pages canvas + canvas { border-top: 1px solid #e8c9c4; }
+    body:not([data-communication-view="team"]) #admin-home-messages .admin-announcement-box { display: none; }
+    .admin-announcement-box { padding: 20px; border-radius: 18px; background: var(--surface-soft); }
+    .team-announcements-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .team-announcements-header :is(h3, p), .admin-announcement-box h4 { margin: 0; }
+    .team-announcements-header p { margin-top: 5px; }
+    #new-team-announcement {
+      width: 250px; max-width: 100%; min-height: 44px;
+      padding: 0; border: 0; border-radius: 999px; background: transparent;
+    }
+    #new-team-announcement img { display: block; width: 100%; height: auto; }
+    #new-team-announcement:hover { filter: brightness(1.06); }
+    #new-team-announcement:focus-visible { outline: 2px solid var(--brick); outline-offset: 2px; }
+    .team-announcements-history-section > summary {
+      display: flex; align-items: center; gap: 8px; min-height: 44px;
+      cursor: pointer; list-style: none;
+    }
+    .team-announcements-history-section > summary::-webkit-details-marker { display: none; }
+    .team-announcements-history-section > summary span {
+      width: 16px; height: 16px; flex: none;
+      background: var(--dd-chevron-down) center / contain no-repeat;
+    }
+    .team-announcements-history-section[open] > summary span { background-image: var(--dd-chevron-up); }
+    #team-announcements-history { display: grid; gap: 8px; }
+    .announcement-history-excerpt { overflow-wrap: anywhere; }
+    #team-announcements-history summary { flex-wrap: wrap; }
+    .announcement-publish { padding: 10px 16px; min-height: 44px; border: 1px solid var(--brick); border-radius: 12px; background: var(--brick); color: white; font-weight: 800; }
+    .announcement-publish:hover { background: color-mix(in srgb, var(--brick) 88%, black); }
+    .announcement-publish:disabled { opacity: .65; cursor: wait; }
+    .announcement-composer-dialog, .announcement-small-dialog {
+      padding: 0; border: 1px solid var(--border); border-radius: 24px;
+      background: var(--surface); color: var(--fg); box-shadow: var(--shadow);
+    }
+    .announcement-composer-dialog { width: min(1050px, calc(100% - 24px)); max-height: calc(100dvh - 90px); overflow: visible; }
+    .announcement-composer-dialog::backdrop, .announcement-small-dialog::backdrop { background: color-mix(in srgb, var(--brick) 30%, rgb(0 0 0 / 30%)); backdrop-filter: blur(2px); }
+    .announcement-composer-shell { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; max-height: calc(100dvh - 92px); border-radius: inherit; overflow: hidden; }
+    .announcement-composer-header { position: relative; padding: clamp(34px, 5vw, 46px) 42px 15px; text-align: center; background: color-mix(in srgb, var(--blush) 15%, var(--surface)); border-bottom: 1px solid var(--border); }
+    .announcement-composer-header h2 { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; font-family: var(--font-script); font-size: clamp(2rem, 4.8vw, 3.3rem); line-height: 1; color: var(--brick); }
+    .announcement-composer-header h2 img { flex: none; width: clamp(66px, 12vw, 138px); height: auto; }
+    .announcement-composer-header h2 img:last-child { transform: scaleX(-1); }
+    .announcement-composer-header p { margin: 8px 0 0; }
+    .announcement-bow {
+      position: absolute; top: -32px; left: 50%; z-index: 1;
+      width: clamp(150px, 31vw, 230px); height: auto;
+      transform: translateX(-50%); pointer-events: none;
+    }
+    .announcement-close { position: absolute; top: 10px; right: 10px; min-width: 44px; min-height: 44px; color: var(--brick); }
+    .announcement-composer-columns { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); overflow: auto; }
+    .announcement-composer-fields, .announcement-preview-panel { padding: clamp(14px, 2.4vw, 26px); min-width: 0; }
+    .announcement-composer-fields { display: grid; gap: 8px; }
+    .announcement-composer-fields label, #team-announcement-message-label { font-weight: 800; }
+    .announcement-composer-fields > label { display: block; font-size: inherit; }
+    .announcement-writing .announcement-toolbar select { width: auto; max-width: 100%; min-width: 0; flex: 1; }
+    .announcement-touch-row { display: flex; align-items: center; gap: 8px; max-width: 100%; }
+    .announcement-touch-row .dt-writing-toolbar-controls { display: flex; align-items: center; gap: 6px; }
+    .announcement-touch-row .dt-writing-toolbar-controls { flex-wrap: wrap; }
+    .announcement-touch-row .dt-writing-status { flex-basis: 100%; }
+    #announcement-dt-touch-controls > .dt-writing-touch {
+      position: relative; overflow: hidden; flex: 0 0 40px;
+      width: 40px; height: 40px; min-width: 40px; min-height: 40px; padding: 7px;
+      border: 1px solid #c69a3c; border-radius: 50%;
+      background: linear-gradient(135deg, #f7e2a1, #d8ad50);
+      box-shadow: 0 2px 8px #b8892930;
+    }
+    #announcement-dt-touch-controls > .dt-writing-touch img {
+      display: block; width: 100%; height: 100%; object-fit: contain;
+    }
+    .announcement-composer-fields > :is(input, .announcement-writing) { margin-bottom: 8px; }
+    .announcement-composer-fields input { width: 100%; min-width: 0; }
+    .announcement-composer-fields input[hidden], .announcement-preview-panel [hidden], .announcement-composer-status[hidden] { display: none; }
+    .announcement-composer-fields :is(label, #team-announcement-message-label) > span, .announcement-notification span { color: var(--brick); }
+    .announcement-writing { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .announcement-writing .announcement-toolbar { padding: 8px; background: color-mix(in srgb, var(--blush) 18%, var(--surface)); border-bottom: 1px solid var(--border); }
+    .announcement-writing .announcement-editor { min-height: 152px; max-height: 40dvh; border: 0; border-radius: 0; overflow-wrap: anywhere; white-space: pre-wrap; font-weight: 400; }
+    .announcement-writing .announcement-editor:focus { outline: 2px solid var(--brick); outline-offset: -2px; box-shadow: none; }
+    .announcement-writing img { max-width: 100%; height: auto; }
+    .announcement-upload { display: grid; gap: 3px; justify-items: center; padding: 14px; border: 1px dashed var(--blush); border-radius: 12px; background: color-mix(in srgb, var(--blush) 16%, var(--surface)); color: var(--brick); }
+    .announcement-upload[data-dragging] { outline: 2px solid var(--brick); }
+    .announcement-upload span { color: var(--fg); }
+    .announcement-composer-status { margin: 0; color: var(--brick); }
+    .announcement-notification { padding: 12px; border-radius: 12px; background: color-mix(in srgb, var(--blush) 25%, var(--surface)); }
+    .announcement-notification summary { cursor: pointer; font-weight: 800; }
+    .announcement-notification-fields { display: grid; gap: 8px; margin-top: 10px; }
+    .announcement-notification-fields label, .announcement-small-dialog label { display: grid; gap: 5px; }
+    .announcement-notification-fields p { margin: 0; }
+    .announcement-preview-panel { border-left: 1px solid var(--border); }
+    .announcement-preview-panel h3 { margin: 0 0 10px; }
+    .announcement-preview-toggle { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 4px; background: color-mix(in srgb, var(--blush) 22%, var(--surface)); }
+    .announcement-preview-toggle button[aria-pressed="true"] { background: var(--brick); color: white; }
+    .announcement-live-preview, .announcement-phone-preview { padding: 16px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); box-shadow: var(--shadow); overflow-wrap: anywhere; }
+    .announcement-live-preview {
+      display: grid;
+      align-content: center;
+      aspect-ratio: 3 / 2;
+      padding: 15% 17% 18% 14%;
+      border: 0;
+      background: var(--surface) url("assets/announcement-preview-frame.webp") center / 100% 100% no-repeat;
+    }
+    .announcement-live-preview .rich-announcement-body { min-width: 0; margin: 0; }
+    .announcement-live-preview h3 { text-align: center; }
+    .announcement-phone-preview { display: grid; gap: 5px; }
+    .announcement-phone-preview small { color: var(--brick); }
+    .announcement-phone-preview p { margin: 0; }
+    .announcement-composer-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+    .announcement-composer-footer .announcement-save { margin-left: auto; background: color-mix(in srgb, var(--blush) 28%, var(--surface)); color: var(--brick); }
+    .announcement-small-dialog { width: min(440px, calc(100% - 24px)); padding: 20px; }
+    .announcement-small-dialog form { display: grid; gap: 12px; }
+    .announcement-small-dialog form :is(h3, p) { margin: 0; }
+    .announcement-small-dialog form > div { display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+    @media (max-width: 700px) {
+      .announcement-composer-columns { grid-template-columns: minmax(0, 1fr); }
+      .announcement-preview-panel { border-left: 0; border-top: 1px solid var(--border); }
+    }
+    @media (max-width: 480px) {
+      .announcement-composer-header { padding: 54px 14px 15px; }
+      .announcement-composer-header h2 { font-size: clamp(1.65rem, 6.5vw, 2rem); }
+    }
+    @media (max-width: 400px) {
+      .announcement-composer-footer :is(button, .announcement-save) { margin-left: 0; flex: 1 1 auto; }
+    }
+    .announcement-history-row { display: flex; align-items: center; gap: 12px; padding: 8px; }
+    .announcement-history-open { display: grid; flex: 1 1 220px; gap: 4px; text-align: left; min-width: 0; padding: 9px; border: 0; border-radius: 10px; background: transparent; color: var(--fg); }
+    .announcement-history-open:hover { background: color-mix(in srgb, var(--blush) 14%, transparent); }
+    .announcement-tracking-badge { flex: 0 1 auto; min-height: 44px; padding: 7px 12px; border: 1px solid var(--border); border-radius: 999px; background: color-mix(in srgb, var(--blush) 37%, var(--surface)); color: var(--brick); font-size: .8rem; font-weight: 800; }
+    .announcement-tracking-badge.is-complete, .announcement-activity-complete { background: var(--sage); color: var(--sage-dark, #31523a); }
+    #announcement-review-dialog { width: min(640px, calc(100% - 24px)); max-height: calc(100dvh - 30px); padding: 0; overflow: hidden; }
+    #announcement-review-dialog[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); }
+    #announcement-review-dialog header { position: relative; padding: 18px 64px 15px 18px; border-bottom: 1px solid var(--border); background: color-mix(in srgb, var(--blush) 12%, var(--surface)); }
+    #announcement-review-dialog header h2, #announcement-review-dialog header p { margin: 0; overflow-wrap: anywhere; }
+    #announcement-review-dialog header p { margin-top: 4px; color: var(--brick); }
+    .announcement-review-body { overflow: auto; padding: 16px; overflow-wrap: anywhere; }
+    .announcement-activity-summary { margin: 0 0 6px; font-weight: 800; }
+    .announcement-review-body progress { display: block; appearance: none; width: 100%; height: 6px; border: 0; border-radius: 8px; background: var(--surface-soft); overflow: hidden; }
+    .announcement-review-body progress::-webkit-progress-bar { background: color-mix(in srgb, var(--blush) 20%, var(--surface)); }
+    .announcement-review-body progress::-webkit-progress-value { background: var(--sage); }
+    .announcement-review-body progress::-moz-progress-bar { background: var(--sage); }
+    .announcement-activity-complete { display: inline-block; padding: 4px 9px; border-radius: 99px; font-size: .8rem; }
+    .announcement-activity-list { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
+    .announcement-activity-card { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: 9px; padding: 9px; border: 1px solid var(--border); border-radius: 14px; background: var(--surface); }
+    .announcement-activity-card .teacher-card-photo { width: 44px; height: 44px; border-radius: 50%; }
+    .announcement-activity-identity { display: grid; justify-items: start; gap: 4px; }
+    .announcement-activity-identity small { border-radius: 99px; padding: 3px 7px; }
+    .announcement-activity-card.is-unread small { color: var(--brick); background: color-mix(in srgb, var(--brick) 12%, var(--surface)); }
+    .announcement-activity-card.is-read small { color: color-mix(in srgb, var(--gold) 51%, var(--fg)); background: color-mix(in srgb, var(--dt-focus-light-gold, var(--gold)) 30%, var(--surface)); }
+    .announcement-activity-card.is-acknowledged small { color: var(--sage-dark, #31523a); background: color-mix(in srgb, var(--sage) 38%, var(--surface)); }
+    .announcement-activity-times { display: grid; gap: 3px; font-size: .75rem; color: color-mix(in srgb, var(--fg) 75%, var(--surface)); }
+    @media (max-width: 560px) {
+      .announcement-history-row { flex-wrap: wrap; }
+      .announcement-tracking-badge { margin-left: 9px; }
+      .announcement-activity-card { grid-template-columns: 44px minmax(0, 1fr); }
+      .announcement-activity-times { grid-column: 2; }
+      .announcement-activity-times:empty { display: none; }
+    }
 </style>
   <link rel="stylesheet" href="tulle.css?v=20260729-questions">
   <link rel="stylesheet" href="roster-care.css?v=20260908">
   <link rel="stylesheet" href="director-corner.css?v=20261110-idle-availability">
   <link rel="stylesheet" href="assets/search-input.css">
   <link rel="stylesheet" href="assets/action-icons.css">
+  <link rel="stylesheet" href="assets/focus-styles.css">
 </head>
 <body class="auth-checking" data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="today">
+  <dialog class="announcement-composer-dialog" id="team-announcement-composer" aria-labelledby="announcement-composer-title">
+    <img class="announcement-bow" src="assets/announcement-bow.webp" alt="">
+    <div class="announcement-composer-shell">
+      <header class="announcement-composer-header">
+        <button class="library-icon-button announcement-close" type="button" data-close-announcement aria-label="Close Announcement Composer">×</button>
+        <h2 id="announcement-composer-title"><img src="assets/announcement-megaphone.webp" alt=""><span>Create an Announcement</span><img src="assets/announcement-megaphone.webp" alt=""></h2>
+        <p>Share an update with your teaching team.</p>
+      </header>
+      <div class="announcement-composer-columns">
+        <section class="announcement-composer-fields">
+          <label for="team-announcement-title">Announcement Title <span aria-hidden="true">*</span></label>
+          <input id="team-announcement-title" maxlength="160" required autofocus placeholder="e.g. Recital Reminders, Schedule Update, Team Meeting">
+          <span id="team-announcement-message-label">Message <span aria-hidden="true">*</span></span>
+          <div class="announcement-writing">
+            <div class="announcement-toolbar" role="group" aria-label="Announcement Formatting Toolbar">
+              <button type="button" data-announcement-command="bold" aria-label="Bold">B</button>
+              <button type="button" data-announcement-command="italic" aria-label="Italic"><i>I</i></button>
+              <button type="button" data-announcement-command="underline" aria-label="Underline"><u>U</u></button>
+              <button type="button" data-announcement-command="insertUnorderedList" aria-label="Bulleted List">• List</button>
+              <button type="button" data-announcement-command="insertOrderedList" aria-label="Numbered List">1. List</button>
+              <button type="button" id="announcement-open-link">Link</button>
+              <button type="button" id="announcement-add-image">Image</button>
+              <div class="announcement-touch-row"><select id="announcement-font-size" aria-label="Font Size"><option value="3">Normal</option><option value="2">Small</option><option value="4">Large</option><option value="5">Extra Large</option></select><span id="announcement-dt-touch-controls" class="dt-writing-toolbar-controls"></span></div>
+            </div>
+            <div id="admin-announcement-draft" data-dt-touch-field data-dt-touch-controls="announcement-dt-touch-controls" data-dt-touch-audience="staff" data-dt-touch-max-length="5000" aria-label="Announcement Message" class="announcement-editor" contenteditable="true" role="textbox" aria-multiline="true" aria-required="true" aria-labelledby="team-announcement-message-label" data-placeholder="Write your announcement here…"></div>
+          </div>
+          <button type="button" class="announcement-upload" id="announcement-upload"><strong>Add a Photo</strong><span>Drag and drop here or click to browse.</span></button>
+          <input id="announcement-image-url" type="file" accept="image/*" hidden>
+          <p class="announcement-composer-status" id="announcement-composer-status" role="status" hidden></p>
+          <details class="announcement-notification">
+            <summary>Notification Settings <span>(Optional)</span></summary>
+            <div class="announcement-notification-fields">
+              <label>Notification Title<input id="admin-announcement-notification-title" maxlength="70"></label>
+              <label>Notification Subtitle<input id="admin-announcement-notification-subtitle" maxlength="140"></label>
+              <p>These fields control what teachers see in their phone notifications.</p>
+              <button type="button" class="secondary" id="announcement-reset-notification">Use Announcement Text</button>
+            </div>
+          </details>
+        </section>
+        <section class="announcement-preview-panel" aria-labelledby="announcement-preview-title">
+          <h3 id="announcement-preview-title">Preview</h3>
+          <div class="communication-studio-toggle announcement-preview-toggle" role="group" aria-label="Preview Type">
+            <button type="button" data-announcement-preview="announcement" aria-pressed="true">Announcement</button>
+            <button type="button" data-announcement-preview="phone" aria-pressed="false">Phone Notification</button>
+          </div>
+          <div class="latest-announcement announcement-live-preview" id="announcement-live-preview"></div>
+          <div class="announcement-phone-preview" id="announcement-phone-preview" hidden>
+            <small>Dance Techniques</small><strong></strong><p></p>
+          </div>
+        </section>
+      </div>
+      <footer class="announcement-composer-footer">
+        <button class="secondary" type="button" data-close-announcement>Cancel</button>
+        <button class="secondary announcement-save" type="button" id="announcement-save-draft">Save Draft</button>
+        <button class="announcement-publish" type="button" id="admin-post-announcement">Publish Announcement</button>
+      </footer>
+    </div>
+  </dialog>
+  <dialog class="announcement-small-dialog" id="announcement-review-dialog" aria-labelledby="announcement-review-title" aria-describedby="announcement-review-subtitle">
+    <header>
+      <h2 id="announcement-review-title"></h2><p id="announcement-review-subtitle"></p>
+      <form method="dialog"><button class="library-icon-button announcement-close" aria-label="Close Announcement Review" autofocus>×</button></form>
+    </header>
+    <div class="announcement-review-body" tabindex="0" role="region" aria-label="Announcement Review"></div>
+  </dialog>
+  <dialog class="announcement-small-dialog" id="announcement-link-dialog" aria-labelledby="announcement-link-heading">
+    <form method="dialog">
+      <h3 id="announcement-link-heading">Add a Link</h3>
+      <label>Link Text<input id="announcement-link-text" required></label>
+      <label>Destination URL<input id="announcement-link-url" type="url" required placeholder="https://example.com"></label>
+      <div><button class="secondary" value="cancel" formnovalidate>Cancel</button><button class="announcement-publish" id="announcement-add-link" value="insert">Insert Link</button></div>
+    </form>
+  </dialog>
+  <dialog class="announcement-small-dialog" id="announcement-confirm-dialog" aria-labelledby="announcement-confirm-heading">
+    <form method="dialog">
+      <h3 id="announcement-confirm-heading">Publish Announcement</h3>
+      <p>Ready to publish this announcement to all teachers?</p>
+      <div><button class="secondary" value="cancel" autofocus>Cancel</button><button class="announcement-publish" value="publish">Publish Announcement</button></div>
+    </form>
+  </dialog>
+
   <button class="teacher-tools-viewer-return" id="teacher-tools-viewer-return" type="button">← Back to Teaching Team</button>
   <section class="auth-gate" id="auth-gate" data-state="checking" aria-live="polite">
     <div class="portal-landing" id="portal-landing">
@@ -18692,39 +18926,16 @@
                 <div class="automated-post-history-list" id="automated-post-history-list" aria-live="polite"></div>
               </section>
             </section>
-            <div class="admin-announcement-box">
-              <div class="section-title">
-                <h3>Announcement</h3>
-                <span class="status pending">To All Teachers</span>
-              </div>
-              <div class="announcement-notification-fields" aria-label="Phone Notification Wording">
-                <label>Notification Title
-                  <input id="admin-announcement-notification-title" maxlength="70" value="Dance Techniques Announcement" placeholder="Team Meeting">
-                </label>
-                <label>Notification Subtitle
-                  <input id="admin-announcement-notification-subtitle" maxlength="140" placeholder="Wednesday, August 26 at 9:00 AM">
-                </label>
-                <p class="announcement-notification-help">Only this short title and subtitle appear in the phone notification. Your fully formatted announcement appears inside Teacher Tools.</p>
-              </div>
-              <div class="announcement-toolbar" aria-label="Announcement Formatting Toolbar">
-                <select id="announcement-font-size" aria-label="Font Size">
-                  <option value="3">Normal</option>
-                  <option value="2">Small</option>
-                  <option value="4">Large</option>
-                  <option value="5">Extra Large</option>
-                </select>
-                <button type="button" data-announcement-command="bold" aria-label="Bold">B</button>
-                <button type="button" data-announcement-command="italic" aria-label="Italic"><i>I</i></button>
-                <button type="button" data-announcement-command="underline" aria-label="Underline"><u>U</u></button>
-                <input id="announcement-link-text" placeholder="Link Text" aria-label="Link Text">
-                <input id="announcement-link-url" type="url" placeholder="Link URL" aria-label="Link URL">
-                <button type="button" id="announcement-add-link">Link</button>
-                <input id="announcement-image-url" type="url" placeholder="Image URL" aria-label="Image URL">
-                <button type="button" id="announcement-add-image">Picture</button>
-              </div>
-              <div id="admin-announcement-draft" class="announcement-editor" contenteditable="true" data-placeholder="Write an announcement for all teachers"></div>
-              <div class="tt-feedback-actions"><button class="secondary" type="button" data-open-announcement-history>Announcement History</button><button class="primary" type="button" id="admin-post-announcement">Post Announcement</button></div>
-            </div>
+            <section class="admin-announcement-box" aria-labelledby="team-announcements-title">
+              <header class="team-announcements-header">
+                <div><h3 id="team-announcements-title">Teaching Team Announcements</h3><p>Share updates, reminders, and important information with your teaching team.</p></div>
+                <button id="new-team-announcement" type="button"><img src="assets/new-announcement-button.webp" alt="New Announcement"></button>
+              </header>
+              <details class="team-announcements-history-section" open>
+                <summary><h4>Announcement History</h4><span aria-hidden="true"></span></summary>
+                <div id="team-announcements-history"></div>
+              </details>
+            </section>
             <div class="admin-message-audience-toggle" role="tablist" aria-label="Director Message Audience">
               <button id="admin-messages-parents-tab" type="button" role="tab" aria-selected="true" aria-controls="admin-messages-parents-panel" tabindex="0" data-admin-message-audience="parents">Parents</button>
               <button id="admin-messages-staff-tab" type="button" role="tab" aria-selected="false" aria-controls="admin-messages-staff-panel" tabindex="-1" data-admin-message-audience="staff">Staff</button>
@@ -20812,7 +21023,7 @@
   <script src="supabase-auth.js?v=20261022-session-lifecycle"></script>
   <script src="dt-touch/dt-touch.js?v=20260722c"></script>
   <link rel="stylesheet" href="dt-touch/writing-fields.css">
-  <script type="module" src="dt-touch/writing-fields.mjs?v=20261110-stage-optout"></script>
+  <script type="module" src="dt-touch/writing-fields.mjs?v=20261111-announcement-controls"></script>
   <script type="module" src="dt-touch/behavior-interview.mjs"></script>
   <link rel="stylesheet" href="newsletter-web.css">
   <link rel="stylesheet" href="web-submissions.css?v=20261110-enrolled-portrait">
@@ -24763,7 +24974,7 @@
         unreadFor: ["Lexi"],
         activityOrder: 110,
         messages: [
-          { from: "Admin", role: "Admin", time: "Today 8:15 AM", text: "Reminder: please double-check Teacher Tools before your first class and send schedule changes through the app.", readBy: ["Lexi", "Tiffany", "Erika", "Makayla"], reaction: "up" }
+          { id: "tour-teacher-activity", from: "Admin", role: "Admin", time: "Today 8:15 AM", text: "Reminder: please double-check Teacher Tools before your first class and send schedule changes through the app.", readBy: ["Lexi", "Tiffany", "Erika", "Makayla"], reaction: "up" }
         ]
       },
       {
@@ -29788,6 +29999,28 @@
       readBy: [],
       reactions: []
     });
+    const loadAnnouncementRecipientIds = async (client, ids) => {
+      const recipients = new Map();
+      const pageSize = 500;
+      for (let offset = 0; ; offset += pageSize) {
+        const { data, error } = await client.from("teacher_notifications")
+          .select("teacher_id, metadata")
+          .eq("notification_type", "studio_announcement")
+          .in("metadata->>staff_announcement_id", ids)
+          .order("id").range(offset, offset + pageSize - 1);
+        if (error) {
+          console.error("Announcement recipient history could not sync", error);
+          return new Map();
+        }
+        for (const row of data || []) {
+          const id = row.metadata?.staff_announcement_id;
+          if (!id || !row.teacher_id) continue;
+          if (!recipients.has(id)) recipients.set(id, new Set());
+          recipients.get(id).add(String(row.teacher_id));
+        }
+        if ((data || []).length < pageSize) return recipients;
+      }
+    };
     const loadSharedStaffAnnouncements = async () => {
       const client = window.dtSupabase;
       const profile = window.dtCurrentProfile;
@@ -29802,12 +30035,15 @@
       }
       const thread = sharedAnnouncementThread();
       if (!thread) return false;
-      thread.messages = (data || []).map(mapSharedStaffAnnouncement);
-      const announcementIds = thread.messages.map((message) => message.id);
+      const messages = (data || []).map(mapSharedStaffAnnouncement);
+      const announcementIds = messages.map((message) => message.id);
       if (announcementIds.length) {
-        const { data: receiptRows, error: receiptError } = await client.from("staff_studio_announcement_receipts")
-          .select("announcement_id, teacher_id, read_at, acknowledged_at, acknowledgement")
-          .in("announcement_id", announcementIds);
+        const [{ data: receiptRows, error: receiptError }, recipients] = await Promise.all([
+          client.from("staff_studio_announcement_receipts")
+            .select("announcement_id, teacher_id, read_at, acknowledged_at, acknowledgement")
+            .in("announcement_id", announcementIds),
+          ["admin", "director"].includes(profile.role) ? loadAnnouncementRecipientIds(client, announcementIds) : new Map()
+        ]);
         if (receiptError) console.error("Announcement receipts could not sync", receiptError);
         const receiptsByAnnouncement = new Map();
         (receiptRows || []).forEach((receipt) => {
@@ -29816,13 +30052,18 @@
           list.push({ ...receipt, teacherName: teacher ? teacherNameForMessages(teacher) : "Teacher" });
           receiptsByAnnouncement.set(receipt.announcement_id, list);
         });
-        thread.messages.forEach((message) => {
+        messages.forEach((message) => {
+          message.activityUnavailable = Boolean(receiptError);
+          const recipientSet = recipients.get(message.id);
+          if (recipientSet?.size) message.recipientIds = [...recipientSet];
           message.receipts = receiptsByAnnouncement.get(message.id) || [];
           message.readBy = message.receipts.filter((receipt) => receipt.read_at).map((receipt) => receipt.teacherName);
           message.reactions = message.receipts.filter((receipt) => receipt.acknowledgement).map((receipt) => ({ reactor_id: receipt.teacher_id, reactor_name: receipt.teacherName, reaction: receipt.acknowledgement }));
           message.reaction = message.receipts.find((receipt) => receipt.teacher_id === profile.id)?.acknowledgement || "";
         });
       }
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
+      thread.messages = messages;
       thread.activityOrder = thread.messages.length ? Date.parse(thread.messages.at(-1).createdAt) || 100 : 100;
       sharedStaffAnnouncementsReady = true;
       renderTeacherMessages();
@@ -30219,27 +30460,131 @@
           markSharedAnnouncementRead(message);
         }, true);
       }
-      const messages = thread.messages.slice().reverse();
-      const activeTeachers = teachers.filter((teacher) => {
-        if (teacher.status === "inactive") return false;
-        const name = String(teacher.displayName || fullName(teacher) || "").trim().toLowerCase();
-        return name !== "dance techniques" && name !== "dance techniques admin";
-      });
-      const activeTeacherIds = new Set(activeTeachers.map((teacher) => String(teacher.id)));
-      modal.querySelector("#announcement-history-list").innerHTML = messages.length ? messages.map((message) => {
-        const receiptRows = activeTeachers.map((teacher) => {
-          const receipt = (message.receipts || []).find((item) => item.teacher_id === teacher.id);
-          const acknowledgement = receipt?.acknowledgement ? receipt.acknowledgement === "heart" ? "Heart" : receipt.acknowledgement === "up" ? "Thumbs up" : "Thumbs down" : "Not acknowledged";
-          return `<div class="receipt-row ${receipt?.read_at ? "" : "not-read"}"><span>${escapeText(teacher.displayName || fullName(teacher))}</span><span>${receipt?.read_at ? "Read" : "Not read"} · ${escapeText(acknowledgement)}</span></div>`;
-        }).join("");
-        const readCount = (message.receipts || []).filter((receipt) => activeTeacherIds.has(String(receipt.teacher_id)) && receipt.read_at).length;
-        const acknowledgedCount = (message.receipts || []).filter((receipt) => activeTeacherIds.has(String(receipt.teacher_id)) && receipt.acknowledgement).length;
-        return `<details class="latest-announcement announcement-history-item" data-announcement-history-id="${escapeText(message.id || "")}">
-          <summary><span><strong>${escapeText(message.notificationTitle || "Dance Techniques Announcement")}</strong><small>${escapeText(announcementDateTimeLabel(message))}</small></span><span class="status private">${readCount}/${activeTeachers.length} read · ${acknowledgedCount} acknowledged</span></summary>
-          <div class="announcement-history-body">${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`}${window.dtCurrentProfile?.role === "teacher" ? "" : `<h4>Teacher Activity</h4><div class="receipt-list">${receiptRows}</div>`}</div>
-        </details>`;
-      }).join("") : '<p class="subtle">No announcements yet.</p>';
+      modal.querySelector("#announcement-history-list").innerHTML = announcementHistoryMarkup(thread, true);
       modal.classList.add("open");
+    };
+
+    const announcementMessageTitle = (message) => {
+      if (document.body.dataset.tourMode === "true" && message.id === "tour-teacher-activity") return "Class Reminders · Sample";
+      const template = document.createElement("template");
+      template.innerHTML = message.html || "";
+      return template.content.firstElementChild?.matches("h3[data-staff-announcement-title]")
+        ? template.content.firstElementChild.textContent
+        : message.notificationTitle || "Dance Techniques Announcement";
+    };
+
+    const announcementActivity = (message) => {
+      if (document.body.dataset.tourMode === "true" && message.id === "tour-teacher-activity") {
+        const recipientIds = teacherNotificationRecipientIds().map(String);
+        const sampleTime = (minute) => new Date(new Date().setHours(8, minute, 0, 0)).toISOString();
+        const receipts = recipientIds.slice(0, Math.max(0, recipientIds.length - 1)).map((teacher_id, index) => ({
+          teacher_id,
+          read_at: sampleTime(19 + index),
+          acknowledged_at: index > 0 ? sampleTime(28 + index) : null
+        }));
+        message = { ...message, recipientIds, receipts };
+      }
+      const receipts = message.receipts || [];
+      const ids = message.recipientIds || [...new Set(receipts.map(receipt => String(receipt.teacher_id)))];
+      const rows = ids.map(id => {
+        const teacher = teachers.find(entry => String(entry.id) === id);
+        const receipt = (message.receipts || []).find((entry) => String(entry.teacher_id) === id);
+        const name = teacher ? teacher.displayName || fullName(teacher) : receipt?.teacherName || "Teacher";
+        const status = receipt?.acknowledgement || receipt?.acknowledged_at ? 2 : receipt?.read_at ? 1 : 0;
+        return { teacher, receipt, name, status };
+      }).sort((a, b) => a.status - b.status || a.name.localeCompare(b.name));
+      const total = message.recipientIds?.length || 0;
+      const read = rows.filter(row => row.receipt?.read_at).length;
+      const acknowledged = rows.filter(row => row.status === 2).length;
+      return { rows, total, read, acknowledged, complete: total > 0 && acknowledged === total };
+    };
+
+    const announcementHistoryMarkup = (thread, teacherArchive = false) => {
+      const messages = (thread?.messages || []).slice().reverse();
+      return messages.length ? messages.map((message, index) => {
+        const title = escapeText(announcementMessageTitle(message));
+        const metadata = `<small>${escapeText(announcementDateTimeLabel(message))} · All Teachers · Published</small>`;
+        const excerpt = `<small class="announcement-history-excerpt">${escapeText((message.text || "").slice(0, 140))}</small>`;
+        const content = message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p>${escapeText(message.text)}</p>`;
+        if (teacherArchive) {
+          const activeIds = new Set(teachers.filter(teacher => teacher.status !== "inactive"
+            && !["dance techniques", "dance techniques admin"].includes(String(teacher.displayName || fullName(teacher)).trim().toLowerCase()))
+            .map(teacher => String(teacher.id)));
+          const readCount = (message.receipts || []).filter((receipt) => activeIds.has(String(receipt.teacher_id)) && receipt.read_at).length;
+          const acknowledgedCount = (message.receipts || []).filter((receipt) => activeIds.has(String(receipt.teacher_id)) && receipt.acknowledgement).length;
+          return `<details class="latest-announcement announcement-history-item" data-announcement-history-id="${escapeText(message.id || "")}">
+            <summary><span><strong>${title}</strong>${metadata}${excerpt}</span><span class="status private">${readCount}/${activeIds.size} read · ${acknowledgedCount} acknowledged</span></summary>
+            <div class="announcement-history-body">${content}</div></details>`;
+        }
+        const { total, read, acknowledged, complete } = announcementActivity(message);
+        const count = total ? `${read}/${total} Read · ${acknowledged}/${total} Acknowledged` : `${read} Read · ${acknowledged} Acknowledged`;
+        const badge = message.activityUnavailable ? "Activity Unavailable" : complete ? `✓ ${acknowledged}/${total} Acknowledged` : count;
+        return `<article class="latest-announcement announcement-history-item announcement-history-row" data-announcement-history-id="${escapeText(message.id || "")}">
+          <button class="announcement-history-open" type="button" data-announcement-detail="${index}"><strong>${title}</strong>${metadata}${excerpt}</button>
+          <button class="announcement-tracking-badge${complete ? " is-complete" : ""}" type="button" data-announcement-activity="${index}" aria-label="Teacher Activity for ${title}: ${escapeText(badge)}">${badge}</button>
+        </article>`;
+      }).join("") : '<p class="subtle">No announcements yet.</p>';
+    };
+
+    const announcementActivityTime = (label, value) => {
+      const date = new Date(value);
+      if (!value || !Number.isFinite(date.getTime())) return "";
+      return `<span>${label} <time datetime="${escapeText(value)}">${escapeText(date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }))}</time></span>`;
+    };
+
+    const announcementActivityMarkup = (message) => {
+      if (message.activityUnavailable) return '<p class="subtle">Teacher activity could not load. Try again shortly.</p>';
+      const { rows, total, read, acknowledged, complete } = announcementActivity(message);
+      const audience = total ? `${total} Teacher${total === 1 ? "" : "s"}` : "Recipient Count Unavailable";
+      return `<p class="announcement-activity-summary">${audience} · ${read} Read · ${acknowledged} Acknowledged</p>
+        ${total ? `<progress aria-label="Teacher Acknowledgments" value="${acknowledged}" max="${total}"></progress>` : ""}
+        ${complete ? '<p class="announcement-activity-complete">✓ All Teachers Acknowledged</p>' : ""}
+        <ul class="announcement-activity-list">${rows.map(({ teacher, receipt, name, status }) => {
+          const labels = ["Not Yet Read", "Read · Awaiting Acknowledgment", "✓ Acknowledged"];
+          return `<li class="announcement-activity-card is-${["unread", "read", "acknowledged"][status]}">
+            <span class="teacher-card-photo teacher-identity-bubble ${teacherProfileColorClass(teacher)}" aria-hidden="true">${teacher?.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(teacher ? initialsFor(teacher) : name.slice(0, 1))}</span>
+            <span class="announcement-activity-identity"><strong>${escapeText(name)}</strong><small>${labels[status]}</small></span>
+            <span class="announcement-activity-times">${announcementActivityTime("Read:", receipt?.read_at)}${announcementActivityTime("Acknowledged:", receipt?.acknowledged_at)}</span>
+          </li>`;
+        }).join("")}</ul>${rows.length ? "" : '<p class="subtle">No teacher activity is available yet.</p>'}`;
+    };
+
+    let selectedAnnouncementActivityId;
+    const refreshAnnouncementActivity = () => {
+      const dialog = document.getElementById("announcement-review-dialog");
+      if (!dialog?.open || selectedAnnouncementActivityId == null) return;
+      const message = sharedAnnouncementThread()?.messages.find(entry => entry.id === selectedAnnouncementActivityId);
+      if (message) dialog.querySelector(".announcement-review-body").innerHTML = announcementActivityMarkup(message);
+    };
+
+    const openAnnouncementReview = (button) => {
+      const activity = button.hasAttribute("data-announcement-activity");
+      const index = Number(activity ? button.dataset.announcementActivity : button.dataset.announcementDetail);
+      const message = sharedAnnouncementThread()?.messages.at(-index - 1);
+      if (!message) return;
+      const dialog = document.getElementById("announcement-review-dialog");
+      const title = announcementMessageTitle(message);
+      selectedAnnouncementActivityId = activity ? message.id : null;
+      dialog.querySelector("h2").textContent = activity ? "Teacher Activity" : title;
+      dialog.querySelector("header p").textContent = activity ? title : announcementDateTimeLabel(message);
+      const body = dialog.querySelector(".announcement-review-body");
+      if (activity) {
+        body.innerHTML = announcementActivityMarkup(message);
+      } else if (message.html) {
+        body.innerHTML = `<div class="rich-announcement-body">${message.html}</div>`;
+        body.querySelector(".rich-announcement-body > h3[data-staff-announcement-title]:first-child")?.remove();
+      } else {
+        body.textContent = message.text || "";
+      }
+      dialog.showModal();
+      dialog.querySelector(".announcement-review-body").scrollTop = 0;
+      dialog.addEventListener("close", () => {
+        selectedAnnouncementActivityId = null;
+        dialog.querySelector(".announcement-review-body").replaceChildren();
+        const row = [...document.querySelectorAll("#team-announcements-history [data-announcement-history-id]")]
+          .find(entry => entry.dataset.announcementHistoryId === String(message.id || ""));
+        (button.isConnected ? button : row?.querySelector(activity ? "[data-announcement-activity]" : "[data-announcement-detail]"))?.focus();
+      }, { once: true });
     };
 
     const renderTeacherConversationProfile = (thread, viewerName) => {
@@ -30817,11 +31162,11 @@
     const cleanAnnouncementHtml = (html) => {
       const template = document.createElement("template");
       template.innerHTML = html || "";
-      template.content.querySelectorAll("script, style, iframe, object, embed").forEach((node) => node.remove());
+      template.content.querySelectorAll("script, style, iframe, object, embed, svg, math, link, meta, base, form, input, button, video, audio").forEach((node) => node.remove());
       template.content.querySelectorAll("*").forEach((node) => {
         [...node.attributes].forEach((attribute) => {
           const name = attribute.name.toLowerCase();
-          if (name.startsWith("on")) node.removeAttribute(attribute.name);
+          if (name.startsWith("on") || ["srcset", "id", "autofocus", "contenteditable", "tabindex"].includes(name)) node.removeAttribute(attribute.name);
           if (name === "href" || name === "src") {
             const value = attribute.value.trim();
             if (value && !/^(https?:|mailto:|tel:|data:image\/)/i.test(value)) node.removeAttribute(attribute.name);
@@ -30832,62 +31177,11 @@
     };
 
     const runAnnouncementCommand = (command, value = null) => {
-      const editor = announcementEditor();
-      if (!editor) return;
-      editor.focus();
+      announcementEditor().focus();
       document.execCommand(command, false, value);
     };
 
-    const addAnnouncementLink = () => {
-      const urlInput = document.getElementById("announcement-link-url");
-      const textInput = document.getElementById("announcement-link-text");
-      const url = urlInput?.value.trim() || "";
-      const linkText = textInput?.value.trim() || "";
-      if (!url) {
-        urlInput?.focus();
-        showToast("Add a link URL first");
-        return;
-      }
-      const selection = window.getSelection();
-      if (linkText && (!selection || selection.toString().trim() === "")) {
-        runAnnouncementCommand("insertHTML", `<a href="${escapeText(url)}" target="_blank" rel="noopener">${escapeText(linkText)}</a>`);
-      } else {
-        runAnnouncementCommand("createLink", url);
-      }
-      if (urlInput) urlInput.value = "";
-      if (textInput) textInput.value = "";
-    };
-
-    const addAnnouncementImage = () => {
-      const input = document.getElementById("announcement-image-url");
-      const url = input?.value.trim() || "";
-      if (!url) {
-        input?.focus();
-        showToast("Add an image URL first");
-        return;
-      }
-      runAnnouncementCommand("insertImage", url);
-      if (input) input.value = "";
-    };
-
-    const postAdminAnnouncement = async () => {
-      const draft = document.getElementById("admin-announcement-draft");
-      const notificationTitleInput = document.getElementById("admin-announcement-notification-title");
-      const notificationSubtitleInput = document.getElementById("admin-announcement-notification-subtitle");
-      const html = cleanAnnouncementHtml(draft?.innerHTML || "");
-      const text = draft?.textContent.trim() || "";
-      const notificationTitle = notificationTitleInput?.value.trim() || "";
-      const notificationSubtitle = notificationSubtitleInput?.value.trim() || "";
-      if (!notificationTitle) {
-        notificationTitleInput?.focus();
-        showToast("Add a short notification title first");
-        return;
-      }
-      if (!text) {
-        draft?.focus();
-        showToast("Write an announcement first");
-        return;
-      }
+    const postAdminAnnouncement = async ({ html, text, notificationTitle, notificationSubtitle }) => {
       const thread = messageThreads.find((entry) => entry.id === announcementThreadId);
       if (!thread) return;
       if (document.body.dataset.tourMode !== "true") {
@@ -30906,22 +31200,295 @@
           showToast("The announcement was not posted. Nothing was sent.");
           return;
         }
-        await loadSharedStaffAnnouncements();
+        try { await loadSharedStaffAnnouncements(); }
+        catch (error) { console.error("Published announcement history could not refresh", error); }
       } else {
-        thread.messages.push({ from: "Admin", role: "Admin", time: "Just now", createdAt: new Date().toISOString(), text, html, notificationTitle, notificationSubtitle, readBy: [] });
+        thread.messages.push({ id: crypto.randomUUID(), from: "Admin", role: "Admin", time: "Just now", createdAt: new Date().toISOString(), text, html, notificationTitle, notificationSubtitle, recipientIds: teacherNotificationRecipientIds().map(String), readBy: [] });
         thread.activityOrder = ++messageActivitySequence;
         thread.unreadFor = [...new Set([...(thread.unreadFor || []), ...teachers.map((teacher) => teacherNameForMessages(teacher))])];
         queueAppNotifications(teacherNotificationRecipientIds(), { title: notificationTitle, message: notificationSubtitle || "Open Teacher Tools to read the full announcement.", notification_type: "studio_announcement", action_url: "/?open=messages&thread=announcements" });
       }
-      if (draft) draft.innerHTML = "";
-      if (notificationTitleInput) notificationTitleInput.value = "Dance Techniques Announcement";
-      if (notificationSubtitleInput) notificationSubtitleInput.value = "";
+
       selectedAdminMessageThreadId = announcementThreadId;
       renderTeacherMessages();
       renderAdminMessages();
       renderAdminMessagesPage();
-      clearUnsavedEdits();
-      showToast("Announcement posted to teacher Messages");
+      showToast("Announcement published to all teachers.");
+      return true;
+    };
+
+    const bindAnnouncementComposer = () => {
+      const byId = id => document.getElementById(id);
+      const dialog = byId("team-announcement-composer");
+      const editor = announcementEditor();
+      const title = byId("team-announcement-title");
+      const notificationTitle = byId("admin-announcement-notification-title");
+      const notificationSubtitle = byId("admin-announcement-notification-subtitle");
+      const preview = byId("announcement-live-preview");
+      const phone = byId("announcement-phone-preview");
+      const status = byId("announcement-composer-status");
+      const save = byId("announcement-save-draft");
+      const publish = byId("admin-post-announcement");
+      const confirmation = byId("announcement-confirm-dialog");
+      const link = byId("announcement-link-dialog");
+      const file = byId("announcement-image-url");
+      const upload = byId("announcement-upload");
+      let customTitle = false;
+      let customSubtitle = false;
+      let draftKey;
+      let baseline;
+      let selection;
+      let publishing = false;
+      let insertingImage = false;
+
+      const currentDraft = () => ({
+        title: title.value,
+        html: cleanAnnouncementHtml(editor.innerHTML),
+        customTitle: customTitle ? notificationTitle.value : null,
+        customSubtitle: customSubtitle ? notificationSubtitle.value : null
+      });
+      const messageText = () => editor.innerText.trim();
+      const excerpt = (text, length) => [...text].slice(0, length).join("");
+      const showStatus = (message = "") => {
+        status.textContent = message;
+        status.hidden = !message;
+      };
+      const updatePreview = () => {
+        if (!customTitle) notificationTitle.value = excerpt(title.value.trim(), 70);
+        if (!customSubtitle) notificationSubtitle.value = excerpt(messageText().replace(/\s+/g, " "), 140);
+        const html = cleanAnnouncementHtml(editor.innerHTML);
+        preview.innerHTML = `<div class="rich-announcement-body"><h3>${escapeText(title.value.trim() || "Announcement Title")}</h3>${html || "<p>Your announcement will appear here for your teaching team.</p>"}</div>`;
+        phone.querySelector("strong").textContent = notificationTitle.value.trim() || "Announcement Title";
+        phone.querySelector("p").textContent = notificationSubtitle.value.trim() || "Open Teacher Tools to read the full announcement.";
+      };
+      const setPreview = mode => {
+        preview.hidden = mode === "phone";
+        phone.hidden = !preview.hidden;
+        dialog.querySelectorAll("[data-announcement-preview]").forEach(button => {
+          button.setAttribute("aria-pressed", String(button.dataset.announcementPreview === mode));
+        });
+      };
+      const loadDraft = draft => {
+        title.value = draft?.title || "";
+        editor.innerHTML = cleanAnnouncementHtml(draft?.html || "");
+        customTitle = typeof draft?.customTitle === "string";
+        customSubtitle = typeof draft?.customSubtitle === "string";
+        notificationTitle.value = draft?.customTitle || "";
+        notificationSubtitle.value = draft?.customSubtitle || "";
+        updatePreview();
+      };
+      const close = () => {
+        if (publishing || insertingImage) return;
+        if (JSON.stringify(currentDraft()) !== baseline && !window.confirm("Discard unsaved changes to this announcement?")) return;
+        dialog.close();
+      };
+      const rememberSelection = () => {
+        const range = window.getSelection().getRangeAt(0);
+        if (range && editor.contains(range.commonAncestorContainer)) selection = range.cloneRange();
+      };
+      const restoreSelection = (range = selection) => {
+        editor.focus();
+        const current = window.getSelection();
+        if (!current) return;
+        const target = range && editor.contains(range.commonAncestorContainer) ? range : document.createRange();
+        if (target !== range) {
+          target.selectNodeContents(editor);
+          target.collapse(false);
+        }
+        current.removeAllRanges();
+        current.addRange(target);
+      };
+      const addAnnouncementLink = () => {
+        const url = byId("announcement-link-url").value.trim();
+        const text = byId("announcement-link-text").value.trim();
+        if (!/^https?:\/\//i.test(url) || !text) {
+          showStatus("Enter link text and a web address beginning with https:// or http://.");
+          return;
+        }
+        restoreSelection();
+        runAnnouncementCommand("insertHTML", `<a href="${escapeText(url)}" target="_blank" rel="noopener noreferrer">${escapeText(text)}</a>`);
+        showStatus();
+        updatePreview();
+      };
+      const addAnnouncementImage = async imageFile => {
+        if (!imageFile || insertingImage) return;
+        if (!imageFile.type.startsWith("image/")) {
+          showStatus("Choose an image file to add to this announcement.");
+          return;
+        }
+        const range = selection?.cloneRange();
+        const url = URL.createObjectURL(imageFile);
+        insertingImage = true;
+        save.disabled = publish.disabled = true;
+        try {
+          const image = new Image();
+          image.src = url;
+          await image.decode();
+          if (!dialog.open) return;
+          const canvas = document.createElement("canvas");
+          const budget = 19500 - currentDraft().html.length;
+          let dataUrl = "";
+          for (const width of [960, 640, 440, 320, 220]) {
+            const scale = Math.min(1, width / Math.max(image.naturalWidth, image.naturalHeight));
+            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+            const context = canvas.getContext("2d");
+            context.fillStyle = "#fff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            context.drawImage(image, 0, 0, canvas.width, canvas.height);
+            dataUrl = canvas.toDataURL("image/jpeg", 0.68);
+            if (dataUrl.length < budget) break;
+          }
+          if (dataUrl.length >= budget) {
+            showStatus("This photo will not fit with the current message. Remove a photo or try a smaller one.");
+            return;
+          }
+          restoreSelection(range);
+          runAnnouncementCommand("insertHTML", `<img src="${dataUrl}" alt="${escapeText(imageFile.name.replace(/\.[^.]+$/, ""))}">`);
+          showStatus();
+          updatePreview();
+        } catch (error) {
+          showStatus("This photo could not be opened. Try a JPEG or PNG.");
+        } finally {
+          URL.revokeObjectURL(url);
+          insertingImage = false;
+          save.disabled = publish.disabled = false;
+        }
+      };
+
+      byId("new-team-announcement").addEventListener("click", () => {
+        const profileId = document.body.dataset.tourMode === "true" ? "preview" : window.dtCurrentProfile?.id;
+        if (!profileId) return;
+        draftKey = `dt-staff-announcement-draft:${profileId}`;
+        let draft;
+        showStatus();
+        try { draft = JSON.parse(localStorage.getItem(draftKey)); }
+        catch (error) { showStatus("The saved draft could not be opened."); }
+        selection = null;
+        dialog.querySelector(".announcement-notification").open = false;
+        setPreview("announcement");
+        dialog.showModal();
+        loadDraft(draft);
+        baseline = JSON.stringify(currentDraft());
+        dialog.querySelector(".announcement-composer-columns").scrollTop = 0;
+        title.focus();
+      });
+      dialog.querySelectorAll("[data-close-announcement]").forEach(button => button.addEventListener("click", close));
+      dialog.addEventListener("cancel", event => { event.preventDefault(); close(); });
+      dialog.addEventListener("close", () => {
+        loadDraft(null);
+        byId("new-team-announcement").focus();
+      });
+      dialog.querySelectorAll("[data-announcement-preview]").forEach(button => button.addEventListener("click", () => setPreview(button.dataset.announcementPreview)));
+      title.addEventListener("input", updatePreview);
+      editor.addEventListener("input", updatePreview);
+      editor.addEventListener("paste", event => {
+        if (!event.clipboardData) return;
+        event.preventDefault();
+        const html = event.clipboardData.getData("text/html");
+        runAnnouncementCommand(html ? "insertHTML" : "insertText", html ? cleanAnnouncementHtml(html) : event.clipboardData.getData("text/plain"));
+        updatePreview();
+      });
+      editor.addEventListener("drop", event => event.preventDefault());
+      document.addEventListener("selectionchange", () => {
+        if (dialog.open && window.getSelection()?.rangeCount) rememberSelection();
+      });
+      notificationTitle.addEventListener("input", () => { customTitle = true; updatePreview(); });
+      notificationSubtitle.addEventListener("input", () => { customSubtitle = true; updatePreview(); });
+      byId("announcement-reset-notification").addEventListener("click", () => {
+        customTitle = customSubtitle = false;
+        updatePreview();
+      });
+      dialog.querySelectorAll("[data-announcement-command]").forEach(button => {
+        button.addEventListener("mousedown", event => event.preventDefault());
+        button.addEventListener("click", () => {
+          restoreSelection();
+          runAnnouncementCommand(button.dataset.announcementCommand);
+          updatePreview();
+        });
+      });
+      byId("announcement-font-size").addEventListener("change", event => {
+        restoreSelection();
+        runAnnouncementCommand("fontSize", event.target.value);
+        updatePreview();
+      });
+      byId("announcement-open-link").addEventListener("click", () => {
+        link.returnValue = "";
+        byId("announcement-link-text").value = selection?.toString() || "";
+        byId("announcement-link-url").value = "";
+        link.showModal();
+      });
+      link.addEventListener("close", () => { if (link.returnValue === "insert") addAnnouncementLink(); });
+      [upload, byId("announcement-add-image")].forEach(button => button.addEventListener("click", () => file.click()));
+      file.addEventListener("change", () => {
+        addAnnouncementImage(file.files[0]);
+        file.value = "";
+      });
+      upload.addEventListener("dragover", event => { event.preventDefault(); upload.dataset.dragging = ""; });
+      upload.addEventListener("dragleave", () => { delete upload.dataset.dragging; });
+      upload.addEventListener("drop", event => {
+        event.preventDefault();
+        delete upload.dataset.dragging;
+        addAnnouncementImage(event.dataTransfer.files[0]);
+      });
+      save.addEventListener("click", () => {
+        const draft = JSON.stringify(currentDraft());
+        try { localStorage.setItem(draftKey, draft); }
+        catch (error) { showStatus("The draft could not be saved on this device."); return; }
+        baseline = draft;
+        dialog.close();
+        showToast("Announcement draft saved on this device.");
+      });
+
+      let pending;
+      publish.addEventListener("click", () => {
+        const draft = currentDraft();
+        const text = messageText();
+        const html = `<h3 data-staff-announcement-title="">${escapeText(draft.title.trim())}</h3>${draft.html}`;
+        if (!draft.title.trim() || !text) {
+          showStatus("Enter an announcement title and message.");
+          (draft.title.trim() ? editor : title).focus();
+          return;
+        }
+        if ([...text].length > 5000 || [...html].length > 20000) {
+          showStatus("This announcement is too long. Shorten the message or remove a photo.");
+          return;
+        }
+        if (!notificationTitle.value.trim()) {
+          showStatus("Enter a phone notification title or use the announcement text.");
+          notificationTitle.closest("details").open = true;
+          notificationTitle.focus();
+          return;
+        }
+        pending = { html, text, notificationTitle: notificationTitle.value.trim(), notificationSubtitle: notificationSubtitle.value.trim() };
+        confirmation.returnValue = "";
+        confirmation.showModal();
+      });
+      confirmation.addEventListener("close", async () => {
+        if (confirmation.returnValue !== "publish" || !pending || publishing) return;
+        const payload = pending;
+        pending = null;
+        publishing = true;
+        const fields = editor.closest(".announcement-composer-fields");
+        fields.inert = true;
+        save.disabled = publish.disabled = true;
+        showStatus("Publishing announcement…");
+        try {
+          if (await postAdminAnnouncement(payload)) {
+            try { localStorage.removeItem(draftKey); } catch (error) { console.warn("Announcement draft could not be cleared", error); }
+            dialog.close();
+          } else {
+            showStatus("The announcement was not published. Your draft is still open.");
+          }
+        } catch (error) {
+          console.error("Announcement publication could not be confirmed", error);
+          showStatus("Publication could not be confirmed. Check Announcement History before trying again.");
+        } finally {
+          publishing = false;
+          fields.inert = false;
+          save.disabled = publish.disabled = false;
+        }
+      });
     };
 
     const sendAdminTeacherReply = (teacherId) => {
@@ -34581,6 +35148,13 @@
     const renderAdminMessagesPage = () => {
       const container = document.getElementById("admin-teacher-message-sections");
       if (!container) return;
+      const history = document.getElementById("team-announcements-history");
+      const historyMarkup = announcementHistoryMarkup(sharedAnnouncementThread());
+      if (history && history.announcementMarkup !== historyMarkup) {
+        history.innerHTML = historyMarkup;
+        history.announcementMarkup = historyMarkup;
+      }
+      refreshAnnouncementActivity();
       const teamTalkThread = messageThreads.find((thread) => thread.id === pinnedMessageThreadId);
       const teamTalkLatest = teamTalkThread ? latestThreadMessage(teamTalkThread) : null;
       const teamTalkCard = `<details class="admin-teacher-message-section admin-team-talk-card" open>
@@ -35932,15 +36506,17 @@
       if (note) note.textContent = file ? file.name : "";
     });
     document.getElementById("admin-send-message")?.addEventListener("click", sendAdminMessage);
-    document.getElementById("admin-post-announcement")?.addEventListener("click", postAdminAnnouncement);
-    document.querySelectorAll("[data-announcement-command]").forEach((button) => {
-      button.addEventListener("click", () => runAnnouncementCommand(button.dataset.announcementCommand));
+    bindAnnouncementComposer();
+    document.getElementById("team-announcements-history")?.addEventListener("click", event => {
+      const button = event.target.closest("[data-announcement-activity], [data-announcement-detail]");
+      if (button) openAnnouncementReview(button);
     });
-    document.getElementById("announcement-font-size")?.addEventListener("change", (event) => {
-      runAnnouncementCommand("fontSize", event.target.value);
+    document.getElementById("announcement-review-dialog")?.addEventListener("click", event => {
+      if (event.target !== event.currentTarget) return;
+      const bounds = event.currentTarget.getBoundingClientRect();
+      if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) event.currentTarget.close();
     });
-    document.getElementById("announcement-add-link")?.addEventListener("click", addAnnouncementLink);
-    document.getElementById("announcement-add-image")?.addEventListener("click", addAnnouncementImage);
+
     document.getElementById("admin-teacher-message-sections")?.addEventListener("click", (event) => {
       if (event.target.closest("#admin-team-talk-send")) {
         const draft = document.getElementById("admin-team-talk-draft");

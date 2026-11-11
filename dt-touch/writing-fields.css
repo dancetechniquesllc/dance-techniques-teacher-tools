@@ -24,3 +24,6 @@
 #teacher-parent-shared-compose [data-reply-behavior-interview] { grid-column: 1 / -1; justify-self: start; }
 [data-help-from-home-draft] textarea { box-sizing: border-box; width: 100%; }
 [data-help-result-wrap][hidden] { display: none; }
+
+.dt-writing-toolbar-controls > .dt-writing-undo { padding: 3px 7px; color: var(--brick); }
+.dt-writing-toolbar-controls > .dt-writing-status { max-width: 18em; }

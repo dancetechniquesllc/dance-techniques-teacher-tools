@@ -1,0 +1,53 @@
+/* Shared by the Director Dashboard, Teacher Tools, and Parent Portal. */
+:root {
+  --dt-focus-gold: #d58c24;
+  --dt-focus-light-gold: #e6b766;
+  --dt-focus-ink: #241918;
+  --dt-focus-glow: color-mix(in srgb, var(--dt-focus-light-gold) 29%, transparent);
+}
+
+:where(input, textarea, select, button, a[href], summary, [tabindex], [contenteditable]) {
+  transition: outline-color 170ms ease, box-shadow 170ms ease;
+}
+
+:where(input[type="checkbox"], input[type="radio"], input[type="range"]) {
+  accent-color: var(--dt-focus-gold);
+}
+
+/* The inset perimeter stays visible inside clipped and scrolling containers.
+   These declarations supersede legacy component focus rules across both shells. */
+:root body :focus-visible,
+:root body :is(input:not([type="hidden"], [type="checkbox"], [type="radio"], [type="button"], [type="submit"], [type="reset"], [type="range"], [type="file"], [type="color"]), textarea, select, [contenteditable]:not([contenteditable="false"])):focus {
+  outline: 2px solid var(--dt-focus-gold) !important;
+  outline-offset: -2px !important;
+  box-shadow: 0 0 8px 2px var(--dt-focus-glow) !important;
+}
+
+/* Pointer focus is finer. Keyboard focus retains a solid 2px perimeter. */
+:root body :focus:not(:focus-visible):is(input, textarea, select, [contenteditable]:not([contenteditable="false"])) {
+  outline-width: 1.5px !important;
+  outline-offset: -1.5px !important;
+}
+
+:root ::selection {
+  background: var(--dt-focus-light-gold) !important;
+  color: var(--dt-focus-ink) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(input, textarea, select, button, a[href], summary, [tabindex], [contenteditable]) {
+    transition-duration: 0s;
+  }
+}
+
+@media (forced-colors: active) {
+  :root body :focus-visible,
+  :root body :is(input, textarea, select, [contenteditable]:not([contenteditable="false"])):focus {
+    outline-color: Highlight !important;
+    box-shadow: none !important;
+  }
+  :root ::selection {
+    background: Highlight !important;
+    color: HighlightText !important;
+  }
+}
