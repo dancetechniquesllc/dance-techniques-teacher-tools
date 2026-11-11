@@ -8566,6 +8566,7 @@
     .enrollment-christmas-status.january { background:#8A4E54; color:white; }
     .enrollment-christmas-status.immediate { background:var(--blush); color:#68103f; }
     .enrollment-christmas-status.review { background:#f8e2ae; color:#69480f; }
+    .enrollment-card-avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
     .enrollment-card-avatar { width: 68px; height: 68px; display: grid; place-items: center; border-radius: 999px; background: var(--blush); color: var(--berry); font-family: var(--font-body); font-size: 19px; font-weight: 850; }
     .enrollment-queue-item strong { font-family: var(--font-body); font-size: 17px; font-weight: 800 !important; line-height: 1.15; }
     .enrollment-queue-item small { color: var(--muted); font-family: "Avenir Next", "Avenir Next LT Pro", "Helvetica Neue", Arial, sans-serif; font-size: 11px; font-weight: 400 !important; }
@@ -22775,6 +22776,14 @@
       if (confirmed) return confirmed;
       return candidates.length === 1 && candidates[0].strong ? candidates[0] : null;
     };
+    const enrollmentPortraitMarkup = (item, match, initials) => {
+      // Placement reuses the confirmed prospect's student ID and private photo path.
+      const confirmed = match && match.student.id === confirmedEnrollmentTrials.get(item.id);
+      const student = item.placed_student_id
+        ? rosterClasses.flatMap((rosterClass) => rosterClass.students).find((entry) => entry.id === item.placed_student_id)
+        : confirmed ? match.student : null;
+      return studentPhotoMarkup(student, initials);
+    };
     const rosterStudentRecordByName = (name) => {
       const normalized = String(name || "").trim().toLowerCase();
       if (!normalized) return null;
@@ -22867,7 +22876,7 @@
           ${enrollmentChristmasSpecial(item) ? `<span class="enrollment-christmas-badge" role="img" aria-label="Christmas Special" title="Christmas Special">🎄</span>` : ""}
           ${batchConfig ? `<input class="enrollment-queue-select" type="checkbox" data-enrollment-batch-select="${escapeText(item.id)}" aria-label="Select ${escapeText([firstName, lastName].filter(Boolean).join(" ") || "enrollment")} for batch completion" ${enrollmentBatchSelected.has(item.id) ? "checked" : ""}>` : ""}
           <button class="enrollment-queue-open" type="button" data-enrollment-intake-open="${escapeText(item.id)}" aria-label="Open ${escapeText([firstName, lastName].filter(Boolean).join(" ") || "enrollment")}">
-          <span class="enrollment-card-avatar ${teacherProfileColorClass(assignedTeacherId)}">${escapeText(initials)}</span>
+          <span class="enrollment-card-avatar ${teacherProfileColorClass(assignedTeacherId)}">${enrollmentPortraitMarkup(item, futureDancerMatch, initials)}</span>
           <strong>${escapeText([item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "Unnamed dancer")}</strong>
           <small>${escapeText(enrollmentDisplaySchoolName(item))}</small>
           ${brightwheelClass ? `<small class="enrollment-card-class">${escapeText(brightwheelClass.name)}</small>` : ""}
@@ -22988,14 +22997,12 @@
       const tuition = suggestedEnrollmentTuition(item, suggestion);
       const enrollmentStudentName = [item.student_preferred_name || item.student_first_name, item.student_last_name].filter(Boolean).join(" ") || "Enrollment Review";
       const enrollmentStudentInitials = `${(item.student_preferred_name || item.student_first_name || "D").charAt(0)}${(item.student_last_name || "T").charAt(0)}`.toUpperCase();
-      const placedStudent = rosterClasses.flatMap((rosterClass) => rosterClass.students).find((student) => student.id === item.placed_student_id);
-      const enrollmentStudentPhoto = placedStudent?.photo || "";
       detail.innerHTML = `
         <div class="enrollment-editor-sticky-header">
           <button class="enrollment-editor-back" type="button" data-close-enrollment-review>‹ &nbsp;Back to Student Library</button>
           <button class="secondary enrollment-editor-cancel" type="button" data-close-enrollment-review>Cancel</button>
           <header class="enrollment-editor-hero">
-          <span class="enrollment-editor-avatar">${enrollmentStudentPhoto ? `<img src="${escapeText(enrollmentStudentPhoto)}" alt="">` : escapeText(enrollmentStudentInitials)}</span>
+          <span class="enrollment-editor-avatar">${enrollmentPortraitMarkup(item, futureDancerMatch, enrollmentStudentInitials)}</span>
           <div>
             <h3 class="enrollment-editor-title" id="enrollment-review-title">${escapeText(enrollmentStudentName)}</h3>
           </div>
