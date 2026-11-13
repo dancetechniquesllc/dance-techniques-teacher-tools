@@ -10,6 +10,13 @@ const form = editor.querySelector('form');
 const demo = new Map();
 let categories = [];
 let resources = [];
+let subfolders = [];
+let activeFolder = null;
+let dragged;
+let organizing = false;
+const previewFolderKey = 'dt-resource-library-folders';
+let previewPlacements = {};
+
 let editing;
 let draftId;
 let versions;
@@ -37,8 +44,201 @@ function button(label, action) {
   node.onclick = action;
   return node;
 }
-const category = id => categories.find(item => String(item.id) === String(id))?.name || '';
+const category = id => categories.find(item => item.id === folderCategoryId(categories, id))?.name || '';
 const report = (message, target = $('#resource-status')) => { target.textContent = message; };
+
+function formatTag(tag) {
+  const shortWords = /^(a|an|and|as|at|but|by|for|in|nor|of|on|or|per|the|to|via)$/i;
+  const words = tag.trim().split(/\s+/);
+  return words.map((word, index) => {
+    if (word !== word.toLowerCase() && word !== word.toUpperCase()) return word;
+    if (index > 0 && index < words.length - 1 && shortWords.test(word)) return word.toLowerCase();
+    return word.replace(/^\p{L}/u, letter => letter.toUpperCase());
+  }).join(' ');
+}
+
+function visibilityToggle(resource) {
+  const toggle = button('Teacher Tools', async () => {
+    const visible = !resource.teacher_visible;
+    toggle.disabled = true;
+    report('');
+    try {
+      if (!tour()) {
+        const saved = await checked(client().from('library_resources')
+          .update({teacher_visible:visible}).eq('id',resource.id).eq('updated_at',resource.updated_at)
+          .select('teacher_visible,updated_at').single());
+        Object.assign(resource, saved);
+      } else resource.teacher_visible = visible;
+      toggle.setAttribute('aria-checked', String(resource.teacher_visible));
+      if (['teacher', 'director'].includes($('#resource-visibility').value) ||
+          $('#resource-search').value.trim()) render();
+      report(visible ? 'Resource is visible in Teacher Tools.' : 'Resource is hidden in Teacher Tools.');
+    } catch (error) {
+      report('Could not change Teacher Tools visibility. ' + error.message);
+    } finally {
+      toggle.disabled = false;
+    }
+  });
+  toggle.className = 'resource-card-visibility';
+  toggle.setAttribute('role', 'switch');
+  toggle.setAttribute('aria-checked', String(resource.teacher_visible));
+  toggle.setAttribute('aria-label', 'Teacher Tools visibility for ' + resource.title);
+  return toggle;
+}
+
+function savePreviewFolders() {
+  localStorage.setItem(previewFolderKey, JSON.stringify({subfolders, placements:previewPlacements}));
+}
+
+function folderName(folder) {
+  const parent = subfolders.find(item => item.id === folder.parent_id);
+  return parent ? folderName(parent) + ' / ' + folder.name : folder.name;
+}
+
+async function organize(action) {
+  if (organizing) return;
+  organizing = true;
+  try { await action(); render(); report(''); }
+  catch (error) { report(error.message || 'Could not organize the resource.'); }
+  finally { organizing = false; }
+}
+
+function destinations(item, isFolder) {
+  const categoryId = folderCategoryId(categories, item.category_id);
+  return subfolders.filter(folder => {
+    if (folderCategoryId(categories, folder.category_id) !== categoryId) return false;
+    if (item.organization_id !== folder.organization_id) return false;
+    if (!isFolder) return true;
+    for (let parent = folder; parent; parent = subfolders.find(candidate => candidate.id === parent.parent_id)) {
+      if (parent.id === item.id) return false;
+    }
+    return true;
+  });
+}
+
+function moveItem(item, isFolder, target) {
+  return organize(async () => {
+    if (target && !destinations(item, isFolder).includes(target)) throw Error('Choose a folder within the same category.');
+    const field = isFolder ? 'parent_id' : 'folder_id';
+    const value = target?.id ?? null;
+    if ((item[field] ?? null) === value) return;
+    const changes = {[field]:value};
+    if (!isFolder && target) changes.category_id = target.category_id;
+    if (tour()) {
+      Object.assign(item, changes);
+      if (!isFolder) previewPlacements[item.id] = changes;
+      savePreviewFolders();
+    } else {
+      const table = isFolder ? 'resource_library_folders' : 'library_resources';
+      const column = isFolder ? 'parent_id' : 'folder_id';
+      let query = client().from(table).update(changes).eq('id',item.id);
+      query = item[column] == null ? query.is(column,null) : query.eq(column,item[column]);
+      Object.assign(item, await checked(query.select('*').single()));
+    }
+  });
+}
+
+function makeDraggable(node, item, isFolder) {
+  node.draggable = true;
+  node.ondragstart = event => {
+    dragged = {item, isFolder};
+    event.dataTransfer.setData('text/plain', item.id);
+    event.dataTransfer.effectAllowed = 'move';
+  };
+  node.ondragend = () => { dragged = null; };
+}
+
+function acceptDrop(node, folder) {
+  node.ondragover = event => {
+    if (!dragged || !destinations(dragged.item, dragged.isFolder).includes(folder)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+  };
+  node.ondrop = event => {
+    if (!dragged) return;
+    event.preventDefault();
+    const {item, isFolder} = dragged;
+    dragged = null;
+    void moveItem(item, isFolder, folder);
+  };
+}
+
+function moveControl(item, isFolder) {
+  const select = element('select', '', 'resource-move-select');
+  select.setAttribute('aria-label', 'Move ' + (isFolder ? item.name : item.title));
+  select.append(option('', 'Move to…'), option('root', 'Category Home'),
+    ...destinations(item, isFolder).map(folder => option(folder.id, folderName(folder))));
+  select.onchange = () => {
+    const value = select.value;
+    select.value = '';
+    if (value) void moveItem(item, isFolder, subfolders.find(folder => folder.id === value));
+  };
+  return select;
+}
+
+function folderActions(item) {
+  const menu = element('details', '', 'resource-folder-actions');
+  const trigger = element('summary', '⋯');
+  trigger.setAttribute('aria-label', 'Actions for ' + item.name);
+  const controls = element('div', '', 'resource-folder-action-panel');
+  const rename = button('Rename Folder', () => {
+    menu.open = false;
+    openFolderDialog(item);
+  });
+  controls.append(rename, moveControl(item, true));
+  menu.append(trigger, controls);
+  menu.onkeydown = event => {
+    if (event.key !== 'Escape' || !menu.open) return;
+    menu.open = false;
+    trigger.focus();
+  };
+  return menu;
+}
+
+function renderFolders(resources, selectedCategory, searching) {
+  const folders = $('#resource-folders');
+  const header = $('#resource-folder-header');
+  header.hidden = !selectedCategory;
+  $('#resource-folder-back').textContent = activeFolder ? '← Up One Folder' : '← All Folders';
+  const current = subfolders.find(folder => folder.id === activeFolder);
+  $('#resource-folder-title').textContent = [category(selectedCategory), current && folderName(current)].filter(Boolean).join(' / ');
+  folders.hidden = searching;
+  folders.replaceChildren();
+  if (folders.hidden) return;
+  if (selectedCategory) {
+    for (const item of subfolders.filter(folder => String(folderCategoryId(categories, folder.category_id)) === selectedCategory && folder.parent_id === activeFolder)) {
+      const tile = element('article', '', 'resource-subfolder');
+      const folder = button('', () => { activeFolder = item.id; render(); $('#resource-folder-back').focus(); });
+      folder.className = 'resource-folder';
+      const artwork = element('img', '', 'resource-folder-art');
+      artwork.src = 'assets/resource-folders/subfolder.webp';
+      artwork.alt = '';
+      folder.append(artwork, element('strong', item.name));
+      makeDraggable(folder, item, true);
+      acceptDrop(folder, item);
+      tile.append(folder, folderActions(item));
+      folders.append(tile);
+    }
+    folders.hidden = !folders.children.length;
+    return;
+  }
+  for (const item of categories) {
+    const count = resources.filter(resource => folderCategoryId(categories, resource.category_id) === item.id).length;
+    const folder = button('', () => {
+      $('#resource-category').value = item.id;
+      activeFolder = null;
+      render();
+      $('#resource-folder-back').focus();
+    });
+    folder.className = 'resource-folder resource-category-folder';
+    const artwork = element('img', '', 'resource-folder-art');
+    artwork.src = `assets/resource-folders/${item.art}.webp`;
+    artwork.alt = '';
+    folder.append(artwork, element('strong', item.name), element('span', item.description, 'resource-folder-description'),
+      element('small', count + (count === 1 ? ' Resource' : ' Resources'), 'resource-folder-count'));
+    folders.append(folder);
+  }
+}
 
 function render() {
   const query = $('#resource-search').value.trim().toLowerCase();
@@ -47,19 +247,27 @@ function render() {
   const visible = resources.filter(resource => {
     if (type === 'archived' ? !resource.archived : resource.archived) return false;
     if (type === 'teacher' && !resource.teacher_visible || type === 'director' && resource.teacher_visible) return false;
-    if (selectedCategory && String(resource.category_id) !== selectedCategory) return false;
+    if (selectedCategory && String(folderCategoryId(categories, resource.category_id)) !== selectedCategory) return false;
+    if (selectedCategory && !query && (resource.folder_id ?? null) !== activeFolder) return false;
     return [resource.title, resource.description, category(resource.category_id), resource.collection, ...resource.tags,
       resource.teacher_visible ? 'Teacher Tools' : ''].join(' ').toLowerCase().includes(query);
   });
   const gallery = $('#resource-gallery');
   gallery.replaceChildren();
+  renderFolders(visible, selectedCategory, Boolean(query));
+  if (!selectedCategory && !query) return;
   if (!visible.length) gallery.append(element('p', 'No resources match these filters.'));
   for (const resource of visible) {
-    const card = button('', () => openDetail(resource));
-    card.classList.add('resource-card');
-    card.append(element('span', resource.files[0]?.name.split('.').at(-1)?.toUpperCase() || 'File', 'resource-type'),
-      element('strong', resource.title), element('small', category(resource.category_id)),
-      element('small', [...resource.tags, ...(resource.teacher_visible ? ['Teacher Tools'] : [])].join(' · ')));
+    const card = element('article', '', 'resource-card');
+    const open = button('', () => openDetail(resource));
+    open.className = 'resource-card-open';
+    const thumbnail = element('span', resource.files[0]?.name.split('.').at(-1)?.toUpperCase() || 'File', 'resource-type');
+    open.append(element('strong', resource.title, 'resource-card-title'), thumbnail,
+      element('small', category(resource.category_id)));
+    const tags = element('div', '', 'resource-card-tags');
+    for (const tag of resource.tags) tags.append(element('span', formatTag(tag)));
+    makeDraggable(open, resource, false);
+    card.append(open, tags, moveControl(resource, false), visibilityToggle(resource));
     gallery.append(card);
     if (/^image\/(png|jpeg|webp)$/.test(resource.files[0]?.type || '')) {
       fileUrl(resource.files[0]).then(url => {
@@ -68,30 +276,61 @@ function render() {
         image.alt = '';
         image.loading = 'lazy';
         image.src = url;
-        card.firstChild.replaceWith(image);
+        thumbnail.replaceWith(image);
       }).catch(() => {});
     }
   }
 }
 
+const folderDefinitions = [
+  ['marketing', 'Marketing & Enrollment', 'Enrollment promotions, flyers, advertising, referrals, and new dancer recruitment.', ['Marketing & Promotions']],
+  ['parents', 'Parent Communications', 'Class reminders, announcements, safety information, tuition notices, and parent updates.', ['Parent Communications']],
+  ['curriculum', 'Curriculum & Education', 'Ballet and tap instruction, dance skills, choreography, and educational resources.', ['Dance Education']],
+  ['recital', 'Recital & Events', 'Recital announcements, costumes, rehearsals, performances, and special events.', ['Recital Resources', 'Holidays & Seasons']],
+  ['music', 'Music & Media', 'Original songs, album artwork, playlists, instructional videos, and audio resources.', ['Music & Media']],
+  ['brand', 'Brand & Creative Assets', 'Official logos, Tempo Tots characters, photo frames, backgrounds, and design templates.', ['Branding & Characters']],
+  ['team', 'Teaching Team', 'Staff announcements, reminders, appreciation graphics, training, and internal communications.', ['Teaching Team Resources']],
+  ['business', 'Business & Operations', 'School partnerships, administrative documents, policies, forms, and franchise resources.', ['Documents & Forms', 'School Partnerships', 'Franchise Operations']]
+];
+
 export const sampleCategories = ['Marketing & Promotions','Parent Communications','Dance Education','Recital Resources','Holidays & Seasons','Branding & Characters','Music & Media','Documents & Forms','School Partnerships','Franchise Operations','Teaching Team Resources'].map((name,index)=>({id:name === 'Teaching Team Resources' ? -1 : index+1,name}));
+
+export function organizeCategories(rows) {
+  return folderDefinitions.flatMap(([art, name, description, legacyNames]) => {
+    const primary = rows.find(item => item.name === name) || rows.find(item => item.name === legacyNames[0]);
+    if (!primary) return [];
+    return [{id:primary.id, name, description, art, ids:rows.filter(item =>
+      item.name === name || legacyNames.includes(item.name)).map(item => item.id)}];
+  });
+}
+
+export function folderCategoryId(folders, id) {
+  return folders.find(folder => folder.ids.some(member => String(member) === String(id)))?.id ?? '';
+}
+
 export async function load() {
   try {
     if (tour()) {
-      categories = sampleCategories;
+      categories = organizeCategories(sampleCategories);
+      const saved = JSON.parse(localStorage.getItem(previewFolderKey) || '{}');
+      subfolders = saved.subfolders || [];
+      previewPlacements = saved.placements || {};
       if (!resources.length) resources = [{id:'sample',organization_id:'sample',title:'Dance Techniques Logo',description:'Sample branding resource for the library preview.',category_id:6,tags:['Branding'],collection:'',files:[{name:'Dance Techniques Logo.png',type:'image/png',sample:'assets/dance-techniques-logo-only.png'}],captions:[{name:'Teacher Reminder',text:'Please use the approved Dance Techniques logo on materials for {school_name}.'}],teacher_visible:true}];
     } else {
       if (!client() || !['director','admin'].includes(window.dtCurrentProfile?.role)) return;
-      [categories, resources] = await Promise.all([
+      [categories, resources, subfolders] = await Promise.all([
         checked(client().from('resource_library_categories').select('id,name').order('id')),
-        checked(client().from('library_resources').select('*').order('updated_at',{ascending:false}))
+        checked(client().from('library_resources').select('*').order('updated_at',{ascending:false})),
+        checked(client().from('resource_library_folders').select('*').order('name'))
       ]);
     }
+    if (!tour()) categories = organizeCategories(categories);
+    else for (const resource of resources) Object.assign(resource, previewPlacements[resource.id]);
     const filter = $('#resource-category');
     const previous = filter.value;
     filter.replaceChildren(option('', 'All Categories'), ...categories.map(item => option(item.id,item.name)));
     filter.value = previous;
-    report(tour() ? 'Sample library. Changes reset when you refresh.' : '');
+    report(tour() ? 'Sample Resource Library.' : '');
     render();
   } catch (error) { report('Resource Library could not load. ' + error.message); }
 }
@@ -248,10 +487,11 @@ function openEditor(resource) {
   versions = resource?.files.map(file=>({...file})) || [];
   pending = [];
   form.reset();
-  form.elements.category.replaceChildren(...categories.map(item=>option(item.id,item.name)));
+  form.elements.category.replaceChildren(option('', 'Choose a Category'), ...categories.map(item=>option(item.id,item.name)));
+  form.elements.category.value = $('#resource-category').value;
   if (resource) {
     for (const field of ['title','description','collection']) form.elements[field].value = resource[field];
-    form.elements.category.value = resource.category_id;
+    form.elements.category.value = folderCategoryId(categories, resource.category_id);
     form.elements.tags.value = resource.tags.join(', ');
     form.elements.visible.checked = resource.teacher_visible;
   }
@@ -307,6 +547,7 @@ form.addEventListener('submit',async event=>{
   const status = $('#resource-edit-status');
   if (!versions.length && !pending.length) { report('Add at least one file.',status); return; }
   const values = new FormData(form);
+  if (!category(values.get('category'))) { report('Choose a category before saving.', status); return; }
   const title = String(values.get('title')).trim();
   if (!title) { report('Enter a resource title.',status); return; }
   const tags = [...new Set(String(values.get('tags')).split(',').map(tag=>tag.trim()).filter(tag=>tag && tag.toLowerCase()!=='teacher tools'))];
@@ -339,8 +580,15 @@ form.addEventListener('submit',async event=>{
       }
       files.push({path:entry.path,name,type,size,label:label || ''});
     }
-    const record = {category_id:Number(values.get('category')),title,description:values.get('description'),collection:values.get('collection'),tags,files,captions,teacher_visible:values.has('visible')};
-    if (tour()) resources = [{...editing,...record,id,organization_id:org},...resources.filter(item=>item.id!==id)];
+    const selectedCategory = Number(values.get('category'));
+    const folder = subfolders.find(item => item.id === (editing ? editing.folder_id : activeFolder));
+    const keepFolder = folder && folderCategoryId(categories, folder.category_id) === selectedCategory;
+    const record = {category_id:keepFolder ? folder.category_id : selectedCategory,folder_id:keepFolder ? folder.id : null,title,description:values.get('description'),collection:values.get('collection'),tags,files,captions,teacher_visible:values.has('visible')};
+    if (tour()) {
+      resources = [{...editing,...record,id,organization_id:org},...resources.filter(item=>item.id!==id)];
+      previewPlacements[id] = {folder_id:record.folder_id, category_id:record.category_id};
+      savePreviewFolders();
+    }
     else if (editing) await checked(client().from('library_resources').update(record).eq('id',id).eq('updated_at',editing.updated_at).select('id').single());
     else await checked(client().from('library_resources').insert({...record,id,organization_id:org}));
     editor.close();
@@ -356,7 +604,80 @@ upload.addEventListener('drop',event=>{event.preventDefault();addFiles(event.dat
 $('#resource-upload').onchange = event=>{addFiles(event.target.files);event.target.value='';};
 $('#resource-add-caption').onclick = ()=>$('#resource-captions').append(captionRow());
 $('#resource-add').onclick = ()=>openEditor();
-for (const selector of ['#resource-search','#resource-category','#resource-visibility']) $(selector).addEventListener('input',render);
+$('#resource-folder-back').onclick = () => {
+  if (activeFolder) activeFolder = subfolders.find(folder => folder.id === activeFolder)?.parent_id ?? null;
+  else $('#resource-category').value = '';
+  $('#resource-search').value = '';
+  render();
+  $('#resource-folders button')?.focus();
+};
+const folderDialog = $('#resource-folder-dialog');
+const folderForm = folderDialog.querySelector('form');
+const folderStatus = folderDialog.querySelector('[role="status"]');
+const folderSubmit = folderForm.querySelector('[type="submit"]');
+const folderCancel = folderForm.querySelector('[data-folder-cancel]');
+let renamingFolder = null;
+function openFolderDialog(folder = null) {
+  renamingFolder = folder;
+  folderForm.reset();
+  folderForm.elements.folderName.value = folder?.name || '';
+  $('#resource-folder-dialog-title').textContent = folder ? 'Rename Folder' : 'Add Folder';
+  folderSubmit.textContent = folder ? 'Save Name' : 'Create Folder';
+  folderStatus.hidden = true;
+  folderDialog.showModal();
+}
+$('#resource-folder-add').onclick = () => openFolderDialog();
+folderCancel.onclick = () => folderDialog.close();
+folderDialog.addEventListener('cancel', event => {
+  if (folderSubmit.disabled) event.preventDefault();
+});
+folderForm.onsubmit = async event => {
+  event.preventDefault();
+  if (organizing) return;
+  const input = folderForm.elements.folderName;
+  const name = input.value.trim();
+  if (!name) {
+    folderStatus.textContent = 'Enter a folder name.';
+    folderStatus.hidden = false;
+    input.focus();
+    return;
+  }
+  const categoryId = Number($('#resource-category').value);
+  const parent = subfolders.find(folder => folder.id === activeFolder);
+  organizing = folderSubmit.disabled = folderCancel.disabled = true;
+  folderStatus.hidden = true;
+  try {
+    if (renamingFolder) {
+      const folder = renamingFolder;
+      if (!tour() && name !== folder.name) {
+        await checked(client().from('resource_library_folders').update({name})
+          .eq('id', folder.id).eq('name', folder.name).select('id').single());
+      }
+      folder.name = name;
+    } else {
+      const memberships = tour() ? [{organization_id:'sample'}]
+        : await checked(client().from('resource_library_members').select('organization_id').eq('can_manage',true));
+      const organizationId = parent?.organization_id ?? (memberships.length === 1 ? memberships[0].organization_id : null);
+      if (!organizationId) throw Error('A single managing organization is required to add a folder.');
+      const record = {name, organization_id:organizationId, category_id:parent?.category_id ?? categoryId, parent_id:parent?.id ?? null};
+      const folder = tour() ? {...record,id:crypto.randomUUID()}
+        : await checked(client().from('resource_library_folders').insert(record).select('*').single());
+      subfolders.push(folder);
+    }
+    if (tour()) savePreviewFolders();
+    $('#resource-search').value = '';
+    render();
+    folderDialog.close();
+    report(renamingFolder ? 'Folder renamed.' : 'Folder created.');
+  } catch (error) {
+    folderStatus.textContent = error.message || 'Could not create the folder. Try again.';
+    folderStatus.hidden = false;
+  } finally {
+    organizing = folderSubmit.disabled = folderCancel.disabled = false;
+  }
+};
+$('#resource-category').addEventListener('input', () => { activeFolder = null; render(); });
+for (const selector of ['#resource-search','#resource-visibility']) $(selector).addEventListener('input',render);
 new MutationObserver(()=>{
   if (document.body.dataset.adminSection === 'resource-library') void load();
 }).observe(document.body,{attributes:true,attributeFilter:['data-admin-section']});
@@ -366,6 +687,6 @@ export function addPreviewResource(resource, files) {
   for (const [path, file] of files) {
     if (!demo.has(path)) demo.set(path,URL.createObjectURL(file));
   }
-  resources = [resource,...resources.filter(item=>item.id!==resource.id)];
+  resources = [{...resource,...previewPlacements[resource.id]},...resources.filter(item=>item.id!==resource.id)];
   render();
 }

@@ -1,5 +1,5 @@
 import { fields } from "./communication-personalization.mjs";
-import { sampleCategories, allowed, load as reloadLibrary, addPreviewResource } from "./resource-library.mjs";
+import { sampleCategories, organizeCategories, folderCategoryId, allowed, load as reloadLibrary, addPreviewResource } from "./resource-library.mjs";
 
 const launch = document.querySelector("#resource-bulk-import");
 const dialog = document.createElement("dialog");
@@ -102,7 +102,7 @@ async function openStudio() {
     checked(client().from("resource_library_categories").select("id,name").order("name")),
     checked(client().from("resource_library_members").select("organization_id").eq("can_manage",true))
   ]);
-  categories = choices;
+  categories = organizeCategories(choices);
   if (!tour()) {
     const {data} = await client().from("library_resources").select("tags").eq("archived",false);
     libraryTags = (data || []).flatMap(item=>item.tags || []);
@@ -220,7 +220,7 @@ async function downloadOfficial() {
   const clean = value => value.normalize("NFC").replace(/[<>:"/\\|?*\x00-\x1f]/g,"-").trim().replace(/^\.+|[. ]+$/g,"").slice(0,90);
   for (const [id, snapshot] of Object.entries(batch.state.saved || {})) {
     const file = batch.state.files.find(item=>item.id===snapshot.file);
-    const category = snapshot.categoryName || categories.find(item=>String(item.id)===snapshot.category)?.name || "Resources";
+    const category = snapshot.categoryName || categories.find(item=>item.id===folderCategoryId(categories,snapshot.category))?.name || "Resources";
     const stem = "DT-" + (clean(snapshot.title).replace(/\s+/g,"-") || "Resource");
     const extension = file.name.split(".").at(-1);
     const folder = clean(category) || "Resources";
@@ -263,11 +263,13 @@ async function importApproved() {
   const errors = [];
   for (const group of groups) {
     try {
+      const categoryId = folderCategoryId(categories, group.category);
+      if (categoryId === '') throw Error("Choose a category before saving.");
       const files = group.files.map(id=>entries.find(file=>file.id===id));
       if (files.some(file => file.marked && !file.excluded && !chosen.has(file.id))) throw Error("Confirm or undo the marked versions first.");
       const kept = files.filter(file=>!file.marked).sort((a,b)=>Number(b.id===group.official)-Number(a.id===group.official));
       if (kept[0]?.id !== group.official || kept.length > 20) throw Error("Choose an official version and keep no more than 20 versions.");
-      const record = {id:group.id,organization_id:batch.organization_id,title:group.title,category_id:Number(group.category),
+      const record = {id:group.id,organization_id:batch.organization_id,title:group.title,category_id:categoryId,
         tags:[...new Set(group.tags.split(",").map(tag=>tag.trim()).filter(tag=>tag && tag.toLowerCase()!=="teacher tools"))],
         description:group.description,collection:"",teacher_visible:group.visible,
         captions:group.caption ? [{name:"Suggested Caption",text:group.caption}] : [],archived:false,
@@ -287,7 +289,7 @@ async function importApproved() {
           await checked(client().from("library_resources").insert(record));
         } else if (existing.files[0]?.path !== record.files[0].path) throw Error("This resource already exists with a different official version.");
       }
-      await persist({...batch.state,saved:{...batch.state.saved,[group.id]:{title:group.title,category:group.category,categoryName:categories.find(item=>String(item.id)===group.category)?.name,file:group.official,date:new Date().toISOString()}}});
+      await persist({...batch.state,saved:{...batch.state.saved,[group.id]:{title:group.title,category:group.category,categoryName:categories.find(item=>item.id===categoryId)?.name,file:group.official,date:new Date().toISOString()}}});
       imported++;
     } catch(error) { errors.push(`${group.title} · ${error.message}`); }
   }
@@ -373,7 +375,7 @@ async function render() {
   const category = field("Category","select","category");
   category.required = true;
   category.append(new Option("Choose a Category",""), ...categories.map(item => new Option(item.name,item.id)));
-  category.value = group.category || "";
+  category.value = folderCategoryId(categories, group.category);
   const tagInput = field("Tags","input","tags");
   tagInput.placeholder = "Type a Tag and Press Enter";
   const tagList = el("div");
@@ -665,8 +667,11 @@ async function render() {
   if (!saved) aiPanel.append(action("Give It a TULLE Touch!",async () => {
     const data = await requestTulle();
     if (Array.isArray(data.categories)) {
-      categories = data.categories;
-      controls.category.replaceChildren(new Option("Choose a Category",""), ...categories.map(item=>new Option(item.name,item.id)));
+      const remoteFolders = organizeCategories(data.categories);
+      const remoteFolderId = folderCategoryId(remoteFolders, data.category);
+      const folderName = remoteFolders.find(item => item.id === remoteFolderId)?.name;
+      data.category = categories.find(item => item.name === folderName)?.id ?? "";
+      data.categories = categories;
     }
     const selectedFields = await reviewTulleSuggestions(data);
     if (!selectedFields.length) { status("Your version was kept."); return; }

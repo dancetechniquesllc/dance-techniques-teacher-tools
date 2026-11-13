@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v365-bulk-import";
+const CACHE_NAME = "my-dance-techniques-v366-resource-folders";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",

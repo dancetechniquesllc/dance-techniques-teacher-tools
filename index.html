@@ -17941,7 +17941,26 @@
               <label>Visibility<select id="resource-visibility"><option value="">All Resources</option><option value="teacher">Teacher Tools</option><option value="director">DD Only</option><option value="archived">Archived</option></select></label>
             </div>
             <p id="resource-status" role="status"></p>
+            <div id="resource-folder-header" class="resource-library-header" hidden>
+              <button id="resource-folder-back" type="button" class="secondary">← All Folders</button>
+              <h3 id="resource-folder-title"></h3>
+              <button id="resource-folder-add" type="button" class="secondary">+ Add Folder</button>
+            </div>
+            <div id="resource-folders"></div>
             <div id="resource-gallery"></div>
+            <dialog class="resource-dialog" id="resource-folder-dialog" aria-labelledby="resource-folder-dialog-title">
+              <form>
+                <div class="resource-detail-body">
+                  <h3 id="resource-folder-dialog-title">Add Folder</h3>
+                  <label>Folder Name<input name="folderName" required maxlength="100" autofocus></label>
+                  <p role="status" hidden></p>
+                  <div class="resource-actions">
+                    <button type="button" class="secondary" data-folder-cancel>Cancel</button>
+                    <button type="submit" class="primary">Create Folder</button>
+                  </div>
+                </div>
+              </form>
+            </dialog>
             <dialog class="resource-dialog" id="resource-editor" aria-labelledby="resource-editor-title">
               <form>
                 <header class="resource-library-header"><h3 id="resource-editor-title">Add Resource</h3><button class="secondary" value="cancel" formnovalidate aria-label="Close Resource Editor">×</button></header>
