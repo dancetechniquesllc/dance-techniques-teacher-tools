@@ -16573,6 +16573,9 @@
   <link rel="stylesheet" href="director-corner.css?v=20261110-idle-availability">
   <link rel="stylesheet" href="assets/search-input.css">
   <link rel="stylesheet" href="assets/action-icons.css">
+  <link rel="stylesheet" href="staff-messages.css">
+  <link rel="stylesheet" href="resource-library.css">
+  <script type="module" src="resource-library.mjs"></script>
   <link rel="stylesheet" href="assets/focus-styles.css">
 </head>
 <body class="auth-checking" data-mode="admin" data-admin-page="home" data-teacher-tab="today" data-view-tab="today">
@@ -16633,6 +16636,9 @@
         <button class="announcement-publish" type="button" id="admin-post-announcement">Publish Announcement</button>
       </footer>
     </div>
+  </dialog>
+  <dialog class="announcement-small-dialog" id="staff-heart-details" aria-labelledby="staff-heart-title">
+    <form method="dialog"><div><button class="secondary" aria-label="Close Hearts">×</button></div><h3 id="staff-heart-title">Hearts</h3><div class="staff-heart-list"></div></form>
   </dialog>
   <dialog class="announcement-small-dialog" id="announcement-review-dialog" aria-labelledby="announcement-review-title" aria-describedby="announcement-review-subtitle">
     <header>
@@ -17828,7 +17834,7 @@
               <button class="admin-sidebar-link" type="button" data-admin-open-section="dt-tunes" aria-label="Open DT Tunes Music Center"><svg class="admin-nav-icon" aria-hidden="true"><use href="#icon-tunes"></use></svg><span class="admin-sidebar-label">DT Tunes</span></button>
               <button class="admin-sidebar-link" type="button" data-admin-open-section="big-stage"><svg class="admin-nav-icon" aria-hidden="true"><use href="#icon-big-stage"></use></svg><span class="admin-sidebar-label">The Big Stage</span></button>
               <button class="admin-sidebar-link" type="button" data-admin-open-section="costume-catalog"><svg class="admin-nav-icon" aria-hidden="true"><use href="#icon-costume-catalog"></use></svg><span class="admin-sidebar-label">Costume Catalog</span></button>
-              <button class="admin-sidebar-link" type="button" disabled aria-label="Resource Library Coming Soon"><svg class="admin-nav-icon" aria-hidden="true"><use href="#icon-resource-library"></use></svg><span class="admin-sidebar-label">Resource Library</span></button>
+              <button class="admin-sidebar-link" type="button" data-admin-open-section="resource-library"><svg class="admin-nav-icon" aria-hidden="true"><use href="#icon-resource-library"></use></svg><span class="admin-sidebar-label">Resource Library</span></button>
             </div>
           </nav>
         </aside>
@@ -17913,14 +17919,51 @@
                   <span class="admin-tool-card-title"><svg class="admin-nav-icon" aria-hidden="true"><use href="#icon-big-stage"></use></svg><span><strong>The Big Stage</strong><small>Build recital shows, flow order, class details, costumes, and family communication.</small></span></span>
                   <span class="status ok">Recital Planner</span>
                 </button>
-                <button class="admin-tool-card is-disabled admin-resource-library-card" type="button" disabled aria-disabled="true">
+                <button class="admin-tool-card admin-resource-library-card" type="button" data-admin-open-section="resource-library">
                   <span class="admin-tool-card-title"><svg class="admin-nav-icon" aria-hidden="true"><use href="#icon-resource-library"></use></svg><span><strong>Resource Library</strong><small>Access partnership guides, tutorials, brochures, templates, and the latest Dance Techniques materials.</small></span></span>
-                  <span class="status disabled">Coming Soon</span>
+
                 </button>
               </div>
             </div>
           </section>
 
+          <section class="admin-profile-card admin-section-page" id="admin-home-resource-library">
+            <header class="resource-library-header">
+              <div><h2>Resource Library</h2><p>Find and organize guides, graphics, and templates for Dance Techniques.</p></div>
+              <button id="resource-add" type="button" class="primary">Add Resource</button>
+            </header>
+            <div class="resource-filters">
+              <label>Search<input id="resource-search" type="search" placeholder="Search Resources"></label>
+              <label>Category<select id="resource-category"><option value="">All Categories</option></select></label>
+              <label>Visibility<select id="resource-visibility"><option value="">All Resources</option><option value="teacher">Teacher Tools</option><option value="director">DD Only</option><option value="archived">Archived</option></select></label>
+            </div>
+            <p id="resource-status" role="status"></p>
+            <div id="resource-gallery"></div>
+            <dialog class="resource-dialog" id="resource-editor" aria-labelledby="resource-editor-title">
+              <form>
+                <header class="resource-library-header"><h3 id="resource-editor-title">Add Resource</h3><button class="secondary" value="cancel" formnovalidate aria-label="Close Resource Editor">×</button></header>
+                <div class="resource-detail-body">
+                  <label>Title<input name="title" maxlength="160" required></label>
+                  <label>Description<textarea name="description" maxlength="5000"></textarea></label>
+                  <label>Category<select name="category" required></select></label>
+                  <label>Collection<input name="collection" maxlength="160"></label>
+                  <label>Tags<input name="tags" placeholder="Separate Tags With Commas" maxlength="500"></label>
+                  <label><span><input name="visible" type="checkbox"> Visible in Teacher Tools</span></label>
+                  <label id="resource-drop">Add Files or Drop Them Here<input id="resource-upload" type="file" multiple></label>
+                  <div id="resource-versions"></div>
+                  <h4>Suggested Captions</h4>
+                  <div id="resource-captions"></div>
+                  <button id="resource-add-caption" type="button" class="secondary">Add Caption</button>
+                </div>
+                <p id="resource-edit-status" role="status"></p>
+                <button class="primary resource-save" value="save">Save Resource</button>
+              </form>
+            </dialog>
+            <dialog class="resource-dialog" id="resource-detail" aria-labelledby="resource-detail-title">
+              <header class="resource-library-header"><h3 id="resource-detail-title">Resource</h3><form method="dialog"><button class="secondary" aria-label="Close Resource">×</button></form></header>
+              <div class="resource-detail-body"></div>
+            </dialog>
+          </section>
           <section class="admin-profile-card admin-section-page" id="admin-home-shape-the-magic">
             <div class="admin-card-header">
               <div><h3>Shape the Magic</h3><p><em>Listen to the teaching team and turn their feedback into thoughtful improvements.</em></p></div>
@@ -29920,7 +29963,7 @@
       const { data, error } = await client
         .from("staff_team_talk_messages")
         .select("id, author_id, author_name, author_role, body, attachment_path, attachment_type, attachment_name, created_at")
-        .order("created_at", { ascending: true })
+        .order("created_at", { ascending: false })
         .limit(250);
       if (error) {
         sharedTeamTalkReady = false;
@@ -29929,7 +29972,7 @@
       }
       const thread = sharedTeamTalkThread();
       if (!thread) return false;
-      thread.messages = (data || []).map(mapSharedTeamTalkMessage);
+      thread.messages = (data || []).slice().reverse().map(mapSharedTeamTalkMessage);
       await hydrateTeamTalkAttachmentUrls(thread.messages);
       const messageIds = thread.messages.map((message) => message.id);
       const receiptsByMessage = new Map();
@@ -29945,11 +29988,12 @@
           receiptsByMessage.set(receipt.message_id, list);
         });
       }
-      const { data: reactionRows, error: reactionError } = await client
+      const { data: reactionRows, error: reactionError } = messageIds.length ? await client
         .from("staff_team_talk_reactions")
         .select("message_id, reactor_id, reactor_name, reaction, created_at")
         .order("created_at", { ascending: true })
-        .limit(1000);
+        .in("message_id", messageIds)
+        .limit(1000) : { data: [] };
       if (reactionError) console.error("Team Talk reactions could not sync", reactionError);
       const reactionsByMessage = new Map();
       (reactionRows || []).forEach((reaction) => {
@@ -30085,16 +30129,33 @@
       if (!client || !profile || document.body.dataset.tourMode === "true") return false;
       const { data, error } = await client
         .from("staff_direct_messages")
-        .select("id, author_id, recipient_id, author_name, author_role, recipient_name, recipient_role, body, created_at, read_at")
-        .order("created_at", { ascending: true })
+        .select("id, author_id, recipient_id, author_name, author_role, recipient_name, recipient_role, body, created_at")
+        .order("created_at", { ascending: false })
         .limit(500);
       if (error) {
         sharedDirectMessagesReady = false;
         console.error("Staff direct messages could not sync", error);
         return false;
       }
+      const ids = (data || []).map(row => row.id);
+      const [receiptResult, heartResult] = ids.length ? await Promise.all([
+        client.rpc("staff_direct_message_receipts", {message_ids:ids}),
+        Promise.all(Array.from({ length: Math.ceil(ids.length / 100) }, (_, index) => client
+          .from("staff_direct_message_hearts").select("message_id, reactor_id, created_at")
+          .in("message_id", ids.slice(index * 100, (index + 1) * 100))))
+          .then(results => ({ data: results.flatMap(result => result.data || []), error: results.find(result => result.error)?.error }))
+      ]) : [{data:[]},{data:[]}];
+      if (receiptResult.error || heartResult.error) console.warn("Private message activity could not sync", receiptResult.error || heartResult.error);
+      if (window.dtCurrentProfile?.id !== profile.id) return false;
+      const receipts = new Map((receiptResult.data || []).map(row => [row.id,row.read_at]));
+      const hearts = new Map();
+      for (const entry of heartResult.data || []) {
+        const list = hearts.get(entry.message_id) || [];
+        list.push({...entry,reaction:"heart"});
+        hearts.set(entry.message_id,list);
+      }
       const grouped = new Map();
-      (data || []).forEach((row) => {
+      (data || []).slice().reverse().forEach((row) => {
         const viewerIsAuthor = row.author_id === profile.id;
         const otherId = viewerIsAuthor ? row.recipient_id : row.author_id;
         const otherName = sharedStaffDisplayName(
@@ -30112,6 +30173,10 @@
           messages: []
         });
         const thread = grouped.get(otherId);
+        const reactions = (hearts.get(row.id) || []).map(entry => ({
+          ...entry, reactor_name: entry.reactor_id === row.author_id ? row.author_name : row.recipient_name
+        }));
+        const readAt = receipts.get(row.id);
         thread.messages.push({
           id: row.id,
           authorId: row.author_id,
@@ -30120,7 +30185,11 @@
           time: new Date(row.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
           createdAt: row.created_at,
           text: row.body,
-          readBy: row.read_at ? [sharedStaffDisplayName(row.recipient_name, row.recipient_role)] : []
+          readAt,
+          readByIds: readAt ? [row.recipient_id] : [],
+          reactions,
+          reaction: reactions.some(entry => entry.reactor_id === profile.id) ? "heart" : "",
+          readBy: readAt ? [sharedStaffDisplayName(row.recipient_name, row.recipient_role)] : []
         });
         thread.activityOrder = Date.parse(row.created_at) || thread.activityOrder;
       });
@@ -30139,6 +30208,7 @@
       staffDirectMessageSubscription = window.dtSupabase
         .channel(`staff-direct-messages-${window.dtCurrentProfile?.id || "staff"}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "staff_direct_messages" }, () => loadSharedDirectMessages())
+        .on("postgres_changes", { event: "*", schema: "public", table: "staff_direct_message_hearts" }, () => loadSharedDirectMessages())
         .subscribe();
     };
     const postSharedDirectMessage = async (recipientProfileId, text) => {
@@ -30152,7 +30222,7 @@
           message_body: text
         });
         if (error) throw error;
-        await loadSharedDirectMessages();
+        void loadSharedDirectMessages().catch(error => console.error("Sent message could not refresh", error));
         return true;
       } catch (error) {
         console.error("Private staff message could not send", error);
@@ -30181,12 +30251,14 @@
         console.error("Announcement read receipt could not save", error);
       }
     };
+    const staffReadInFlight = new Set();
     const markSharedConversationRead = async (thread) => {
       const profile = window.dtCurrentProfile;
       if (!thread || !profile || !window.dtSupabase || document.body.dataset.tourMode === "true") return;
       const unreadMessages = (thread.messages || []).filter((message) => (
         message?.id &&
         message.authorId !== profile.id &&
+        !staffReadInFlight.has(`${profile.id}:${message.id}`) &&
         !(message.readByIds || []).includes(profile.id) &&
         !(message.readBy || []).includes(teacherMessageViewerName())
       ));
@@ -30195,14 +30267,21 @@
         ? "mark_team_talk_message_read"
         : (thread.type === "private" ? "mark_staff_direct_message_read" : "");
       if (!rpcName) return;
-      const results = await Promise.all(unreadMessages.map((message) => window.dtSupabase.rpc(rpcName, { target_message_id: message.id })));
-      const failed = results.find((result) => result.error);
-      if (failed) {
-        console.error("Message read receipt could not save", failed.error);
-        return;
+      unreadMessages.forEach(message => staffReadInFlight.add(`${profile.id}:${message.id}`));
+      try {
+        const results = await Promise.all(unreadMessages.map((message) => window.dtSupabase.rpc(rpcName, { target_message_id: message.id })));
+        const failed = results.find((result) => result.error);
+        if (failed) {
+          console.error("Message read receipt could not save", failed.error);
+          return;
+        }
+        if (thread.id === pinnedMessageThreadId) await loadSharedTeamTalk();
+        else await loadSharedDirectMessages();
+      } catch (error) {
+        console.error("Message read receipt could not save", error);
+      } finally {
+        unreadMessages.forEach(message => staffReadInFlight.delete(`${profile.id}:${message.id}`));
       }
-      if (thread.id === pinnedMessageThreadId) await loadSharedTeamTalk();
-      else await loadSharedDirectMessages();
     };
     const postSharedTeamTalkMessage = async (text, attachmentFile = null) => {
       let attachmentPath = "";
@@ -30231,7 +30310,7 @@
           message_attachment_name: attachmentFile?.name || null
         });
         if (error) throw error;
-        await loadSharedTeamTalk();
+        void loadSharedTeamTalk().catch(error => console.error("Sent message could not refresh", error));
         return true;
       } catch (error) {
         console.error("Team Talk message could not send", error);
@@ -30294,7 +30373,8 @@
       return others.map(personDisplayName).join(" + ") || thread.title;
     };
     const readReceiptNamesFor = (thread, message) => {
-      if (thread.type === "announcement" || thread.type === "team") return readReceiptTeacherNames();
+      if (thread.type === "announcement") return readReceiptTeacherNames();
+      if (thread.type === "team") return readReceiptTeacherNames().filter(name => name !== message.from);
       return thread.participants.filter((participant) => participant !== message.from && participant !== "Admins");
     };
     const inboxTimeDateLabel = (value = "") => {
@@ -30325,7 +30405,7 @@
     ));
     const adminMessageColor = "#dba9a1";
     const messageAssignedColor = (name, role = "") => {
-      if (name === "Admin" || role === "Admin") return adminMessageColor;
+      if (name === "Admin" || role === "Admin" || role === "Director") return adminMessageColor;
       const teacher = messageTeacherForName(name);
       return teacher ? teacherProfileColor(teacher) : adminMessageColor;
     };
@@ -30644,7 +30724,7 @@
         const readBy = Array.isArray(message.readBy) ? message.readBy : [];
         const receiptNames = readReceiptNamesFor(thread, message);
         const viewedCount = receiptNames.filter((name) => readBy.includes(name)).length;
-        const receipt = viewerName === "Admin" ? `
+        const receipt = document.body.dataset.mode === "admin" && viewerName === "Admin" ? `
           <button class="message-read-receipt" type="button" data-read-receipt-thread="${escapeText(thread.id)}" data-read-receipt-message="${messageIndex}">
             ✔ ${viewedCount} of ${receiptNames.length} viewed
           </button>
@@ -30660,6 +30740,7 @@
             ${message.html ? `<div class="rich-announcement-body">${message.html}</div>` : `<p class="message-rich-text">${messageTextMarkup(message.text)}</p>`}
             ${messageAttachmentMarkup(message)}
             ${messageReactionSummaryMarkup(message)}
+            ${["team","private"].includes(thread.type) ? `<div class="staff-chat-meta">${staffHeartControls(thread,message,messageIndex)}</div>` : ""}
             <button class="message-reaction-toggle" type="button" data-message-reaction-toggle aria-label="React to This Message" title="React to This Message">+</button>
             ${receipt}
             <div class="reaction-row" aria-label="Message Reactions">
@@ -31525,16 +31606,20 @@
       const readBy = Array.isArray(message?.readBy) ? message.readBy : [];
       return readReceiptNamesFor(thread, message).map((teacher) => {
         const viewed = readBy.includes(teacher);
+        const portrait = messageTeacherForName(teacher);
+        const receipt = (message.receipts || []).find(row => row.viewer_id === portrait?.id || sharedTeamTalkSenderName(row.viewer_name) === teacher);
+        const time = receipt?.read_at || (thread.type === "private" && viewed ? message.readAt : null);
         return `
           <div class="receipt-row ${viewed ? "" : "not-read"}">
-            <span>${escapeText(personDisplayName(teacher))}</span>
-            <span>${viewed ? "Viewed" : "Not read"}</span>
+            <span class="staff-receipt-person">${staffPortrait(portrait,teacher)}${escapeText(personDisplayName(teacher))}</span>
+            <span>${time ? escapeText(announcementDateTimeLabel({createdAt:time})) : viewed ? "Viewed" : "Not Read"}</span>
           </div>
         `;
       }).join("");
     };
 
     const openReadReceiptModal = (threadId, messageIndex) => {
+      if (document.body.dataset.mode !== "admin" || (document.body.dataset.tourMode !== "true" && !["admin","director"].includes(window.dtCurrentProfile?.role))) return;
       const thread = messageThreads.find((entry) => entry.id === threadId);
       const message = thread?.messages[Number(messageIndex)];
       if (!message) return;
@@ -31564,7 +31649,7 @@
       const readBy = Array.isArray(message.readBy) ? message.readBy : [];
       const receiptNames = readReceiptNamesFor(thread, message);
       const viewedCount = receiptNames.filter((name) => readBy.includes(name)).length;
-      modal.querySelector("#read-receipt-summary").textContent = `${viewedCount} of ${receiptNames.length} viewed this message.`;
+      modal.querySelector("#read-receipt-summary").textContent = receiptNames.length ? `${viewedCount} of ${receiptNames.length} viewed this message.` : "Recipient Count Unavailable";
       modal.querySelector(".receipt-list").innerHTML = receiptRowsMarkup(thread, message);
       modal.classList.add("open");
     };
@@ -31586,7 +31671,13 @@
           await loadSharedStaffAnnouncements();
           return true;
         }
-        const viewer = teacherMessageViewerName();
+        if (thread.type === "private" && message.id && document.body.dataset.tourMode !== "true") {
+          const { error } = await window.dtSupabase.rpc("toggle_staff_direct_message_heart", {target_message_id:message.id});
+          if (error) throw error;
+          await loadSharedDirectMessages();
+          return true;
+        }
+        const viewer = document.body.dataset.mode === "admin" ? "Admin" : teacherMessageViewerName();
         const currentReaction = message.reaction === reaction ? "" : reaction;
         message.reaction = currentReaction;
         message.reactions = (Array.isArray(message.reactions) ? message.reactions : [])
@@ -31594,6 +31685,7 @@
         if (currentReaction) message.reactions.push({ reactor_id: `local-${viewer}`, reactor_name: viewer, reaction: currentReaction });
         renderTeacherMessages();
         renderAdminMessages();
+        renderAdminMessagesPage();
         return true;
       } catch (error) {
         console.error("Message reaction could not save", error);
@@ -35145,6 +35237,197 @@
       }).join("") : '<p class="admin-parent-message-preview-empty">No family conversations match these filters.</p>';
     };
 
+    let selectedStaffTeacherId = "";
+    const staffDrafts = new Map();
+    const staffSends = new Set();
+    const staffPortrait = (teacher, name) => `<span class="staff-chat-avatar teacher-identity-bubble ${teacher ? teacherProfileColorClass(teacher) : ""}" aria-hidden="true">${teacher?.photo ? `<img src="${escapeText(teacher.photo)}" alt="">` : escapeText(teacher ? initialsFor(teacher) : name[0] || "A")}</span>`;
+    const staffHeartDetails = (threadId, index) => {
+      const message = messageThreads.find(thread => thread.id === threadId)?.messages[index];
+      const dialog = document.getElementById("staff-heart-details");
+      if (!message || dialog.open) return;
+      const hearts = (message.reactions || []).filter(item => item.reaction === "heart");
+      dialog.querySelector(".staff-heart-list").innerHTML = hearts.map(item => {
+        const teacher = teachers.find(entry => entry.id === item.reactor_id);
+        const name = teacher?.displayName || item.reactor_name || "Staff";
+        return `<div>${staffPortrait(teacher,name)}<strong>${escapeText(name)}</strong>${item.created_at ? `<small>${escapeText(announcementDateTimeLabel({createdAt:item.created_at}))}</small>` : ""}</div>`;
+      }).join("") || "<p>No hearts yet.</p>";
+      dialog.showModal();
+    };
+    const staffHeartControls = (thread, message, index) => {
+      const count = (message.reactions || []).filter(item => item.reaction === "heart").length;
+      const active = message.reaction === "heart";
+      return `<button type="button" class="staff-heart" data-react-thread="${escapeText(thread.id)}" data-react-message="${index}" data-reaction="heart" aria-pressed="${active}" aria-label="${active ? "Remove Heart" : "Add Heart"}">${reactionIconMarkup("heart")}</button><button type="button" class="staff-heart-count" data-staff-heart-thread="${escapeText(thread.id)}" data-staff-heart-index="${index}" aria-label="View ${count} Hearts">${count}</button>`;
+    };
+    const staffChatMessages = (thread, readOnly = false) => {
+      let lastDay, lastSender;
+      return (thread?.messages || []).map((message,index) => {
+        const admin = ["admin","director"].includes(String(message.role).toLowerCase()) || message.from === "Admin";
+        const teacher = !admin && teachers.find(item => item.id === message.authorId || teacherNameForMessages(item) === message.from);
+        const name = admin ? "Admin" : messageSenderDisplayName(message);
+        const color = teacher ? teacherProfileColor(teacher) : "var(--blush)";
+        const day = message.createdAt ? new Date(message.createdAt).toLocaleDateString([], {month:"long",day:"numeric"}) : message.time?.match(/^(Today|Yesterday)/)?.[0];
+        const separator = day && day !== lastDay ? `<div class="staff-chat-date">${escapeText(day)}</div>` : "";
+        const sender = message.authorId || name;
+        const repeat = !separator && sender === lastSender && lastDay === day;
+        lastDay = day;
+        lastSender = sender;
+        const readBy = Array.isArray(message.readBy) ? message.readBy : [];
+        const names = readReceiptNamesFor(thread,message);
+        const count = names.filter(item => readBy.includes(item)).length;
+        const canViewReceipts = document.body.dataset.mode === "admin" && (document.body.dataset.tourMode === "true" || ["admin","director"].includes(window.dtCurrentProfile?.role));
+        const mine = message.authorId ? message.authorId === window.dtCurrentProfile?.id : admin;
+        return `${separator}<article class="staff-chat-line${mine ? " is-mine" : ""}" style="--staff-color:${escapeText(color)}">
+          ${repeat ? '<span aria-hidden="true"></span>' : staffPortrait(teacher,name)}
+          <div class="staff-chat-bubble">${repeat ? "" : `<strong>${escapeText(name)}</strong>`}
+            <p class="message-rich-text">${messageTextMarkup(message.text || "")}</p>${messageAttachmentMarkup(message)}
+            <div class="staff-chat-meta"><small>${escapeText(message.time || "")}</small>${readOnly ? "" : staffHeartControls(thread,message,index)}
+            ${canViewReceipts && names.length ? `<button type="button" class="message-read-receipt" data-read-receipt-thread="${escapeText(thread.id)}" data-read-receipt-message="${index}">Seen by ${count} of ${names.length}</button>` : ""}</div>
+          </div></article>`;
+      }).join("") || '<p class="hint-text">No messages yet.</p>';
+    };
+    let staffTeamAttachment = null;
+    const staffTeamPreviewUrls = [];
+    const setStaffTeamAttachment = file => {
+      if (file) {
+        const image = /^image\/(jpeg|png|webp)$/.test(file.type);
+        const video = /^video\/(mp4|quicktime|webm)$/.test(file.type);
+        if ((!image && !video) || file.size > (image ? 10 : 50) * 1024 * 1024) {
+          showToast("Choose a JPG, PNG, or WebP up to 10 MB, or an MP4, MOV, or WebM up to 50 MB.");
+          return false;
+        }
+      }
+      staffTeamAttachment = file;
+      const field = document.getElementById("admin-team-talk-draft");
+      const note = document.getElementById("staff-team-attachment-note");
+      note.hidden = !file;
+      note.querySelector("span").textContent = file?.name || "";
+      field.nextElementSibling.disabled = staffSends.has("team") || (!file && !field.value.trim());
+      return true;
+    };
+    const openStaffAttachmentPicker = () => {
+      const dialog = document.getElementById("staff-team-attachment-dialog");
+      dialog.querySelector("[data-staff-media-files]").replaceChildren();
+      dialog.showModal();
+    };
+    const loadStaffLibraryMedia = async dialog => {
+      const list = dialog.querySelector("[data-staff-media-files]");
+      const request = document.createElement("p");
+      request.textContent = "Loading photos and videos…";
+      list.replaceChildren(request);
+      try {
+        const tour = document.body.dataset.tourMode === "true";
+        const client = window.dtSupabase;
+        let resources = [{ files: [{name:"Dance Techniques Logo.png", type:"image/png", sample:"assets/dance-techniques-logo-only.png"}] }];
+        if (!tour) {
+          const result = await client.from("library_resources").select("files").eq("archived", false).order("updated_at", {ascending:false});
+          if (result.error) throw result.error;
+          resources = result.data || [];
+        }
+        if (!request.isConnected || !dialog.open) return;
+        const files = resources.flatMap(resource => resource.files || []).filter(file =>
+          /^(image\/(jpeg|png|webp)|video\/(mp4|quicktime|webm))$/.test(file.type)
+        );
+        request.textContent = files.length ? "Choose a photo or video." : "There are no photos or videos in the Resource Library.";
+        for (const file of files) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = file.name;
+          button.onclick = async () => {
+            if (list.getAttribute("aria-busy") === "true") return;
+            list.setAttribute("aria-busy", "true");
+            try {
+              let blob;
+              if (tour) {
+                const response = await fetch(file.sample);
+                if (!response.ok) throw new Error("Sample attachment unavailable");
+                blob = await response.blob();
+              } else {
+                const result = await client.storage.from("resource-library").download(file.path);
+                if (result.error) throw result.error;
+                blob = result.data;
+              }
+              if (request.isConnected && dialog.open && setStaffTeamAttachment(new File([blob],file.name,{type:file.type}))) dialog.close();
+            } catch (error) {
+              console.error("Could not attach Resource Library media", error);
+              request.textContent = "This file could not be attached. Please try again.";
+            } finally {
+              list.removeAttribute("aria-busy");
+            }
+          };
+          list.append(button);
+        }
+      } catch (error) {
+        console.error("Could not load Resource Library media", error);
+        request.textContent = "The Resource Library is unavailable. You can still choose a file from your device.";
+      }
+    };
+    window.addEventListener("pagehide", event => {
+      if (!event.persisted) staffTeamPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    });
+    const staffComposer = (teacher) => {
+      const key = teacher?.id || "team";
+      const draft = staffDrafts.get(key) || "";
+      const target = teacher ? `Message ${teacher.displayName || fullName(teacher)}…` : "Message your teaching team…";
+      const media = teacher ? "" : `<button type="button" class="staff-media-add" data-staff-media-open aria-label="Add Photo or Video" title="Add Photo or Video">+</button><input type="file" id="staff-team-device-file" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" hidden>`;
+      const note = teacher ? "" : `<div id="staff-team-attachment-note" hidden><span aria-live="polite"></span><button type="button" data-staff-media-remove aria-label="Remove Attachment">×</button></div>`;
+      return `${note}<div class="staff-chat-composer">${media}<textarea rows="1" maxlength="2000" data-staff-draft="${escapeText(key)}" ${teacher ? `data-admin-teacher-reply="${escapeText(key)}"` : 'id="admin-team-talk-draft"'} aria-label="${escapeText(target)}" placeholder="${escapeText(target)}">${escapeText(draft)}</textarea><button class="primary" type="button" ${teacher ? `data-admin-send-teacher-reply="${escapeText(key)}"` : 'id="admin-team-talk-send"'} aria-label="Send Message" ${!draft.trim() || staffSends.has(key) ? "disabled" : ""}>➤</button></div>`;
+    };
+    const renderStaffMessageWorkspace = container => {
+      if (!container.querySelector(".staff-workspace")) container.innerHTML = `<section class="staff-workspace"><div class="staff-panels">
+        <section class="staff-panel"><header><div><h4>Team Talk</h4><small>Teaching Team Group Chat</small></div><div class="staff-members"></div></header><div class="staff-chat-scroll" data-staff-scroll="team" tabindex="0" aria-label="Team Talk Messages"></div><div class="staff-team-compose"></div></section>
+        <section class="staff-panel"><header><h4>Individual Messages</h4></header><div class="staff-private-grid"><aside><input type="search" id="staff-teacher-search" placeholder="Search Teachers…" aria-label="Search Teachers"><div class="staff-teacher-list"></div></aside><div class="staff-private-chat"></div></div></section>
+      </div></section>`;
+      const privateThreads = messageThreads.filter(thread => thread.type === "private");
+      const list = teachers.filter(teacher => teacher.status !== "inactive" || privateThreads.some(thread => thread.otherProfileId === teacher.id || thread.participants.includes(teacherNameForMessages(teacher))))
+        .map(teacher => {
+          const name = teacherNameForMessages(teacher);
+          const direct = privateThreads.filter(thread => thread.otherProfileId === teacher.id || (!thread.otherProfileId && thread.participants.includes("Admin") && thread.participants.includes(name)));
+          const latest = latestThreadMessage(orderedMessageThreads(direct)[0] || {messages:[]});
+          const unread = direct.reduce((sum,thread) => sum + (thread.otherProfileId ? thread.messages.filter(message => message.authorId !== window.dtCurrentProfile?.id && !message.readBy.length).length : Number(Boolean(isThreadUnreadFor(thread,"Admin")))), 0);
+          return {teacher,name,direct,latest,unread};
+        }).sort((a,b) => (Date.parse(b.latest?.createdAt) || b.direct[0]?.activityOrder || 0) - (Date.parse(a.latest?.createdAt) || a.direct[0]?.activityOrder || 0) || a.name.localeCompare(b.name));
+      const selected = list.find(item => item.teacher.id === selectedStaffTeacherId) || list[0];
+      selectedStaffTeacherId = selected?.teacher.id || "";
+      const group = sharedTeamTalkThread();
+      const members = teachers.filter(teacher => teacher.status !== "inactive" && teacher.teacherType === "Teacher");
+      const unreadGroup = group?.messages.filter(message => message.authorId && message.authorId !== window.dtCurrentProfile?.id && !message.readByIds?.includes(window.dtCurrentProfile?.id)).length || 0;
+      container.querySelector(".staff-members").innerHTML = `<span class="staff-member-faces">${members.slice(0,4).map(item => staffPortrait(item,teacherNameForMessages(item))).join("")}</span><small>${members.length} Members${unreadGroup ? ` · ${unreadGroup} Unread` : ""}</small>`;
+      const search = container.querySelector("#staff-teacher-search").value.trim().toLowerCase();
+      const listElement = container.querySelector(".staff-teacher-list");
+      const listMarkup = list.filter(item => `${item.name} ${fullName(item.teacher)}`.toLowerCase().includes(search)).map(({teacher,name,latest,unread}) => `<button type="button" data-message-teacher-id="${escapeText(teacher.id)}" aria-pressed="${teacher.id === selectedStaffTeacherId}" style="--staff-color:${escapeText(teacherProfileColor(teacher))}">${staffPortrait(teacher,name)}<span><strong>${escapeText(teacher.displayName || name)}</strong><small>${escapeText(latest?.text || "No Messages Yet")}</small><small>${escapeText(latest?.time || "")}${unread ? ` · ${unread} Unread` : ""}</small></span></button>`).join("") || "<p>No teachers match.</p>";
+      if (listElement.staffMarkup !== listMarkup) { listElement.innerHTML = listMarkup; listElement.staffMarkup = listMarkup; }
+      const individual = container.querySelector(".staff-private-chat");
+      if (individual.dataset.teacher !== selectedStaffTeacherId) {
+        individual.dataset.teacher = selectedStaffTeacherId;
+        individual.innerHTML = selected ? `<div class="staff-private-person">${staffPortrait(selected.teacher, selected.name)}<strong>${escapeText(selected.teacher.displayName || selected.name)}</strong></div><div class="staff-chat-scroll" data-staff-scroll="private" tabindex="0" aria-label="Private Messages"></div>${staffComposer(selected.teacher)}` : "<p>No teacher conversations.</p>";
+      }
+      const teamComposer = container.querySelector(".staff-team-compose");
+      if (!teamComposer.firstElementChild) teamComposer.innerHTML = staffComposer() + `
+        <dialog id="staff-team-attachment-dialog" aria-labelledby="staff-media-title">
+          <form method="dialog"><h4 id="staff-media-title">Add Photo or Video</h4><button aria-label="Close">×</button></form>
+          <div class="staff-media-sources"><button type="button" data-staff-media-library>From Resource Library</button><button type="button" data-staff-media-device>From Device</button></div>
+          <div data-staff-media-files aria-live="polite"></div>
+        </dialog>`;
+      const updateMessages = (target, markup) => {
+        if (!target || target.staffMarkup === markup) return;
+        const nearEnd = target.scrollHeight - target.scrollTop - target.clientHeight < 70;
+        const top = target.scrollTop;
+        target.innerHTML = markup;
+        target.staffMarkup = markup;
+        target.scrollTop = nearEnd ? target.scrollHeight : top;
+      };
+      updateMessages(container.querySelector('[data-staff-scroll="team"]'),staffChatMessages(group));
+      if (document.body.dataset.adminSection === "messages" && document.body.dataset.communicationView === "team") {
+        void markSharedConversationRead(group);
+        if (selected) selected.direct.forEach(thread => void markSharedConversationRead(thread));
+      }
+      if (selected) {
+        const teacherOnlyThreads = privateThreads.filter(thread => !thread.otherProfileId && !thread.participants.includes("Admin") && thread.participants.includes(selected.name));
+        updateMessages(individual.querySelector('[data-staff-scroll="private"]'),(selected.direct.map(thread => staffChatMessages(thread)).join("") || staffChatMessages(null))
+          + (teacherOnlyThreads.length ? `<details class="admin-teacher-thread-details"><summary>Teacher Threads · View Only</summary>${teacherOnlyThreads.map(thread => adminMessageThreadMarkup(thread,selected.name,true)).join("")}</details>` : ""));
+      }
+    };
+
     const renderAdminMessagesPage = () => {
       const container = document.getElementById("admin-teacher-message-sections");
       if (!container) return;
@@ -35155,58 +35438,7 @@
         history.announcementMarkup = historyMarkup;
       }
       refreshAnnouncementActivity();
-      const teamTalkThread = messageThreads.find((thread) => thread.id === pinnedMessageThreadId);
-      const teamTalkLatest = teamTalkThread ? latestThreadMessage(teamTalkThread) : null;
-      const teamTalkCard = `<details class="admin-teacher-message-section admin-team-talk-card" open>
-        <summary aria-label="Open Team Talk Group Conversation">
-          <span class="admin-message-teacher-avatar team-talk-heart" aria-hidden="true"><img src="./assets/team-talk-blush-logo.png" alt=""></span>
-          <span class="admin-teacher-message-identity"><strong>Team Talk</strong><small>All Teachers · Group Chat</small></span>
-          <span class="admin-message-latest-bubble">${escapeText(teamTalkLatest?.text || "No Team Talk messages yet.")}</span>
-          <time class="admin-message-latest-time">${escapeText(teamTalkLatest?.time || "No recent activity")}</time>
-        </summary>
-        <div class="admin-teacher-message-body">
-          <section class="message-composer open"><textarea id="admin-team-talk-draft" placeholder="Message the Entire Teaching Team"></textarea><button class="primary" type="button" id="admin-team-talk-send">Send to Team Talk</button></section>
-          ${teamTalkThread ? adminMessageThreadMarkup(teamTalkThread, "Admin") : '<p class="hint-text">Team Talk is loading.</p>'}
-        </div>
-      </details>`;
-      container.innerHTML = teamTalkCard + teachers.map((teacher, index) => {
-        const teacherName = teacherNameForMessages(teacher);
-        const adminThreads = orderedMessageThreads(messageThreads.filter((thread) => (
-          thread.type === "private" &&
-          thread.participants.includes("Admin") &&
-          thread.participants.includes(teacherName)
-        )));
-        const teacherOnlyThreads = orderedMessageThreads(messageThreads.filter((thread) => (
-          thread.type === "private" &&
-          !thread.participants.includes("Admin") &&
-          thread.participants.includes(teacherName)
-        )));
-        const unreadCount = adminThreads.filter((thread) => isThreadUnreadFor(thread, "Admin")).length;
-        return `
-          <details class="admin-teacher-message-section" data-message-teacher-id="${escapeText(teacher.id)}">
-            <summary>
-              <span class="admin-teacher-message-identity"><strong>${escapeText(teacher.displayName || fullName(teacher))}</strong><small>${adminThreads.length} admin thread${adminThreads.length === 1 ? "" : "s"} • ${teacherOnlyThreads.length} teacher thread${teacherOnlyThreads.length === 1 ? "" : "s"}</small></span>
-              <span class="status ${unreadCount ? "pending" : "ok"}">${unreadCount ? `${unreadCount} unread` : "Current"}</span>
-            </summary>
-            <div class="admin-teacher-message-body">
-              <section class="message-composer open">
-                <textarea data-admin-teacher-reply="${escapeText(teacher.id)}" placeholder="Respond to ${escapeText(teacher.displayName || fullName(teacher))}"></textarea>
-                <button class="primary" type="button" data-admin-send-teacher-reply="${escapeText(teacher.id)}">Send Response</button>
-              </section>
-              ${adminThreads.length ? adminThreads.map((thread) => adminMessageThreadMarkup(thread, "Admin")).join("") : `<p class="hint-text">No messages with admin yet. Use the response box to start one.</p>`}
-              <details class="admin-teacher-thread-details">
-                <summary>
-                  <span><strong>Teacher Threads</strong><small>${teacherOnlyThreads.length} view-only thread${teacherOnlyThreads.length === 1 ? "" : "s"}</small></span>
-                  <span class="status private">View only</span>
-                </summary>
-                <div class="admin-teacher-thread-body">
-                  ${teacherOnlyThreads.length ? teacherOnlyThreads.map((thread) => adminMessageThreadMarkup(thread, teacherName, true)).join("") : `<p class="readonly-thread-note">No teacher-to-teacher threads for this teacher yet.</p>`}
-                </div>
-              </details>
-            </div>
-          </details>
-        `;
-      }).join("");
+      renderStaffMessageWorkspace(container);
     };
 
     const renderPayDateOptions = () => {
@@ -36517,21 +36749,83 @@
       if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) event.currentTarget.close();
     });
 
-    document.getElementById("admin-teacher-message-sections")?.addEventListener("click", (event) => {
-      if (event.target.closest("#admin-team-talk-send")) {
-        const draft = document.getElementById("admin-team-talk-draft");
-        const text = draft?.value.trim() || "";
-        if (!text) { draft?.focus(); showToast("Write a Team Talk message first"); return; }
-        postSharedTeamTalkMessage(text).then((posted) => {
-          if (!posted) return;
-          if (draft) draft.value = "";
-          showToast("Team Talk posted for the teaching team");
-        });
+    const staffWorkspace = document.getElementById("admin-teacher-message-sections");
+    staffWorkspace.addEventListener("change", event => {
+      if (event.target.id !== "staff-team-device-file") return;
+      const file = event.target.files[0];
+      if (file) setStaffTeamAttachment(file);
+      event.target.value = "";
+    });
+    staffWorkspace.addEventListener("input", event => {
+      if (event.target.id === "staff-teacher-search") renderAdminMessagesPage();
+      if (!event.target.matches("[data-staff-draft]")) return;
+      const field = event.target;
+      staffDrafts.set(field.dataset.staffDraft, field.value);
+      field.style.height = "auto";
+      field.style.height = `${Math.min(field.scrollHeight, 104)}px`;
+      field.nextElementSibling.disabled = staffSends.has(field.dataset.staffDraft) || (!field.value.trim() && !(field.dataset.staffDraft === "team" && staffTeamAttachment));
+    });
+    staffWorkspace.addEventListener("keydown", event => {
+      if (event.key !== "Enter" || event.shiftKey || event.isComposing || !event.target.matches("[data-staff-draft]")) return;
+      event.preventDefault();
+      event.target.nextElementSibling.click();
+    });
+    staffWorkspace.addEventListener("click", async event => {
+      if (event.target.closest("[data-staff-media-open]")) { openStaffAttachmentPicker(); return; }
+      if (event.target.closest("[data-staff-media-remove]")) { setStaffTeamAttachment(null); return; }
+      if (event.target.closest("[data-staff-media-device]")) {
+        event.target.closest("dialog").close();
+        document.getElementById("staff-team-device-file").click();
         return;
       }
-      const button = event.target.closest("[data-admin-send-teacher-reply]");
-      if (!button) return;
-      sendAdminTeacherReply(button.dataset.adminSendTeacherReply);
+      if (event.target.closest("[data-staff-media-library]")) {
+        await loadStaffLibraryMedia(event.target.closest("dialog"));
+        return;
+      }
+      const person = event.target.closest("[data-message-teacher-id]");
+      if (person) {
+        selectedStaffTeacherId = person.dataset.messageTeacherId;
+        clearThreadUnreadFor("direct-" + selectedStaffTeacherId,"Admin");
+        renderAdminMessagesPage();
+        staffWorkspace.querySelector('[data-message-teacher-id][aria-pressed="true"]')?.focus();
+        void markSharedConversationRead(messageThreads.find(thread => thread.otherProfileId === selectedStaffTeacherId));
+        return;
+      }
+      const send = event.target.closest("#admin-team-talk-send, [data-admin-send-teacher-reply]");
+      if (!send) return;
+      const field = send.previousElementSibling;
+      const key = field.dataset.staffDraft;
+      const text = field.value.trim();
+      const attachment = key === "team" ? staffTeamAttachment : null;
+      if ((!text && !attachment) || staffSends.has(key)) return;
+      staffSends.add(key);
+      send.disabled = true;
+      send.setAttribute("aria-busy","true");
+      try {
+        let posted;
+        if (document.body.dataset.tourMode === "true") {
+          if (key === "team") {
+            const thread = sharedTeamTalkThread();
+            const attachmentUrl = attachment ? URL.createObjectURL(attachment) : "";
+            if (attachmentUrl) staffTeamPreviewUrls.push(attachmentUrl);
+            thread.messages.push({from:"Admin",role:"Admin",text,time:"Just now",createdAt:new Date().toISOString(),
+              attachmentUrl, attachmentName:attachment?.name, attachmentType:attachment?.type});
+            thread.activityOrder = Date.now();
+          } else sendAdminTeacherReply(key);
+          posted = true;
+        } else posted = key === "team" ? await postSharedTeamTalkMessage(text || "Shared an attachment",attachment) : await postSharedDirectMessage(key,text);
+        if (posted && attachment && staffTeamAttachment === attachment) setStaffTeamAttachment(null);
+        if (posted && (staffDrafts.get(key) || "").trim() === text) {
+          staffDrafts.delete(key);
+          const input = staffWorkspace.querySelector(`[data-staff-draft="${CSS.escape(key)}"]`);
+          if (input) { input.value = ""; input.style.height = ""; }
+        }
+      } finally {
+        staffSends.delete(key);
+        const current = staffWorkspace.querySelector(`[data-staff-draft="${CSS.escape(key)}"]`)?.nextElementSibling;
+        if (current) { current.disabled = !(staffDrafts.get(key) || "").trim() && !(key === "team" && staffTeamAttachment); current.removeAttribute("aria-busy"); }
+        renderAdminMessagesPage();
+      }
     });
 
     document.getElementById("admin-curriculum-progress-day-filter")?.addEventListener("click", (event) => {
@@ -36560,6 +36854,11 @@
       }
       if (event.target.closest("[data-open-announcement-history]")) {
         openAnnouncementHistory();
+        return;
+      }
+      const hearts = event.target.closest("[data-staff-heart-thread]");
+      if (hearts) {
+        staffHeartDetails(hearts.dataset.staffHeartThread, Number(hearts.dataset.staffHeartIndex));
         return;
       }
       const receiptButton = event.target.closest("[data-read-receipt-thread]");

@@ -1,5 +1,9 @@
-const CACHE_NAME = "my-dance-techniques-v362-announcements-gold-focus";
+const CACHE_NAME = "my-dance-techniques-v363-teaching-team-messages";
 const CORE_ASSETS = [
+  "./staff-messages.css",
+  "./resource-library.css",
+  "./resource-library.mjs",
+  "./communication-personalization.mjs",
   "./assets/search-input.css",
   "./assets/action-icons.css",
   "./assets/action-view.png",

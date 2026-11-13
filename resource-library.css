@@ -1,0 +1,23 @@
+body[data-admin-page="home"][data-admin-section="resource-library"] #admin-home-resource-library { display: grid; gap: 18px; }
+.resource-library-header, .resource-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.resource-library-header h2,.resource-library-header p { margin: 0; }
+.resource-library-header p { margin-top: 5px; }
+#resource-add,.resource-save { background: var(--brick); color: white; }
+.resource-filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; padding: 20px; border: 1px solid var(--border); border-radius: 16px; background: var(--surface-soft); }
+.resource-filters label,.resource-dialog label { display: grid; gap: 5px; min-width: 0; }
+#resource-gallery { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,210px),1fr)); gap: 14px; }
+#resource-gallery .resource-card { display: grid; gap: 7px; text-align: left; padding: 12px; min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow-wrap: anywhere; }
+.resource-card img,.resource-type { width: 100%; aspect-ratio: 3 / 2; object-fit: contain; border-radius: 10px; background: var(--surface-soft); }
+.resource-type { display: grid; place-items: center; color: var(--brick); font-weight: 800; }
+.resource-dialog { width: min(720px,calc(100% - 24px)); max-height: 90dvh; overflow: auto; border: 1px solid var(--border); border-radius: 20px; padding: 18px; background: var(--surface); color: var(--fg); }
+.resource-dialog::backdrop { background: rgb(0 0 0 / 34%); }
+.resource-dialog h3 { margin: 0; }
+.resource-detail-body { display: grid; gap: 12px; overflow-wrap: anywhere; }
+.resource-detail-body textarea { width: 100%; min-height: 90px; }
+.resource-file-preview :is(img, video, iframe, audio) { display: block; width: 100%; max-height: 52dvh; object-fit: contain; }
+.resource-file-preview iframe { height: 46dvh; border: 0; }
+#resource-drop { display: grid; gap: 6px; justify-items: center; padding: 18px; border: 1px dashed var(--brick); border-radius: 12px; background: var(--surface-soft); }
+#resource-captions fieldset { display: grid; gap: 8px; min-width: 0; margin-bottom: 8px; border: 1px solid var(--border); border-radius: 12px; }
+#resource-status:empty,#resource-edit-status:empty { display: none; }
+@media(max-width:650px) { .resource-filters { grid-template-columns: 1fr; } }
+.resource-caption-preview { margin: 0; padding: 14px; border-radius: 12px; background: var(--surface-soft); white-space: pre-wrap; }
