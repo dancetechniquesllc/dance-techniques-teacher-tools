@@ -1,0 +1,75 @@
+.resource-import-dialog { width: min(950px, calc(100% - 28px)); max-height: 90dvh; padding: clamp(16px, 4vw, 30px); border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--fg); }
+.resource-import-dialog::backdrop { background: rgb(0 0 0 / .34); }
+.resource-import-dialog header { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.resource-import-dialog header h2 { margin: 0; }
+.resource-import-dialog [data-status] { white-space: pre-wrap; color: var(--brick); }
+.resource-import-dialog [data-batches], .resource-import-dialog nav { display: flex; gap: 8px; flex-wrap: wrap; }
+.resource-import-dialog [aria-pressed="true"] { background: var(--blush); }
+.resource-import-dialog .import-drop { display: grid; gap: 10px; justify-items: center; margin: 16px 0; padding: 22px; border: 2px dashed var(--border); border-radius: 14px; background: var(--surface-soft); text-align: center; }
+.resource-import-dialog input { max-width: 100%; }
+.resource-import-dialog nav { margin-top: 10px; max-height: 160px; overflow: auto; }
+.resource-import-dialog nav button { max-width: 100%; overflow-wrap: anywhere; }
+.resource-import-dialog [data-review] :is(img, video, iframe) { display: block; width: 100%; max-height: 48dvh; object-fit: contain; border: 0; }
+.resource-import-dialog iframe { height: 48dvh; }
+.resource-import-dialog nav button { width: 57px; height: 57px; padding: 3px; }
+.resource-import-dialog nav img, .resource-import-dialog [data-review] section button img { width: 100%; height: 100%; object-fit: contain; }
+.resource-import-dialog [data-review] { display: grid; grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap: 18px; margin-top: 14px; }
+.resource-import-dialog [data-review] form, .resource-import-dialog [data-review] form label { display: grid; gap: 6px; }
+.resource-import-dialog [data-review] form { gap: 10px; }
+.resource-import-dialog [data-review] footer { display: flex; gap: 6px; flex-wrap: wrap; }
+.resource-import-dialog [data-review] section button img { width: 42px; height: 42px; }
+.resource-import-dialog .import-marked { filter: grayscale(1); opacity: .55; }
+@media (max-width: 700px) { .resource-import-dialog [data-review] { grid-template-columns: minmax(0,1fr); } }
+.resource-import-dialog nav { gap: 12px; padding: 8px; }
+.resource-import-dialog .import-thumbnail { position: relative; }
+.resource-import-dialog .import-thumbnail > button:first-child {
+  width: 64px; height: 64px; display: grid; place-items: center; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 12px; padding: 4px;
+}
+.resource-import-dialog .import-thumbnail > button[aria-pressed="true"] {
+  border: 2px solid var(--brick); box-shadow: 0 0 0 3px var(--blush);
+}
+.resource-import-dialog .import-thumbnail .import-thumbnail-mark {
+  position: absolute; top: -4px; right: -4px; width: 24px; height: 24px; min-height: 0; padding: 0;
+  border: 1px solid var(--surface); border-radius: 50%; background: var(--brick); color: white; font-size: 16px; line-height: 1;
+}
+.resource-import-dialog .import-ai-panel { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.resource-import-dialog .import-ai-panel p { flex-basis: 100%; margin: 0; }
+.resource-import-dialog nav { flex-wrap: nowrap; overflow-x: auto; }
+.resource-import-dialog .import-thumbnail { flex: 0 0 90px; }
+.resource-import-dialog .import-thumbnail > button:first-child { width: 90px; height: 76px; }
+.resource-import-dialog .import-thumbnail small { display: block; margin-top: 4px; text-align: center; line-height: 1.15; font-size: 10px; border-radius: 6px; padding: 3px; }
+.import-thumbnail [data-state="approved"] { background: var(--sage); }
+.import-thumbnail [data-state="review"] { background: var(--gold-soft, #f8e5b8); }
+.import-thumbnail [data-state="attention"] { background: var(--brick); color: white; }
+.import-thumbnail [data-state="marked"] { background: #e5e5e5; color: #353535; }
+.import-tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
+.import-tag-list span { display: inline-flex; align-items: center; gap: 5px; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 999px; padding: 2px 7px; }
+.import-tag-list button { border: 0; background: none; color: var(--brick); padding: 2px 4px; }
+.resource-import-dialog .import-review-actions { position: sticky; bottom: 0; padding: 7px; border-radius: 10px; background: var(--surface); }
+.resource-import-dialog.tulle-review { width: min(520px, calc(100% - 28px)); }
+.tulle-review > img { width: 54px; height: 54px; object-fit: contain; float: right; }
+.tulle-review label { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; padding: 8px; border-top: 1px solid var(--border); }
+.tulle-review label span { grid-column: 2; }
+.tulle-review footer { display: flex; justify-content: end; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.resource-import-dialog [data-review-actions] { position: sticky; bottom: 0; z-index: 1; }
+.resource-import-dialog [data-review-actions] footer { display: flex; flex-wrap: wrap; gap: 6px; border: 1px solid var(--border); }
+.resource-import-dialog [data-review] form [hidden] { display: none; }
+.import-caption { display: grid; position: relative; }
+.import-caption textarea { min-height: 110px; }
+.import-caption-tools { position: relative; display: flex; flex-wrap: wrap; gap: 5px; background: var(--surface-soft); border-radius: 8px; padding: 4px; max-width: 100%; }
+.import-caption-tools button { padding: 4px 8px; min-height: 30px; font-size: 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--brick); background: var(--surface); }
+.import-caption-menu { position: absolute; z-index: 3; top: 100%; left: 0; min-width: 200px; max-height: 200px; overflow: auto; padding: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); }
+.import-caption-menu button { display: block; width: 100%; text-align: left; margin-bottom: 2px; }
+.resource-import-dialog [data-review] form .import-visibility { display: flex; position: relative; align-items: center; gap: 8px; padding-block: 5px; }
+.import-visibility input { position: absolute; opacity: 0; right: 0; width: 64px; height: 30px; }
+.import-visibility-switch { margin-left: auto; border-radius: 999px; background: var(--surface-soft); border: 1px solid var(--border); padding: 4px 7px; min-width: 60px; display: inline-flex; align-items: center; justify-content: space-between; gap: 5px; font-size: 11px; transition: background .18s ease; }
+.import-visibility-switch::after { content: ""; width: 13px; height: 13px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); }
+.import-visibility input:checked ~ .import-visibility-switch { background: var(--sage); flex-direction: row-reverse; }
+.import-visibility input:focus-visible ~ .import-visibility-switch { outline: 2px solid var(--gold); outline-offset: 2px; }
+.import-tt-badge { padding: 2px 6px; border-radius: 999px; background: var(--sage); font-size: 11px; font-weight: 700; }
+.resource-import-dialog [data-review-actions] footer button { border: 1px solid var(--border); border-radius: 9px; padding: 6px 11px; font-size: 13px; background: var(--surface); color: var(--brick); }
+.resource-import-dialog [data-review-actions] footer .import-previous { margin-right: auto; border-color: var(--brick); }
+.resource-import-dialog [data-review-actions] footer .import-save-draft { background: color-mix(in srgb,var(--blush) 20%,var(--surface)); }
+.resource-import-dialog [data-review-actions] footer .import-approve { background: var(--brick); color: white; }
+.resource-import-dialog [data-review-actions] footer .import-approve:hover { filter: brightness(1.13); }

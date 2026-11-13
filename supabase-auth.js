@@ -72,6 +72,11 @@
 
   if (isLocalTour) {
     sessionName.textContent = "Sample App Tour";
+    if (window.supabase?.createClient) {
+      window.dtResourceAnalysisClient = window.supabase.createClient(projectUrl, publishableKey, {
+        auth: { autoRefreshToken: false, detectSessionInUrl: false }
+      });
+    }
     document.body.dataset.userRole = "admin";
     document.body.dataset.tourMode = "true";
     setGateState("ready");

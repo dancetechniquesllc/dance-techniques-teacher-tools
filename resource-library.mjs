@@ -2,7 +2,7 @@ import { fields, captionFields, personalizeCaption } from "./communication-perso
 
 const panel = document.querySelector('#admin-home-resource-library');
 const bucket = 'resource-library';
-const allowed = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', svg:'image/svg+xml', pdf:'application/pdf', mp4:'video/mp4', mp3:'audio/mpeg', txt:'text/plain', doc:'application/msword', docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xls:'application/vnd.ms-excel', xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
+export const allowed = { webp:'image/webp', png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', svg:'image/svg+xml', pdf:'application/pdf', mp4:'video/mp4', mp3:'audio/mpeg', txt:'text/plain', doc:'application/msword', docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xls:'application/vnd.ms-excel', xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
 const $ = (selector) => panel.querySelector(selector);
 const editor = $('#resource-editor');
 const detail = $('#resource-detail');
@@ -61,7 +61,7 @@ function render() {
       element('strong', resource.title), element('small', category(resource.category_id)),
       element('small', [...resource.tags, ...(resource.teacher_visible ? ['Teacher Tools'] : [])].join(' · ')));
     gallery.append(card);
-    if (/^image\/(png|jpeg)$/.test(resource.files[0]?.type || '')) {
+    if (/^image\/(png|jpeg|webp)$/.test(resource.files[0]?.type || '')) {
       fileUrl(resource.files[0]).then(url => {
         if (!card.isConnected) return;
         const image = element('img');
@@ -74,11 +74,11 @@ function render() {
   }
 }
 
-const sampleCategories = ['Marketing & Promotions','Parent Communications','Dance Education','Recital Resources','Holidays & Seasons','Branding & Characters','Music & Media','Documents & Forms','School Partnerships','Franchise Operations'];
-async function load() {
+export const sampleCategories = ['Marketing & Promotions','Parent Communications','Dance Education','Recital Resources','Holidays & Seasons','Branding & Characters','Music & Media','Documents & Forms','School Partnerships','Franchise Operations','Teaching Team Resources'].map((name,index)=>({id:name === 'Teaching Team Resources' ? -1 : index+1,name}));
+export async function load() {
   try {
     if (tour()) {
-      categories = sampleCategories.map((name, index) => ({id:index+1,name}));
+      categories = sampleCategories;
       if (!resources.length) resources = [{id:'sample',organization_id:'sample',title:'Dance Techniques Logo',description:'Sample branding resource for the library preview.',category_id:6,tags:['Branding'],collection:'',files:[{name:'Dance Techniques Logo.png',type:'image/png',sample:'assets/dance-techniques-logo-only.png'}],captions:[{name:'Teacher Reminder',text:'Please use the approved Dance Techniques logo on materials for {school_name}.'}],teacher_visible:true}];
     } else {
       if (!client() || !['director','admin'].includes(window.dtCurrentProfile?.role)) return;
@@ -136,7 +136,7 @@ function openDetail(resource) {
     const current = ++viewRequest;
     preview.textContent = 'Opening preview…';
     try {
-      if (!['image/png','image/jpeg','video/mp4','audio/mpeg','application/pdf'].includes(file.type)) {
+      if (!['image/png','image/jpeg','image/webp','video/mp4','audio/mpeg','application/pdf'].includes(file.type)) {
         preview.textContent = 'Download this file to view it.';
         return;
       }
@@ -361,3 +361,11 @@ new MutationObserver(()=>{
   if (document.body.dataset.adminSection === 'resource-library') void load();
 }).observe(document.body,{attributes:true,attributeFilter:['data-admin-section']});
 if (document.body.dataset.adminSection === 'resource-library') void load();
+
+export function addPreviewResource(resource, files) {
+  for (const [path, file] of files) {
+    if (!demo.has(path)) demo.set(path,URL.createObjectURL(file));
+  }
+  resources = [resource,...resources.filter(item=>item.id!==resource.id)];
+  render();
+}

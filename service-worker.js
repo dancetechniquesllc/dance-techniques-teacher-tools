@@ -1,8 +1,11 @@
-const CACHE_NAME = "my-dance-techniques-v364-staff-message-refinements";
+const CACHE_NAME = "my-dance-techniques-v365-bulk-import";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",
   "./resource-library.mjs",
+  "./resource-bulk-import.css",
+  "./resource-bulk-import.mjs",
+  "./vendor/fflate-0.8.2.mjs",
   "./communication-personalization.mjs",
   "./assets/search-input.css",
   "./assets/action-icons.css",
@@ -52,7 +55,7 @@ const CORE_ASSETS = [
   "./dt-touch/writing-fields.css",
   "./dt-touch/behavior-interview.mjs",
   "./manifest.webmanifest",
-  "./supabase-auth.js?v=20261022-session-lifecycle",
+  "./supabase-auth.js?v=20261113-resource-analysis",
   "./data/partner-schools.js",
   "./dt-touch/dt-touch.js?v=20260722c",
   "./config/dt-touch-voice.json",
