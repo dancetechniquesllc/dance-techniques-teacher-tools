@@ -30356,7 +30356,14 @@
     };
     const teacherTitleNames = ["Lexi", "Tiffany", "Erika", "Makayla"];
     const personDisplayName = (name) => teacherTitleNames.includes(name) ? `Ms. ${name}` : name;
-    const messageSenderDisplayName = (message) => message.from === "Admin" ? "Admin" : personDisplayName(message.from);
+    const messageSenderDisplayName = (message) => {
+      const name = message.from;
+      if (name === "Admin") return name;
+      if (!/^Ms\.\s/i.test(name) && (
+        String(message.role).toLowerCase() === "teacher" || ["Taylor", "Judy"].includes(name)
+      )) return `Ms. ${name}`;
+      return personDisplayName(name);
+    };
     const messageMetaLine = (message, thread) => (
       thread.type === "announcement" ? message.time : `${message.role} • ${message.time}`
     );
@@ -35278,9 +35285,12 @@
         const mine = message.authorId ? message.authorId === window.dtCurrentProfile?.id : admin;
         return `${separator}<article class="staff-chat-line${mine ? " is-mine" : ""}" style="--staff-color:${escapeText(color)}">
           ${repeat ? '<span aria-hidden="true"></span>' : staffPortrait(teacher,name)}
-          <div class="staff-chat-bubble">${repeat ? "" : `<strong>${escapeText(name)}</strong>`}
-            <p class="message-rich-text">${messageTextMarkup(message.text || "")}</p>${messageAttachmentMarkup(message)}
-            <div class="staff-chat-meta"><small>${escapeText(message.time || "")}</small>${readOnly ? "" : staffHeartControls(thread,message,index)}
+          <div class="staff-chat-bubble">
+            <div class="staff-chat-message-header"><strong>${escapeText(name)}</strong>
+              ${readOnly ? "" : `<div class="staff-chat-hearts">${staffHeartControls(thread,message,index)}</div>`}
+            </div>
+            ${message.text ? `<p class="message-rich-text">${messageTextMarkup(message.text)}</p>` : ""}${messageAttachmentMarkup(message)}
+            <div class="staff-chat-meta"><small>${escapeText(message.createdAt ? new Date(message.createdAt).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}) : (message.time || "").replace(/^(Today|Yesterday)\s+(?:[·•-]\s+)?/i, ""))}</small>
             ${canViewReceipts && names.length ? `<button type="button" class="message-read-receipt" data-read-receipt-thread="${escapeText(thread.id)}" data-read-receipt-message="${index}">Seen by ${count} of ${names.length}</button>` : ""}</div>
           </div></article>`;
       }).join("") || '<p class="hint-text">No messages yet.</p>';
@@ -35394,7 +35404,7 @@
       container.querySelector(".staff-members").innerHTML = `<span class="staff-member-faces">${members.slice(0,4).map(item => staffPortrait(item,teacherNameForMessages(item))).join("")}</span><small>${members.length} Members${unreadGroup ? ` · ${unreadGroup} Unread` : ""}</small>`;
       const search = container.querySelector("#staff-teacher-search").value.trim().toLowerCase();
       const listElement = container.querySelector(".staff-teacher-list");
-      const listMarkup = list.filter(item => `${item.name} ${fullName(item.teacher)}`.toLowerCase().includes(search)).map(({teacher,name,latest,unread}) => `<button type="button" data-message-teacher-id="${escapeText(teacher.id)}" aria-pressed="${teacher.id === selectedStaffTeacherId}" style="--staff-color:${escapeText(teacherProfileColor(teacher))}">${staffPortrait(teacher,name)}<span><strong>${escapeText(teacher.displayName || name)}</strong><small>${escapeText(latest?.text || "No Messages Yet")}</small><small>${escapeText(latest?.time || "")}${unread ? ` · ${unread} Unread` : ""}</small></span></button>`).join("") || "<p>No teachers match.</p>";
+      const listMarkup = list.filter(item => `${item.name} ${fullName(item.teacher)}`.toLowerCase().includes(search)).map(({teacher,name,latest,unread}) => `<button type="button" data-message-teacher-id="${escapeText(teacher.id)}" aria-pressed="${teacher.id === selectedStaffTeacherId}" style="--staff-color:${escapeText(teacherProfileColor(teacher))}">${staffPortrait(teacher,name)}<span class="staff-teacher-preview"><strong>${escapeText(teacher.displayName || name)}</strong><span class="staff-teacher-snippet">${escapeText(latest?.text || "No Messages Yet")}</span><span class="staff-teacher-preview-meta"><small>${escapeText(latest?.time || "")}</small>${unread ? `<span class="staff-teacher-unread" aria-label="${unread} Unread Messages">${unread}</span>` : ""}</span></span></button>`).join("") || "<p>No teachers match.</p>";
       if (listElement.staffMarkup !== listMarkup) { listElement.innerHTML = listMarkup; listElement.staffMarkup = listMarkup; }
       const individual = container.querySelector(".staff-private-chat");
       if (individual.dataset.teacher !== selectedStaffTeacherId) {
