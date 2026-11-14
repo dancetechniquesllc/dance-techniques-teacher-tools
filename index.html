@@ -58834,6 +58834,8 @@
         ["Birthday Boy", "assets/photo-frames/birthday-boy.png"],
         ["Class Star", "assets/photo-frames/class-star.png"],
         ["First Day of Dance", "assets/photo-frames/first-day-of-dance.png"],
+        ["Last Day of Dance", "assets/photo-frames/last-day-of-dance.webp", "5", "2026"],
+        ["Last Day of Dance", "assets/photo-frames/last-day-of-dance-2027.png", "5", "2027"],
         ["Ballet Skill of the Week", "assets/photo-frames/ballet-skill-of-the-week.png"],
         ["Tap Skill of the Week", "assets/photo-frames/tap-skill-of-the-week.png"],
         ["Butterflies", "assets/photo-frames/butterflies.png"],
@@ -58876,7 +58878,7 @@
               <img class="photo-frame-result" alt="Finished framed photo" hidden>
             </div>
             <div class="photo-frame-picker">
-              <select class="photo-frame-select" aria-label="Choose a Photo Frame">${frames.map(([label], index) => `<option value="${index}">${label}</option>`).join("")}</select>
+              <select class="photo-frame-select" aria-label="Choose a Photo Frame"></select>
             </div>
             <p class="photo-frame-note photo-frame-status" role="status"></p>
             <div class="photo-frame-actions">
@@ -58922,6 +58924,23 @@
       const retakeButton = modal.querySelector(".photo-frame-retake");
       const anotherButton = modal.querySelector(".photo-frame-another");
       const saveButton = modal.querySelector(".photo-frame-save");
+
+      const frameSelect = modal.querySelector(".photo-frame-select");
+      const studioMonth = new Intl.DateTimeFormat("en-US", { month: "numeric", year: "numeric", timeZone: "America/Chicago" });
+      const updateFrameOptions = () => {
+        const parts = studioMonth.formatToParts(new Date());
+        const month = parts.find(part => part.type === "month").value;
+        const year = parts.find(part => part.type === "year").value;
+        const options = frames.flatMap(([label, , availableMonth, availableYear], index) =>
+          !availableMonth || (availableMonth === month && availableYear === year) ? [new Option(label, index)] : []
+        );
+        frameSelect.replaceChildren(...options);
+        frameSelect.value = String(frames.indexOf(selectedFrame));
+        if (frameSelect.selectedIndex < 0) {
+          frameSelect.selectedIndex = 0;
+          frameSelect.dispatchEvent(new Event("change"));
+        }
+      };
 
       const selectedFrameIsLandscape = () => ["/group-photo.png", "/group-thankful.png"].some((name) => selectedFrame[1].endsWith(name));
       const updateFrameLayout = () => {
@@ -59164,12 +59183,13 @@
 
       document.addEventListener("click", (event) => {
         if (event.target.closest("[data-teacher-photo-frames]")) {
+          updateFrameOptions();
           updateFrameLayout();
           modal.hidden = false;
           document.body.style.overflow = "hidden";
         }
       });
-      modal.querySelector(".photo-frame-select").addEventListener("change", (event) => {
+      frameSelect.addEventListener("change", (event) => {
         selectedFrame = frames[Number(event.target.value)] || frames[0];
         updateFrameLayout();
         overlay.src = selectedFrame[1];
