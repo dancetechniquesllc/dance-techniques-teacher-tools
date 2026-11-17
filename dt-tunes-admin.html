@@ -217,7 +217,7 @@
 
     <section class="panel" id="panel-catalog" data-panel="catalog" hidden>
       <div class="card">
-        <div class="card-head"><div><h2>DT Song Catalog</h2><p>Your complete originals library, divided into easy sections for building future playlists.</p></div><button class="primary" type="button" data-jump-add>Add a Song</button></div>
+        <div class="card-head"><div><h2>DT Song Catalog</h2><p>Your complete originals library, divided into easy sections for building future playlists.</p></div><div><button type="button" id="add-section-button">Add a Section</button> <button class="primary" type="button" data-jump-add>Add a Song</button></div></div>
         <div class="catalog-toolbar">
           <label>Find a Song<input id="catalog-search" type="search" placeholder="Song Title"></label>
           <strong id="catalog-count"></strong>
@@ -241,6 +241,7 @@
               <option>Transitions</option>
               <option>Props</option>
               <option value="Across The Floor">Across the Floor</option>
+              <option>Meet The Gang</option>
               <option>Holidays</option>
               <option>Celebrations</option>
               <option>Other DT Originals</option>
@@ -269,7 +270,8 @@
 
   <script>
     const catalogSectionLabel = (section) => section === "Across The Floor" ? "Across the Floor" : section;
-    const CATALOG_SECTIONS = ["Ballet", "Tap", "Tots", "Transitions", "Props", "Across The Floor", "Holidays", "Celebrations", "Other DT Originals"];
+    const DEFAULT_CATALOG_SECTIONS = ["Ballet", "Tap", "Tots", "Transitions", "Props", "Across The Floor", "Meet The Gang", "Holidays", "Celebrations", "Other DT Originals"];
+    let CATALOG_SECTIONS = DEFAULT_CATALOG_SECTIONS.slice();
     const state = { client: null, playlists: [], tracks: [], links: [], selectedPlaylistId: "", catalogSection: "All", catalogSearch: "" };
     let listOrderDraft = null;
     let listOrderSaving = false;
@@ -369,7 +371,44 @@
       }));
     }
 
+    async function loadCatalogSections() {
+      try {
+        const { data, error } = await state.client.from("music_catalog_sections").select("name,sort_order").order("sort_order").order("name");
+        if (error || !data || !data.length) return;
+        CATALOG_SECTIONS = data.map((row) => row.name);
+      } catch (error) { /* table not available yet: keep the built-in list */ }
+    }
+
+    function renderSectionSelect() {
+      const select = $("#song-section");
+      if (!select) return;
+      const current = select.value;
+      select.innerHTML = CATALOG_SECTIONS.map((name) => `<option value="${escapeText(name)}">${escapeText(catalogSectionLabel(name))}</option>`).join("");
+      const addOption = new Option("+ Add Category", "");
+      addOption.dataset.addCategory = "";
+      select.add(addOption);
+      if (CATALOG_SECTIONS.includes(current)) select.value = current;
+      select.dataset.selectedCategory = select.value;
+    }
+
+    async function addCatalogSection() {
+      const raw = prompt("Name for the new section (for example: Meet The Gang)");
+      if (raw === null) return;
+      const name = raw.replace(/\s+/g, " ").trim();
+      if (!name) return;
+      if (name.length > 60) { alert("Please keep the section name under 60 characters."); return; }
+      if (CATALOG_SECTIONS.some((existing) => existing.toLowerCase() === name.toLowerCase())) { alert("That section already exists."); return; }
+      const { error } = await state.client.from("music_catalog_sections").insert({ name, sort_order: 95 });
+      if (error) { alert(error.code === "42P01" || error.code === "PGRST205" ? "Adding sections isn't switched on yet. It goes live with the next release." : `Could not add the section: ${error.message}`); return; }
+      CATALOG_SECTIONS.push(name);
+      await loadCatalogSections();
+      state.catalogSection = name;
+      renderAll();
+      return name;
+    }
+
     async function loadData(preferredPlaylistId = state.selectedPlaylistId) {
+      await loadCatalogSections();
       const [playlistResult, trackResult, linkResult] = await Promise.all([
         state.client.from("music_playlists").select("id,name,category,cover_path,cover_storage_path,sort_order,active").order("sort_order").order("id"),
         state.client.from("music_tracks").select("id,title,artist,duration_seconds,filename,storage_path,cover_path,cover_storage_path,catalog_section,active").eq("active", true).order("title"),
@@ -387,6 +426,7 @@
     }
 
     function renderAll() {
+      renderSectionSelect();
       renderPlaylists();
       renderCatalog();
       renderPlaylistChecks();
@@ -505,7 +545,7 @@
       $("#catalog-groups").innerHTML = sections.map((section) => {
         const songs = visible.filter((track) => (track.catalog_section || "Other DT Originals") === section);
         if (!songs.length) return "";
-        return `<section class="catalog-group"><div class="catalog-group-title"><h3>${escapeText(catalogSectionLabel(section))}</h3><span>${songs.length} song${songs.length === 1 ? "" : "s"}</span></div><div class="catalog-song-grid">${songs.map((track) => `<article class="catalog-song">${coverMarkup(track, track.title, true)}<div><strong>${escapeText(track.title)}</strong><small>${durationLabel(track.duration_seconds)} · Used in ${state.links.filter((link) => link.track_id === track.id && state.playlists.some((playlist) => playlist.id === link.playlist_id && playlist.active)).length} teacher playlist(s)</small><label class="cover-replace-label">Replace Cover<input type="file" accept="image/png,image/jpeg,image/webp" data-attach-cover="${escapeText(track.id)}" hidden></label><label class="catalog-move-label">Move To<select class="catalog-move-select" data-move-section="${escapeText(track.id)}" aria-label="Move ${escapeText(track.title)} to a different section">${CATALOG_SECTIONS.map((option) => `<option value="${escapeText(option)}" ${option === section ? "selected" : ""}>${escapeText(option)}</option>`).join("")}</select></label></div></article>`).join("")}</div></section>`;
+        return `<section class="catalog-group"><div class="catalog-group-title"><h3>${escapeText(catalogSectionLabel(section))}</h3><span>${songs.length} song${songs.length === 1 ? "" : "s"}</span></div><div class="catalog-song-grid">${songs.map((track) => `<article class="catalog-song">${coverMarkup(track, track.title, true)}<div><strong>${escapeText(track.title)}</strong><small>${durationLabel(track.duration_seconds)} · Used in ${state.links.filter((link) => link.track_id === track.id && state.playlists.some((playlist) => playlist.id === link.playlist_id && playlist.active)).length} teacher playlist(s)</small><label class="cover-replace-label">Replace Cover<input type="file" accept="image/png,image/jpeg,image/webp" data-attach-cover="${escapeText(track.id)}" hidden></label><label class="catalog-move-label">Move To<select class="catalog-move-select" data-move-section="${escapeText(track.id)}" aria-label="Move ${escapeText(track.title)} to a different section">${CATALOG_SECTIONS.map((option) => `<option value="${escapeText(option)}" ${option === section ? "selected" : ""}>${escapeText(option)}</option>`).join("")}</select></label><button class="danger small-button" type="button" data-delete-song="${escapeText(track.id)}" aria-label="Delete ${escapeText(track.title)}">Delete Song</button></div></article>`).join("")}</div></section>`;
       }).join("") || `<p class="empty">No songs match that search.</p>`;
     }
 
@@ -719,6 +759,7 @@
       const tab = event.target.closest("[data-tab]");
       if (tab) showTab(tab.dataset.tab);
       if (event.target.closest("[data-jump-add]")) showTab("add-song");
+      if (event.target.closest("#add-section-button")) addCatalogSection();
       const playlistButton = event.target.closest("[data-playlist-id]");
       if (playlistButton && !orderDraft && !listOrderDraft) { state.selectedPlaylistId = playlistButton.dataset.playlistId; renderPlaylists(); }
       const sectionButton = event.target.closest("[data-catalog-section]");
@@ -737,6 +778,26 @@
         return;
       }
 
+      const deleteSongButton = event.target.closest("[data-delete-song]");
+      if (deleteSongButton) {
+        const track = state.tracks.find((item) => item.id === deleteSongButton.dataset.deleteSong);
+        if (!track || !confirm(`Delete “${track.title}” from the DT Song Catalog? It will also be removed from every playlist that uses it.`)) return;
+        deleteSongButton.disabled = true;
+        try {
+          // The database removes playlist links together with the catalog entry.
+          const { data, error } = await state.client.from("music_tracks").delete().eq("id", track.id).select("id").maybeSingle();
+          if (error || !data) throw error || new Error("Song unavailable");
+          state.tracks = state.tracks.filter((item) => item.id !== track.id);
+          state.links = state.links.filter((link) => link.track_id !== track.id);
+          renderAll();
+        } catch {
+          alert("That song could not be deleted. Please refresh and try again.");
+        } finally {
+          deleteSongButton.disabled = false;
+        }
+        return;
+      }
+
       const removeButton = event.target.closest("[data-remove-track]");
       if (removeButton && selectedPlaylist() && !listOrderDraft) {
         const track = state.tracks.find((item) => item.id === removeButton.dataset.removeTrack);
@@ -747,6 +808,29 @@
         const remaining = tracksForPlaylist(state.selectedPlaylistId).map((track) => track.id).filter((id) => id !== removeButton.dataset.removeTrack);
         await renumberPlaylist(state.selectedPlaylistId, remaining);
         await loadData(state.selectedPlaylistId);
+      }
+    });
+
+    $("#song-section").addEventListener("change", async (event) => {
+      const select = event.currentTarget;
+      if (!select.selectedOptions[0]?.hasAttribute("data-add-category")) {
+        select.dataset.selectedCategory = select.value;
+        return;
+      }
+
+      select.value = select.dataset.selectedCategory;
+      select.disabled = true;
+      try {
+        const name = await addCatalogSection();
+        if (name) {
+          select.value = name;
+          select.dataset.selectedCategory = name;
+        }
+      } catch {
+        alert("Could not add the category. Please try again.");
+      } finally {
+        select.disabled = false;
+        select.focus();
       }
     });
 
@@ -952,6 +1036,7 @@
       const button = $("#upload-song-button");
       const title = $("#song-title").value.trim();
       const section = $("#song-section").value;
+      if (!CATALOG_SECTIONS.includes(section)) return setStatus("#song-form-status", "Choose a song category.", true);
       const song = $("#song-file").files[0];
       const cover = $("#song-cover").files[0];
       const playlistIds = [...document.querySelectorAll("#song-playlist-checks input:checked")].map((input) => input.value);
@@ -981,6 +1066,7 @@
         const linkInsert = await state.client.from("music_playlist_tracks").insert(playlistIds.map((playlistId) => ({ playlist_id: playlistId, track_id: id, position: positions.get(playlistId) })));
         if (linkInsert.error) throw linkInsert.error;
         form.reset();
+        $("#song-section").dataset.selectedCategory = $("#song-section").value;
         setStatus("#song-form-status", `Done — “${title}” is in your catalog and ${playlistIds.length} teacher playlist${playlistIds.length === 1 ? "" : "s"}.`);
         await loadData(state.selectedPlaylistId);
       } catch (error) {
