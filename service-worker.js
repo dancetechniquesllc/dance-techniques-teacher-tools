@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v366-last-day-frame-2027";
+const CACHE_NAME = "my-dance-techniques-v367-payroll-period-rollover";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",

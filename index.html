@@ -9,7 +9,7 @@
   <title>My Dance Techniques</title>
   <script src="vendor/pdf-lib-1.17.1.min.js"></script>
 <script src="payroll-statements.js?v=20261007-effective-date-proration"></script>
-<script src="teacher-work-clock.js?v=20261007-2020"></script>
+<script src="teacher-work-clock.js?v=20261118-payroll-rollover"></script>
 <script src="enrollment-tuition-confirmation.js"></script>
 <script>
     document.documentElement.dataset.localPreview = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname) ? "true" : "false";
@@ -28526,6 +28526,20 @@
       approvedAt: "",
       paidAt: ""
     };
+    // Each payday owns its progress; changing the selector never relabels another run.
+    const payrollRunDefaults = () => ({ status: "not_started", currentStep: 0, completedSteps: [],
+      workingHours: [], adjustments: [], approvedAt: "", paidAt: "", approvedStatements: null, approvedCalculationVersion: null });
+    const payrollRunKey = (month, sequence) => `${month}:${sequence}`;
+    const rememberPayrollRun = () => {
+      payrollState.periodRuns ||= {};
+      payrollState.periodRuns[payrollRunKey(payrollState.month, payrollState.sequence)] = Object.fromEntries(
+        Object.keys(payrollRunDefaults()).map(key => [key, JSON.parse(JSON.stringify(payrollState[key] ?? payrollRunDefaults()[key]))]));
+    };
+    const selectPayrollRun = (month, sequence) => {
+      rememberPayrollRun();
+      const saved = payrollState.periodRuns[payrollRunKey(month, sequence)];
+      Object.assign(payrollState, payrollRunDefaults(), saved || {}, { month, sequence: String(sequence) });
+    };
     const payrollProgressStorageKey = "dt-payroll-progress-v1";
     const readSavedPayrollProgress = () => {
       try {
@@ -28534,6 +28548,7 @@
       } catch (error) { return null; }
     };
     const savePayrollProgress = () => {
+      rememberPayrollRun();
       try { window.localStorage?.setItem(payrollProgressStorageKey, JSON.stringify({ savedAt: new Date().toISOString(), payrollState })); } catch (error) {}
     };
     const initialPayrollProgress = readSavedPayrollProgress();
@@ -29271,7 +29286,10 @@
             .map((step) => Number(step) > 1 ? Number(step) - 1 : Number(step)))];
         }
         const dedicatedProgress = readSavedPayrollProgress();
-        const dedicatedPayrollState = dedicatedProgress?.payrollState || {};
+        const localPayrollState = dedicatedProgress?.payrollState || {};
+        // A director reset supersedes older device-local progress, without clearing business records.
+        const dedicatedPayrollState = (Date.parse(localPayrollState.progressResetAt || "") || 0) < (Date.parse(restoredPayrollState.progressResetAt || "") || 0)
+          ? {} : localPayrollState;
         const restoredOutstanding = restoredPayrollState.outstandingStudents || {};
         const dedicatedOutstanding = dedicatedPayrollState.outstandingStudents || {};
         const outstandingStudents = {};
@@ -49121,7 +49139,11 @@
           held: false
         }));
       });
-      lines.push(...DTWorkClock.payrollLines(DTWorkClock.entries, date => payrollDateIsInRange(date)));
+      const rolloverAssignments = payrollState.workHourRollovers || {};
+      const runKey = `${payrollState.month}:${payrollState.sequence}`;
+      lines.push(...DTWorkClock.payrollLines(DTWorkClock.entries.filter(entry => !rolloverAssignments[entry.id]), date => payrollDateIsInRange(date)));
+      lines.push(...DTWorkClock.payrollLines(DTWorkClock.entries.filter(entry => rolloverAssignments[entry.id] === runKey), () => true)
+        .map(line => ({ ...line, type: "Prior Payroll Credit", description: `Working Hours Rollover · ${line.description}` })));
       (payrollState.workingHours || []).forEach((entry) => {
         if (!entry.teacherId || !Number(entry.hours)) return;
         lines.push({ teacherId: entry.teacherId, hours: Number(entry.hours), type: "Working Hours", description: entry.description || "Admin/preparation time", amount: Number(entry.hours) * 20, held: false });
@@ -49585,8 +49607,8 @@
       if (!await DTWorkClock.load()) { showToast("Working hours could not load. Try again before starting payroll."); return; }
       const selectedMonth = document.getElementById("payroll-month")?.value || defaultPayrollMonth();
       const selectedSequence = document.getElementById("payroll-sequence")?.value || "1";
-      const resuming = payrollState.status !== "not_started" && payrollState.month === selectedMonth && String(payrollState.sequence) === String(selectedSequence);
-      payrollState.month = selectedMonth;
+      if (payrollState.month !== selectedMonth || String(payrollState.sequence) !== selectedSequence) selectPayrollRun(selectedMonth, selectedSequence);
+      const resuming = payrollState.status !== "not_started";
       try { await loadConfirmedEnrollmentTuition(payrollState.month); } catch(error) { showToast(error.message); return; }
       payrollState.sequence = selectedSequence;
       if (!resuming) {
@@ -49597,8 +49619,8 @@
       renderPayrollWizard();
       scheduleAppDataSave();
     });
-    document.getElementById("payroll-month")?.addEventListener("change", (event) => { payrollState.month = event.target.value; renderPayrollLanding(); scheduleAppDataSave(); });
-    document.getElementById("payroll-sequence")?.addEventListener("change", (event) => { payrollState.sequence = event.target.value; if (!document.getElementById("payroll-wizard")?.hidden) renderPayrollWizard(); else renderPayrollLanding(); scheduleAppDataSave(); });
+    document.getElementById("payroll-month")?.addEventListener("change", (event) => { selectPayrollRun(event.target.value, payrollState.sequence); renderPayrollLanding(); scheduleAppDataSave(); });
+    document.getElementById("payroll-sequence")?.addEventListener("change", (event) => { selectPayrollRun(payrollState.month, event.target.value); if (!document.getElementById("payroll-wizard")?.hidden) renderPayrollWizard(); else renderPayrollLanding(); scheduleAppDataSave(); });
     document.getElementById("close-payroll-stub-library")?.addEventListener("click", () => setPayrollStubLibraryOpen(false));
     document.getElementById("teacher-pay-stubs-close")?.addEventListener("click", () => setTeacherPayStubsOpen(""));
     document.getElementById("teacher-pay-stubs-overlay")?.addEventListener("click", (event) => { if (event.target === event.currentTarget) setTeacherPayStubsOpen(""); });
@@ -49622,7 +49644,7 @@
         renderPayrollWizard(); scheduleAppDataSave(); return;
       }
       const sequence = event.target.closest("[data-payroll-sequence-choice]");
-      if (sequence) { payrollState.sequence = sequence.dataset.payrollSequenceChoice; renderPayrollWizard(); scheduleAppDataSave(); return; }
+      if (sequence) { selectPayrollRun(payrollState.month, sequence.dataset.payrollSequenceChoice); if (payrollState.status === "not_started") payrollState.status = "in_progress"; renderPayrollWizard(); scheduleAppDataSave(); return; }
       const studentCard = event.target.closest("[data-payroll-student]");
       if (studentCard) {
         if (payrollState.sequence !== "2") return;
