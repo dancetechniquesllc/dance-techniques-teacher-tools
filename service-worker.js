@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v368-recital-combo-opt-in";
+const CACHE_NAME = "my-dance-techniques-v369-recital-enrollment-updates";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",
