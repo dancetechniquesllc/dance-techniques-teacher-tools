@@ -58886,6 +58886,7 @@
         ["Halloween", "assets/photo-frames/halloween.png"],
         ["Thanksgiving", "assets/photo-frames/thanksgiving.png"],
         ["Group Thankful", "assets/photo-frames/group-thankful.png"],
+        ["Twinkle Toes Group", "assets/photo-frames/twinkle-toes-group.png"],
         ["Hispanic Heritage", "assets/photo-frames/hispanic-heritage.png"],
         ["1st Position", "assets/photo-frames/first-position.png"]
       ];
@@ -58967,12 +58968,18 @@
 
       const frameSelect = modal.querySelector(".photo-frame-select");
       const studioMonth = new Intl.DateTimeFormat("en-US", { month: "numeric", year: "numeric", timeZone: "America/Chicago" });
+      const seasonalFrameMonths = {Halloween:[10],Thanksgiving:[11],"Group Thankful":[11],"Hispanic Heritage":[9,10]};
+      const frameIsAvailable = (label,availableMonth,availableYear,month,year) => {
+        const seasonalMonths=seasonalFrameMonths[label];
+        if(seasonalMonths)return Number(year)>=2027&&seasonalMonths.includes(Number(month));
+        return !availableMonth||(availableMonth===month&&availableYear===year);
+      };
       const updateFrameOptions = () => {
         const parts = studioMonth.formatToParts(new Date());
         const month = parts.find(part => part.type === "month").value;
         const year = parts.find(part => part.type === "year").value;
         const options = frames.flatMap(([label, , availableMonth, availableYear], index) =>
-          !availableMonth || (availableMonth === month && availableYear === year) ? [new Option(label, index)] : []
+          frameIsAvailable(label,availableMonth,availableYear,month,year) ? [new Option(label, index)] : []
         );
         frameSelect.replaceChildren(...options);
         frameSelect.value = String(frames.indexOf(selectedFrame));
@@ -58982,9 +58989,11 @@
         }
       };
 
-      const selectedFrameIsLandscape = () => ["/group-photo.png", "/group-thankful.png"].some((name) => selectedFrame[1].endsWith(name));
+      const selectedFrameIsLandscape = () => ["/group-photo.png", "/group-thankful.png", "/twinkle-toes-group.png"].some((name) => selectedFrame[1].endsWith(name));
+      const selectedLandscapeRatio = () => selectedFrame[1].endsWith("/twinkle-toes-group.png") ? 4 / 3 : 3 / 2;
       const updateFrameLayout = () => {
         stage.classList.toggle("is-landscape", selectedFrameIsLandscape());
+        stage.style.aspectRatio = selectedFrameIsLandscape() ? String(selectedLandscapeRatio()) : "";
       };
 
       const stopCamera = () => {
@@ -59042,7 +59051,7 @@
               facingMode: { ideal: facingMode },
               width: { ideal: landscapeFrame ? 6144 : 4096 },
               height: { ideal: landscapeFrame ? 4096 : 6144 },
-              aspectRatio: { ideal: landscapeFrame ? 3 / 2 : 2 / 3 }
+              aspectRatio: { ideal: landscapeFrame ? selectedLandscapeRatio() : 2 / 3 }
             }
           });
           video.srcObject = stream;
@@ -59094,7 +59103,7 @@
         const canvas = document.createElement("canvas");
         const landscapeFrame = selectedFrameIsLandscape();
         canvas.width = landscapeFrame ? 3072 : 2048;
-        canvas.height = landscapeFrame ? 2048 : 3072;
+        canvas.height = landscapeFrame ? Math.round(canvas.width / selectedLandscapeRatio()) : 3072;
         const context = canvas.getContext("2d");
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
@@ -59253,11 +59262,11 @@
       });
     })();
   </script>
-  <link rel="stylesheet" href="big-stage.css?v=20261121-production">
+  <link rel="stylesheet" href="big-stage.css?v=20261122-combo-inspector">
 <link rel="stylesheet" href="big-stage-order.css?v=20261005-compact-separation">
 <link rel="stylesheet" href="big-stage-wizard.css?v=20261012-recital-reset">
 <link rel="stylesheet" href="big-stage-matching.css?v=20261008-live-classes">
-  <script src="big-stage.js?v=20261121-production"></script>
+  <script src="big-stage.js?v=20261122-combo-inspector"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
 <script src="big-stage-wizard.js?v=20261020-preserve-plans"></script>
   <script src="director-task-sync.js?v=20260908"></script>

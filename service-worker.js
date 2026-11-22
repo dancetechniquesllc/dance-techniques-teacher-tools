@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v370-show-production";
+const CACHE_NAME = "my-dance-techniques-v371-combo-frames";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",
@@ -45,6 +45,7 @@ const CORE_ASSETS = [
   "./assets/photo-frames/last-day-of-dance.webp",
   "./assets/photo-frames/last-day-of-dance-2027.png",
   "./assets/photo-frames/group-thankful.png",
+  "./assets/photo-frames/twinkle-toes-group.png",
 
   "./roster-care.js?v=20260908",
   "./roster-care.css?v=20260908",

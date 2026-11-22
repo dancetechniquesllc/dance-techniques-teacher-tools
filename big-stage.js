@@ -260,7 +260,32 @@
   const comboSetIsOpen = (classes) => state.comboOpenSets[comboSetKey(classes)] === true;
   const comboOpenToggle = (item,combined) => {
     const members=comboSetFor(item),key=comboSetKey(members);
-    return `<label class="stage-combo-open ${combined?"is-combined":"is-single"}"><span>Open for Combo</span><input type="checkbox" role="switch" data-stage-combo-open="${esc(key)}" aria-label="Open for Combo: ${esc(members.map(member=>member.name).join(" + "))}" ${comboSetIsOpen(members)?"checked":""}><i aria-hidden="true"></i></label>`;
+    return `<span class="stage-combo-open ${combined?"is-combined":"is-single"}"><label class="stage-combo-switch"><span>Open for Combo</span><input type="checkbox" role="switch" data-stage-combo-open="${esc(key)}" aria-label="Open for Combo: ${esc(members.map(member=>member.name).join(" + "))}" ${comboSetIsOpen(members)?"checked":""}><i aria-hidden="true"></i></label>${comboSetIsOpen(members)?`<button type="button" class="stage-combo-eye" data-stage-combo-inspect="${esc(key)}" data-dt-action-icon="view" aria-label="View All Combo Matches for ${esc(members.map(member=>member.name).join(" + "))}" title="View All Combo Matches"></button>`:""}</span>`;
+  };
+  const rankedComboCandidates = (source) => {
+    const sourceIds=new Set(source.map(item=>item.id)),groups=state.groups.filter(group=>!group.crossTeacher&&group.decision!=="rejected"),seen=new Set();
+    const committed=new Set(state.groups.filter(group=>group.crossTeacher&&(group.showsLinked||["approved","locked"].includes(group.decision))).flatMap(group=>group.classes.map(item=>item.id)));
+    return groups.flatMap(group=>group.stageSets).filter(set=>{
+      const key=comboSetKey(set);if(!set.length||seen.has(key)||set.some(item=>sourceIds.has(item.id))||!comboSetIsOpen(set))return false;seen.add(key);return true;
+    }).map(members=>{
+      const all=[...source,...members],total=all.reduce((sum,item)=>sum+item.count,0),spread=ageSpread(all),reasons=[];
+      if(total>STAGE_CAP)reasons.push(`${total} dancers exceeds the ${STAGE_CAP}-dancer limit`);
+      if(spread==null)reasons.push("Birthdates are needed to check the age range");else if(spread>18)reasons.push(`${spread}-month age range exceeds 18 months`);
+      if(all.some(item=>committed.has(item.id)))reasons.push("Already approved or linked to another combination");
+      if(isRejectedMatch(all))reasons.push("This match was previously rejected");
+      const sourceGroup=groups.find(group=>group.classes.some(item=>sourceIds.has(item.id)));
+      if(sourceGroup&&members.some(item=>sourceGroup.classes.some(existing=>existing.id===item.id)))reasons.push("Already assigned to the same routine");
+      return {members,total,spread,compatible:reasons.length===0,reasons};
+    }).sort((a,b)=>Number(b.compatible)-Number(a.compatible)||a.reasons.length-b.reasons.length||(a.spread??Infinity)-(b.spread??Infinity)||a.total-b.total||comboSetKey(a.members).localeCompare(comboSetKey(b.members)));
+  };
+  const openComboInspector = (key) => {
+    const source=state.groups.filter(group=>!group.crossTeacher).flatMap(group=>group.stageSets).find(set=>comboSetKey(set)===key);
+    if(!source||!comboSetIsOpen(source))return;
+    document.querySelector(".stage-combo-inspector")?.remove();
+    const candidates=rankedComboCandidates(source),dialog=document.createElement("dialog");
+    dialog.className="stage-combo-inspector";dialog.setAttribute("aria-labelledby","stage-combo-inspector-title");
+    dialog.innerHTML=`<header><div><h3 id="stage-combo-inspector-title">Open Combo Matches</h3><p>${source.map(item=>`${esc(item.teacher)} · ${esc(item.school)} · ${esc(item.name)}`).join("<br>")}</p><small>${candidates.filter(item=>item.compatible).length} compatible · ${candidates.length} open options</small></div><button class="secondary" type="button" data-stage-combo-inspector-close aria-label="Close Combo Matches">×</button></header><p>Compatible options appear first, ranked by the closest combined age range. Combined groups stay together.</p><div class="stage-combo-candidates">${candidates.length?candidates.map((candidate,index)=>`<article class="${candidate.compatible?"is-compatible":"is-review"}"><header><strong>${index+1}. ${candidate.members.map(item=>esc(item.name)).join(" + ")}</strong><span>${candidate.compatible?"Compatible Match":"Not Currently Compatible"}</span></header><p>${candidate.members.map(item=>`${esc(item.teacher)} · ${esc(item.school)} · ${item.count} dancers`).join("<br>")}</p><div class="stage-combo-match-facts"><span>${candidate.total} Total Dancers</span><span>${candidate.spread==null?"Age Range Unknown":`${candidate.spread} Month Age Range`}</span></div>${candidate.reasons.length?`<ul>${candidate.reasons.map(reason=>`<li>${esc(reason)}</li>`).join("")}</ul>`:""}</article>`).join(""):'<p>No other classes are marked Open for Combo yet.</p>'}</div>`;
+    document.body.append(dialog);dialog.addEventListener("close",()=>dialog.remove(),{once:true});dialog.querySelector("[data-stage-combo-inspector-close]").addEventListener("click",()=>dialog.close());dialog.showModal();
   };
   const matchRejectionKey = (classes) => classes.map(item=>`${item.id}:${item.requirement}`).sort().join("||");
   const isRejectedMatch = (classes) => state.rejectedMatches.includes(matchRejectionKey(classes));
@@ -287,7 +312,7 @@
     return suggestions.sort((a,b)=>(b.targetFourPriority-a.targetFourPriority)||(Math.abs(4-a.resultingShowUses)-Math.abs(4-b.resultingShowUses))||(b.priorityMatchCount-a.priorityMatchCount)||(a.projectedRoutineTotal-b.projectedRoutineTotal)||((ageSpread(a.classes)??0)-(ageSpread(b.classes)??0)));
   };
   const rebuildCrossTeacherSuggestions = () => {
-    const internal=state.groups.filter((group)=>!group.crossTeacher),fixed=state.groups.filter((group)=>group.crossTeacher&&group.decision!=="rejected"&&(group.decision!=="suggested"||group.showsLinked)),reserved=new Set(fixed.flatMap((group)=>group.classes.map((item)=>item.id))),suggestions=crossTeacherSuggestions(state.classes.filter((item)=>!reserved.has(item.id)),internal);
+    const internal=state.groups.filter((group)=>!group.crossTeacher),fixed=state.groups.filter((group)=>group.crossTeacher&&group.decision!=="rejected"&&(group.decision!=="suggested"||group.showsLinked)),reserved=new Set(fixed.filter(group=>group.showsLinked||["approved","locked"].includes(group.decision)).flatMap((group)=>group.classes.map((item)=>item.id))),suggestions=crossTeacherSuggestions(state.classes.filter((item)=>!reserved.has(item.id)),internal);
 
     state.groups=[...internal,...fixed,...suggestions.filter(group=>!isRejectedMatch(group.classes))];
   };
@@ -378,6 +403,12 @@
     <details class="stage-board-dancers"><summary>Dancers <span>${item.count}</span></summary><div>${dancers.map((student)=>{const age=monthsOld(student.birthdate),noRecital=isNoRecital(student),boy=state.teacherPortal&&isBoy(student);return `<article class="${noRecital?"is-no-recital":""} ${boy?"is-boy":""}"><span class="stage-board-dancer-photo ${noRecital?"stage-dancer-no-recital":""}">${noRecital?"×":student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span><strong>${esc(boardDancerName(student))}</strong><small>${noRecital?"No Recital":Number.isFinite(age)?ageLabel(age):"Age needed"}</small></article>`;}).join("")}</div></details>
   </article>`;
   };
+  const boardSlotCards = (matches,combinedSet,combinedPosition) => {
+    const sameSchoolCombined=combinedSet&&matches.length>1&&matches.every(item=>combinedSet.some(member=>member.id===item.id));
+    const ages=combinedSet?combinedAgeSummary(combinedSet):null;
+    if(sameSchoolCombined)return `<div class="stage-same-school-combined" style="--combined-class-count:${matches.length}">${matches.map((item,index)=>`<div class="stage-same-school-member">${boardClassCard(item,true,ages,index===matches.length-1)}${boardCombineNotice(state.groups.find(group=>group.classes.some(member=>member.id===item.id)),item)}</div>`).join("")}</div>`;
+    return matches.map(item=>`${boardClassCard(item,true,ages,combinedPosition==="is-combined-end")}${boardCombineNotice(state.groups.find(group=>group.classes.some(member=>member.id===item.id)),item)}`).join("");
+  };
   const combinedAgeSummary = (classes) => {
     const ages=classes.flatMap((item)=>item.students.filter((student)=>!isNoRecital(student)).map((student)=>monthsOld(student.birthdate)).filter(Number.isFinite));
     return ages.length?{min:Math.min(...ages),max:Math.max(...ages),avg:ages.reduce((sum,age)=>sum+age,0)/ages.length,total:classes.reduce((sum,item)=>sum+item.count,0)}:null;
@@ -402,7 +433,16 @@
     while(remaining.size){const start=[...remaining].sort((a,b)=>(adjacency.get(b)?.size||0)-(adjacency.get(a)?.size||0)||a.localeCompare(b))[0];const queue=[start];while(queue.length){const school=queue.shift();if(!remaining.has(school))continue;remaining.delete(school);ordered.push(school);[...(adjacency.get(school)||[])].sort().forEach((next)=>{if(remaining.has(next))queue.push(next);});}}
     return ordered.map((school,index)=>({school,index,show:showForSchool(school)||99})).sort((a,b)=>a.show-b.show||a.index-b.index).map((item)=>item.school);
   };
-  const combineOptionsFor = (group,item) => group.classes.filter((candidate)=>candidate.id!==item.id);
+  const stageShowKey = (item) => {
+    const show=state.showPlan?.classShow?.[item.id]||state.schoolShows[`${item.teacherId}::${item.school}`];
+    return show?`${item.teacherId}::${show}`:`unassigned::${item.id}`;
+  };
+  const sharesAssignedRecital = (left,right) => {
+    const leftShow=state.showPlan?.classShow?.[left.id]||state.schoolShows[`${left.teacherId}::${left.school}`],rightShow=state.showPlan?.classShow?.[right.id]||state.schoolShows[`${right.teacherId}::${right.school}`];
+    if(!leftShow||!rightShow)return false;
+    return Object.values(state.recitalTeacherShows||{}).some(selected=>Number(selected[left.teacherId])===Number(leftShow)&&Number(selected[right.teacherId])===Number(rightShow));
+  };
+  const combineOptionsFor = (group,item) => group.classes.filter((candidate)=>candidate.id!==item.id&&stageShowKey(candidate)===stageShowKey(item)&&sharesAssignedRecital(item,candidate));
   const schoolPairKey = (left,right) => [left,right].map((value)=>schoolKey(value)).sort().join("::");
   const confirmedSchoolPairKeys = () => new Set(combinedSchoolPairs(state.groups).map(([left,right])=>schoolPairKey(left,right)));
   const isConfirmedSchoolPair = (left,right) => confirmedSchoolPairKeys().has(schoolPairKey(left,right));
@@ -450,7 +490,12 @@
     const moving=new Set(classIds);return siblingComponents().find(([left,right])=>{if(!moving.has(left)&&!moving.has(right))return false;const other=moving.has(left)?right:left;if(moving.has(other))return false;const otherClass=state.classes.find((item)=>item.id===other),otherShow=state.showPlan?.classShow?.[other]||showForSchool(otherClass?.school);return otherShow&&otherShow!==targetShow;});
   };
   const normalizeCombinedShowAssignments = (routines) => {
-    routines.filter((group)=>!group.manualCombination).forEach((group)=>group.stageSets.filter((set)=>set.length>1).forEach((set)=>{const show=set.map((item)=>state.schoolShows[`${item.teacherId}::${item.school}`]||state.showPlan?.classShow?.[item.id]).find(Boolean);if(show)setSchoolShow(set[0].school,show);}));
+    routines.filter(group=>!group.crossTeacher).forEach(group=>{
+      group.stageSets=group.stageSets.flatMap(set=>{
+        const buckets=new Map();set.forEach(item=>{const key=stageShowKey(item);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(item);});
+        return [...buckets.values()];
+      });
+    });
   };
   const teacherPlanningBoard = () => {
     const loads=teacherLoad();
@@ -460,13 +505,13 @@
     const classes=state.classes.filter((item)=>item.teacherId===state.boardTeacher).sort((a,b)=>(a.avgAge??999)-(b.avgAge??999)||a.name.localeCompare(b.name,undefined,{numeric:true}));
     const routines=state.groups.filter((group)=>group.decision!=="rejected"&&(group.classes.some((item)=>item.teacherId===state.boardTeacher)||group.emptyForTeacher===state.boardTeacher)&&!group.crossTeacher);
     // Rendering the planning board must not move classes after a show has been locked.
-    if (!Object.values(state.recitalLocks).some((locks)=>locks[state.boardTeacher])) normalizeCombinedShowAssignments(routines);
+    normalizeCombinedShowAssignments(routines);
     const schools=orderedBoardSchools([...new Set(classes.map((item)=>item.school))],routines);
     const recitalSongs=recitalPlaylistSongs();
     return `<section class="stage-teacher-board ${state.fullscreen?"is-workspace-fullscreen":""}" data-stage-teacher-planning-board>${state.fullscreen?`<button type="button" class="stage-fullscreen-close" data-stage-exit-fullscreen aria-label="Exit Fullscreen Planning View">×</button>`:""}
       <nav class="stage-teacher-tabs" aria-label="Teacher Planning Boards">${loads.map((item)=>{const color=state.classes.find((candidate)=>candidate.teacherId===item.id)?.teacherColor||teacherColor(item.name);return `<button type="button" data-stage-board-teacher="${esc(item.id)}" aria-pressed="${item.id===state.boardTeacher}" style="--teacher-tab-color:${esc(color)}">${esc(item.name)}<small>${item.routines} routine${item.routines===1?"":"s"}</small></button>`;}).join("")}</nav>
       <header class="stage-board-header" style="--stage-teacher-color:${esc(classes[0]?.teacherColor||"#dba9a1")}"><div class="stage-board-primary-controls"><button type="button" class="stage-fullscreen-open" data-stage-enter-fullscreen>Fullscreen</button><button class="stage-undo-button" data-stage-undo ${state.history.length&&!state.recitalSaving?"":"disabled"}>← Undo</button><button class="stage-save-button is-${state.saveStatus||"idle"}" data-stage-save-work ${state.saveStatus==="saving"||state.recitalSaving?"disabled":""}>${state.saveStatus==="saving"?"Saving…":state.saveStatus==="saved"?"✓ Saved":state.saveStatus==="error"?"Save Failed":"Save Work"}</button></div><div class="stage-board-teacher-title"><h4>${esc(load.name)}</h4><p>${schools.length} School${schools.length===1?"":"s"} · ${classes.length} Planning Class${classes.length===1?"":"es"}</p><strong class="stage-board-dance-total">${classes.length} classes → ${routines.length} dances</strong></div><div class="stage-show-color-key stage-board-header-controls">${Object.keys(state.showColors).map(Number).sort((a,b)=>a-b).map((number)=>`<label style="--show-color:${esc(state.showColors[number])}"><span>Show ${number}</span><input type="color" value="${esc(state.showColors[number])}" data-stage-show-color="${number}" aria-label="Change Show ${number} color"></label>`).join("")}</div><p class="stage-layer-help stage-board-show-help">These Show 1–4 labels belong only to ${esc(load.name)}. They do not match another teacher's show numbers.</p></header>
-      <section class="stage-routine-board"><header><div><h4>Routine Rows</h4><p>Suggestions populate automatically. Drag a class vertically to change its routine.</p></div></header>${routines.length?`<div class="stage-routine-matrix" style="--stage-school-count:${schools.length};--stage-matrix-width:calc(180px + ${schools.length} * 225px)">${boardShowBandsMarkup(schools)}<div class="stage-routine-column-heads" style="grid-template-columns:180px repeat(${schools.length},minmax(225px,1fr))"><div class="stage-routine-corner"><span>Routine</span><button type="button" data-stage-add-routine aria-label="Add Another Routine Row" title="Add Another Routine Row">＋</button></div>${schools.map((school)=>{const show=showForSchool(school),color=boardSchoolColor(school,schools,routines);return `<div data-stage-school-header="${esc(school)}" style="--school-color:${esc(color)}"><strong>${esc(school)}</strong><select data-stage-school-show="${esc(school)}" aria-label="Choose a show for ${esc(school)}"><option value="" ${show?"":"selected"}>Planning Pool</option>${[1,2,3,4].map((number)=>`<option value="${number}" ${show===number?"selected":""}>Show ${number}</option>`).join("")}</select></div>`;}).join("")}</div><div class="stage-routine-rows">${routines.map((group,index)=>{const teacherClasses=group.classes.filter((item)=>item.teacherId===state.boardTeacher);const status=boardAgeStatus(teacherClasses),showCount=new Set(teacherClasses.map((item)=>showForSchool(item.school)).filter(Boolean)).size;const combinedIds=new Set(group.stageSets.filter((set)=>set.length>1).flatMap((set)=>set.map((item)=>item.id)));return `<article class="stage-routine-row" data-stage-group="${esc(group.id)}"><div class="stage-routine-name"><select class="stage-routine-song" data-stage-routine-theme aria-label="Choose a Theme for Routine ${index+1}"><option value="">Routine ${index+1} · Select Theme</option>${routineThemes.map((theme)=>`<option value="${esc(theme)}" ${group.theme===theme?"selected":""}>${esc(theme)}</option>`).join("")}</select><small>${esc(title(group.requirement==="either"?"Undecided":group.requirement))} · ${teacherClasses.length>1?"Replicate":"Own Routine"}</small><span class="stage-board-age ${status.tone}">${status.tone==="strong"?`✓ ${esc(status.label)}`:`⚠ ${esc(status.label)}`}</span><small>Using ${showCount} ${showCount===1?"Time":"Times"}</small><button type="button" class="stage-remove-routine" data-stage-remove-routine="${esc(group.id)}" aria-label="Remove Routine ${index+1}" title="Remove Routine">−</button></div><div class="stage-routine-slots" style="grid-template-columns:repeat(${schools.length},minmax(225px,1fr))">${schools.map((school)=>{const matches=teacherClasses.filter((item)=>item.school===school),color=boardSchoolColor(school,schools,routines),combinedSet=group.stageSets.find((set)=>set.length>1&&matches[0]&&set.some((member)=>member.id===matches[0].id)),combinedIndexes=(combinedSet||[]).map((member)=>schools.indexOf(member.school)).sort((a,b)=>a-b),schoolIndex=schools.indexOf(school),combinedPosition=!combinedSet?"":schoolIndex===combinedIndexes[0]?"is-combined-start":schoolIndex===combinedIndexes.at(-1)?"is-combined-end":"is-combined-middle";return `<div class="stage-routine-slot ${combinedIds.has(matches[0]?.id)?`is-combined ${combinedPosition}`:""}" data-stage-drop-group="${esc(group.id)}" style="--school-color:${esc(color)};--pair-color:${esc(color)}"><small>${esc(school)}</small>${matches.length?matches.map((item)=>`${boardClassCard(item,true,combinedSet?combinedAgeSummary(combinedSet):null,combinedPosition==="is-combined-end")}${boardCombineNotice(group,item)}`).join(""):`<span class="stage-routine-empty">Drop class here</span>`}</div>`;}).join("")}</div></article>`;}).join("")}</div></div>`:`<div class="stage-empty"><h4>No routine rows yet.</h4><p>Recalculate suggestions to create a starting plan.</p><button type="button" data-stage-add-routine>＋ Add Routine</button></div>`}</section>
+      <section class="stage-routine-board"><header><div><h4>Routine Rows</h4><p>Suggestions populate automatically. Drag a class vertically to change its routine.</p></div></header>${routines.length?`<div class="stage-routine-matrix" style="--stage-school-count:${schools.length};--stage-matrix-width:calc(180px + ${schools.length} * 225px)">${boardShowBandsMarkup(schools)}<div class="stage-routine-column-heads" style="grid-template-columns:180px repeat(${schools.length},minmax(225px,1fr))"><div class="stage-routine-corner"><span>Routine</span><button type="button" data-stage-add-routine aria-label="Add Another Routine Row" title="Add Another Routine Row">＋</button></div>${schools.map((school)=>{const show=showForSchool(school),color=boardSchoolColor(school,schools,routines);return `<div data-stage-school-header="${esc(school)}" style="--school-color:${esc(color)}"><strong>${esc(school)}</strong><select data-stage-school-show="${esc(school)}" aria-label="Choose a show for ${esc(school)}"><option value="" ${show?"":"selected"}>Planning Pool</option>${[1,2,3,4].map((number)=>`<option value="${number}" ${show===number?"selected":""}>Show ${number}</option>`).join("")}</select></div>`;}).join("")}</div><div class="stage-routine-rows">${routines.map((group,index)=>{const teacherClasses=group.classes.filter((item)=>item.teacherId===state.boardTeacher);const status=boardAgeStatus(teacherClasses),showCount=new Set(teacherClasses.map((item)=>showForSchool(item.school)).filter(Boolean)).size;const combinedIds=new Set(group.stageSets.filter((set)=>set.length>1).flatMap((set)=>set.map((item)=>item.id)));return `<article class="stage-routine-row" data-stage-group="${esc(group.id)}"><div class="stage-routine-name"><select class="stage-routine-song" data-stage-routine-theme aria-label="Choose a Theme for Routine ${index+1}"><option value="">Routine ${index+1} · Select Theme</option>${routineThemes.map((theme)=>`<option value="${esc(theme)}" ${group.theme===theme?"selected":""}>${esc(theme)}</option>`).join("")}</select><small>${esc(title(group.requirement==="either"?"Undecided":group.requirement))} · ${teacherClasses.length>1?"Replicate":"Own Routine"}</small><span class="stage-board-age ${status.tone}">${status.tone==="strong"?`✓ ${esc(status.label)}`:`⚠ ${esc(status.label)}`}</span><small>Using ${showCount} ${showCount===1?"Time":"Times"}</small><button type="button" class="stage-remove-routine" data-stage-remove-routine="${esc(group.id)}" aria-label="Remove Routine ${index+1}" title="Remove Routine">−</button></div><div class="stage-routine-slots" style="grid-template-columns:repeat(${schools.length},minmax(225px,1fr))">${schools.map((school)=>{const matches=teacherClasses.filter((item)=>item.school===school),color=boardSchoolColor(school,schools,routines),combinedSet=group.stageSets.find((set)=>set.length>1&&matches[0]&&set.some((member)=>member.id===matches[0].id)),combinedIndexes=(combinedSet||[]).map((member)=>schools.indexOf(member.school)).sort((a,b)=>a-b),schoolIndex=schools.indexOf(school),combinedPosition=!combinedSet?"":schoolIndex===combinedIndexes[0]?"is-combined-start":schoolIndex===combinedIndexes.at(-1)?"is-combined-end":"is-combined-middle";return `<div class="stage-routine-slot ${combinedIds.has(matches[0]?.id)?`is-combined ${combinedPosition}`:""}" data-stage-drop-group="${esc(group.id)}" style="--school-color:${esc(color)};--pair-color:${esc(color)}"><small>${esc(school)}</small>${matches.length?boardSlotCards(matches,combinedSet,combinedPosition):`<span class="stage-routine-empty">Drop class here</span>`}</div>`;}).join("")}</div></article>`;}).join("")}</div></div>`:`<div class="stage-empty"><h4>No routine rows yet.</h4><p>Recalculate suggestions to create a starting plan.</p><button type="button" data-stage-add-routine>＋ Add Routine</button></div>`}</section>
       <div class="big-stage-note"><strong>Interactive preview:</strong> The board preserves the detailed matcher while you test dragging, stage combinations, school pairing, and show colors.</div>
     </section>`;
   };
@@ -650,6 +695,7 @@
   }).filter(Boolean);
   const productionConfig = (recital) => state.productionPlans[recital] || {};
   const productionUnits = (recital) => {
+    normalizeCombinedShowAssignments(state.groups);
     const all=recitalUnits(recital),units=document.body.dataset.tourMode==="true"?all:all.map(unit=>({...unit,classes:unit.classes.filter(item=>state.recitalLocks[recital]?.[item.teacherId])})).filter(unit=>unit.classes.length);
     const performances=units.flatMap(unit=>{
       const present=new Map(unit.classes.map(item=>[item.id,item])),sets=(unit.group.stageSets||[]).map(set=>set.map(item=>present.get(item.id)).filter(Boolean)).filter(set=>set.length),seen=new Set(sets.flatMap(set=>set.map(item=>item.id)));
@@ -995,14 +1041,17 @@
     group.quality=qualityFor(group.classes);group.analysis=analysisFor(group.classes,group.crossTeacher);group.decision=group.decision==="suggested"?"modified":group.decision;
   };
   const combineBoardClasses = async (group,leftId) => {
-    if(!group.classes.some((item)=>item.id===leftId)||group.classes.length<2)return;
+    const left=group.classes.find(item=>item.id===leftId);if(!left)return;
+    const members=[left,...combineOptionsFor(group,left)];if(members.length<2)return;
     rememberPlannerState();
     group.manualCombination=true;
-    group.stageSets=[group.classes.slice()];
+    const combinedIds=new Set(members.map(item=>item.id));
+    group.stageSets=group.stageSets.map(set=>set.filter(item=>!combinedIds.has(item.id))).filter(set=>set.length);
+    group.stageSets.push(members);
     refreshBoardGroup(group);
     await persistGroup(group);
     await savePlannerWorkspace();
-    state.notice=`All ${group.classes.length} classes on this routine are combined.`;render();
+    state.notice=`${members.length} classes in the same show are combined.`;render();
   };
   document.addEventListener("change", async (event) => {
     if(event.target.matches("[data-stage-combo-open]")){
@@ -1113,6 +1162,7 @@
     if(event.target.closest("[data-stage-save-work]")){if(state.recitalSaving)return;const button=event.target.closest("[data-stage-save-work]");state.saveStatus="saving";button.textContent="Saving…";button.disabled=true;const saved=await savePlannerWorkspace();state.saveStatus=saved?"saved":"error";state.notice=saved?"Planning workspace saved. It will be restored after refresh.":"The planner could not be saved. Please try again.";render();window.setTimeout(()=>{if(state.saveStatus!==(saved?"saved":"error"))return;state.saveStatus="";const current=root()?.querySelector("[data-stage-save-work]");if(current){current.textContent="Save Work";current.className="stage-save-button is-idle";}},2500);return;}
     if(event.target.closest("[data-stage-enter-fullscreen]")){try{await document.documentElement.requestFullscreen?.();}catch(error){console.warn("True fullscreen was unavailable; using the enlarged planner view.",error);}state.fullscreen=true;render();return;}
     if(event.target.closest("[data-stage-exit-fullscreen]")){if(document.fullscreenElement)await document.exitFullscreen?.();state.fullscreen=false;render();return;}
+    const comboInspector=event.target.closest("[data-stage-combo-inspect]");if(comboInspector){openComboInspector(comboInspector.dataset.stageComboInspect);return;}
     const section=event.target.closest("[data-stage-section]");if(section){state.section=section.dataset.stageSection;render();return;}
     const matching=event.target.closest("[data-production-matching]");if(matching){const draft=readProductionForm();if(draft&&!await saveProductionPlan(draft.recital,draft.next)){window.alert(state.notice);return;}state.section="matching";state.view="show";if(matching.dataset.productionMatching)state.activeRecital=matching.dataset.productionMatching;render();return;}
     const moveProduction=event.target.closest("[data-production-move]");if(moveProduction){await reorderProduction(moveProduction.dataset.productionMove,null,Number(moveProduction.dataset.direction));return;}
@@ -1169,6 +1219,7 @@
   document.addEventListener("drop",(event)=>{const schoolHeader=event.target.closest("[data-stage-school-header]");if(!schoolHeader||!state.draggedShow)return;event.preventDefault();const school=schoolHeader.dataset.stageSchoolHeader,show=state.draggedShow;setSchoolShow(school,show);delete state.pendingShows[state.boardTeacher];state.draggedShow=0;state.notice=`${school} placed in Show ${show}. Drag the topper edges to include neighboring schools.`;render();});
   document.addEventListener("dragleave",(event)=>event.target.closest("[data-stage-drop-group]")?.classList.remove("is-drag-target"));
   const moveRoutineClasses = async (source,target,items,performWith) => {
+    if(performWith&&items.some(item=>stageShowKey(item)!==stageShowKey(performWith))){state.notice="Classes in different shows cannot perform together. Assign them to the same show first.";render();return;}
     rememberPlannerState();
     const moveIds=new Set(items.map(item=>item.id));
     source.emptyForTeacher=items[0].teacherId;
