@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v371-combo-frames";
+const CACHE_NAME = "my-dance-techniques-v372-combo-selection";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",

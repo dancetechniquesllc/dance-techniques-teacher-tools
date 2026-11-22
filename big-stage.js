@@ -276,7 +276,23 @@
       const sourceGroup=groups.find(group=>group.classes.some(item=>sourceIds.has(item.id)));
       if(sourceGroup&&members.some(item=>sourceGroup.classes.some(existing=>existing.id===item.id)))reasons.push("Already assigned to the same routine");
       return {members,total,spread,compatible:reasons.length===0,reasons};
-    }).sort((a,b)=>Number(b.compatible)-Number(a.compatible)||a.reasons.length-b.reasons.length||(a.spread??Infinity)-(b.spread??Infinity)||a.total-b.total||comboSetKey(a.members).localeCompare(comboSetKey(b.members)));
+    }).filter(candidate=>candidate.total<=STAGE_CAP).sort((a,b)=>Number(b.compatible)-Number(a.compatible)||a.reasons.length-b.reasons.length||(a.spread??Infinity)-(b.spread??Infinity)||a.total-b.total||comboSetKey(a.members).localeCompare(comboSetKey(b.members)));
+  };
+  const comboDancerDetails = (members) => members.map(item=>{
+    const dancers=(item.students||[]).filter(student=>!isNoRecital(student));
+    return `<details class="stage-combo-dancers"><summary>Dancers · ${esc(item.name)} <span>${dancers.length}</span></summary><div>${dancers.map(student=>`<article><span class="stage-board-dancer-photo">${student.photo?`<img src="${esc(student.photo)}" alt="">`:esc(boardDancerInitials(student))}</span><strong>${esc(fullName(student))}</strong><small>${Number.isFinite(monthsOld(student.birthdate))?ageLabel(monthsOld(student.birthdate)):"Age Needed"}</small></article>`).join("")||'<p>No dancers available.</p>'}</div></details>`;
+  }).join("");
+  const selectInspectedCombo = async (sourceKey,candidateKey) => {
+    const sets=state.groups.filter(group=>!group.crossTeacher&&group.decision!=="rejected").flatMap(group=>group.stageSets),source=sets.find(set=>comboSetKey(set)===sourceKey);
+    if(!source||!comboSetIsOpen(source))return {error:"This class is no longer open for combinations."};
+    const candidate=rankedComboCandidates(source).find(row=>comboSetKey(row.members)===candidateKey);
+    if(!candidate?.compatible)return {error:"This option is no longer compatible. Reopen the list to see current matches."};
+    const members=[...source,...candidate.members],key=comboSetKey(members),suggestion=crossTeacherSuggestions(state.classes,state.groups).find(group=>comboSetKey(group.classes)===key);
+    if(!suggestion)return {error:"This match could not be created. Please refresh the match list."};
+    const before=state.groups,selected={...suggestion,id:crypto.randomUUID(),decision:"approved",showsLinked:false};
+    rememberPlannerState();state.groups=[...state.groups.filter(group=>!(group.crossTeacher&&group.decision==="suggested"&&comboSetKey(group.classes)===key)),selected];
+    if(!await savePlannerWorkspace()){state.groups=before;state.history.pop();return {error:"Your selection could not be saved. Please try again."};}
+    rebuildCrossTeacherSuggestions();return {selected};
   };
   const openComboInspector = (key) => {
     const source=state.groups.filter(group=>!group.crossTeacher).flatMap(group=>group.stageSets).find(set=>comboSetKey(set)===key);
@@ -284,7 +300,15 @@
     document.querySelector(".stage-combo-inspector")?.remove();
     const candidates=rankedComboCandidates(source),dialog=document.createElement("dialog");
     dialog.className="stage-combo-inspector";dialog.setAttribute("aria-labelledby","stage-combo-inspector-title");
-    dialog.innerHTML=`<header><div><h3 id="stage-combo-inspector-title">Open Combo Matches</h3><p>${source.map(item=>`${esc(item.teacher)} · ${esc(item.school)} · ${esc(item.name)}`).join("<br>")}</p><small>${candidates.filter(item=>item.compatible).length} compatible · ${candidates.length} open options</small></div><button class="secondary" type="button" data-stage-combo-inspector-close aria-label="Close Combo Matches">×</button></header><p>Compatible options appear first, ranked by the closest combined age range. Combined groups stay together.</p><div class="stage-combo-candidates">${candidates.length?candidates.map((candidate,index)=>`<article class="${candidate.compatible?"is-compatible":"is-review"}"><header><strong>${index+1}. ${candidate.members.map(item=>esc(item.name)).join(" + ")}</strong><span>${candidate.compatible?"Compatible Match":"Not Currently Compatible"}</span></header><p>${candidate.members.map(item=>`${esc(item.teacher)} · ${esc(item.school)} · ${item.count} dancers`).join("<br>")}</p><div class="stage-combo-match-facts"><span>${candidate.total} Total Dancers</span><span>${candidate.spread==null?"Age Range Unknown":`${candidate.spread} Month Age Range`}</span></div>${candidate.reasons.length?`<ul>${candidate.reasons.map(reason=>`<li>${esc(reason)}</li>`).join("")}</ul>`:""}</article>`).join(""):'<p>No other classes are marked Open for Combo yet.</p>'}</div>`;
+    dialog.innerHTML=`<header><div><h3 id="stage-combo-inspector-title">Open Combo Matches</h3><p>${source.map(item=>`${esc(item.teacher)} · ${esc(item.school)} · ${esc(item.name)}`).join("<br>")}</p><small>${candidates.filter(item=>item.compatible).length} compatible · ${candidates.length} open options</small>${comboDancerDetails(source)}</div><button class="secondary" type="button" data-stage-combo-inspector-close aria-label="Close Combo Matches">×</button></header><p>Compatible options appear first, ranked by the closest combined age range. Combined groups stay together.</p><div class="stage-combo-candidates">${candidates.length?candidates.map((candidate,index)=>`<article class="${candidate.compatible?"is-compatible":"is-review"}"><header><strong>${index+1}. ${candidate.members.map(item=>esc(item.name)).join(" + ")}</strong><span>${candidate.compatible?"Compatible Match":"Not Currently Compatible"}</span></header><p>${candidate.members.map(item=>`${esc(item.teacher)} · ${esc(item.school)} · ${item.count} dancers`).join("<br>")}</p><div class="stage-combo-match-facts"><span>${candidate.total} Total Dancers</span><span>${candidate.spread==null?"Age Range Unknown":`${candidate.spread} Month Age Range`}</span></div>${comboDancerDetails(candidate.members)}${candidate.reasons.length?`<ul>${candidate.reasons.map(reason=>`<li>${esc(reason)}</li>`).join("")}</ul>`:""}${candidate.compatible?`<div class="stage-combo-select-actions"><button class="primary" type="button" data-stage-combo-select="${esc(comboSetKey(candidate.members))}">Select This Match</button></div>`:""}</article>`).join(""):'<p>No other classes are marked Open for Combo yet.</p>'}</div>`;
+    dialog.addEventListener("click",async event=>{
+      const button=event.target.closest("[data-stage-combo-select]");if(!button)return;
+      const buttons=[...dialog.querySelectorAll("[data-stage-combo-select]")];buttons.forEach(control=>control.disabled=true);
+      const result=await selectInspectedCombo(key,button.dataset.stageComboSelect);
+      if(result.error){buttons.forEach(control=>control.disabled=false);let status=dialog.querySelector("[data-combo-selection-status]");if(!status){status=document.createElement("p");status.dataset.comboSelectionStatus="";status.setAttribute("role","alert");dialog.prepend(status);}status.textContent=result.error;return;}
+      dialog.close();state.section="matching";state.view="teacher";state.filters={teacher:"",school:"",requirement:""};state.notice="Match selected and saved. Review Link Shows to place the teacher shows in the same recital.";render();
+      [...(root()?.querySelectorAll("[data-stage-group]")||[])].find(card=>card.dataset.stageGroup===result.selected.id)?.scrollIntoView({block:"center"});
+    });
     document.body.append(dialog);dialog.addEventListener("close",()=>dialog.remove(),{once:true});dialog.querySelector("[data-stage-combo-inspector-close]").addEventListener("click",()=>dialog.close());dialog.showModal();
   };
   const matchRejectionKey = (classes) => classes.map(item=>`${item.id}:${item.requirement}`).sort().join("||");
@@ -493,7 +517,7 @@
     routines.filter(group=>!group.crossTeacher).forEach(group=>{
       group.stageSets=group.stageSets.flatMap(set=>{
         const buckets=new Map();set.forEach(item=>{const key=stageShowKey(item);if(!buckets.has(key))buckets.set(key,[]);buckets.get(key).push(item);});
-        return [...buckets.values()];
+        return [...buckets.values()].flatMap(members=>members.reduce((sum,item)=>sum+item.count,0)>STAGE_CAP?members.map(item=>[item]):[members]);
       });
     });
   };
@@ -1043,6 +1067,7 @@
   const combineBoardClasses = async (group,leftId) => {
     const left=group.classes.find(item=>item.id===leftId);if(!left)return;
     const members=[left,...combineOptionsFor(group,left)];if(members.length<2)return;
+    if(members.reduce((sum,item)=>sum+item.count,0)>STAGE_CAP){state.notice="Classes cannot perform together with more than 12 dancers.";render();return;}
     rememberPlannerState();
     group.manualCombination=true;
     const combinedIds=new Set(members.map(item=>item.id));
@@ -1220,6 +1245,7 @@
   document.addEventListener("dragleave",(event)=>event.target.closest("[data-stage-drop-group]")?.classList.remove("is-drag-target"));
   const moveRoutineClasses = async (source,target,items,performWith) => {
     if(performWith&&items.some(item=>stageShowKey(item)!==stageShowKey(performWith))){state.notice="Classes in different shows cannot perform together. Assign them to the same show first.";render();return;}
+    if(performWith){const partners=target.stageSets.find(set=>set.some(item=>item.id===performWith.id))||[performWith];if([...partners,...items].reduce((sum,item)=>sum+item.count,0)>STAGE_CAP){state.notice="Classes cannot perform together with more than 12 dancers.";render();return;}}
     rememberPlannerState();
     const moveIds=new Set(items.map(item=>item.id));
     source.emptyForTeacher=items[0].teacherId;
