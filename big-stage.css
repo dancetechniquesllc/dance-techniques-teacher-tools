@@ -158,3 +158,12 @@ body.phone-stage-sheet-preview .stage-sheet-modal{position:fixed!important;right
 .stage-board-class .stage-combo-open.is-combined{position:absolute;top:35px;left:-100%;right:0;z-index:3;justify-content:center;margin:0}
 .stage-routine-slot.is-combined .stage-board-class{padding-top:68px}
 .stage-board-class .stage-combo-open.is-single{position:relative;top:auto;right:auto;justify-self:end;margin:20px 0 3px}
+
+/* Show Production: saved settings and running order. */
+.stage-production-settings,.stage-production-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:20px;background:#F8F1EF;border:1px solid #E8C9C4;border-radius:16px}
+.stage-production-settings label,.stage-production-fields label{display:flex;flex-direction:column;gap:8px;font-weight:600;min-width:0}
+.stage-production-settings input,.stage-production-fields input,.stage-production-fields select,.stage-production-fields textarea{box-sizing:border-box;width:100%;padding:12px;background:white;border:1px solid #E8C9C4;border-radius:12px;font:inherit;color:inherit}
+.stage-production-lineup{display:grid;gap:18px;margin-bottom:20px}.stage-production-routine{padding:20px;border:1px solid #E8C9C4;border-radius:16px;background:white}.stage-production-routine>header{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.stage-production-routine>header>strong{flex:1}.stage-production-routine [data-production-drag]{cursor:grab;font-size:24px;border:0;background:#F8F1EF;border-radius:10px;padding:8px 12px}.stage-production-routine p{line-height:1.5}
+@media(max-width:600px){.stage-production-settings,.stage-production-fields{grid-template-columns:1fr;padding:14px}.stage-production-routine{padding:14px}.stage-production-routine>header .big-stage-actions{width:100%;flex-wrap:wrap}}
+
+.stage-production-note-label{display:block;margin-top:12px}.stage-production-note-label textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid #E8C9C4;border-radius:12px;font:inherit}.stage-production-routine summary{color:#944A53;cursor:pointer;font-weight:600}
