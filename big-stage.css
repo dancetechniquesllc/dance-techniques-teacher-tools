@@ -192,3 +192,5 @@ body.phone-stage-sheet-preview .stage-sheet-modal{position:fixed!important;right
 .stage-routine-name-bubble.is-repeated{background:#944A53;color:#fff}
 
 button.stage-routine-name-bubble{border:0;cursor:pointer;font-family:inherit;text-align:left;min-height:36px}.stage-unused-theme-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.stage-unused-theme-options button{padding:12px 16px;border:1px solid #e8c9c4;border-radius:18px;background:#f8f1ef;color:#944a53;text-align:left;font:inherit}
+
+[data-stage-recital-row]{cursor:grab}[data-stage-recital-row].is-order-dragging{opacity:.5}[data-recital-order-handle]{cursor:grab;touch-action:manipulation}

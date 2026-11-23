@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v375-unused-routine-themes";
+const CACHE_NAME = "my-dance-techniques-v376-recital-row-order";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",
