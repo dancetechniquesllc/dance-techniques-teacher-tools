@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v372-combo-selection";
+const CACHE_NAME = "my-dance-techniques-v373-recital-routine-bubbles";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",
