@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v377-combine-routine-review";
+const CACHE_NAME = "my-dance-techniques-v378-measurements-planning";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",
@@ -26,6 +26,7 @@ const CORE_ASSETS = [
   "./attendance-preview.css?v=attendance-workflows-20261020",
   "./assets/teacher-class-action-deliveries.png",
   "./assets/teacher-class-actions.png",
+  "./assets/teacher-measurements.png",
   "./teacher-work-clock.js",
   "./assets/event-check-in-out.png",
   "./payroll-statements.js",
@@ -46,6 +47,7 @@ const CORE_ASSETS = [
   "./assets/photo-frames/last-day-of-dance-2027.png",
   "./assets/photo-frames/group-thankful.png",
   "./assets/photo-frames/twinkle-toes-group.png",
+  "./assets/photo-frames/measurements.png",
 
   "./roster-care.js?v=20260908",
   "./roster-care.css?v=20260908",

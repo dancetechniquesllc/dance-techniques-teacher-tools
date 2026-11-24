@@ -649,7 +649,7 @@
     const selected=state.recitalTeacherShows[recital]||{};
     const units=state.groups.filter((group)=>!group.crossTeacher&&group.decision!=="rejected").map((group)=>{const classes=group.classes.filter((item)=>(!teacherId||item.teacherId===teacherId)&&Number(selected[item.teacherId])===Number(teacherShowForItem(item)));return classes.length?{group,classes}:null;}).filter(Boolean);
     if (teacherId) return units;
-    state.groups.filter((group)=>group.crossTeacher&&group.showsLinked&&group.decision!=="rejected").forEach((linked)=>{const linkedSelected=linked.classes.every((item,index)=>Number(selected[item.teacherId])===Number(linked.teacherShows?.[index]||teacherShowForItem(item)));if(!linkedSelected)return;const sourceUnits=units.filter((unit)=>linked.classes.some((match)=>unit.group.classes.some((item)=>item.id===match.id)));if(sourceUnits.length<2)return;const insertAt=Math.min(...sourceUnits.map((unit)=>units.indexOf(unit))),classes=[...new Map(sourceUnits.flatMap((unit)=>unit.classes).map((item)=>[item.id,item])).values()],teachers=[...new Set(classes.map((item)=>item.teacher))],decidedRequirements=[...new Set(sourceUnits.map((unit)=>unit.group.requirement).filter((requirement)=>requirement&&requirement!=="either"))],resolvedRequirement=decidedRequirements.length===1?decidedRequirements[0]:linked.requirement,merged={...linked,requirement:resolvedRequirement,name:`${teachers.join(" + ")} · ${resolvedRequirement==="either"?"Undecided":title(resolvedRequirement)} Cross-Teacher Routine`,crossTeacher:true};sourceUnits.forEach((unit)=>units.splice(units.indexOf(unit),1));units.splice(insertAt,0,{group:merged,classes});});
+    state.groups.filter((group)=>group.crossTeacher&&group.showsLinked&&group.decision!=="rejected").forEach((linked)=>{const linkedSelected=linked.classes.every((item,index)=>Number(selected[item.teacherId])===Number(linked.teacherShows?.[index]||teacherShowForItem(item)));if(!linkedSelected)return;const sourceUnits=units.filter((unit)=>linked.classes.some((match)=>unit.group.classes.some((item)=>item.id===match.id)));if(!sourceUnits.length)return;const insertAt=Math.min(...sourceUnits.map((unit)=>units.indexOf(unit))),classes=[...new Map(sourceUnits.flatMap((unit)=>unit.classes).map((item)=>[item.id,item])).values()],teachers=[...new Set(classes.map((item)=>item.teacher))],decidedRequirements=[...new Set(sourceUnits.map((unit)=>unit.group.requirement).filter((requirement)=>requirement&&requirement!=="either"))],resolvedRequirement=decidedRequirements.length===1?decidedRequirements[0]:linked.requirement,merged={...linked,requirement:resolvedRequirement,name:`${teachers.join(" + ")} · ${resolvedRequirement==="either"?"Undecided":title(resolvedRequirement)} Cross-Teacher Routine`,crossTeacher:true};sourceUnits.forEach((unit)=>units.splice(units.indexOf(unit),1));units.splice(insertAt,0,{group:merged,classes});});
     const order=state.productionPlans[recital]?.recitalRowOrder||[];
     return units.sort((a,b)=>{const ai=order.indexOf(a.group.id),bi=order.indexOf(b.group.id);return (ai<0?Infinity:ai)-(bi<0?Infinity:bi);});
   };
@@ -693,7 +693,18 @@
     oldOrder.forEach(id=>{if(selected.includes(id)){if(!rowOrder.includes(combined.id))rowOrder.push(combined.id);}else rowOrder.push(id);});
     recitalCombineSaving=true;
     state.productionPlans[recital]={...previousPlan,recitalRowOrder:rowOrder};
-    state.groups=[...before.filter(group=>!group.crossTeacher||!group.classes.some(item=>ids.has(item.id))),combined];
+    // Reflect the recital combination in each teacher's routine rows in the same save.
+    // Split only the selected classes out of replicated routines; other shows retain their plan.
+    const boardGroups=before.filter(group=>!group.crossTeacher).map(group=>{
+      const remaining=group.classes.filter(item=>!ids.has(item.id));
+      return {...group,classes:remaining,stageSets:group.stageSets.map(set=>set.filter(item=>!ids.has(item.id))).filter(set=>set.length)};
+    }).filter(group=>group.classes.length||group.emptyForTeacher);
+    const teacherRows=teacherIds.map(teacherId=>{
+      const members=classes.filter(item=>item.teacherId===teacherId),source=before.find(group=>!group.crossTeacher&&group.classes.some(item=>item.id===members[0].id));
+      const rowId=boardGroups.some(group=>group.id===source.id)?crypto.randomUUID():source.id;
+      return {...source,id:rowId,name:theme,theme,songId:"",songTitle:"",classes:members,stageSets:[members],teacherIds:[teacherId],crossTeacher:false,manualCombination:true,decision:"approved",requirement:combined.requirement,relationship:members.length>1?"combine":"separate",showAssignments:Object.fromEntries(members.map(item=>[item.id,teacherShowForItem(item)]))};
+    });
+    state.groups=[...boardGroups,...teacherRows,...before.filter(group=>group.crossTeacher&&!group.classes.some(item=>ids.has(item.id))),combined];
     let saved=false;try{saved=await savePlannerWorkspace();}catch(_){}finally{recitalCombineSaving=false;}
     if(!saved){state.groups=before;if(previousPlan)state.productionPlans[recital]=previousPlan;else delete state.productionPlans[recital];return {error:"The combination could not be saved. Please try again."};}
     return {combined};

@@ -20243,6 +20243,14 @@
       </div>
     </div>
   </div>
+  <div class="confirm-overlay" id="teacher-measurements-overlay" aria-hidden="true">
+    <div class="confirm-dialog teacher-measurements-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-measurements-title">
+      <div class="teacher-measurements-head"><div><h3 id="teacher-measurements-title">Measurements</h3><p class="subtle">Choose a class, then measure one dancer at a time.</p></div><button class="secondary teacher-measurements-close" type="button" id="teacher-measurements-close" aria-label="Close Measurements">×</button></div>
+      <div class="teacher-measurements-selectors"><label>School<select id="teacher-measurements-school"></select></label><label>Class<select id="teacher-measurements-class"></select></label></div>
+      <div class="teacher-measurements-classes" id="teacher-measurements-classes" aria-label="Classes"></div>
+      <div id="teacher-measurements-content"></div><p id="teacher-measurements-error" role="alert"></p>
+    </div>
+  </div>
   <div class="confirm-overlay" id="teacher-activities-overlay" aria-hidden="true">
     <div class="confirm-dialog teacher-activities-dialog" role="dialog" aria-modal="true" aria-labelledby="teacher-activities-title">
       <div class="teacher-activities-header">
@@ -20480,6 +20488,7 @@
           <button class="roster-profile-tab" type="button" role="tab" id="roster-profile-tab-histories" data-roster-profile-tab="histories" aria-controls="roster-profile-panel-histories" aria-selected="false">Histories</button>
         </div>
         <div class="roster-profile-tab-panel" id="roster-profile-panel-profile" role="tabpanel" aria-labelledby="roster-profile-tab-profile" data-roster-profile-panel="profile">
+        <section class="roster-profile-section-card student-measurement-summary" id="roster-profile-measurements"></section>
         <section class="roster-profile-section-card roster-dancer-information-card">
           <div class="roster-profile-section-heading">
             <span class="roster-profile-section-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"></circle><path d="M4.5 21v-2.2A6.5 6.5 0 0 1 11 12.3h2a6.5 6.5 0 0 1 6.5 6.5V21"></path></svg></span>
@@ -21166,6 +21175,40 @@
     @media (max-width:760px) {
       body[data-mode="admin"] .stage-match-filters { grid-template-columns:repeat(2,minmax(0,1fr)); }
     }
+    .teacher-measurements-dialog { width: min(620px, 100%); max-height: calc(100dvh - 28px); overflow: auto; }
+    .teacher-measurements-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .teacher-measurements-head h3, .teacher-measurements-head p { margin: 0; }
+    .teacher-measurements-close { min-width: 38px; min-height: 38px; padding: 0; border-radius: 999px; }
+    .teacher-measurements-selectors { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0; }
+    .teacher-measurements-selectors label, .teacher-measurements-fields label { display: grid; gap: 5px; color: var(--muted); font-size: 11px; font-weight: 850;   }
+    .teacher-measurements-classes { display: flex; gap: 8px; overflow-x: auto; padding: 2px 1px 12px; scrollbar-width: thin; }
+    .teacher-measurements-class { flex: 0 0 auto; min-height: 40px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); color: var(--berry); font-weight: 800; }
+    .teacher-measurements-class.is-active { background: var(--blush); border-color: var(--berry); }
+    .teacher-measurements-student { display: grid; justify-items: center; gap: 10px; padding: 18px; border: 1px solid var(--border); border-radius: 22px; background: var(--surface-soft); text-align: center; }
+    .teacher-measurements-photo { display: grid; place-items: center; width: 92px; height: 92px; overflow: hidden; border: 4px solid var(--lavender); border-radius: 50%; background: var(--lavender-soft); color: var(--berry); font-size: 25px; font-weight: 900; }
+    .teacher-measurements-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .teacher-measurements-student h4 { margin: 0; font-size: 24px; }
+    .teacher-measurements-student > small { color: var(--muted); font-weight: 750; }
+    .teacher-measurements-fields { width: 100%; display: grid; grid-template-columns: 1fr; gap: 10px; text-align: left; }
+    .teacher-measurements-input { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px; }
+    .teacher-measurements-fields input { min-width: 0; min-height: 46px; }
+    .teacher-measurements-half { min-width: 50px; min-height: 46px; padding: 0 10px; border: 1px solid var(--sage-deep); border-radius: 12px; background: var(--sage); color: #34412f; font-size: 16px; font-weight: 900; }
+    .teacher-measurements-carousel { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; width: 100%; }
+    .teacher-measurements-arrow { width: 42px; height: 42px; padding: 0; border-radius: 50%; background: var(--blush); color: var(--berry); font-size: 23px; }
+    .teacher-measurements-progress { color: var(--muted); font-size: 12px; font-weight: 800; }
+    .teacher-measurements-empty { padding: 28px 16px; color: var(--muted); text-align: center; }
+    @media (max-width: 520px) { .teacher-measurements-selectors, .teacher-measurements-fields { grid-template-columns: 1fr; } }
+
+    /* Keep the roster post implementation available until Parent Portal launch. */
+    #teacher-roster-list [data-teacher-class-post] { display:none!important; }
+    .teacher-measurements-launch { grid-column:1/-1;display:block;width:100%;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important; }
+    .teacher-measurements-launch img { display:block;width:100%;height:auto;object-fit:contain; }
+    #teacher-measurements-error { color:#944a53; }
+    #teacher-measurements-overlay { z-index:12000; }
+    .student-measurement-summary { width:100%;box-sizing:border-box;padding:14px;border:1px solid #e8c9c4;border-radius:16px;background:#f8f1ef; }
+    .student-measurement-summary h4 {margin:0 0 10px;}
+    .student-measurement-summary-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(65px,1fr));gap:8px;margin-bottom:12px;}
+    .student-measurement-summary-grid small,.student-measurement-summary-grid strong{display:block;}
   </style>
   <script type="module" src="web-submissions.mjs?v=20261110-enrolled-portrait"></script>
   <!-- Workshop previews use the built-in fallback; live music loads from shared storage. -->
@@ -40731,6 +40774,13 @@
       }).join("") : `<div class="teacher-roster-empty">${records.length ? "No dancers match these filters." : "No enrolled dancers are assigned to your classes yet."}</div>`;
     }
 
+    const teacherStudentMeasurementsComplete = (student) => {
+      const measurements={...student.measurements,...student.additionalInformation?.costume_measurements};
+      const fields=["chest","waist","hips","girth"];
+      if(["male","boy","m"].includes(String(student.gender||"").trim().toLowerCase()))fields.push("length");
+      return fields.every(key=>Number.isFinite(Number(measurements[key]))&&Number(measurements[key])>0);
+    };
+    const teacherClassNeedsMeasurements = (students) => students.some(student=>!teacherStudentMeasurementsComplete(student));
     function renderTeacherRosters() {
       const list = document.getElementById("teacher-roster-list");
       const filter = document.getElementById("teacher-roster-school-filter");
@@ -40840,7 +40890,7 @@
           && /^class\s*5$/i.test(String(rosterClass.name || "").trim())
         );
         return `<details class="teacher-roster-card teacher-roster-active-card" data-teacher-roster-details="${rosterSafe(rosterClass.id)}" ${classIsOpen ? "open" : ""}>
-          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(classDisplayTitle)} class roster"><div class="teacher-roster-active-heading"><div><h3 class="${teacherRosterSchoolFilter === "all" ? "is-all-schools-title" : ""}">${rosterSafe(classDisplayTitle)}</h3><p><span>${rosterSafe(scheduledDay || "Day not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span>${rosterSafe(rosterClass.time || "Time not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span class="teacher-roster-duration ${durationClass}"><strong>${attendanceStudents.length} dancers</strong><span class="teacher-roster-heading-dot" aria-hidden="true"> • </span>${rosterSafe(duration).replace(" minutes", " min")}</span></p>${classTimingMarkup}</div>${classCanPostToParentPortal ? `<button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button>` : ""}</div><div class="teacher-roster-class-actions">${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}${window.DTAttendancePreview?.enabled ? `<button type="button" data-teacher-deliveries="${rosterSafe(rosterClass.id)}" data-shirts-ready="${readyKits.length}" data-boutique-ready="${readyBoutiqueOrders.length}" aria-label="Deliveries">${classActionContent("teacher-class-action-deliveries.png", kitDeliveryActive ? "Delivering Shirts & Bags" : boutiqueDeliveryActive ? "Delivering Boutique" : "Deliveries")}${readyKits.length+readyBoutiqueOrders.length ? `<span class="aw-delivery-count" aria-label="${readyKits.length+readyBoutiqueOrders.length} deliveries ready">${readyKits.length+readyBoutiqueOrders.length}</span>` : ""}</button>` : `<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" ${readyBoutiqueOrders.length ? "" : "disabled"}>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button>`}<button class="teacher-class-action-photo-frames" type="button" data-teacher-photo-frames="${rosterSafe(rosterClass.id)}" aria-label="Photo Frames">${classActionContent("teacher-class-action-photo-frames.png", "Photo Frames")}</button><button class="teacher-class-action-star" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}" aria-label="Class Star">${classActionContent("teacher-class-action-star.png", "Class Star")}</button></div></summary>
+          <summary data-teacher-roster-summary="${rosterSafe(rosterClass.id)}" aria-label="${classIsOpen ? "Collapse" : "Expand"} ${rosterSafe(classDisplayTitle)} class roster"><div class="teacher-roster-active-heading"><div><h3 class="${teacherRosterSchoolFilter === "all" ? "is-all-schools-title" : ""}">${rosterSafe(classDisplayTitle)}</h3><p><span>${rosterSafe(scheduledDay || "Day not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span>${rosterSafe(rosterClass.time || "Time not set")}</span><span class="teacher-roster-heading-dot" aria-hidden="true">•</span><span class="teacher-roster-duration ${durationClass}"><strong>${attendanceStudents.length} dancers</strong><span class="teacher-roster-heading-dot" aria-hidden="true"> • </span>${rosterSafe(duration).replace(" minutes", " min")}</span></p>${classTimingMarkup}</div>${classCanPostToParentPortal ? `<button class="teacher-class-post-launch" type="button" data-teacher-class-post="${rosterSafe(rosterClass.id)}" aria-label="Post to Parent Portal" ${attendanceStudents.length ? "" : "disabled"}><img src="assets/teacher-class-post-badge.png" alt="" aria-hidden="true"></button>` : ""}</div><div class="teacher-roster-class-actions">${teacherClassNeedsMeasurements(attendanceStudents)?`<button type="button" class="teacher-measurements-launch" data-teacher-measurements-class="${rosterSafe(rosterClass.id)}" aria-label="Measurements for ${rosterSafe(classDisplayTitle)}"><img src="assets/teacher-measurements.png" alt="Measurements"></button>`:""}${attendanceStudents.length ? `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""} ${(checkInActive || checkOutActive) ? "is-active" : ""}" type="button" data-teacher-start-class="${rosterSafe(rosterClass.id)}" data-teacher-start-mode="${checkInSubmitted ? "checkout" : "checkin"}" ${!classIsToday ? `data-teacher-off-day="true" aria-disabled="true"` : ""} ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="${startClassLabel}"`} ${startClassDisabled ? "disabled" : ""}>${classActionContent("teacher-class-action-start.png", startClassLabel)}</button>` : `<button class="teacher-class-action-start ${!classIsToday ? "is-off-day" : ""}" type="button" ${startClassTitle ? `title="${rosterSafe(startClassTitle)}" aria-label="${rosterSafe(startClassTitle)}"` : `aria-label="Start Class"`} disabled>${classActionContent("teacher-class-action-start.png", "Start Class")}</button>`}${window.DTAttendancePreview?.enabled ? `<button type="button" data-teacher-deliveries="${rosterSafe(rosterClass.id)}" data-shirts-ready="${readyKits.length}" data-boutique-ready="${readyBoutiqueOrders.length}" aria-label="Deliveries">${classActionContent("teacher-class-action-deliveries.png", kitDeliveryActive ? "Delivering Shirts & Bags" : boutiqueDeliveryActive ? "Delivering Boutique" : "Deliveries")}${readyKits.length+readyBoutiqueOrders.length ? `<span class="aw-delivery-count" aria-label="${readyKits.length+readyBoutiqueOrders.length} deliveries ready">${readyKits.length+readyBoutiqueOrders.length}</span>` : ""}</button>` : `<button class="teacher-class-action-kit ${kitDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-kit-delivery="${rosterSafe(rosterClass.id)}" aria-label="${shirtLabel}" ${readyKits.length ? "" : "disabled"}>${classActionContent("teacher-class-action-shirts.png", shirtLabel)}</button><button class="teacher-class-action-boutique ${boutiqueDeliveryActive ? "is-active" : ""}" type="button" data-teacher-start-boutique-delivery="${rosterSafe(rosterClass.id)}" aria-label="${boutiqueLabel}" ${readyBoutiqueOrders.length ? "" : "disabled"}>${classActionContent("teacher-class-action-boutique.png", boutiqueLabel)}</button>`}<button class="teacher-class-action-photo-frames" type="button" data-teacher-photo-frames="${rosterSafe(rosterClass.id)}" aria-label="Photo Frames">${classActionContent("teacher-class-action-photo-frames.png", "Photo Frames")}</button><button class="teacher-class-action-star" type="button" data-teacher-change-helper="${rosterSafe(rosterClass.id)}" aria-label="Class Star">${classActionContent("teacher-class-action-star.png", "Class Star")}</button></div></summary>
           <div class="teacher-roster-card-body">
             ${classComplete ? `<div class="teacher-attendance-complete">✓ Class attendance complete for today</div>` : checkInSubmitted ? `<div class="teacher-attendance-complete">✓ Check-in recorded</div>` : ""}
             <div>${displayedStudents.length ? teacherRosterClassroomMarkup(displayedStudents, rosterClass) : `<div class="teacher-roster-empty">No dancers attending this class yet.</div>`}</div>
@@ -41223,6 +41273,103 @@
       window.setTimeout(() => document.getElementById("teacher-roster-class-name")?.focus(), 40);
     };
 
+    const studentMeasurementSummary = (rosterClass,student,directorMode=false) => {
+      const fields=["chest","waist","hips","girth",...(["male","boy","m"].includes(String(student.gender||"").toLowerCase())?["length"]:[])];
+      return `<h4>Costume Measurements</h4><div class="student-measurement-summary-grid">${fields.map(key=>{const value=teacherMeasurementValue(student,key);return `<span><small>${key[0].toUpperCase()+key.slice(1)}</small><strong>${Number(value)>0?`${rosterSafe(value)}″`:"—"}</strong></span>`;}).join("")}</div><button type="button" data-profile-measurements="${rosterSafe(student.id)}" data-measurements-profile-class="${rosterSafe(rosterClass.id)}" data-measurements-director="${directorMode}">Edit Measurements</button>`;
+    };
+    const refreshStudentMeasurementSummaries = () => document.querySelectorAll("[data-measurements-summary]").forEach(section=>{const rosterClass=rosterClasses.find(item=>item.id===section.dataset.measurementsClass),student=rosterClass?.students.find(item=>item.id===section.dataset.measurementsSummary);if(student)section.innerHTML=studentMeasurementSummary(rosterClass,student,section.dataset.measurementsDirector==="true");});
+    let teacherMeasurementsDirectorMode=false;
+    const teacherMeasurementAccessibleClasses=()=>teacherMeasurementsDirectorMode?rosterClasses.filter(item=>item.sourceActive!==false):teacherRosterClasses();
+    let teacherMeasurementsClassId = "";
+    let teacherMeasurementsStudentIndex = 0;
+    let teacherMeasurementsSaving = false;
+    const teacherMeasurementClassesForSchool = (schoolName) => teacherMeasurementAccessibleClasses().filter((rosterClass) => (
+      enrollmentSchoolNameMatches(rosterClass.schoolName, schoolName)
+    ));
+    const teacherMeasurementStudents = () => {
+      const rosterClass = teacherMeasurementAccessibleClasses().find((item) => item.id === teacherMeasurementsClassId);
+      return rosterClass ? teacherRosterAttendanceStudents(rosterClass) : [];
+    };
+    const teacherMeasurementValue = (student, key) => {
+      const saved = student?.additionalInformation?.costume_measurements || student?.measurements || {};
+      return saved[key] ?? "";
+    };
+    const renderTeacherMeasurements = () => {
+      const schoolSelect = document.getElementById("teacher-measurements-school");
+      const classSelect = document.getElementById("teacher-measurements-class");
+      const classes = teacherMeasurementClassesForSchool(schoolSelect?.value || "");
+      if (!classes.some((item) => item.id === teacherMeasurementsClassId)) teacherMeasurementsClassId = classes[0]?.id || "";
+      if (classSelect) {
+        classSelect.innerHTML = classes.length
+          ? classes.map((item) => `<option value="${rosterSafe(item.id)}" ${item.id === teacherMeasurementsClassId ? "selected" : ""}>${rosterSafe(item.name)}</option>`).join("")
+          : '<option value="">No classes at this school</option>';
+        classSelect.disabled = !classes.length;
+      }
+      const classButtons = document.getElementById("teacher-measurements-classes");
+      if (classButtons) classButtons.innerHTML = classes.map((item) => `<button class="teacher-measurements-class ${item.id === teacherMeasurementsClassId ? "is-active" : ""}" type="button" data-measurements-class="${rosterSafe(item.id)}">${rosterSafe(item.name)}</button>`).join("");
+      const students = teacherMeasurementStudents();
+      teacherMeasurementsStudentIndex = Math.max(0, Math.min(teacherMeasurementsStudentIndex, Math.max(0, students.length - 1)));
+      const student = students[teacherMeasurementsStudentIndex];
+      const content = document.getElementById("teacher-measurements-content");
+      if (!content) return;
+      if (!student) {
+        content.innerHTML = `<div class="teacher-measurements-empty">${classes.length ? "This class does not have any dancers to measure yet." : "Choose a school with at least one class."}</div>`;
+        return;
+      }
+      const isBoy = ["male", "boy", "m"].includes(String(student.gender || "").trim().toLowerCase());
+      content.innerHTML = `<section class="teacher-measurements-student">
+        <span class="teacher-measurements-photo">${student.photo ? `<img src="${rosterSafe(student.photo)}" alt="">` : rosterSafe(rosterStudentInitials(student))}</span>
+        <div><h4>${rosterSafe(rosterStudentFullName(student))}</h4><small>${rosterSafe(rosterAge(student.birthdate))}</small></div>
+        <div class="teacher-measurements-fields">
+          <label>Chest (Inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="chest" value="${rosterSafe(teacherMeasurementValue(student, "chest"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to chest">+ ½</button></span></label>
+          <label>Waist (Inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="waist" value="${rosterSafe(teacherMeasurementValue(student, "waist"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to waist">+ ½</button></span></label>
+          <label>Hips (Inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="hips" value="${rosterSafe(teacherMeasurementValue(student, "hips"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to hips">+ ½</button></span></label>
+          <label>Girth (Inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="girth" value="${rosterSafe(teacherMeasurementValue(student, "girth"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to girth">+ ½</button></span></label>
+          ${isBoy ? `<label>Length (Inches)<span class="teacher-measurements-input"><input type="number" min="0" step="0.5" inputmode="decimal" data-measurement-field="length" value="${rosterSafe(teacherMeasurementValue(student, "length"))}"><button class="teacher-measurements-half" type="button" data-measurements-half aria-label="Add half an inch to length">+ ½</button></span></label>` : ""}
+        </div>
+        <div class="teacher-measurements-carousel"><button class="teacher-measurements-arrow" type="button" data-measurements-step="-1" aria-label="Previous dancer">‹</button><span class="teacher-measurements-progress">${teacherMeasurementsStudentIndex + 1} of ${students.length}${teacherMeasurementsSaving ? " · Saving…" : ""}</span><button class="teacher-measurements-arrow" type="button" data-measurements-step="1" aria-label="Next dancer">›</button></div>
+      </section>`;
+    };
+    const saveCurrentTeacherMeasurements = async () => {
+      const student=teacherMeasurementStudents()[teacherMeasurementsStudentIndex];
+      if(!student)return true;if(teacherMeasurementsSaving)return false;
+      const fields=[...document.querySelectorAll("#teacher-measurements-content [data-measurement-field]")],measurements=Object.fromEntries(fields.map(field=>[field.dataset.measurementField,field.value===""?null:Number(field.value)]));
+      const errorLine=document.getElementById("teacher-measurements-error");errorLine.textContent="";
+      if(Object.values(measurements).some(value=>value!==null&&(!Number.isFinite(value)||value<=0))){errorLine.textContent="Enter positive measurements in inches, or leave a field blank.";return false;}
+      if(Object.entries(measurements).every(([key,value])=>(teacherMeasurementValue(student,key)===""?null:Number(teacherMeasurementValue(student,key)))===value))return true;
+      teacherMeasurementsSaving=true;
+      const metadata={...measurements,measured_at:new Date().toISOString(),measured_by:window.dtCurrentProfile?.id||profileTeacher?.id||null};
+      try{
+        let info=student.additionalInformation||{};
+        if(document.body.dataset.tourMode!=="true"){
+          if(!sharedRosterReady||!window.dtSupabase)throw new Error("Student records are still loading. Please try again.");
+          const loaded=await window.dtSupabase.from("students").select("additional_information,updated_at").eq("id",student.id).single();if(loaded.error)throw loaded.error;
+          info=loaded.data.additional_information||{};
+          const updated=await window.dtSupabase.from("students").update({additional_information:{...info,costume_measurements:{...info.costume_measurements,...metadata}}}).eq("id",student.id).eq("updated_at",loaded.data.updated_at).select("id");
+          if(updated.error)throw updated.error;if(!updated.data?.length)throw new Error("This dancer was updated elsewhere. Please try saving again.");
+        }
+        student.additionalInformation={...info,costume_measurements:{...info.costume_measurements,...metadata}};
+        student.measurements={...student.measurements,...measurements};saveAppData();renderTeacherRosters();refreshStudentMeasurementSummaries();return true;
+      }catch(error){errorLine.textContent="Measurements could not be saved. "+(error.message||"Please try again.");return false;}
+      finally{teacherMeasurementsSaving=false;}
+    };
+    const openTeacherMeasurements = (classId="",studentId="",directorMode=false) => {
+      teacherMeasurementsDirectorMode=directorMode&&(document.body.dataset.tourMode==="true"||["director","admin"].includes(window.dtCurrentProfile?.role));
+      const schools = (teacherMeasurementsDirectorMode?[...new Set(teacherMeasurementAccessibleClasses().map(item=>item.schoolName))].map(name=>({name})):assignedTeacherSchools()).filter((school) => teacherMeasurementClassesForSchool(school.name).length);
+      if (!schools.length) return showToast("Create a class before entering measurements");
+      const schoolSelect = document.getElementById("teacher-measurements-school");
+      schoolSelect.innerHTML = schools.map((school) => `<option value="${rosterSafe(school.name)}">${rosterSafe(school.nickname || school.name)}</option>`).join("");
+      const filteredSchool = teacherRosterSchoolFilter !== "all" && schools.find((school) => enrollmentSchoolNameMatches(school.name, teacherRosterSchoolFilter));
+      const requested=teacherMeasurementAccessibleClasses().find(item=>item.id===classId);
+      schoolSelect.value = (requested&&schools.find(school=>enrollmentSchoolNameMatches(school.name,requested.schoolName)||enrollmentSchoolNameMatches(school.nickname,requested.schoolName)))?.name || filteredSchool?.name || schools[0].name;
+      teacherMeasurementsClassId = requested?.id || teacherMeasurementClassesForSchool(schoolSelect.value)[0]?.id || "";
+      teacherMeasurementsStudentIndex = 0;
+      if(studentId)teacherMeasurementsStudentIndex=Math.max(0,teacherMeasurementStudents().findIndex(student=>student.id===studentId));
+      document.getElementById("teacher-measurements-error").textContent="";
+      renderTeacherMeasurements();
+      setTeacherRosterOverlay("teacher-measurements-overlay", true);
+    };
+
     let editingTeacherProspectStudentId = "";
     let editingTeacherProspectClassId = "";
     let pendingTeacherProspectPhoto = "";
@@ -41491,6 +41638,7 @@
           </span>
           <small>${classroomOptions.length ? `Only Official Classrooms for ${rosterSafe(rosterSchoolNickname(rosterClass.schoolName))} are available.` : "No Official Classrooms are available for this school. Ask a Director to add one in Partner Schools."}</small>
         </div>
+        <section class="student-measurement-summary" data-measurements-summary="${rosterSafe(student.id)}" data-measurements-class="${rosterSafe(rosterClass.id)}">${studentMeasurementSummary(rosterClass,student)}</section>
         <label class="roster-profile-kit-check"><input type="checkbox" ${student.kitReady ? "checked" : ""} disabled> T-Shirt &amp; Bag Ready</label>
         <label class="roster-profile-kit-check" data-teacher-student-edit-related hidden><input type="checkbox" data-teacher-kit-received="${rosterSafe(student.id)}" data-teacher-kit-class="${rosterSafe(rosterClass.id)}" ${student.kitReceived ? "checked" : ""}> Received T-Shirt &amp; Bag</label>
         <div class="teacher-student-attendance-history">${window.DTAttendancePreview?.enabled ? window.DTAttendancePreview.history(rosterClass, student) : `
@@ -41601,6 +41749,52 @@
       }
     };
 
+    document.getElementById("teacher-measurements-school")?.addEventListener("change", async (event) => {
+      if(!await saveCurrentTeacherMeasurements()){event.target.value=teacherRosterClasses().find(item=>item.id===teacherMeasurementsClassId)?.schoolName||"";return;}
+      teacherMeasurementsClassId = teacherMeasurementClassesForSchool(event.target.value)[0]?.id || "";
+      teacherMeasurementsStudentIndex = 0;
+      renderTeacherMeasurements();
+    });
+    document.getElementById("teacher-measurements-class")?.addEventListener("change", async (event) => {
+      if(!await saveCurrentTeacherMeasurements()){event.target.value=teacherMeasurementsClassId;return;}
+      teacherMeasurementsClassId = event.target.value || "";
+      teacherMeasurementsStudentIndex = 0;
+      renderTeacherMeasurements();
+    });
+    document.getElementById("teacher-measurements-classes")?.addEventListener("click", async (event) => {
+      const classButton = event.target.closest("[data-measurements-class]");
+      if (!classButton) return;
+      if(!await saveCurrentTeacherMeasurements())return;
+      teacherMeasurementsClassId = classButton.dataset.measurementsClass;
+      teacherMeasurementsStudentIndex = 0;
+      renderTeacherMeasurements();
+    });
+    document.getElementById("teacher-measurements-content")?.addEventListener("click", async (event) => {
+      const halfButton = event.target.closest("[data-measurements-half]");
+      if (halfButton) {
+        const input = halfButton.parentElement?.querySelector("[data-measurement-field]");
+        if (input) input.value = String((Number(input.value) || 0) + 0.5);
+        return;
+      }
+      const arrow = event.target.closest("[data-measurements-step]");
+      if (!arrow || teacherMeasurementsSaving) return;
+      if(!await saveCurrentTeacherMeasurements())return;
+      const students = teacherMeasurementStudents();
+      if (!students.length) return;
+      const step = Number(arrow.dataset.measurementsStep) || 0;
+      teacherMeasurementsStudentIndex = (teacherMeasurementsStudentIndex + step + students.length) % students.length;
+      renderTeacherMeasurements();
+    });
+    document.getElementById("teacher-measurements-close")?.addEventListener("click", async () => {
+      if(!await saveCurrentTeacherMeasurements())return;
+      setTeacherRosterOverlay("teacher-measurements-overlay", false);
+    });
+    document.getElementById("teacher-measurements-overlay")?.addEventListener("click", async (event) => {
+      if (event.target.id !== "teacher-measurements-overlay") return;
+      if(!await saveCurrentTeacherMeasurements())return;
+      setTeacherRosterOverlay("teacher-measurements-overlay", false);
+    });
+    document.addEventListener("click",event=>{const edit=event.target.closest("[data-profile-measurements]");if(edit){event.preventDefault();openTeacherMeasurements(edit.dataset.measurementsProfileClass,edit.dataset.profileMeasurements,edit.dataset.measurementsDirector==="true");return;}const button=event.target.closest("[data-teacher-measurements-class]");if(!button)return;event.preventDefault();event.stopPropagation();openTeacherMeasurements(button.dataset.teacherMeasurementsClass);});
     document.getElementById("teacher-roster-create-class")?.addEventListener("click", openTeacherRosterClassCreator);
     document.getElementById("teacher-roster-add-future")?.addEventListener("click", () => openTeacherFutureDancerCreator());
     document.getElementById("teacher-roster-school-filter")?.addEventListener("change", (event) => {
@@ -43851,6 +44045,7 @@
       document.getElementById("roster-delete-student").textContent = "Delete Dancer";
       const intakeRecord = isFutureDancer ? null : enrollmentIntakeQueue.find((item) => item.placed_student_id === student.id || item.placed_class_enrollment_id === student.enrollmentId);
       const profileValue = (studentField, intakeField) => student[studentField] ?? intakeRecord?.[intakeField] ?? "";
+      const measurementSection=document.getElementById("roster-profile-measurements");measurementSection.dataset.measurementsSummary=student.id;measurementSection.dataset.measurementsClass=rosterClass.id;measurementSection.dataset.measurementsDirector="true";measurementSection.innerHTML=studentMeasurementSummary(rosterClass,student,true);
       document.getElementById("roster-edit-first-name").value = student.firstName || "";
       document.getElementById("roster-edit-last-name").value = student.lastName || "";
       document.getElementById("roster-edit-preferred-name").value = profileValue("preferredName", "student_preferred_name");
@@ -50560,7 +50755,7 @@
       return true;
     };
     window.getCostumeMatcherData = () => {
-      if (!costumeMatcherLeader() || !sharedRosterReady) return { teachers: [], classes: [] };
+      if (document.body.dataset.tourMode !== "true" && (!costumeMatcherLeader() || !sharedRosterReady)) return { teachers: [], classes: [] };
       const names = new Map(teachers.map(teacher => [String(teacher.id), teacher.displayName || fullName(teacher)]));
       const classes = rosterClasses.filter(item => item.sourceActive !== false).map(item => ({
         id: String(item.id), teacherId: String(item.teacherId || ""), teacherName: names.get(String(item.teacherId)) || "Unassigned",
@@ -50576,6 +50771,17 @@
           measurements: student.measurements || student.additionalInformation?.costume_measurements || {}
         }))
       }));
+      // Opt-in display fixtures never alter saved dancer measurements.
+      if (document.body.dataset.tourMode === "true" && new URLSearchParams(location.search).get("sample-measurements") === "1") {
+        const samples = [
+          { chest: 23, waist: 22, hips: 24, girth: 39, length: 21 },
+          { chest: 22, waist: 21, hips: 23, girth: 39, length: 22 },
+          { chest: 23, waist: 21.5, hips: 24, girth: 41, length: 23 },
+          { chest: 24, waist: 23, hips: 26, girth: 43, length: 24 },
+          { chest: 22.5, waist: 21, hips: 23.5, girth: 40, length: 22 }
+        ];
+        classes.forEach(item => item.students.forEach((student, index) => { student.measurements = { ...samples[index % samples.length] }; }));
+      }
       return clonePayload({ teachers: teachers.filter(teacher => classes.some(item => item.teacherId === String(teacher.id))).map(teacher => ({ id: String(teacher.id), name: names.get(String(teacher.id)), color: teacher.color || "#dba9a1" })), classes });
     };
     window.saveCostumeMatcherSelection = async (selection) => {
@@ -50662,7 +50868,9 @@
       if (section === "costume-catalog") {
         const frame = document.getElementById("costume-catalog-frame");
         styleEmbeddedDirectorFilters(frame, ".filters, .assignment-filters");
-        if (frame) void loadCostumeMatcherSelections().then(loaded => {
+        if (frame && document.body.dataset.tourMode === "true") {
+          if (!frame.getAttribute("src")) frame.setAttribute("src", frame.dataset.src);
+        } else if (frame) void loadCostumeMatcherSelections().then(loaded => {
           if (!loaded || document.body.dataset.adminSection !== "costume-catalog") return;
           if (!frame.getAttribute("src")) frame.setAttribute("src", frame.dataset.src);
           else frame.contentWindow?.refreshCostumeMatcherData?.();
@@ -58887,6 +59095,7 @@
         ["Thanksgiving", "assets/photo-frames/thanksgiving.png"],
         ["Group Thankful", "assets/photo-frames/group-thankful.png"],
         ["Twinkle Toes Group", "assets/photo-frames/twinkle-toes-group.png"],
+        ["Measurements", "assets/photo-frames/measurements.png"],
         ["Hispanic Heritage", "assets/photo-frames/hispanic-heritage.png"],
         ["1st Position", "assets/photo-frames/first-position.png"]
       ];
@@ -58970,6 +59179,7 @@
       const studioMonth = new Intl.DateTimeFormat("en-US", { month: "numeric", year: "numeric", timeZone: "America/Chicago" });
       const seasonalFrameMonths = {Halloween:[10],Thanksgiving:[11],"Group Thankful":[11],"Hispanic Heritage":[9,10]};
       const frameIsAvailable = (label,availableMonth,availableYear,month,year) => {
+        if(label==="Measurements") return (Number(year)===2026&&Number(month)>=11)||[12,1].includes(Number(month));
         const seasonalMonths=seasonalFrameMonths[label];
         if(seasonalMonths)return Number(year)>=2027&&seasonalMonths.includes(Number(month));
         return !availableMonth||(availableMonth===month&&availableYear===year);
@@ -58991,9 +59201,10 @@
 
       const selectedFrameIsLandscape = () => ["/group-photo.png", "/group-thankful.png", "/twinkle-toes-group.png"].some((name) => selectedFrame[1].endsWith(name));
       const selectedLandscapeRatio = () => selectedFrame[1].endsWith("/twinkle-toes-group.png") ? 4 / 3 : 3 / 2;
+      const selectedPortraitRatio = () => selectedFrame[1].endsWith("/measurements.png") ? 3 / 4 : 2 / 3;
       const updateFrameLayout = () => {
         stage.classList.toggle("is-landscape", selectedFrameIsLandscape());
-        stage.style.aspectRatio = selectedFrameIsLandscape() ? String(selectedLandscapeRatio()) : "";
+        stage.style.aspectRatio = selectedFrameIsLandscape() ? String(selectedLandscapeRatio()) : String(selectedPortraitRatio());
       };
 
       const stopCamera = () => {
@@ -59051,7 +59262,7 @@
               facingMode: { ideal: facingMode },
               width: { ideal: landscapeFrame ? 6144 : 4096 },
               height: { ideal: landscapeFrame ? 4096 : 6144 },
-              aspectRatio: { ideal: landscapeFrame ? selectedLandscapeRatio() : 2 / 3 }
+              aspectRatio: { ideal: landscapeFrame ? selectedLandscapeRatio() : selectedPortraitRatio() }
             }
           });
           video.srcObject = stream;
@@ -59103,7 +59314,7 @@
         const canvas = document.createElement("canvas");
         const landscapeFrame = selectedFrameIsLandscape();
         canvas.width = landscapeFrame ? 3072 : 2048;
-        canvas.height = landscapeFrame ? Math.round(canvas.width / selectedLandscapeRatio()) : 3072;
+        canvas.height = landscapeFrame ? Math.round(canvas.width / selectedLandscapeRatio()) : Math.round(canvas.width / selectedPortraitRatio());
         const context = canvas.getContext("2d");
         context.imageSmoothingEnabled = true;
         context.imageSmoothingQuality = "high";
