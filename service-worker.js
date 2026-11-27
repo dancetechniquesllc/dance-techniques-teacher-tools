@@ -1,4 +1,4 @@
-const CACHE_NAME = "my-dance-techniques-v378-measurements-planning";
+const CACHE_NAME = "my-dance-techniques-v379-recital-gifts-attendance";
 const CORE_ASSETS = [
   "./staff-messages.css",
   "./resource-library.css",

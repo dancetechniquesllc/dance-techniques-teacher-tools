@@ -8490,6 +8490,9 @@
     .enrollment-editor-history-card { display: flex; align-items: center; justify-content: space-between; min-height: 48px; padding: 10px 14px; border: 1px solid #dfcfca; border-radius: 7px; background: #fffefd; }
     .enrollment-editor-finance { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
     .enrollment-editor-finance .enrollment-review-field { display: grid; gap: 6px; padding: 0; }
+    .boutique-gift-badge { display:inline-flex;align-items:center;color:#a34450;flex-shrink:0; }
+    .dancer-attendance-summary { display:flex; flex-direction:column; gap:5px; }
+    .enrollment-payment-details { display: grid; gap: 15px; align-content: start; }
     .enrollment-editor-finance .fee-unpaid { padding: 12px; border-radius: 9px; }
     .enrollment-editor-section .enrollment-placement-class-section { margin-top: 0; padding-top: 0; border-top: 0; }
     .enrollment-editor-section .enrollment-review-save-actions { display: none; }
@@ -20600,7 +20603,7 @@
           </section>
         </div>
         <div class="roster-profile-tab-panel" id="roster-profile-panel-histories" role="tabpanel" aria-labelledby="roster-profile-tab-histories" data-roster-profile-panel="histories" hidden>
-        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m8 15 2 2 5-5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Attendance</strong><small>Review attendance history and class helper records.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-attendance"></section></details>
+        <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16"></path><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="m8 15 2 2 5-5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Attendance</strong><small>Review attendance history and class star records.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-attendance"></section></details>
         <details class="roster-profile-raw" id="roster-profile-tuition-plan"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 6v12M15.5 8.5H10a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8.5"></path></svg></span><span class="roster-profile-tool-copy"><strong>Tuition Plan</strong><small>Open this dancer’s complete financial hub.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-billing-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6.5 12 13l9-6.5"></path><rect x="3" y="5" width="18" height="14" rx="2"></rect></svg></span><span class="roster-profile-tool-copy"><strong>Email &amp; Newsletter History</strong><small>See sent, delivered, read, link-clicked, and Parent Portal setup activity.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><section class="roster-profile-attendance" id="roster-profile-newsletter-history"></section></details>
         <details class="roster-profile-raw"><summary><span class="roster-profile-tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 8h14l1 13H4L5 8Z"></path><path d="M8 9V6a4 4 0 0 1 8 0v3"></path></svg></span><span class="roster-profile-tool-copy"><strong>Boutique Orders</strong><small>Track T-shirt, bag, pickup, delivery, and issue history.</small></span><span class="roster-profile-tool-chevron" aria-hidden="true">›</span></summary><div class="roster-profile-shirt-field"><label>T-Shirt &amp; Bag Status<select id="roster-edit-kit-status"><option value="not_ready">To Fill</option><option value="ready">To Pick Up</option><option value="picked_up">To Deliver</option><option value="delivered">Delivered</option></select></label><div class="roster-profile-delivery-date"><span>T-Shirt &amp; Bag Delivery Date</span><strong id="roster-edit-kit-delivered-date">Not Delivered</strong></div></div><div class="roster-profile-placeholder" id="roster-edit-boutique-orders">No boutique orders are assigned to this dancer.</div><div class="boutique-delivery-issue-history" id="roster-profile-kit-delivery-history"></div></details>
@@ -21215,7 +21218,7 @@
   <script src="newsletter-history.js?v=20261030-shared-images"></script>
   <script src="roster-care.js?v=20260908"></script>
   <script src="attendance-storage.js?v=student-storage-20261020"></script>
-  <script src="attendance-preview.js?v=class-action-artwork-20261022"></script>
+  <script src="attendance-preview.js?v=20261127-totals-class-action-artwork-20261022"></script>
   <script>
     const modalScrollLockSelector = [
       ".confirm-overlay.active",
@@ -21666,6 +21669,29 @@
     let teacherNewEnrollmentAssigning = false;
 
     const enrollmentDateLabel = (value) => value ? new Date(value).toLocaleString([], { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "Not provided";
+    const enrollmentPaymentDate = (item) => {
+      const normalizeDate = (value) => {
+        const text=String(value||"").trim(),match=text.match(/^(\d{4})-(\d{2})-(\d{2})(?:$|T|\s)/);
+        if(!match)return "";
+        const day=match.slice(1).join("-"),date=new Date(`${day}T12:00:00Z`);
+        return Number.isFinite(date.valueOf())&&date.toISOString().slice(0,10)===day?day:"";
+      };
+      const override=item?.additional_information?.["Enrollment Payment Date"];
+      if(override!==undefined)return normalizeDate(override);
+      const direct=normalizeDate(item?.payment_paid_at||item?.payment_date);if(direct)return direct;
+      let found="";
+      const inspect=(value,path="",depth=0)=>{
+        if(found||depth>15||!value)return;
+        if(typeof value==="string"&&/^[{[]/.test(value.trim())){try{inspect(JSON.parse(value),path,depth+1);}catch{}return;}
+        if(typeof value!=="object")return;
+        for(const [key,child] of Object.entries(value)){
+          const name=key.toLowerCase().replace(/[^a-z0-9]/g,""),context=`${path}.${key}`;
+          if(["paymentdate","paidat","paiddate","paymentcompletedat","transactiondate"].includes(name)||(/payment|transaction|square/i.test(path)&&["completedat","capturedat"].includes(name))){found=normalizeDate(child);if(found)return;}
+          inspect(child,context,depth+1);
+        }
+      };
+      inspect(item?.raw_submission);return found;
+    };
     const enrollmentDateOnly = (value) => !value ? null : new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T12:00:00` : value);
     const enrollmentBirthdateLabel = (value) => {
       const birthdate = enrollmentDateOnly(value);
@@ -23011,7 +23037,8 @@
     const additionalInformationFieldIsVisible = (label) => {
       const normalized = String(label || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "");
       if (!normalized || hiddenEnrollmentMetadataKeys.has(normalized)) return false;
-      return !normalized.startsWith("norecital")
+      return normalized !== "enrollmentpaymentdate"
+        && !normalized.startsWith("norecital")
         && !normalized.startsWith("eventobserver")
         && !normalized.startsWith("jsexecutiontracker")
         && !normalized.startsWith("payment")
@@ -23426,7 +23453,10 @@
               <div><h4>Administrative Details</h4><p>Internal enrollment, billing, and team information.</p></div>
             </div>
             <div class="enrollment-editor-finance">
+              <div class="enrollment-payment-details">
               <label class="enrollment-review-field ${item.payment_status === "paid" ? "" : "fee-unpaid"}"><span>Enrollment Fee Status</span><select name="payment_status"><option value="unpaid" ${item.payment_status !== "paid" ? "selected" : ""}>Unpaid</option><option value="paid" ${item.payment_status === "paid" ? "selected" : ""}>Paid</option></select></label>
+              <label class="enrollment-review-field"><span>Enrollment Date</span><input type="date" data-enrollment-additional-information="Enrollment Payment Date" value="${escapeText(enrollmentPaymentDate(item))}"><small>Date payment was made.</small></label>
+              </div>
               <label class="enrollment-review-field"><span>Tuition Circumstances</span><select name="tuition_discount"><option value="none" ${effectiveEnrollmentTuitionType(item, suggestion) === "none" ? "selected" : ""}>None</option><option value="meadow_oaks" ${effectiveEnrollmentTuitionType(item, suggestion) === "meadow_oaks" ? "selected" : ""}>Meadow Oaks Rate — $65</option><option value="sibling" ${effectiveEnrollmentTuitionType(item, suggestion) === "sibling" ? "selected" : ""}>Sibling</option><option value="staff" ${effectiveEnrollmentTuitionType(item, suggestion) === "staff" ? "selected" : ""}>Staff</option><option value="director" ${effectiveEnrollmentTuitionType(item, suggestion) === "director" ? "selected" : ""}>Director</option></select></label>
               <div class="enrollment-review-field suggested"><span>Suggested Tuition</span><strong>${tuition.beforeSeason ? `$${tuition.amount.toFixed(2)} · Full Tuition` : tuition.nextMonth ? `$${tuition.monthlyTuition.toFixed(2)} Next Month` : `$${tuition.amount.toFixed(2)} · ${tuition.classCount >= 4 ? "100%" : `${tuition.classCount * 25}%`} Tuition`}</strong><small>${tuition.beforeSeason ? `Season starts ${new Date(`${tuition.seasonStartDate}T12:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric" })}.` : tuition.nextMonth ? "No remaining classes this month." : `${tuition.classCount} ${tuition.classCount === 1 ? "class" : "classes"}${tuition.includedTrialDate ? `, including trial ${new Date(`${tuition.includedTrialDate}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : " remaining"}.`}</small></div>
             </div>
@@ -38546,6 +38576,21 @@
       }
       return boutiqueItemDeliverySelections.get(order.id);
     };
+    const boutiqueItemIsGift = (item) => {
+      const question=value=>String(value||"").toLowerCase().replace(/[^a-z0-9]/g,"")==="isthisachristmasgift";
+      const yes=value=>/^(?:yes(?:$|[\s,;.!])|true$)/i.test(String(value?.original??value?.translated??value?.value??value??"").trim());
+      const inspect=(value,depth=0)=>{
+        if(!value||depth>12)return false;
+        if(typeof value==="string"){try{return inspect(JSON.parse(value),depth+1);}catch{return false;}}
+        if(Array.isArray(value))return value.some(entry=>inspect(entry,depth+1));
+        if(typeof value!=="object")return false;
+        if(question(value.title?.original||value.title||value.name?.original||value.name||value.label)&&yes(value.plainText||value.value?.plainText||value.value?.original||value.value||value.answer||value.description))return true;
+        return Object.entries(value).some(([key,child])=>(question(key)&&yes(child))||inspect(child,depth+1));
+      };
+      return inspect(item.options);
+    };
+    const boutiqueGiftIcon = () => `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 8h18v4H3zM5 12v9h14v-9M12 8v13M12 8H8a3 3 0 1 1 3-3l1 3Zm0 0h4a3 3 0 1 0-3-3l-1 3Z"/></svg>`;
+    const boutiqueGiftBadge = () => `<span class="boutique-gift-badge" role="img" aria-label="Christmas Gift" title="Christmas Gift · Leave at front desk please!">${boutiqueGiftIcon()}</span>`;
     const boutiqueOrderItemsMarkup = (order, selectableItems = false, unfillItems = false) => {
       const items = order.boutique_order_items || [];
       const selectedItems = selectableItems ? ensureBoutiqueItemSelections(order) : null;
@@ -38569,7 +38614,7 @@
         const tag = canSelect || canUnfill ? "button" : "span";
         const isBoyShirtSize = isBoyOrder && /(?:t[ -]?shirt|shirt)/i.test(String(item.name || ""));
         const action = canSelect ? `data-boutique-item-toggle="${rosterSafe(order.id)}"` : canUnfill ? `data-boutique-item-unfill="${rosterSafe(order.id)}"` : "";
-        return `<${tag} ${(canSelect || canUnfill) ? `type="button" ${action} data-boutique-item-id="${rosterSafe(item.id)}" aria-label="${canUnfill ? "Move" : excluded ? "Include" : "Do not deliver"} ${rosterSafe(item.name || "boutique item")}${canUnfill ? " back to To Fill" : ""}"` : ""} class="boutique-order-item ${ordered > 1 ? "is-multiple" : ""} ${state} ${excluded ? "is-excluded" : ""} ${canUnfill ? "is-unfill-target" : ""} ${awaitingStock ? "is-stock-pending" : ""}">${size ? `<span class="boutique-order-item-size ${isBoyShirtSize ? "is-sage-boy" : ""}">${rosterSafe(size)}</span><span aria-hidden="true">-</span>` : ""}<span>${rosterSafe(item.name || "Boutique item")}</span>${awaitingStock ? `<span class="boutique-item-stock-status">Ordered · Awaiting Delivery</span>` : filled > 0 ? `<span class="boutique-item-progress">${filled}/${ordered} filled</span>` : ordered > 1 ? `<span class="boutique-order-item-quantity" aria-label="Quantity ${ordered}">${ordered}</span>` : ""}</${tag}>`;
+        return `<${tag} ${(canSelect || canUnfill) ? `type="button" ${action} data-boutique-item-id="${rosterSafe(item.id)}" aria-label="${canUnfill ? "Move" : excluded ? "Include" : "Do not deliver"} ${rosterSafe(item.name || "boutique item")}${canUnfill ? " back to To Fill" : ""}"` : ""} class="boutique-order-item ${ordered > 1 ? "is-multiple" : ""} ${state} ${excluded ? "is-excluded" : ""} ${canUnfill ? "is-unfill-target" : ""} ${awaitingStock ? "is-stock-pending" : ""}">${size ? `<span class="boutique-order-item-size ${isBoyShirtSize ? "is-sage-boy" : ""}">${rosterSafe(size)}</span><span aria-hidden="true">-</span>` : ""}<span>${rosterSafe(item.name || "Boutique item")}</span>${boutiqueItemIsGift(item)?boutiqueGiftBadge():""}${awaitingStock ? `<span class="boutique-item-stock-status">Ordered · Awaiting Delivery</span>` : filled > 0 ? `<span class="boutique-item-progress">${filled}/${ordered} filled</span>` : ordered > 1 ? `<span class="boutique-order-item-quantity" aria-label="Quantity ${ordered}">${ordered}</span>` : ""}</${tag}>`;
       }).join("")}</span>` : `<span class="boutique-order-items"><span class="boutique-order-item">Items Unavailable</span></span>`;
     };
     const boutiqueOrderUnfillMarkup = (order) => {
@@ -38611,7 +38656,8 @@
       )).map((item) => ({
         name: String(item.name || "Boutique item").trim(),
         size: boutiqueOrderItemSize(item),
-        quantity: Math.max(1, Number(item.quantity) || 1)
+        quantity: Math.max(1, Number(item.quantity) || 1),
+        isGift: boutiqueItemIsGift(item)
       }));
     };
     const boutiqueLabelMarkup = (order, suppliedItems = null) => {
@@ -38623,12 +38669,13 @@
       const schedule = [boutiqueLabelDay(record.rosterClass.day), boutiqueLabelPeriod(record.rosterClass.time)].filter(Boolean).join(" · ");
       const items = suppliedItems || boutiqueLabelItems(order);
       if (!items.length) return "";
-      return `<section class="boutique-print-label">
+      return `<section class="boutique-print-label ${items.some(item=>item.isGift)?"is-gift":""}">
+        ${items.some(item=>item.isGift)?`<div class="boutique-print-gift">${boutiqueGiftIcon()}<strong>GIFT! Leave at front desk please!</strong></div>`:""}
         <header class="boutique-print-top"><img src="${rosterSafe(new URL("assets/boutique-label-logo.png", location.href).href)}" alt="Dance Techniques logo"><div><strong>${rosterSafe(teacher)}</strong><span>${rosterSafe(schedule)}</span></div></header>
         <h1>${rosterSafe(rosterStudentFullName(record.student))}</h1>
         <div class="boutique-print-location"><span>${rosterSafe(classroom)} at</span><strong>${rosterSafe(school)}</strong></div>
         <div class="boutique-print-goodies"><b aria-hidden="true">✦</b><span>You've Got Goodies!</span><b aria-hidden="true">✦</b></div>
-        <div class="boutique-print-items">${items.map((item) => `<div class="boutique-print-item"><span class="boutique-print-quantity ${item.quantity > 1 ? "is-multiple" : ""}">${item.quantity}</span><strong>${rosterSafe(item.name)}</strong><span>${item.size ? `Size ${rosterSafe(item.size)}` : ""}</span></div>`).join("")}</div>
+        <div class="boutique-print-items">${items.map((item) => `<div class="boutique-print-item"><span class="boutique-print-quantity ${item.quantity > 1 ? "is-multiple" : ""}">${item.quantity}</span><strong>${rosterSafe(item.name)}${item.isGift?" · GIFT":""}</strong><span>${item.size ? `Size ${rosterSafe(item.size)}` : ""}</span></div>`).join("")}</div>
       </section>`;
     };
     const boutiqueLabelDocument = (orders) => `<!doctype html><html><head><meta charset="utf-8"><title>Boutique Labels</title><style>
@@ -38636,6 +38683,9 @@
       * { box-sizing: border-box; }
       html, body { margin: 0; padding: 0; color: #000; background: #fff; font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; }
       .boutique-print-label { width: 4in; height: 6in; padding: .24in; display: grid; grid-template-rows: auto auto auto auto 1fr; gap: .14in; break-after: page; page-break-after: always; overflow: hidden; }
+      .boutique-print-label.is-gift { grid-template-rows: auto auto auto auto auto 1fr; gap:.10in; }
+      .boutique-print-gift { display:flex;align-items:center;gap:.08in;border:2px solid #000;padding:.06in;font-size:12pt;line-height:1.2; }
+      .boutique-print-gift svg { flex-shrink:0; }
       .boutique-print-label:last-child { break-after: auto; page-break-after: auto; }
       .boutique-print-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .16in; padding-bottom: .12in; border-bottom: 2px solid #000; }
       .boutique-print-top img { display: block; width: 1.08in; height: .64in; object-fit: contain; object-position: left center; filter: grayscale(1) contrast(1.3); }
@@ -40451,7 +40501,7 @@
                   ${!pending && !(window.DTAttendancePreview?.enabled && (kitDeliveryActive || boutiqueDeliveryActive)) && checkedIn && (checkInSubmitted || checkOutActive || checkedOut) ? `<span class="teacher-roster-selection-check ${checkedOut ? "is-safe" : ""}" aria-label="${status === "tardy" ? "Tardy · " : ""}${checkedOut ? "Safely returned to classroom" : "Checked in"}" title="${checkedOut ? "Safely returned to classroom" : "Checked in"}">✓</span>` : ""}
                   ${!pending && !checkedIn && !(kitDeliveryActive || boutiqueDeliveryActive) && (knownAbsence || (attendanceFinalized && status === "absent")) ? `<span class="teacher-roster-selection-check aw-absence-x" aria-label="Absent" title="Absent">×</span>` : ""}
                 </button>
-                <strong class="${weeklyHelperId === student.id ? "teacher-helper-name" : ""}">${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
+                <strong class="${weeklyHelperId === student.id ? "teacher-helper-name" : ""}">${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" role="img" aria-label="Class Star" title="Class Star">✦</span>` : ""}${rosterSafe(rosterStudentFullName(student))}${weeklyHelperId === student.id ? `<span class="teacher-helper-sparkle" aria-hidden="true">✦</span>` : ""}</strong>
                 ${student.connectedPreviewSample || student.id === "sample-elena" ? `<span class="teacher-roster-preview-badge">PP Sample</span>` : ""}
                 ${paused ? `<span class="student-paused-badge">Paused</span>` : ""}
                 ${window.dtShoeIndicators?.(student) || ""}
@@ -41573,6 +41623,16 @@
       showToast(`${rosterStudentFullName(student)} was archived`);
     };
 
+    const dancerAttendanceTotals = (rows, now = new Date()) => {
+      const year=now.getMonth()>=7?now.getFullYear():now.getFullYear()-1;
+      const start=`${year}-08-01`,end=`${year+1}-05-31`,unique=new Map();
+      rows.forEach(row=>{const date=String(row.date||row.attendance_date||"").slice(0,10),classId=row.classId||row.dance_class_id||"";if(/^\d{4}-\d{2}-\d{2}$/.test(date))unique.set(`${classId}|${date}`,{...row,date});});
+      const records=[...unique.values()],attended=records.filter(row=>["present","tardy"].includes(row.status));
+      return {total:attended.length,season:attended.filter(row=>row.date>=start&&row.date<=end).length,tardy:records.filter(row=>row.status==="tardy").length,absent:records.filter(row=>row.status==="absent").length};
+    };
+    window.dancerAttendanceTotals=dancerAttendanceTotals;
+    const dancerAttendanceTotalsMarkup = (counts,stars) => `<span>Total Classes Attended: ${counts.total}</span><span>Current Season Classes: ${counts.season}</span><span>${counts.tardy} Tardy · ${counts.absent} Absent · ${stars} Class Star</span>`;
+    const localDancerAttendanceHistory = (studentId) => rosterClasses.flatMap(roster=>Object.entries(roster.attendance||{}).flatMap(([date,entries])=>{const entry=entries?.[studentId],status=teacherAttendanceStatus(entry);return status?[{date,status,classId:roster.id}]:[];}));
     const openTeacherStudentProfile = (rosterClass, student) => {
       const content = document.getElementById("teacher-student-profile-content");
       if (!content) return;
@@ -41642,7 +41702,7 @@
         <label class="roster-profile-kit-check"><input type="checkbox" ${student.kitReady ? "checked" : ""} disabled> T-Shirt &amp; Bag Ready</label>
         <label class="roster-profile-kit-check" data-teacher-student-edit-related hidden><input type="checkbox" data-teacher-kit-received="${rosterSafe(student.id)}" data-teacher-kit-class="${rosterSafe(rosterClass.id)}" ${student.kitReceived ? "checked" : ""}> Received T-Shirt &amp; Bag</label>
         <div class="teacher-student-attendance-history">${window.DTAttendancePreview?.enabled ? window.DTAttendancePreview.history(rosterClass, student) : `
-          <h4>Attendance History · ${tardyCount} Tardy · ${absentCount} Absent</h4>
+          <h4>Attendance History</h4><p class="dancer-attendance-summary">${dancerAttendanceTotalsMarkup(dancerAttendanceTotals(localDancerAttendanceHistory(student.id)),new Set(rosterClasses.flatMap(roster=>(roster.helperHistory||[]).filter(entry=>entry.studentId===student.id).map(entry=>entry.weekStart))).size)}</p>
           ${attendanceHistory.length ? attendanceHistory.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(new Date(`${entry.date}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))}<span class="dd-attendance-status is-${rosterSafe(entry.status)}">${rosterSafe(entry.status[0].toUpperCase() + entry.status.slice(1))}</span></strong><strong>${rosterSafe(rosterClass.name)}</strong><small>In ${rosterSafe(teacherAttendanceTimeLabel(entry.checkInAt))}</small><small>Out ${rosterSafe(teacherAttendanceTimeLabel(entry.checkOutAt))}</small></div>`).join("") : `<div class="teacher-roster-empty">No attendance recorded yet.</div>`}
 `}        </div>`;
       setTeacherRosterOverlay("teacher-student-profile-overlay", true);
@@ -44167,8 +44227,14 @@
         });
         const tardyCount = attendanceHistory.filter((entry) => entry.status === "tardy").length;
         const absentCount = attendanceHistory.filter((entry) => entry.status === "absent").length;
-        const helperCount = new Set(attendanceHistory.filter((entry) => entry.wasHelper).map((entry) => entry.helperWeek)).size;
-        attendancePanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Attendance History</strong><span>${tardyCount} Tardy · ${absentCount} Absent · ${helperCount} Class Helper</span></div>${attendanceHistory.length ? attendanceHistory.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(new Date(`${entry.date}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))}<span class="dd-attendance-status is-${rosterSafe(entry.status)}">${rosterSafe(entry.status[0].toUpperCase() + entry.status.slice(1))}</span>${entry.wasHelper ? `<span class="roster-attendance-helper-sparkle" aria-label="Helper of the Week" title="Helper of the Week">✦</span>` : ""}</strong><strong>${rosterSafe(rosterClass.name)}</strong><small>In ${rosterSafe(teacherAttendanceTimeLabel(entry.checkInAt))}</small><small>Out ${rosterSafe(teacherAttendanceTimeLabel(entry.checkOutAt))}</small></div>`).join("") : `<div class="teacher-roster-empty">No attendance recorded yet.</div>`}`;
+        const helperCount = new Set(rosterClasses.flatMap(roster=>(roster.helperHistory||[]).filter(entry=>entry.studentId===student.id).map(entry=>entry.weekStart))).size;
+        attendancePanel.innerHTML = `<div class="roster-profile-attendance-heading"><strong>Attendance History</strong><span class="dancer-attendance-summary" data-dancer-attendance-summary>${dancerAttendanceTotalsMarkup(dancerAttendanceTotals(localDancerAttendanceHistory(student.id)),helperCount)}</span></div>${attendanceHistory.length ? attendanceHistory.map((entry) => `<div class="teacher-student-attendance-entry"><strong>${rosterSafe(new Date(`${entry.date}T12:00:00`).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" }))}<span class="dd-attendance-status is-${rosterSafe(entry.status)}">${rosterSafe(entry.status[0].toUpperCase() + entry.status.slice(1))}</span>${entry.wasHelper ? `<span class="roster-attendance-helper-sparkle" aria-label="Class Star" title="Class Star">✦</span>` : ""}</strong><strong>${rosterSafe(rosterClass.name)}</strong><small>In ${rosterSafe(teacherAttendanceTimeLabel(entry.checkInAt))}</small><small>Out ${rosterSafe(teacherAttendanceTimeLabel(entry.checkOutAt))}</small></div>`).join("") : `<div class="teacher-roster-empty">No attendance recorded yet.</div>`}`;
+      }
+      const summary=attendancePanel?.querySelector("[data-dancer-attendance-summary]");
+      if(summary&&document.body.dataset.tourMode!=="true"&&window.dtSupabase){
+        const starWeeks=new Set(rosterClasses.flatMap(roster=>(roster.helperHistory||[]).filter(entry=>entry.studentId===student.id).map(entry=>entry.weekStart)));
+        summary.textContent="Loading attendance totals…";
+        window.DTAttendanceStorage.history(window.dtSupabase,student.id).then(rows=>{if(summary.isConnected)summary.innerHTML=dancerAttendanceTotalsMarkup(dancerAttendanceTotals(rows),starWeeks.size);}).catch(()=>{if(summary.isConnected)summary.textContent="Attendance totals could not load. Reopen this profile to try again.";});
       }
       const billingHistoryPanel = document.getElementById("roster-profile-billing-history");
       if (billingHistoryPanel) {
@@ -59473,11 +59539,11 @@
       });
     })();
   </script>
-  <link rel="stylesheet" href="big-stage.css?v=20261124-combine-selectors">
+  <link rel="stylesheet" href="big-stage.css?v=20261127-separate-classes">
 <link rel="stylesheet" href="big-stage-order.css?v=20261005-compact-separation">
 <link rel="stylesheet" href="big-stage-wizard.css?v=20261012-recital-reset">
 <link rel="stylesheet" href="big-stage-matching.css?v=20261008-live-classes">
-  <script src="big-stage.js?v=20261124-combine-selectors"></script>
+  <script src="big-stage.js?v=20261127-separate-classes"></script>
 <script src="big-stage-order.js?v=20261004-class-rows"></script>
 <script src="big-stage-wizard.js?v=20261020-preserve-plans"></script>
   <script src="director-task-sync.js?v=20260908"></script>
